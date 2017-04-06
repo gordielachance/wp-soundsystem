@@ -236,7 +236,7 @@ class WP_SoundSytem {
     
     function enqueue_scripts_styles(){
         
-        //TO FIX TO CHECK should we always embed those ?
+        //TO FIX TO CHECK embed only for music post types ?
         
         wp_register_script( 'wpsstm-shortenTables', $this->plugin_url . '_inc/js/wpsstm-shortenTables.js', array('jquery'),$this->version);
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);

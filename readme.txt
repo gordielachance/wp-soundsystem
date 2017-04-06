@@ -11,6 +11,8 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 
 == Description ==
 
+Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
+
 = MusicBrainz =
 
 When managing a track, artist or album, the plugin can search for its MusicBrainz ID.
