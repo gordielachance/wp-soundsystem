@@ -13,14 +13,16 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 
 Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
 
-= MusicBrainz =
+= Several new post types =
+Tracks, artists, albums, playlists and live playlists uses each a custom post type, so you can easily manage them.
 
+= MusicBrainz =
 When managing a track, artist or album, the plugin can search for its MusicBrainz ID.
 It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) (an open data music database).
 For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
 
 = Playlists =
-Create and manage playlists entries easily with the Tracklist metabox.  Each entry added creates a new Track post.
+Create and manage tracklists easily with the Tracklist metabox.  Each entry added creates a new Track post.
 Import a tracklist from a file or a music service like Spotify using the Tracklist Parser metabox.
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
@@ -36,8 +38,8 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 = Donate! =
-It truly took me a LOT of time to code this plugin.
-If it saved you the time to backup manually a few hundred (or more!) pins, please consider converting this time into [a donation](http://bit.ly/gbreant).
+It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
+If you like it, please consider [making a donation](http://bit.ly/gbreant).
 This would be very appreciated — Thanks !
 
 = Dependencies =
