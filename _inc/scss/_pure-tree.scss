@@ -1,0 +1,71 @@
+@import "compass/css3/hyphenation";
+    
+.pure-tree{
+    &:not(.main-tree)
+    {
+        padding-left: .5em;
+        li{
+            overflow: hidden;
+            height: 0;
+            display: block;
+        }
+    }
+    li{
+        @include hyphenation;
+        margin:0;
+        > label{
+            line-height: 1em;
+            display: inline;
+            padding-right: .5em;
+        }
+        &.checkbox-tree-parent > label:before{
+            font-family: 'FontAwesome', sans-serif;
+            content: "\f114";
+            margin-right:.25em;
+        }
+        label{
+            //display: block;
+            cursor: pointer;
+            color: #717780;
+            //border-bottom: 1px dashed #B0B9C5;
+            //padding: 1.125em 1.125em 1.125em 0;
+
+            &:hover
+            {
+                color: #434a58;
+                border-bottom-color: #434a58;
+            }
+        }
+    }
+
+    .pure-tree_link
+    {
+        a
+        {
+            padding: 1.500em 1.125em 0.750em 0;
+            display: block;
+            border-radius: .2em;
+            color: #717780;
+            text-decoration: none;
+            &:hover
+            {
+                color: #434a58;
+            }
+        }
+    }
+    &.nested
+    {
+        padding-left: 1.7em;
+    }
+    [type="checkbox"]
+    {
+        display: none;
+        &:checked + label:before{
+            content: "\f115";
+        }
+        &:checked ~ ul > li
+        {
+            height: auto;
+        }
+    }
+}

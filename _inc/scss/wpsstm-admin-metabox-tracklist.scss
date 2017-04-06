@@ -1,0 +1,124 @@
+@import "compass/css3";
+@import "compass/typography/text/ellipsis";
+@import '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css';
+
+
+#wpsstm-tracklist{
+    
+    #list-tracks-section{
+
+        .loading{
+            pointer-events: none;
+            @include opacity(0.5);
+        }
+
+        .ellipsis{
+            display:block;
+            @include ellipsis($no-wrap: true);
+        }
+
+        >.search-box{ //filter links
+
+        }
+        >.subsubsub{ //tabs
+            margin:0;
+            margin-bottom:1em;
+        }
+
+        >.tablenav{ //bulk actions
+            .add-tracklist-track{
+                margin:0;
+                body.no-js &{
+                    display:none;
+                }
+            }
+            &.top{
+
+            }
+            &.bottom{
+
+            }
+
+        }
+
+        > table.wp-list-table{
+            .column-reorder,.column-trackitem_order {
+                width: 2em;
+                text-align:center;
+            }
+
+            .column-trackitem-action{
+                body.no-js &{
+                    display:none;
+                }
+            }
+
+            #the-list {
+
+                tr{
+
+                    td{
+                        overflow:hidden;
+                        input[type='text']{
+                            width:100%;
+                        }
+
+                        &.column-reorder{
+                            .metabox-table-row-draghandle {
+                                text-align: center;
+                                &:not(.disabled) {
+                                    cursor: pointer;
+                                    cursor: hand;
+                                }
+                                &.disabled{
+                                    opacity:0.5;
+                                }
+                            }
+                        }
+
+                    }
+                    
+                    .metabox-table-cell-toggle{
+                        &.metabox-table-cell-display{
+                            display:inherit;
+                        }
+                        &.metabox-table-cell-edit{
+                            display:none;
+                        }
+                    }
+
+                    .row-actions{
+                        span.save{
+                            display:none;
+                        }
+                    }
+
+                    &.metabox-table-row-edit{
+                        .metabox-table-cell-toggle{
+                            &.metabox-table-cell-display{
+                                display:none;
+                            }
+                            &.metabox-table-cell-edit{
+                                display:inherit;
+                            }
+                        }
+
+                        .row-actions{
+                            span.save{
+                                display:inline;
+                            }
+                            span.edit{
+                                display:none;
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    }
+
+}

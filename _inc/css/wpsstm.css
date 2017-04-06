@@ -1,0 +1,44 @@
+/* line 3, ../scss/_shared.scss */
+.wpsstm-toggle-tracklist-length {
+  display: block;
+  text-align: center;
+}
+/* line 7, ../scss/_shared.scss */
+.wpsstm-toggle-tracklist-length button {
+  cursor: pointer;
+  cursor: hand;
+  font-size: 1.5em;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: black;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+/* line 17, ../scss/_shared.scss */
+.wpsstm-toggle-tracklist-length button:hover {
+  background: none;
+  color: black;
+  filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
+  opacity: 1;
+}
+
+/* line 3, ../scss/wpsstm.scss */
+#wpsstm-player {
+  position: fixed;
+  width: 100%;
+  height: 10em;
+  background-color: red;
+  bottom: 0;
+}
+/* line 9, ../scss/wpsstm.scss */
+#wpsstm-player > * {
+  margin: auto;
+}
+/* line 12, ../scss/wpsstm.scss */
+#wpsstm-player .post-navigation {
+  position: absolute;
+  top: 0;
+  right: 0;
+}

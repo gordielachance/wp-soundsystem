@@ -1,0 +1,84 @@
+@import "compass";
+
+
+
+.wpsstm-tracklist-table {
+    position:relative;
+    font-family: sans-serif;
+    width: 100%;
+    margin-bottom:1.5em;
+
+    .tablenav{
+        .tablenav-pages{
+            line-height:3em;
+        }
+    }
+
+    table{
+        width: 100%;
+        display: table;
+        border-collapse: collapse;
+        border-spacing: 0;
+        border: 1px solid #e5e5e5;
+        background: rgba(255,255,255,0.5);
+        margin:0;
+        
+        .column-trackitem_order{
+            width:2em;
+            text-align:center;
+        }
+        
+        th{
+            font-weight: 400;
+        }
+
+        thead {
+                display: table-header-group;
+                vertical-align: middle;
+                border-color: inherit;
+                th{
+                    border-bottom: 1px solid #e1e1e1;
+                    text-align:center;
+                }
+        }
+        tfoot {
+            th {
+                border-top: 1px solid #e1e1e1;
+            }
+        }
+
+	   tbody tr {
+            
+            @include transition-property(background);
+            @include transition-duration(.4s);
+
+            &:nth-child(odd) {
+                    background: rgba(249, 249, 249, 0.5);
+            }
+            &:hover {
+                    background: rgba(0,0,0,0.025);
+                    td.column-image img{
+                        @include opacity(0.8);
+                    }
+            }
+
+            td{
+                &.column-image{
+                    width: 50px;
+                    padding:0;
+                    img {
+                        max-width: 100%;
+                        @include opacity(0.2);
+                        @include transition-property(opacity);
+                        @include transition-duration(.4s);
+                    }
+                }
+            }
+                
+	   }
+    }
+    .single & {
+        font-size:0.8em;
+    }
+ 
+}
