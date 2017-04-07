@@ -34,8 +34,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
-        add_filter('manage_posts_columns', array($this,'tracks_column_live_playlist_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'tracks_column_live_playlist_content'), 10, 2 );
 
     }
     
@@ -212,62 +210,6 @@ class WP_SoundSytem_Core_Live_Playlists{
     function metabox_tracklist_scripts_styles(){
         // CSS
         wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',wpsstm()->version );
-    }
-
-    function tracks_column_live_playlist_register($defaults) {
-        global $post;
-
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            
-            $hide_subtracks = wpsstm()->get_options('hide_subtracks');
-            $hide_subtracks = ($hide_subtracks == 'on') ? true : false;
-            
-            $hide_subtracks = false; //TO FIX remove this line
-            
-            if (!$hide_subtracks){
-                $after['live_playlist'] = __('Live playlist','wpsstm');
-            }
-            
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function tracks_column_live_playlist_content($column,$post_id){
-        global $post;
-
-        switch ( $column ) {
-            case 'live_playlist':
-
-                $tracklist_ids = wpsstm_get_tracklist_ids_for_track($post_id);
-                $links = array();
-                
-                foreach((array)$tracklist_ids as $tracklist_id){
-                    
-                    $tracklist_post_type = get_post_type($tracklist_id);
-                    if ( $tracklist_post_type != wpsstm()->post_type_live_playlist ) continue;
-                    
-                    $playlist_url = get_permalink($tracklist_id);
-                    $playlist_name = get_the_title($tracklist_id);
-                    $links[] = sprintf('<a href="%s">%s</a>',$playlist_url,$playlist_name);
-                    
-                }
-                if ($links){
-                    echo implode(',',$links);
-                }else{
-                    echo '—';
-                }
-
-                
-            break;
-        }
     }
 
 }
