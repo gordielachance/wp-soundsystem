@@ -188,18 +188,6 @@ function wpsstm_locate_template( $template_name, $template_path = '', $default_p
 	return apply_filters( 'wpsstm_locate_template', $template, $template_name, $template_path, $default_path );
 }
 
-function wpsstm_get_player($post_id = false){
-    $provider = null;
-    $sources = wpsstm_get_sources($post_id);
-    foreach ((array)$sources as $source){
-        if ($provider = wpsstm_get_provider($source->link_url) ){
-            if ($player = $provider->get_player() ){
-                return $player;
-            }
-        }
-    }    
-}
-
 /**
 Returns the class instance for a wp music post id
 Requires a post_id, global $post is not always available here

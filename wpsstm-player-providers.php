@@ -1,41 +1,31 @@
 <?php
 
-function wpsstm_get_available_providers(){
-    return array(
-        'WP_SoundSytem_Provider_Youtube'
-    );
-}
+abstract class WP_SoundSytem_Provider{
+    
+    var $provider_slug;
+    var $oembed_html;
+    
+    /*
+    Can this provider work with the input widget html ?
+    */
+    public abstract static function can_handle_oembed($html);
 
-function wpsstm_get_provider($url){
-    $list = wpsstm_get_available_providers();
-
-    foreach ($list as $classname){
-        if ( class_exists($classname) && ($provider = new $classname($url)) ) {
-            return $provider;
-        }
+    function __construct($oembed_html){
+        $this->oembed_html = $oembed_html;
+        add_filter( 'wpsstm_player_oembed_html', array($this,'add_iframe_id') );
     }
-}
 
-
-class WP_SoundSytem_Provider{
-    
-    var $iframe_id = 'wpsstm-iframe';
-    var $url;
-    var $can_play = false;
-    
-    function __construct($url = null){
-        if ($url){
-            $this->url = $url;
-            $this->can_play = true;
-        }
+    function get_updated_oembed_html(){
+        //load widget scripts & styles
+        $this->provider_scripts_styles();
         
-        add_filter( 'oembed_result', array($this,'add_iframe_id'), 10, 3 );
+        //allow providers to filter widget html
+        $this->oembed_html = apply_filters('wpsstm_player_oembed_html',$this->oembed_html);
         
-
-
+        return $this->oembed_html;
     }
     
-    function add_iframe_id( $html, $url, $args ) {
+    function add_iframe_id( $html ) {
         $fix  = true;
         //$fix &= strpos( $html, 'vimeo.com' ) !== false; // Embed code from Vimeo
         //$fix &= strpos( $html, ' id=' ) === false; // No ID attribute supplied by Vimeo
@@ -43,7 +33,7 @@ class WP_SoundSytem_Provider{
         if ( $fix ) {
             $html = str_replace(
                 '<iframe ',
-                sprintf( '<iframe id="%s" ', esc_attr( $this->iframe_id ) ),
+                sprintf( '<iframe id="%s" ', esc_attr( 'wpsstm-iframe-' . $this->provider_slug ) ),
                 $html
             );
         }
@@ -51,40 +41,73 @@ class WP_SoundSytem_Provider{
         return $html;
     }
 
-    function get_player(){
-        //oEmbed
-        $embed_code = wp_oembed_get( $this->url );
-        //require_once( ABSPATH . WPINC . '/class-oembed.php' );
-        //$oembed = _wp_oembed_get_object();
-        return $embed_code;
-    }
+
+    
+    /*
+    Scripts/Styles to load
+    */
+    public abstract function provider_scripts_styles();
+
 }
 
 class WP_SoundSytem_Provider_Youtube extends WP_SoundSytem_Provider{
-
-    function __construct($url){
-        parent::__construct($url);
-        add_filter( 'oembed_result', array($this,'enable_js_api'), 9, 3 );
+    
+    var $provider_slug = 'youtube';
+    
+    function __construct($oembed_html){
+        parent::__construct($oembed_html);
+        add_filter( 'wpsstm_player_oembed_html', array($this,'youtube_filter_oembed_html'), 10, 3 );
     }
     
-    function enable_js_api($html, $url, $args) {
-        if (strstr($html, 'youtube.com/embed/')) { //youtube
-            $this->iframe_id = 'wpsstm-iframe-youtube';
-            wp_register_script( 'youtube-player-api', 'http://www.youtube.com/player_api');
-            wp_enqueue_script( 'wpsstm-provider-youtube', wpsstm()->plugin_url . '_inc/js/provider-youtube.js', array('jquery','youtube-player-api'),wpsstm()->version,true);
-            $html = str_replace('?feature=oembed', '?feature=oembed&enablejsapi=1', $html);
-        }elseif (strstr($html, 'mixcloud.com/widget/')) { //mixcloud
-            $this->iframe_id = 'wpsstm-iframe-mixcloud';
-            wp_register_script( 'mixcloud-widget-api', '//widget.mixcloud.com/media/js/widgetApi.js');
-            wp_enqueue_script( 'wpsstm-provider-mixcloud', wpsstm()->plugin_url . '_inc/js/provider-mixcloud.js', array('jquery','mixcloud-widget-api'),wpsstm()->version,true);
-        }elseif (strstr($html, 'soundcloud.com/player/')) { //soundcloud
-            $this->iframe_id = 'wpsstm-iframe-soundcloud';
-            wp_register_script( 'soundcloud-player-api', '//w.soundcloud.com/player/api.js');
-            wp_enqueue_script( 'wpsstm-provider-soundcloud', wpsstm()->plugin_url . '_inc/js/provider-soundcloud.js', array('jquery','soundcloud-player-api'),wpsstm()->version,true);
-        }
+    static function can_handle_oembed($html){
+        if ( strstr($html, 'youtube.com/embed/') ) return true;
+        return false;
+    }
+
+    function youtube_filter_oembed_html($html, $url, $args) {
+        $html = str_replace('?feature=oembed', '?feature=oembed&enablejsapi=1', $html);
         return $html;
     }
- 
+    
+    function provider_scripts_styles(){
+        wp_register_script( 'youtube-player-api', 'http://www.youtube.com/player_api');
+        wp_enqueue_script( 'wpsstm-provider-youtube', wpsstm()->plugin_url . '_inc/js/provider-youtube.js', array('jquery','youtube-player-api'),wpsstm()->version,true);
+        
+    }
+
 }
+
+class WP_SoundSytem_Provider_Mixcloud extends WP_SoundSytem_Provider{
+    
+    var $provider_slug = 'mixcloud';
+    
+    static function can_handle_oembed($html){
+        if ( strstr($html, 'mixcloud.com/widget/') ) return true;
+        return false;
+    }
+    
+    function provider_scripts_styles(){
+        wp_register_script( 'mixcloud-widget-api', '//widget.mixcloud.com/media/js/widgetApi.js');
+        wp_enqueue_script( 'wpsstm-provider-mixcloud', wpsstm()->plugin_url . '_inc/js/provider-mixcloud.js', array('jquery','mixcloud-widget-api'),wpsstm()->version,true);
+    }
+}
+class WP_SoundSytem_Provider_Soundcloud extends WP_SoundSytem_Provider{
+    
+    var $provider_slug = 'soundcloud';
+    
+    static function can_handle_oembed($html){
+        if ( strstr($html, 'soundcloud.com/player/') ) return true;
+        return false;
+    }
+    
+    function provider_scripts_styles(){
+        wp_register_script( 'mixcloud-widget-api', '//widget.mixcloud.com/media/js/widgetApi.js');
+        wp_enqueue_script( 'wpsstm-provider-mixcloud', wpsstm()->plugin_url . '_inc/js/provider-mixcloud.js', array('jquery','mixcloud-widget-api'),wpsstm()->version,true);
+    }
+}
+
+wpsstm_player()->register_provider('WP_SoundSytem_Provider_Youtube');
+wpsstm_player()->register_provider('WP_SoundSytem_Provider_Mixcloud');
+wpsstm_player()->register_provider('WP_SoundSytem_Provider_Soundcloud');
 
 
