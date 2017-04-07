@@ -44,7 +44,6 @@ class WP_SoundSytem {
     public $meta_name_options = 'wpsstm_options';
     
     var $menu_page;
-    var $can_music_sources = false;
 
     public static function instance() {
         
@@ -74,7 +73,7 @@ class WP_SoundSytem {
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->options_default = array(
             'musicbrainz_enabled'               => 'on',
-            'player_enabled'                    => 'off',
+            'player_enabled'                    => 'on',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
             'live_playlists_enabled'            => 'on',
@@ -114,7 +113,7 @@ class WP_SoundSytem {
             require $this->plugin_dir . 'wpsstm-core-player.php';
         }
         
-        if ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) {
+        if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
             require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
         
@@ -127,9 +126,7 @@ class WP_SoundSytem {
     function setup_actions(){  
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
-        
-        add_action( 'init', array($this, 'check_can_music_sources'));
-        
+
         add_action( 'admin_init', array($this,'load_textdomain'));
 
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_styles_admin' ) );
@@ -139,17 +136,7 @@ class WP_SoundSytem {
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
 
     }
-    
 
-    
-    /*
-    Be sure that we have the Post Bookmarks plugin enabled (to handle music sources)
-    */
-    
-    function check_can_music_sources(){
-        $this->can_music_sources = class_exists( 'Post_Bookmarks' );
-    }
-    
     // Move all "after_title" metaboxes above the default editor
     function metabox_reorder(){
         global $post, $wp_meta_boxes;
