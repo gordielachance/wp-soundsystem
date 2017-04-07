@@ -73,7 +73,7 @@ class WP_SoundSytem {
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->options_default = array(
             'musicbrainz_enabled'               => 'on',
-            'player_enabled'                    => 'on',
+            'player_enabled'                    => 'off',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
             'live_playlists_enabled'            => 'on',
