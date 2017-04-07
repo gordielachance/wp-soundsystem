@@ -272,7 +272,7 @@ class WP_SoundSytem_Settings {
     
     function mb_suggest_bookmarks_callback(){
         $option = ( wpsstm()->get_options('mb_suggest_bookmarks') == "on" );
-        $disabled = !wpsstm()->can_music_sources;
+        $disabled = !class_exists( 'Post_Bookmarks' );
         
         printf(
             '<input type="checkbox" name="%s[mb_suggest_bookmarks]" value="on" %s %s /> %s %s',

@@ -247,3 +247,24 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
     return $xspf_url;
 
 }
+
+/*
+Get our  music sources links for a post
+*/
+
+function wpsstm_get_post_player_sources($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    
+    $links = array();
+    
+    if ( class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
+        $args = array(
+            'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
+        );
+        $links = post_bkmarks_get_post_links($post_id, $args);
+    }
+
+    return apply_filters('wpsstm_get_post_player_sources',$links,$post_id);
+    
+}

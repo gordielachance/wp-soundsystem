@@ -4,7 +4,7 @@
 Requires the Custom Post Links plugin.
 */
 
-class WP_SoundSytem_Custom_Post_Links {
+class WP_SoundSytem_Post_Bookmarks {
     
     static $music_source_cat_slug = 'wpsstm-sources';
     
@@ -61,13 +61,34 @@ class WP_SoundSytem_Custom_Post_Links {
         return $tabs;
     }
     
+    /*
+    Get our  music sources links category (based on slug) or create it if it does not exists
+    */
+
+    static function get_sources_category(){
+
+        $cat_id = null;
+
+        if ( $cat = get_term_by( 'slug', WP_SoundSytem_Post_Bookmarks::$music_source_cat_slug, 'link_category') ){
+            $cat_id = $cat->term_id;
+        }else{
+            $cat_id = wp_insert_term( 
+                __('Music sources','wpsstm'), 
+                'link_category',
+                 array(
+                     'description'  => sprintf(__('Parent category for all the music sources links created by the %s plugin.','post_bkmarks'),'<a href="'.admin_url('admin.php?page=wpsstm').'" target="blank">'.__('WP SoundSystem','wpsstm').'</a>'),
+                     'slug'         => WP_SoundSytem_Post_Bookmarks::$music_source_cat_slug
+                 ) 
+            );
+        }
+        return $cat_id;
+    }
+    
     function links_tab_music_sources_args($args,$tab,$post_id){
         if ( $tab != 'music_sources' ) return $args;
-        
-        $args['post_bkmarks_for_post'] = $post_id;
-        
+
         $categories_arr = (isset($args['category']) ) ? explode(",", $args['category']) : array();
-        $categories_arr[] = wpsstm_get_sources_category();
+        $categories_arr[] = self::get_sources_category();
         $args['category'] = implode(',',$categories_arr);
 
         return $args;
@@ -106,28 +127,5 @@ class WP_SoundSytem_Custom_Post_Links {
     }
 }
 
-/*
-Get our  music sources links category (based on slug) or create it if it does not exists
-*/
 
-function wpsstm_get_sources_category(){
-
-    $cat_id = null;
-
-    if ( $cat = get_term_by( 'slug', WP_SoundSytem_Custom_Post_Links::$music_source_cat_slug, 'link_category') ){
-        $cat_id = $cat->term_id;
-    }else{
-        $cat_id = wp_insert_term( 
-            __('Music sources','wpsstm'), 
-            'link_category',
-             array(
-                 'description'  => sprintf(__('Parent category for all the music sources links created by the %s plugin.','post_bkmarks'),'<a href="'.admin_url('admin.php?page=wpsstm').'" target="blank">'.__('WP SoundSystem','wpsstm').'</a>'),
-                 'slug'         => WP_SoundSytem_Custom_Post_Links::$music_source_cat_slug
-             ) 
-        );
-    }
-    return $cat_id;
-}
-
-
-new WP_SoundSytem_Custom_Post_Links();
+new WP_SoundSytem_Post_Bookmarks();
