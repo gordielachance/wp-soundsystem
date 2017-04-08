@@ -98,10 +98,9 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         if ( isset($_POST[ 'wpsstm_wizard' ]['reset']) ){
             delete_post_meta( $post_id, WP_SoundSytem_Playlist_Scraper::$meta_key_scraper_url );
             delete_post_meta( $post_id, WP_SoundSytem_Playlist_Scraper::$meta_key_options_scraper );
+            $this->scraper->page->delete_cache();
         }
-        
-        
-        
+
     }
 
     function wizard_settings_init(){
