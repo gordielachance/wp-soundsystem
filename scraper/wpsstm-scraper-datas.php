@@ -36,6 +36,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if ($this->datas === null){
             
             $feed_url = $this->parser->feed_url;
+            if (!$feed_url) return;
 
             //preset redirect url
             if ( ($preset = $this->parser->preset) && isset($preset->redirect_url) ){
@@ -48,7 +49,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             }
 
             if ( !$feed_url ){
-                return new WP_Error( 'empty_feed_url', __('No feed url)','spiff') );
+                return new WP_Error( 'empty_feed_url', __('No feed url','wpsstm') );
             }
             
             $this->feed_url = $feed_url;
