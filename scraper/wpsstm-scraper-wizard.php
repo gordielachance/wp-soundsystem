@@ -159,7 +159,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
 
 
-            if ( $this->scraper->preset && isset($this->scraper->preset['matches']) ){
+            if ( $this->scraper->preset && isset($this->scraper->preset->variables) ){
                 add_settings_field(
                     'regex_matches', 
                     __('Regex matches','wpsstm'), 
@@ -520,11 +520,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     }
     
     function feedback_regex_matches_callback(){
-        $preset = $this->scraper->preset;
-        $matches = $preset['matches'];
-        foreach((array)$matches as $match){
-            $value_str = ( isset($match['value']) ) ? sprintf('<code>%s</code>',$match['value']) : '—';
-            printf('<p><strong>%s <small>(%s)</small>:</strong> %s',$match['name'],$match['slug'],$value_str);
+        $variables = $this->scraper->preset->variables;
+
+        foreach($variables as $variable_slug => $variable){
+            $value_str = ( isset($variable['value']) ) ? sprintf('<code>%s</code>',$variable['value']) : '—';
+            printf('<p><strong>%s <small>(%s)</small>:</strong> %s',$variable['name'],$variable_slug,$value_str);
         }
     }
     
@@ -649,7 +649,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             '<input type="number" name="%1$s[datas_cache_min]" size="4" min="0" value="%2$s" /><span class="wizard-field-desc">%3$s</span>',
             'wpsstm_wizard',
             $option,
-            __('Time the remote tracks should be cached (in seconds).','spiff')
+            __('Time the remote tracks should be cached (in minutes).','spiff')
         );
 
         
