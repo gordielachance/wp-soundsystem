@@ -15,10 +15,8 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public $datas_cache = null;
     public $datas_remote = null;
     public $datas = null;
-    
-    
-    
-    var $querypath_options = array(
+
+    static $querypath_options = array(
         'omit_xml_declaration'      => true,
         'ignore_parser_warnings'    => true,
         'convert_from_encoding'     => 'auto',
@@ -38,22 +36,20 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if ($this->datas === null){
             
             $feed_url = $this->parser->feed_url;
+            if (!$feed_url) return;
 
             //preset redirect url
-            if ( ($preset = $this->parser->preset) && isset($preset['redirect_url']) ){
+            if ( ($preset = $this->parser->preset) && isset($preset->redirect_url) ){
 
-                $feed_url = $preset['redirect_url'];
-                
-                //TO FIX if missing value ?
-                foreach($preset['matches'] as $match){
-                    $pattern = '%' . $match['slug'] . '%';
-                    $value = $match['value'];
-                    $feed_url = str_replace($pattern,$value,$feed_url);
-                }
+                $feed_url = $preset->get_redirect_url();
+            }
+
+            if ( is_wp_error($feed_url) ){
+                return $feed_url;
             }
 
             if ( !$feed_url ){
-                return new WP_Error( 'empty_feed_url', __('No feed url)','spiff') );
+                return new WP_Error( 'empty_feed_url', __('No feed url','wpsstm') );
             }
             
             $this->feed_url = $feed_url;
@@ -208,7 +204,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             //QueryPath
             try{
 
-                $track_nodes = qp( $this->response_body, null, $this->querypath_options  )->find($selector);
+                $track_nodes = qp( $this->response_body, null, self::$querypath_options  )->find($selector);
 
                 if ($track_nodes->length == 0){
                     $error = new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist – you may perhaps try again later.','spiff') );
@@ -333,7 +329,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                     //QueryPath
                     //should be "trackList" instead of "tracklist", but it does not work.
                     try{
-                        if ( qp( $content, 'playlist tracklist track', $this->querypath_options )->length > 0 ){
+                        if ( qp( $content, 'playlist tracklist track', self::$querypath_options )->length > 0 ){
                             $this->response_type = 'text/xspf+xml';
                         }
                     }catch(Exception $e){
@@ -357,7 +353,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
                 //QueryPath
                 try{
-                    $result = qp( $xml, null, $this->querypath_options );
+                    $result = qp( $xml, null, self::$querypath_options );
                 }catch(Exception $e){
                     $error = new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }
@@ -389,7 +385,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
                 //QueryPath
                 try{
-                    $result = htmlqp( $content, null, $this->querypath_options );
+                    $result = htmlqp( $content, null, self::$querypath_options );
                 }catch(Exception $e){
                     $error = WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }
@@ -401,7 +397,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             default: //text/plain
                 //QueryPath
                 try{
-                    $result = qp( $content, 'body', $this->querypath_options );
+                    $result = qp( $content, 'body', self::$querypath_options );
                 }catch(Exception $e){
                     $error = WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }

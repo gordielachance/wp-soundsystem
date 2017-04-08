@@ -31,8 +31,7 @@ The Tracklist Parser metabox allows you to enter the URL of a remote tracklist (
 The tracklist will be synced to the remote page, and tracks will be updated each time someone access the Live Playlist post.
 
 For popular services like Spotify, no need to go any further.
-
-If the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
+But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
@@ -63,9 +62,22 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
+= How can I display the tracklist of a post in my templates ? =
+
+`<?php
+$tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
+$tracklist->get_tracklist_table();
+
+?>`
+
 == Screenshots ==
 
 == Changelog ==
+
+= 0.9.1 =
+* New Radionomy preset
+* Improved scraper presets system
+* Improved Post Bookmarks
 
 = 0.9 =
 * First release
