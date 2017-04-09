@@ -141,7 +141,8 @@ class WP_SoundSytem_Playlist_Scraper{
             new WP_SoundSytem_Playlist_Scraper_LastFM(),
             new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist(),
             new WP_SoundSytem_Playlist_Scraper_Radionomy(),
-            new WP_SoundSytem_Playlist_Scraper_SomaFM()
+            new WP_SoundSytem_Playlist_Scraper_SomaFM(),
+            new WP_SoundSytem_Playlist_Scraper_BBC_Station()
         );
 
         //TO FIX sort presets

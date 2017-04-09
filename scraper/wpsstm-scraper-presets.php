@@ -5,6 +5,7 @@ class WP_SoundSytem_Playlist_Scraper_Preset{
     var $pattern;
     
     var $name;
+    var $description;
     var $options = array();
     
     var $feed_url;
@@ -284,4 +285,34 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
         );
 
     }
+}
+
+class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
+    var $slug = 'bbc-station';
+    var $pattern = '/^https?:\/\/(?:www\.)?bbc\.co\.uk\/([\w\d]+)/i';
+    var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
+            'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist a'),
+            'track_title'       => array('path'=>'.pll-playlist-item-details .pll-playlist-item-title'),
+            'track_image'       => array('path'=>'img.pll-playlist-item-image')
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('BBC station','wpsstm');
+        
+        $this->variables = array(
+            'bbc-slug' => array(
+                'name'  => __('Station slug','wpsstm'),
+                'value' => null 
+            )
+        );
+
+    }
+    
+    
 }
