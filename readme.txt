@@ -39,6 +39,11 @@ NB : unlike playlists and albums, the Live Playlists tracklist entries are not s
 
 = Shortcodes =
 
+`[wpsstm-track post_id="150"]`
+
+To embed a single track.
+Optional arguments : *post_id*.
+
 `[wpsstm-tracklist post_id="160"]`
 
 To embed the tracklist from a post.  
