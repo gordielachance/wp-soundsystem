@@ -208,7 +208,7 @@ cache_only parameter is for live playlists.  If set to true, load only tracks fr
 function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $post_type = get_post_type($post->ID);
+    $post_type = get_post_type($post_id);
     
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
 
