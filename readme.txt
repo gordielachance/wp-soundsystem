@@ -90,10 +90,9 @@ $tracklist->get_tracklist_table();
 
 == Changelog ==
 
-= 0.9.X =
-* New 'BBC Station' and 'BBC Playlist' scraper presets
-* New 'wpsstm-tracklist' shortcode
-
+= 0.9.2 =
+* New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets
+* New 'wpsstm-track' and 'wpsstm-tracklist' shortcodes
 
 = 0.9.1 =
 * New Radionomy preset

@@ -8,9 +8,9 @@ class WP_SoundSytem_Playlist_Scraper_Preset{
     var $description;
     var $options = array();
     
-    var $feed_url;
+    var $feed_url;//source URL
     var $variables;
-    var $redirect_url;
+    var $redirect_url;//URL of the page that will be parsed if different from $feed_url
     
     function __construct(){
         $default_options = WP_SoundSytem_Playlist_Scraper::get_default_options();
@@ -90,7 +90,7 @@ class WP_SoundSytem_Playlist_Scraper_Preset{
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'last-fm-website';
-    var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
+    var $pattern = '~https?://(?:www.)?last.fm/user/([\w\d]+)/([\w\d]+)~i';
     var $options = array(
         'selectors' => array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
@@ -99,8 +99,7 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
             'track_image'      => array('path'=>'.chartlist-play-image')
         )
     );
-    
-    
+
     function __construct(){
         parent::__construct();
 
@@ -123,7 +122,7 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
 class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'spotify-playlist';
-    var $pattern = '/^https?:\/\/(?:open|play)\.spotify\.com\/user\/([\w\d]+)\/playlist\/([\w\d]+)$/i';
+    var $pattern = '~^https?://(?:open|play).spotify.com/user/([\w\d]+)/playlist/([\w\d]+)/?$~i';
     var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
     var $options = array(
         'selectors' => array(
@@ -132,8 +131,7 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
             'track_title'      => array('path'=>'.track-name'),
         )
     );
-    
-    
+
     function __construct(){
         parent::__construct();
 
@@ -156,7 +154,7 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
 class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'radionomy';
-    var $pattern = '~^(?:http(?:s)?://(?:www\.)?radionomy.com/.*?/radio/)([^/]+)~';
+    var $pattern = '^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     /*
             '~^(?:http(?:s)?://(?:www\.)?radionomy.com/.*?/radio/)([^/]+)~',
             '~^(?:http(?:s)?://listen.radionomy.com/)([^/]+)~',
@@ -261,7 +259,7 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
 class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'somafm';
-    var $pattern = '~^(?:http(?:s)?://(?:www\.)?somafm.com/)([^/]+)(?:/?)$~';
+    var $pattern = '~^https?://(?:www.)?somafm.com/([\w\d]+)/?$~i';
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $options = array(
         'selectors' => array(
@@ -289,7 +287,7 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
 
 class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-station';
-    var $pattern = '~^https?://(?:www.)?bbc.co.uk/([\w\d]+)/?$~i';
+    var $pattern = '^https?://(?:www.)?bbc.co.uk/(?!music)([\w\d]+)~i';
     var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
     var $options = array(
         'selectors' => array(
@@ -336,6 +334,32 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
         $this->variables = array(
             'bbc-playlist-id' => array(
                 'name'  => __('Playlist ID','wpsstm'),
+                'value' => null 
+            )
+        );
+
+    } 
+}
+
+class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
+    var $slug = 'slacker-station-tops';
+    var $pattern = '~^(?:http(?:s)?://(?:www.)?slacker.com/station/)([^/]*)~i';
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
+            'track_artist'      => array('path'=>'span.artist'),
+            'track_title'       => array('path'=>'span.title')
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Slacker.com station tops','wpsstm');
+        
+        $this->variables = array(
+            'slacker-station-slug' => array(
+                'name'  => __('Station Slug','wpsstm'),
                 'value' => null 
             )
         );
