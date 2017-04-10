@@ -281,7 +281,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
             if ( is_admin() ){
                 if ( $this->feed_url != $this->parser->feed_url ){
-                    add_settings_error( 'wizard-header-advanced', 'grabbed_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->feed_url.'</em>'),'updated inline' );
+                    add_settings_error( 'wizard-header', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->feed_url.'</em>'),'updated inline' );
                 }
             }
         }

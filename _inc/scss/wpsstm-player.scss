@@ -1,0 +1,81 @@
+@import "compass/css3";
+
+#wpsstm-player{
+    position:fixed;
+    width:100%;
+    background-color: #DDD;
+    border-top: 1px solid #b7b7b7;
+    padding:1em;
+    
+    bottom: 0;
+    
+    > * {
+        margin:auto;
+    }
+
+    #wpsstm-player-provider{
+        height: 100%;
+        overflow: hidden;
+        width: 20%;
+        position: absolute;
+        right: 0;
+    }
+    #wpsstm-player-main{
+        
+        .wpsstm-player-item-title{
+            text-align:center;
+        }
+        .wpsstm-player-item-controls{
+            text-align:center;
+        }
+
+        
+        .wpsstm-player-progress{
+            background-color:white;
+            position:relative;
+            display:inline-block;
+            width: 50%;
+            background-color: white;
+            height:1em;
+            text-align: left;
+            .wpsstm-player-progress-bar{
+                background-color:black;
+                @include opacity(0.1);
+                position:absolute;
+                height:100%;
+                width:0%;
+            }
+        }
+        
+        .wpsstm-player-control{
+            cursor: pointer;
+            cursor: hand;
+            display:inline-block;
+            margin:0 .25em;
+            
+            &.wpsstm-player-control-toggle{
+                :nth-child(odd) { //pause
+                    display:inherit;
+                }
+                :nth-child(even) { //pause
+                    display:none;
+                }
+                &.wpsstm-player-control-toggle-on{
+                    :nth-child(odd) { //pause
+                        display:none;
+                    }
+                    :nth-child(even) { //pause
+                        display:inherit;
+                    }
+                }
+            }
+        }
+
+    }
+    
+    .post-navigation{
+        position:absolute;
+        top:0;
+        right:0;
+    }
+}

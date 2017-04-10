@@ -49,7 +49,6 @@ class WP_SoundSytem_Core_Tracklists{
         add_filter( 'query_vars', array($this,'add_query_var_xspf'));
         add_action( 'init', array($this,'xspf_register_endpoint' ));
         add_filter( 'single_template', array($this,'xspf_template_loader'));
-        add_filter( 'the_content', array($this,'post_content_append_tracklist_table'));
         
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         add_action( 'save_post', array($this,'metabox_tracklist_save')); 
@@ -71,6 +70,13 @@ class WP_SoundSytem_Core_Tracklists{
         //scraper
         add_action( 'admin_init', array($this,'scraper_wizard_init') );
         add_action( 'save_post',  array($this, 'scraper_wizard_save'));
+        
+        //post content
+        add_filter( 'the_content', array($this,'content_append_tracklist_table'));
+        
+        //tracklist shortcode
+        add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
+        
 
     }
 
@@ -117,6 +123,7 @@ class WP_SoundSytem_Core_Tracklists{
     }
 
     function tracklists_script_styles(){
+        //TO FIX limitations ?
         wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',wpsstm()->version );
     }
     
@@ -323,23 +330,6 @@ class WP_SoundSytem_Core_Tracklists{
         }
 
     }
-    
-    function post_content_append_tracklist_table($content){
-        global $post;
-        
-        //check post type
-        $this->allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        $post_type = get_post_type($post->ID);
-        if ( !in_array($post_type,$this->allowed_post_types) ) return;
-        
-        $tracklist = wpsstm_get_post_tracklist($post->ID);
-
-        return $content . $tracklist->get_tracklist_table();
-    }
 
     /**
     If option 'hide_subtracks' is set,
@@ -452,6 +442,49 @@ class WP_SoundSytem_Core_Tracklists{
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
         $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($post_id);
         $wizard->save_wizard($post_id);
+    }
+    
+    function content_append_tracklist_table($content){
+        global $post;
+        
+        //check post type
+        $this->allowed_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+        $post_type = get_post_type($post->ID);
+        if ( !in_array($post_type,$this->allowed_post_types) ) return $content;
+        
+        $tracklist = wpsstm_get_post_tracklist($post->ID);
+
+        return $content . $tracklist->get_tracklist_table();
+    }
+    
+    function shortcode_tracklist( $atts ) {
+
+        global $post;
+
+        // Attributes
+        $default = array(
+            'post_id'       => $post->ID,
+            'max_rows'      => -1    
+        );
+        $atts = shortcode_atts($default,$atts);
+        
+        //check post type
+        $this->allowed_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+        $post_type = get_post_type($atts['post_id']);
+
+        if ( !in_array($post_type,$this->allowed_post_types) ) return;
+        
+        $tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+        return $tracklist->get_tracklist_table();
+
     }
     
 }

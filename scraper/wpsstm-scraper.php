@@ -77,12 +77,14 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->feed_url = $feed_url;
         
         //set preset
+        $preset_matches = array();
         foreach($this->all_presets as $preset){
             if ( $preset->is_preset_match($feed_url) ){
-                $this->preset = $preset;
-                break;
+                $preset_matches[] = $preset;
             }
         }
+        //get last one (highest priorty)
+        $this->preset = end($preset_matches);
 
         if ( $this->preset ){
             
@@ -141,7 +143,9 @@ class WP_SoundSytem_Playlist_Scraper{
             new WP_SoundSytem_Playlist_Scraper_LastFM(),
             new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist(),
             new WP_SoundSytem_Playlist_Scraper_Radionomy(),
-            new WP_SoundSytem_Playlist_Scraper_SomaFM()
+            new WP_SoundSytem_Playlist_Scraper_SomaFM(),
+            new WP_SoundSytem_Playlist_Scraper_BBC_Station(),
+            new WP_SoundSytem_Playlist_Scraper_BBC_Playlist()
         );
 
         //TO FIX sort presets

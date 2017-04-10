@@ -40,6 +40,9 @@ class WP_SoundSytem_Core_Tracks{
         
         add_filter('manage_posts_columns', array($this,'column_track_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_track_content'), 10, 2 );
+        
+        //tracklist shortcode
+        add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
 
     }
     
@@ -272,6 +275,31 @@ class WP_SoundSytem_Core_Tracks{
         }else{
             update_post_meta( $post_id, $this->metakey, $track );
         }
+
+    }
+    
+    function shortcode_track( $atts ) {
+        global $post;
+
+        // Attributes
+        $default = array(
+            'post_id'       => $post->ID 
+        );
+        $atts = shortcode_atts($default,$atts);
+        
+        //check post type
+        $this->allowed_post_types = array(
+            wpsstm()->post_type_track
+        );
+        $post_type = get_post_type($atts['post_id']);
+        if ( !in_array($post_type,$this->allowed_post_types) ) return;
+        
+        $track = new WP_SoundSystem_Track(null,$atts['post_id']);
+        $tracks = array($track);
+        $tracklist = new WP_SoundSytem_Tracklist();
+
+        $tracklist->add($tracks);
+        return $tracklist->get_tracklist_table();
 
     }
     

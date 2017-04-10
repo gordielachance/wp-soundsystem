@@ -1,0 +1,77 @@
+/* line 3, ../scss/wpsstm-player.scss */
+#wpsstm-player {
+  position: fixed;
+  width: 100%;
+  background-color: #DDD;
+  border-top: 1px solid #b7b7b7;
+  padding: 1em;
+  bottom: 0;
+}
+/* line 12, ../scss/wpsstm-player.scss */
+#wpsstm-player > * {
+  margin: auto;
+}
+/* line 16, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-provider {
+  height: 100%;
+  overflow: hidden;
+  width: 20%;
+  position: absolute;
+  right: 0;
+}
+/* line 25, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-item-title {
+  text-align: center;
+}
+/* line 28, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-item-controls {
+  text-align: center;
+}
+/* line 33, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-progress {
+  background-color: white;
+  position: relative;
+  display: inline-block;
+  width: 50%;
+  background-color: white;
+  height: 1em;
+  text-align: left;
+}
+/* line 41, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-progress .wpsstm-player-progress-bar {
+  background-color: black;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=10);
+  opacity: 0.1;
+  position: absolute;
+  height: 100%;
+  width: 0%;
+}
+/* line 50, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-control {
+  cursor: pointer;
+  cursor: hand;
+  display: inline-block;
+  margin: 0 .25em;
+}
+/* line 57, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-control.wpsstm-player-control-toggle :nth-child(odd) {
+  display: inherit;
+}
+/* line 60, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-control.wpsstm-player-control-toggle :nth-child(even) {
+  display: none;
+}
+/* line 64, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-control.wpsstm-player-control-toggle.wpsstm-player-control-toggle-on :nth-child(odd) {
+  display: none;
+}
+/* line 67, ../scss/wpsstm-player.scss */
+#wpsstm-player #wpsstm-player-main .wpsstm-player-control.wpsstm-player-control-toggle.wpsstm-player-control-toggle-on :nth-child(even) {
+  display: inherit;
+}
+/* line 76, ../scss/wpsstm-player.scss */
+#wpsstm-player .post-navigation {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
