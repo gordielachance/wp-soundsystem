@@ -73,6 +73,10 @@ class WP_SoundSytem_Core_Tracklists{
         
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table'));
+        
+        //tracklist shortcode
+        add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
+        
 
     }
 
@@ -455,6 +459,32 @@ class WP_SoundSytem_Core_Tracklists{
         $tracklist = wpsstm_get_post_tracklist($post->ID);
 
         return $content . $tracklist->get_tracklist_table();
+    }
+    
+    function shortcode_tracklist( $atts ) {
+
+        global $post;
+
+        // Attributes
+        $default = array(
+            'post_id'       => $post->ID,
+            'max_rows'      => -1    
+        );
+        $atts = shortcode_atts($default,$atts);
+        
+        //check post type
+        $this->allowed_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+        $post_type = get_post_type($atts['post_id']);
+
+        if ( !in_array($post_type,$this->allowed_post_types) ) return;
+        
+        $tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+        return $tracklist->get_tracklist_table();
+
     }
     
 }

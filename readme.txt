@@ -23,6 +23,7 @@ For example, when creating an album post, you can load its tracklist from the Mu
 
 = Playlists =
 Create and manage tracklists easily with the Tracklist metabox.  Each entry added creates a new Track post.
+
 Import a tracklist from a file or a music service like Spotify using the Tracklist Parser metabox.
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
@@ -35,6 +36,15 @@ But if the URL is not recognized, the advanced wizard will show up and you will 
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
+
+= Shortcodes =
+
+`[wpsstm-tracklist post_id="160"]`
+
+To embed the tracklist from a post.  
+Works for albums, playlists and live playlists.
+Optional arguments : *post_id*,*max_rows*.
+
 
 = Donate! =
 It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
@@ -64,15 +74,21 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 = How can I display the tracklist of a post in my templates ? =
 
+Use the tracklist shortcode **wpsstm-tracklist** in your post content (see the *shortcodes* section above), or use those functions directly in your templates :
+
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
 $tracklist->get_tracklist_table();
-
 ?>`
 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.9.X =
+* New 'BBC Station' and 'BBC Playlist' scraper presets
+* New 'wpsstm-tracklist' shortcode
+
 
 = 0.9.1 =
 * New Radionomy preset
