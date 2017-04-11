@@ -90,6 +90,14 @@ $tracklist->get_tracklist_table();
 
 == Screenshots ==
 
+1. Settings page
+2. Artists menu
+3. Tracks menu
+4. Albums menu
+5. Playlists menu
+6. Tracklist metabox
+7. Tracklist parser metabox
+
 == Changelog ==
 
 = 0.9.2 =
