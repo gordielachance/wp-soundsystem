@@ -209,7 +209,7 @@ class WP_SoundSytem_Core_Live_Playlists{
     
     function metabox_tracklist_scripts_styles(){
         // CSS
-        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',wpsstm()->version );
+        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
     }
 
 }

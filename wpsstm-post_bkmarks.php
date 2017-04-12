@@ -105,16 +105,23 @@ class WP_SoundSytem_Post_Bookmarks {
         if ( $mb_relations ){
 
             foreach((array)$mb_relations as $rel){
-
-                 $mb_link = array(
+                
+                $link_url = ( isset($rel['url']['resource']) ) ? $rel['url']['resource'] : null;
+                if (!$link_url) continue;
+                
+                if ( $link_id = post_bkmarks_get_existing_link_id($link_url) ) continue; 
+                    
+                $mb_link = array(
                     'link_name'     => ( isset($rel['type']) ) ? $rel['type'] : null,
-                    'link_url'      => ( isset($rel['url']['resource']) ) ? $rel['url']['resource'] : null
-                 );
+                    'link_url'      => $link_url
+                );
 
                 $mb_links[] = $mb_link;
 
             }
         }
+        
+        
 
         return $mb_links;
     }
