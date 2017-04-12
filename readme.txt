@@ -31,22 +31,24 @@ Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_
 The Tracklist Parser metabox allows you to enter the URL of a remote tracklist (eg. a Last.FM profile or a radio station tracklist) and to scrape its data.
 The tracklist will be synced to the remote page, and tracks will be updated each time someone access the Live Playlist post.
 
-For popular services like Spotify, no need to go any further.
+For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
+Services supported by default : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker.
+
 = Shortcodes =
 
 `[wpsstm-track post_id="150"]`
 
-To embed a single track.
+To embed the single track #150.
 Optional arguments : *post_id*.
 
 `[wpsstm-tracklist post_id="160"]`
 
-To embed the tracklist from a post.  
+To embed the tracklist from the post #160.  
 Works for albums, playlists and live playlists.
 Optional arguments : *post_id*,*max_rows*.
 
@@ -79,7 +81,7 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 = How can I display the tracklist of a post in my templates ? =
 
-Use the tracklist shortcode **wpsstm-tracklist** in your post content (see the *shortcodes* section above), or use those functions directly in your templates :
+Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates :
 
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
@@ -88,12 +90,19 @@ $tracklist->get_tracklist_table();
 
 == Screenshots ==
 
+1. Settings page
+2. Artists menu
+3. Tracks menu
+4. Albums menu
+5. Playlists menu
+6. Tracklist metabox
+7. Tracklist parser metabox
+
 == Changelog ==
 
-= 0.9.X =
-* New 'BBC Station' and 'BBC Playlist' scraper presets
-* New 'wpsstm-tracklist' shortcode
-
+= 0.9.2 =
+* New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets
+* New 'wpsstm-track' and 'wpsstm-tracklist' shortcodes
 
 = 0.9.1 =
 * New Radionomy preset

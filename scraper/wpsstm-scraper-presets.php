@@ -12,7 +12,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
     function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
         $this->scraper = $scraper;
     }
-    
+
     /*
     Check that this preset can be loaded by the scraper.
     You should override this in your preset class.
@@ -21,6 +21,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
     function can_load_preset(){
         return false;
     }
+
     
     function init_preset(){
         $this->override_scraper_options();
@@ -151,12 +152,13 @@ class WP_SoundSytem_Playlist_Scraper_Default extends WP_SoundSytem_Playlist_Scra
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
 
     var $slug = 'last-fm-website';
+
     var $name = null;
     var $description = null;
     
     var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
     var $variables = array();
-    
+
     var $options = array(
         'selectors' => array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
@@ -165,10 +167,10 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
             'track_image'      => array('path'=>'.chartlist-play-image')
         )
     );
-    
+
     function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
         parent::__construct($scraper);
-        
+
         $this->name = __('Last.FM website','wpsstm');
         
         $this->variables = array(
@@ -189,12 +191,13 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
 class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
 
     var $slug = 'spotify-playlist';
+
     var $name = null;
     var $description = null;
     
-    var $pattern = '/^https?:\/\/(?:open|play)\.spotify\.com\/user\/([\w\d]+)\/playlist\/([\w\d]+)$/i';
+    var $pattern = '~^https?://(?:open|play).spotify.com/user/([\w\d]+)/playlist/([\w\d]+)/?$~i';
     var $variables = array();
-    
+
     var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
     var $options = array(
         'selectors' => array(
@@ -203,7 +206,7 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
             'track_title'      => array('path'=>'.track-name'),
         )
     );
-    
+
     function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
         parent::__construct($scraper);
 
@@ -227,10 +230,10 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
 class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
 
     var $slug = 'radionomy';
+
     var $name = null;
     var $description = null;
-    
-    var $pattern = '~^(?:http(?:s)?://(?:www\.)?radionomy.com/.*?/radio/)([^/]+)~';
+    var $pattern = '^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     /*
             '~^(?:http(?:s)?://(?:www\.)?radionomy.com/.*?/radio/)([^/]+)~',
             '~^(?:http(?:s)?://listen.radionomy.com/)([^/]+)~',
@@ -327,12 +330,13 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
 class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
     var $slug = 'somafm';
+
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^(?:http(?:s)?://(?:www\.)?somafm.com/)([^/]+)(?:/?)$~';
+    var $pattern = '~^https?://(?:www.)?somafm.com/([\w\d]+)/?$~i';
     var $variables = array();
-    
+
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $options = array(
         'selectors' => array(
@@ -359,13 +363,14 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
 
 class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
     var $slug = 'bbc-station';
+
     var $name = null;
     var $description = null;
-    
-    var $pattern = '~^https?://(?:www.)?bbc.co.uk/([\w\d]+)/?$~i';
+
+    var $pattern = '^https?://(?:www.)?bbc.co.uk/(?!music)([\w\d]+)~i';
     var $variables = array();
-    
-    var $redirect_url = 'http://www.bbc.co.uk/%bbc-slug%/playlist';
+    var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
+
     var $options = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
@@ -421,6 +426,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
     } 
 }
 
+
 abstract class WP_SoundSytem_Playlist_Scraper_Preset_AFTER extends WP_SoundSytem_Playlist_Scraper_Preset{
     
     function can_load_preset(){
@@ -428,6 +434,33 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset_AFTER extends WP_SoundSytem
         return true;
     }
     
+}
+  
+class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
+    var $slug = 'slacker-station-tops';
+    var $pattern = '~^(?:http(?:s)?://(?:www.)?slacker.com/station/)([^/]*)~i';
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
+            'track_artist'      => array('path'=>'span.artist'),
+            'track_title'       => array('path'=>'span.title')
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Slacker.com station tops','wpsstm');
+        
+        $this->variables = array(
+            'slacker-station-slug' => array(
+                'name'  => __('Station Slug','wpsstm'),
+                'value' => null 
+            )
+        );
+
+    } 
+
 }
 
 class WP_SoundSytem_Playlist_Scraper_XSPF extends WP_SoundSytem_Playlist_Scraper_Preset_AFTER{
@@ -455,6 +488,5 @@ class WP_SoundSytem_Playlist_Scraper_XSPF extends WP_SoundSytem_Playlist_Scraper
     function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
         parent::__construct($scraper);
         $this->name = __('XSPF','wpsstm');
-    } 
-    
+    }
 }

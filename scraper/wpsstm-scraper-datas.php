@@ -55,26 +55,22 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         
         $this->setup_url();
 
-        if ($this->datas === null){
+        //try to get cache first
+        $this->datas = $this->get_datas_cache();
 
-            //try to get cache first
-            $this->datas = $this->get_datas_cache();
-            
-            if ( count($this->datas['tracks']) && $this->scraper->is_wizard ){
-                add_settings_error( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','spiff'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['time'])),'updated inline' );
-            }
+        if ( count($this->datas['tracks']) && $this->scraper->is_wizard ){
+            add_settings_error( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','spiff'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['time'])),'updated inline' );
+        }
 
-            if ( ( !$this->datas && (!$this->scraper->cache_only) ) || $this->scraper->is_wizard ){
+        if ( ( !$this->datas && (!$this->scraper->cache_only) ) || $this->scraper->is_wizard ){
 
-                wpsstm()->debug_log($this->scraper->redirect_url,"WP_SoundSytem_Playlist_Scraper_Datas::get_datas() url"); 
-                $this->datas = $this->get_datas_remote();
+            wpsstm()->debug_log($this->scraper->redirect_url,"WP_SoundSytem_Playlist_Scraper_Datas::get_datas() url"); 
+            $this->datas = $this->get_datas_remote();
 
-                //repopulate author & title as we might change them depending of the page content
-                //$this->title = $this->get_station_title();
-                //$this->author = $this->get_station_author();
+            //repopulate author & title as we might change them depending of the page content
+            //$this->title = $this->get_station_title();
+            //$this->author = $this->get_station_author();
 
-            }
-            
         }
 
         return $this->datas;

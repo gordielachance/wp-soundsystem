@@ -133,6 +133,7 @@ class WP_SoundSytem_Playlist_Scraper{
         $enabled_presets = array();
         
         $all_presets = array(
+
             new WP_SoundSytem_Playlist_Scraper_Default($scraper),
             new WP_SoundSytem_Playlist_Scraper_LastFM($scraper),
             new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist($scraper),
@@ -140,7 +141,9 @@ class WP_SoundSytem_Playlist_Scraper{
             new WP_SoundSytem_Playlist_Scraper_SomaFM($scraper),
             new WP_SoundSytem_Playlist_Scraper_BBC_Station($scraper),
             new WP_SoundSytem_Playlist_Scraper_BBC_Playlist($scraper),
+            new WP_SoundSytem_Playlist_Scraper_Slacker_Station($scraper),
             new WP_SoundSytem_Playlist_Scraper_XSPF($scraper)
+
         );
 
         //get matching presets
