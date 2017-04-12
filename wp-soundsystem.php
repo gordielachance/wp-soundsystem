@@ -73,7 +73,7 @@ class WP_SoundSytem {
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->options_default = array(
             'musicbrainz_enabled'               => 'on',
-            'player_enabled'                    => 'off',
+            'player_enabled'                    => 'on',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
             'live_playlists_enabled'            => 'on',
@@ -200,19 +200,17 @@ class WP_SoundSytem {
             if (!$is_allowed_post_type && !$is_top_menu) return;
 
             // css
-            wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',false,'4.3.0');
+            wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
             wp_register_style( 'wpsstm_admin',  $this->plugin_url . '_inc/css/wpsstm-admin.css',array('font-awesome'),$this->version );
             // js
             wp_register_script( 'wpsstm-shortenTables', $this->plugin_url . '_inc/js/wpsstm-shortenTables.js', array('jquery'),$this->version);
             wp_register_script( 'wpsstm_admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shortenTables'),$this->version);
 
-            
             //localize vars
             $localize_vars=array();
             $localize_vars['ajaxurl']=admin_url( 'admin-ajax.php' );
             wp_localize_script('wpsstm_admin','wpsstmL10n', $localize_vars);
-            
-            
+
             wp_enqueue_script( 'wpsstm_admin' );
             wp_enqueue_style( 'wpsstm_admin' );
             
@@ -235,7 +233,7 @@ class WP_SoundSytem {
         wp_localize_script( 'wpsstm', 'wpsstm', $datas );
         wp_enqueue_script( 'wpsstm' );
         
-        wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',false,'4.3.0');
+        wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
         wp_register_style( 'wpsstm',  $this->plugin_url . '_inc/css/wpsstm.css',array('font-awesome'),$this->version );
         
         wp_enqueue_style( 'wpsstm' );

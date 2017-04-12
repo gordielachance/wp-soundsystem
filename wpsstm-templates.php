@@ -249,7 +249,7 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
 }
 
 /*
-Get our  music sources links for a post
+Get the music sources links for a post
 */
 
 function wpsstm_get_post_player_sources($post_id = null){
@@ -262,7 +262,12 @@ function wpsstm_get_post_player_sources($post_id = null){
         $args = array(
             'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
         );
-        $links = post_bkmarks_get_post_links($post_id, $args);
+        $bookmarks = post_bkmarks_get_post_links($post_id, $args);
+        
+        foreach ((array)$bookmarks as $bookmark){
+            $links[] = $bookmark->link_url;
+        }
+        
     }
 
     return apply_filters('wpsstm_get_post_player_sources',$links,$post_id);

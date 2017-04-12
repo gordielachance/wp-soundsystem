@@ -25,10 +25,12 @@ class WP_SoundSytem_Playlist_Scraper{
     public $options_default;
     public $options;
     
-    public $all_presets;
     public $preset;
+    public $enabled_presets = array();
     
     public $feed_url;
+    public $redirect_url;
+    
     public $page;
     public $page_response = null;
     public $tracklist;
@@ -52,7 +54,6 @@ class WP_SoundSytem_Playlist_Scraper{
 
         $this->tracklist = new WP_SoundSytem_Tracklist();
         $this->page = new WP_SoundSytem_Playlist_Scraper_Datas($this);
-        $this->all_presets = $this->get_presets_sorted();
         
     }
     
@@ -74,32 +75,24 @@ class WP_SoundSytem_Playlist_Scraper{
     
     function init($feed_url){
         
-        $this->feed_url = $feed_url;
-        
-        //set preset
-        $preset_matches = array();
-        foreach($this->all_presets as $preset){
-            if ( $preset->is_preset_match($feed_url) ){
-                $preset_matches[] = $preset;
-            }
-        }
-        //get last one (highest priorty)
-        $this->preset = end($preset_matches);
-
-        if ( $this->preset ){
-            
-            //set preset options
-            $this->options = wp_parse_args($this->preset->options, $this->options );
-            
-            if ( is_admin() ){
-                $message = sprintf(__('The %s preset has been loaded.','wpsstm'),'<em>'.$this->preset->name.'</em>' );
-                add_settings_error( 'wizard-header', 'has-presets',$message,'updated inline' );
-            }
-
-        }
+        //set feed url
+        $this->feed_url = $this->redirect_url = $feed_url;
+        wpsstm()->debug_log("***");
+        wpsstm()->debug_log($this->feed_url,"feed url");
 
         //populate tracklist
-        $datas = $this->page->get_datas($this->cache_only);
+        $datas = $this->page->get_datas();
+        
+        //presets feedback
+        foreach($this->enabled_presets as $preset){
+            if ( is_admin() ){
+                add_settings_error( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$preset->name.'</em>'),'updated inline' );
+            }
+        }
+
+        if ( $this->feed_url != $this->page->url ){
+            wpsstm()->debug_log($this->feed_url,"feed url filtered");
+        }
         
         if ( is_wp_error($datas) ){
             add_settings_error( 'wizard-header', 'no-datas', $datas->get_error_message(),'error inline' );
@@ -115,8 +108,6 @@ class WP_SoundSytem_Playlist_Scraper{
     static function get_default_options($keys = null){
         
         $default = array(
-            'website_url'               => null, //url to parse
-            'regexes'                   => array(),
             'selectors' => array(
                 'tracks'           => array('path'=>null,'regex'=>null),
                 'track_artist'     => array('path'=>null,'regex'=>null),
@@ -127,7 +118,7 @@ class WP_SoundSytem_Playlist_Scraper{
             ),
             'tracks_order'              => 'desc',
             'datas_cache_min'          => (int)wpsstm()->get_options('live_playlists_cache_min'),
-            'musicbrainz'               => false                               //check tracks with musicbrainz
+            'musicbrainz'               => false //check tracks with musicbrainz
         );
         
         return wpsstm_get_array_value($keys,$default);
@@ -137,20 +128,30 @@ class WP_SoundSytem_Playlist_Scraper{
         return wpsstm_get_array_value($keys,$this->options);
     }
     
-    function get_presets_sorted(){
+    function populate_presets($scraper){
+        
+        $enabled_presets = array();
         
         $all_presets = array(
-            new WP_SoundSytem_Playlist_Scraper_LastFM(),
-            new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist(),
-            new WP_SoundSytem_Playlist_Scraper_Radionomy(),
-            new WP_SoundSytem_Playlist_Scraper_SomaFM(),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Station(),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Playlist()
+            new WP_SoundSytem_Playlist_Scraper_Default($scraper),
+            new WP_SoundSytem_Playlist_Scraper_LastFM($scraper),
+            new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist($scraper),
+            new WP_SoundSytem_Playlist_Scraper_Radionomy($scraper),
+            new WP_SoundSytem_Playlist_Scraper_SomaFM($scraper),
+            new WP_SoundSytem_Playlist_Scraper_BBC_Station($scraper),
+            new WP_SoundSytem_Playlist_Scraper_BBC_Playlist($scraper),
+            new WP_SoundSytem_Playlist_Scraper_XSPF($scraper)
         );
 
-        //TO FIX sort presets
+        //get matching presets
+        foreach((array)$all_presets as $preset){
+            if ( $preset->can_load_preset() ){
+                $preset->init_preset();
+                $this->enabled_presets[] = $preset;
+            }
+        }
         
-        return apply_filters('wpsstm_get_scraper_presets',$all_presets);
+        $this->enabled_presets = array_unique($this->enabled_presets, SORT_REGULAR);
     }
 
 }

@@ -1,14 +1,13 @@
 <?php
 
 class WP_SoundSytem_Playlist_Scraper_Datas{
-    var $parser;
-    var $feed_url;
+    var $scraper;
     var $id;
     var $transient_name_cache;
 
     public $response;
     public $response_type;
-    public $response_body;
+    public $response_body = null;
     public $track_nodes;
     
 
@@ -27,47 +26,47 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         'User-Agent'        => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML => like Gecko) Iron/31.0.1700.0 Chrome/31.0.1700.0'
     );
     
-    public function __construct(WP_SoundSytem_Playlist_Scraper $parser){
-        $this->parser = $parser;
+    public function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
+        $this->scraper = $scraper;
+    }
+    
+    public function setup_url(){
+        
+        //load presets
+        $this->scraper->populate_presets($this->scraper);
+
+        $url = $this->scraper->redirect_url;
+
+        if ( is_wp_error($url) ){
+            return $url;
+        }
+
+        if ( !$url ){
+            return new WP_Error( 'empty_feed_url', __('No feed url','wpsstm') );
+        }
+
+        $this->id = md5( $url );
+        $this->transient_name_cache = 'wpsstm_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
     }
 
-    public function get_datas($cache_only = false){
+    public function get_datas(){
+        
+        if (!$this->scraper->feed_url) return;
+        
+        $this->setup_url();
 
         if ($this->datas === null){
-            
-            $feed_url = $this->parser->feed_url;
-            if (!$feed_url) return;
-
-            //preset redirect url
-            if ( ($preset = $this->parser->preset) && isset($preset->redirect_url) ){
-
-                $feed_url = $preset->get_redirect_url();
-            }
-
-            if ( is_wp_error($feed_url) ){
-                return $feed_url;
-            }
-
-            if ( !$feed_url ){
-                return new WP_Error( 'empty_feed_url', __('No feed url','wpsstm') );
-            }
-            
-            $this->feed_url = $feed_url;
-            
-            
-            
-            $this->id = md5( $this->feed_url );
-            $this->transient_name_cache = 'wpsstm_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
 
             //try to get cache first
             $this->datas = $this->get_datas_cache();
             
-            if ( count($this->datas['tracks']) && $this->parser->is_wizard ){
+            if ( count($this->datas['tracks']) && $this->scraper->is_wizard ){
                 add_settings_error( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','spiff'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['time'])),'updated inline' );
             }
 
-            if ( ( !$this->datas && (!$cache_only) ) || $this->parser->is_wizard ){
+            if ( ( !$this->datas && (!$this->scraper->cache_only) ) || $this->scraper->is_wizard ){
 
+                wpsstm()->debug_log($this->scraper->redirect_url,"WP_SoundSytem_Playlist_Scraper_Datas::get_datas() url"); 
                 $this->datas = $this->get_datas_remote();
 
                 //repopulate author & title as we might change them depending of the page content
@@ -92,7 +91,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
     
     public function get_cache(){
-        if ( !$this->parser->get_options('datas_cache_min') ){
+        if ( !$this->scraper->get_options('datas_cache_min') ){
             if ( is_admin() ){
                 add_settings_error( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'spiff'),'updated inline' );
             }
@@ -109,7 +108,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     
     function set_cache(){
 
-        if ( !$duration_min = $this->parser->get_options('datas_cache_min') ) return;
+        if ( !$duration_min = $this->scraper->get_options('datas_cache_min') ) return;
         
         $duration = $duration_min * MINUTE_IN_SECONDS;
         $success = set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
@@ -126,15 +125,15 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
         $nodes = $this->populate_track_nodes(); //must be before the selectors check as requesting the response can modify get_options
 
-        $empty_artist_selector  = ( !$this->parser->get_options('selectors','track_artist') );
-        $empty_title_selector   = ( !$this->parser->get_options('selectors','track_title') );
+        $empty_artist_selector  = ( !$this->scraper->get_options('selectors','track_artist') );
+        $empty_title_selector   = ( !$this->scraper->get_options('selectors','track_title') );
 
 
-        if ( $empty_artist_selector && !$this->parser->is_wizard ){
+        if ( $empty_artist_selector && !$this->scraper->is_wizard ){
                 return false;
         }
         
-        if ( $empty_title_selector && !$this->parser->is_wizard ){
+        if ( $empty_title_selector && !$this->scraper->is_wizard ){
                 return false;
         }
 
@@ -157,14 +156,14 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         }
         
         //sort
-        if ($this->parser->get_options('tracks_order') == 'asc'){
+        if ($this->scraper->get_options('tracks_order') == 'asc'){
             $tracks_arr = array_reverse($tracks_arr);
         }
 
 
         //lookup
         /*
-        if ( ($this->parser->get_options('musicbrainz')) && ( !$this->parser->is_wizard ) ){
+        if ( ($this->scraper->get_options('musicbrainz')) && ( !$this->scraper->is_wizard ) ){
             foreach ($this->tracklist->tracks as $track){
                 $track->musicbrainz();
             }
@@ -181,8 +180,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if ( !$this->get_datas_cache() ){
             $this->set_cache();
         }
-        
-        
+
         return $this->datas_remote;
 
     }
@@ -190,14 +188,17 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     private function populate_track_nodes(){
 
         $error = null;
+        
 
-        if ( !$this->response_body ){
-            $this->populate_feed();
-        }
+
+        $this->populate_source_body();
 
         if ( $this->response_body ){
+            
+            //load presets - a second time since now we have a body
+            $this->scraper->populate_presets($this->scraper);
 
-            $selector = $this->parser->get_options( array('selectors','tracks','path') );
+            $selector = $this->scraper->get_options( array('selectors','tracks','path') );
 
             if ( !$selector ) return;
        
@@ -232,56 +233,63 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
     
-    private function populate_feed(){
-        $error = $remote_body = $source_content = null;
-
-        $remote_args = apply_filters('spiff_get_response_args',$this->remote_get_options,$this->feed_url );
-        $response = wp_remote_get( $this->feed_url, $remote_args );
-
-        if ( !is_wp_error($response) ){
+    private function populate_source_body(){
+        
+        if ( $this->response_body === null){
             
-            $this->response = $response;
-            $this->response_type = $this->get_response_datatype($response);
-            
-            $response_code = wp_remote_retrieve_response_code( $response );
+            $this->response_body = false; //to avoid to run this code several times
+        
+            $error = $remote_body = $source_content = null;
 
-            if ($response_code && $response_code != 200){
+            $remote_args = apply_filters('spiff_get_response_args',$this->remote_get_options,$this->scraper->redirect_url );
+            $response = wp_remote_get( $this->scraper->redirect_url, $remote_args );
 
-                $response_message = wp_remote_retrieve_response_message( $response );
-                $error = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
-                
-            }else{
+            if ( !is_wp_error($response) ){
 
-                $remote_body = wp_remote_retrieve_body( $response ); 
+                $this->response = $response;
+                $this->response_type = $this->get_response_datatype($response);
 
-                if ( !is_wp_error($remote_body) ){
+                $response_code = wp_remote_retrieve_response_code( $response );
 
-                    $source_content = $this->parse_source_body($remote_body);
+                if ($response_code && $response_code != 200){
 
-                    if ( is_wp_error($source_content ) ){
-                        $error = $source_content;
+                    $response_message = wp_remote_retrieve_response_message( $response );
+                    $error = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
+
+                }else{
+
+                    $remote_body = wp_remote_retrieve_body( $response ); 
+
+                    if ( !is_wp_error($remote_body) ){
+
+                        $source_content = $this->parse_response_body($remote_body);
+
+                        if ( is_wp_error($source_content ) ){
+                            $error = $source_content;
+                        }
+
                     }
-                    
+
                 }
 
+            }else{
+                $error = $response;
             }
 
-        }else{
-            $error = $response;
-        }
+            if ($error){
+                if ( is_admin() ){
+                    $error_msg = sprintf(__('Error while trying to reach %1$s : %2$s','spiff'),'<em>'.$this->scraper->redirect_url.'</em>','<strong>'.$error->get_error_message().'</strong>' );
+                    add_settings_error( 'wizard-header', 'no_response', $error_msg,'error inline' );
+                }
+            }else{
 
-        if ($error){
-            if ( is_admin() ){
-                $error_msg = sprintf(__('Error while trying to reach %1$s : %2$s','spiff'),'<em>'.$this->feed_url.'</em>','<strong>'.$error->get_error_message().'</strong>' );
-                add_settings_error( 'wizard-header', 'no_response', $error_msg,'error inline' );
-            }
-        }else{
-            
-            $this->response_body = $source_content;
+                $this->response_body = apply_filters('wpsstm_scraper_preset_body',$source_content,$this->scraper);
+                remove_all_filters( 'wpsstm_scraper_preset_body' ); //don't add up preset filters, it should run only once per scraper
 
-            if ( is_admin() ){
-                if ( $this->feed_url != $this->parser->feed_url ){
-                    add_settings_error( 'wizard-header', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->feed_url.'</em>'),'updated inline' );
+                if ( is_admin() ){
+                    if ( $this->scraper->redirect_url != $this->scraper->feed_url ){
+                        add_settings_error( 'wizard-header', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->scraper->redirect_url.'</em>'),'updated inline' );
+                    }
                 }
             }
         }
@@ -309,9 +317,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
     
-    function parse_source_body($content){
-
-        //$content = apply_filters('xspf_parse_source_body_pre',$content,$this->parser);
+    function parse_response_body($content){
 
         $error = null;
         
@@ -326,14 +332,21 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                 
                 //check for XSPF
                 if ($this->response_type=='application/xml' || $this->response_type=='text/xml'){
+                    
+                    $is_xspf = false;
+                    
                     //QueryPath
-                    //should be "trackList" instead of "tracklist", but it does not work.
                     try{
-                        if ( qp( $content, 'playlist tracklist track', self::$querypath_options )->length > 0 ){
-                            $this->response_type = 'text/xspf+xml';
+                        if ( qp( $content, 'playlist trackList track', self::$querypath_options )->length > 0 ){
+                            $is_xspf = true;
                         }
                     }catch(Exception $e){
 
+                    }
+                    
+                    if ($is_xspf){
+                        $this->response_type = 'text/xspf+xml';
+                        return $this->parse_response_body($content);
                     }
                 }
 
@@ -361,22 +374,28 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             break;
 
             case 'application/json':
+                
+                $xml = null;
 
                 try{
                     $data = json_decode($content, true);
 
                     $dom = Array2XML::createXML($data,'root','element');
                     $xml = $dom->saveXML($dom);
-                    $this->response_type = 'text/xml';
+                    
+
+                }catch(Exception $e){
+                    $error = WP_Error( 'XML2Array', sprintf(__('XML2Array Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+                }
+                
+                if ($xml){
                     
                     if ( is_admin() ){
                         add_settings_error( 'wizard-row-feed_content_type', 'json2xml', __("The json input has been converted to XML.",'spiff'),'updated inline');
                     }
-
-                    $result = $this->parse_source_body($xml);
-
-                }catch(Exception $e){
-                    $error = WP_Error( 'XML2Array', sprintf(__('XML2Array Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+                    
+                    $this->response_type = 'text/xml';
+                    return $this->parse_response_body($xml);
                 }
 
             break;
@@ -432,8 +451,8 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $string = null;
         
         $selector_slug  = 'track_'.$slug;
-        $selector_css   = $this->parser->get_options(array('selectors',$selector_slug,'path'));
-        $selector_regex = $this->parser->get_options(array('selectors',$selector_slug,'regex'));
+        $selector_css   = $this->scraper->get_options(array('selectors',$selector_slug,'path'));
+        $selector_regex = $this->scraper->get_options(array('selectors',$selector_slug,'regex'));
 
         //abord
         if ( !$selector_css && !$selector_regex ){

@@ -41,10 +41,7 @@ function wpsstm_ajax_save_tracklist_row(){
     
     $result['tracks'] = $tracklist->tracks; //for debug
 
-    
     if ( count($tracklist->tracks) ){
-
-        //$tracklist->save_subtracks();
 
         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
         $entries_table = new WP_SoundSytem_TracksList_Admin_Table();

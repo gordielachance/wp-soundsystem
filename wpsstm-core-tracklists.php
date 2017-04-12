@@ -124,7 +124,7 @@ class WP_SoundSytem_Core_Tracklists{
 
     function tracklists_script_styles(){
         //TO FIX limitations ?
-        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',wpsstm()->version );
+        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
     }
     
     function metabox_tracklist_scripts_styles(){
@@ -138,7 +138,7 @@ class WP_SoundSytem_Core_Tracklists{
         if ($screen->base != 'post') return;
 
         // CSS
-        wp_enqueue_style( 'wpsstm-admin-metabox-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-admin-metabox-tracklist.css',wpsstm()->version );
+        wp_enqueue_style( 'wpsstm-admin-metabox-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-admin-metabox-tracklist.css',null,wpsstm()->version );
         
         // JS
         

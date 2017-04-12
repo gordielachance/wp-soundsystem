@@ -24,7 +24,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function metabox_wizard_scripts_styles(){
         // CSS
-        wp_enqueue_style( 'wpsstm-admin-metabox-scraper',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-admin-metabox-scraper.css',wpsstm()->version );
+        wp_enqueue_style( 'wpsstm-admin-metabox-scraper',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-admin-metabox-scraper.css',null,wpsstm()->version );
         
         // JS
         wp_enqueue_script( 'wpsstm-admin-metabox-scraper', wpsstm()->plugin_url . 'scraper/_inc/js/wpsstm-admin-metabox-scraper.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
@@ -155,8 +155,6 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             /*
             Source feedback
             */
-
-
 
             if ( $this->scraper->preset && isset($this->scraper->preset->variables) ){
                 add_settings_field(
@@ -342,18 +340,6 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         //cache has been disabled, delete existing cache
         if ( !isset($new_input['datas_cache_min']) && isset($previous_values['datas_cache_min']) && ( $this->scraper->page->datas_cache ) ) {
             $this->scraper->page->delete_cache();
-        }
-
-        //website URL
-        $new_input['website_url'] = trim($input['website_url']);
-
-        //regexes
-        if ( isset($input['regexes']) ){
-            foreach($input['regexes'] as $regex){
-                $new_input['regexes'][] = trim($regex);
-            }
-            $new_input['regexes'] = array_unique($new_input['regexes']);
-            $new_input['regexes'] = array_filter($new_input['regexes']);
         }
 
         //selectors 
