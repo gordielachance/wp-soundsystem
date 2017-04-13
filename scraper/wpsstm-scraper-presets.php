@@ -30,10 +30,8 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
     function override_scraper_options(){
 
         if (!$this->options) return;
+        $this->scraper->options = array_replace_recursive($this->scraper->options, $this->options );
         
-        $default_options = WP_SoundSytem_Playlist_Scraper::get_default_options();
-        $preset_options =  array_replace_recursive($default_options, $this->options );
-        $this->scraper->options = array_replace_recursive($this->scraper->options, $preset_options );
     }
 
 }
