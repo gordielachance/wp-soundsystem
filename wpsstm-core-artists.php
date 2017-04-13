@@ -233,12 +233,13 @@ class WP_SoundSytem_Core_Artists{
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_album,wpsstm()->post_type_track);
         if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //avoid running this for tracklist posts
-        if ( $tracklist_ids = wpsstm_get_tracklist_ids_for_track( $post_id ) ) return;
 
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_artist_meta_box_nonce'], 'wpsstm_artist_meta_box' ) );
         if ( !$is_valid_nonce ) return;
+        
+        //this should run only once (for the main post); so unset meta box nonce.
+        //without this the function would be called for every subtrack if there was some.
+        unset($_POST['wpsstm_artist_meta_box_nonce']);
 
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
 
