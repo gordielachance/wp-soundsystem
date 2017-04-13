@@ -22,12 +22,12 @@ class WP_SoundSytem_Playlist_Scraper{
     
     static $meta_key_scraper_url = '_wpsstm_scraper_url';
     static $meta_key_options_scraper = '_wpsstm_scraper_options';
-    public $options_default;
-    public $options;
     
-    public $preset;
     public $enabled_presets = array();
     
+    public $options_default;
+    public $options;
+
     public $feed_url;
     public $redirect_url;
     
@@ -43,8 +43,7 @@ class WP_SoundSytem_Playlist_Scraper{
         
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-datas.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
-        
+
         $this->setup_globals();
         $this->setup_actions();
         
@@ -62,7 +61,7 @@ class WP_SoundSytem_Playlist_Scraper{
     }
 
     function init_post($post_id){
-        
+
         $this->tracklist = new WP_SoundSytem_Tracklist($post_id);
         
         $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
@@ -128,27 +127,27 @@ class WP_SoundSytem_Playlist_Scraper{
         return wpsstm_get_array_value($keys,$this->options);
     }
     
-    function populate_presets($scraper){
+    function get_enabled_presets_variables(){
+        $all_variables = array();
+        foreach((array)$this->enabled_presets as $preset){
+            $variables = $preset->variables;
+
+            foreach((array)$variables as $key => $variable){
+                $all_variables[$key] = $variable;
+            }
+        }
+        return $all_variables;
+    }
+
+    function populate_scraper_presets($scraper){
         
         $enabled_presets = array();
-        
-        $all_presets = array(
 
-            new WP_SoundSytem_Playlist_Scraper_Default($scraper),
-            new WP_SoundSytem_Playlist_Scraper_LastFM($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Radionomy($scraper),
-            new WP_SoundSytem_Playlist_Scraper_SomaFM($scraper),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Station($scraper),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Playlist($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Slacker_Station($scraper),
-            new WP_SoundSytem_Playlist_Scraper_XSPF($scraper)
-
-        );
+        $all_presets = wpsstm_live_playlists()->available_presets;
 
         //get matching presets
         foreach((array)$all_presets as $preset){
-            if ( $preset->can_load_preset() ){
+            if ( $preset->can_load_preset($scraper) ){
                 $preset->init_preset();
                 $this->enabled_presets[] = $preset;
             }

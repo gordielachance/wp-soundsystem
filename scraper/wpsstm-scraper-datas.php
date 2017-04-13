@@ -33,9 +33,9 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public function setup_url(){
         
         //load presets
-        $this->scraper->populate_presets($this->scraper);
+        $this->scraper->populate_scraper_presets($this->scraper);
 
-        $url = $this->scraper->redirect_url;
+        $url = $this->scraper->feed_url;
 
         if ( is_wp_error($url) ){
             return $url;
@@ -192,7 +192,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if ( $this->response_body ){
             
             //load presets - a second time since now we have a body
-            $this->scraper->populate_presets($this->scraper);
+            $this->scraper->populate_scraper_presets($this->scraper);
 
             $selector = $this->scraper->get_options( array('selectors','tracks','path') );
 

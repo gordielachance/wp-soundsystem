@@ -156,7 +156,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Source feedback
             */
 
-            if ( $this->scraper->preset && isset($this->scraper->preset->variables) ){
+            if ( $this->scraper->enabled_presets && $this->scraper->get_enabled_presets_variables() ){
                 add_settings_field(
                     'regex_matches', 
                     __('Regex matches','wpsstm'), 
@@ -505,11 +505,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     }
     
     function feedback_regex_matches_callback(){
-        $variables = $this->scraper->preset->variables;
+        $variables = $this->scraper->get_enabled_presets_variables();
 
         foreach($variables as $variable_slug => $variable){
-            $value_str = ( isset($variable['value']) ) ? sprintf('<code>%s</code>',$variable['value']) : '—';
-            printf('<p><strong>%s <small>(%s)</small>:</strong> %s',$variable['name'],$variable_slug,$value_str);
+            $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
+            printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
         }
     }
     
@@ -823,7 +823,10 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         if ($this->can_show_step('track_details')){
             
             $icon_track_details_tab = $status_icons[0];
-            if ( $this->scraper->tracklist->tracks ){
+            $tracklist_validated = clone $this->scraper->tracklist;
+            $tracklist_validated->validate_tracks();
+            
+            if ( $tracklist_validated->tracks ){
                 $icon_track_details_tab = $status_icons[1];
             }
             

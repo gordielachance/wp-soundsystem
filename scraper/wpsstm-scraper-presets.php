@@ -1,7 +1,7 @@
 <?php
 
 abstract class WP_SoundSytem_Playlist_Scraper_Preset{
-    var $slug;    
+    var $slug;
     var $name;
     var $description;
 
@@ -9,8 +9,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
     
     var $options = array();
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        $this->scraper = $scraper;
+    function __construct(){
     }
 
     /*
@@ -18,7 +17,8 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
     You should override this in your preset class.
     */
 
-    function can_load_preset(){
+    function can_load_preset(WP_SoundSytem_Playlist_Scraper $scraper){
+        $this->scraper = $scraper;
         return false;
     }
 
@@ -35,9 +35,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset{
         $preset_options =  array_replace_recursive($default_options, $this->options );
         $this->scraper->options = array_replace_recursive($this->scraper->options, $preset_options );
     }
-    
 
-    
 }
 
 /**
@@ -46,11 +44,12 @@ Class for presets that should run before the remote page is requested, eg. to fi
 
 abstract class WP_SoundSytem_Playlist_Scraper_Preset_BEFORE extends WP_SoundSytem_Playlist_Scraper_Preset{
     
-    var $pattern; //pattern used to check if the URL to scrape fits the preset
+    var $pattern; //pattern used to check if the scraper URL matches the preset.
     var $variables; //list of variables that matches the regex groups from $pattern
-    var $redirect_url;
+    var $redirect_url; //if needed, a redirect URL.  Can use variables extracted from the pattern using the %variable% format.
 
-    function can_load_preset(){
+    function can_load_preset(WP_SoundSytem_Playlist_Scraper $scraper){
+        $this->scraper = $scraper;
         if ( $this->scraper->page->datas !== null ) return false; //source already populated
         if ( !$this->is_feed_url_match() ) return false;
         return true;
@@ -62,22 +61,27 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset_BEFORE extends WP_SoundSyte
         
         //populate variables from URL
         if ($this->pattern){
-            preg_match($this->pattern, $this->scraper->feed_url, $url_matches);
 
-            if ($url_matches){
+            if ( $url_matches = $this->is_feed_url_match() ){
                 array_shift($url_matches); //remove first item (full match)
                 $this->populate_variable_values($url_matches);
             }
         }
-
+        
         //update scraper url
+        $this->update_scraper_redirect_url();
+
+    }
+    
+    function update_scraper_redirect_url(){
         if ($this->redirect_url){
             $this->scraper->redirect_url = $this->variables_fill_string($this->redirect_url);
         }
     }
+    
 
     /**
-    Checks the input URL to see if this preset should be loaded or not, and init it if required.
+    Extract values from the feed url.  If $url_matches is empty, it means that the feed url does not match the pattern.
     **/
     
     function is_feed_url_match(){
@@ -85,22 +89,30 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset_BEFORE extends WP_SoundSyte
         preg_match($this->pattern, $this->scraper->feed_url, $url_matches);
         return ($url_matches);
     }
+    
+    /**
+    Fill the preset $variables.
+    The array keys from the preset $variables and the input $values_arr have to match.
+    **/
 
     function populate_variable_values($values_arr){
         
         $key = 0;
 
         foreach((array)$this->variables as $variable_slug=>$variable){
-            
             $value = ( isset($values_arr[$key]) ) ? $values_arr[$key] : null;
-            $this->set_variable_value($variable_slug,$value);
+            
+            if ($value){
+                $this->set_variable_value($variable_slug,$value);
+            }
+            
             $key++;
         }
 
     }
 
     function set_variable_value($slug,$value='null'){
-        $this->variables[$slug]['value'] = $value;
+        $this->variables[$slug] = $value;
     }
     
     function get_variable_value($slug){
@@ -110,33 +122,39 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset_BEFORE extends WP_SoundSyte
         foreach($this->variables as $variable_slug => $variable){
             
             if ( $variable_slug == $slug ){
-                return $variable['value'];
+                return $variable;
             }
         }
 
     }
     
+    /*
+    Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
+    */
+    
     function variables_fill_string($str){
-        foreach($this->variables as $variable_slug => $variable){
+
+        foreach($this->variables as $variable_slug => $variable_value){
             $pattern = '%' . $variable_slug . '%';
-            $value = $variable['value'];
+            $value = $variable_value;
             
             if ($value) {
                 $str = str_replace($pattern,$value,$str);
             }
         }
+
         return $str;
     }
     
 }
-
 
 class WP_SoundSytem_Playlist_Scraper_Default extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
     var $slug = 'default';
     var $name = null;
     var $description = null;
     
-    function can_load_preset(){
+    function can_load_preset(WP_SoundSytem_Playlist_Scraper $scraper){
+        $this->scraper = $scraper;
         return ($this->scraper->feed_url);
     }
     
@@ -157,7 +175,10 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
     var $description = null;
     
     var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
-    var $variables = array();
+    var $variables = array(
+        'lastfm-user' => null,
+        'lastfm-page' => null
+    );
 
     var $options = array(
         'selectors' => array(
@@ -168,22 +189,11 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('Last.FM website','wpsstm');
-        
-        $this->variables = array(
-            'lastfm-user' => array(
-            'name'  => __('Last.FM user','wpsstm'),
-            'value' => null 
-            ),
-            'lastfm-page' => array(
-            'name'  => __('Last.FM page','wpsstm'),
-             'value' => null
-            )
-        );
-        
+
     }
 
 }
@@ -196,7 +206,10 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
     var $description = null;
     
     var $pattern = '~^https?://(?:open|play).spotify.com/user/([\w\d]+)/playlist/([\w\d]+)/?$~i';
-    var $variables = array();
+    var $variables = array(
+        'spotify-user' => null,
+        'spotify-playlist' => null
+    );
 
     var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
     var $options = array(
@@ -207,21 +220,10 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('Spotify Playlist','wpsstm');
-        
-        $this->variables = array(
-            'spotify-user' => array(
-                'name'  => __('Spotify user','wpsstm'),
-                'value' => null 
-            ),
-            'spotify-playlist' => array(
-                'name'  => __('Spotify playlist','wpsstm'),
-                'value' => null
-            )
-        );
         
     }
 
@@ -233,13 +235,16 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
     var $name = null;
     var $description = null;
-    var $pattern = '^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
+    var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     /*
             '~^(?:http(?:s)?://(?:www\.)?radionomy.com/.*?/radio/)([^/]+)~',
             '~^(?:http(?:s)?://listen.radionomy.com/)([^/]+)~',
             '~^(?:http(?:s)?://streaming.radionomy.com/)([^/]+)~',
     */
-    var $variables = array();
+    var $variables = array(
+        'radionomy-slug' => null,
+        'radionomy-id' => null
+    );
     
     var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
     var $options = array(
@@ -251,26 +256,22 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('Radionomy Station','wpsstm');
+    }
+    
+    function init_preset(){
         
-        $this->variables = array(
-            'radionomy-slug' => array(
-                'name'  => __('Radionomy slug','wpsstm'),
-                'value' => null 
-            ),
-            'radionomy-id' => array(
-                'name'  => __('Radionomy ID','wpsstm'),
-                'value' => null 
-            )
-        );
+        parent::init_preset();
 
-        //set station ID //TO FIX TO MOVE
+        //set station ID
         if ( $station_id = $this->get_station_id() ){
             $this->set_variable_value('radionomy-id',$station_id);
+            $this->update_scraper_redirect_url();
         }
+
     }
 
     function get_station_id(){
@@ -335,7 +336,9 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
     var $description = null;
     
     var $pattern = '~^https?://(?:www.)?somafm.com/([\w\d]+)/?$~i';
-    var $variables = array();
+    var $variables = array(
+        'somafm-slug' => null
+    );
 
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $options = array(
@@ -347,17 +350,11 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('Soma FM Station','wpsstm');
-        
-        $this->variables = array(
-            'somafm-slug' => array(
-                'name'  => __('Station slug','wpsstm'),
-                'value' => null 
-            )
-        );
+
     }
 }
 
@@ -367,8 +364,10 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
     var $name = null;
     var $description = null;
 
-    var $pattern = '^https?://(?:www.)?bbc.co.uk/(?!music)([\w\d]+)~i';
-    var $variables = array();
+    var $pattern = '^https?://(?:www.)?bbc.co.uk/(?!music)([\w\d]+)/?$~i';
+    var $variables = array(
+        'bbc-slug' => null
+    );
     var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
 
     var $options = array(
@@ -380,17 +379,11 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('BBC station','wpsstm');
-        
-        $this->variables = array(
-            'bbc-slug' => array(
-                'name'  => __('Station slug','wpsstm'),
-                'value' => null 
-            )
-        );
+
     }
 
 }
@@ -400,8 +393,10 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([\w\d]+)~i';
-    var $variables = array();
+    var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([\w\d]+)/?$~i';
+    var $variables = array(
+        'bbc-playlist-id' => null
+    );
     
     var $options = array(
         'selectors' => array(
@@ -411,34 +406,20 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
         )
     );
 
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
 
         $this->name = __('BBC playlist','wpsstm');
-        
-        $this->variables = array(
-            'bbc-playlist-id' => array(
-                'name'  => __('Playlist ID','wpsstm'),
-                'value' => null 
-            )
-        );
 
     } 
 }
 
-
-abstract class WP_SoundSytem_Playlist_Scraper_Preset_AFTER extends WP_SoundSytem_Playlist_Scraper_Preset{
-    
-    function can_load_preset(){
-        if ( $this->scraper->page->response_body === null ) return false; //source has not been populated yet
-        return true;
-    }
-    
-}
-  
-class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
     var $slug = 'slacker-station-tops';
-    var $pattern = '~^(?:http(?:s)?://(?:www.)?slacker.com/station/)([^/]*)~i';
+    var $pattern = '~^https?://(?:www.)?slacker.com/station/)([\w\d]+)/?$~i';
+    var $variables = array(
+        'slacker-station-slug' => null
+    );
     var $options = array(
         'selectors' => array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
@@ -451,16 +432,45 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
         parent::__construct();
 
         $this->name = __('Slacker.com station tops','wpsstm');
-        
-        $this->variables = array(
-            'slacker-station-slug' => array(
-                'name'  => __('Station Slug','wpsstm'),
-                'value' => null 
-            )
-        );
 
     } 
 
+}
+
+class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset_BEFORE{
+    var $slug = 'twitter';
+    var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([\w\d]+)/?$~i';
+    var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
+    var $variables = array(
+        'twitter-username' => null
+    );
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'#main_content .timeline .tweet')
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Twitter','wpsstm');
+
+    } 
+
+}
+
+/*
+This abstract class could be extended to build a preset that would run only when the scraper has its source loaded.
+*/
+
+abstract class WP_SoundSytem_Playlist_Scraper_Preset_AFTER extends WP_SoundSytem_Playlist_Scraper_Preset{
+    
+    function can_load_preset(WP_SoundSytem_Playlist_Scraper $scraper){
+        $this->scraper = $scraper;
+        if ( $this->scraper->page->response_body === null ) return false; //source has not been populated yet
+        return true;
+    }
+    
 }
 
 class WP_SoundSytem_Playlist_Scraper_XSPF extends WP_SoundSytem_Playlist_Scraper_Preset_AFTER{
@@ -480,13 +490,32 @@ class WP_SoundSytem_Playlist_Scraper_XSPF extends WP_SoundSytem_Playlist_Scraper
         )
     );
     
-    function can_load_preset(){
-        if ( !parent::can_load_preset() ) return false;
+    function can_load_preset(WP_SoundSytem_Playlist_Scraper $scraper){
+        if ( !parent::can_load_preset($scraper) ) return false;
         return ($this->scraper->page->response_type == 'text/xspf+xml');
     }
     
-    function __construct(WP_SoundSytem_Playlist_Scraper $scraper){
-        parent::__construct($scraper);
+    function __construct(){
+        parent::__construct();
         $this->name = __('XSPF','wpsstm');
+        
+        if (!$this->scraper) return;
     }
 }
+
+function wpsstm_register_scraper_presets(){
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_Default');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_LastFM');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_Spotify_Playlist');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_Radionomy');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_SomaFM');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_BBC_Station');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_BBC_Playlist');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_Slacker_Station');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_Twitter');
+    wpsstm_live_playlists()->register_preset('WP_SoundSytem_Playlist_Scraper_XSPF');
+}
+
+add_action('init','wpsstm_register_scraper_presets');
+
+    
