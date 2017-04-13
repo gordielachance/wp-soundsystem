@@ -260,13 +260,14 @@ class WP_SoundSytem_Core_Tracks{
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_track);
         if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //avoid running this for tracklist posts
-        if ( $tracklist_ids = wpsstm_get_tracklist_ids_for_track( $post_id ) ) return;
 
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_meta_box_nonce'], 'wpsstm_track_meta_box' ) );
         if ( !$is_valid_nonce ) return;
+        
+        //this should run only once (for the main post); so unset meta box nonce.
+        //without this the function would be called for every subtrack if there was some.
+        unset($_POST['wpsstm_track_meta_box_nonce']);
 
         $track = ( isset($_POST[ 'wpsstm_track' ]) ) ? $_POST[ 'wpsstm_track' ] : null;
 

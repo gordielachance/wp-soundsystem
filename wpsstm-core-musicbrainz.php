@@ -360,13 +360,14 @@ class WP_SoundSytem_Core_MusicBrainz {
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //avoid running this for tracklist posts
-        if ( $tracklist_ids = wpsstm_get_tracklist_ids_for_track( $post_id ) ) return;
 
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_mbid_meta_box_nonce'], 'wpsstm_mbid_meta_box' ) );
         if ( !$is_valid_nonce ) return;
+        
+        //this should run only once (for the main post); so unset meta box nonce.
+        //without this the function would be called for every subtrack if there was some.
+        unset($_POST['wpsstm_mbid_meta_box_nonce']);
 
         //save MBID input
         $mbid_db = wpsstm_get_post_mbid($post_id);
@@ -502,13 +503,14 @@ class WP_SoundSytem_Core_MusicBrainz {
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //avoid running this for tracklist posts
-        if ( $tracklist_ids = wpsstm_get_tracklist_ids_for_track( $post_id ) ) return;
-        
+
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_mbdata_meta_box_nonce'], 'wpsstm_mbdata_meta_box' ) );
         if ( !$is_valid_nonce ) return;
+        
+        //this should run only once (for the main post); so unset meta box nonce.
+        //without this the function would be called for every subtrack if there was some.
+        unset($_POST['wpsstm_mbdata_meta_box_nonce']);
         
         //get mbdatas action
         if ( isset($_REQUEST['wpsstm-mbdata-refresh']) ){
@@ -518,6 +520,10 @@ class WP_SoundSytem_Core_MusicBrainz {
         }elseif ( isset($_REQUEST['wpsstm-mbdata-switch']) ){
             $mbdatas_action = 'switch';
         }
+        
+        if (!$mbdatas_action) return;
+
+        wpsstm()->debug_log( array('post_id'=>$post_id,'action'=>$mbdatas_action),"metabox_mbdata_save()" ); 
 
         if ( $mbid = wpsstm_get_post_mbid($post_id) ){
 
@@ -547,15 +553,6 @@ class WP_SoundSytem_Core_MusicBrainz {
             //delete mdbata option 
             delete_post_meta( $post_id, $this->mb_data_meta_name );
         }
-        
-        
-
-        
-        //get mbdatas if there is none (or that it is 'refreshed')
-        
-        
-        
-
     }
     
     function load_api_errors($post){
