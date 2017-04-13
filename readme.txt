@@ -100,10 +100,11 @@ $tracklist->get_tracklist_table();
 
 == Changelog ==
 
-= 0.9.X =
+= 0.9.3 =
 * new 'Twitter' and 'XSPF' presets
 * improved presets
 * validate_tracks() in function content_append_tracklist_table() and file playlist-xspf.php
+* Improved the saving routine for metaboxes
 
 = 0.9.2 =
 * New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets
