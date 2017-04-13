@@ -444,7 +444,7 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
     );
     var $options = array(
         'selectors' => array(
-            'tracks'            => array('path'=>'#main_content .timeline .tweet')
+            'tracks'            => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )
     );
 
