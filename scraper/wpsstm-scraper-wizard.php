@@ -10,7 +10,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->scraper = new WP_SoundSytem_Playlist_Scraper();
         $this->scraper->is_wizard = true;
         $this->scraper->init_post($post_id);
-        $this->advanced = ( ( $this->scraper->feed_url && !$this->scraper->tracklist->tracks ) || isset($_REQUEST['advanced_wizard']) );
+        
+        $tracklist_validated = clone $this->scraper->tracklist;
+        $tracklist_validated->validate_tracks();
+        
+        $this->advanced = ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) );
         //$this->advanced = false;
 
         //populate settings
