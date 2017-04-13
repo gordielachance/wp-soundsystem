@@ -37,7 +37,7 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
-Services supported by default : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker.
+Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Twitter, XSPF.
 
 = Shortcodes =
 
@@ -99,6 +99,11 @@ $tracklist->get_tracklist_table();
 7. Tracklist parser metabox
 
 == Changelog ==
+
+= 0.9.X =
+* new 'Twitter' and 'XSPF' presets
+* improved presets
+* validate_tracks() in function content_append_tracklist_table() and file playlist-xspf.php
 
 = 0.9.2 =
 * New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets
