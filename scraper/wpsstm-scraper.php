@@ -77,8 +77,6 @@ class WP_SoundSytem_Playlist_Scraper{
         
         //set feed url
         $this->feed_url = $this->redirect_url = $feed_url;
-        wpsstm()->debug_log("***");
-        wpsstm()->debug_log($this->feed_url,"feed url");
 
         //populate tracklist
         $datas = $this->page->get_datas();
@@ -90,8 +88,8 @@ class WP_SoundSytem_Playlist_Scraper{
             }
         }
 
-        if ( $this->feed_url != $this->page->url ){
-            wpsstm()->debug_log($this->feed_url,"feed url filtered");
+        if ( $this->feed_url != $this->redirect_url ){
+            wpsstm()->debug_log($this->redirect_url,"feed url filtered");
         }
         
         if ( is_wp_error($datas) ){
