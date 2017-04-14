@@ -1,8 +1,9 @@
 <?php
 class WP_SoundSytem_Core_Live_Playlists{
     
-    public $qvar_url_input='wpsstm_url_input';
+    public $qvar_url_input='wizard_url';
     public $allowed_post_types;
+    public $frontend_page_id = null;
     
     /**
     * @var The one true Instance
@@ -22,16 +23,24 @@ class WP_SoundSytem_Core_Live_Playlists{
     function init(){
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
+        
+        
+        
     }
     
     function setup_globals(){
-        
+        $this->frontend_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
     }
 
     function setup_actions(){
         
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        
+        //frontend Tracklist Parser
+        if ( $this->frontend_page_id ){
+            add_filter( 'the_content', array($this,'frontend_tracklist_parser'));
+        }
 
     }
     
@@ -208,6 +217,32 @@ class WP_SoundSytem_Core_Live_Playlists{
     function metabox_tracklist_scripts_styles(){
         // CSS
         wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
+    }
+    
+    function frontend_tracklist_parser_get_input(){
+        $form_qvar = wpsstm_live_playlists()->qvar_url_input;
+        $form_url = ( isset($_REQUEST[$form_qvar]) ) ? $_REQUEST[$form_qvar] : null;
+        return $form_url;
+    }
+
+    
+    function frontend_tracklist_parser($content){
+        global $post;
+        if ($post->ID != $this->frontend_page_id) return $content;
+
+        $output = "coucou";
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
+        
+        $url = $this->frontend_tracklist_parser_get_input();
+        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($url);
+        
+        ob_start();
+        $wizard->wizard_form();
+        $output = ob_get_clean();
+        
+        return $content . $output;
+        
     }
 
 }

@@ -219,9 +219,3 @@ function wpsstm_get_class_instance($post_id){
 
     }
 }
-
-function wpsstm_get_user_input_url(){
-    $form_qvar = wpsstm_live_playlists()->qvar_url_input;
-    $form_url = ( isset($_REQUEST[$form_qvar]) ) ? $_REQUEST[$form_qvar] : null;
-    return $form_url;
-}

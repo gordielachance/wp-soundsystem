@@ -99,7 +99,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         ?>
         <div id="export-xspf">
-            <a class="submit export" href="<?php echo wpsstm_get_xspf_link(); ?>"><?php printf('Download XSPF','wpsstm'); ?></a>
+            <a class="submit export" href="<?php echo $xpsf_link; ?>"><?php printf('Download XSPF','wpsstm'); ?></a>
         </div>
         <?php
 

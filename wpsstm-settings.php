@@ -111,9 +111,16 @@ class WP_SoundSytem_Settings {
             live playlists
             */
             $new_input['live_playlists_enabled'] = ( isset($input['live_playlists_enabled']) ) ? 'on' : 'off';
+            
+            //scraper page ID
+            if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
+                if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
+                    $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
+                }
+                
+            }
 
             //cache duration
-            
             if ( isset ($input['live_playlists_cache_min']) && ctype_digit($input['live_playlists_cache_min']) ){
                 $new_input['live_playlists_cache_min'] = $input['live_playlists_cache_min'];
             }
@@ -213,6 +220,16 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'live_playlists_settings'
         );
+        
+        /*
+        add_settings_field(
+            'frontend_scraper_page_id', 
+            __('Tracklist Parser page ID','wpsstm'), 
+            array( $this, 'live_playlists_scraper_page_id_callback' ), 
+            'wpsstm-settings-page', 
+            'live_playlists_settings'
+        );
+        */
 
         add_settings_field(
             'cache_tracks_intval', 
@@ -221,8 +238,6 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'live_playlists_settings'
         );
-        
-
 
         add_settings_section(
             'settings_system', // ID
@@ -323,6 +338,19 @@ class WP_SoundSytem_Settings {
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
             __("Enable Live Playlists","wpsstm")
+        );
+    }
+    
+    function live_playlists_scraper_page_id_callback(){
+        $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
+
+        $help = "<small>".__("ID of the page to use for the frontend Tracklist Parser. 0 = Disabled.","wpsstm")."</small>";
+        
+        printf(
+            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" /><br/>%s',
+            wpsstm()->meta_name_options,
+            $option,
+            $help
         );
     }
     

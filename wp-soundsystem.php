@@ -77,6 +77,7 @@ class WP_SoundSytem {
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
             'live_playlists_enabled'            => 'on',
+            'frontend_scraper_page_id'          => null,
             'live_playlists_cache_min'          => '10',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'hide_subtracks'                    => 'on'

@@ -3,19 +3,33 @@
 class WP_SoundSytem_Playlist_Scraper_Wizard{
 
     var $scraper;
-    var $advanced = true; //advanced wizard ?
     
-    function __construct($post_id){
+    var $frontend = false;
+    var $advanced = true; //advanced wizard ?
+
+    var $wizard_sections  = array();
+    var $wizard_fields = array();
+    
+    function __construct($post_id_or_feed_url = null){
         
         $this->scraper = new WP_SoundSytem_Playlist_Scraper();
         $this->scraper->is_wizard = true;
-        $this->scraper->init_post($post_id);
-        
+
+        //populate post ID or URL
+        if ( $post_id_or_feed_url ){
+            if ( ctype_digit($post_id_or_feed_url) ) { //post ID
+                $this->scraper->init_post($post_id_or_feed_url);
+            }else{ //url
+                $this->scraper->init($post_id_or_feed_url);
+            }
+        }
+
         $tracklist_validated = clone $this->scraper->tracklist;
         $tracklist_validated->validate_tracks();
         
-        $this->advanced = ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) );
-        //$this->advanced = false;
+        $this->frontend = ( !is_admin() );
+        $this->advanced = ( (!$this->frontend) && ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
+        
 
         //populate settings
         $this->wizard_settings_init();
@@ -37,18 +51,15 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     function metabox_scraper_wizard_register(){
 
         $metabox_id = ($this->advanced) ? 'wpsstm-scraper-advanced' : 'wpsstm-scraper-simple';
-        
-        
 
         add_meta_box( 
             $metabox_id, 
             __('Tracklist Parser','wpsstm'),
-            array($this,'wizard'),
+            array($this,'wizard_form'),
             wpsstm_tracklists()->scraper_post_types, 
             'normal', //context
             'default' //priority
         );
-
 
     }
     
@@ -113,14 +124,14 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         Source
         */
 
-        add_settings_section(
+        $this->add_wizard_section(
              'wizard_section_source', //id
              __('Source','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
              'wpsstm-wizard-step-source' //page
         );
 
-        add_settings_field(
+        $this->add_wizard_field(
             'feed_url', //id
             __('URL','wpsstm'), //title
             array( $this, 'feed_url_callback' ), //callback
@@ -133,7 +144,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         Source feedback
         */
 
-        add_settings_section(
+        $this->add_wizard_section(
              'wizard_section_source_feedback', //id
              __('Feedback','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
@@ -141,7 +152,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         );
         
         if ($this->scraper->tracklist->tracks){
-            add_settings_field(
+            $this->add_wizard_field(
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
                 array( $this, 'feedback_tracklist_callback' ), 
@@ -159,7 +170,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             */
 
             if ( $this->scraper->page->variables ){
-                add_settings_field(
+                $this->add_wizard_field(
                     'regex_matches', 
                     __('Regex matches','wpsstm'), 
                     array( $this, 'feedback_regex_matches_callback' ), 
@@ -172,14 +183,14 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Tracks
             */
 
-            add_settings_section(
+            $this->add_wizard_section(
                 'wizard_section_tracks', //id
                 __('Tracks','wpsstm'), //title
                 array( $this, 'section_tracks_desc' ), //callback
                 'wpsstm-wizard-step-tracks' //page
             );
             
-            add_settings_field(
+            $this->add_wizard_field(
                 'feedback_data_type', 
                 __('Input type','wpsstm'), 
                 array( $this, 'feedback_data_type_callback' ), 
@@ -187,7 +198,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard_section_tracks'
             );
             
-            add_settings_field(
+            $this->add_wizard_field(
                 'feedback_source_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_source_content_callback' ), 
@@ -195,7 +206,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard_section_tracks'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'tracks_selector', 
                 __('Tracks Selector','wpsstm'), 
                 array( $this, 'selector_tracks_callback' ), 
@@ -203,7 +214,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard_section_tracks'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'tracks_order', 
                 __('Tracks Order','wpsstm'), 
                 array( $this, 'tracks_order_callback' ), 
@@ -215,7 +226,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Tracks feedback
             */
 
-            add_settings_section(
+            $this->add_wizard_section(
                  'wizard_section_tracks_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -226,14 +237,14 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Single track
             */
 
-            add_settings_section(
+            $this->add_wizard_section(
                 'wizard-section-single-track', //id
                 __('Track details','wpsstm'),
                 array( $this, 'section_single_track_desc' ),
                 'wpsstm-wizard-step-single-track' //page
             );
             
-            add_settings_field(
+            $this->add_wizard_field(
                 'feedback_tracklist_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_tracks_callback' ), 
@@ -241,7 +252,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-single-track'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'track_artist_selector', 
                 __('Artist Selector','wpsstm').'* '.$this->regex_link(),
                 array( $this, 'track_artist_selector_callback' ), 
@@ -249,7 +260,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-single-track'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'track_title_selector', 
                 __('Title Selector','wpsstm').'* '.$this->regex_link(), 
                 array( $this, 'track_title_selector_callback' ), 
@@ -257,7 +268,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-single-track'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'track_album_selector', 
                 __('Album Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_album_selector_callback' ), 
@@ -265,7 +276,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-single-track'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'track_location_selector', 
                 __('File Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_location_selector_callback' ), 
@@ -273,7 +284,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-single-track'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'track_image_selector', 
                 __('Image Selector','wpsstm'), 
                 array( $this, 'track_image_selector_callback' ), 
@@ -285,7 +296,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Single track feedback
             */
 
-            add_settings_section(
+            $this->add_wizard_section(
                  'wizard_section_single_track_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -296,14 +307,14 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Options
             */
 
-            add_settings_section(
+            $this->add_wizard_section(
                 'wizard-section-options', //id
                 __('Options','wpsstm'),
                 array( $this, 'section_desc_empty' ),
                 'wpsstm-wizard-step-options' //page
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'datas_cache_min', 
                 __('Enable Cache','wpsstm'), 
                 array( $this, 'cache_callback' ), 
@@ -311,7 +322,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wizard-section-options'
             );
 
-            add_settings_field(
+            $this->add_wizard_field(
                 'enable_musicbrainz', 
                 __('Use MusicBrainz','wpsstm'), 
                 array( $this, 'musicbrainz_callback' ), 
@@ -680,10 +691,9 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         
     }
     
-    function wizard(){
+    function wizard_form(){
         
         $reset_checked = false;
-        $post_type = get_post_type();
         
         $this->scraper->display_notices('wizard-header');
         
@@ -696,14 +706,18 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $this->wizard_advanced();
         }
         
-        if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->scraper->tracklist->tracks) ){
-            $reset_checked = true;
-            submit_button(__('Import Tracks','wpsstm'),'primary','import-tracks');
+        if ( !$this->frontend){
+            $post_type = get_post_type();
+            if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->scraper->tracklist->tracks) ){
+                $reset_checked = true;
+                $this->submit_button(__('Import Tracks','wpsstm'),'primary','import-tracks');
 
+            }
         }
         
-        
-        submit_button(__('Save Changes'),'primary','save-scraper-settings');
+
+
+        $this->submit_button(__('Save Changes'),'primary','save-scraper-settings');
         
         if ( $this->scraper->feed_url ){
 
@@ -723,15 +737,16 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         ?>
 
         <div id="wpsstm-wizard-step-source-content" class="wpsstm-wizard-step-content">
-            <?php do_settings_sections( 'wpsstm-wizard-step-source' );?>
+            <?php $this->do_wizard_sections( 'wpsstm-wizard-step-source' );?>
         </div>
         <?php
         
-            
-        if ( $this->scraper->feed_url && !isset($_REQUEST['advanced_wizard']) ){
-            $advanced_wizard_url = get_edit_post_link();
-            $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
-            echo '<p><a href="'.$advanced_wizard_url.'">' . __('Advanced Settings','wpsstm') . '</a></p>';
+        if ( !$this->frontend ){
+            if ( $this->scraper->feed_url && !isset($_REQUEST['advanced_wizard']) ){
+                $advanced_wizard_url = get_edit_post_link();
+                $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
+                echo '<p><a href="'.$advanced_wizard_url.'">' . __('Advanced Settings','wpsstm') . '</a></p>';
+            }
         }
     }
     
@@ -745,7 +760,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             </ul>
 
             <div id="wpsstm-wizard-step-source-content" class="wpsstm-wizard-step-content">
-                <?php do_settings_sections( 'wpsstm-wizard-step-source' );?>
+                <?php $this->do_wizard_sections( 'wpsstm-wizard-step-source' );?>
             </div>
 
             <?php
@@ -753,7 +768,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             if ($this->can_show_step('tracks_selector')){
                 ?>
                 <div id="wpsstm-wizard-step-tracks-content" class="wpsstm-wizard-step-content">
-                    <?php do_settings_sections( 'wpsstm-wizard-step-tracks' );?>
+                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-tracks' );?>
                 </div>
                 <?php
             }
@@ -763,7 +778,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             if ($this->can_show_step('track_details')){
                 ?>
                 <div id="wpsstm-wizard-step-single-track-content" class="wpsstm-wizard-step-content">
-                    <?php do_settings_sections( 'wpsstm-wizard-step-single-track' );?>
+                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-single-track' );?>
                 </div>
                 <?php
             }
@@ -773,7 +788,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             if ($this->can_show_step('playlist_options')){
                 ?>
                 <div id="wpsstm-wizard-step-options" class="wpsstm-wizard-step-content">
-                    <?php do_settings_sections( 'wpsstm-wizard-step-options' );?>
+                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-options' );?>
                 </div>
                 <?php
             }
@@ -904,6 +919,135 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             
         }
         return false;
+    }
+    
+    /*
+    Inspired by WP function add_settings_section()
+    */
+    
+    function add_wizard_section($id, $title, $callback, $page) {
+        $this->wizard_sections[$page][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback);
+    }
+    
+    /*
+    Inspired by WP function add_settings_field()
+    */
+    
+    function add_wizard_field($id, $title, $callback, $page, $section = 'default', $args = array()) {
+        $this->wizard_fields[$page][$section][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback, 'args' => $args);
+    }
+    
+    /*
+    Inspired by WP function do_settings_sections()
+    */
+    
+    function do_wizard_sections( $page ) {
+
+        if ( ! isset( $this->wizard_sections[$page] ) )
+            return;
+
+        foreach ( (array) $this->wizard_sections[$page] as $section ) {
+            if ( $section['title'] )
+                echo "<h2>{$section['title']}</h2>\n";
+
+            if ( $section['callback'] )
+                call_user_func( $section['callback'], $section );
+
+            if ( ! isset( $this->wizard_fields ) || !isset( $this->wizard_fields[$page] ) || !isset( $this->wizard_fields[$page][$section['id']] ) )
+                continue;
+            echo '<table class="form-table">';
+            $this->do_wizard_fields( $page, $section['id'] );
+            echo '</table>';
+        }
+    }
+    
+    /*
+    Inspired by WP function do_settings_fields()
+    */
+    
+    function do_wizard_fields($page, $section) {
+
+        if ( ! isset( $this->wizard_fields[$page][$section] ) )
+            return;
+
+        foreach ( (array) $this->wizard_fields[$page][$section] as $field ) {
+            $class = '';
+
+            if ( ! empty( $field['args']['class'] ) ) {
+                $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
+            }
+
+            echo "<tr{$class}>";
+
+            if ( ! empty( $field['args']['label_for'] ) ) {
+                echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
+            } else {
+                echo '<th scope="row">' . $field['title'] . '</th>';
+            }
+
+            echo '<td>';
+            call_user_func($field['callback'], $field['args']);
+            echo '</td>';
+            echo '</tr>';
+        }
+    }
+    
+    /*
+    Inspired by WP function submit_button()
+    */
+    
+    function submit_button( $text = null, $type = 'primary', $name = 'submit', $wrap = true, $other_attributes = null ) {
+        echo $this->get_submit_button( $text, $type, $name, $wrap, $other_attributes );
+    }
+    
+    /*
+    Inspired by WP function get_submit_button()
+    */
+    
+    function get_submit_button( $text = '', $type = 'primary large', $name = 'submit', $wrap = true, $other_attributes = '' ) {
+        if ( ! is_array( $type ) )
+            $type = explode( ' ', $type );
+
+        $button_shorthand = array( 'primary', 'small', 'large' );
+        $classes = array( 'button' );
+        foreach ( $type as $t ) {
+            if ( 'secondary' === $t || 'button-secondary' === $t )
+                continue;
+            $classes[] = in_array( $t, $button_shorthand ) ? 'button-' . $t : $t;
+        }
+        // Remove empty items, remove duplicate items, and finally build a string.
+        $class = implode( ' ', array_unique( array_filter( $classes ) ) );
+
+        $text = $text ? $text : __( 'Save Changes' );
+
+        // Default the id attribute to $name unless an id was specifically provided in $other_attributes
+        $id = $name;
+        if ( is_array( $other_attributes ) && isset( $other_attributes['id'] ) ) {
+            $id = $other_attributes['id'];
+            unset( $other_attributes['id'] );
+        }
+
+        $attributes = '';
+        if ( is_array( $other_attributes ) ) {
+            foreach ( $other_attributes as $attribute => $value ) {
+                $attributes .= $attribute . '="' . esc_attr( $value ) . '" '; // Trailing space is important
+            }
+        } elseif ( ! empty( $other_attributes ) ) { // Attributes provided as a string
+            $attributes = $other_attributes;
+        }
+
+        // Don't output empty name and id attributes.
+        $name_attr = $name ? ' name="' . esc_attr( $name ) . '"' : '';
+        $id_attr = $id ? ' id="' . esc_attr( $id ) . '"' : '';
+
+        $button = '<input type="submit"' . $name_attr . $id_attr . ' class="' . esc_attr( $class );
+        $button .= '" value="' . esc_attr( $text ) . '" ' . $attributes . ' />';
+
+        if ( $wrap ) {
+            $button = '<p class="submit">' . $button . '</p>';
+        }
+
+        return $button;
     }
 
     

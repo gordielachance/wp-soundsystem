@@ -267,7 +267,7 @@ class WP_SoundSytem_Playlist_Scraper{
             );
             
             $notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
-
+            
             printf('<div %s><p><strong>%s</strong></p></div>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
         }
     }
