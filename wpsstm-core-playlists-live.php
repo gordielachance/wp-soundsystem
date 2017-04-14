@@ -1,7 +1,6 @@
 <?php
 class WP_SoundSytem_Core_Live_Playlists{
     
-    public $qvar_url_input='wizard_url';
     public $allowed_post_types;
     public $frontend_page_id = null;
     
@@ -218,30 +217,21 @@ class WP_SoundSytem_Core_Live_Playlists{
         // CSS
         wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
     }
-    
-    function frontend_tracklist_parser_get_input(){
-        $form_qvar = wpsstm_live_playlists()->qvar_url_input;
-        $form_url = ( isset($_REQUEST[$form_qvar]) ) ? $_REQUEST[$form_qvar] : null;
-        return $form_url;
-    }
 
-    
     function frontend_tracklist_parser($content){
         global $post;
         if ($post->ID != $this->frontend_page_id) return $content;
 
-        $output = "coucou";
-        
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
         
-        $url = $this->frontend_tracklist_parser_get_input();
-        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($url);
+        $form_url = ( isset($_REQUEST['wpsstm_feed_url']) ) ? $_REQUEST['wpsstm_feed_url'] : null;
+        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($form_url);
         
         ob_start();
         $wizard->wizard_form();
         $output = ob_get_clean();
         
-        return $content . $output;
+        return $content . sprintf('<form id="wpsstm-frontend-scraper" method="post" action="%s">%s</form>',get_permalink(),$output);
         
     }
 
