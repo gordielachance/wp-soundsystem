@@ -3,7 +3,6 @@ class WP_SoundSytem_Core_Live_Playlists{
     
     public $qvar_url_input='wpsstm_url_input';
     public $allowed_post_types;
-    public $available_presets = array();
     
     /**
     * @var The one true Instance
@@ -21,20 +20,12 @@ class WP_SoundSytem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
-        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
     
     function setup_globals(){
-
-    }
-    
-    function register_preset($preset_class_name){
-        if ( !class_exists($preset_class_name) ) return;
-        $this->available_presets[] = new $preset_class_name();
+        
     }
 
     function setup_actions(){

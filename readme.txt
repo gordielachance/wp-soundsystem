@@ -100,6 +100,10 @@ $tracklist->get_tracklist_table();
 
 == Changelog ==
 
+= 0.9.4 =
+* improved presets - much cleaner code here.
+* improved scraper notices; don't uses add_settings_error anymore.
+
 = 0.9.3 =
 * new 'Twitter' and 'XSPF' presets
 * improved presets
