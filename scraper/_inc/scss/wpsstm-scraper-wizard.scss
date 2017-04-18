@@ -1,8 +1,5 @@
 #wizard-wrapper{
-    position:relative;
-    .inside{
-        overflow:auto;
-    }
+
     input.fullwidth{
         width:100%;
     }
@@ -128,5 +125,13 @@
         .no-js &{
             
         }
+    }
+}
+
+//metabox
+.postbox#wpsstm-metabox-scraper-wizard{
+    position:relative;
+    .inside{
+        overflow:auto;
     }
 }

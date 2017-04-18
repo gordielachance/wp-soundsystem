@@ -301,6 +301,6 @@ function wpsstm_register_scraper_presets($presets){
     return $presets;
 }
 
-add_filter('wpsstm_scraper_presets','wpsstm_register_scraper_presets');
+add_filter('wpsstm_get_scraper_presets','wpsstm_register_scraper_presets');
 
     

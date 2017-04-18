@@ -45,10 +45,6 @@ class WP_SoundSytem_Playlist_Scraper{
 
     
     function __construct() {
-        
-        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
 
         $this->setup_globals();
         $this->setup_actions();
@@ -217,10 +213,10 @@ class WP_SoundSytem_Playlist_Scraper{
         
         $enabled_presets = array();
 
-        $all_presets = apply_filters( 'wpsstm_scraper_presets',array() );
+        $available_presets = wpsstm_live_playlists()->available_presets;
 
         //get matching presets
-        foreach((array)$all_presets as $preset){
+        foreach((array)$available_presets as $preset){
 
             if ( $preset->can_load_preset($scraper->feed_url) ){
                 $enabled_presets[] = $preset;

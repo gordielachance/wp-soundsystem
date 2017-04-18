@@ -370,7 +370,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         //selectors 
 
-        foreach ($input['selectors'] as $selector_slug=>$value){
+        foreach ((array)$input['selectors'] as $selector_slug=>$value){
 
             //path
             if ( isset($value['path']) ) {
@@ -513,6 +513,17 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $option,
             __('URL of the tracklist you would like to get','wpsstm')
         );
+        
+        //presets
+        $presets_list = array();
+        $presets_list_str = null;
+        foreach ((array)wpsstm_live_playlists()->available_presets as $preset){
+            $presets_list[] = $preset->name;
+        }
+        $presets_list_str = implode(', ',$presets_list);
+        
+        printf('<p><small><strong>%s</strong> : %s</small></p>',__('Available presets','wpsstm'),$presets_list_str);
+        
 
     }
 
@@ -980,7 +991,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
             if ( ! isset( $this->wizard_fields ) || !isset( $this->wizard_fields[$page] ) || !isset( $this->wizard_fields[$page][$section['id']] ) )
                 continue;
-            echo '<table class="wizard-section-table">';
+            echo '<table class="form-table wizard-section-table">';
             $this->do_wizard_fields( $page, $section['id'] );
             echo '</table>';
         }
