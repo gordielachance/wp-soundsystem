@@ -30,32 +30,45 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->frontend = ( !is_admin() );
         $this->advanced = ( (!$this->frontend) && ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
         
-
+        //metabox
+        add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
+        
         //populate settings
         $this->wizard_settings_init();
+        
+        //scripts & styles
+        $this->wizard_register_scripts_styles();  //so we can enqueue them both frontend and backend
+        add_action( 'admin_enqueue_scripts', array( $this, 'wizard_scripts_styles_backend' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
+        
 
-        //populate metabox
-        add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
-        add_action( 'admin_enqueue_scripts', array( $this, 'metabox_wizard_scripts_styles' ) );
+        
 
     }
     
-    function metabox_wizard_scripts_styles(){
+    function wizard_register_scripts_styles(){
         // CSS
-        wp_enqueue_style( 'wpsstm-admin-metabox-scraper',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-admin-metabox-scraper.css',null,wpsstm()->version );
+        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-scraper-wizard.css',null,wpsstm()->version );
         
         // JS
-        wp_enqueue_script( 'wpsstm-admin-metabox-scraper', wpsstm()->plugin_url . 'scraper/_inc/js/wpsstm-admin-metabox-scraper.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
+        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . 'scraper/_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
+    }
+    
+    function wizard_scripts_styles_backend(){
+        wp_enqueue_style('wpsstm-scraper-wizard');
+        wp_enqueue_script('wpsstm-scraper-wizard');
+    }
+    function wizard_scripts_styles_frontend(){
+        wp_enqueue_style('wpsstm-scraper-wizard');
+        wp_enqueue_script('wpsstm-scraper-wizard');
     }
     
     function metabox_scraper_wizard_register(){
 
-        $metabox_id = ($this->advanced) ? 'wpsstm-scraper-advanced' : 'wpsstm-scraper-simple';
-
         add_meta_box( 
-            $metabox_id, 
+            'wpsstm-metabox-scraper-wizard', 
             __('Tracklist Parser','wpsstm'),
-            array($this,'wizard_form'),
+            array($this,'wizard_display'),
             wpsstm_tracklists()->scraper_post_types, 
             'normal', //context
             'default' //priority
@@ -691,45 +704,56 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         
     }
     
-    function wizard_form(){
+    function wizard_display(){
         
-        $reset_checked = false;
+        $classes = array();
+        $classes[]  = ($this->advanced) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
+        $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-frontend';
         
-        $this->scraper->display_notices('wizard-header');
-        
-        if (!$this->advanced){
-            $this->wizard_simple();
-        }else{
-            
-            $this->scraper->display_notices('wizard-header-advanced');
-            
-            $this->wizard_advanced();
-        }
-        
-        if ( !$this->frontend){
-            $post_type = get_post_type();
-            if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->scraper->tracklist->tracks) ){
-                $reset_checked = true;
-                $this->submit_button(__('Import Tracks','wpsstm'),'primary','import-tracks');
+        ?>
+        <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
+            <?php
 
+            $reset_checked = false;
+
+            $this->scraper->display_notices('wizard-header');
+
+            if (!$this->advanced){
+                $this->wizard_simple();
+            }else{
+
+                $this->scraper->display_notices('wizard-header-advanced');
+
+                $this->wizard_advanced();
             }
-        }
-        
+
+            if ( !$this->frontend){
+                $post_type = get_post_type();
+                if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->scraper->tracklist->tracks) ){
+                    $reset_checked = true;
+                    $this->submit_button(__('Import Tracks','wpsstm'),'primary','import-tracks');
+
+                }
+            }
 
 
-        $this->submit_button(__('Save Changes'),'primary','save-scraper-settings');
-        
-        if ( $this->scraper->feed_url ){
+            $submit_bt_txt = (!$this->advanced) ? __('Load URL','wpsstm') : __('Save Changes');
+            $this->submit_button($submit_bt_txt,'primary','save-scraper-settings');
 
-            printf(
-                '<small><input type="checkbox" name="%1$s[reset]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span></small>',
-                'wpsstm_wizard',
-                checked($reset_checked, true, false),
-                __('Clear wizard','wpsstm')
-            );
-        }
-        
-        wp_nonce_field('wpsstm_scraper_wizard','wpsstm_scraper_wizard_nonce',false);
+            if ( $this->scraper->feed_url ){
+
+                printf(
+                    '<small><input type="checkbox" name="%1$s[reset]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span></small>',
+                    'wpsstm_wizard',
+                    checked($reset_checked, true, false),
+                    __('Clear wizard','wpsstm')
+                );
+            }
+
+            wp_nonce_field('wpsstm_scraper_wizard','wpsstm_scraper_wizard_nonce',false);
+            ?>
+        </div>
+        <?php
         
     }
     

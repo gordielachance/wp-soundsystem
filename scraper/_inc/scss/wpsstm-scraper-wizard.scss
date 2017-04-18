@@ -1,17 +1,13 @@
-body {
-    .postbox#wpsstm-scraper-simple,.postbox#wpsstm-scraper-advanced{
-        position:relative;
-        .inside{
-            overflow:auto;
-        }
-        input.fullwidth{
-            width:100%;
-        }
-        
-
-        
+#wizard-wrapper{
+    position:relative;
+    .inside{
+        overflow:auto;
     }
-    .postbox#wpsstm-scraper-advanced{
+    input.fullwidth{
+        width:100%;
+    }
+
+    &.wizard-wrapper-advanced{
 
         table#wizard-regexes{
             width:100%;

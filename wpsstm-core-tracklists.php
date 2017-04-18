@@ -152,10 +152,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         wp_enqueue_script( 'wpsstm-admin-metabox-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-admin-metabox-tracklist.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery-uri'),wpsstm()->version);
     }
-    
 
-
-    
     /**
     *    From http://codex.wordpress.org/Template_Hierarchy
     *

@@ -2,7 +2,10 @@
 class WP_SoundSytem_Core_Live_Playlists{
     
     public $allowed_post_types;
-    public $frontend_page_id = null;
+    public $qvar_frontend_wizard_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
+    public $frontend_wizard_page_id = null;
+    public $frontend_wizard_url = null;
+    public $frontend_wizard = null;
     
     /**
     * @var The one true Instance
@@ -22,13 +25,10 @@ class WP_SoundSytem_Core_Live_Playlists{
     function init(){
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-        
-        
-        
     }
     
     function setup_globals(){
-        $this->frontend_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
+        $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
     }
 
     function setup_actions(){
@@ -36,10 +36,11 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
-        //frontend Tracklist Parser
-        if ( $this->frontend_page_id ){
-            add_filter( 'the_content', array($this,'frontend_tracklist_parser'));
-        }
+        //frontend wizard
+        add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
+        add_action ('wp', array($this,'frontend_wizard_populate' ));
+        add_filter( 'the_content', array($this,'frontend_wizard_display'));
+        add_filter( 'wpsstm_get_xspf_link', array($this,'frontend_wizard_get_xspf_link'), 10, 3);
 
     }
     
@@ -217,22 +218,52 @@ class WP_SoundSytem_Core_Live_Playlists{
         // CSS
         wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
     }
-
-    function frontend_tracklist_parser($content){
+    
+    /**
+    *   Add the 'xspf' query variable so Wordpress
+    *   won't mangle it.
+    */
+    function add_query_var_feed_url($vars){
+        $vars[] = $this->qvar_frontend_wizard_url;
+        return $vars;
+    }
+    
+    function frontend_wizard_populate(){
         global $post;
-        if ($post->ID != $this->frontend_page_id) return $content;
+        global $wp_query;
+        
+        if ($post->ID != $this->frontend_wizard_page_id) return;
+        
+        $frontend_wizard_url = isset( $wp_query->query[$this->qvar_frontend_wizard_url] ) ? $wp_query->query[$this->qvar_frontend_wizard_url] : null;
 
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        
-        $form_url = ( isset($_REQUEST['wpsstm_feed_url']) ) ? $_REQUEST['wpsstm_feed_url'] : null;
-        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($form_url);
-        
+        $this->frontend_wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($frontend_wizard_url);
+    }
+
+    function frontend_wizard_display($content){
+        global $post;
+        if ($post->ID != $this->frontend_wizard_page_id) return $content;
+
         ob_start();
-        $wizard->wizard_form();
+        $this->frontend_wizard->wizard_display();
         $output = ob_get_clean();
         
         return $content . sprintf('<form id="wpsstm-frontend-scraper" method="post" action="%s">%s</form>',get_permalink(),$output);
         
+    }
+    
+    function frontend_wizard_get_xspf_link($link,$post_id,$download){
+        global $wp_query;
+        
+        if ( $post_id != $this->frontend_wizard_page_id ) return $link;
+        
+        $frontend_wizard_url = isset( $wp_query->query[$this->qvar_frontend_wizard_url] ) ? $wp_query->query[$this->qvar_frontend_wizard_url] : null;
+
+        if ( $frontend_wizard_url ) {
+            $link = add_query_arg(array($this->qvar_frontend_wizard_url=>$frontend_wizard_url),$link);
+        }
+        
+        return $link;
     }
 
 }
