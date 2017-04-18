@@ -221,7 +221,7 @@ function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
         $tracklist->load_subtracks();
     }
     
-    return $tracklist;
+    return apply_filters('wpsstm_get_post_tracklist',$tracklist,$post_id,$cache_only);
     
 }
 
