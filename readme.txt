@@ -39,6 +39,11 @@ NB : unlike playlists and albums, the Live Playlists tracklist entries are not s
 
 Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Twitter, XSPF.
 
+= Frontend Tracklist Parser =
+You may propose a frontend tracklist parser to your visitors.  
+They will be able to use it to get a remote tracklist; which could be useful for backups or to load it in a software like [Tomahawk](https://www.tomahawk-player.org/).
+Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
+
 = Shortcodes =
 
 `[wpsstm-track post_id="150"]`

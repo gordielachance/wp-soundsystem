@@ -224,7 +224,7 @@ class WP_SoundSytem_Settings {
 
         add_settings_field(
             'frontend_scraper_page_id', 
-            __('Tracklist Parser page ID','wpsstm'), 
+            __('Frontend wizard page ID','wpsstm'), 
             array( $this, 'live_playlists_scraper_page_id_callback' ), 
             'wpsstm-settings-page', 
             'live_playlists_settings'
