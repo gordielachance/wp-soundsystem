@@ -509,8 +509,9 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $option = $this->scraper->feed_url;
 
         printf(
-            '<input type="text" name="wpsstm_feed_url" value="%s" class="fullwidth" />',
-            $option
+            '<input type="text" name="wpsstm_feed_url" value="%s" class="fullwidth" placeholder="%s" />',
+            $option,
+            __('URL of the tracklist you would like to get','wpsstm')
         );
 
     }
@@ -740,7 +741,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $submit_bt_txt = (!$this->advanced) ? __('Load URL','wpsstm') : __('Save Changes');
             $this->submit_button($submit_bt_txt,'primary','save-scraper-settings');
 
-            if ( $this->scraper->feed_url ){
+            if ( $this->scraper->feed_url && !$this->frontend ){
 
                 printf(
                     '<small><input type="checkbox" name="%1$s[reset]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span></small>',
@@ -979,7 +980,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
             if ( ! isset( $this->wizard_fields ) || !isset( $this->wizard_fields[$page] ) || !isset( $this->wizard_fields[$page][$section['id']] ) )
                 continue;
-            echo '<table class="form-table">';
+            echo '<table class="wizard-section-table">';
             $this->do_wizard_fields( $page, $section['id'] );
             echo '</table>';
         }

@@ -253,7 +253,7 @@ class WP_SoundSytem_TracksList_Table{
                 <?php
                 if ( !is_admin() ){
                     ?>
-                    <a href="<?php echo wpsstm_get_xspf_link();?>" class="link-xspf-download button"><?php _e('Dowload XSPF', 'wpsstm'); ?></a>
+                    <a href="<?php echo wpsstm_get_xspf_link();?>" class="link-xspf-download button"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Dowload XSPF', 'wpsstm'); ?></a>
                     <?php
                 }
                 ?>

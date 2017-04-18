@@ -9,6 +9,7 @@
     margin-bottom:1.5em;
 
     .tablenav{
+        padding:.5em;
         .tablenav-pages{
             line-height:3em;
         }
@@ -17,15 +18,17 @@
     table{
         width: 100%;
         display: table;
-        border-collapse: collapse;
-        border-spacing: 0;
-        border: 1px solid #e5e5e5;
+        border: none;
         background: rgba(255,255,255,0.5);
         margin:0;
         
         .column-trackitem_order{
             width:2em;
             text-align:center;
+        }
+        
+        th,td{
+            border:none;
         }
         
         th{

@@ -6,6 +6,24 @@
     input.fullwidth{
         width:100%;
     }
+    
+    &.wizard-wrapper-frontend{
+        h2{
+            display:none;
+        }
+        p.submit{
+            text-align:center;
+        }
+        table.wizard-section-table{
+            border:none;
+            th{
+                display:none;
+            }
+            th,td{
+                border:none;
+            }
+        }
+    }
 
     &.wizard-wrapper-advanced{
 
