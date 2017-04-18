@@ -48,7 +48,7 @@ class WP_SoundSytem_Core_Tracklists{
 
         add_filter( 'query_vars', array($this,'add_query_var_xspf'));
         add_action( 'init', array($this,'xspf_register_endpoint' ));
-        add_filter( 'single_template', array($this,'xspf_template_loader'));
+        add_filter( 'template_include', array($this,'xspf_template_loader'));
         
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         add_action( 'save_post', array($this,'metabox_tracklist_save')); 
