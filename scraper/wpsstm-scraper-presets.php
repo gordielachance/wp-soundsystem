@@ -1,8 +1,22 @@
 <?php
 
-class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scraper_Datas{
+    var $slug = null;
+    var $can_frontend = false; //can this preset work without advanced options ? (eg. the Twitter preset has some options pre-filled but can't get a tracklist)
+    
+    var $name = null;
+    var $description = null;
+    
+    var $pattern = null; //regex pattern that would match an URL
+    var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
+    var $variables = array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
+    
+}
+
+class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'last-fm-website';
+    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -31,20 +45,22 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
 
 }
 
-class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'spotify-playlist';
+    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
     
     var $pattern = '~^https?://(?:open|play).spotify.com/user/(.+)/playlist/(.+)/?$~i';
+    var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
     var $variables = array(
         'spotify-user' => null,
         'spotify-playlist' => null
     );
-
-    var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
+    
+    
     var $options = array(
         'selectors' => array(
             'tracks'           => array('path'=>'.tracklist-container li.tracklist-row'),
@@ -62,20 +78,22 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
 
 }
 
-class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'radionomy';
+    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
+    
     var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
+    var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
 
     var $variables = array(
         'radionomy-slug' => null,
         'radionomy-id' => null
     );
-    
-    var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
+
     var $options = array(
         'selectors' => array(
             'tracks'            => array('path'=>'div.titre'),
@@ -157,18 +175,19 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
 }
 
-class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'somafm';
+    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
     
     var $pattern = '~^https?://(?:www.)?somafm.com/(.+)/?$~i';
+    var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $variables = array(
         'somafm-slug' => null
     );
 
-    var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $options = array(
         'selectors' => array(
             'tracks'            => array('path'=>'song'),
@@ -186,17 +205,18 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
     }
 }
 
-class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-station';
+    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
 
     var $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)(.+)/?$~i';
+    var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
     var $variables = array(
         'bbc-slug' => null
     );
-    var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
 
     var $options = array(
         'selectors' => array(
@@ -216,8 +236,10 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
 
 }
 
-class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-playlist';
+    var $can_frontend = true;
+    
     var $name = null;
     var $description = null;
     
@@ -242,8 +264,13 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
     } 
 }
 
-class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'slacker-station-tops';
+    var $can_frontend = true;
+    
+    var $name = null;
+    var $description= null;
+    
     var $pattern = '~^https?://(?:www.)?slacker.com/station/(.+)/?~i';
     var $variables = array(
         'slacker-station-slug' => null
@@ -265,8 +292,13 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
 
 }
 
-class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
+    var $can_frontend = false;
+    
+    var $name = null;
+    var $description = null;
+    
     var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/(.+)/?$~i';
     var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
     var $variables = array(
