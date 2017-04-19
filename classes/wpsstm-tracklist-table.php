@@ -218,11 +218,10 @@ class WP_SoundSytem_TracksList_Table{
 	 * @access public
 	 */
 	public function display() {
-
         ?>
         <div class="wpsstm-tracklist wpsstm-tracklist-table">
             <?php $this->display_tablenav( 'top' );?>
-            <table>
+            <table data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
                     <thead>
                     <tr>
                             <?php $this->print_column_headers(); ?>
