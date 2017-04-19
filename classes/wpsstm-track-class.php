@@ -1,131 +1,5 @@
 <?php
 
-/**
-For tracks that are attached to a tracklist (albums / playlists / live playlists)
-**/
-
-class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
-    /*
-    $subtrack_id is the meta_id of the meta that contains informations related to the tracklist entry.
-    - post_id of this meta is the post track ID
-    - meta_key will contain the ID of the parent post (eg. wpsstm_tracklist_11180)
-    - meta_value will be used to order the tracklist.  It can be either a number (for regular playlists) or a timestamp (for live playlists)
-    */
-    public $subtrack_id = 0;
-    public $subtrack_parent = 0;
-    public $subtrack_order = 0;
-    
-    function __construct( $args = array(), $subtrack_id = null, $tracklist_id = null ){
-        
-        $track_id = null;
-        
-        //has parent ID
-        if ( $tracklist_id ){
-            $this->subtrack_parent = $tracklist_id;
-        }
-        
-        //has subtrack ID
-        if ( $subtrack_id ){
-            $subtrack_meta = get_metadata_by_mid( 'post', $subtrack_id );
-            if ($subtrack_meta){
-                
-                $track_id = $subtrack_meta->post_id;
-                
-                $this->subtrack_id = $subtrack_meta->meta_id;
-                $this->subtrack_parent = str_replace('wpsstm_tracklist_','',$subtrack_meta->meta_key);
-                $this->subtrack_order = $subtrack_meta->meta_value;
-
-            }
-        }
-        
-        parent::__construct($args,$track_id);
-
-    }
-    
-    function get_default(){
-        $track_defaults = parent::get_default();
-        
-        $default = array(
-            'subtrack_id'          => null,
-            'subtrack_parent'      => null,
-            'subtrack_order'       => null
-        );
-        
-        return wp_parse_args($default,$track_defaults);
-    }
-    
-    function save_track(){
-        
-        if ( !$this->subtrack_parent || !get_post($this->subtrack_parent) ) return new WP_Error('subtrack_parent',__("Subtrack parent not defined or does not exists",'wpsstm'));
-
-        //save track
-        $track_id = parent::save_track();
-        if (!$track_id) return false;
-        if ( is_wp_error($track_id) ) return $track_id;
-        
-        //save order
-        $subtrack_id = $this->save_subtrack_order();
-        if (!$subtrack_id) return false;
-        if ( is_wp_error($subtrack_id) ) return $subtrack_id;
-
-        //return track ID to match parent::save_track;
-        return $track_id; 
-        
-    }
-    
-    /**
-    Update or add the subtrack meta key.  
-    Returns the meta ID.
-    **/
-    
-    function save_subtrack_order(){
-        global $wpdb;
-        
-        if (!$this->post_id) return new WP_Error('no_post_track',__("Track does not exists",'wpsstm'));
-        
-        if ( !$this->subtrack_parent || !get_post($this->subtrack_parent) ) return new WP_Error('subtrack_parent',__("Subtrack parent not defined or does not exists",'wpsstm'));
-
-        $success = false;
-
-        if ($this->subtrack_id){ //meta already exists
-            
-            $update_order = $wpdb->update( 
-                $wpdb->postmeta, 
-                array( //data
-                    'meta_value' => $this->subtrack_order 
-                ), 
-                array( 'meta_id' => $this->subtrack_id ) //where
-            );
-            
-            $success = ($update_order !== false);
-            
-            wpsstm()->debug_log( array('subtrack_id'=>$this->subtrack_id,'success'=>$success,'subtrack_order'=>$this->subtrack_order), "WP_SoundSystem_Subtrack::save_subtrack_order() - meta updated");
-            
-            if ($success) return $this->subtrack_id;
-            
-        }else{
-            $subtrack_metakey = wpsstm_get_tracklist_entry_metakey($this->subtrack_parent);
-            $new_meta_id = add_post_meta($this->post_id, $subtrack_metakey, $this->subtrack_order);
-            if ($new_meta_id){
-                $this->subtrack_id = $new_meta_id;
-                
-                wpsstm()->debug_log( array('post_id'=>$this->post_id,'subtrack_id'=>$this->subtrack_id,'subtrack_parent'=>$this->subtrack_parent,'subtrack_order'=>$this->subtrack_order), "WP_SoundSystem_Subtrack::save_subtrack_order() - meta inserted"); 
-                
-                return $this->subtrack_id;
-                
-            }
-        }
-        
-    }
-    
-    function remove_subtrack(){
-        global $wpdb;
-        if (!$this->subtrack_id) return;
-        return $wpdb->delete( $wpdb->postmeta, array( 'meta_id' => $this->subtrack_id ) );
-    }
-    
-}
-
 class WP_SoundSystem_Track{
     public $post_id = 0;
 
@@ -387,6 +261,132 @@ class WP_SoundSystem_Track{
         
     }
 
+}
+
+/**
+For tracks that are attached to a tracklist (albums / playlists / live playlists)
+**/
+
+class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
+    /*
+    $subtrack_id is the meta_id of the meta that contains informations related to the tracklist entry.
+    - post_id of this meta is the post track ID
+    - meta_key will contain the ID of the parent post (eg. wpsstm_tracklist_11180)
+    - meta_value will be used to order the tracklist.  It can be either a number (for regular playlists) or a timestamp (for live playlists)
+    */
+    public $subtrack_id = 0;
+    public $subtrack_parent = 0;
+    public $subtrack_order = 0;
+    
+    function __construct( $args = array(), $subtrack_id = null, $tracklist_id = null ){
+        
+        $track_id = null;
+        
+        //has parent ID
+        if ( $tracklist_id ){
+            $this->subtrack_parent = $tracklist_id;
+        }
+        
+        //has subtrack ID
+        if ( $subtrack_id ){
+            $subtrack_meta = get_metadata_by_mid( 'post', $subtrack_id );
+            if ($subtrack_meta){
+                
+                $track_id = $subtrack_meta->post_id;
+                
+                $this->subtrack_id = $subtrack_meta->meta_id;
+                $this->subtrack_parent = str_replace('wpsstm_tracklist_','',$subtrack_meta->meta_key);
+                $this->subtrack_order = $subtrack_meta->meta_value;
+
+            }
+        }
+        
+        parent::__construct($args,$track_id);
+
+    }
+    
+    function get_default(){
+        $track_defaults = parent::get_default();
+        
+        $default = array(
+            'subtrack_id'          => null,
+            'subtrack_parent'      => null,
+            'subtrack_order'       => null
+        );
+        
+        return wp_parse_args($default,$track_defaults);
+    }
+    
+    function save_track(){
+        
+        if ( !$this->subtrack_parent || !get_post($this->subtrack_parent) ) return new WP_Error('subtrack_parent',__("Subtrack parent not defined or does not exists",'wpsstm'));
+
+        //save track
+        $track_id = parent::save_track();
+        if (!$track_id) return false;
+        if ( is_wp_error($track_id) ) return $track_id;
+        
+        //save order
+        $subtrack_id = $this->save_subtrack_order();
+        if (!$subtrack_id) return false;
+        if ( is_wp_error($subtrack_id) ) return $subtrack_id;
+
+        //return track ID to match parent::save_track;
+        return $track_id; 
+        
+    }
+    
+    /**
+    Update or add the subtrack meta key.  
+    Returns the meta ID.
+    **/
+    
+    function save_subtrack_order(){
+        global $wpdb;
+        
+        if (!$this->post_id) return new WP_Error('no_post_track',__("Track does not exists",'wpsstm'));
+        
+        if ( !$this->subtrack_parent || !get_post($this->subtrack_parent) ) return new WP_Error('subtrack_parent',__("Subtrack parent not defined or does not exists",'wpsstm'));
+
+        $success = false;
+
+        if ($this->subtrack_id){ //meta already exists
+            
+            $update_order = $wpdb->update( 
+                $wpdb->postmeta, 
+                array( //data
+                    'meta_value' => $this->subtrack_order 
+                ), 
+                array( 'meta_id' => $this->subtrack_id ) //where
+            );
+            
+            $success = ($update_order !== false);
+            
+            wpsstm()->debug_log( array('subtrack_id'=>$this->subtrack_id,'success'=>$success,'subtrack_order'=>$this->subtrack_order), "WP_SoundSystem_Subtrack::save_subtrack_order() - meta updated");
+            
+            if ($success) return $this->subtrack_id;
+            
+        }else{
+            $subtrack_metakey = wpsstm_get_tracklist_entry_metakey($this->subtrack_parent);
+            $new_meta_id = add_post_meta($this->post_id, $subtrack_metakey, $this->subtrack_order);
+            if ($new_meta_id){
+                $this->subtrack_id = $new_meta_id;
+                
+                wpsstm()->debug_log( array('post_id'=>$this->post_id,'subtrack_id'=>$this->subtrack_id,'subtrack_parent'=>$this->subtrack_parent,'subtrack_order'=>$this->subtrack_order), "WP_SoundSystem_Subtrack::save_subtrack_order() - meta inserted"); 
+                
+                return $this->subtrack_id;
+                
+            }
+        }
+        
+    }
+    
+    function remove_subtrack(){
+        global $wpdb;
+        if (!$this->subtrack_id) return;
+        return $wpdb->delete( $wpdb->postmeta, array( 'meta_id' => $this->subtrack_id ) );
+    }
+    
 }
 
 add_filter('wpsstm_get_track_artist','strip_tags');
