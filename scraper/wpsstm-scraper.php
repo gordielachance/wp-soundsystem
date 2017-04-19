@@ -102,9 +102,12 @@ class WP_SoundSytem_Playlist_Scraper{
 
             $remote_tracks = $this->page->get_tracks();
             
-            if ( $this->feed_url != $this->page->redirect_url ){
-                $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->page->redirect_url.'</em>') );
+            if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                if ( $this->feed_url != $this->page->redirect_url ){
+                    $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->page->redirect_url.'</em>') );
+                }
             }
+
 
             if ( !is_wp_error($remote_tracks) ) {
                 
@@ -208,16 +211,31 @@ class WP_SoundSytem_Playlist_Scraper{
         return wpsstm_get_array_value($keys,$this->options);
     }
 
+    static function get_available_presets($frontend = false){
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        
+        $available_presets = array();
+        $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
+        
+        foreach((array)$available_presets as $key=>$preset){
+            if ( !$preset->can_use_preset() ) unset($available_presets[$key]);
+            if( $frontend && !$preset->can_use_preset_frontend() ) unset($available_presets[$key]);
+        }
+
+        return $available_presets;
+    }
+
     function populate_scraper_presets($scraper){
         
         $enabled_presets = array();
 
-        $available_presets = wpsstm_live_playlists()->available_presets;
+        $available_presets = self::get_available_presets();
 
         //get matching presets
         foreach((array)$available_presets as $preset){
 
-            if ( $preset->can_load_preset($scraper->feed_url) ){
+            if ( $preset->can_load_url($scraper->feed_url) ){
                 $enabled_presets[] = $preset;
             }
 

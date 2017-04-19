@@ -38,7 +38,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     );
     
     public function __construct(){
-
+        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
     }
     
     public function init($url,$options){
@@ -61,11 +61,11 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     If $url_matches is empty, it means that the feed url does not match the pattern.
     **/
     
-    public function can_load_preset($url){
+    public function can_load_url($url){
 
         if (!$this->pattern) return true;
         
-        //wpsstm()->debug_log(array('slug'=>$this->slug,'url'=>$url,'pattern'=>$this->pattern),"can_load_preset()"); 
+        //wpsstm()->debug_log(array('slug'=>$this->slug,'url'=>$url,'pattern'=>$this->pattern),"can_load_url()"); 
 
         preg_match($this->pattern, $url, $url_matches);
 
@@ -144,7 +144,10 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $this->response_type = $response_type;
 
         //response body
-        $body_node = $this->get_body_node($this->response);
+        $content = wp_remote_retrieve_body( $this->response ); 
+        if ( is_wp_error($content) ) return $content;
+        
+        $body_node = $this->get_body_node($content);
         if ( is_wp_error($body_node) ) return $body_node;
         $this->body_node = $body_node;
 
@@ -220,10 +223,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
     
-    protected function get_body_node($response){
-        
-        $content = wp_remote_retrieve_body( $response ); 
-        if ( is_wp_error($content) ) return $content;
+    protected function get_body_node($content){
 
         $result = null;
         
@@ -287,10 +287,10 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                 
                 if ($xml){
 
-                    $this->add_notice( 'wizard-step-tracks', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
+                    $this->add_notice( 'wizard-header-advanced', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
  
                     $this->response_type = 'text/xml';
-                    return $this->get_body_node($response);
+                    return $this->get_body_node($xml);
                 }
 
             break;

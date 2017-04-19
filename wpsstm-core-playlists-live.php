@@ -2,7 +2,6 @@
 class WP_SoundSytem_Core_Live_Playlists{
     
     public $allowed_post_types;
-    public $available_presets = array();
     public $qvar_frontend_wizard_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
     public $frontend_wizard_page_id = null;
     public $frontend_wizard_url = null;
@@ -24,10 +23,8 @@ class WP_SoundSytem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        
-        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
+
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
         
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
@@ -35,7 +32,6 @@ class WP_SoundSytem_Core_Live_Playlists{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        $this->available_presets = apply_filters( 'wpsstm_get_scraper_presets',$this->available_presets );
     }
 
     function setup_actions(){

@@ -1,9 +1,8 @@
 <?php
 
-class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scraper_Datas{
+abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scraper_Datas{
     var $slug = null;
-    var $can_frontend = false; //can this preset work without advanced options ? (eg. the Twitter preset has some options pre-filled but can't get a tracklist)
-    
+
     var $name = null;
     var $description = null;
     
@@ -11,12 +10,24 @@ class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scrap
     var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
     var $variables = array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
     
+    /*
+    Check if we can use this preset.
+    Could return false if something required is missing (eg. an API key)
+    */
+    
+    abstract function can_use_preset();
+    
+    /*
+    If the preset isn't able to get a tracklist directly, it should not be available frontend.
+    Eg. the Twitter preset do prefills some fileds of the wizard but requires the user to complete more informations to get a tracklist.
+    */
+    abstract function can_use_preset_frontend();
+    
 }
 
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'last-fm-website';
-    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -42,13 +53,20 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
         $this->name = __('Last.FM website','wpsstm');
 
     }
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
 
 }
 
 class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'spotify-playlist';
-    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -75,13 +93,20 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
         $this->name = __('Spotify Playlist','wpsstm');
         
     }
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
 
 }
 
 class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'radionomy';
-    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -118,6 +143,14 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
         
         return parent::get_remote_url();
 
+    }
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
     }
 
     function get_station_id(){
@@ -177,7 +210,6 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
 class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'somafm';
-    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -203,11 +235,19 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
         $this->name = __('Soma FM Station','wpsstm');
 
     }
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
+    
 }
 
 class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-station';
-    var $can_frontend = true;
 
     var $name = null;
     var $description = null;
@@ -233,12 +273,19 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
         $this->name = __('BBC station','wpsstm');
 
     }
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
 
 }
 
 class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-playlist';
-    var $can_frontend = true;
     
     var $name = null;
     var $description = null;
@@ -262,11 +309,19 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
         $this->name = __('BBC playlist','wpsstm');
 
     } 
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
+    
 }
 
 class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'slacker-station-tops';
-    var $can_frontend = true;
     
     var $name = null;
     var $description= null;
@@ -289,12 +344,19 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
         $this->name = __('Slacker.com station tops','wpsstm');
 
     } 
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
 
 }
 
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
-    var $can_frontend = false;
     
     var $name = null;
     var $description = null;
@@ -316,9 +378,23 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
         $this->name = __('Twitter','wpsstm');
 
     } 
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    /*
+    Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
+    */
+    function can_use_preset_frontend(){
+        return false;
+    }
 
 }
 
+/*
+Register scraper presets.
+*/
 function wpsstm_register_scraper_presets($presets){
     
     $presets[] = new WP_SoundSytem_Playlist_Scraper_LastFM();
