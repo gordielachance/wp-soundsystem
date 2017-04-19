@@ -158,7 +158,7 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
         $slug = $this->get_variable_value('radionomy-slug');
         if (!$slug) return false;
 
-        $transient_name = 'radionomy-' . $slug . '-id';
+        $transient_name = 'wpsstm-radionomy-' . $slug . '-id';
 
         if ( false === ( $station_id = get_transient($transient_name ) ) ) {
 
@@ -360,8 +360,8 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
 
     var $name = null;
     var $description = null;
-    var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~i';
-    var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-username%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
+    var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/?([^/]+)?~i';
+    var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-userid%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
     var $variables = array(
         'soundcloud-username' => null,
         'soundcloud-page' => null
@@ -379,7 +379,7 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Soundcloud','wpsstm');
+        $this->name = __('Soundcloud tracks / likes','wpsstm');
 
     } 
 
@@ -396,6 +396,11 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
 
     function get_remote_url(){
         
+        //get soundcloud user ID
+        $user_id = $this->get_user_id();
+        if (!$user_id) return false;
+        $this->set_variable_value('soundcloud-userid',$user_id);
+
         $page = $this->get_variable_value('soundcloud-page');
         $page_api = 'tracks';
         
@@ -406,6 +411,40 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
         $this->set_variable_value('soundcloud-api-page',$page_api);
         
         return parent::get_remote_url();
+    }
+    
+    function get_user_id(){
+        
+        $username = $this->get_variable_value('soundcloud-username');
+        if (!$username) return false;
+        
+        $client_id = $this->get_variable_value('soundcloud-client-id');
+        if (!$client_id) return false;
+
+        $transient_name = 'wpsstm-soundcloud-' . $username . '-userid';
+
+        if ( false === ( $user_id = get_transient($transient_name ) ) ) {
+
+            $api_url = sprintf('http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/%s&client_id=%s',$username,$client_id);
+            $response = wp_remote_get( $api_url );
+
+            if ( is_wp_error($response) ) return;
+
+            $response_code = wp_remote_retrieve_response_code( $response );
+            if ($response_code != 200) return;
+
+            $content = wp_remote_retrieve_body( $response );
+            if ( is_wp_error($content) ) return;
+            $content = json_decode($content);
+
+            if ( $user_id = $content->id ){
+                set_transient( $transient_name, $user_id );
+            }
+
+        }
+        
+        return $user_id;
+
     }
 
 
