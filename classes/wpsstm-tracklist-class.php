@@ -17,8 +17,7 @@ class WP_SoundSytem_Tracklist{
 
         $post_type = get_post_type($this->post_id);
         $subtracks = array();
-        
-            
+ 
         //get tracklist metas
         $subtrack_ids = $this->get_subtracks_ids();
 
@@ -46,7 +45,11 @@ class WP_SoundSytem_Tracklist{
     }
     
     function add($tracks){
-        $tracks = (array)$tracks;
+        
+        //force array
+        if ( !is_array($tracks) ){
+            $tracks = array($tracks);
+        }
 
         foreach ($tracks as $track){
             
