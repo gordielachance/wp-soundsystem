@@ -98,18 +98,24 @@ class WP_SoundSytem_Settings {
             
         }else{ //sanitize values
 
-            //musicbrainz
+            /* 
+            Musicbrainz 
+            */
+            
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
-            
-            //auto guess
             $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
+            $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
             
-            //playlists
+            /* 
+            Tracklists 
+            */
+            
             $new_input['hide_subtracks'] = ( isset($input['hide_subtracks']) ) ? 'on' : 'off';
             
             /*
-            live playlists
+            Live playlists
             */
+            
             $new_input['live_playlists_enabled'] = ( isset($input['live_playlists_enabled']) ) ? 'on' : 'off';
             
             //scraper page ID
@@ -125,8 +131,9 @@ class WP_SoundSytem_Settings {
                 $new_input['live_playlists_cache_min'] = $input['live_playlists_cache_min'];
             }
 
-            //post bookmarks
-            $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
+            //APIs
+            $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
+
     
         }
         
@@ -154,14 +161,14 @@ class WP_SoundSytem_Settings {
         add_settings_section(
             'settings_general', // ID
             __('General','wpsstm'), // Title
-            array( $this, 'wpsstm_settings_general_desc' ), // Callback
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
 
         add_settings_section(
             'settings-musicbrainz', // ID
             __('MusicBrainz','wpsstm'), // Title
-            array( $this, 'musicbrainz_section_desc' ), // Callback
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -191,9 +198,9 @@ class WP_SoundSytem_Settings {
         
         //playlists
         add_settings_section(
-            'tracks_settings', // ID
-            __('Tracks','wpsstm'), // Title
-            array( $this, 'tracks_section_desc' ), // Callback
+            'tracklist_settings', // ID
+            __('Tracklists','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -202,14 +209,14 @@ class WP_SoundSytem_Settings {
             __('Hide tracklist tracks','wpsstm'), 
             array( $this, 'hide_subtracks_callback' ), 
             'wpsstm-settings-page', 
-            'tracks_settings'
+            'tracklist_settings'
         );
         
         //live playlists
         add_settings_section(
             'live_playlists_settings', // ID
             __('Live Playlists','wpsstm'), // Title
-            array( $this, 'live_tracks_section_desc' ), // Callback
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -237,11 +244,30 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'live_playlists_settings'
         );
+        
+        //APIs
+        
+        add_settings_section(
+            'settings_apis', // ID
+            __('APIs','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'soundcloud_client_id', 
+            __('Soundcloud Client ID','wpsstm'), 
+            array( $this, 'soundcloud_client_id_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
+        );
+        
+        //system
 
         add_settings_section(
             'settings_system', // ID
             __('System','wpsstm'), // Title
-            array( $this, 'wpsstm_settings_system_desc' ), // Callback
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -264,7 +290,7 @@ class WP_SoundSytem_Settings {
 
     }
     
-    function wpsstm_settings_general_desc(){
+    function section_desc_empty(){
         
     }
     
@@ -278,10 +304,6 @@ class WP_SoundSytem_Settings {
             __("Enable MusicBrainz","wpsstm"),
             '— <small>'.sprintf(__('MusicBrainz is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post with this plugin, and will for example try to get the unique MusicBrainz ID of each item.','wpsstm')).'</small>'
         );
-    }
-    
-    function musicbrainz_section_desc(){
-        
     }
     
     function mb_suggest_bookmarks_callback(){
@@ -309,11 +331,7 @@ class WP_SoundSytem_Settings {
         );
         echo '  <small> ' . sprintf(__('Can be ignored by setting %s for input value.','wpsstm'),'<code>-</code>') . '</small>';
     }
-    
-    function tracks_section_desc(){
-        
-    }
-    
+
     function hide_subtracks_callback(){
         $option = wpsstm()->get_options('hide_subtracks');
         
@@ -321,14 +339,10 @@ class WP_SoundSytem_Settings {
             '<input type="checkbox" name="%s[hide_subtracks]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Hide tracks that belongs to an album or a playlist from the tracks listing","wpsstm")
+            __("Hide tracks that belongs to an album or a playlist from the backend tracks listing","wpsstm")
         );
     }
-    
-    function live_tracks_section_desc(){
-        
-    }
-    
+
     function live_playlists_enabled_callback(){
         $option = wpsstm()->get_options('live_playlists_enabled');
         
@@ -366,11 +380,21 @@ class WP_SoundSytem_Settings {
         );
         
     }
-
     
-    function wpsstm_settings_system_desc(){
-        
+    //APIs
+    
+    function soundcloud_client_id_callback(){
+        $option = wpsstm()->get_options('soundcloud_client_id');
+
+        printf(
+            '<input type="text" name="%s[soundcloud_client_id]" value="%s" /> <small>%s</small>',
+            wpsstm()->meta_name_options,
+            $option,
+            __('Required for the Live Playlists Soundcloud preset','wpsstm')
+        );
     }
+    
+    //System
     
     function reset_options_callback(){
         printf(
@@ -393,7 +417,6 @@ class WP_SoundSytem_Settings {
         );
     }
     
-
 	function  settings_page() {
         ?>
         <div class="wrap">

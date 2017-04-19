@@ -355,6 +355,7 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
 
 }
 
+
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
     
@@ -404,6 +405,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_BBC_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_BBC_Playlist();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
+    $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
     
     return $presets;

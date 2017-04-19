@@ -37,7 +37,7 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
-Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Twitter, XSPF.
+Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
 
 = Frontend Tracklist Parser =
 You may propose a frontend tracklist parser to your visitors.  
@@ -90,7 +90,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
-$tracklist->get_tracklist_table();
+echo $tracklist->get_tracklist_table();
 ?>`
 
 == Screenshots ==
