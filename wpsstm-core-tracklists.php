@@ -48,7 +48,7 @@ class WP_SoundSytem_Core_Tracklists{
 
         add_filter( 'query_vars', array($this,'add_query_var_xspf'));
         add_action( 'init', array($this,'xspf_register_endpoint' ));
-        add_filter( 'single_template', array($this,'xspf_template_loader'));
+        add_filter( 'template_include', array($this,'xspf_template_loader'));
         
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         add_action( 'save_post', array($this,'metabox_tracklist_save')); 
@@ -99,7 +99,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         ?>
         <div id="export-xspf">
-            <a class="submit export" href="<?php echo wpsstm_get_xspf_link(); ?>"><?php printf('Download XSPF','wpsstm'); ?></a>
+            <a class="submit export" href="<?php echo $xpsf_link; ?>"><?php printf('Download XSPF','wpsstm'); ?></a>
         </div>
         <?php
 
@@ -152,10 +152,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         wp_enqueue_script( 'wpsstm-admin-metabox-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-admin-metabox-tracklist.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery-uri'),wpsstm()->version);
     }
-    
 
-
-    
     /**
     *    From http://codex.wordpress.org/Template_Hierarchy
     *
@@ -457,6 +454,7 @@ class WP_SoundSytem_Core_Tracklists{
         if ( !in_array($post_type,$this->allowed_post_types) ) return $content;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
+        $tracklist->validate_tracks();
 
         return $content . $tracklist->get_tracklist_table();
     }

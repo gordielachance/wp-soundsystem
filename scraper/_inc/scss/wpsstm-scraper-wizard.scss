@@ -1,17 +1,28 @@
-body {
-    .postbox#wpsstm-scraper-simple,.postbox#wpsstm-scraper-advanced{
-        position:relative;
-        .inside{
-            overflow:auto;
-        }
-        input.fullwidth{
-            width:100%;
-        }
-        
+#wizard-wrapper{
 
-        
+    input.fullwidth{
+        width:100%;
     }
-    .postbox#wpsstm-scraper-advanced{
+    
+    &.wizard-wrapper-frontend{
+        h2{
+            display:none;
+        }
+        p.submit{
+            text-align:center;
+        }
+        table.wizard-section-table{
+            border:none;
+            th{
+                display:none;
+            }
+            th,td{
+                border:none;
+            }
+        }
+    }
+
+    &.wizard-wrapper-advanced{
 
         table#wizard-regexes{
             width:100%;
@@ -114,5 +125,13 @@ body {
         .no-js &{
             
         }
+    }
+}
+
+//metabox
+.postbox#wpsstm-metabox-scraper-wizard{
+    position:relative;
+    .inside{
+        overflow:auto;
     }
 }

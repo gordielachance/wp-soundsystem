@@ -179,7 +179,7 @@ class WP_SoundSytem_MB_Entries extends WP_List_Table {
 	}
     
 	public function column_mbitem_score( $item ) {
-        echo wpsstm_percent_bar($item['score']);
+        echo wpsstm_get_percent_bar($item['score']);
 	}
 
     

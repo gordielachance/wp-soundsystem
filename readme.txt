@@ -37,7 +37,12 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
-Services supported by default : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker.
+Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
+
+= Frontend Tracklist Parser =
+You may propose a frontend tracklist parser to your visitors.  
+They will be able to use it to get a remote tracklist; which could be useful for backups or to load it in a software like [Tomahawk](https://www.tomahawk-player.org/).
+Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
 = Shortcodes =
 
@@ -85,7 +90,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
-$tracklist->get_tracklist_table();
+echo $tracklist->get_tracklist_table();
 ?>`
 
 == Screenshots ==
@@ -99,6 +104,16 @@ $tracklist->get_tracklist_table();
 7. Tracklist parser metabox
 
 == Changelog ==
+
+= 0.9.4 =
+* improved presets - much cleaner code here.
+* improved scraper notices; don't uses add_settings_error anymore.
+
+= 0.9.3 =
+* new 'Twitter' and 'XSPF' presets
+* improved presets
+* validate_tracks() in function content_append_tracklist_table() and file playlist-xspf.php
+* Improved the saving routine for metaboxes
 
 = 0.9.2 =
 * New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets

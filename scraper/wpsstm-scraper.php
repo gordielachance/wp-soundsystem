@@ -22,14 +22,16 @@ class WP_SoundSytem_Playlist_Scraper{
     
     static $meta_key_scraper_url = '_wpsstm_scraper_url';
     static $meta_key_options_scraper = '_wpsstm_scraper_options';
+
     public $options_default;
     public $options;
-    
-    public $preset;
-    public $enabled_presets = array();
-    
+
     public $feed_url;
-    public $redirect_url;
+    public $id;
+    public $transient_name_cache;
+    public $datas_cache = null;
+    public $datas_remote = null;
+    public $datas = null;
     
     public $page;
     public $page_response = null;
@@ -37,14 +39,12 @@ class WP_SoundSytem_Playlist_Scraper{
     
     public $is_wizard = false;
     public $cache_only = false;
+    
+    public $notices = array();
 
     
     function __construct() {
-        
-        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-datas.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
-        
+
         $this->setup_globals();
         $this->setup_actions();
         
@@ -53,8 +53,7 @@ class WP_SoundSytem_Playlist_Scraper{
     function setup_globals(){
 
         $this->tracklist = new WP_SoundSytem_Tracklist();
-        $this->page = new WP_SoundSytem_Playlist_Scraper_Datas($this);
-        
+        $this->page = new WP_SoundSytem_Playlist_Scraper_Datas();
     }
     
     function setup_actions(){
@@ -62,7 +61,7 @@ class WP_SoundSytem_Playlist_Scraper{
     }
 
     function init_post($post_id){
-        
+
         $this->tracklist = new WP_SoundSytem_Tracklist($post_id);
         
         $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
@@ -74,33 +73,128 @@ class WP_SoundSytem_Playlist_Scraper{
     }
     
     function init($feed_url){
+
+        if (!$feed_url) return;
         
         //set feed url
-        $this->feed_url = $this->redirect_url = $feed_url;
+        $this->feed_url = $feed_url;
+        $this->id = md5( $this->feed_url ); //unique ID based on URL
+        $this->transient_name_cache = 'wpsstm_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
 
-        //populate tracklist
-        $datas = $this->page->get_datas();
+        //try to get cache first
+        $this->datas = $this->datas_cache = $this->get_cache();
         
-        //presets feedback
-        foreach($this->enabled_presets as $preset){
-            if ( is_admin() ){
-                add_settings_error( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$preset->name.'</em>'),'updated inline' );
+        //we got cached tracks, but do ignore them in wizard
+        if ( count($this->datas['tracks']) && $this->is_wizard ){
+            $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['time'])) );
+        }
+        
+        //load page preset
+        if ( $page_preset = $this->populate_scraper_presets($this) ){
+            $this->page = $page_preset;
+            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->name.'</em>') );
+        }
+        //populate page
+        $this->page->init($this->feed_url,$this->options);
+
+        //get remote tracks
+        if ( ( !$this->datas && (!$this->cache_only) ) || $this->is_wizard ){
+
+            $this->datas_remote = false; // so we can detect that we ran a remote request
+            $remote_tracks = $this->page->get_tracks();
+            
+            if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                if ( $this->feed_url != $this->page->redirect_url ){
+                    $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->page->redirect_url.'</em>') );
+                }
             }
-        }
 
-        if ( $this->feed_url != $this->redirect_url ){
-            wpsstm()->debug_log($this->redirect_url,"feed url filtered");
+
+            if ( !is_wp_error($remote_tracks) ) {
+                
+                //lookup
+                /*
+                if ( ($this->get_options('musicbrainz')) && ( !$this->is_wizard ) ){
+                    foreach ($this->tracklist->tracks as $track){
+                        $track->musicbrainz();
+                    }
+                }
+                */
+                
+                //populate page notices
+                foreach($this->page->notices as $notice){
+                    $this->notices[] = $notice;
+                }
+                
+                //format response
+                $this->datas = $this->datas_remote = array(
+                    'tracks'    => $remote_tracks,
+                    'time'      => current_time( 'timestamp' )
+                );
+
+                //set cache if there is none
+                if ( !$this->datas_cache ){
+                    $this->set_cache();
+                }
+                
+            }else{
+                $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+            }
+            
+
+
+            //repopulate author & title as we might change them depending of the page content
+            //$this->title = $this->get_station_title();
+            //$this->author = $this->get_station_author();
+
         }
         
-        if ( is_wp_error($datas) ){
-            add_settings_error( 'wizard-header', 'no-datas', $datas->get_error_message(),'error inline' );
-            return;
+        //get options back from page (a preset could have changed them)
+        $this->options = $this->page->options; 
+
+        if ($this->datas && isset($this->datas['tracks']) ){
+            $this->tracklist->add($this->datas['tracks']);
         }
         
-        if ($datas && isset($datas['tracks']) ){
-            $this->tracklist->add($datas['tracks']);
+        
+        //stats
+        if ( $this->datas_remote !==null ){ //we made a remote request
+            new WP_SoundSytem_Live_Playlist_Stats($this->tracklist);
         }
 
+        
+
+    }
+    
+    public function get_cache(){
+        if ( !$this->get_options('datas_cache_min') ){
+
+                $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
+
+            return false;
+        }
+
+        if ( $cache = get_transient( $this->transient_name_cache ) ){
+            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache)),"WP_SoundSytem_Playlist_Scraper_Datas::get_cache()"); 
+        }
+        
+        return $cache;
+
+    }
+    
+    function set_cache(){
+
+        if ( !$duration_min = $this->get_options('datas_cache_min') ) return;
+        
+        $duration = $duration_min * MINUTE_IN_SECONDS;
+        $success = set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
+
+        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($this->datas_remote)),"WP_SoundSytem_Playlist_Scraper_Datas::set_cache()"); 
+        
+    }
+
+    function delete_cache(){
+        delete_transient( $this->transient_name_cache );
     }
 
     static function get_default_options($keys = null){
@@ -125,34 +219,79 @@ class WP_SoundSytem_Playlist_Scraper{
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
-    function populate_presets($scraper){
+
+    static function get_available_presets($frontend = false){
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        
+        $available_presets = array();
+        $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
+        
+        foreach((array)$available_presets as $key=>$preset){
+            if ( !$preset->can_use_preset() ) unset($available_presets[$key]);
+            if( $frontend && !$preset->can_use_preset_frontend() ) unset($available_presets[$key]);
+        }
+
+        return $available_presets;
+    }
+
+    function populate_scraper_presets($scraper){
         
         $enabled_presets = array();
-        
-        $all_presets = array(
 
-            new WP_SoundSytem_Playlist_Scraper_Default($scraper),
-            new WP_SoundSytem_Playlist_Scraper_LastFM($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Spotify_Playlist($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Radionomy($scraper),
-            new WP_SoundSytem_Playlist_Scraper_SomaFM($scraper),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Station($scraper),
-            new WP_SoundSytem_Playlist_Scraper_BBC_Playlist($scraper),
-            new WP_SoundSytem_Playlist_Scraper_Slacker_Station($scraper),
-            new WP_SoundSytem_Playlist_Scraper_XSPF($scraper)
-
-        );
+        $available_presets = self::get_available_presets();
 
         //get matching presets
-        foreach((array)$all_presets as $preset){
-            if ( $preset->can_load_preset() ){
-                $preset->init_preset();
-                $this->enabled_presets[] = $preset;
+        foreach((array)$available_presets as $preset){
+
+            if ( $preset->can_load_url($scraper->feed_url) ){
+                $enabled_presets[] = $preset;
             }
+
         }
         
-        $this->enabled_presets = array_unique($this->enabled_presets, SORT_REGULAR);
+        //return last (highest priority) preset
+        return end($enabled_presets);
+
+    }
+    
+    /*
+    Use a custom function to display our notices since natice WP function add_settings_error() works only backend.
+    */
+    
+    function add_notice($slug,$code,$message,$error = false){
+        
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Playlist_Scraper notice]: ' . $message ); 
+        
+        $this->notices[] = array(
+            'slug'      => $slug,
+            'code'      => $code,
+            'message'   => $message,
+            'error'     => $error
+        );
+
+    }
+       
+    /*
+    Render notices as WP settings_errors() would.
+    */
+    
+    function display_notices($slug){
+ 
+        foreach ($this->notices as $notice){
+            if ( $notice['slug'] != $slug ) continue;
+            
+            $notice_classes = array(
+                'inline',
+                'settings-error',
+                'notice',
+                'is-dismissible'
+            );
+            
+            $notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
+            
+            printf('<div %s><p><strong>%s</strong></p></div>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
+        }
     }
 
 }

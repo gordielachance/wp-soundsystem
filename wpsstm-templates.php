@@ -9,7 +9,7 @@ function wpsstm_get_classes_attr($classes){
     return' class="'.implode(' ',$classes).'"';
 }
 
-function wpsstm_percent_bar($percent){
+function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
         $text_bar = $bar_width = null;
         $text_bar = $bar_width = $percent;
@@ -221,7 +221,7 @@ function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
         $tracklist->load_subtracks();
     }
     
-    return $tracklist;
+    return apply_filters('wpsstm_get_post_tracklist',$tracklist,$post_id,$cache_only);
     
 }
 
@@ -229,22 +229,13 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
     global $post;
     if (!$post_id) $post_id = $post->ID;
 
-    //check post type
-    $post_type = get_post_type($post->ID);
-    $allowed_post_types = array(
-        wpsstm()->post_type_album,
-        wpsstm()->post_type_playlist,
-        wpsstm()->post_type_live_playlist
-    );
-
-    if ( !in_array($post_type,$allowed_post_types) ) return;
-    
     $xspf_url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
 
     if($download){
         $xspf_url = add_query_arg(array('download'=>true),$xspf_url);
     }
-    return $xspf_url;
+
+    return apply_filters('wpsstm_get_xspf_link',$xspf_url,$post_id,$download);
 
 }
 

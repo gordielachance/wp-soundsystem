@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 0.9.2
+Version: 0.9.4
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '0.9.2';
+    public $version = '0.9.4';
     /**
     * @public string plugin DB version
     */
@@ -73,13 +73,15 @@ class WP_SoundSytem {
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->options_default = array(
             'musicbrainz_enabled'               => 'on',
-            'player_enabled'                    => 'on',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
+            'hide_subtracks'                    => 'on',
             'live_playlists_enabled'            => 'on',
+            'frontend_scraper_page_id'          => null,
             'live_playlists_cache_min'          => '10',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'hide_subtracks'                    => 'on'
+            'soundcloud_client_id'              => null,
+            'player_enabled'                    => 'off'
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
