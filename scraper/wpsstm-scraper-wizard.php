@@ -55,10 +55,12 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     }
     
     function wizard_scripts_styles_backend(){
+        wpsstm_tracklists()->tracklists_script_styles();
         wp_enqueue_style('wpsstm-scraper-wizard');
         wp_enqueue_script('wpsstm-scraper-wizard');
     }
     function wizard_scripts_styles_frontend(){
+        wpsstm_tracklists()->tracklists_script_styles();
         wp_enqueue_style('wpsstm-scraper-wizard');
         wp_enqueue_script('wpsstm-scraper-wizard');
     }
@@ -517,7 +519,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         //presets
         $presets_list = array();
         $presets_list_str = null;
-        foreach ((array)wpsstm_live_playlists()->available_presets as $preset){
+        $only_standalone_presets = ($this->is_frontend);
+        foreach ((array)WP_SoundSytem_Playlist_Scraper::get_available_presets($only_standalone_presets) as $preset){
             $presets_list[] = $preset->name;
         }
         $presets_list_str = implode(', ',$presets_list);

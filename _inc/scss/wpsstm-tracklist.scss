@@ -27,6 +27,13 @@
             text-align:center;
         }
         
+        .column-trackitem_image{
+            width:2em;
+            img{
+                max-width:100%;
+            }
+        }
+        
         th,td{
             border:none;
         }
