@@ -71,7 +71,7 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^https?://(?:open|play).spotify.com/user/(.+)/playlist/(.+)/?$~i';
+    var $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
     var $redirect_url = 'https://open.spotify.com/user/%spotify-user%/playlist/%spotify-playlist%';
     var $variables = array(
         'spotify-user' => null,
@@ -214,7 +214,7 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^https?://(?:www.)?somafm.com/(.+)/?$~i';
+    var $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
     var $variables = array(
         'somafm-slug' => null
@@ -252,7 +252,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
     var $name = null;
     var $description = null;
 
-    var $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)(.+)/?$~i';
+    var $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)/?~i';
     var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
     var $variables = array(
         'bbc-slug' => null
@@ -261,7 +261,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
     var $options = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
-            'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist a'),
+            'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
             'track_title'       => array('path'=>'.pll-playlist-item-details .pll-playlist-item-title'),
             'track_image'       => array('path'=>'img.pll-playlist-item-image')
         )
@@ -290,7 +290,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/(.+)/?$~i';
+    var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)/?$~i';
     var $variables = array(
         'bbc-playlist-id' => null
     );
@@ -326,7 +326,7 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
     var $name = null;
     var $description= null;
     
-    var $pattern = '~^https?://(?:www.)?slacker.com/station/(.+)/?~i';
+    var $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
     var $variables = array(
         'slacker-station-slug' => null
     );
@@ -456,7 +456,7 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
     var $name = null;
     var $description = null;
     
-    var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/(.+)/?$~i';
+    var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
     var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
     var $variables = array(
         'twitter-username' => null
@@ -487,6 +487,46 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
 
 }
 
+class WP_SoundSytem_Playlist_Scraper_RTBF extends WP_SoundSytem_Playlist_Scraper_Preset{
+    var $slug = 'rtbf';
+    
+    var $name = null;
+    var $description = null;
+    
+    var $pattern = '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i'; //ignore la premiere which has different selectors.
+    var $redirect_url= 'https://www.rtbf.be/%rtbf-slug%/conducteur';
+    var $variables = array(
+        'rtbf-slug' => null
+    );
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'li.radio-thread__entry'),
+            'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
+            'track_title'       => array('path'=>'span[itemprop="name"]'),
+            'track_image'       => array('path'=>'span[itemprop="inAlbum"]')
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('RTBF radios','wpsstm');
+
+    } 
+    
+    function can_use_preset(){
+        return true;
+    }
+    
+    /*
+    Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
+    */
+    function can_use_preset_frontend(){
+        return true;
+    }
+
+}
+
 /*
 Register scraper presets.
 */
@@ -501,6 +541,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
+    $presets[] = new WP_SoundSytem_Playlist_Scraper_RTBF();
     
     return $presets;
 }
