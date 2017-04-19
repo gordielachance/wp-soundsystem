@@ -354,7 +354,62 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
     }
 
 }
+class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_Scraper_Preset{
+    
+    var $slug = 'soundcloud';
 
+    var $name = null;
+    var $description = null;
+    var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~i';
+    var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-username%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
+    var $variables = array(
+        'soundcloud-username' => null,
+        'soundcloud-page' => null
+    );
+
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'element'),
+            'track_artist'      => array('path'=>'user username'),
+            'track_title'       => array('path'=>'title'),
+            'track_image'       => array('path'=>'artwork_url')
+        )
+    );
+    
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Soundcloud','wpsstm');
+
+    } 
+
+    function can_use_preset(){
+        if ( $client_id = wpsstm()->get_options('soundcloud_client_id') ){
+            $this->set_variable_value('soundcloud-client-id',$client_id);
+            return true;
+        }
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
+
+    function get_remote_url(){
+        
+        $page = $this->get_variable_value('soundcloud-page');
+        $page_api = 'tracks';
+        
+        switch($page){
+            case 'likes':
+                $page_api = 'favorites';
+        }
+        $this->set_variable_value('soundcloud-api-page',$page_api);
+        
+        return parent::get_remote_url();
+    }
+
+
+}
 
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
