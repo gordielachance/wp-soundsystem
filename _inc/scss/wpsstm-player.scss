@@ -1,5 +1,10 @@
 @import "compass/css3";
 
+a.wpsstm-play-track{
+    text-decoration:none;
+    border-bottom:none!important; //twentyfifteen fix
+}
+
 #wpsstm-bottom-player{
     position:fixed;
     width:100%;

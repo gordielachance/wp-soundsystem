@@ -115,6 +115,10 @@ class WP_SoundSytem_TracksList_Table{
         
         $columns['trackitem_order']     = '#';
         
+        if ( wpsstm()->get_options('player_enabled') == 'on' ){
+            $columns['trackitem_play_bt']     = '';
+        }
+        
         if ( $this->show_property_column('image') ){
             $columns['trackitem_image']     = '';
         }
@@ -552,6 +556,8 @@ class WP_SoundSytem_TracksList_Table{
             case 'trackitem_order':
                 $this->track_index++;
                 return $this->track_index;
+            case 'trackitem_play_bt':
+                return wpsstm_get_post_player_button($item->post_id);
             case 'trackitem_track':
                 $artist = $item->artist;
                 $track = $item->title;

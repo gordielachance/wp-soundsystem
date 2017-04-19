@@ -267,3 +267,12 @@ function wpsstm_get_post_player_sources($post_id = null){
     return apply_filters('wpsstm_get_post_player_sources',$links,$post_id);
     
 }
+
+function wpsstm_get_post_player_button($post_id = null){
+
+    if ( !$sources = wpsstm_get_post_player_sources($post_id) ) return;
+    
+    $data_attr_str = implode(',',$sources);
+    $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+    return $link;
+}
