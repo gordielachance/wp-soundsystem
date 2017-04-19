@@ -214,6 +214,9 @@ class WP_SoundSytem_Core_Live_Playlists{
     }
     
     function post_column_content($column_name, $post_id){
+        
+        if ( !in_array($column_name,array('health','requests-month','requests-total')) ) return;
+        
         $output = '—';
         
         switch($column_name){
