@@ -9,9 +9,22 @@ var player_item_time_percent; //percent of item played
 
 (function($){
 
-  $(document).ready(function(){
-        wpsstm_player = $('#wpsstm-player');
+    $(document).ready(function(){
+
+    //play buttons
+    $( "a.wpsstm-play-track" ).live( "click", function(e) {
+        e.preventDefault();
+        console.log("play!");
+        var sources_json = $(this).attr('data-wpsstm-sources');
+        var sources = JSON.parse(sources_json);
+        console.log(sources);
+    });
       
+      
+      wpsstm_player = $('#wpsstm-bottom-player');
+
+      wpsstm_player.find('#wpsstm-player-widgets').tabs();
+
       //progress
       wpsstm_player_progress_wrapper = wpsstm_player.find('.wpsstm-player-progress');
       wpsstm_player_progress_bar = wpsstm_player_progress_wrapper.find('.wpsstm-player-progress-bar');
@@ -77,13 +90,18 @@ function wpsstm_player_jump_to(percent) {
     console.log("wpsstm_player_jump_to() : " + percent);
     
     player_item_time_percent = percent;
-    wpsstm_player_progress_update_bar();
+    wpsstm_player_animate_progress_bar();
     
     var jumpTo = player_item_time_total /100 * percent;
     providerJumpTo(jumpTo);
 }
 
-function wpsstm_player_progress_update_bar() {
+function wpsstm_player_update_time(){
+    player_item_time_percent = (player_item_time_current / player_item_time_total) * 100;
+    wpsstm_player_animate_progress_bar();
+}
+
+function wpsstm_player_animate_progress_bar() {
     wpsstm_player_progress_bar.animate({ width: player_item_time_percent + '%' });
 }
 
@@ -92,7 +110,7 @@ function wpsstm_player_ended() {
     wpsstm_player_do_toggle_play(false);
     
     player_item_time_percent = 0;
-    wpsstm_player_progress_update_bar();
+    wpsstm_player_animate_progress_bar();
     
     //wpsstm_nav_previous();
 }

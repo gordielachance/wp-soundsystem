@@ -211,13 +211,16 @@ function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
     $post_type = get_post_type($post_id);
     
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
-
-    if ($post_type == wpsstm()->post_type_live_playlist){
+    
+    if ($post_type == wpsstm()->post_type_track){ //single track
+        $track = new WP_SoundSystem_Track(null,$post_id);
+        $tracklist->add($track);
+    }elseif ($post_type == wpsstm()->post_type_live_playlist){ //live playlist
         $scraper = new WP_SoundSytem_Playlist_Scraper();
         $scraper->cache_only = $cache_only;
         $scraper->init_post($post_id);
         $tracklist = $scraper->tracklist;
-    }else{
+    }else{ //playlist or album
         $tracklist->load_subtracks();
     }
     
@@ -263,4 +266,27 @@ function wpsstm_get_post_player_sources($post_id = null){
 
     return apply_filters('wpsstm_get_post_player_sources',$links,$post_id);
     
+}
+
+function wpsstm_get_post_player_button($post_id = null){
+
+    if ( !$sources = wpsstm_get_post_player_sources($post_id) ) return;
+    
+    $provider_slugs = wpsstm_player()->providers;
+    
+    $providers_attr_arr = array();
+    
+    foreach ((array)$provider_slugs as $provider_slug){
+        
+        foreach( $sources as $key => $source){
+            $provider = new $provider_slug($source);
+            if ( $provider->can_load_url() ){
+                $providers_attr_arr[$provider->slug] = $source;
+            }
+        }
+    }
+    
+    $data_attr_str = htmlspecialchars( json_encode($providers_attr_arr) );
+    $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+    return $link;
 }

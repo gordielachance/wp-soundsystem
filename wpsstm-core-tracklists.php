@@ -446,6 +446,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         //check post type
         $this->allowed_post_types = array(
+            wpsstm()->post_type_track,
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist,
             wpsstm()->post_type_live_playlist
