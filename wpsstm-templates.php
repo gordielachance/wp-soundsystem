@@ -9,7 +9,7 @@ function wpsstm_get_classes_attr($classes){
     return' class="'.implode(' ',$classes).'"';
 }
 
-function wpsstm_percent_bar($percent){
+function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
         $text_bar = $bar_width = null;
         $text_bar = $bar_width = $percent;

@@ -25,6 +25,7 @@ class WP_SoundSytem_Core_Live_Playlists{
     function init(){
 
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
         
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
@@ -38,6 +39,11 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        
+        //listing
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
+        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
         
         //frontend wizard
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
@@ -113,8 +119,16 @@ class WP_SoundSytem_Core_Live_Playlists{
                 'spiff_service'
             );
         $wpdb->query($query_post_meta_service);
+        
+        //rename health meta
+        $query_post_meta = $wpdb->prepare( 
+            "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",
+            $this->meta_key_health,
+            'spiff_station_health'
+        );
+        $wpdb->query($query_post_meta);
             
-        //upgrade other old post meta
+        //rename other old post meta
         $query_post_meta = $wpdb->prepare( 
             "UPDATE $wpdb->postmeta SET meta_key = REPLACE(meta_key, '%s', '%s')",
             'spiff',
@@ -181,6 +195,92 @@ class WP_SoundSytem_Core_Live_Playlists{
         );
 
         register_post_type( wpsstm()->post_type_live_playlist, $args );
+    }
+    
+    function post_column_register($columns){
+        
+        $columns['health'] = __('Live','spiff');
+        $columns['requests-month'] = __('Requests (month)','spiff');
+        $columns['requests-total'] = __('Requests (total)','spiff');
+        
+        return $columns;
+    }
+    
+    function post_column_sortable_register($columns){
+        $columns['health'] = 'health';
+        $columns['requests-month'] = 'trending';
+        $columns['requests-total'] = 'popular';
+        return $columns;
+    }
+    
+    function post_column_content($column_name, $post_id){
+        $output = '—';
+        
+        switch($column_name){
+            //health
+            case 'health':
+
+                if ( get_post_status($post_id) != 'publish') break;
+
+                $percentage = WP_SoundSytem_Live_Playlist_Stats::get_health($post_id);
+                $output = wpsstm_get_percent_bar($percentage);
+            break;
+            
+            //month requests
+            case 'requests-month':
+                
+                if ( get_post_status($post_id) != 'publish') break;
+                
+                $output = WP_SoundSytem_Live_Playlist_Stats::get_monthly_request_count($post_id);
+            break;
+                
+            //total requests
+            case 'requests-total':
+                
+                if ( get_post_status($post_id) != 'publish') break;
+                
+                $output = WP_SoundSytem_Live_Playlist_Stats::get_request_count($post_id);
+
+                
+            break;  
+        }
+
+        echo $output;
+    }
+    
+    function sort_stations( $query ) {
+
+        if ( ($query->get('post_type')==wpsstm()->post_type_live_playlist) && ( $orderby = $query->get( 'orderby' ) ) ){
+
+            $order = ( $query->get( 'order' ) ) ? $query->get( 'order' ) : 'DESC';
+
+            switch ($orderby){
+
+                case 'health':
+                    $query->set('meta_key', $this->meta_key_health );
+                    $query->set('orderby','meta_value_num');
+                    $query->set('order', $order);
+                break;
+                    
+                case 'trending':
+                    $query->set('meta_key', $this->meta_key_monthly_requests );
+                    $query->set('orderby','meta_value_num');
+                    $query->set('order', $order);
+                break;
+                    
+                case 'popular':
+                    $query->set('meta_key', $this->meta_key_requests );
+                    $query->set('orderby','meta_value_num');
+                    $query->set('order', $order);
+                break;
+                break;
+                    
+            }
+
+        }
+
+        return $query;
+        
     }
     
 

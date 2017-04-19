@@ -100,6 +100,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //get remote tracks
         if ( ( !$this->datas && (!$this->cache_only) ) || $this->is_wizard ){
 
+            $this->datas_remote = false; // so we can detect that we ran a remote request
             $remote_tracks = $this->page->get_tracks();
             
             if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
@@ -154,6 +155,14 @@ class WP_SoundSytem_Playlist_Scraper{
         if ($this->datas && isset($this->datas['tracks']) ){
             $this->tracklist->add($this->datas['tracks']);
         }
+        
+        
+        //stats
+        if ( $this->datas_remote !==null ){ //we made a remote request
+            new WP_SoundSytem_Live_Playlist_Stats($this->tracklist);
+        }
+
+        
 
     }
     
