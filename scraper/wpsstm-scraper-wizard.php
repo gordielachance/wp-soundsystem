@@ -4,8 +4,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
     var $scraper;
     
-    var $frontend = false;
-    var $advanced = true; //advanced wizard ?
+    var $is_frontend = false;
+    var $is_advanced = true; //advanced wizard ?
 
     var $wizard_sections  = array();
     var $wizard_fields = array();
@@ -27,8 +27,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $tracklist_validated = clone $this->scraper->tracklist;
         $tracklist_validated->validate_tracks();
         
-        $this->frontend = ( !is_admin() );
-        $this->advanced = ( (!$this->frontend) && ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
+        $this->is_frontend = ( !is_admin() );
+        $this->is_advanced = ( (!$this->is_frontend) && ( ( $this->scraper->feed_url && !$tracklist_validated->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
         
         //metabox
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
@@ -174,7 +174,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             );
         }
         
-        if (!$this->advanced){
+        if (!$this->is_advanced){
             
         }else{
             
@@ -719,7 +719,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     function wizard_display(){
         
         $classes = array();
-        $classes[]  = ($this->advanced) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
+        $classes[]  = ($this->is_advanced) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
         $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-frontend';
         
         ?>
@@ -730,7 +730,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
             $this->scraper->display_notices('wizard-header');
 
-            if (!$this->advanced){
+            if (!$this->is_advanced){
                 $this->wizard_simple();
             }else{
 
@@ -739,7 +739,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 $this->wizard_advanced();
             }
 
-            if ( !$this->frontend){
+            if ( !$this->is_frontend){
                 $post_type = get_post_type();
                 if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->scraper->tracklist->tracks) ){
                     $reset_checked = true;
@@ -749,10 +749,10 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             }
 
 
-            $submit_bt_txt = (!$this->advanced) ? __('Load URL','wpsstm') : __('Save Changes');
+            $submit_bt_txt = (!$this->is_advanced) ? __('Load URL','wpsstm') : __('Save Changes');
             $this->submit_button($submit_bt_txt,'primary','save-scraper-settings');
 
-            if ( $this->scraper->feed_url && !$this->frontend ){
+            if ( $this->scraper->feed_url && !$this->is_frontend ){
 
                 printf(
                     '<small><input type="checkbox" name="%1$s[reset]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span></small>',
@@ -777,7 +777,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         </div>
         <?php
         
-        if ( !$this->frontend ){
+        if ( !$this->is_frontend ){
             if ( $this->scraper->feed_url && !isset($_REQUEST['advanced_wizard']) ){
                 $advanced_wizard_url = get_edit_post_link();
                 $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
