@@ -21,7 +21,7 @@ class WP_SoundSytem_Core_Player{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        require $this->plugin_dir . 'wpsstm-player-providers.php';
+        require wpsstm()->plugin_dir . 'wpsstm-player-providers.php';
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
@@ -31,7 +31,6 @@ class WP_SoundSytem_Core_Player{
     
     function setup_actions(){
 
-        //add_action('init', array($this,'register_oembed') );
         //add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script_embeds' ), 11 );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_player_scripts_styles'));
         add_action( 'wp_footer', array($this,'show_player'));
@@ -47,39 +46,73 @@ class WP_SoundSytem_Core_Player{
         $this->providers[] = $class;
     }
 
-    function get_player_html($url){
+    
+    /*
+    Get the music sources for a post and return its player.
+    */
+    
+    function get_post_player_html($post_id = false){
+        global $post;
+        if (!$post_id) $post_id = $post->ID;
         
-        //get WP oEmbed widget
-        $widget_html = wp_oembed_get( $url );
-        
-        $provider = null;
-        
-        foreach ($this->providers as $possible_provider){
-            if ( $possible_provider::can_handle_oembed($widget_html) ){
-                $provider = new $possible_provider($widget_html);
-                break;
-            }
-        }
-
-        if (!$provider) return;
-        
-        return $provider->get_updated_oembed_html();
+        $urls = wpsstm_get_post_player_sources($post_id);
+        return $this->get_player_html($urls);
     }
     
-    function get_provider_html($post_id = false){
-        $provider = null;
-        $sources = wpsstm_get_post_player_sources($post_id);
+    /*
+    Choose a player according to its sources
+    https://github.com/angelmunozs/officeplayer
+    */
+    
+    function get_player_html($urls){
 
-        foreach ((array)$sources as $source){
-            if ($player = $this->get_player_html($source->link_url) ){
-                return $player;
+        $providers = array();
+        $tabs = array();
+        $widgets = array();
+        
+        foreach ($urls as $url){
+
+            foreach ($this->providers as $possible_provider){
+                $provider = new $possible_provider($url);
+                if ( $provider->can_load_url() ){
+                    $providers[] = $provider;
+                }
             }
-        }    
+            
+        }
+
+        ob_start();
+
+        ?>
+        <?php
+        $tabs_html = $widgets_html = null;
+
+        foreach ((array)$providers as $provider){
+            $icon = ($provider->icon) ? sprintf('<span class="wpsstm-player-widget-icon">%s</span>',$provider->icon) : null;
+            $tab_text = $icon . $provider->name;
+            $tabs_html.= sprintf('<li><a href="#wpsstm-player-widget-%s">%s</a></li>',$provider->slug,$tab_text);
+            $widgets_html.= sprintf('<div id="wpsstm-player-widget-%s" class="wpsstm-player-widget">%s</div>',$provider->slug,$provider->get_widget());
+
+        }
+
+        if ($tabs_html){
+             printf('<ul id="wpsstm-player-tabs">%s</ul>',$tabs_html);
+        }
+
+        if ($widgets_html){
+             echo $widgets_html;
+        }
+
+        ?>
+        <?php
+        
+        $output = ob_get_clean();
+        return $output;
     }
     
     function show_player(){
         if ( !is_single() ) return;
-        if ( !$provider = $this->get_provider_html() ) return;
+        if ( !$player = $this->get_post_player_html() ) return;
         
         /*
         $file = 'playlist-xspf.php';
@@ -89,10 +122,7 @@ class WP_SoundSytem_Core_Player{
         */
         
        ?>
-        <div id="wpsstm-player">
-            <div id="wpsstm-player-provider">
-                <?php print_r($provider);?>
-            </div>
+        <div id="wpsstm-bottom-player">
             <div id="wpsstm-player-main">
                 <p class="wpsstm-player-item-title">
                     <span class="wpsstm-player-control-toggleplay wpsstm-player-control-toggle wpsstm-player-control"><i class="fa fa-play" aria-hidden="true"></i><i class="fa fa-pause" aria-hidden="true"></i></span>
@@ -112,9 +142,12 @@ class WP_SoundSytem_Core_Player{
                 </p>
 
             </div>
+            <div id="wpsstm-player-widgets">
+                <?php print_r($player);?>
+            </div>
+            
             <?php
-                
-        
+
 			// Previous/next post navigation.
 			the_post_navigation( array(
 				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next', 'twentyfifteen' ) . '</span> ' .
@@ -130,8 +163,13 @@ class WP_SoundSytem_Core_Player{
     }
     
     function enqueue_player_scripts_styles(){
-        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css',wpsstm()->version );
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery'),wpsstm()->version);
+        global $wp_scripts;
+        
+        //css
+        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', null, wpsstm()->version );
+        
+        //js
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
     }
         
     function enqueue_script_embeds(){
@@ -207,11 +245,6 @@ class WP_SoundSytem_Core_Player{
         
     }
 
-    function register_oembed(){ //TO FIX
-        wp_oembed_add_provider( '#http://(www\.)?youtube\.com/watch.*#i', 'http://www.youtube.com/oembed', true );
-    }
-
-    
 }
 
 function wpsstm_player() {

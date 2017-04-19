@@ -1,30 +1,34 @@
 @import "compass/css3";
 
-#wpsstm-player{
+#wpsstm-bottom-player{
     position:fixed;
     width:100%;
     background-color: #DDD;
     border-top: 1px solid #b7b7b7;
     padding:1em;
-    
     bottom: 0;
-    
-    > * {
-        margin:auto;
-    }
+    z-index: 50;
 
-    #wpsstm-player-provider{
-        height: 100%;
-        overflow: hidden;
-        width: 20%;
-        position: absolute;
-        right: 0;
-    }
     #wpsstm-player-main{
         
-        .wpsstm-player-item-title{
-            text-align:center;
+        position:relative;
+        
+        p{
+            margin: 0;
+            &.wpsstm-player-item-title{
+                text-align:center;
+                font-size: 0.8em;
+            }
+            &.wpsstm-player-item-controls{
+                
+            }
+            &.wpsstm-player-controls{
+                position:absolute;
+                bottom:0;
+            }
         }
+        
+        
         .wpsstm-player-item-controls{
             text-align:center;
         }
@@ -71,6 +75,56 @@
             }
         }
 
+    }
+    
+    #wpsstm-player-widgets{
+        position:relative;
+        margin-bottom:1em;
+        
+        ul#wpsstm-player-tabs{
+            margin:0;
+            padding:0;
+            list-style: none;
+            position: absolute;
+            bottom: -2em;
+            li{
+                display:inline-block;
+                background-color:#DDD;
+                margin: 0 .125em;
+                padding: 0 .25em;
+            }
+        }
+
+        .wpsstm-player-widget{
+            iframe{
+                width:100%;
+                margin:0;
+                padding:0;
+                height:150px;
+                @include transition-property(height);
+                @include transition-duration(2s);
+                @include transition-timing-function(ease-in);
+            }
+            &#wpsstm-player-widget-youtube{
+
+                iframe{
+                    height: 60px;
+                }
+            }
+            &#wpsstm-player-widget-soundcloud{
+
+                iframe{
+                    height: 162px;
+                }
+            }
+            &#wpsstm-player-widget-mixcloud{
+
+                iframe{
+                    height: 60px;
+                }
+            }
+        }
+        
     }
     
     .post-navigation{

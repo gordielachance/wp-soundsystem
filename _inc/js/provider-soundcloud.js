@@ -6,7 +6,7 @@
   });  
 })(jQuery);
 
-var soundcloud_iframe = document.getElementById('wpsstm-iframe-soundcloud');
+var soundcloud_iframe = document.getElementById('wpsstm-player-iframe-soundcloud');
 var soundcloud_player = SC.Widget(soundcloud_iframe);
 
 soundcloud_player.bind(SC.Widget.Events.READY, function() {
