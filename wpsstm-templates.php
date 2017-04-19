@@ -272,7 +272,21 @@ function wpsstm_get_post_player_button($post_id = null){
 
     if ( !$sources = wpsstm_get_post_player_sources($post_id) ) return;
     
-    $data_attr_str = implode(',',$sources);
+    $provider_slugs = wpsstm_player()->providers;
+    
+    $providers_attr_arr = array();
+    
+    foreach ((array)$provider_slugs as $provider_slug){
+        
+        foreach( $sources as $key => $source){
+            $provider = new $provider_slug($source);
+            if ( $provider->can_load_url() ){
+                $providers_attr_arr[$provider->slug] = $source;
+            }
+        }
+    }
+    
+    $data_attr_str = htmlspecialchars( json_encode($providers_attr_arr) );
     $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
     return $link;
 }

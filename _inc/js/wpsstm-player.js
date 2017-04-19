@@ -15,6 +15,9 @@ var player_item_time_percent; //percent of item played
     $( "a.wpsstm-play-track" ).live( "click", function(e) {
         e.preventDefault();
         console.log("play!");
+        var sources_json = $(this).attr('data-wpsstm-sources');
+        var sources = JSON.parse(sources_json);
+        console.log(sources);
     });
       
       
