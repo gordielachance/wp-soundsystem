@@ -244,7 +244,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //get matching presets
         foreach((array)$available_presets as $preset){
 
-            if ( $preset->can_load_url($scraper->feed_url) ){
+            if ( $preset->can_load_tracklist_url($scraper->feed_url) ){
                 $enabled_presets[] = $preset;
             }
 

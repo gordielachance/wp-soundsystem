@@ -242,35 +242,11 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
 
 }
 
-/*
-Get the music sources links for a post
-*/
-
-function wpsstm_get_post_player_sources($post_id = null){
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    
-    $links = array();
-    
-    if ( class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
-        $args = array(
-            'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
-        );
-        $bookmarks = post_bkmarks_get_post_links($post_id, $args);
-        
-        foreach ((array)$bookmarks as $bookmark){
-            $links[] = $bookmark->link_url;
-        }
-        
-    }
-
-    return apply_filters('wpsstm_get_post_player_sources',$links,$post_id);
-    
-}
-
 function wpsstm_get_post_player_button($post_id = null){
+    
+    $track = new WP_SoundSystem_Track(null,$post_id);
 
-    if ( !$sources = wpsstm_get_post_player_sources($post_id) ) return;
+    if ( !$sources = $track->get_source_urls() ) return;
     
     $provider_slugs = wpsstm_player()->providers;
     
@@ -279,8 +255,8 @@ function wpsstm_get_post_player_button($post_id = null){
     foreach ((array)$provider_slugs as $provider_slug){
         
         foreach( $sources as $key => $source){
-            $provider = new $provider_slug($source);
-            if ( $provider->can_load_url() ){
+            $provider = new $provider_slug();
+            if ( $provider->can_play_source_url($source) ){
                 $providers_attr_arr[$provider->slug] = $source;
             }
         }

@@ -62,11 +62,11 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     If $url_matches is empty, it means that the feed url does not match the pattern.
     **/
     
-    public function can_load_url($url){
+    public function can_load_tracklist_url($url){
 
         if (!$this->pattern) return true;
         
-        //wpsstm()->debug_log(array('slug'=>$this->slug,'url'=>$url,'pattern'=>$this->pattern),"can_load_url()"); 
+        //wpsstm()->debug_log(array('slug'=>$this->slug,'url'=>$url,'pattern'=>$this->pattern),"can_load_tracklist_url()"); 
 
         preg_match($this->pattern, $url, $url_matches);
 
