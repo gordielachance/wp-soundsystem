@@ -260,6 +260,34 @@ class WP_SoundSystem_Track{
         return $api_response;
         
     }
+    
+    /*
+    Get the music sources links for a track
+    */
+
+    function get_source_urls(){
+
+        $links = array();
+
+        if ( $this->post_id ){
+
+            if ( class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
+                $args = array(
+                    'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
+                );
+                $bookmarks = post_bkmarks_get_post_links($this->post_id, $args);
+
+                foreach ((array)$bookmarks as $bookmark){
+                    $links[] = $bookmark->link_url;
+                }
+
+            }
+
+        }
+
+        return apply_filters('wpsstm_get_source_urls',$links,$this);
+
+    }
 
 }
 
@@ -388,26 +416,3 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
     }
     
 }
-
-add_filter('wpsstm_get_track_artist','strip_tags');
-add_filter('wpsstm_get_track_artist','urldecode');
-add_filter('wpsstm_get_track_artist','htmlspecialchars_decode');
-add_filter('wpsstm_get_track_artist','trim');
-
-add_filter('wpsstm_get_track_title','strip_tags');
-add_filter('wpsstm_get_track_title','urldecode');
-add_filter('wpsstm_get_track_title','htmlspecialchars_decode');
-add_filter('wpsstm_get_track_title','trim');
-
-add_filter('wpsstm_get_track_album','strip_tags');
-add_filter('wpsstm_get_track_album','urldecode');
-add_filter('wpsstm_get_track_album','htmlspecialchars_decode');
-add_filter('wpsstm_get_track_album','trim');
-
-add_filter('wpsstm_get_track_image','strip_tags');
-add_filter('wpsstm_get_track_image','urldecode');
-add_filter('wpsstm_get_track_image','trim');
-
-add_filter('wpsstm_get_track_location','strip_tags');
-add_filter('wpsstm_get_track_location','urldecode');
-add_filter('wpsstm_get_track_location','trim');
