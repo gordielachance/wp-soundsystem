@@ -1,3 +1,7 @@
+var wpsstm_providers = {};
+
+
+
 var wpsstm_player;
 var wpsstm_player_toggle_play_bt;
 var wpsstm_player_toggle_sound_bt;
@@ -11,35 +15,24 @@ var player_item_time_percent; //percent of item played
 
     $(document).ready(function(){
 
-    //play buttons
-    $( "a.wpsstm-play-track" ).live( "click", function(e) {
-        e.preventDefault();
-        console.log("play!");
-        var sources_json = $(this).attr('data-wpsstm-sources');
-        var sources = JSON.parse(sources_json);
-        console.log(sources);
-    });
-      
-      
-      wpsstm_player = $('#wpsstm-bottom-player');
+        //bottom player
+        wpsstm_player = $('#wpsstm-bottom-player');
+        wpsstm_player.find('#wpsstm-player-widgets').tabs();
 
-      wpsstm_player.find('#wpsstm-player-widgets').tabs();
+        //progress
+        wpsstm_player_progress_wrapper = wpsstm_player.find('.wpsstm-player-progress');
+        wpsstm_player_progress_bar = wpsstm_player_progress_wrapper.find('.wpsstm-player-progress-bar');
 
-      //progress
-      wpsstm_player_progress_wrapper = wpsstm_player.find('.wpsstm-player-progress');
-      wpsstm_player_progress_bar = wpsstm_player_progress_wrapper.find('.wpsstm-player-progress-bar');
-      
         wpsstm_player_progress_wrapper.click(function(e) {
             var percent = e.offsetX/ $(this).width() * 100;
             wpsstm_player_jump_to(percent);
         });
-      
 
         //toggle play-pause
         wpsstm_player_toggle_play_bt = wpsstm_player.find('.wpsstm-player-control-toggleplay');
         wpsstm_player_toggle_play_bt.click(function() {
             var is_on = $(this).hasClass('wpsstm-player-control-toggle-on');
-            
+
             if (!is_on){
                 providerPlay();
                 wpsstm_player_do_toggle_play(true);
@@ -48,12 +41,12 @@ var player_item_time_percent; //percent of item played
                 wpsstm_player_do_toggle_play(false);
             }
         });
-      
+
         //toggle sound on-off
         wpsstm_player_toggle_sound_bt = wpsstm_player.find('.wpsstm-player-control-togglesound');
         wpsstm_player_toggle_sound_bt.click(function() {
             var is_on = $(this).hasClass('wpsstm-player-control-toggle-on');
-            
+
             if (!is_on){
                 providerMute();
                 wpsstm_player_do_toggle_sound(true);
@@ -62,9 +55,32 @@ var player_item_time_percent; //percent of item played
                 wpsstm_player_do_toggle_sound(false);
             }
         });
+        
+        //play buttons
+        $( "a.wpsstm-play-track" ).live( "click", function(e) {
+            e.preventDefault();
+            
+            //stop current stream
+            wpsstm_player_do_toggle_play(false);
+            
+            //get new sources
+            var sources_json = $(this).attr('data-wpsstm-sources');
+            var sources = JSON.parse(sources_json);
+            
+            //load URLs for each provider
+            $.each( sources, function( provider_slug, url ) {
+                var provider = wpsstm_providers[provider_slug];
+                provider.loadUrl(url);
+            });
+            
+            //fill player with sources
+            
+            //play
+            
+
+        });
       
-      
-  });  
+    });  
 })(jQuery);
 
 function wpsstm_nav_previous(){

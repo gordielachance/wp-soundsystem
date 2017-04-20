@@ -30,10 +30,8 @@ class WP_SoundSytem_Core_Player{
     }
     
     function setup_actions(){
-
-        //add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script_embeds' ), 11 );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_player_scripts_styles'));
-        add_action( 'wp_footer', array($this,'show_player'));
+        add_action( 'wp_footer', array($this,'player_html'));
 
     }
     
@@ -45,41 +43,17 @@ class WP_SoundSytem_Core_Player{
         if ( !class_exists($class) ) return;
         $this->providers[] = $class;
     }
-
-    
-    /*
-    Get the music sources for a post and return its player.
-    */
-    
-    function get_post_player_html($post_id = false){
-        global $post;
-        if (!$post_id) $post_id = $post->ID;
-        
-        $urls = wpsstm_get_post_player_sources($post_id);
-        return $this->get_player_html($urls);
-    }
     
     /*
     Choose a player according to its sources
     https://github.com/angelmunozs/officeplayer
     */
     
-    function get_player_html($urls){
+    function get_player_providers_html(){
 
         $providers = array();
         $tabs = array();
         $widgets = array();
-        
-        foreach ($urls as $url){
-
-            foreach ($this->providers as $possible_provider){
-                $provider = new $possible_provider($url);
-                if ( $provider->can_load_url() ){
-                    $providers[] = $provider;
-                }
-            }
-            
-        }
 
         ob_start();
 
@@ -87,40 +61,28 @@ class WP_SoundSytem_Core_Player{
         <?php
         $tabs_html = $widgets_html = null;
 
-        foreach ((array)$providers as $provider){
-            $icon = ($provider->icon) ? sprintf('<span class="wpsstm-player-widget-icon">%s</span>',$provider->icon) : null;
+        foreach ($this->providers as $possible_provider){
+            $provider = new $possible_provider();
+            $icon = ($provider->icon) ? sprintf('<span class="wpsstm-player-icon">%s</span>',$provider->icon) : null;
             $tab_text = $icon . $provider->name;
-            $tabs_html.= sprintf('<li><a href="#wpsstm-player-widget-%s">%s</a></li>',$provider->slug,$tab_text);
-            $widgets_html.= sprintf('<div id="wpsstm-player-widget-%s" class="wpsstm-player-widget">%s</div>',$provider->slug,$provider->get_widget());
+            $tabs_html[]= sprintf('<li><a href="#wpsstm-player-%s">%s</a></li>',$provider->slug,$tab_text);
+            $widgets_html[]= sprintf('<div id="wpsstm-player-%s" class="wpsstm-player-widget">%s</div>',$provider->slug,$provider->get_widget());
 
         }
 
         if ($tabs_html){
-             printf('<ul id="wpsstm-player-tabs">%s</ul>',$tabs_html);
+             printf('<ul id="wpsstm-player-tabs">%s</ul>',implode("\n",$tabs_html) );
         }
 
         if ($widgets_html){
-             echo $widgets_html;
+             echo implode("\n",$widgets_html);
         }
-
-        ?>
-        <?php
         
         $output = ob_get_clean();
         return $output;
     }
     
-    function show_player(){
-        if ( !is_single() ) return;
-        if ( !$player = $this->get_post_player_html() ) return;
-        
-        /*
-        $file = 'playlist-xspf.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
-        }
-        */
-        
+    function player_html(){
        ?>
         <div id="wpsstm-bottom-player">
             <div id="wpsstm-player-main">
@@ -143,21 +105,10 @@ class WP_SoundSytem_Core_Player{
 
             </div>
             <div id="wpsstm-player-widgets">
-                <?php print_r($player);?>
+                <?php
+                echo $this->get_player_providers_html();
+                ?>
             </div>
-            
-            <?php
-
-			// Previous/next post navigation.
-			the_post_navigation( array(
-				'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next', 'twentyfifteen' ) . '</span> ' .
-					'<span class="screen-reader-text">' . __( 'Next post:', 'twentyfifteen' ) . '</span> ' .
-					'<span class="post-title">%title</span>',
-				'prev_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Previous', 'twentyfifteen' ) . '</span> ' .
-					'<span class="screen-reader-text">' . __( 'Previous post:', 'twentyfifteen' ) . '</span> ' .
-					'<span class="post-title">%title</span>',
-			) );
-            ?>
         </div>
         <?php
     }
@@ -170,81 +121,8 @@ class WP_SoundSytem_Core_Player{
         
         //js
         wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-player-provider', wpsstm()->plugin_url . '_inc/js/wpsstm-player-provider.js', null,wpsstm()->version);
     }
-        
-    function enqueue_script_embeds(){
-        global $wp_query;
-        $datas = array();
-        
-        if (!$posts = $wp_query->posts) return;
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_track,
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist
-        );
-        
-        foreach ((array)$posts as $post){
-            $post_type = $post->post_type;
-            if (!in_array($post_type,$allowed_post_types)) continue;
-
-            $postdata = array();
-            
-            //load datas
-            $artist = wpsstm_get_post_artist($post->ID);
-            $track = wpsstm_get_post_track($post->ID);
-            $album = wpsstm_get_post_album($post->ID);
-
-            switch( $post_type ){
-
-                case wpsstm()->post_type_artist:
-                    
-                    if (!$artist) break;
-                    
-                    $postdata['artist'][] = $artist;
-                break;
-                    
-                case wpsstm()->post_type_track:
-                    
-                    if (!$artist or !$track) break;
-                    
-                    $postdata['title'][] = array(
-                        'artist'    => $artist,
-                        'title'     => $track,
-                        'album'     => ($album) ? $album : null
-                    );
-                    
-                break;
-                    
-                case wpsstm()->post_type_album:
-                    
-                    if (!$artist or !$album) break;
-                    
-                    $postdata['album'][] = array(
-                        'artist'    => $artist,
-                        'album'     => $album
-                    );
-                    
-                break;
-                    
-
-            }
-            
-            if ($postdata){
-                $datas[$post->ID] = $postdata;
-            }
-            
-        }
-        
-        if (!$datas) return;
-
-        wp_localize_script( 'wpsstm-embeds', 'wpsstmEmbed', $datas );
-        wp_enqueue_script( 'wpsstm-embeds', wpsstm()->plugin_url . '_inc/js/wpsstm_embeds.js', array('jquery'),wpsstm()->version);
-
-        
-    }
-
 }
 
 function wpsstm_player() {

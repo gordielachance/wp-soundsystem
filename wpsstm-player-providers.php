@@ -7,27 +7,26 @@ abstract class WP_SoundSytem_Provider{
     var $pattern;
     var $url;
     
-    function __construct($url){
+    function __construct(){
+        
+    }
+
+    function can_play_source_url($url){
+        if (!$this->pattern) return false;
+        preg_match($this->pattern, $url, $url_matches);
+        return (bool)$url_matches;
+    }
+    
+    function init_source_url($url){
         $this->url = $url;
     }
-
-    function can_load_url(){
-        if (!$this->pattern) return false;
-        preg_match($this->pattern, $this->url, $url_matches);
-        if (!$url_matches) return false;
-        
-        return true;
-        
-    }
-
 
     function get_widget(){
         //load widget scripts & styles
         $this->provider_scripts_styles();
         
-        return sprintf('<iframe id="wpsstm-player-iframe-%s" type="text/html" src="%s" frameborder="0"></iframe>',$this->slug,$this->get_iframe_url());
+        return sprintf('<iframe id="wpsstm-player-%s-iframe" type="text/html" src="%s" frameborder="0"></iframe>',$this->slug,$this->get_iframe_url());
 
-        return $this->oembed_html;
     }
     
     /*
@@ -126,5 +125,5 @@ class WP_SoundSytem_Provider_Soundcloud extends WP_SoundSytem_Provider{
 //no spotify widget : there is no JS SDK available for the player
 
 wpsstm_player()->register_provider('WP_SoundSytem_Provider_Youtube');
-wpsstm_player()->register_provider('WP_SoundSytem_Provider_Mixcloud');
-wpsstm_player()->register_provider('WP_SoundSytem_Provider_Soundcloud');
+//wpsstm_player()->register_provider('WP_SoundSytem_Provider_Mixcloud');
+//wpsstm_player()->register_provider('WP_SoundSytem_Provider_Soundcloud');

@@ -110,19 +110,19 @@ a.wpsstm-play-track{
                 @include transition-duration(2s);
                 @include transition-timing-function(ease-in);
             }
-            &#wpsstm-player-widget-youtube{
+            &#wpsstm-player-youtube{
 
                 iframe{
                     height: 60px;
                 }
             }
-            &#wpsstm-player-widget-soundcloud{
+            &#wpsstm-player-soundcloud{
 
                 iframe{
                     height: 162px;
                 }
             }
-            &#wpsstm-player-widget-mixcloud{
+            &#wpsstm-player-mixcloud{
 
                 iframe{
                     height: 60px;
