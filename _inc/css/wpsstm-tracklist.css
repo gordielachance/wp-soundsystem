@@ -105,7 +105,17 @@
   -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
-/* line 95, ../scss/wpsstm-tracklist.scss */
+/* line 92, ../scss/wpsstm-tracklist.scss */
+.wpsstm-tracklist-table table tbody tr:not(.wpsstm-row-current) .wpsstm-player-icon {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
+  opacity: 0.25;
+}
+/* line 96, ../scss/wpsstm-tracklist.scss */
+.wpsstm-tracklist-table table tbody tr:hover .wpsstm-player-icon {
+  filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
+  opacity: 1;
+}
+/* line 102, ../scss/wpsstm-tracklist.scss */
 .single .wpsstm-tracklist-table {
   font-size: 0.8em;
 }

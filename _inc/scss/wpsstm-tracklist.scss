@@ -89,7 +89,14 @@
                     }
                 }
             }
-                
+            &:not(.wpsstm-row-current) .wpsstm-player-icon{
+                    @include opacity(.25);
+            }
+            &:hover{
+                .wpsstm-player-icon{
+                        @include opacity(1);
+                }
+            }
 	   }
     }
     .single & {

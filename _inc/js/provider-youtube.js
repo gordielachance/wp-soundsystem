@@ -8,6 +8,7 @@ function Player_Provider_Youtube() {
 Player_Provider_Youtube.prototype = Object.create(Player_Provider.prototype); //inherit methods
 Player_Provider_Youtube.prototype.constructor = Player_Provider_Youtube; //fix constructor
 
+wpsstm_providers.youtube = new Player_Provider_Youtube();
 
 /*
 Extract video ID from Youtube URL
@@ -21,53 +22,50 @@ Player_Provider_Youtube.prototype.getVideoID = function(url) {
 
 Player_Provider_Youtube.prototype.loadUrl = function(url) {
     
-    Player_Provider.prototype.loadUrl(url);
+    Player_Provider.prototype.loadUrl.call(this, url);
     
     var video_id = this.getVideoID(url);
     if (wpsstm.debug) console.log("Youtube video ID: " + video_id);
     
+    //Youtube API
     this.player.loadVideoById(video_id);
 }
 
 Player_Provider_Youtube.prototype.play = function() {
-    
-    Player_Provider.prototype.play();
+    Player_Provider.prototype.play.call(this);
     
     this.player.playVideo();
 }
 
 Player_Provider_Youtube.prototype.pause = function(url) {
     
-    Player_Provider.prototype.pause();
+    Player_Provider.prototype.pause.call(this);
     
     this.player.pauseVideo();
 }
 
 Player_Provider_Youtube.prototype.jumpTo = function(time) {
     
-    Player_Provider.prototype.pause(time);
+    Player_Provider.prototype.jumpTo.call(this, time);
     
     this.player.seekTo(time,true);
 }
 
 Player_Provider_Youtube.prototype.mute = function() {
     
-    Player_Provider.prototype.mute();
+    Player_Provider.prototype.mute.call(this);
     
     this.player.mute();
 }
 
 Player_Provider_Youtube.prototype.unMute = function() {
     
-    Player_Provider.prototype.unMute();
+    Player_Provider.prototype.unMute.call(this);
     
     this.player.unMute();
 }
 
 
-
-
-wpsstm_providers.youtube = new Player_Provider_Youtube();
 
 /*
 API init
@@ -93,17 +91,37 @@ Player_Provider_Youtube_onStateChange = function(event) {
     
     var provider = wpsstm_providers.youtube;
     
+    switch (event.data){
+        case YT.PlayerState.ENDED:
+            Player_Provider.prototype.onStateChange.call(provider,'ended');
+        break;
+        case YT.PlayerState.PLAYING:
+            Player_Provider.prototype.onStateChange.call(provider,'playing');
+        break;
+        case YT.PlayerState.PAUSED:
+            Player_Provider.prototype.onStateChange.call(provider,'paused');
+        break;
+        case YT.PlayerState.BUFFERING:
+            Player_Provider.prototype.onStateChange.call(provider,'buffering');
+        break;
+        case YT.PlayerState.CUED:
+            Player_Provider.prototype.onStateChange.call(provider,'cued');
+        break;
+    }
+    /*
     //progress bar
     if (event.data == YT.PlayerState.PLAYING) {
-        progress(true);
+        Player_Provider.prototype.onStateChange.call(provider,'playing');
+        //progress(true);
     } else {
-        progress(false);
+        //progress(false);
     }
 
     if(event.data == YT.PlayerState.ENDED) {          
         if (wpsstm.debug) console.log("WP SoundSystem - Youtube player - video finished");
         wpsstm_player_ended();
     }
+    */
 }
 
 var wpsstm_player_youtube;

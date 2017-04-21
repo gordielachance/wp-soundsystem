@@ -263,6 +263,6 @@ function wpsstm_get_post_player_button($post_id = null){
     }
     
     $data_attr_str = htmlspecialchars( json_encode($providers_attr_arr) );
-    $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+    $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
     return $link;
 }

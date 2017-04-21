@@ -1,8 +1,21 @@
-var iframe = document.getElementById('wpsstm-player-iframe-mixcloud');
-var mixcloud_player = Mixcloud.PlayerWidget(iframe);
+/*
+Init Provider
+*/
+function Player_Provider_Mixcloud() {
+  Player_Provider.call(this, 'mixcloud');
+}
+
+Player_Provider_Mixcloud.prototype = Object.create(Player_Provider.prototype); //inherit methods
+Player_Provider_Mixcloud.prototype.constructor = Player_Provider_Mixcloud; //fix constructor
+
+wpsstm_providers.mixcloud = new Player_Provider_Mixcloud();
+wpsstm_providers.mixcloud.player = SC.Widget(wpsstm_providers.mixcloud.iframe_id);
+
+/*
+var wpsstm_player_mixcloud = Mixcloud.PlayerWidget(iframe);
 progressBarTimer = false;
 
-mixcloud_player.ready.then(function() {
+wpsstm_player_mixcloud.ready.then(function() {
     providerReady();
 });
 
@@ -10,18 +23,26 @@ mixcloud_player.ready.then(function() {
 function providerReady() {
     console.log("WP SoundSystem - Mixcloud - providerReady()");
     return;//TO FIX
-    mixcloud_player.getDuration().then(function(value) {
+    wpsstm_player_mixcloud.getDuration().then(function(value) {
         player_item_time_total = value;
         if (wpsstm.debug){
             console.log(player_item_time_total);
         }
     });
     
-    mixcloud_player.events.progress.on(MixcloudEventProgress);
-    mixcloud_player.events.play.on(providerPlay);
-    mixcloud_player.events.pause.on(providerPause);
-    mixcloud_player.events.ended.on(MixcloudEventEnded);
+    wpsstm_player_mixcloud.events.progress.on(MixcloudEventProgress);
+    wpsstm_player_mixcloud.events.play.on(providerPlay);
+    wpsstm_player_mixcloud.events.pause.on(providerPause);
+    wpsstm_player_mixcloud.events.ended.on(MixcloudEventEnded);
 
+}
+
+function providerLoadUrl(url){
+    var urlSplit = url.split("mixcloud.com");
+    console.log(urlSplit);
+    
+    if (wpsstm.debug) console.log("WP SoundSystem - Mixloud - providerLoadUrl()");
+    wpsstm_player_mixcloud.load(cloudcastKey);
 }
 
 function MixcloudEventProgress(){
@@ -31,37 +52,37 @@ function MixcloudEventProgress(){
 function MixcloudEventEnded(){
     console.log("MixcloudEventEnded()");
     
-    mixcloud_player.events.progress.off(MixcloudEventProgress);
+    wpsstm_player_mixcloud.events.progress.off(MixcloudEventProgress);
     progress(false);
 }
 
 function providerPlay() {
     if (wpsstm.debug) console.log("WP SoundSystem - Mixcloud - providerPlay()");
-    //mixcloud_player.events.play.off(providerPlay);
-    mixcloud_player.play();
+    //wpsstm_player_mixcloud.events.play.off(providerPlay);
+    wpsstm_player_mixcloud.play();
     
 }
 
 function providerPause() {
     if (wpsstm.debug) console.log("WP SoundSystem - Mixcloud - providerPause()");
-    mixcloud_player.pause();
+    wpsstm_player_mixcloud.pause();
     
     progress(false);
 }
 
 function providerJumpTo(time){
     if (wpsstm.debug) console.log("WP SoundSystem - Mixcloud - providerJumpTo():" + time);
-    mixcloud_player.seek(time,true);
+    wpsstm_player_mixcloud.seek(time,true);
     
 }
 
 function providerMute(){
     if (wpsstm.debug) console.log("WP SoundSystem - Mixcloud - providerMute()");
-    mixcloud_player.mute();
+    wpsstm_player_mixcloud.mute();
 }
 function providerUnMute(){
     if (wpsstm.debug) console.log("WP SoundSystem - Mixcloud - providerUnMute()");
-    mixcloud_player.unMute();
+    wpsstm_player_mixcloud.unMute();
 }
 
 function progress(enabled){
@@ -71,7 +92,7 @@ function progress(enabled){
     if ( enabled ){
 
         progressBarTimer = setInterval(function() {
-            mixcloud_player.getPosition().then(function(position) {
+            wpsstm_player_mixcloud.getPosition().then(function(position) {
                 player_item_time_current = position;
                 wpsstm_player_update_time();
 
@@ -85,3 +106,4 @@ function progress(enabled){
 
 
 }
+*/

@@ -3,6 +3,13 @@
 a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
+    
+    .wpsstm-player-icon{
+        &.wpsstm-player-icon-buffering,&.wpsstm-player-icon-pause{ //pause
+            display:none;
+        }
+    }
+
 }
 
 #wpsstm-bottom-player{
@@ -62,20 +69,9 @@ a.wpsstm-play-track{
             display:inline-block;
             margin:0 .25em;
             
-            &.wpsstm-player-control-toggle{
-                :nth-child(odd) { //pause
-                    display:inherit;
-                }
-                :nth-child(even) { //pause
+            .wpsstm-player-icon{
+                &.wpsstm-player-icon-buffering,&.wpsstm-player-icon-pause{ //pause
                     display:none;
-                }
-                &.wpsstm-player-control-toggle-on{
-                    :nth-child(odd) { //pause
-                        display:none;
-                    }
-                    :nth-child(even) { //pause
-                        display:inherit;
-                    }
                 }
             }
         }
@@ -97,6 +93,13 @@ a.wpsstm-play-track{
                 background-color:#DDD;
                 margin: 0 .125em;
                 padding: 0 .25em;
+                @include opacity(.5);
+                &:hover,&.ui-state-active{
+                    @include opacity(1);
+                }
+                .wpsstm-player-tab-icon{
+                    padding:0 .25em;
+                }
             }
         }
 

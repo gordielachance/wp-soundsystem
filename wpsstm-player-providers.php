@@ -55,7 +55,7 @@ class WP_SoundSytem_Provider_Youtube extends WP_SoundSytem_Provider{
     }
     
     function get_iframe_url(){
-        $url = 'https://www.youtube.com/embed/BLya0SiphU8';
+        $url = 'https://www.youtube.com/embed/';
         $iframe_args = array(
             'rel'           => 0,
             'showinfo'      => 0,
@@ -76,7 +76,7 @@ class WP_SoundSytem_Provider_Mixcloud extends WP_SoundSytem_Provider{
 
     function provider_scripts_styles(){
         wp_register_script( 'mixcloud-widget-api', '//widget.mixcloud.com/media/js/widgetApi.js');
-        wp_enqueue_script( 'wpsstm-provider-mixcloud', wpsstm()->plugin_url . '_inc/js/provider-mixcloud.js', array('jquery','mixcloud-widget-api'),wpsstm()->version,true);
+        wp_enqueue_script( 'wpsstm-provider-mixcloud', wpsstm()->plugin_url . '_inc/js/provider-mixcloud.js', array('jquery', 'mixcloud-widget-api'),wpsstm()->version,true);
     }
     
     function get_iframe_url(){
@@ -105,7 +105,8 @@ class WP_SoundSytem_Provider_Soundcloud extends WP_SoundSytem_Provider{
     var $icon = '<i class="fa fa-soundcloud" aria-hidden="true"></i>';
 
     function provider_scripts_styles(){
-
+        wp_register_script( 'soundcloud-widget-api', 'http://connect.soundcloud.com/sdk-2.0.0.js',null,'2.0.0');
+        wp_enqueue_script( 'wpsstm-provider-soundcloud', wpsstm()->plugin_url . '_inc/js/provider-soundcloud.js', array('jquery','soundcloud-widget-api'),wpsstm()->version,true);
     }
     
     function get_iframe_url(){
@@ -125,5 +126,5 @@ class WP_SoundSytem_Provider_Soundcloud extends WP_SoundSytem_Provider{
 //no spotify widget : there is no JS SDK available for the player
 
 wpsstm_player()->register_provider('WP_SoundSytem_Provider_Youtube');
-//wpsstm_player()->register_provider('WP_SoundSytem_Provider_Mixcloud');
-//wpsstm_player()->register_provider('WP_SoundSytem_Provider_Soundcloud');
+wpsstm_player()->register_provider('WP_SoundSytem_Provider_Mixcloud');
+wpsstm_player()->register_provider('WP_SoundSytem_Provider_Soundcloud');
