@@ -6,8 +6,31 @@ var wpsstm_current_bt;
 var page_buttons;
 
 (function($){
-
+    
+    //tests
+    /*
     $(document).ready(function(){
+        console.log("docready");
+        track_players = $('audio.wpsstm-track-player');
+        
+        $(track_players).mediaelementplayer({
+            pauseOtherPlayers: false,
+            features: ['playpause','sourcechooser'],
+            success: function (player, node) {
+                $(player).removeClass('buffering');
+              player.pause();
+             }
+        });
+        
+        
+        
+    });
+    */
+    $(document).ready(function(){
+        
+        track_players = $('audio.wpsstm-track-player');
+        console.log(track_players);
+
         
         page_buttons = $( "[data-wpsstm-sources]" );
 
@@ -106,8 +129,8 @@ var page_buttons;
 
                             $(wpsstm_current_media).on('play', function() {
                                 console.log('MediaElement.js event - play');
-                                    $(wpsstm_current_bt).addClass('playing');
-                                    $(wpsstm_current_bt).removeClass('buffering ended');
+                                $(wpsstm_current_bt).addClass('playing');
+                                $(wpsstm_current_bt).removeClass('buffering ended');
                             });
 
                             $(wpsstm_current_media).on('pause', function() {
@@ -158,7 +181,7 @@ var page_buttons;
         first_button.trigger('click');
         
       
-    });  
+    });
 })(jQuery);
 
 function wpsstm_toggle_playpause(media){

@@ -86,12 +86,15 @@ class WP_SoundSytem_Core_Player{
         $provider_slugs = wpsstm_player()->providers;
 
         $sources_attr_arr = array();
+        $sources_el_arr = array();
 
         foreach( $sources as $key => $url){
             
             foreach( (array)$this->providers as $provider ){
 
                 if ( !$source_type = $provider->get_source_mimetype($url) ) continue; //cannot play source
+                
+                $sources_el_arr[] = sprintf('<source src="%s" tyoe="%s" />',esc_url($url),$source_type);
                 
                 $sources_attr_arr[] = array(
                     'type'  => $source_type,
@@ -101,11 +104,27 @@ class WP_SoundSytem_Core_Player{
             }
 
         }
+        
+        //TO FIX TO REMOVE ? test with a single player by track
+        
+        /*
+        if ( $sources_el_arr ) {
+
+            $player_classes = array('wpsstm-track-player');
+            $player_id = 'wpsstm-track-player-';
+            $player_sources_str = implode("\n",$sources_el_arr);
+
+            $player = sprintf('<audio id="%s" %s>%s</audio>',$player_id,wpsstm_get_classes_attr($player_classes),$player_sources_str);
+
+            return $player;
+        }
+        */
 
         if ( $sources_attr_arr ) {
-            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS ); //https://wordpress.stackexchange.com/a/162945/70449
 
+            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS ); //https://wordpress.stackexchange.com/a/162945/70449
             $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+            
             return $link;
         }
 
