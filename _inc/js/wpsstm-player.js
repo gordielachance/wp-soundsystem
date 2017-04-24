@@ -1,4 +1,5 @@
 var wpsstm_player;
+var wpsstm_player_do_play;
 var wpsstm_current_media;
 var wpsstm_current_source;
 var wpsstm_current_bt;
@@ -77,14 +78,30 @@ var page_buttons;
                     loop: false,
                     success: function(media, node, player) {
                             console.log("player ready");
-                            wpsstm_current_media = media;
                             wpsstm_player = player;
-                            wpsstm_current_media.play();
+                            
+                            console.log("media ready");
+                            wpsstm_current_media = media;
+                            console.log(wpsstm_current_media);
+                            
+                        
+                            $(wpsstm_current_media).on('error', function(error) {
+                                console.log('MediaElement.js event - error: ');
+                                console.log(error);
+                                $(wpsstm_current_bt).addClass('error');
+                                
+                                console.log("do_play status: "+wpsstm_player_do_play);
+                                if (wpsstm_player_do_play){
+                                    console.log("try to get next source or next media");
+                                }
+                                
+                            });
 
                             $(wpsstm_current_media).on('loadeddata', function() {
                                 console.log('MediaElement.js event - loadeddata');
                                 wpsstm_current_source = wpsstm_player.media.getSrc();
                                 console.log(wpsstm_current_source);
+                                
                             });
 
                             $(wpsstm_current_media).on('play', function() {
@@ -121,20 +138,15 @@ var page_buttons;
 
                         },error(media) {
                             // Your action when media had an error loading
+                            //TO FIX is this required ?
                             console.log("player error");
                         }
                 });
                 
-            }else if ( wpsstm_current_media ){
-                
-                console.log("media toggle play/pause");
-
-                if ( wpsstm_current_media.paused ){
-                    wpsstm_player.play();
-                }else{
-                    wpsstm_player.pause();
-                }
-                
+            }
+            
+            if ( wpsstm_current_media ){
+                wpsstm_toggle_playpause(wpsstm_current_media);
             }
 
 
@@ -148,6 +160,24 @@ var page_buttons;
       
     });  
 })(jQuery);
+
+function wpsstm_toggle_playpause(media){
+
+    if (media.paused !== null) {
+        wpsstm_player_do_play = media.paused;
+    }else{
+        wpsstm_player_do_play = true;
+    }
+                
+    console.log("wpsstm_toggle_playpause - doplay: " + wpsstm_player_do_play);
+
+    if ( wpsstm_player_do_play ){
+        wpsstm_player.play();
+    }else{
+        wpsstm_player.pause();
+    }
+
+}
 
 function wpsstm_nav_previous(){
     console.log('wpsstm_nav_previous()');

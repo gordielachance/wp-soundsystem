@@ -5,10 +5,12 @@ a.wpsstm-play-track{
     border-bottom:none!important; //twentyfifteen fix
     
     .wpsstm-player-icon{
-        &.wpsstm-player-icon-buffering,&.wpsstm-player-icon-pause{ //pause
-            display:none;
+        display:none;
+        &.wpsstm-player-icon-play{
+            display:inline;
         }
     }
+    
     
     .wpsstm-player-icon{
             @include opacity(.25);
@@ -26,12 +28,18 @@ a.wpsstm-play-track{
         
     }
     
-    &.buffering{
-        @include opacity(.2);
-        pointer-events: none;
+    &.error{
+        .wpsstm-player-icon{
+            display:none;
+        }
+        .wpsstm-player-icon-error{
+            display:inline;
+        }
     }
     
     &.buffering{
+        @include opacity(.2);
+        pointer-events: none;
         pointer-events: none;
         
         .wpsstm-player-icon{
