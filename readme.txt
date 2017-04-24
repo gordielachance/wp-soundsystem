@@ -2,7 +2,7 @@
 Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
-Requires at least: 3.5
+Requires at least: 3.6
 Tested up to: 4.7.3
 Stable tag: trunk
 License: GPLv2 or later
@@ -38,6 +38,15 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
+
+= Music Sources =
+If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
+Just enter the link of the source and be sure you checked the 'Music Sources' category before saving it.
+
+The source can be an audio file, or a link to a music services like Youtube or Soundcloud.
+In a near future, those links will be used by an audio player to play the track; if the source URL is supported.
+
+If you don't want to use the Post Bookmarks plugin, you can filter the sources for a track by using the filter hook *wpsstm_get_track_source_urls*.
 
 = Frontend Tracklist Parser =
 You may propose a frontend tracklist parser to your visitors.  
@@ -102,6 +111,7 @@ echo $tracklist->get_tracklist_table();
 5. Playlists menu
 6. Tracklist metabox
 7. Tracklist parser metabox
+8. Music sources metabox
 
 == Changelog ==
 
