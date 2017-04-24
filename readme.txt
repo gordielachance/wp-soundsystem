@@ -39,14 +39,16 @@ NB : unlike playlists and albums, the Live Playlists tracklist entries are not s
 
 Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
 
+= Audio player =
+In a near future, an audio player will show up to play your tracks if they have supported sources, as described below.
+It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
+
 = Music Sources =
 If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
-Just enter the link of the source and be sure you checked the 'Music Sources' link category before saving it.
+Just enter the link of the source and be sure you checked the 'Music Sources' category before saving it.
 
-The source can be an audio file, or a link to a music services like Youtube or Soundcloud.
-In a near future, those links will be used by an audio player to play the track; if the source URL is supported.
-
-If you don't want to use the Post Bookmarks plugin or would like to filter the sources, use the filter hook *wpsstm_get_track_source_urls*.
+In a near future, those links will be used by the audio player (see above) to play the track - if the source URL is supported.
+We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
 = Frontend Tracklist Parser =
 You may propose a frontend tracklist parser to your visitors.  
@@ -102,6 +104,17 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
+= How can I alter the music sources for a track ? =
+If you don't want to use the Post Bookmarks plugin or if you want to filter the sources for a track, use filter hook *wpsstm_get_track_source_urls*.
+
+`<?php
+function my_filter_track_sources($urls,$track){
+    //...your code here...
+    return $urls;
+}
+add_filter('wpsstm_get_track_source_urls','my_filter_track_sources',10,2);
+?>`
+
 == Screenshots ==
 
 1. Settings page
@@ -140,4 +153,3 @@ echo $tracklist->get_tracklist_table();
 == Upgrade Notice ==
 
 == Localization ==
-
