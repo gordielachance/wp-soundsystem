@@ -152,7 +152,7 @@ class WP_SoundSytem_Core_Albums{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'editor','author','thumbnail', 'comments' ),
+            'supports' => array( 'title','editor','author','thumbnail', 'comments' ),
             //'taxonomies' => array( $this->tax_music_tag ),
             'public' => true,
             'show_ui' => true,
