@@ -242,6 +242,34 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
 
 }
 
+function wpsstm_get_source_type($url){
+    
+    //youtube
+    $pattern = '~(?:youtube.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu.be/)([^"&?/ ]{11})~i';
+    preg_match($pattern, $url, $url_matches);
+    
+    if ($url_matches){
+        return 'video/youtube';
+    }
+    
+    //soundcloud
+    $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
+    preg_match($pattern, $url, $url_matches);
+    
+    if ($url_matches){
+        return 'video/soundcloud';
+    }
+    
+    //mixcloud
+    $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
+    preg_match($pattern, $url, $url_matches);
+    
+    if ($url_matches){
+        //return 'audio/mixcloud';
+    }
+
+}
+
 function wpsstm_get_post_player_button($post_id = null){
     
     $track = new WP_SoundSystem_Track(null,$post_id);
@@ -250,19 +278,20 @@ function wpsstm_get_post_player_button($post_id = null){
     
     $provider_slugs = wpsstm_player()->providers;
     
-    $providers_attr_arr = array();
+    $sources_attr_arr = array();
     
-    foreach ((array)$provider_slugs as $provider_slug){
+    foreach( $sources as $key => $source){
         
-        foreach( $sources as $key => $source){
-            $provider = new $provider_slug();
-            if ( $provider->can_play_source_url($source) ){
-                $providers_attr_arr[$provider->slug] = $source;
-            }
-        }
+        $type = wpsstm_get_source_type($source);
+        if (!$type) continue;
+        
+        $sources_attr_arr[] = array(
+            'type'  => $type,
+            'src'   => $source
+        );
     }
     
-    $data_attr_str = htmlspecialchars( json_encode($providers_attr_arr) );
+    $data_attr_str = htmlspecialchars( json_encode($sources_attr_arr) );
     $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
     return $link;
 }

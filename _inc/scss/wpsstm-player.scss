@@ -9,6 +9,47 @@ a.wpsstm-play-track{
             display:none;
         }
     }
+    
+    .wpsstm-player-icon{
+            @include opacity(.25);
+    }
+    &:hover{
+        .wpsstm-player-icon{
+                @include opacity(1);
+        }
+    }
+    
+    &.active{
+        .wpsstm-player-icon{
+            @include opacity(.8);
+        }
+        
+    }
+    
+    &.buffering{
+        @include opacity(.2);
+        pointer-events: none;
+    }
+    
+    &.buffering{
+        pointer-events: none;
+        
+        .wpsstm-player-icon{
+            display:none;
+        }
+        .wpsstm-player-icon-buffering{
+            display:inline;
+        }
+    }
+    
+    &.playing{
+        .wpsstm-player-icon{
+            display:none;
+        }
+        .wpsstm-player-icon-pause{
+            display:inline;
+        }
+    }
 
 }
 
@@ -20,124 +61,6 @@ a.wpsstm-play-track{
     padding:1em;
     bottom: 0;
     z-index: 50;
-
-    #wpsstm-player-main{
-        
-        position:relative;
-        
-        p{
-            margin: 0;
-            &.wpsstm-player-item-title{
-                text-align:center;
-                font-size: 0.8em;
-            }
-            &.wpsstm-player-item-controls{
-                
-            }
-            &.wpsstm-player-controls{
-                position:absolute;
-                bottom:0;
-            }
-        }
-        
-        
-        .wpsstm-player-item-controls{
-            text-align:center;
-        }
-
-        
-        .wpsstm-player-progress{
-            background-color:white;
-            position:relative;
-            display:inline-block;
-            width: 50%;
-            background-color: white;
-            height:1em;
-            text-align: left;
-            .wpsstm-player-progress-bar{
-                background-color:black;
-                @include opacity(0.1);
-                position:absolute;
-                height:100%;
-                width:0%;
-            }
-        }
-        
-        .wpsstm-player-control{
-            cursor: pointer;
-            cursor: hand;
-            display:inline-block;
-            margin:0 .25em;
-            
-            .wpsstm-player-icon{
-                &.wpsstm-player-icon-buffering,&.wpsstm-player-icon-pause{ //pause
-                    display:none;
-                }
-            }
-        }
-
-    }
+    min-height:0em;
     
-    #wpsstm-player-widgets{
-        position:relative;
-        margin-bottom:1em;
-        
-        ul#wpsstm-player-tabs{
-            margin:0;
-            padding:0;
-            list-style: none;
-            position: absolute;
-            bottom: -2em;
-            li{
-                display:inline-block;
-                background-color:#DDD;
-                margin: 0 .125em;
-                padding: 0 .25em;
-                @include opacity(.5);
-                &:hover,&.ui-state-active{
-                    @include opacity(1);
-                }
-                .wpsstm-player-tab-icon{
-                    padding:0 .25em;
-                }
-            }
-        }
-
-        .wpsstm-player-widget{
-            iframe{
-                width:100%;
-                margin:0;
-                padding:0;
-                height:150px;
-                @include transition-property(height);
-                @include transition-duration(2s);
-                @include transition-timing-function(ease-in);
-            }
-            &#wpsstm-player-youtube{
-
-                iframe{
-                    height: 60px;
-                }
-            }
-            &#wpsstm-player-soundcloud{
-
-                iframe{
-                    height: 162px;
-                }
-            }
-            &#wpsstm-player-mixcloud{
-
-                iframe{
-                    height: 60px;
-                }
-            }
-        }
-        
-    }
-    
-    .post-navigation{
-        position:absolute;
-        top:0;
-        right:0;
-    }
 }
