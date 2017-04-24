@@ -11,6 +11,7 @@ class WP_SoundSystem_Track{
     public $mbid = null;
     public $duration;
     public $did_lookup = false; // TO FIX
+    protected $source_urls = null; //set 'null' so we can check later it has been populated
     
     function __construct( $args = array(), $track_id = null ){
 
@@ -266,12 +267,12 @@ class WP_SoundSystem_Track{
     */
 
     function get_source_urls(){
+        
+        if ($this->source_urls === null ){
+            
+            $links = array();
 
-        $links = array();
-
-        if ( $this->post_id ){
-
-            if ( class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
+            if ( $this->post_id && class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
                 $args = array(
                     'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
                 );
@@ -283,10 +284,11 @@ class WP_SoundSystem_Track{
 
             }
 
+            $this->source_urls = apply_filters('wpsstm_get_track_source_urls',$links,$this);
+            
         }
-
-        return apply_filters('wpsstm_get_track_source_urls',$links,$this);
-
+        
+        return $this->source_urls;
     }
 
 }
