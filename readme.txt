@@ -27,6 +27,17 @@ Create and manage tracklists easily with the Tracklist metabox.  Each entry adde
 Import a tracklist from a file or a music service like Spotify using the Tracklist Parser metabox.
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
+= Audio player =
+In a near future, an audio player will show up to play your tracks if they have supported sources, as described below.
+It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
+
+= Music Sources =
+If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
+Just enter the URL of this source and be sure you checked the 'Music Sources' category before saving it.
+
+In a near future, those links will be used by the audio player (see above) to play the track - if the source URL is supported.
+We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
+
 = Live Playlists =
 The Tracklist Parser metabox allows you to enter the URL of a remote tracklist (eg. a Last.FM profile or a radio station tracklist) and to scrape its data.
 The tracklist will be synced to the remote page, and tracks will be updated each time someone access the Live Playlist post.
@@ -38,17 +49,6 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
-
-= Audio player =
-In a near future, an audio player will show up to play your tracks if they have supported sources, as described below.
-It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
-
-= Music Sources =
-If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
-Just enter the link of the source and be sure you checked the 'Music Sources' category before saving it.
-
-In a near future, those links will be used by the audio player (see above) to play the track - if the source URL is supported.
-We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
 = Frontend Tracklist Parser =
 You may propose a frontend tracklist parser to your visitors.  
