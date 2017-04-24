@@ -285,7 +285,7 @@ class WP_SoundSystem_Track{
 
         }
 
-        return apply_filters('wpsstm_get_source_urls',$links,$this);
+        return apply_filters('wpsstm_get_track_source_urls',$links,$this);
 
     }
 
