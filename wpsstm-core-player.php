@@ -67,8 +67,67 @@ class WP_SoundSytem_Core_Player{
         wp_register_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
         
         wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser','wp-mediaelement-renderer-soundcloud'),wpsstm()->version);
-        
-        
+    }
+    
+    /*
+    Get the mime type for an URL, 
+    matching the mime types or pseudo-mime types from http://www.mediaelementjs.com/.
+    */
+    
+    function get_source_mimetype($url){
+
+        //youtube
+        $pattern = '~(?:youtube.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu.be/)([^"&?/ ]{11})~i';
+        preg_match($pattern, $url, $url_matches);
+
+        if ($url_matches){
+            return 'video/youtube';
+        }
+
+        //soundcloud
+        $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
+        preg_match($pattern, $url, $url_matches);
+
+        if ($url_matches){
+            return 'video/soundcloud';
+        }
+
+        //mixcloud
+        $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
+        preg_match($pattern, $url, $url_matches);
+
+        if ($url_matches){
+            //return 'audio/mixcloud';
+        }
+
+    }
+    
+    function can_play_source($url){
+        return (bool)$this->get_source_mimetype($url);
+    }
+    
+    function get_track_button($track){
+
+        if ( !$sources = $track->get_source_urls() ) return;
+
+        $provider_slugs = wpsstm_player()->providers;
+
+        $sources_attr_arr = array();
+
+        foreach( $sources as $key => $url){
+            
+            if ( !$this->can_play_source($url) ) continue;
+            $type = $this->get_source_mimetype($url);
+
+            $sources_attr_arr[] = array(
+                'type'  => $type,
+                'src'   => $url
+            );
+        }
+
+        $data_attr_str = htmlspecialchars( json_encode($sources_attr_arr) );
+        $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+        return $link;
     }
 }
 
