@@ -26,6 +26,8 @@ class WP_SoundSytem_Core_Player{
     }
     
     function setup_globals(){
+        $providers = $this->register_providers();
+        $this->providers = apply_filters( 'wpsstm_player_providers',$providers );
     }
     
     function setup_actions(){
@@ -34,15 +36,26 @@ class WP_SoundSytem_Core_Player{
 
     }
     
-    /**
-    Adds the provider to the list of providers and check if the class exists.
-    **/
-    
-    function register_provider($class){
-        if ( !class_exists($class) ) return;
-        $this->providers[] = $class;
+    function register_providers(){
+        
+        $providers = array();
+        
+        $slugs = array(
+            'WP_SoundSytem_Player_Provider_Native',
+            'WP_SoundSytem_Player_Provider_Youtube',
+            'WP_SoundSytem_Player_Provider_Soundcloud',
+            //'WP_SoundSytem_Player_Provider_Mixcloud'
+        );
+        //$slugs = null;
+        
+        foreach((array)$slugs as $classname){
+            if ( !class_exists($classname) ) continue;
+            $providers[] = new $classname();
+        }
+        
+        return $providers;
     }
-    
+
     function player_html(){
        ?>
         <div id="wpsstm-bottom-player"></div>
@@ -62,17 +75,97 @@ class WP_SoundSytem_Core_Player{
         
         //sourcechooser plugin
         wp_register_script('mediaelement-plugin-source-chooser','https://cdnjs.cloudflare.com/ajax/libs/mediaelement-plugins/2.1.1/source-chooser/source-chooser.js',array('wp-mediaelement'), '2.1.1');
-        
-        //soundcloud renderer
-        wp_register_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
-        
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser','wp-mediaelement-renderer-soundcloud'),wpsstm()->version);
+
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser'),wpsstm()->version);
+    }
+
+    function get_track_button($track){
+
+        if ( !$sources = $track->get_source_urls() ) return;
+
+        $provider_slugs = wpsstm_player()->providers;
+
+        $sources_attr_arr = array();
+
+        foreach( $sources as $key => $url){
+            
+            foreach( (array)$this->providers as $provider ){
+
+                if ( !$source_type = $provider->get_source_mimetype($url) ) continue; //cannot play source
+                
+                $sources_attr_arr[] = array(
+                    'type'  => $source_type,
+                    'src'   => esc_url($url)
+                );
+
+            }
+
+        }
+
+        if ( $sources_attr_arr ) {
+            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS ); //https://wordpress.stackexchange.com/a/162945/70449
+
+            $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+            return $link;
+        }
+
+    }
+}
+
+abstract class WP_SoundSytem_Player_Provider{
+    
+    var $name;
+    var $slug;
+    var $icon;
+    
+    function __construct(){
+        add_action( 'wp_enqueue_scripts',array($this,'provider_scripts_styles') );
     }
     
+    /*
+    Scripts/Styles to load
+    */
+    public function provider_scripts_styles(){
+        /* override if any style or script is required to run this provider, eg. a MediaElement.js renderer */
+    }
+
     /*
     Get the mime type for an URL, 
     matching the mime types or pseudo-mime types from http://www.mediaelementjs.com/.
     */
+    
+    abstract function get_source_mimetype($url);
+    
+}
+
+class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider{
+    
+    var $name = 'Wordpress';
+    var $slug = 'wp';
+    var $icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+    
+    function get_source_mimetype($url){
+        
+        //check file is supported
+        $filetype = wp_check_filetype($url);
+        if ( !$ext = $filetype['ext'] ) return;
+        
+        $audio_extensions = wp_get_audio_extensions();
+        if ( !in_array($ext,$audio_extensions) ) return;
+        
+        //return mime
+        return $filetype['type'];
+
+    }
+
+    
+}
+
+class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provider{
+    
+    var $name = 'Youtube';
+    var $slug = 'youtube';
+    var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
     function get_source_mimetype($url){
 
@@ -84,6 +177,24 @@ class WP_SoundSytem_Core_Player{
             return 'video/youtube';
         }
 
+    }
+
+    
+}
+
+class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Provider{
+    
+    var $name = 'Soundcloud';
+    var $slug = 'soundcloud';
+    var $icon = '<i class="fa fa-soundcloud" aria-hidden="true"></i>';
+    
+    function provider_scripts_styles(){
+        //soundcloud renderer
+        wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
+    }
+    
+    function get_source_mimetype($url){
+
         //soundcloud
         $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
         preg_match($pattern, $url, $url_matches);
@@ -91,44 +202,30 @@ class WP_SoundSytem_Core_Player{
         if ($url_matches){
             return 'video/soundcloud';
         }
+        
+    }
+    
+    
+}
+
+class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provider{
+    
+    var $name = 'Mixcloud';
+    var $slug = 'mixcloud';
+    var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
+    
+    function get_source_mimetype($url){
 
         //mixcloud
         $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
         preg_match($pattern, $url, $url_matches);
 
         if ($url_matches){
-            //return 'audio/mixcloud';
+            return 'audio/mixcloud';
         }
 
     }
-    
-    function can_play_source($url){
-        return (bool)$this->get_source_mimetype($url);
-    }
-    
-    function get_track_button($track){
 
-        if ( !$sources = $track->get_source_urls() ) return;
-
-        $provider_slugs = wpsstm_player()->providers;
-
-        $sources_attr_arr = array();
-
-        foreach( $sources as $key => $url){
-            
-            if ( !$this->can_play_source($url) ) continue;
-            $type = $this->get_source_mimetype($url);
-
-            $sources_attr_arr[] = array(
-                'type'  => $type,
-                'src'   => $url
-            );
-        }
-
-        $data_attr_str = htmlspecialchars( json_encode($sources_attr_arr) );
-        $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
-        return $link;
-    }
 }
 
 function wpsstm_player() {
@@ -136,3 +233,4 @@ function wpsstm_player() {
 }
 
 wpsstm_player();
+

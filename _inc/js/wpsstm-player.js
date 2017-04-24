@@ -52,8 +52,9 @@ var page_buttons;
                 
                 $(sources).each(function(i, source_attr) {
                     var source_el = $('<source />');
+                    var source_url = source_attr.src; //TO FIX problems with special chars here
                     source_el.attr({
-                        src:    source_attr.src,
+                        src:    source_url,
                         type:   source_attr.type
                     });
                     media.append(source_el);
@@ -78,16 +79,12 @@ var page_buttons;
                             console.log("player ready");
                             wpsstm_current_media = media;
                             wpsstm_player = player;
+                            wpsstm_current_media.play();
 
                             $(wpsstm_current_media).on('loadeddata', function() {
                                 console.log('MediaElement.js event - loadeddata');
                                 wpsstm_current_source = wpsstm_player.media.getSrc();
                                 console.log(wpsstm_current_source);
-                            });
-                        
-                            $(wpsstm_current_media).on('canplay', function() {
-                                console.log('MediaElement.js event - canplay');
-                                wpsstm_current_media.play();
                             });
 
                             $(wpsstm_current_media).on('play', function() {
