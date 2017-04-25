@@ -33,10 +33,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         'convert_to_encoding'       => 'ISO-8859-1'
     );
     
-    var $remote_get_options = array(
-        'User-Agent'        => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML => like Gecko) Iron/31.0.1700.0 Chrome/31.0.1700.0'
-    );
-    
     public function __construct(){
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
@@ -132,10 +128,9 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         //url
         $url = $this->redirect_url = $this->get_remote_url();
         if ( is_wp_error($url) ) return $url;
-        $this->url = $url;
 
         //response
-        $response = $this->get_remote_content($url);
+        $response = $this->get_remote_response($url);
         if ( is_wp_error($response) ) return $response;
         $this->response = $response;
         
@@ -180,12 +175,21 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
     
-    protected function get_remote_content($url){
+    /*
+    Headers used for the remote request.  (Could be overriden for presets).
+    */
+    
+    protected function get_request_headers(){
+        return array(
+            'User-Agent'        => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML => like Gecko) Iron/31.0.1700.0 Chrome/31.0.1700.0'
+        );
+    }
+    
+    protected function get_remote_response($url){
 
         $error = $remote_body = $source_content = null;
 
-        $remote_args = apply_filters('spiff_get_response_args',$this->remote_get_options,$url );
-        $response = wp_remote_get( $url, $remote_args );
+        $response = wp_remote_get( $url, $this->get_request_headers() );
 
         if ( !is_wp_error($response) ){
 
