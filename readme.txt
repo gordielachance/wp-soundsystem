@@ -45,7 +45,7 @@ We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see below).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
 
-NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
+NB : unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 = Tracklist Parser Metabox =
 
@@ -133,6 +133,22 @@ add_filter('wpsstm_get_track_source_urls','my_filter_track_sources',10,2);
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.5 =
+
+* live playlists disabled by default
+* ajax : reorder tracklist tracks with ajax only
+* include scraper metabox even if live playlists are disabled
+* fixed bug when deleting subtracks
+* populate track sources only once
+* Add title support for albums, artists & tracks (wasn't showing the 'View Post' or permalink on the post page)
+* tracklist table : add 'data-tracks-count' attribute
+
+* WIP : audio player
+* Show a play button in tracklist tables
+* Embed a tracklist for single tracks too
+
+* WIP : frontend scraper
 
 = 0.9.4 =
 * improved presets - much cleaner code here.
