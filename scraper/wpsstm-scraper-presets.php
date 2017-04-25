@@ -450,6 +450,63 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
 
 }
 
+class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_Scraper_Preset{
+    
+    var $slug = 'soundsgood';
+
+    var $name = null;
+    var $description = null;
+    var $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
+    var $redirect_url= 'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
+    var $variables = array(
+        'soundsgood-playlist-slug' => null,
+    );
+
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'root > element'),
+            'track_artist'      => array('path'=>'artist'),
+            'track_title'       => array('path'=>'title')
+        )
+    );
+    
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Soundsgood playlists','wpsstm');
+
+    } 
+
+    function can_use_preset(){
+        return true;
+    }
+    
+    function can_use_preset_frontend(){
+        return true;
+    }
+    
+    function get_request_headers(){
+        $headers = parent::get_request_headers();
+        
+        $headers['Origin'] = 'https://play.soundsgood.co';
+        $headers['Referer'] = $this->url;
+        
+        if ( $client_id = $this->get_client_id() ){
+            $headers['client'] = $client_id;
+            $this->set_variable_value('soundsgood-client-id',$client_id);
+        }
+
+        return $headers;
+    }
+
+    //WIP to fix
+    function get_client_id(){
+
+        return 'XXX';
+
+    }
+}
+
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
     
@@ -540,6 +597,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_BBC_Playlist();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
+    //$presets[] = new WP_SoundSytem_Playlist_Scraper_Soundsgood();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_RTBF();
     
