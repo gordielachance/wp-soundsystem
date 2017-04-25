@@ -23,10 +23,6 @@ class WP_SoundSytem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
-        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
