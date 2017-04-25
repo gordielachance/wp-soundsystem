@@ -24,35 +24,41 @@ For example, when creating an album post, you can load its tracklist from the Mu
 = Playlists =
 Create and manage tracklists easily with the Tracklist metabox.  Each entry added creates a new Track post.
 
-Import a tracklist from a file or a music service like Spotify using the Tracklist Parser metabox.
+Import a tracklist from a file or a music service like Spotify using the Tracklist Parser Metabox (see below).
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
 = Audio player =
-In a near future, an audio player will show up to play your tracks if they have supported sources, as described below.
+In the future (not implemented yet), an audio player will show up to play your tracks if they have supported sources, as described below.
 It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
 
 = Music Sources =
 If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
 Just enter the URL of this source and be sure you checked the 'Music Sources' category before saving it.
 
-In a near future, those links will be used by the audio player (see above) to play the track - if the source URL is supported.
+Those links will be used by the audio player (see above) to play the track - if the source URL is supported.
 We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
 = Live Playlists =
-The Tracklist Parser metabox allows you to enter the URL of a remote tracklist (eg. a Last.FM profile or a radio station tracklist) and to scrape its data.
-The tracklist will be synced to the remote page, and tracks will be updated each time someone access the Live Playlist post.
+
+(disabled by default, you can enable them by acessing the plugin's settings page)
+
+Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see below).
+The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
+
+NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
+
+= Tracklist Parser Metabox =
+
+Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
 
 For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-NB : unlike playlists and albums, the Live Playlists tracklist entries are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
-
 Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
 
-= Frontend Tracklist Parser =
-You may propose a frontend tracklist parser to your visitors.  
-They will be able to use it to get a remote tracklist; which could be useful for backups or to load it in a software like [Tomahawk](https://www.tomahawk-player.org/).
+With Live Playlists enabled, you may also propose a Frontend Tracklist Parser to your visitors. 
+They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
 Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
 = Shortcodes =
