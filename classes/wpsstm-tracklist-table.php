@@ -557,7 +557,7 @@ class WP_SoundSytem_TracksList_Table{
                 $this->track_index++;
                 return $this->track_index;
             case 'trackitem_play_bt':
-                return wpsstm_get_post_player_button($item->post_id);
+                return wpsstm_player()->get_track_button($item);
             case 'trackitem_track':
                 $artist = $item->artist;
                 $track = $item->title;

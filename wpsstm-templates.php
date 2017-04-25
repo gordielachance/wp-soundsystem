@@ -242,27 +242,3 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
 
 }
 
-function wpsstm_get_post_player_button($post_id = null){
-    
-    $track = new WP_SoundSystem_Track(null,$post_id);
-
-    if ( !$sources = $track->get_source_urls() ) return;
-    
-    $provider_slugs = wpsstm_player()->providers;
-    
-    $providers_attr_arr = array();
-    
-    foreach ((array)$provider_slugs as $provider_slug){
-        
-        foreach( $sources as $key => $source){
-            $provider = new $provider_slug();
-            if ( $provider->can_play_source_url($source) ){
-                $providers_attr_arr[$provider->slug] = $source;
-            }
-        }
-    }
-    
-    $data_attr_str = htmlspecialchars( json_encode($providers_attr_arr) );
-    $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
-    return $link;
-}
