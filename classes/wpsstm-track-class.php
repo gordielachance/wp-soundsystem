@@ -128,10 +128,9 @@ class WP_SoundSystem_Track{
 
         if ( count($query->posts) ){
             $post_id = $query->posts[0];
+            wpsstm()->debug_log( array('post_id'=>$post_id,'meta_query'=>json_encode($meta_query)), "WP_SoundSystem_Track::get_existing_track_id()"); 
         }
-        
-        wpsstm()->debug_log( array('post_id'=>$post_id,'meta_query'=>json_encode($meta_query)), "WP_SoundSystem_Track::get_existing_track_id()"); 
-        
+
         return $post_id;
         
     }
