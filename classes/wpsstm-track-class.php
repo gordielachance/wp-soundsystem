@@ -198,10 +198,10 @@ class WP_SoundSystem_Track{
     
     function delete_track($force_delete = false){
         $deleted = wp_delete_post( $this->post_id, $force_delete );
-        if($deleted !== false){
-            wpsstm()->debug_log( array('post_id',$this->post_id,'force_delete'=>$force_delete), "WP_SoundSystem_Track::delete_track()"); 
-            unset($this->tracks[$key]);
-        }
+        if($deleted === false) return false;
+        
+        wpsstm()->debug_log( array('post_id',$this->post_id,'force_delete'=>$force_delete), "WP_SoundSystem_Track::delete_track()"); 
+        return $deleted;
     }
 
     

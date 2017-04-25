@@ -124,7 +124,9 @@ class WP_SoundSytem_Tracklist{
     
     function delete_subtracks(){
         foreach($this->tracks as $key=>$track){
-            $track->delete_track();
+            if ( $track->delete_track() ){
+                unset($this->tracks[$key]);
+            }
         }
     }
     
