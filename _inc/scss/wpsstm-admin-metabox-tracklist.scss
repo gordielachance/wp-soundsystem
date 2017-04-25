@@ -1,9 +1,9 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
 
-#wpsstm-tracklist{
+.postbox#wpsstm-tracklist{
     
-    #list-tracks-section{
+    #wpsstm-subtracks-list{
 
         .loading{
             pointer-events: none;

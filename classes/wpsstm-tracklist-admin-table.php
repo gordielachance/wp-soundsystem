@@ -142,7 +142,6 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             
             $actions = array();
 
-            $actions['reorder'] = __('Reorder tracks','wpsstm');
             $actions['remove']  = __('Remove tracks','wpsstm');
             $actions['save']    = __('Save tracks','wpsstm');
             $actions['delete']  = __('Delete tracks','wpsstm');
@@ -250,16 +249,12 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     $input_cb = sprintf( '<input type="checkbox" name="%s" value="on"/>',
                                         $this->get_field_name('selected')
                                        );
-                    $input_subtrack_parent = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                                        $this->get_field_name('subtrack_parent'),
-                                        $item->subtrack_parent
-                                       );
                     $input_subtrack_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
                                         $this->get_field_name('subtrack_id'),
                                         $item->subtrack_id
                                        );
 
-                    return $input_cb . $input_subtrack_parent . $input_subtrack_id;
+                    return $input_cb . $input_subtrack_id;
                 break;
 
                 case 'reorder':

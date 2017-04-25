@@ -13,10 +13,7 @@ function wpsstm_ajax_artist_lookup(){
 
 }
 
-add_action('wp_ajax_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
-add_action('wp_ajax_nopriv_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
-
-function wpsstm_ajax_save_tracklist_row(){
+function wpsstm_ajax_tracklist_save_row(){
     $result = array(
         'input'     => $_REQUEST,
         'tracks'    => null,
@@ -62,9 +59,42 @@ function wpsstm_ajax_save_tracklist_row(){
 
 }
 
-add_action('wp_ajax_wpsstm_save_tracklist_row', 'wpsstm_ajax_save_tracklist_row');
-add_action('wp_ajax_nopriv_wpsstm_save_tracklist_row', 'wpsstm_ajax_save_tracklist_row');
+function wpsstm_ajax_tracklist_update_order(){
+    $result = array(
+        'message'   => null,
+        'success'   => false,
+        'input'     => $_POST
+    );
+    
+    $result['post_id']  =           $post_id =          ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+    $result['subtracks_order']   =  $subtracks_order =  ( isset($_POST['subtracks_order']) ) ? $_POST['subtracks_order'] : null;
 
+    if ( $subtracks_order && $post_id ){
+        
+        //populate a tracklist with the selected tracks
+        $tracklist = new WP_SoundSytem_Tracklist($post_id);
+        $tracklist->load_subtracks();
+        $result['tracklist'] = $tracklist;
+
+        $result['success'] = $tracklist->save_subtracks_order($subtracks_order);
+        
+    }
+    
+    header('Content-type: application/json');
+    echo json_encode($result);
+    die(); 
+}
+
+//artist
+add_action('wp_ajax_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
+add_action('wp_ajax_nopriv_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
+
+//tracklist
+add_action('wp_ajax_wpsstm_tracklist_save_row', 'wpsstm_ajax_tracklist_save_row');
+add_action('wp_ajax_nopriv_wpsstm_tracklist_save_row', 'wpsstm_ajax_tracklist_save_row');
+
+add_action('wp_ajax_wpsstm_tracklist_update_order', 'wpsstm_ajax_tracklist_update_order');
+add_action('wp_ajax_nopriv_wpsstm_tracklist_update_order', 'wpsstm_ajax_tracklist_update_order');
 
 
 ?>

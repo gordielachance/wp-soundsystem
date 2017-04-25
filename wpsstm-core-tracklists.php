@@ -230,13 +230,15 @@ class WP_SoundSytem_Core_Tracklists{
     
     function metabox_tracklist_content( $post ){
         ?>
-        <div id="list-tracks-section">
+        <div id="wpsstm-subtracks-list" data-wpsstm-tracklist-id="<?php echo $post->ID;?>">
+            
             <?php
         
                 $tracklist = wpsstm_get_post_tracklist($post->ID);
                 echo $tracklist->get_tracklist_table(true);
             ?>
         </div>
+
         <?php
 
         wp_nonce_field( 'wpsstm_tracklist_meta_box', 'wpsstm_tracklist_meta_box_nonce' );
@@ -312,9 +314,6 @@ class WP_SoundSytem_Core_Tracklists{
         
         //do tracks actions
         switch($bulk_action){
-            case 'reorder':
-                $tracklist->save_subtracks_order();
-            break;
             case 'save':
                 $tracklist->save_subtracks();
             break;

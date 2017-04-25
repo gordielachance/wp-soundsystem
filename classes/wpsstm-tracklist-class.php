@@ -110,10 +110,20 @@ class WP_SoundSytem_Tracklist{
         }
     }
     
-    function save_subtracks_order(){
-        foreach($this->tracks as $key=>$track){
+    function save_subtracks_order($ordered_ids = null){
+        
+        foreach( $this->tracks as $track ){
+            
+            if ($ordered_ids){
+                $new_order = array_search($track->subtrack_id, $ordered_ids);
+                $track->subtrack_order = $new_order + 1; //avoid null
+            }
+
             $track->save_subtrack_order();
         }
+        
+        return true;
+        
     }
     
     function remove_subtracks(){
