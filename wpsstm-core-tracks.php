@@ -6,6 +6,8 @@ class WP_SoundSytem_Core_Tracks{
     public $qvar_track = 'lookup_track';
     public $qvar_subtracks_hide = 'hide_subtracks';
     public $mbtype = 'recording'; //musicbrainz type, for lookups
+    
+    public $subtracks_hide = true; //default hide subtracks in track listings
 
     /**
     * @var The one true Instance
@@ -23,11 +25,16 @@ class WP_SoundSytem_Core_Tracks{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
+        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
-
     
+    function setup_globals(){
+        if ( $subtracks_hide_db = get_option('wpsstm_subtracks_hide') ){
+            $this->subtracks_hide = ($subtracks_hide_db == 'on') ? true : false;
+        }
+    }
+
     function setup_actions(){
 
         add_action( 'init', array($this,'register_post_type_track' ));
@@ -46,8 +53,64 @@ class WP_SoundSytem_Core_Tracks{
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
         //subtracks
+        add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
+        add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
+    }
+    
+    /*
+    Display a notice (and link) to toggle view subtracks
+    */
+    
+    function toggle_subtracks_notice(){
+        $screen = get_current_screen();
+        if ( $screen->post_type != wpsstm()->post_type_track ) return;
+        if ( $screen->base != 'edit' ) return;
+        
+        $toggle_value = ($this->subtracks_hide) ? 'off' : 'on';
+        
+        $link = admin_url('edit.php');
+        $post_status = ( isset($_REQUEST['post_status']) ) ? $_REQUEST['post_status'] : null;
+        
+        if ( $post_status ){
+            $link = add_query_arg(array('post_status'=>$post_status),$link);
+        }
+        
+        $link = add_query_arg(array('post_type'=>wpsstm()->post_type_track,'wpsstm_subtracks_hide'=>$toggle_value),$link);
+        
+
+
+        $notice_link = sprintf( '<a href="%s">%s</a>',$link,__('here','wpsstm') );
+        
+        $notice = null;
+        
+        if ($this->subtracks_hide){
+            $notice = sprintf(__('Click %s if you want to include tracks belonging to albums and playlists in this listing.','wpsstm'),$notice_link);
+        }else{
+            $notice = sprintf(__('Click %s if you want to exclude tracks belonging to albums and playlists of this listing.','wpsstm'),$notice_link);
+        }
+
+        printf('<div class="notice notice-warning"><p>%s</p></div>',$notice);
+
+    }
+    
+    /*
+    Toggle view subtracks : store option then redirect
+    */
+    
+    function toggle_subtracks_store_option(){
+        $screen = get_current_screen();
+        if ( $screen->post_type != wpsstm()->post_type_track ) return;
+        if ( $screen->base != 'edit' ) return;
+        if ( !isset($_REQUEST['wpsstm_subtracks_hide']) ) return;
+        
+        $value = $_REQUEST['wpsstm_subtracks_hide'];
+
+        update_option( 'wpsstm_subtracks_hide', $value );
+        
+        $this->subtracks_hide = ($value == 'on') ? true : false;
+
     }
     
     function default_exclude_subtracks( $query ) {
@@ -62,10 +125,7 @@ class WP_SoundSytem_Core_Tracks{
         if ( $query->get($this->qvar_subtracks_hide) ) return $query;
         
         //option enabled ?
-        $hide_subtracks = wpsstm()->get_options('hide_subtracks');
-        $hide_subtracks = ($hide_subtracks == 'on') ? true : false;
-        
-        if ($hide_subtracks){
+        if ($this->subtracks_hide){
             $query->set($this->qvar_subtracks_hide,true);
         }
 

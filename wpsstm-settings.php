@@ -105,13 +105,7 @@ class WP_SoundSytem_Settings {
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
             $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
             $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
-            
-            /* 
-            Tracklists 
-            */
-            
-            $new_input['hide_subtracks'] = ( isset($input['hide_subtracks']) ) ? 'on' : 'off';
-            
+
             /*
             Live playlists
             */
@@ -202,14 +196,6 @@ class WP_SoundSytem_Settings {
             __('Tracklists','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'hide_subtracks', 
-            __('Hide subtracks','wpsstm'), 
-            array( $this, 'hide_subtracks_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_settings'
         );
         
         //live playlists
@@ -330,17 +316,6 @@ class WP_SoundSytem_Settings {
             __("Try to guess MusicBrainz ID if for items if user left the MusicBrainz ID field empty.","wpsstm")
         );
         echo '  <small> ' . sprintf(__('Can be ignored by setting %s for input value.','wpsstm'),'<code>-</code>') . '</small>';
-    }
-
-    function hide_subtracks_callback(){
-        $option = wpsstm()->get_options('hide_subtracks');
-        
-        printf(
-            '<input type="checkbox" name="%s[hide_subtracks]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("By default, hide tracks that belongs to an album or a playlist from the tracks listing","wpsstm")
-        );
     }
 
     function live_playlists_enabled_callback(){

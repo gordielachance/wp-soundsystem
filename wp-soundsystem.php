@@ -75,7 +75,6 @@ class WP_SoundSytem {
             'musicbrainz_enabled'               => 'on',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
-            'hide_subtracks'                    => 'on',
             'live_playlists_enabled'            => 'off',
             'frontend_scraper_page_id'          => null,
             'live_playlists_cache_min'          => '10',
