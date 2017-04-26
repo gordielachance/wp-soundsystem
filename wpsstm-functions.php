@@ -23,39 +23,52 @@ function wpsstm_get_array_value($keys = null, $array){
     return false;
 }
 
-/**
-Tracks are referenced in playlists using a track post meta.
-The little trick here is that the playlist ID is contained in the post meta name (eg. wpsstm_tracklist_19).
-This is kind of a hack but avoid us to use a specific table for playlist tracks.
-The meta value will be either the track order (for regular playlists) or a timestamp (for live playlists)
-
-!!! $playlist_id value could be set to 'only' or 'exclude', so do NOT check for numeric value or for existing post here.
-**/
-
-function wpsstm_get_tracklist_entry_metakey($tracklist_id){
-    if ( ctype_digit($tracklist_id) ){
-        return sprintf('wpsstm_tracklist_%s',$tracklist_id);
-    }
-}
-
-
-
 /*
-Get IDs of the parent tracklists (albums / playlists / live playlists) of a track.
+Get the IDs of every tracks appearing in a tracklist (playlist or album)
 */
 
-function wpsstm_get_tracklist_ids_for_track($post_id){
+function wpsstm_get_all_subtrack_ids(){
     global $wpdb;
-    $query = $wpdb->prepare( "SELECT meta_key FROM $wpdb->postmeta WHERE `post_id`='%s' AND `meta_key` LIKE '%s'", $post_id, 'wpsstm_tracklist_%' );
-	$meta_keys = $wpdb->get_col( $query );
+    $query = $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE `meta_key` = '%s'", 'wpsstm_subtrack_ids' );
+    $metas = $wpdb->get_col( $query );
     
-    $ids = array();
-    
-    foreach ((array)$meta_keys as $meta_key){
-        $str_split = explode('wpsstm_tracklist_',$meta_key);
-        if( isset($str_split[1]) ) $ids[] = $str_split[1];
-    }
+    $subtrack_ids = array();
 
+    foreach($metas as $meta){
+        $ids = maybe_unserialize($meta);
+        $subtrack_ids = array_merge($subtrack_ids,$ids);
+    }
+    
+    $subtrack_ids = array_unique($subtrack_ids);
+    
+    return $subtrack_ids;
+    
+}
+
+/*
+Get IDs of the parent tracklists (albums / playlists) for a subtrack.
+*/
+
+function wpsstm_get_subtrack_parent_ids($post_id){
+    global $wpdb;
+
+    $meta_query = array();
+    $meta_query[] = array(
+        'key'     => 'wpsstm_subtrack_ids',
+        'value'   => serialize( $post_id ), //https://wordpress.stackexchange.com/a/224987/70449
+        'compare' => 'LIKE'
+    );
+    
+    $args = array(
+        'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
+        'post_status'       => 'any',
+        'posts_per_page'    => -1,
+        'fields'            => 'ids',
+        'meta_query'        => $meta_query
+    );
+
+    $query = new WP_Query( $args );
+    $ids = $query->posts;
     return $ids;
 }
 /**

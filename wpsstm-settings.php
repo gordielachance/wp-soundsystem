@@ -206,7 +206,7 @@ class WP_SoundSytem_Settings {
         
         add_settings_field(
             'hide_subtracks', 
-            __('Hide tracklist tracks','wpsstm'), 
+            __('Hide subtracks','wpsstm'), 
             array( $this, 'hide_subtracks_callback' ), 
             'wpsstm-settings-page', 
             'tracklist_settings'
@@ -339,7 +339,7 @@ class WP_SoundSytem_Settings {
             '<input type="checkbox" name="%s[hide_subtracks]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Hide tracks that belongs to an album or a playlist from the backend tracks listing","wpsstm")
+            __("By default, hide tracks that belongs to an album or a playlist from the tracks listing","wpsstm")
         );
     }
 

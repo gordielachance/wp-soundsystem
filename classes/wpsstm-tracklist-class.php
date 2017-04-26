@@ -38,12 +38,37 @@ class WP_SoundSytem_Tracklist{
 
     function get_subtracks_ids(){
         global $wpdb;
+        
+        $ordered_ids = get_post_meta($this->post_id,'wpsstm_subtrack_ids',true);
+        $ordered_ids = array_unique($ordered_ids);
+        
+        if ( empty($ordered_ids) ) return;
 
-        if ( $metakey = wpsstm_get_tracklist_entry_metakey($this->post_id) ){
-            $query = $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE `meta_key` = '%s' ORDER BY $wpdb->postmeta.meta_value ASC", $metakey );
-            return $wpdb->get_col( $query );
+        //validate those IDs, we must be sure they are tracks.
+        $args = array(
+            'post_type'         => array(wpsstm()->post_type_track),
+            'post_status'       => 'any',
+            'posts_per_page'    => -1,
+            'fields'            => 'ids',
+            'post__in'          => $ordered_ids
+        );
+
+        $query = new WP_Query( $args );
+        $post_ids = $query->posts;
+        
+        foreach($ordered_ids as $key=>$ordered_id){
+            if (!in_array($ordered_id,$post_ids)) unset($ordered_ids[$key]);
         }
 
+        return $ordered_ids;
+        
+    }
+    
+    function set_subtrack_ids($ordered_ids){
+
+        $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
+        $ordered_ids = array_unique($ordered_ids);
+        return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
     }
     
     function add($tracks){
@@ -57,8 +82,7 @@ class WP_SoundSytem_Tracklist{
             
             if ( !is_a($track, 'WP_SoundSystem_Subtrack') ){
                 if ( is_array($track) ){
-                    $subtrack_id = ( isset($track['subtrack_id']) ) ? $track['subtrack_id'] : null;
-                    $track = new WP_SoundSystem_Subtrack($track,$subtrack_id,$this->post_id);
+                    $track = new WP_SoundSystem_Subtrack($track,$this->post_id);
                 }
             }
             
@@ -74,25 +98,15 @@ class WP_SoundSytem_Tracklist{
     function validate_tracks($strict = true){
         
         //array unique
-        $this->tracks = array_unique($this->tracks, SORT_REGULAR);
+        $pending_tracks = array_unique($this->tracks, SORT_REGULAR);
+        $valid_tracks = array();
         
-        if ($strict){
-            //keep only tracks having artist AND title
-            $this->tracks = array_filter(
-                $this->tracks,
-                function ($e) {
-                    return ($e->artist && $e->title);
-                }
-            );
-        }else{
-            //keep only tracks having artist OR title (Wizard)
-            $this->tracks = array_filter(
-                $this->tracks,
-                function ($e) {
-                    return ($e->artist || $e->title);
-                }
-            );
+        foreach($pending_tracks as $track){
+            if ( !$track->validate_track($strict) ) continue;
+            $valid_tracks[] = $track;
         }
+        
+        $this->tracks = $valid_tracks;
 
     }
 
@@ -110,22 +124,6 @@ class WP_SoundSytem_Tracklist{
         foreach($this->tracks as $key=>$track){
             $saved = $track->save_track();
         }
-    }
-    
-    function save_subtracks_order($ordered_ids = null){
-        
-        foreach( $this->tracks as $track ){
-            
-            if ($ordered_ids){
-                $new_order = array_search($track->subtrack_id, $ordered_ids);
-                $track->subtrack_order = $new_order + 1; //avoid null
-            }
-
-            $track->save_subtrack_order();
-        }
-        
-        return true;
-        
     }
     
     function remove_subtracks(){

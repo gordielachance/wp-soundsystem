@@ -50,7 +50,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
             //append blank row
             if ( $this->can_manage_rows ){ 
-                $blank_track = new WP_SoundSystem_Subtrack(null,null,$post->ID);
+                $blank_track = new WP_SoundSystem_Subtrack(null,$post->ID);
                 $blank_track->row_classes = array('metabox-table-row-new','metabox-table-row-edit');
                 $this->single_row($blank_track);
             }

@@ -4,6 +4,7 @@ class WP_SoundSytem_Core_Tracks{
 
     public $metakey = '_wpsstm_track';
     public $qvar_track = 'lookup_track';
+    public $qvar_subtracks_hide = 'hide_subtracks';
     public $mbtype = 'recording'; //musicbrainz type, for lookups
 
     /**
@@ -43,7 +44,58 @@ class WP_SoundSytem_Core_Tracks{
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
+        
+        //subtracks
+        add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
+        add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
+    }
+    
+    function default_exclude_subtracks( $query ) {
+        
+        //only for main query
+        if ( !$query->is_main_query() ) return $query;
+        
+        //only for tracks
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        
+        //already defined
+        if ( $query->get($this->qvar_subtracks_hide) ) return $query;
+        
+        //option enabled ?
+        $hide_subtracks = wpsstm()->get_options('hide_subtracks');
+        $hide_subtracks = ($hide_subtracks == 'on') ? true : false;
+        
+        if ($hide_subtracks){
+            $query->set($this->qvar_subtracks_hide,true);
+        }
 
+        return $query;
+    }
+    
+    
+    /**
+    If query var 'hide_subtracks' is set,
+    Filter tracks queries so tracks belonging to tracklists (albums/playlists/live playlists)) are not listed.
+    TO FIX should update the post count too. see wp_count_posts
+    **/
+    
+    function exclude_subtracks( $query ) {
+        
+        //only for main query
+        if ( !$query->is_main_query() ) return $query;
+        
+        //only for tracks
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        
+        //hide subtracks ?
+        
+        if ( $query->get($this->qvar_subtracks_hide) ){
+            if ( $subtrack_ids = wpsstm_get_all_subtrack_ids() ) {
+                $query->set('post__not_in',$subtrack_ids);
+            }
+        }
+
+        return $query;
     }
     
     function column_track_register($defaults) {
@@ -190,6 +242,7 @@ class WP_SoundSytem_Core_Tracks{
     
     function add_query_var_track( $qvars ) {
         $qvars[] = $this->qvar_track;
+        $qvars[] = $this->qvar_subtracks_hide;
         return $qvars;
     }
     

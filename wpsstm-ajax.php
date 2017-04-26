@@ -76,7 +76,7 @@ function wpsstm_ajax_tracklist_update_order(){
         $tracklist->load_subtracks();
         $result['tracklist'] = $tracklist;
 
-        $result['success'] = $tracklist->save_subtracks_order($subtracks_order);
+        $result['success'] = $tracklist->set_subtrack_ids($subtracks_order);
         
     }
     

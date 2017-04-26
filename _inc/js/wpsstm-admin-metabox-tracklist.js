@@ -65,7 +65,7 @@ jQuery(function($){
             event.preventDefault();
             var row = $(this).parents('tr');
             row.remove();
-            reorder_tracks();
+            wpsstm_tracklist_reorder();
         });
 
         wrapper.find('.metabox-table-row-new').hide();
@@ -131,7 +131,7 @@ jQuery(function($){
             $('#post-bkmarks-bulk-action-selector-top').val("save");
             
             //reorder
-            reorder_tracks();
+            wpsstm_tracklist_reorder();
 
         });
 
@@ -160,7 +160,7 @@ function wpsstm_tracklist_order_update(){
     var wrapper = jQuery('#wpsstm-subtracks-list');
     var all_rows = wrapper.find( '#the-list tr' );
     var new_order = [];
-    var subtrack_parent_id = 0; //TO FIX
+    var tracklist_id = 0; //TO FIX
     
     jQuery.each( all_rows, function( key, value ) {
         
@@ -189,6 +189,7 @@ function wpsstm_tracklist_order_update(){
             table.addClass('loading');
         },
         success: function(data){
+            console.log(data);
             if (data.success === false) {
                 console.log(data);
             }

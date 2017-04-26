@@ -134,6 +134,10 @@ add_filter('wpsstm_get_track_source_urls','my_filter_track_sources',10,2);
 
 == Changelog ==
 
+= 0.9.6 =
+* Changed how subtracks are stored : now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.
+* 'Hide subtracks' filter works - still some work to do on this
+
 = 0.9.5 =
 
 * live playlists disabled by default

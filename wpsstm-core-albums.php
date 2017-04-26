@@ -42,6 +42,7 @@ class WP_SoundSytem_Core_Albums{
     
     function column_album_register($defaults) {
         global $post;
+        global $wp_query;
 
         $post_types = array(
             wpsstm()->post_type_album,
@@ -52,7 +53,12 @@ class WP_SoundSytem_Core_Albums{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            $after['album'] = __('Album','wpsstm');
+
+            if ( !$wp_query->get(wpsstm_tracks()->qvar_subtracks_hide) ){
+                $after['album'] = __('Album','wpsstm');
+            }
+            
+            
         }
         
         return array_merge($before,$defaults,$after);
@@ -64,11 +70,11 @@ class WP_SoundSytem_Core_Albums{
         switch ( $column ) {
             case 'album':
 
-                $tracklist_ids = wpsstm_get_tracklist_ids_for_track($post_id);
+                $tracklist_ids = wpsstm_get_subtrack_parent_ids($post_id);
                 $links = array();
                 
                 foreach((array)$tracklist_ids as $tracklist_id){
-                    
+
                     $tracklist_post_type = get_post_type($tracklist_id);
                     if ( $tracklist_post_type != wpsstm()->post_type_album ) continue;
                     

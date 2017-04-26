@@ -7,7 +7,6 @@ Handle posts that have a tracklist, like albums and playlists.
 class WP_SoundSytem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
-    public $qvar_tracklist = 'tracklist';
     public $allowed_post_types = array();
     
     /**
@@ -59,11 +58,6 @@ class WP_SoundSytem_Core_Tracklists{
         add_filter('manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
 
-        add_action( 'delete_post', array($this,'delete_subtrack_metas') );
-
-        //add_filter( 'pre_get_posts', array($this,'exclude_subtracks'), 9 );
-        add_filter( 'pre_get_posts', array($this,'filter_subtracks_by_tracklist_id') );
-        
         add_action( 'post_submitbox_start', array($this,'publish_metabox_xspf_link') );
         
         //scraper
@@ -326,131 +320,6 @@ class WP_SoundSytem_Core_Tracklists{
 
     }
 
-    /**
-    If option 'hide_subtracks' is set,
-    Filter tracks queries so tracks belonging to tracklists (albums/playlists/live playlists)) are not listed.
-    **/
-    
-    function exclude_subtracks( $query ) {
-        
-        //only for main queries
-        if ( !$query->is_main_query() ) return $query;
-
-        //only for tracks archive
-        if ( !is_post_type_archive( wpsstm()->post_type_track ) ) return $query;
-
-        //check option value
-        $default_hide_subtracks = wpsstm()->get_options('hide_subtracks');
-        $default_hide_subtracks = ($default_hide_subtracks == 'on') ? true : false;
-        
-        if ($default_hide_subtracks) {
-
-            if ( !$query->get($this->qvar_tracklist) ){ //is not yet set
-                $query->set($this->qvar_tracklist, 'exclude');
-            }
-
-        }
-
-        return $query;
-    }
-    
-    /*
-    if query var 'tracklist' is set, add a meta query clause to the current query.
-    value should be a post ID
-    OR 'only' or 'exclude' --> see filter_subtracks_where().
-    */
-    
-    function filter_subtracks_by_tracklist_id( $query ){
-
-        //check post type
-        $post_type = $query->get('post_type');
-        if ( $post_type != wpsstm()->post_type_track ) return $query;
-         
-        if ( !$tracklist_id = $query->get($this->qvar_tracklist) ) return $query;
-        
-        //Get original meta query
-        $meta_query = $query->get('meta_query'); 
-        
-        if ( ctype_digit($tracklist_id) ) { //is a tracklist ID
-            
-            if ( $meta_key = wpsstm_get_tracklist_entry_metakey($tracklist_id) ){
-                $meta_query[] = array(
-                    'key'       => $meta_key,
-                    'compare'   => 'EXISTS'
-                );
-            }
-            
-        }else{
-            switch ($tracklist_id){
-                    
-                case 'exclude':
-                    $meta_query[] = array(
-                        'key'       => 'wpsstm_tracklist_exclude'
-                    );
-                break;
-                case 'only':
-                    $meta_query[] = array(
-                        'key'       => 'wpsstm_tracklist_only'
-                    );
-                break;
-                    
-            }
-            
-            add_filter( 'posts_where', array($this,'filter_subtracks_where') );
-            
-        }
-
-        $query->set('meta_query',$meta_query);
-
-        return $query;
-    }
-    
-    /*
-    special cases : if query var 'tracklist' is set to 'only' or 'exclude', edit the where clause.
-    */
-    function filter_subtracks_where( $where ) {
-        global $wp_query;
-        
-        //only for main queries
-        if ( !$wp_query->is_main_query() ) return $where;
-        
-        if ( !is_post_type_archive( wpsstm()->post_type_track ) ) return $where;
-
-        $subtracks_mode = $wp_query->get($this->qvar_tracklist);
-        if ( !in_array($subtracks_mode,array('only','exclude')) ) return $where;
-
-        switch ($subtracks_mode){
-            case 'only':
-                $where = str_replace( "meta_key = 'wpsstm_tracklist_only'", "meta_key LIKE 'wpsstm_tracklist_%'", $where );
-            break;
-            case 'exclude':
-                $where = str_replace( "meta_key = 'wpsstm_tracklist_exclude'", "meta_key NOT LIKE 'wpsstm_tracklist_%'", $where );  
-
-            break;
-        }
-
-        remove_filter( 'posts_where', array($this,'filter_subtracks_where') );
-
-        return $where;
-        
-    }
-
-    /*
-    When a tracklist is deleted (not moved to trash), delete subtracks metas related to this tracklist.
-    */
-    
-    function delete_subtrack_metas($post_id){
-        global $wpdb;
-        
-        $post_type = get_post_type($post_id);
-        if ( !in_array($post_type,$this->allowed_post_types) ) return;
-        
-        if ( $metakey = wpsstm_get_tracklist_entry_metakey($post_id) ){
-            $deleted = $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $metakey ) );
-            wpsstm()->debug_log(array('post_id'=>$post_id,'deleted'=>$deleted),"WP_SoundSytem_Core_Tracklists::delete_subtrack_metas()"); 
-        }
-    }
-    
     function scraper_wizard_init(){
         $post_id = (isset($_REQUEST['post'])) ? $_REQUEST['post'] : null;
         if (!$post_id) return;
