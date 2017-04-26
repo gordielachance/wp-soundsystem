@@ -39,9 +39,11 @@ class WP_SoundSytem_Tracklist{
     function get_subtracks_ids(){
         global $wpdb;
 
-        $metakey = wpsstm_get_tracklist_entry_metakey($this->post_id);
-        $query = $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE `meta_key` = '%s' ORDER BY $wpdb->postmeta.meta_value ASC", $metakey );
-        return $wpdb->get_col( $query );
+        if ( $metakey = wpsstm_get_tracklist_entry_metakey($this->post_id) ){
+            $query = $wpdb->prepare( "SELECT meta_id FROM $wpdb->postmeta WHERE `meta_key` = '%s' ORDER BY $wpdb->postmeta.meta_value ASC", $metakey );
+            return $wpdb->get_col( $query );
+        }
+
     }
     
     function add($tracks){

@@ -173,7 +173,7 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
         if ( !in_array($ext,$audio_extensions) ) return;
 
         return array(
-            'type'  => $filetype['type'],
+            'type'  => sprintf('audio/%s',$ext), //$filetype['type'],
             'src'   => $url
         );
         

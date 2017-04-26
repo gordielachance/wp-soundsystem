@@ -33,7 +33,9 @@ The meta value will be either the track order (for regular playlists) or a times
 **/
 
 function wpsstm_get_tracklist_entry_metakey($tracklist_id){
-    return sprintf('wpsstm_tracklist_%s',$tracklist_id);
+    if ( ctype_digit($tracklist_id) ){
+        return sprintf('wpsstm_tracklist_%s',$tracklist_id);
+    }
 }
 
 

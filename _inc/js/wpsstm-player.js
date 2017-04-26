@@ -116,6 +116,19 @@ var page_buttons;
                                 console.log("do_play status: "+wpsstm_player_do_play);
                                 if (wpsstm_player_do_play){
                                     console.log("try to get next source or next media");
+                                    
+                                    //https://github.com/mediaelement/mediaelement/issues/2179#issuecomment-297090067
+                                    var mediaFiles = node.childNodes;
+                                    for (var i = 0, total = mediaFiles.length; i < total; i++) {
+                                        if (mediaFiles[i].nodeType !== Node.TEXT_NODE &&
+                                            mediaFiles[i].tagName.toLowerCase() === 'source' && media.getSrc() !== mediaFiles[i].getAttribute('src')) {
+                                            media.setSrc(mediaFiles[i].getAttribute('src'));
+                                            media.load();
+                                            media.play();
+                                            break;
+                                        }
+                                    }
+                                    
                                 }
                                 
                             });
@@ -130,7 +143,7 @@ var page_buttons;
                             $(wpsstm_current_media).on('play', function() {
                                 console.log('MediaElement.js event - play');
                                 $(wpsstm_current_bt).addClass('playing');
-                                $(wpsstm_current_bt).removeClass('buffering ended');
+                                $(wpsstm_current_bt).removeClass('error buffering ended');
                             });
 
                             $(wpsstm_current_media).on('pause', function() {

@@ -61,9 +61,8 @@ class WP_SoundSytem_Core_Tracklists{
 
         add_action( 'delete_post', array($this,'delete_subtrack_metas') );
 
-        //add_filter( 'pre_get_posts', array($this,'exclude_subtracks_from_backend_tracks_listing'), 9 );
+        //add_filter( 'pre_get_posts', array($this,'exclude_subtracks'), 9 );
         add_filter( 'pre_get_posts', array($this,'filter_subtracks_by_tracklist_id') );
-        add_filter( 'posts_where', array($this,'filter_subtracks_where') );
         
         add_action( 'post_submitbox_start', array($this,'publish_metabox_xspf_link') );
         
@@ -332,22 +331,24 @@ class WP_SoundSytem_Core_Tracklists{
     Filter tracks queries so tracks belonging to tracklists (albums/playlists/live playlists)) are not listed.
     **/
     
-    function exclude_subtracks_from_backend_tracks_listing( $query ) {
+    function exclude_subtracks( $query ) {
         
-        if ( !is_admin() ) return $query;
-        $screen = get_current_screen();
-        if ($screen->id != 'edit-'.wpsstm()->post_type_track) return $query;
+        //only for main queries
+        if ( !$query->is_main_query() ) return $query;
 
-        $post_type = $query->get('post_type');
-        if ( !in_array($post_type,$allowed_post_types) ) return $query;
+        //only for tracks archive
+        if ( !is_post_type_archive( wpsstm()->post_type_track ) ) return $query;
+
+        //check option value
+        $default_hide_subtracks = wpsstm()->get_options('hide_subtracks');
+        $default_hide_subtracks = ($default_hide_subtracks == 'on') ? true : false;
         
-        //check option
-        $hide_subtracks = wpsstm()->get_options('hide_subtracks');
-        $hide_subtracks = ($hide_subtracks == 'on') ? true : false;
-        if (!$hide_subtracks) return $query;
-        
-        if ( !$query->get($this->qvar_tracklist) ){ //is not yet set
-            $query->set($this->qvar_tracklist, 'exclude');
+        if ($default_hide_subtracks) {
+
+            if ( !$query->get($this->qvar_tracklist) ){ //is not yet set
+                $query->set($this->qvar_tracklist, 'exclude');
+            }
+
         }
 
         return $query;
@@ -360,25 +361,44 @@ class WP_SoundSytem_Core_Tracklists{
     */
     
     function filter_subtracks_by_tracklist_id( $query ){
+
         //check post type
-        $allowed_post_types = array(
-            wpsstm()->post_type_track
-        );
-        
         $post_type = $query->get('post_type');
-        if ( !in_array($post_type,$allowed_post_types) ) return $query;
-                    
+        if ( $post_type != wpsstm()->post_type_track ) return $query;
+         
         if ( !$tracklist_id = $query->get($this->qvar_tracklist) ) return $query;
-
-        $meta_key = wpsstm_get_tracklist_entry_metakey($tracklist_id);
-
+        
         //Get original meta query
         $meta_query = $query->get('meta_query'); 
         
-        $meta_query[] = array(
-            'key'       => $meta_key,
-            'compare'   => 'EXISTS'
-        );
+        if ( ctype_digit($tracklist_id) ) { //is a tracklist ID
+            
+            if ( $meta_key = wpsstm_get_tracklist_entry_metakey($tracklist_id) ){
+                $meta_query[] = array(
+                    'key'       => $meta_key,
+                    'compare'   => 'EXISTS'
+                );
+            }
+            
+        }else{
+            switch ($tracklist_id){
+                    
+                case 'exclude':
+                    $meta_query[] = array(
+                        'key'       => 'wpsstm_tracklist_exclude'
+                    );
+                break;
+                case 'only':
+                    $meta_query[] = array(
+                        'key'       => 'wpsstm_tracklist_only'
+                    );
+                break;
+                    
+            }
+            
+            add_filter( 'posts_where', array($this,'filter_subtracks_where') );
+            
+        }
 
         $query->set('meta_query',$meta_query);
 
@@ -391,12 +411,25 @@ class WP_SoundSytem_Core_Tracklists{
     function filter_subtracks_where( $where ) {
         global $wp_query;
         
-        //only child tracks
-        if ( $wp_query->get($this->qvar_tracklist) == 'only' ){
-            $where = str_replace( "meta_key = 'wpsstm_tracklist_only'", "meta_key LIKE 'wpsstm_tracklist_%'", $where );
-        }elseif ( $wp_query->get($this->qvar_tracklist) == 'exclude' ){
-            $where = str_replace( "meta_key = 'wpsstm_tracklist_exclude'", "meta_key NOT LIKE 'wpsstm_tracklist_%'", $where );
+        //only for main queries
+        if ( !$wp_query->is_main_query() ) return $where;
+        
+        if ( !is_post_type_archive( wpsstm()->post_type_track ) ) return $where;
+
+        $subtracks_mode = $wp_query->get($this->qvar_tracklist);
+        if ( !in_array($subtracks_mode,array('only','exclude')) ) return $where;
+
+        switch ($subtracks_mode){
+            case 'only':
+                $where = str_replace( "meta_key = 'wpsstm_tracklist_only'", "meta_key LIKE 'wpsstm_tracklist_%'", $where );
+            break;
+            case 'exclude':
+                $where = str_replace( "meta_key = 'wpsstm_tracklist_exclude'", "meta_key NOT LIKE 'wpsstm_tracklist_%'", $where );  
+
+            break;
         }
+
+        remove_filter( 'posts_where', array($this,'filter_subtracks_where') );
 
         return $where;
         
@@ -412,11 +445,10 @@ class WP_SoundSytem_Core_Tracklists{
         $post_type = get_post_type($post_id);
         if ( !in_array($post_type,$this->allowed_post_types) ) return;
         
-        $metakey = wpsstm_get_tracklist_entry_metakey($post_id);
-        
-        $deleted = $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $metakey ) );
-        wpsstm()->debug_log(array('post_id'=>$post_id,'deleted'=>$deleted),"WP_SoundSytem_Core_Tracklists::delete_subtrack_metas()"); 
-        
+        if ( $metakey = wpsstm_get_tracklist_entry_metakey($post_id) ){
+            $deleted = $wpdb->delete( $wpdb->postmeta, array( 'meta_key' => $metakey ) );
+            wpsstm()->debug_log(array('post_id'=>$post_id,'deleted'=>$deleted),"WP_SoundSytem_Core_Tracklists::delete_subtrack_metas()"); 
+        }
     }
     
     function scraper_wizard_init(){

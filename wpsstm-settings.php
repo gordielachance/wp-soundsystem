@@ -40,7 +40,7 @@ class WP_SoundSytem_Settings {
 
     }
     
-    function register_admin_submenus(){ //TO FIX - this function should be under wpsstm-item.php instead of each class , but then $post_type_slug is not found.
+    function register_admin_submenus(){ //TO FIX - this function should be under each type of item ?
         
         $menu_slug = WP_SoundSytem_Settings::$menu_slug;
         

@@ -395,8 +395,7 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
             
             if ($success) return $this->subtrack_id;
             
-        }else{
-            $subtrack_metakey = wpsstm_get_tracklist_entry_metakey($this->subtrack_parent);
+        }elseif( $subtrack_metakey = wpsstm_get_tracklist_entry_metakey($this->subtrack_parent) ){
             $new_meta_id = add_post_meta($this->post_id, $subtrack_metakey, $this->subtrack_order);
             if ($new_meta_id){
                 $this->subtrack_id = $new_meta_id;
