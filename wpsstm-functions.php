@@ -27,7 +27,7 @@ function wpsstm_get_array_value($keys = null, $array){
 Get the IDs of every tracks appearing in a tracklist (playlist or album)
 */
 
-function wpsstm_get_all_subtrack_ids(){
+function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
     global $wpdb;
     $query = $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE `meta_key` = '%s'", 'wpsstm_subtrack_ids' );
     $metas = $wpdb->get_col( $query );
@@ -41,6 +41,26 @@ function wpsstm_get_all_subtrack_ids(){
     
     $subtrack_ids = array_unique($subtrack_ids);
     
+    if ($db_check){
+        $default_args = array(
+            'post_type'         => wpsstm()->post_type_track,
+            'post_status'       => 'any',
+            'posts_per_page'    => -1,
+            'fields'            => 'ids',
+            'post__in'          => $subtrack_ids
+        );
+
+        if ($args){
+            $args = wp_parse_args($args,$default_args);
+        }
+
+        $query = new WP_Query( $args );
+        if ( $db_ids = $query->posts ){
+            $subtrack_ids = array_intersect($subtrack_ids, $db_ids);
+        }
+        
+    }
+    
     return $subtrack_ids;
     
 }
@@ -49,7 +69,7 @@ function wpsstm_get_all_subtrack_ids(){
 Get IDs of the parent tracklists (albums / playlists) for a subtrack.
 */
 
-function wpsstm_get_subtrack_parent_ids($post_id){
+function wpsstm_get_subtrack_parent_ids($post_id, $args = null){
     global $wpdb;
 
     $meta_query = array();
@@ -59,13 +79,17 @@ function wpsstm_get_subtrack_parent_ids($post_id){
         'compare' => 'LIKE'
     );
     
-    $args = array(
+    $default_args = array(
         'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
         'post_status'       => 'any',
         'posts_per_page'    => -1,
         'fields'            => 'ids',
         'meta_query'        => $meta_query
     );
+    
+    if ($args){
+        $args = wp_parse_args($args,$default_args);
+    }
 
     $query = new WP_Query( $args );
     $ids = $query->posts;
