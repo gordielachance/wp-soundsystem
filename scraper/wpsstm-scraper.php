@@ -82,7 +82,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //set feed url
         $this->feed_url = $feed_url;
         $this->id = md5( $this->feed_url ); //unique ID based on URL
-        $this->transient_name_cache = 'wpsstm_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
+        $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
 
         //try to get cache first
         $this->datas = $this->datas_cache = $this->get_cache();
