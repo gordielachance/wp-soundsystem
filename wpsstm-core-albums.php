@@ -129,15 +129,22 @@ class WP_SoundSytem_Core_Albums{
         $has_cap = current_user_can('edit_post', $post_id);
         if ( $is_autosave || $is_revision || !$has_cap ) return;
 
-        $title = wpsstm_get_post_album($post_id);
-        if ( $title==get_the_title($post_id) ) return; //does not need update
+        $album = wpsstm_get_post_album($post_id);
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$title,$album) );
+        
+        //TO FIX
+        //title stored in the DB converts some characters like the quotes,
+        //so condition does not work here.
+        //fix this !
+        
+        if ( $post_title==get_the_title($post_id) ) return; //does not need update
 
         //log
-        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$title),"update_title_album()"); 
+        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_album()"); 
 
         $args = array(
             'ID'            => $post_id,
-            'post_title'    => $title
+            'post_title'    => $post_title
         );
 
         remove_action( 'save_post',array($this,'update_title_album'), 99 ); //avoid infinite loop - ! hook priorities
