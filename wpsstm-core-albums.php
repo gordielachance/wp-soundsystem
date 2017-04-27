@@ -129,8 +129,10 @@ class WP_SoundSytem_Core_Albums{
         $has_cap = current_user_can('edit_post', $post_id);
         if ( $is_autosave || $is_revision || !$has_cap ) return;
 
+        $artist = wpsstm_get_post_artist($post_id);
         $album = wpsstm_get_post_album($post_id);
-        $post_title = sanitize_text_field( sprintf('%s - "%s"',$title,$album) );
+        
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$album) );
         
         //TO FIX
         //title stored in the DB converts some characters like the quotes,

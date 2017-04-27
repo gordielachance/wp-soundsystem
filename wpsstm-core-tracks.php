@@ -226,7 +226,7 @@ class WP_SoundSytem_Core_Tracks{
 
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
-        $post_title = sanitize_text_field( sprintf('%s - "%s"',$title,$artist) );
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$title) );
         
         //TO FIX
         //title stored in the DB converts some characters like the quotes,
