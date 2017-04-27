@@ -22,7 +22,7 @@ It makes it easier to identify the items, and loads various metadatas from [Musi
 For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
 
 = Playlists =
-Create and manage tracklists easily with the Tracklist metabox.  Each entry added creates a new Track post.
+Create and manage tracklists easily with the Tracklist metabox.
 
 Import a tracklist from a file or a music service like Spotify using the Tracklist Parser Metabox (see below).
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
@@ -44,8 +44,6 @@ We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
 Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see below).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
-
-NB : unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 = Tracklist Parser Metabox =
 
@@ -120,6 +118,13 @@ function my_filter_track_sources($urls,$track){
 }
 add_filter('wpsstm_get_track_source_urls','my_filter_track_sources',10,2);
 ?>`
+
+= Standalone tracks vs Subtracks vs Live Playlist tracks ? =
+
+Playlist and Albums tracks are saved as Track posts.  
+The playlist / album will have a metakey *wpsstm_subtrack_ids* that contains an array of track IDs.  It is what we call "subtracks" in the plugin's code.
+
+Unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
 
 == Screenshots ==
 
