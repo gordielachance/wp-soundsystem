@@ -38,9 +38,9 @@ class WP_SoundSytem_Tracklist{
 
     function get_subtracks_ids(){
         global $wpdb;
-        
+
         $ordered_ids = get_post_meta($this->post_id,'wpsstm_subtrack_ids',true);
-        $ordered_ids = array_unique($ordered_ids);
+        $ordered_ids = array_unique((array)$ordered_ids);
         
         if ( empty($ordered_ids) ) return;
 
