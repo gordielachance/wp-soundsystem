@@ -122,9 +122,9 @@ add_filter('wpsstm_get_track_source_urls','my_filter_track_sources',10,2);
 = Standalone tracks vs Subtracks vs Live Playlist tracks ? =
 
 Playlist and Albums tracks are saved as Track posts.  
-The playlist / album will have a metakey *wpsstm_subtrack_ids* that contains an array of track IDs.  It is what we call "subtracks" in the plugin's code.
+The playlist / album will have a post meta *wpsstm_subtrack_ids* that contains an array of ordered track IDs.  It is what we call "subtracks" in the plugin's code.
 
-Unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a post meta, to avoid creating too much posts over and over.
+Unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a [transient](https://codex.wordpress.org/Transients_API), to avoid creating too much posts over and over.  The name of that transient starts with *wpsstm_ltracks_*.
 
 == Screenshots ==
 
