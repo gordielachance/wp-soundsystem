@@ -25,19 +25,7 @@
         console.log('loading');
     });
     */
-      
-    // MusicBrainz Metabox
-    $('#wpsstm-mbdata-fill').click(function(event){
-        var container = $(this).closest('#wpsstm-mbdata-fill-container');
-        if ( !container.hasClass('is-opened') ){
-            event.preventDefault();
-            container.addClass('is-opened');
-        }
-    });
-      
-      
 
-    
   });  
 })(jQuery);
 

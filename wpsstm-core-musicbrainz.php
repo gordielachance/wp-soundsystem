@@ -249,31 +249,7 @@ class WP_SoundSytem_Core_MusicBrainz {
                 if ( self::can_lookup($post->ID) ){
                     submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-mbdata-refresh');
                     submit_button( __('Switch entry','wpsstm'), null, 'wpsstm-mbdata-switch');
-                    
-                    //fill
-                    ?>
-                    <div id="wpsstm-mbdata-fill-container">
-                        <div id="wpsstm-mbdata-fill-options">
-                            <p>
-                                <input name="wpsstm-mbdata-fill-options['artist']" id="wpsstm-mbdata-fill-option-artist" type="checkbox" />
-                                <label for="wpsstm-mbdata-fill-option-artist"><?php _e('Set artist','wpsstm');?></label>
-                            </p>
-                            <p>
-                                <input name="wpsstm-mbdata-fill-options['album']" id="wpsstm-mbdata-fill-option-album" type="checkbox" />
-                                <label for="wpsstm-mbdata-fill-option-album"><?php _e('Set album','wpsstm');?></label>
-                            </p>
-                            <p>
-                                <input name="wpsstm-mbdata-fill-options['track']" id="wpsstm-mbdata-fill-option-track" type="checkbox" />
-                                <label for="wpsstm-mbdata-fill-option-track"><?php _e('Set track title','wpsstm');?></label>
-                            </p>
-                            <p>
-                                <input name="wpsstm-mbdata-fill-options['autotitle']" id="wpsstm-mbdata-fill-option-autotitle" type="checkbox" />
-                                <label for="wpsstm-mbdata-fill-option-autotitle"><?php _e('Guess post title','wpsstm');?></label>
-                            </p>
-                        </div>
-                        <?php submit_button( __('Fill with data','wpsstm'), null, 'wpsstm-mbdata-fill');?>
-                    </div>
-                    <?php
+                    submit_button( __('Fill with data','wpsstm'), null, 'wpsstm-mbdata-fill');
                 }
                 ?>
             </div>

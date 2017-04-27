@@ -90,19 +90,6 @@ input[type="checkbox"].checkbox-status{
                 margin: .5em 0;
                 padding: 0;
             }
-            
-            #wpsstm-mbdata-fill-container{
-                
-                #wpsstm-mbdata-fill-options{
-                    display:none;
-                }
-                &.is-opened{
-                    border:1px solid #ddd; 
-                    #wpsstm-mbdata-fill-options{
-                        display:inherit;
-                    }
-                }
-            }
         }
         
     }
