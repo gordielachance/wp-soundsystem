@@ -95,16 +95,21 @@
   height: auto;
 }
 
-/* line 6, ../scss/wpsstm-admin.scss */
+/* line 7, ../scss/wpsstm-admin.scss */
+body.post-type-wpsstm_artist #titlewrap #title, body.post-type-wpsstm_release #titlewrap #title, body.post-type-wpsstm_track #titlewrap #title {
+  display: none;
+}
+
+/* line 15, ../scss/wpsstm-admin.scss */
 input[type="checkbox"].checkbox-status:not(checked) ~ .watch-checkbox {
   display: none;
 }
-/* line 10, ../scss/wpsstm-admin.scss */
+/* line 19, ../scss/wpsstm-admin.scss */
 input[type="checkbox"].checkbox-status:checked ~ .watch-checkbox {
   display: inherit;
 }
 
-/* line 17, ../scss/wpsstm-admin.scss */
+/* line 26, ../scss/wpsstm-admin.scss */
 .wpsstm-fullwidth {
   padding: 3px 8px;
   font-size: 1.7em;
@@ -116,84 +121,84 @@ input[type="checkbox"].checkbox-status:checked ~ .watch-checkbox {
   background-color: #fff;
 }
 
-/* line 31, ../scss/wpsstm-admin.scss */
+/* line 40, ../scss/wpsstm-admin.scss */
 .wp-list-table .mbz-id {
   color: silver;
   font-size: 0.8em;
 }
-/* line 35, ../scss/wpsstm-admin.scss */
+/* line 44, ../scss/wpsstm-admin.scss */
 .wp-list-table .mbz-disambiguation {
   font-style: italic;
   font-size: 0.9em;
 }
 
-/* line 42, ../scss/wpsstm-admin.scss */
+/* line 51, ../scss/wpsstm-admin.scss */
 #mbid-value, #mbid-do-lookup {
   text-align: center;
 }
 
-/* line 47, ../scss/wpsstm-admin.scss */
+/* line 56, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm-artist, .postbox#wpsstm-track, .postbox#wpsstm-album, .postbox#wpsstm-mbid {
   background: none;
   border: none;
   box-shadow: none;
 }
-/* line 52, ../scss/wpsstm-admin.scss */
+/* line 61, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm-artist > h2, .postbox#wpsstm-track > h2, .postbox#wpsstm-album > h2, .postbox#wpsstm-mbid > h2 {
   display: none;
 }
-/* line 55, ../scss/wpsstm-admin.scss */
+/* line 64, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm-artist > button.handlediv, .postbox#wpsstm-track > button.handlediv, .postbox#wpsstm-album > button.handlediv, .postbox#wpsstm-mbid > button.handlediv {
   display: none;
 }
-/* line 67, ../scss/wpsstm-admin.scss */
+/* line 76, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mbdata ul li span {
   font-weight: bold;
 }
-/* line 69, ../scss/wpsstm-admin.scss */
+/* line 78, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mbdata ul li span:after {
   content: " ";
 }
-/* line 77, ../scss/wpsstm-admin.scss */
+/* line 86, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions {
   margin-top: 1em;
   position: relative;
   text-align: center;
 }
-/* line 82, ../scss/wpsstm-admin.scss */
+/* line 91, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions a {
   margin: .5em auto;
   display: block;
   max-width: 75%;
 }
-/* line 88, ../scss/wpsstm-admin.scss */
+/* line 97, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions p.submit {
   text-align: center;
   margin: .5em 0;
   padding: 0;
 }
-/* line 104, ../scss/wpsstm-admin.scss */
+/* line 113, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mb_entries > span {
   font-weight: bold;
 }
-/* line 108, ../scss/wpsstm-admin.scss */
+/* line 117, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mb_entries #wpsstm-mb-section-data {
   display: none;
 }
-/* line 115, ../scss/wpsstm-admin.scss */
+/* line 124, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table {
   border: none;
 }
-/* line 117, ../scss/wpsstm-admin.scss */
+/* line 126, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table .column-score {
   width: 10%;
 }
-/* line 129, ../scss/wpsstm-admin.scss */
+/* line 138, ../scss/wpsstm-admin.scss */
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
 }
 
-/* line 141, ../scss/wpsstm-admin.scss */
+/* line 150, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar {
   position: relative;
   display: block;
@@ -203,55 +208,55 @@ input[type="checkbox"].checkbox-status:checked ~ .watch-checkbox {
   height: 1.3em;
   line-height: 1.3em;
 }
-/* line 150, ../scss/wpsstm-admin.scss */
+/* line 159, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill {
   display: block;
   height: 100%;
   text-align: left;
   position: relative;
 }
-/* line 155, ../scss/wpsstm-admin.scss */
+/* line 164, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color {
   width: 100%;
   height: 100%;
   position: absolute;
 }
-/* line 159, ../scss/wpsstm-admin.scss */
+/* line 168, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color.wpsstm-pc-bar-fill-yellow {
   background-color: #FFE000;
 }
-/* line 162, ../scss/wpsstm-admin.scss */
+/* line 171, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color.wpsstm-pc-bar-fill-red {
   background-color: red;
 }
-/* line 167, ../scss/wpsstm-admin.scss */
+/* line 176, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text {
   margin: auto;
   display: block;
   text-align: center;
 }
-/* line 171, ../scss/wpsstm-admin.scss */
+/* line 180, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text i.fa {
   padding: 0 0.5em;
 }
-/* line 178, ../scss/wpsstm-admin.scss */
+/* line 187, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar.color-light .wpsstm-pc-bar-text {
   color: white;
 }
-/* line 183, ../scss/wpsstm-admin.scss */
+/* line 192, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-fill, .wpsstm-pc-bar.empty .wpsstm-pc-bar-fill {
   width: 100% !important;
 }
-/* line 187, ../scss/wpsstm-admin.scss */
+/* line 196, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-fill-color, .wpsstm-pc-bar.empty .wpsstm-pc-bar-fill-color {
   display: none;
 }
-/* line 190, ../scss/wpsstm-admin.scss */
+/* line 199, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-text, .wpsstm-pc-bar.empty .wpsstm-pc-bar-text {
   color: inherit;
   font-size: 0.8em;
 }
-/* line 200, ../scss/wpsstm-admin.scss */
+/* line 209, ../scss/wpsstm-admin.scss */
 .wpsstm-pc-bar.incomplete .wpsstm-pc-bar-text {
   text-align: right;
 }
