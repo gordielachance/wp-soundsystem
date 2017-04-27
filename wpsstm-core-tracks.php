@@ -41,7 +41,6 @@ class WP_SoundSytem_Core_Tracks{
         add_filter( 'query_vars', array($this,'add_query_var_track') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_track') );
         add_action( 'save_post', array($this,'update_title_track'), 99);
-        add_action( 'mb_filled_post_with_mbdatas', array($this,'update_title_track') );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_save'), 5); 
@@ -216,7 +215,7 @@ class WP_SoundSytem_Core_Tracks{
     
     function update_title_track( $post_id ) {
         
-        //only for albums
+        //only for tracks
         if (get_post_type($post_id) != wpsstm()->post_type_track) return;
 
         //check capabilities
@@ -226,14 +225,22 @@ class WP_SoundSytem_Core_Tracks{
         if ( $is_autosave || $is_revision || !$has_cap ) return;
 
         $title = wpsstm_get_post_track($post_id);
-        if ( $title==get_the_title($post_id) ) return; //does not need update
+        $artist = wpsstm_get_post_artist($post_id);
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$title,$artist) );
+        
+        //TO FIX
+        //title stored in the DB converts some characters like the quotes,
+        //so condition does not work here.
+        //fix this !
+        
+        if ( $post_title==get_the_title($post_id) ) return; //does not need update
 
         //log
-        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$title),"update_title_track()"); 
+        wpsstm()->debug_log(array('post_id'=>$post_id,'post_title'=>$post_title),"update_title_track()"); 
 
         $args = array(
             'ID'            => $post_id,
-            'post_title'    => $title
+            'post_title'    => $post_title
         );
 
         remove_action( 'save_post',array($this,'update_title_track'), 99 ); //avoid infinite loop - ! hook priorities

@@ -31,7 +31,6 @@ class WP_SoundSytem_Core_Albums{
         add_filter( 'query_vars', array($this,'add_query_var_album') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_album') );
         add_action( 'save_post', array($this,'update_title_album'), 99);
-        add_action( 'mb_filled_post_with_mbdatas', array($this,'update_title_album') );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
         add_action( 'save_post', array($this,'metabox_album_save'), 5); 

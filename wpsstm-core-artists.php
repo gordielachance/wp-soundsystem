@@ -32,7 +32,6 @@ class WP_SoundSytem_Core_Artists{
         add_filter( 'query_vars', array($this,'add_query_var_artist') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_artist') );
         add_action( 'save_post', array($this,'update_title_artist'), 99);
-        add_action( 'mb_filled_post_with_mbdatas', array($this,'update_title_artist') );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
         add_action( 'save_post', array($this,'metabox_artist_save'), 5); 

@@ -45,7 +45,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         add_action( 'save_post', array($this,'metabox_mbdata_save'), 7 ); //requires MBID to be set so be careful to hooks priorities
         
         add_action( 'wpsstm_updated_mbid', array($this,'update_mb_datas'), 9 );
-        
+        add_action( 'wpsstm_updated_mbdatas', array($this,'fill_post_with_mbdatas'), 9);
         
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_mbid') );
         
@@ -475,16 +475,11 @@ class WP_SoundSytem_Core_MusicBrainz {
             }else{
                 update_post_meta( $post_id, $this->mb_data_meta_name, $data );
                 wpsstm()->debug_log(json_encode($data),"WP_SoundSytem_Core_MusicBrainz::update_mb_datas()" ); 
-
-                //TO FIX TO CHECK
-                //fill post with MusicBrainz datas
-                //$this->fill_post_with_mbdatas($post_id,$data);
             }
             
         }
         
         do_action('wpsstm_updated_mbdatas',$post_id);
-
 
     }
     
@@ -527,9 +522,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         if ( $mbid = wpsstm_get_post_mbid($post_id) ){
 
-            $mbdatas = wpsstm_get_post_mbdatas($post_id);
-
-            if ( $mbdatas ){
+            if ( $mbdatas = wpsstm_get_post_mbdatas($post_id) ){
 
                 switch ($mbdatas_action){
                     case 'refresh':
@@ -540,7 +533,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
                     break;
                     case 'fill':
-                        $this->fill_post_with_mbdatas($post_id,$mbdatas,true);
+                        $this->fill_post_with_mbdatas($post_id);
                     break;
                     case 'switch':
                         $this->is_switch_entries = true;
@@ -571,24 +564,51 @@ class WP_SoundSytem_Core_MusicBrainz {
     Fill current post with various informations from MusicBrainz
     **/
 
-    function fill_post_with_mbdatas($post_id,$mbdatas,$force=false){
+    function fill_post_with_mbdatas($post_id,$items=null){
         $post_type = get_post_type($post_id);
-        
-        wpsstm()->debug_log( array( 'post_id'=>$post_id,'post_type'=>get_post_type($post_id) ), "fill_post_with_mbdatas()"); 
+        $mbdatas = wpsstm_get_post_mbdatas($post_id);
 
-        $this->fill_post_artist_with_mbdatas($post_id,$mbdatas,$force);
-        $this->fill_post_album_with_mbdatas($post_id,$mbdatas,$force);
-        $this->fill_post_track_with_mbdatas($post_id,$mbdatas,$force);
-        $this->fill_post_tracklist_with_mbdatas($post_id,$mbdatas,$force);
+        //what to update ?
+        if (!$items){
+            $items = array();
+            
+            if ( !$artist = wpsstm_get_post_artist($post_id) ) $items[] = 'artist';
+            if ( !$album = wpsstm_get_post_album($post_id) ) $items[] = 'album';
+            if ( !$track = wpsstm_get_post_track($post_id) ) $items[] = 'track';
+
+            $tracklist = new WP_SoundSytem_Tracklist($post_id);
+            $tracklist->load_subtracks();
+            if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
+            
+        }
         
+        //can we update ?
+        wpsstm()->debug_log( array( 'post_id'=>$post_id,'post_type'=>get_post_type($post_id),'potential_items'=>$items ), "fill_post_with_mbdatas()"); 
+        
+        if ( in_array('artist',$items) ){
+            $this->fill_post_artist_with_mbdatas($post_id);
+        }
+        
+        if ( in_array('album',$items) ){
+            $this->fill_post_album_with_mbdatas($post_id);
+        }
+        
+        if ( in_array('track',$items) ){
+            $this->fill_post_track_with_mbdatas($post_id);
+        }
+        
+        if ( in_array('tracklist',$items) ){
+            $this->fill_post_tracklist_with_mbdatas($post_id);
+        }
+
         do_action('mb_filled_post_with_mbdatas',$post_id);
 
     }
     
-    function fill_post_artist_with_mbdatas($post_id,$mbdatas,$force=false){
+    function fill_post_artist_with_mbdatas($post_id){
         $post_type = get_post_type($post_id);
-        $artist = wpsstm_get_post_artist($post_id);
-        if ($artist && !$force) return;
+        $mbdatas = wpsstm_get_post_mbdatas($post_id);
+        $artist = null;
         
         switch($post_type){
             //artist
@@ -609,10 +629,10 @@ class WP_SoundSytem_Core_MusicBrainz {
 
     }
     
-    function fill_post_album_with_mbdatas($post_id,$mbdatas,$force=false){
+    function fill_post_album_with_mbdatas($post_id){
         $post_type = get_post_type($post_id);
-        $album = wpsstm_get_post_album($post_id);
-        if ($album && !$force) return;
+        $mbdatas = wpsstm_get_post_mbdatas($post_id);
+        $album = null;
         
         switch($post_type){
                 case wpsstm()->post_type_track:
@@ -630,10 +650,10 @@ class WP_SoundSytem_Core_MusicBrainz {
             
     }
     
-    function fill_post_track_with_mbdatas($post_id,$mbdatas,$force=false){
+    function fill_post_track_with_mbdatas($post_id){
         $post_type = get_post_type($post_id);
-        $track = wpsstm_get_post_track($post_id);
-        if ($track && !$force) return;
+        $mbdatas = wpsstm_get_post_mbdatas($post_id);
+        $track = null;
         
         switch($post_type){
                 case wpsstm()->post_type_track:
@@ -648,14 +668,11 @@ class WP_SoundSytem_Core_MusicBrainz {
             
     }
 
-    function fill_post_tracklist_with_mbdatas($post_id,$mbdatas,$force=false){
+    function fill_post_tracklist_with_mbdatas($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_album ) return;
         
-        $tracklist = new WP_SoundSytem_Tracklist($post_id);
-        $tracklist->load_subtracks();
-        
-        if ( !empty($tracklist->tracks) && !$force) return;
+        $mbdatas = wpsstm_get_post_mbdatas($post_id);
 
         //check MusicBrainz datas has media(s)
         if ( !isset($mbdatas['media']) ) return;
@@ -699,6 +716,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         if (!$save_tracks) return;
         
+        $tracklist = new WP_SoundSytem_Tracklist($post_id);
         $tracklist->add($save_tracks);
         $tracklist->save_subtracks();
 
