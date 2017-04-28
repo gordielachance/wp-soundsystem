@@ -519,13 +519,17 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         //presets
         $presets_list = array();
         $presets_list_str = null;
-        $only_standalone_presets = ($this->is_frontend);
-        foreach ((array)WP_SoundSytem_Playlist_Scraper::get_available_presets($only_standalone_presets) as $preset){
+        foreach ((array)WP_SoundSytem_Playlist_Scraper::get_available_presets() as $preset){
+            if ( !$preset->wizard_suggest ) continue;
             $presets_list[] = $preset->name;
         }
-        $presets_list_str = implode(', ',$presets_list);
+
+        if ( !empty($presets_list) ){
+            $presets_list_str = implode(', ',$presets_list);
+            printf('<p><small><strong>%s</strong> : %s</small></p>',__('Available presets','wpsstm'),$presets_list_str);
+        }
         
-        printf('<p><small><strong>%s</strong> : %s</small></p>',__('Available presets','wpsstm'),$presets_list_str);
+
         
 
     }

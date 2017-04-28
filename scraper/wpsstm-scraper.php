@@ -223,7 +223,7 @@ class WP_SoundSytem_Playlist_Scraper{
         return wpsstm_get_array_value($keys,$this->options);
     }
 
-    static function get_available_presets($frontend = false){
+    static function get_available_presets(){
         
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
         
@@ -231,8 +231,7 @@ class WP_SoundSytem_Playlist_Scraper{
         $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
         
         foreach((array)$available_presets as $key=>$preset){
-            if ( !$preset->can_use_preset() ) unset($available_presets[$key]);
-            if( $frontend && !$preset->can_use_preset_frontend() ) unset($available_presets[$key]);
+            if ( !$preset->can_use_preset ) unset($available_presets[$key]);
         }
 
         return $available_presets;

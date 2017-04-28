@@ -10,19 +10,9 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playl
     var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
     var $variables = array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
     
-    /*
-    Check if we can use this preset.
-    Could return false if something required is missing (eg. an API key)
-    */
-    
-    abstract function can_use_preset();
-    
-    /*
-    If the preset isn't able to get a tracklist directly, it should not be available frontend.
-    Eg. the Twitter preset do prefills some fileds of the wizard but requires the user to complete more informations to get a tracklist.
-    */
-    abstract function can_use_preset_frontend();
-    
+    var $can_use_preset = true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
+    var $wizard_suggest = true; //suggest or not this preset in the wizard
+
 }
 
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
@@ -52,14 +42,6 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
 
         $this->name = __('Last.FM website','wpsstm');
 
-    }
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
     }
 
 }
@@ -94,14 +76,6 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
         
     }
     
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
-
 }
 
 class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset{
@@ -143,14 +117,6 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
         
         return parent::get_remote_url();
 
-    }
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
     }
 
     function get_station_id(){
@@ -235,15 +201,7 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
         $this->name = __('Soma FM Station','wpsstm');
 
     }
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
-    
+
 }
 
 class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
@@ -273,14 +231,6 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
         $this->name = __('BBC station','wpsstm');
 
     }
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
 
 }
 
@@ -309,15 +259,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
         $this->name = __('BBC playlist','wpsstm');
 
     } 
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
-    
+
 }
 
 class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
@@ -344,16 +286,9 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
         $this->name = __('Slacker.com station tops','wpsstm');
 
     } 
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
 
 }
+
 class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_Scraper_Preset{
     
     var $slug = 'soundcloud';
@@ -379,20 +314,15 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Soundcloud tracks / likes','wpsstm');
-
-    } 
-
-    function can_use_preset(){
+        $this->name = __('Soundcloud user tracks or likes','wpsstm');
+        
         if ( $client_id = wpsstm()->get_options('soundcloud_client_id') ){
             $this->set_variable_value('soundcloud-client-id',$client_id);
-            return true;
+        }else{
+            $this->can_use_preset = false;
         }
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
+
+    } 
 
     function get_remote_url(){
         
@@ -477,14 +407,6 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
 
     } 
 
-    function can_use_preset(){
-        return true;
-    }
-    
-    function can_use_preset_frontend(){
-        return true;
-    }
-    
     function get_request_headers(){
         $headers = parent::get_request_headers();
         
@@ -523,6 +445,8 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
             'tracks'            => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )
     );
+    
+    var $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
     function __construct(){
         parent::__construct();
@@ -530,17 +454,6 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
         $this->name = __('Twitter','wpsstm');
 
     } 
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    /*
-    Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
-    */
-    function can_use_preset_frontend(){
-        return false;
-    }
 
 }
 
@@ -563,6 +476,8 @@ class WP_SoundSytem_Playlist_Scraper_RTBF extends WP_SoundSytem_Playlist_Scraper
             'track_image'       => array('path'=>'span[itemprop="inAlbum"]')
         )
     );
+    
+    var $wizard_suggest = false;
 
     function __construct(){
         parent::__construct();
@@ -570,17 +485,6 @@ class WP_SoundSytem_Playlist_Scraper_RTBF extends WP_SoundSytem_Playlist_Scraper
         $this->name = __('RTBF radios','wpsstm');
 
     } 
-    
-    function can_use_preset(){
-        return true;
-    }
-    
-    /*
-    Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
-    */
-    function can_use_preset_frontend(){
-        return true;
-    }
 
 }
 
