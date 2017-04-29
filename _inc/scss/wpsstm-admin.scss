@@ -4,8 +4,10 @@
 body{
     //hide title input as we set it automatically - but keep the feature sine it outputs the permalink and 'view' link
     &.post-type-wpsstm_artist,&.post-type-wpsstm_release,&.post-type-wpsstm_track{
-        #titlewrap #title{
-            display:none;
+        #titlewrap{
+            label[for=title],input#title{
+                display:none;
+            }
         }
     }
 }
