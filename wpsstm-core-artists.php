@@ -106,6 +106,8 @@ class WP_SoundSytem_Core_Artists{
         if ( $is_autosave || $is_revision || !$has_cap ) return;
 
         $title = wpsstm_get_post_artist($post_id);
+        if ( !$title ) return;
+        
         if ( $title==get_the_title($post_id) ) return; //does not need update
 
         //log

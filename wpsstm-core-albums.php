@@ -131,6 +131,7 @@ class WP_SoundSytem_Core_Albums{
 
         $artist = wpsstm_get_post_artist($post_id);
         $album = wpsstm_get_post_album($post_id);
+        if ( !$artist || !$album ) return;
         
         $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$album) );
         
