@@ -41,86 +41,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public function init($url,$options){
         $this->url = $url;
         if ($options) $this->options = array_replace_recursive($options, $this->options);
-        
-        //populate variables from URL
-        if ($this->pattern){
-            
-            preg_match($this->pattern, $this->url, $url_matches);
-            if ( $url_matches ){
-                
-                array_shift($url_matches); //remove first item (full match)
-                $this->populate_variable_values($url_matches);
-            }
-        }
-    }
-    
-    /**
-    If $url_matches is empty, it means that the feed url does not match the pattern.
-    **/
-    
-    public function can_load_tracklist_url($url){
-
-        if (!$this->pattern) return true;
-        
-        //wpsstm()->debug_log(array('slug'=>$this->slug,'url'=>$url,'pattern'=>$this->pattern),"can_load_tracklist_url()"); 
-
-        preg_match($this->pattern, $url, $url_matches);
-
-        return (bool)$url_matches;
-    }
-    
-    /**
-    Fill the preset $variables.
-    The array keys from the preset $variables and the input $values_arr have to match.
-    **/
-
-    protected function populate_variable_values($values_arr){
-        
-        $key = 0;
-
-        foreach((array)$this->variables as $variable_slug=>$variable){
-            $value = ( isset($values_arr[$key]) ) ? $values_arr[$key] : null;
-            
-            if ($value){
-                $this->set_variable_value($variable_slug,$value);
-            }
-            
-            $key++;
-        }
-
-    }
-
-    protected function set_variable_value($slug,$value='null'){
-        $this->variables[$slug] = $value;
-    }
-    
-    public function get_variable_value($slug){
-
-        foreach($this->variables as $variable_slug => $variable){
-            
-            if ( $variable_slug == $slug ){
-                return $variable;
-            }
-        }
-
-    }
-    
-    /*
-    Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
-    */
-    
-    public function variables_fill_string($str){
-
-        foreach($this->variables as $variable_slug => $variable_value){
-            $pattern = '%' . $variable_slug . '%';
-            $value = $variable_value;
-            
-            if ($value) {
-                $str = str_replace($pattern,$value,$str);
-            }
-        }
-
-        return $str;
     }
     
     public function get_tracks(){
@@ -176,12 +96,15 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
     
     /*
-    Headers used for the remote request.  (Could be overriden for presets).
+    Arguments for the remote request.  (Could be overriden for presets).
+    https://codex.wordpress.org/Function_Reference/wp_remote_get
     */
     
-    protected function get_request_headers(){
+    protected function get_request_args(){
         return array(
-            'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+            'headers'   => array(
+                'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+            )
         );
     }
     
@@ -189,7 +112,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
         $error = $remote_body = $source_content = null;
 
-        $response = wp_remote_get( $url, $this->get_request_headers() );
+        $response = wp_remote_get( $url, $this->get_request_args() );
 
         if ( !is_wp_error($response) ){
 

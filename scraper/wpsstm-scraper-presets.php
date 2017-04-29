@@ -13,6 +13,89 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playl
     var $can_use_preset = true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
     var $wizard_suggest = true; //suggest or not this preset in the wizard
 
+    public function init($url,$options){
+        parent::init($url,$options);
+        
+        //populate variables from URL
+        if ($this->pattern){
+            
+            preg_match($this->pattern, $this->url, $url_matches);
+            if ( $url_matches ){
+                
+                array_shift($url_matches); //remove first item (full match)
+                $this->populate_variable_values($url_matches);
+            }
+        }
+    }
+    
+    /**
+    If $url_matches is empty, it means that the feed url does not match the pattern.
+    **/
+    
+    public function can_load_tracklist_url($url){
+
+        if (!$this->pattern) return true;
+
+        preg_match($this->pattern, $url, $url_matches);
+
+        return (bool)$url_matches;
+    }
+    
+    /**
+    Fill the preset $variables.
+    The array keys from the preset $variables and the input $values_arr have to match.
+    **/
+
+    protected function populate_variable_values($values_arr){
+        
+        $key = 0;
+
+        foreach((array)$this->variables as $variable_slug=>$variable){
+            $value = ( isset($values_arr[$key]) ) ? $values_arr[$key] : null;
+            
+            if ($value){
+                $this->set_variable_value($variable_slug,$value);
+            }
+            
+            $key++;
+        }
+
+    }
+
+    protected function set_variable_value($slug,$value='null'){
+        $this->variables[$slug] = $value;
+    }
+    
+    public function get_variable_value($slug){
+
+        foreach($this->variables as $variable_slug => $variable){
+            
+            if ( $variable_slug == $slug ){
+                return $variable;
+            }
+        }
+
+    }
+    
+    /*
+    Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
+    */
+    
+    public function variables_fill_string($str){
+
+        foreach($this->variables as $variable_slug => $variable_value){
+            $pattern = '%' . $variable_slug . '%';
+            $value = $variable_value;
+            
+            if ($value) {
+                $str = str_replace($pattern,$value,$str);
+            }
+        }
+
+        return $str;
+    }
+    
+
 }
 
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
@@ -407,25 +490,19 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
 
     } 
 
-    function get_request_headers(){
-        $headers = parent::get_request_headers();
-        
-        $headers['Origin'] = 'https://play.soundsgood.co';
-        $headers['Referer'] = $this->url;
-        
+    function get_request_args(){
+        $args = parent::get_request_args();
+
         if ( $client_id = $this->get_client_id() ){
-            $headers['client'] = $client_id;
+            $args['headers']['client'] = $client_id;
             $this->set_variable_value('soundsgood-client-id',$client_id);
         }
 
-        return $headers;
+        return $args;
     }
 
-    //WIP to fix
     function get_client_id(){
-
-        return 'XXX';
-
+        return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
     }
 }
 
@@ -501,7 +578,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_BBC_Playlist();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
-    //$presets[] = new WP_SoundSytem_Playlist_Scraper_Soundsgood();
+    $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundsgood();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_RTBF();
     
