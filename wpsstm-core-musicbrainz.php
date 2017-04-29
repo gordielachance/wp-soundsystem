@@ -540,26 +540,50 @@ class WP_SoundSytem_Core_MusicBrainz {
     Fill current post with various informations from MusicBrainz
     **/
 
-    function fill_post_with_mbdatas($post_id,$items=null){
+    function fill_post_with_mbdatas($post_id,$items=array()){
+
+        //get potential updatable items by post type
         $post_type = get_post_type($post_id);
-        $mbdatas = wpsstm_get_post_mbdatas($post_id);
+        $post_type_items = array();
+        
+        switch($post_type){
+            //artist
+            case wpsstm()->post_type_artist:
+                $post_type_items = array('artist');
+            break;
+            //album
+            case wpsstm()->post_type_album:
+                $post_type_items = array('artist','album','tracklist');
+            break;
+            //track
+            case wpsstm()->post_type_track:
+                $post_type_items = array('artist','album','track');
+            break;
 
-        //what to update ?
-        if (!$items){
-            $items = array();
-            
-            if ( !$artist = wpsstm_get_post_artist($post_id) ) $items[] = 'artist';
-            if ( !$album = wpsstm_get_post_album($post_id) ) $items[] = 'album';
-            if ( !$track = wpsstm_get_post_track($post_id) ) $items[] = 'track';
-
-            $tracklist = new WP_SoundSytem_Tracklist($post_id);
-            $tracklist->load_subtracks();
-            if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
-            
         }
         
-        //can we update ?
-        wpsstm()->debug_log( array( 'post_id'=>$post_id,'post_type'=>get_post_type($post_id),'potential_items'=>$items ), "fill_post_with_mbdatas()"); 
+        if ( empty($post_type_items) ) return;
+
+        //what to update ?
+        if ( empty($items) ){ //not defined, auto guess what to update
+
+            if ( in_array('artist',$post_type_items) && ( !$artist = wpsstm_get_post_artist($post_id) ) ) $items[] = 'artist';
+            if ( in_array('album',$post_type_items) && ( !$album = wpsstm_get_post_album($post_id) ) ) $items[] = 'album';
+            if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
+
+            if ( in_array('tracklist',$post_type_items) ){
+                $tracklist = new WP_SoundSytem_Tracklist($post_id);
+                $tracklist->load_subtracks();
+                if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
+            }
+
+        }
+        
+        //filter only what is allowed by post type
+        $items = array_intersect($items, $post_type_items);
+        if ( empty($items) ) return;
+
+        wpsstm()->debug_log( array( 'post_id'=>$post_id,'post_type'=>get_post_type($post_id),'items'=>$items ), "fill_post_with_mbdatas()"); 
         
         if ( in_array('artist',$items) ){
             $this->fill_post_artist_with_mbdatas($post_id);
