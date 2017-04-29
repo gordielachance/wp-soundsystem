@@ -135,6 +135,8 @@ class WP_SoundSytem {
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles' ) );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
+        
+        add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
 
     }
 
@@ -234,6 +236,37 @@ class WP_SoundSytem {
         
         wp_enqueue_style( 'wpsstm' );
         
+    }
+    
+    function promo_notice(){
+        
+        //should we embed this ?
+        $screen = get_current_screen();
+        $post_type = $screen->post_type;
+        $allowed_post_types = array(
+            wpsstm()->post_type_artist,
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_track,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+
+        $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );
+        $is_top_menu = ($screen->id == 'toplevel_page_wpsstm');
+
+        if (!$is_allowed_post_type && !$is_top_menu) return;
+
+        $rate_link_wp = 'https://wordpress.org/support/view/plugin-reviews/wp-soundsystem?rate#postform';
+        $rate_link = '<a href="'.$rate_link_wp.'" target="_blank" href=""><i class="fa fa-star"></i> '.__('Reviewing the plugin','wpsstm').'</a>';
+        $donate_link = '<a href="http://bit.ly/gbreant" target="_blank" href=""><i class="fa fa-usd"></i> '.__('make a donation','wpsstm').'</a>';
+        ?>
+        <div id="wpsstm-promo-notice">
+            <p>
+                <?php printf(__('Happy with WP SoundSystem ? %s and %s would help!','pinim'),$rate_link,$donate_link);?>
+            </p>
+        </div>
+        <?php
+
     }
 
     public function debug_log($message,$title = null) {
