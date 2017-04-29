@@ -53,7 +53,7 @@ For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Spotify, Radionomy, Last.FM, SomaFM, BBC, Slacker, Soundcloud, Twitter.
+Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood.
 
 With Live Playlists enabled, you may also propose a Frontend Tracklist Parser to your visitors. 
 They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
