@@ -69,21 +69,10 @@ class WP_SoundSytem_Core_Albums{
         switch ( $column ) {
             case 'album':
 
-                $tracklist_ids = wpsstm_get_subtrack_parent_ids($post_id);
-                $links = array();
+                $album = wpsstm_get_post_album($post_id);
                 
-                foreach((array)$tracklist_ids as $tracklist_id){
-
-                    $tracklist_post_type = get_post_type($tracklist_id);
-                    if ( $tracklist_post_type != wpsstm()->post_type_album ) continue;
-                    
-                    $playlist_url = get_permalink($tracklist_id);
-                    $playlist_name = get_the_title($tracklist_id);
-                    $links[] = sprintf('<a href="%s">%s</a>',$playlist_url,$playlist_name);
-                    
-                }
-                if ($links){
-                    echo implode(',',$links);
+                if ($album){
+                    echo $album;
                 }else{
                     echo '—';
                 }
