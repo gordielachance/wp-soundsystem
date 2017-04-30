@@ -139,7 +139,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
-= 0.9.7 =
+= 0.9.8 =
 * show player column only if at least one track has sources
 * tracks : auto guess ID if not defined
 * improved presets + fixed Soundsgood preset
@@ -148,6 +148,8 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 * improved fill_post_with_mbdatas()
 * improved presets suggestions in the wizard
 * changed live tracks transient name
+
+= 0.9.7 =
 * Better track & album auto title
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
