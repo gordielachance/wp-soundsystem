@@ -15,6 +15,15 @@ class WP_SoundSystem_Track{
     
     function __construct( $args = array(), $track_id = null ){
 
+        $args_default = $this->get_default();
+        $args = wp_parse_args($args,$args_default);
+
+        //only for keys that exists in $args_default
+        foreach ((array)$args_default as $param=>$dummy){
+            if ( !$args[$param] ) continue; //empty value
+            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
+        }
+        
         //has track ID
         if ( $track_id ){
             if ( $post = get_post($track_id) ){
@@ -25,15 +34,8 @@ class WP_SoundSystem_Track{
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
             }
-        }
-
-        $args_default = $this->get_default();
-        $args = wp_parse_args($args,$args_default);
-
-        //only for keys that exists in $args_default
-        foreach ((array)$args_default as $param=>$dummy){
-            if ( !$args[$param] ) continue; //empty value
-            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
+        }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
+            $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
         }
 
     }
