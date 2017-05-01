@@ -131,6 +131,9 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
 
 class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
 
+    //TO FIX is limited to 100 tracks.  Find a way to get more.
+    //https://developer.spotify.com/web-api/console/get-playlist-tracks
+    
     var $slug = 'spotify-playlist';
     var $name = null;
     var $description = null;

@@ -139,6 +139,13 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.8.2 =
+* try to use parser without converting encoding
+* fixed Spotify preset (now uses API)
+* new API settings for Spotify
+* post_tag taxonomy for albums & tracks
+* frontend CSS fixes
+
 = 0.9.8.1 =
 * sort stations by health / trending / popular
 * fixed ajaxed row actions for tracklist rows
