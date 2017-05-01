@@ -181,21 +181,7 @@ class WP_SoundSytem {
 
     function enqueue_scripts_styles_admin( $hook ){
 
-            //should we embed this ?
-            $screen = get_current_screen();
-            $post_type = $screen->post_type;
-            $allowed_post_types = array(
-                wpsstm()->post_type_artist,
-                wpsstm()->post_type_album,
-                wpsstm()->post_type_track,
-                wpsstm()->post_type_playlist,
-                wpsstm()->post_type_live_playlist
-            );
-
-            $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );
-            $is_top_menu = ($screen->id == 'toplevel_page_wpsstm');
-        
-            if (!$is_allowed_post_type && !$is_top_menu) return;
+            if ( !$this->is_admin_page() ) return;
 
             // css
             wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
@@ -237,10 +223,13 @@ class WP_SoundSytem {
         wp_enqueue_style( 'wpsstm' );
         
     }
+
+    /*
+    Checks that we are on one of backend pages of the plugin
+    */
     
-    function promo_notice(){
-        
-        //should we embed this ?
+    function is_admin_page(){
+
         $screen = get_current_screen();
         $post_type = $screen->post_type;
         $allowed_post_types = array(
@@ -255,6 +244,13 @@ class WP_SoundSytem {
         $is_top_menu = ($screen->id == 'toplevel_page_wpsstm');
 
         if (!$is_allowed_post_type && !$is_top_menu) return;
+        
+        return true;
+    }
+    
+    function promo_notice(){
+        
+        if ( !$this->is_admin_page() ) return;
 
         $rate_link_wp = 'https://wordpress.org/support/view/plugin-reviews/wp-soundsystem?rate#postform';
         $rate_link = '<a href="'.$rate_link_wp.'" target="_blank" href=""><i class="fa fa-star"></i> '.__('Reviewing the plugin','wpsstm').'</a>';
