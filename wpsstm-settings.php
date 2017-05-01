@@ -125,8 +125,16 @@ class WP_SoundSytem_Settings {
                 $new_input['live_playlists_cache_min'] = $input['live_playlists_cache_min'];
             }
 
-            //APIs
+            /*
+            APIs
+            */
+            //spotify
+            $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
+            $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
+            
+            //soundcloud
             $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
+            $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
 
     
         }
@@ -241,8 +249,16 @@ class WP_SoundSytem_Settings {
         );
         
         add_settings_field(
+            'spotify_client', 
+            __('Spotify','wpsstm'), 
+            array( $this, 'spotify_client_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
+        );
+        
+        add_settings_field(
             'soundcloud_client_id', 
-            __('Soundcloud Client ID','wpsstm'), 
+            __('Soundcloud','wpsstm'), 
             array( $this, 'soundcloud_client_id_callback' ), 
             'wpsstm-settings-page', 
             'settings_apis'
@@ -358,15 +374,57 @@ class WP_SoundSytem_Settings {
     
     //APIs
     
-    function soundcloud_client_id_callback(){
-        $option = wpsstm()->get_options('soundcloud_client_id');
-
+    function spotify_client_callback(){
+        $client_id = wpsstm()->get_options('spotify_client_id');
+        $client_secret = wpsstm()->get_options('spotify_client_secret');
+        $new_app_link = 'https://developer.spotify.com/my-applications/#!/applications/create';
+        
+        $desc = sprintf(__('Required for the Live Playlists Spotify preset.  Create a Spotify application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+        
+        //client ID
         printf(
-            '<input type="text" name="%s[soundcloud_client_id]" value="%s" /> <small>%s</small>',
+            '<p><label>%s</label> <input type="text" name="%s[spotify_client_id]" value="%s" /></p>',
+            __('Client ID:','wppstm'),
             wpsstm()->meta_name_options,
-            $option,
-            __('Required for the Live Playlists Soundcloud preset','wpsstm')
+            $client_id
         );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[spotify_client_secret]" value="%s" /></p>',
+            __('Client Secret:','wppstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
+        
+    }
+    
+    function soundcloud_client_id_callback(){
+        $client_id = wpsstm()->get_options('soundcloud_client_id');
+        $client_secret = wpsstm()->get_options('soundcloud_client_secret');
+        
+        $new_app_link = 'http://soundcloud.com/you/apps/new';
+        
+        $desc = sprintf(__('Required for the Live Playlists Soundcloud preset.  Create a Soundcloud application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_id]" value="%s" /></p>',
+            __('Client ID:','wppstm'),
+            wpsstm()->meta_name_options,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_secret]" value="%s" /></p>',
+            __('Client Secret:','wppstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
+        
     }
     
     //System
