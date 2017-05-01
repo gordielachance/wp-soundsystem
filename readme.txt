@@ -38,13 +38,6 @@ Just enter the URL of this source and be sure you checked the 'Music Sources' ca
 Those links will be used by the audio player (see above) to play the track - if the source URL is supported.
 We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
-= Live Playlists =
-
-(disabled by default, you can enable them by acessing the plugin's settings page)
-
-Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see below).
-The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
-
 = Tracklist Parser Metabox =
 
 Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
@@ -55,9 +48,18 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood.
 
-With Live Playlists enabled, you may also propose a Frontend Tracklist Parser to your visitors. 
+= Live Playlists =
+
+(disabled by default, you can enable them by acessing the plugin's settings page)
+
+Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see above).
+The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
+
+You may also propose a Frontend Tracklist Parser to your visitors. 
 They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
 Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
+
+Demo on [spiff-radio.org](http://www.spiff-radio.org/tracklist-wizard/).
 
 = Shortcodes =
 
@@ -89,7 +91,7 @@ Contributors [are listed here](https://github.com/gordielachance/wp-soundsystem/
 
 = Notes =
 
-For feature request and bug reports, [please use the forums](http://wordpress.org/support/plugin/wp-soundsystem#postform).
+For feature request and bug reports, please use the [Github Issues Tracker](https://github.com/gordielachance/wp-soundsystem/issues).
 
 If you are a plugin developer, [we would like to hear from you](https://github.com/gordielachance/wp-soundsystem). Any contribution would be very welcome.
 
