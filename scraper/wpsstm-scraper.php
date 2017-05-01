@@ -46,7 +46,6 @@ class WP_SoundSytem_Playlist_Scraper{
     function __construct() {
         
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
 
         $this->setup_globals();
         $this->setup_actions();

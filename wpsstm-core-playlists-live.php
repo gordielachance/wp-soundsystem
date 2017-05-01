@@ -23,6 +23,8 @@ class WP_SoundSytem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
+        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
@@ -37,6 +39,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
         //listing
+        add_action( 'pre_get_posts', array($this, 'sort_stations'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
@@ -57,7 +60,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         if ( !$db_v = get_option("spiff-db") ) return;
 
         wpsstm()->debug_log("upgrade_from_spiff()"); 
-        $scraper = new WP_SoundSytem_Playlist_Scraper();
         
         //upgrade old spiff settings
         $args = array(
@@ -257,19 +259,19 @@ class WP_SoundSytem_Core_Live_Playlists{
             switch ($orderby){
 
                 case 'health':
-                    $query->set('meta_key', $this->meta_key_health );
+                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_health );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'trending':
-                    $query->set('meta_key', $this->meta_key_monthly_requests );
+                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_monthly_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'popular':
-                    $query->set('meta_key', $this->meta_key_requests );
+                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;

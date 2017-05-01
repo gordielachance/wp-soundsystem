@@ -58,13 +58,13 @@ class WP_SoundSytem_Live_Playlist_Stats{
         global $post;
         if (!$post_id) $post_id = $post->ID;
 
-        if ($post_id == 135){
-            return "titi";
-        }
-
         $meta = get_post_meta($post_id, self::$meta_key_health, true);
 
-        if ( is_array($meta) ) return; //TO FIX temporary fix for upgrade, to remove later
+        //TO FIX is an upgrade for Spiff plugin.  Should be removed later.
+        if ( is_array($meta) ) {
+            delete_post_meta($post_id, self::$meta_key_health);
+            return;
+        }
         
         $percent = $meta * 100;
 
