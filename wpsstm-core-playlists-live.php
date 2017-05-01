@@ -283,38 +283,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         
     }
     
-
-    function get_available_services_ids($ignore_ids = null){
-
-        $services_ids = array();
-        $ignore_ids = (array)$ignore_ids;
-
-        //TO FIX should be filter with pre_get_posts
-        $services_args = array(
-            'post_type'         => wpsstm()->post_type_live_playlist,
-            'posts_per_page'    => -1,
-            'orderby'           => 'is_service',
-            //optimize query :
-            'fields'            => 'ids',
-            //'no_found_rows' => true, //https://wpartisan.me/tutorials/wordpress-database-queries-speed-sql_calc_found_rows
-            //'update_post_term_cache' => false, // grabs post terms
-            //'update_post_meta_cache' => true // grabs post meta (here needed)
-        );
-
-        if ( !empty($ignore_ids) ){
-            $services_args['post__not_in'] = $ignore_ids;
-        }
-
-        $query = new WP_Query($services_args);
-
-        foreach ($query->posts as $post_id){
-            $services_ids[] = $post_id;
-        }
-
-        return $services_ids;
-
-    }
-    
     /**
     Overrides the function from WP_SoundSytem_Core_Playlists
     **/
