@@ -57,6 +57,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         if ( !$db_v = get_option("spiff-db") ) return;
 
         wpsstm()->debug_log("upgrade_from_spiff()"); 
+        $scraper = new WP_SoundSytem_Playlist_Scraper();
         
         //upgrade old spiff settings
         $args = array(
@@ -119,7 +120,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         //rename health meta
         $query_post_meta = $wpdb->prepare( 
             "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",
-            $this->meta_key_health,
+            WP_SoundSytem_Live_Playlist_Stats::$meta_key_health,
             'spiff_station_health'
         );
         $wpdb->query($query_post_meta);
@@ -131,7 +132,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             'wpsstm'
         );
         $wpdb->query($query_post_meta);
-        
+
         delete_option( "spiff-db" );
     }
 
