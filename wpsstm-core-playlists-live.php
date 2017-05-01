@@ -47,7 +47,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         //frontend wizard
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
         add_action ('wp', array($this,'frontend_wizard_populate' ));
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'frontend_wizard_get_tracklist'), 10, 3);
+        add_filter( 'wpsstm_get_post_tracklist', array($this,'frontend_wizard_get_tracklist'), 10, 2);
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
         add_filter( 'wpsstm_get_xspf_link', array($this,'frontend_wizard_get_xspf_link'), 10, 3);
         
@@ -340,7 +340,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         return $link;
     }
     
-    function frontend_wizard_get_tracklist($tracklist,$post_id,$cache_only){
+    function frontend_wizard_get_tracklist($tracklist,$post_id){
         global $wp_query;
         if ( ( $post_id == $this->frontend_wizard_page_id ) && ( $this->frontend_wizard ) ) {
             $tracklist = $this->frontend_wizard->scraper->tracklist;

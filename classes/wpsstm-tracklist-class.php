@@ -158,6 +158,21 @@ class WP_SoundSytem_Tracklist{
         }else{
             require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
             $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
+            
+            //cache only if several post are displayed (like an archive page)
+            if ( !is_admin() ){
+                $cache_only = ( !is_singular() );
+            }else{ // is_singular() does not exists backend
+                $screen = get_current_screen();
+                $cache_only = ( $screen->parent_base != 'edit' );
+            }
+            
+            if ( $this->post_id && ( get_post_type($this->post_id) == wpsstm()->post_type_live_playlist ) && $cache_only ){
+                $link = get_permalink($this->post_id);
+                $link = sprintf('<a href="%s">%s</a>',$link,__('here','wpsstm') );
+                $link = sprintf( __('Click %s to load the live tracklist','wpsstm'), $link);
+                return sprintf('<p class="notice wpsstm-notice-load-tracklist">%s</p>',$link );
+            }
         }
 
         ob_start();
