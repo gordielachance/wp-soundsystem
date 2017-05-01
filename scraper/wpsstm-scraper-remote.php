@@ -205,7 +205,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
                 try{
                     $data = json_decode($content, true);
-                    $dom = Array2XML::createXML($data,'root','element');
+                    $dom = WP_SoundSytem_Array2XML::createXML($data,'root','element');
                     $xml = $dom->saveXML($dom);
                     
 
