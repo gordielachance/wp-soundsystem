@@ -23,7 +23,7 @@ class WP_SoundSytem_Tracklist{
 
         foreach ($subtrack_ids as $subtrack_id){
             $subtrack = array(
-                'subtrack_id'  => $subtrack_id
+                'post_id'  => $subtrack_id
             );
             $subtracks[] = $subtrack;
         }
@@ -82,9 +82,12 @@ class WP_SoundSytem_Tracklist{
             
             if ( !is_a($track, 'WP_SoundSystem_Subtrack') ){
                 if ( is_array($track) ){
-                    $track = new WP_SoundSystem_Subtrack($track,$this->post_id);
+                    $track = new WP_SoundSystem_Subtrack($track);
                 }
             }
+            
+            //set tracklist ID
+            $track->tracklist_id = $this->post_id;
             
             //increment count
             $this->tracks_count++;

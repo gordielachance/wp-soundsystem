@@ -13,21 +13,12 @@ class WP_SoundSystem_Track{
     public $did_lookup = false; // TO FIX
     protected $source_urls = null; //set 'null' so we can check later it has been populated
     
-    function __construct( $args = array(), $track_id = null ){
-
-        $args_default = $this->get_default();
-        $args = wp_parse_args($args,$args_default);
-
-        //only for keys that exists in $args_default
-        foreach ((array)$args_default as $param=>$dummy){
-            if ( !$args[$param] ) continue; //empty value
-            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
-        }
+    function __construct( $args = array() ){
         
         //has track ID
-        if ( $track_id ){
+        if ( isset($args['post_id'] ) ){
+            $track_id = $args['post_id'];
             if ( $post = get_post($track_id) ){
-
                 $this->post_id = $track_id;
                 $this->title = wpsstm_get_post_track($track_id);
                 $this->artist = wpsstm_get_post_artist($track_id);
@@ -36,6 +27,15 @@ class WP_SoundSystem_Track{
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
+        }
+
+        $args_default = $this->get_default();
+        $args = wp_parse_args($args,$args_default);
+
+        //only for keys that exists in $args_default
+        foreach ((array)$args_default as $param=>$dummy){
+            if ( !$args[$param] ) continue; //empty value
+            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
         }
 
     }
@@ -314,24 +314,17 @@ For tracks that are attached to a tracklist (albums / playlists / live playlists
 
 class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
 
-    public $subtrack_id = 0;
     public $tracklist_id = 0;
     public $subtrack_order = 0;
     
-    function __construct( $args = array(), $tracklist_id = null ){
-        
-        $track_id = null;
-        
+    function __construct( $args = array() ){
+
         //has parent ID
-        if ( $tracklist_id ){
-            $this->tracklist_id = $tracklist_id;
-        }
-        
-        if ( isset($args['subtrack_id']) ){
-            $this->subtrack_id = $args['subtrack_id'];
+        if ( isset($args['tracklist_id']) ){
+            $this->tracklist_id = $args['tracklist_id'];
         }
 
-        parent::__construct($args,$this->subtrack_id);
+        parent::__construct($args);
 
     }
     
@@ -339,9 +332,8 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         $track_defaults = parent::get_default();
         
         $default = array(
-            'subtrack_id'          => null,
             'tracklist_id'      => null,
-            'subtrack_order'       => null
+            'subtrack_order'    => null
         );
         
         return wp_parse_args($default,$track_defaults);
@@ -369,14 +361,14 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
 
     function remove_subtrack(){
         global $wpdb;
-        if (!$this->subtrack_id) return;
+        if (!$this->post_id) return;
         
         //get current subtrack IDs
         $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
         $subtrack_ids = $tracklist->get_subtracks_ids();
 
         //remove current value
-        if(($key = array_search($this->subtrack_id, $subtrack_ids)) !== false) {
+        if(($key = array_search($this->post_id, $subtrack_ids)) !== false) {
             unset($subtrack_ids[$key]);
         }
         

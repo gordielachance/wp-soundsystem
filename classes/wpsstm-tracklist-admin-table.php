@@ -50,7 +50,8 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
             //append blank row
             if ( $this->can_manage_rows ){ 
-                $blank_track = new WP_SoundSystem_Subtrack(null,$post->ID);
+                $args['tracklist_id'] = $post->ID;
+                $blank_track = new WP_SoundSystem_Subtrack($args);
                 $blank_track->row_classes = array('metabox-table-row-new','metabox-table-row-edit');
                 $this->single_row($blank_track);
             }
@@ -247,14 +248,14 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 case 'cb':
 
                     $input_cb = sprintf( '<input type="checkbox" name="%s" value="on"/>',
-                                        $this->get_field_name('selected')
-                                       );
-                    $input_subtrack_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                                        $this->get_field_name('subtrack_id'),
-                                        $item->subtrack_id
-                                       );
+                        $this->get_field_name('selected')
+                    );
+                    $input_track_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
+                        $this->get_field_name('post_id'),
+                        $item->post_id
+                    );
 
-                    return $input_cb . $input_subtrack_id;
+                    return $input_cb . $input_track_id;
                 break;
 
                 case 'reorder':
@@ -377,11 +378,10 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             }
 
             $actions = array();
-
-            $is_attached = false;
+            $is_attached = ($item->post_id);
             
             //action link
-            $action_url = add_query_arg(array('subtrack_id'=>$item->subtrack_id),get_edit_post_link());
+            $action_url = add_query_arg(array('subtrack_id'=>$item->post_id),get_edit_post_link());
             $action_url = wp_nonce_url($action_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
             
             //edit
@@ -400,10 +400,12 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             $actions['remove'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-save',$remove_url,__('Remove'));
             
             //delete
-            $delete_url = add_query_arg(array('subtrack_action'=>'delete'),$action_url);
-            $delete_url = wp_nonce_url($delete_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
-            $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-delete',$delete_url,__('Delete'));
-
+            if ( $is_attached ){
+                $delete_url = add_query_arg(array('subtrack_action'=>'delete'),$action_url);
+                $delete_url = wp_nonce_url($delete_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
+                $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-delete',$delete_url,__('Delete'));
+            }
+            
             */
 
             return $this->row_actions( $actions, true );

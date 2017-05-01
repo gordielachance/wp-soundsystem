@@ -411,7 +411,7 @@ class WP_SoundSytem_Core_Tracks{
         $post_type = get_post_type($atts['post_id']);
         if ( !in_array($post_type,$this->allowed_post_types) ) return;
         
-        $track = new WP_SoundSystem_Track(null,$atts['post_id']);
+        $track = new WP_SoundSystem_Track(  array('post_id'=>$atts['post_id']) );
         $tracks = array($track);
         $tracklist = new WP_SoundSytem_Tracklist();
 

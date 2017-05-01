@@ -213,7 +213,7 @@ function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
     
     if ($post_type == wpsstm()->post_type_track){ //single track
-        $track = new WP_SoundSystem_Track(null,$post_id);
+        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         $tracklist->add($track);
     }elseif ($post_type == wpsstm()->post_type_live_playlist){ //live playlist
         $scraper = new WP_SoundSytem_Playlist_Scraper();
