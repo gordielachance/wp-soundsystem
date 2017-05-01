@@ -78,6 +78,14 @@ class WP_SoundSytem_Playlist_Scraper{
 
         if (!$feed_url) return;
         
+        //cache only if several post are displayed (like an archive page)
+        if ( !is_admin() ){
+            $this->cache_only = ( !is_singular() );
+        }else{ // is_singular() does not exists backend
+            $screen = get_current_screen();
+            $this->cache_only = ( $screen->parent_base != 'edit' );
+        }
+
         //set feed url
         $this->feed_url = $feed_url;
         $this->id = md5( $this->feed_url ); //unique ID based on URL

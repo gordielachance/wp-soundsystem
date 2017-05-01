@@ -190,7 +190,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         $output = null;
 
-        $tracklist = wpsstm_get_post_tracklist($post_id,true);
+        $tracklist = wpsstm_get_post_tracklist($post_id);
 
         $entry_html = array();
 

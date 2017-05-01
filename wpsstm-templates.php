@@ -202,29 +202,29 @@ function wpsstm_get_post_mb_link_for_post($post_id){
 
 /*
 Get a post tracklist
-cache_only parameter is for live playlists.  If set to true, load only tracks from the cache, not from the remote page.
 */
 
-function wpsstm_get_post_tracklist($post_id=null,$cache_only = false){
+function wpsstm_get_post_tracklist($post_id=null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $post_type = get_post_type($post_id);
     
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
-    
+
     if ($post_type == wpsstm()->post_type_track){ //single track
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         $tracklist->add($track);
     }elseif ($post_type == wpsstm()->post_type_live_playlist){ //live playlist
+
         $scraper = new WP_SoundSytem_Playlist_Scraper();
-        $scraper->cache_only = $cache_only;
         $scraper->init_post($post_id);
         $tracklist = $scraper->tracklist;
+
     }else{ //playlist or album
         $tracklist->load_subtracks();
     }
     
-    return apply_filters('wpsstm_get_post_tracklist',$tracklist,$post_id,$cache_only);
+    return apply_filters('wpsstm_get_post_tracklist',$tracklist,$post_id);
     
 }
 
