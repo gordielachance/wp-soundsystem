@@ -108,8 +108,8 @@ class WP_SoundSytem_Core_Artists{
         $post_title = wpsstm_get_post_artist($post_id);
         if ( !$post_title ) return;
         
-        //title stored in the DB converts some characters like the quotes, so use sanitize_title() to make it match
-        if ( sanitize_title($post_title) == sanitize_title( get_the_title($post_id) ) ) return;
+        //use get_post_field here instead of get_the_title() so title is not filtered
+        if ( $post_title == get_post_field('post_title',$post_id) ) return;
 
         //log
         wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_artist()"); 
