@@ -30,7 +30,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         'omit_xml_declaration'      => true,
         'ignore_parser_warnings'    => true,
         'convert_from_encoding'     => 'auto',
-        'convert_to_encoding'       => 'ISO-8859-1'
+        //'convert_to_encoding'       => 'ISO-8859-1'
     );
     
     public function __construct(){
@@ -154,7 +154,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     protected function get_body_node($content){
 
         $result = null;
-        
+
         libxml_use_internal_errors(true);
 
         switch ($this->response_type){
