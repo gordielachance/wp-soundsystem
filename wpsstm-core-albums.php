@@ -124,12 +124,8 @@ class WP_SoundSytem_Core_Albums{
         
         $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$album) );
         
-        //TO FIX
-        //title stored in the DB converts some characters like the quotes,
-        //so condition does not work here.
-        //fix this !
-        
-        if ( $post_title==get_the_title($post_id) ) return; //does not need update
+        //title stored in the DB converts some characters like the quotes, so use sanitize_title() to make it match
+        if ( sanitize_title($post_title) == sanitize_title( get_the_title($post_id) ) ) return;
 
         //log
         wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_album()"); 

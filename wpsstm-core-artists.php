@@ -105,17 +105,18 @@ class WP_SoundSytem_Core_Artists{
         $has_cap = current_user_can('edit_post', $post_id);
         if ( $is_autosave || $is_revision || !$has_cap ) return;
 
-        $title = wpsstm_get_post_artist($post_id);
-        if ( !$title ) return;
+        $post_title = wpsstm_get_post_artist($post_id);
+        if ( !$post_title ) return;
         
-        if ( $title==get_the_title($post_id) ) return; //does not need update
+        //title stored in the DB converts some characters like the quotes, so use sanitize_title() to make it match
+        if ( sanitize_title($post_title) == sanitize_title( get_the_title($post_id) ) ) return;
 
         //log
-        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$title),"update_title_artist()"); 
+        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_artist()"); 
 
         $args = array(
             'ID'            => $post_id,
-            'post_title'    => $title
+            'post_title'    => $post_title
         );
 
         remove_action( 'save_post',array($this,'update_title_artist'), 99 ); //avoid infinite loop - ! hook priorities
