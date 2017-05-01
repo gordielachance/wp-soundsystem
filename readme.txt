@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 3.6
-Tested up to: 4.7.3
+Tested up to: 4.7.4
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -138,6 +138,16 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.1 =
+* sort stations by health / trending / popular
+* fixed ajaxed row actions for tracklist rows
+* improved classes WP_SoundSystem_Subtrack() and WP_SoundSystem_Track()
+* fix title comparaison check when updating artist/album/track
+* fix Spiff plugin upgrade routine
+* renamed Array2XML > WP_SoundSytem_Array2XML
+* new function WP_SoundSytem::is_admin_page()
+* no CSS background for tracklist table
 
 = 0.9.8 =
 * show player column only if at least one track has sources
