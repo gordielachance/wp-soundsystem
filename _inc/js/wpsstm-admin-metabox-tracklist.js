@@ -14,58 +14,17 @@ jQuery(function($){
         //save
         wrapper.find('.row-actions .save a').live("click", function(event){
             event.preventDefault();
-            
-            //get URI args
-            var uri = new URI( $(this).attr('href') );
-            var uri_args = uri.search(true);
-
-            var row = $(this).parents('tr');
-            
-            var ajax_data = {
-                'action':   'wpsstm_tracklist_save_row',
-                'order':    row.find('.trackitem_order input').val(),
-                'artist':   row.find('.trackitem_artist input').val(),
-                'track':    row.find('.trackitem_track input').val(),
-                'album':    row.find('.trackitem_album input').val(),
-                'mbid':     row.find('.trackitem_mbid input').val(),
-                'uri_args': uri_args
-            };
-            
-            $.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
-                beforeSend: function() {
-                    row.addClass('loading');
-                },
-                success: function(data){
-                    console.log(data);
-                    if (data.success === false) {
-                        console.log(data);
-                    }else{
-                        row.html( data.output );
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    row.removeClass('metabox-table-row-edit'); //remove edit class
-                    row.removeClass('loading');
-                }
-            })
-
-            
+            wpsstm_tracklist_row_action(this);
+        });
+        //remove
+        wrapper.find('.row-actions .remove a').live("click", function(event){
+            event.preventDefault();
+            wpsstm_tracklist_row_action(this);
         });
         //delete
         wrapper.find('.row-actions .delete a').live("click", function(event){
             event.preventDefault();
-            var row = $(this).parents('tr');
-            row.remove();
-            wpsstm_tracklist_reorder();
+            wpsstm_tracklist_row_action(this);
         });
 
         wrapper.find('.metabox-table-row-new').hide();
@@ -144,8 +103,67 @@ jQuery(function($){
                 wpsstm_tracklist_order_update();
             }
         });
+
     })
 })
+
+function wpsstm_tracklist_row_action(row_action_link){
+    var link = row_action_link;
+    var row = jQuery(link).parents('tr');
+            
+    //get URI args
+    var uri = new URI( jQuery(link).attr('href') );
+    var uri_args = uri.search(true);
+    var track_id = uri_args.subtrack_id;
+    var tracklist_id = uri_args.post;
+    var track_action = uri_args.subtrack_action;
+
+    var ajax_data = {
+        'action':           'wpsstm_tracklist_row_action',
+        'artist':           row.find('.trackitem_artist input').val(),
+        'track':            row.find('.trackitem_track input').val(),
+        'album':            row.find('.trackitem_album input').val(),
+        'mbid':             row.find('.trackitem_mbid input').val(),
+        'track_id':         track_id,
+        'tracklist_id':     tracklist_id,
+        'subtrack_order':   row.find('.trackitem_order input').val(),
+        'track_action':     track_action,
+    };
+
+    jQuery.ajax({
+
+        type: "post",
+        url: wpsstmL10n.ajaxurl,
+        data:ajax_data,
+        dataType: 'json',
+        beforeSend: function() {
+            row.addClass('loading');
+        },
+        success: function(data){
+            console.log(data);
+            if (data.success === false) {
+                console.log(data);
+            }else{
+                if ( data.new_html ){
+                    row.html( data.new_html );
+                }
+                if ( (track_action == 'remove') || (track_action == 'delete') ){
+                    row.remove();
+                    wpsstm_tracklist_reorder();
+                }
+
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
+        complete: function() {
+            row.removeClass('metabox-table-row-edit');
+            row.removeClass('loading');
+        }
+    })
+}
 
 function wpsstm_tracklist_reorder(){
     var wrapper = jQuery('#wpsstm-subtracks-list');

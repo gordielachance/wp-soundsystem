@@ -68,6 +68,9 @@ class WP_SoundSytem_Tracklist{
 
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
         $ordered_ids = array_unique($ordered_ids);
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSytem_Tracklist::set_subtrack_ids()"); 
+        
         return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
     }
     
@@ -88,11 +91,11 @@ class WP_SoundSytem_Tracklist{
             
             //set tracklist ID
             $track->tracklist_id = $this->post_id;
-            
+
             //increment count
             $this->tracks_count++;
             $track->subtrack_order = $this->tracks_count;
-            
+
             $this->tracks[] = $track;
         }
 

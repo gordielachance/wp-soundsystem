@@ -387,9 +387,6 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             //edit
             $edit_url = get_edit_post_link($item->post_id);
             $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-edit',$edit_url,__('Edit'));
-            
-            //TO FIX ajax functions not working yet
-            /*
 
             //save
             $save_url = add_query_arg(array('subtrack_action'=>'save'),$action_url);
@@ -405,8 +402,6 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 $delete_url = wp_nonce_url($delete_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
                 $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-delete',$delete_url,__('Delete'));
             }
-            
-            */
 
             return $this->row_actions( $actions, true );
         }
