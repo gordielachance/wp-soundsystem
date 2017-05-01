@@ -5,13 +5,16 @@
     }
     
     &.wizard-wrapper-frontend{
+        text-align:center;
         h2{
             display:none;
         }
         p.submit{
-            text-align:center;
+            margin:auto;
+            max-width:40%;
         }
         table.wizard-section-table{
+            margin:auto;
             border:none;
             th{
                 display:none;

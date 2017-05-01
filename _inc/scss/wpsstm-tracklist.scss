@@ -67,7 +67,7 @@
             @include transition-duration(.4s);
 
             &:nth-child(odd) {
-                    background: rgba(249, 249, 249, 0.5);
+                    background: rgba(0,0,0,0.0125);
             }
             &:hover {
                     background: rgba(0,0,0,0.025);

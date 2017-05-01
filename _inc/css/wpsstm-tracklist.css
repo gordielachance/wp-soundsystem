@@ -74,7 +74,7 @@
 }
 /* line 69, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist-table table tbody tr:nth-child(odd) {
-  background: rgba(249, 249, 249, 0.5);
+  background: rgba(0, 0, 0, 0.0125);
 }
 /* line 72, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist-table table tbody tr:hover {
