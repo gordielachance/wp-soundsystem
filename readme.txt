@@ -55,6 +55,8 @@ Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, 
 Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see above).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
 
+Demo on [spiff-radio.org](http://v2.spiff-radio.org/?post_type=wpsstm_live_playlist).
+
 You may also propose a Frontend Tracklist Parser to your visitors. 
 They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
 Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
@@ -140,6 +142,11 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.3 =
+* doc
+* live playlists : when not displaying a single page, add a notice to load the tracklist
+* scraper : cache only if several post are displayed (like an archive page)
 
 = 0.9.8.2 =
 * try to use parser without converting encoding
