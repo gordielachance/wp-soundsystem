@@ -231,12 +231,14 @@ function wpsstm_get_xspf_link($post_id=null,$download=true){
     if (!$post_id) $post_id = $post->ID;
 
     $xspf_url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
+    
+    $xspf_url = apply_filters('wpsstm_get_xspf_link',$xspf_url,$post_id);
 
     if($download){
         $xspf_url = add_query_arg(array('download'=>true),$xspf_url);
     }
 
-    return apply_filters('wpsstm_get_xspf_link',$xspf_url,$post_id,$download);
+    return $xspf_url;
 
 }
 
