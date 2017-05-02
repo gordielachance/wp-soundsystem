@@ -143,6 +143,9 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= XXX =
+* added rewrite rule for frontend wizard
+
 = 0.9.8.3 =
 * doc
 * live playlists : when not displaying a single page, add a notice to load the tracklist

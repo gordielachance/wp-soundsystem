@@ -46,7 +46,8 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         //frontend wizard
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
-        add_action ('wp', array($this,'frontend_wizard_populate' ));
+        add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
+        add_action( 'wp', array($this,'frontend_wizard_populate' ) );
         add_filter( 'wpsstm_get_post_tracklist', array($this,'frontend_wizard_get_tracklist'), 10, 2);
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
         add_filter( 'wpsstm_get_xspf_link', array($this,'frontend_wizard_get_xspf_link'), 10, 3);
@@ -302,6 +303,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         $vars[] = $this->qvar_frontend_wizard_url;
         return $vars;
     }
+
     
     function frontend_wizard_populate(){
         global $wp_query;
@@ -349,7 +351,23 @@ class WP_SoundSytem_Core_Live_Playlists{
         return $tracklist;
         
     }
+    
+    /*
+    Handle the XSPF endpoint for the frontend wizard page
+    */
+    
+    function frontend_wizard_rewrite($rules){
+        global $wp_rewrite;
+        if ( !$this->frontend_wizard_page_id ) return $rules;
+        
+        $page_slug = get_post_field( 'post_name', $this->frontend_wizard_page_id );
 
+        $wizard_rule = array(
+            $page_slug . '/xspf/?' => sprintf('index.php?pagename=%s&%s=true',$page_slug,wpsstm_tracklists()->qvar_xspf)
+        );
+
+        return array_merge($wizard_rule, $rules);
+    }
 }
 
 function wpsstm_live_playlists() {
