@@ -1,6 +1,8 @@
 <?php
 
 class WP_SoundSytem_Tracklist{
+    var $title = null;
+    var $author = null;
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     var $tracks = array();
     var $tracks_count = 0;
@@ -9,6 +11,11 @@ class WP_SoundSytem_Tracklist{
         
         if ($post_id){
             $this->post_id = $post_id;
+            
+            $this->title = get_the_title($post_id);
+            
+            $post_author_id = get_post_field( 'post_author', $post_id );
+            $this->author = get_the_author_meta( 'display_name', $post_author_id );
         }
 
     }

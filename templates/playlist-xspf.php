@@ -16,6 +16,15 @@ $xspf = new mptre\Xspf();
 $tracklist = wpsstm_get_post_tracklist();
 $tracklist->validate_tracks();
 
+//playlist
+if ( $playlist_title = $tracklist->title ){
+    $xspf->addPlaylistInfo('title', $playlist_title);
+}
+if ( $playlist_creator = $tracklist->author ){
+    $xspf->addPlaylistInfo('creator', $playlist_creator);
+}
+
+//tracks
 foreach ( $tracklist->tracks as $track){
     $arr = $track->get_array_for_xspf();
     $xspf->addTrack($arr);
