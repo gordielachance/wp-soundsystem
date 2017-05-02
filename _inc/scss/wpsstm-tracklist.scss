@@ -10,6 +10,7 @@
     font-family: sans-serif;
     width: 100%;
     margin-bottom:1.5em;
+    font-size:0.8em;
 
     .tablenav{
         padding:.5em;
@@ -93,8 +94,4 @@
             }
 	   }
     }
-    .single & {
-        font-size:0.8em;
-    }
- 
 }
