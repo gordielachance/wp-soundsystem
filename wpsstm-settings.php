@@ -348,7 +348,7 @@ class WP_SoundSytem_Settings {
     function live_playlists_scraper_page_id_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
 
-        $help = "<small>".__("ID of the page to use for the frontend Tracklist Parser. 0 = Disabled.","wpsstm")."</small>";
+        $help = "<small>".__("ID of the page to use for the frontend Tracklist Importer. 0 = Disabled.","wpsstm")."</small>";
         
         printf(
             '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" /><br/>%s',

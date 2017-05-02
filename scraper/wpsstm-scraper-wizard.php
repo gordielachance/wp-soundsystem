@@ -69,7 +69,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         add_meta_box( 
             'wpsstm-metabox-scraper-wizard', 
-            __('Tracklist Parser','wpsstm'),
+            __('Tracklist Importer','wpsstm'),
             array($this,'wizard_display'),
             wpsstm_tracklists()->scraper_post_types, 
             'normal', //context

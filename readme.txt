@@ -24,7 +24,7 @@ For example, when creating an album post, you can load its tracklist from the Mu
 = Playlists =
 Create and manage tracklists easily with the Tracklist metabox.
 
-Import a tracklist from a file or a music service like Spotify using the Tracklist Parser Metabox (see below).
+Import a tracklist from a file or a music service like Spotify using the Tracklist Importer (see below).
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
 = Audio player =
@@ -38,7 +38,7 @@ Just enter the URL of this source and be sure you checked the 'Music Sources' ca
 Those links will be used by the audio player (see above) to play the track - if the source URL is supported.
 We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
 
-= Tracklist Parser Metabox =
+= Tracklist Importer Metabox =
 
 Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
 
@@ -52,12 +52,12 @@ Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, 
 
 (disabled by default, you can enable them by acessing the plugin's settings page)
 
-Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Parser Metabox (see above).
+Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Importer (see above).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
 
-Demo on [spiff-radio.org](http://v2.spiff-radio.org/?post_type=wpsstm_live_playlist).
+Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 
-You may also propose a Frontend Tracklist Parser to your visitors. 
+You may also propose a Frontend Tracklist Importer to your visitors. 
 They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
 Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
