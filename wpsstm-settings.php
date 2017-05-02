@@ -116,6 +116,7 @@ class WP_SoundSytem_Settings {
             if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
                 if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
                     $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
+                    flush_rewrite_rules(); //because of function frontend_wizard_rewrite()
                 }
                 
             }
