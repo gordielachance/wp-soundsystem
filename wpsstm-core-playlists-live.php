@@ -37,6 +37,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_live_playlist_tracklist'), 10, 2);
         
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_stations'));
@@ -48,7 +49,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
         add_action( 'wp', array($this,'frontend_wizard_populate' ) );
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'frontend_wizard_get_tracklist'), 10, 2);
+        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_frontend_wizard_tracklist'), 10, 2);
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
         add_filter( 'wpsstm_get_xspf_link', array($this,'frontend_wizard_get_xspf_link'), 10, 3);
         
@@ -197,6 +198,18 @@ class WP_SoundSytem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
     
+    function get_live_playlist_tracklist($tracklist,$post_id){
+        
+        $post_type = get_post_type($post_id);
+        if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;
+
+        $scraper = new WP_SoundSytem_Playlist_Scraper();
+        $scraper->init_post($post_id);
+        $tracklist = $scraper->tracklist;
+
+        return $tracklist;
+    }
+    
     function post_column_register($columns){
         
         $columns['health'] = __('Live','spiff');
@@ -342,14 +355,11 @@ class WP_SoundSytem_Core_Live_Playlists{
         return $link;
     }
     
-    function frontend_wizard_get_tracklist($tracklist,$post_id){
-        global $wp_query;
+    function get_frontend_wizard_tracklist($tracklist,$post_id){
         if ( ( $post_id == $this->frontend_wizard_page_id ) && ( $this->frontend_wizard ) ) {
             $tracklist = $this->frontend_wizard->scraper->tracklist;
         }
-        
         return $tracklist;
-        
     }
     
     /*

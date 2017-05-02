@@ -201,7 +201,8 @@ function wpsstm_get_post_mb_link_for_post($post_id){
 }
 
 /*
-Get a post tracklist
+Get a post tracklist.
+Live playlists / frontend wizard have a function hooked on the filter.
 */
 
 function wpsstm_get_post_tracklist($post_id=null){
@@ -212,15 +213,12 @@ function wpsstm_get_post_tracklist($post_id=null){
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
 
     if ($post_type == wpsstm()->post_type_track){ //single track
+        
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         $tracklist->add($track);
-    }elseif ($post_type == wpsstm()->post_type_live_playlist){ //live playlist
-
-        $scraper = new WP_SoundSytem_Playlist_Scraper();
-        $scraper->init_post($post_id);
-        $tracklist = $scraper->tracklist;
-
+        
     }else{ //playlist or album
+        
         $tracklist->load_subtracks();
     }
     
