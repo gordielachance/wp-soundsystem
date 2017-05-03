@@ -270,7 +270,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
     
     public function get_tracklist_author(){
-        if ( $this->author ) return $this->author;
+        
     }
 
     
