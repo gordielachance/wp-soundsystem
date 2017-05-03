@@ -163,18 +163,17 @@ class WP_SoundSytem_Playlist_Scraper{
         */
         
         //tracklist informations
-        //set only if not already defined (eg. by a post ID)
+        //set only if not already defined (eg. by a post ID); except for timestamp
+        
+        $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
+        
         if ( !$this->tracklist->title ){
             $this->tracklist->title = wpsstm_get_array_value('title', $this->datas);
         }
         if ( !$this->tracklist->author ){
             $this->tracklist->author = wpsstm_get_array_value('author', $this->datas);
         }
-        
-        if ( !$this->tracklist->timestamp ){
-            $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
-        }
-        
+
         if ( !$this->tracklist->location ){
             $this->tracklist->location = $this->feed_url;
         }
@@ -322,6 +321,3 @@ class WP_SoundSytem_Playlist_Scraper{
     }
 
 }
-
-
-
