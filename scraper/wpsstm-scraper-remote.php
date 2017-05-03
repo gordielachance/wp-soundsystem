@@ -24,7 +24,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public $tracks = array();
     
     public $notices = array();
-
+    
     //request
     static $querypath_options = array(
         'omit_xml_declaration'      => true,
@@ -42,7 +42,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $this->url = $url;
         if ($options) $this->options = array_replace_recursive($options, $this->options);
     }
-    
+
     public function get_tracks(){
         
         //url
@@ -257,6 +257,22 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         return $result;
 
     }
+    
+    public function get_tracklist_title(){
+
+        //QueryPath
+        try{
+            $title_node = qp( $this->body_node, null, self::$querypath_options )->find('title');
+            return $title_node->innerHTML();
+        }catch(Exception $e){
+            return;
+        }
+    }
+    
+    public function get_tracklist_author(){
+        if ( $this->author ) return $this->author;
+    }
+
     
     protected function get_track_nodes($body_node){
         

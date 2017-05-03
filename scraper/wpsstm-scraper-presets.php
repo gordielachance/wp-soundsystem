@@ -167,7 +167,26 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
         if ( !$client_id || !$client_secret ){
             $this->can_use_preset = false;
         }
+
+    }
+    
+    function get_tracklist_title(){
+        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
+        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
         
+        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
+        
+        $json = wp_remote_retrieve_body($response);
+        
+        if ( is_wp_error($json) ) return $json;
+        
+        $api = json_decode($json,true);
+        
+        return wpsstm_get_array_value('name', $api);
+    }
+    
+    function get_tracklist_author(){
+        return $this->get_variable_value('spotify-user');
     }
     
     function get_request_args(){
@@ -184,7 +203,7 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
 
         return $args;
     }
-    
+
     function get_access_token(){
         
         if ($this->token === null){
@@ -314,6 +333,11 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
         return $station_id;
 
     }
+    
+    function get_tracklist_title(){
+        if ( !$slug = $this->get_variable_value('radionomy-slug') ) return;
+        return sprintf(__('Radionomy : %s','wppstm'),$slug);
+    }
 
 }
 
@@ -343,6 +367,11 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
 
         $this->name = __('Soma FM Station','wpsstm');
 
+    }
+    
+    function get_tracklist_title(){
+        if ( !$slug = $this->get_variable_value('somafm-slug') ) return;
+        return sprintf(__('Somafm : %s','wppstm'),$slug);
     }
 
 }
@@ -444,6 +473,7 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
         'soundcloud-username' => null,
         'soundcloud-page' => null
     );
+    var $page_api = null;
 
     var $options = array(
         'selectors' => array(
@@ -465,7 +495,7 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
             $this->can_use_preset = false;
         }
 
-    } 
+    }
 
     function get_remote_url(){
         
@@ -475,13 +505,16 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
         $this->set_variable_value('soundcloud-userid',$user_id);
 
         $page = $this->get_variable_value('soundcloud-page');
-        $page_api = 'tracks';
         
         switch($page){
             case 'likes':
-                $page_api = 'favorites';
+                $this->page_api = 'favorites';
+            break;
+            default:
+                $this->page_api = 'tracks';
+            break;
         }
-        $this->set_variable_value('soundcloud-api-page',$page_api);
+        $this->set_variable_value('soundcloud-api-page',$this->page_api);
         
         return parent::get_remote_url();
     }
@@ -519,7 +552,30 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
         return $user_id;
 
     }
-
+    
+    function get_tracklist_title(){
+        
+        $page = $this->get_variable_value('soundcloud-page');
+        $username = $this->get_variable_value('soundcloud-username');
+        
+        $title = sprintf(__('%s on Soundcloud','wpsstm'),$username);
+        $subtitle = null;
+        
+        switch($this->page_api){
+            case 'favorites':
+                $subtitle = __('Favorite tracks','wpsstm');
+            break;
+            case 'tracks':
+                $subtitle = __('Tracks','wpsstm');
+            break;
+        }
+        
+        if ($subtitle){
+            return $title . ' - ' . $subtitle;
+        }else{
+            return $title;
+        }
+    }
 
 }
 
@@ -564,6 +620,12 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
     function get_client_id(){
         return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
     }
+    
+    function get_tracklist_title(){
+        $slug = $this->get_variable_value('soundsgood-playlist-slug');
+        return sprintf(__('%s on Soundsgood','wpsstm'),$slug);
+    }
+    
 }
 
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
