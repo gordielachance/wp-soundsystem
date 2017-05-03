@@ -46,7 +46,7 @@ For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood.
+Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine.
 
 = Live Playlists =
 
@@ -142,6 +142,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.5 =
+* scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
+informations overriden
+* sanitize string at the end of WP_SoundSytem_Playlist_Scraper_Datas::get_track_node_content()
+* new Hype Machine preset
 
 = 0.9.8.4 =
 * XSPF output : added title, author, timestamp, location and annotation nodes
