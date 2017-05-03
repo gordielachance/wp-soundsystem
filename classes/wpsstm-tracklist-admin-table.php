@@ -203,7 +203,8 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 'trackitem_artist'  => __('Artist','wpsstm'),
                 'trackitem_track'   => __('Track','wpsstm'),
                 'trackitem_album'   => __('Album','wpsstm'),
-                'trackitem_mbid'      => __('MBID','wpsstm'),
+                'trackitem_mbid'    => __('MBID','wpsstm'),
+                'trackitem_sources' => __('Sources','wpsstm'),
                 'trackitem_action'  => __('Action','wpsstm')
             );
             
@@ -345,6 +346,16 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     
                     return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                     
+                break;
+                    
+                case 'trackitem_sources':
+
+                    $display_el = 'coucou';
+                    $field_name = $this->get_field_name('sources');
+                    
+                    $edit_el = wpsstm_sources()->get_sources_field_editable( $item->post_id, $field_name );
+                    
+                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                 break;
                     
                 case 'trackitem_action':

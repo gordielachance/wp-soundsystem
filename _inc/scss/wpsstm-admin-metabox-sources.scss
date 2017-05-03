@@ -1,0 +1,92 @@
+@import "compass/css3";
+
+p.wpsstm-source{
+    
+    position:relative;
+    padding:.5em;
+    margin:0;
+    input{
+        
+        width: calc(100% - 3em)!important; //.wpsstm-source-action
+        display:inline-block;
+    }
+    .wpsstm-source-action{
+        font-size:1.5em;
+        width:2em;
+        text-align:center;
+        display:inline-block;
+        .wpsstm-source-icon{
+            width:1em;
+            display:inline-block;
+            cursor: pointer;
+            cursor: hand;
+            &.wpsstm-source-icon-add{
+                display:none;
+            }
+            &.wpsstm-source-icon-delete{
+                display:inline;
+            }
+        }
+    }
+    &.wpsstm-source-blank,&.wpsstm-source-suggest{
+        .wpsstm-source-icon{
+            &.wpsstm-source-icon-add{
+                display:inline;
+            }
+            &.wpsstm-source-icon-delete{
+                display:none;
+            }
+        }
+    }
+    
+    &:not(.wpsstm-source-blank){
+        .wpsstm-source-action{
+            .wpsstm-source-icon{
+
+            }
+        }
+
+    }
+}
+
+.postbox#wpsstm-track-sources{
+    .inside{
+        
+        margin:0;
+        padding:0;
+        font-size: 1.5em;
+        p.wpsstm-source{
+            
+            input{
+                height:3em;
+            }
+            
+            &.wpsstm-source-blank{
+                background-color:#F1F1F1;
+
+            }
+            
+            
+        }
+    }
+}
+
+#wpsstm-tracklist{
+    td.column-trackitem_sources{
+            margin:0;
+            padding:0;
+    }
+    p.wpsstm-source{
+        &.wpsstm-source-blank{
+            border-bottom:1px solid #DDD;
+            &.wpsstm-source-icon-add{
+                display:inline;
+            }
+            &.wpsstm-source-icon-delete{
+                display:none;
+            }
+        }
+    }
+}
+
+
