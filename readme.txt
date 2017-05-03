@@ -61,7 +61,7 @@ You may also propose a Frontend Tracklist Importer to your visitors.
 They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
 Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
-Demo on [spiff-radio.org](http://www.spiff-radio.org/tracklist-wizard/).
+Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 
 = Shortcodes =
 
@@ -143,7 +143,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
-= XXX =
+= 0.9.8.4 =
+* XSPF output : added title, author, timestamp, location and annotation nodes
+* xspf urls : moved download argument at the end
+* hook on 'wpsstm_get_post_tracklist' to get a live playlist tracklist
 * added rewrite rule for frontend wizard
 
 = 0.9.8.3 =
