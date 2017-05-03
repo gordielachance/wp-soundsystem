@@ -9,6 +9,7 @@ if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
     header("Content-Type: text/xml");
 }
 
+
 require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
 $xspf = new mptre\Xspf();
@@ -17,12 +18,26 @@ $tracklist = wpsstm_get_post_tracklist();
 $tracklist->validate_tracks();
 
 //playlist
-if ( $playlist_title = $tracklist->title ){
-    $xspf->addPlaylistInfo('title', $playlist_title);
+if ( $title = $tracklist->title ){
+    $xspf->addPlaylistInfo('title', $title);
 }
-if ( $playlist_creator = $tracklist->author ){
-    $xspf->addPlaylistInfo('creator', $playlist_creator);
+
+if ( $author = $tracklist->author ){
+    $xspf->addPlaylistInfo('creator', $author);
 }
+
+if ( $timestamp = $tracklist->timestamp ){
+    $date = gmdate(DATE_ISO8601,$timestamp);
+    $xspf->addPlaylistInfo('date', $date);
+}
+
+if ( $location = $tracklist->location ){
+    $xspf->addPlaylistInfo('location', $location);
+}
+
+$annotation = sprintf( __('Station generated with the %s plugin — %s','wpsstm'),'WP SoundSystem','https://wordpress.org/plugins/wp-soundsystem/');
+$xspf->addPlaylistInfo('annotation', $annotation);
+
 
 //tracks
 foreach ( $tracklist->tracks as $track){
