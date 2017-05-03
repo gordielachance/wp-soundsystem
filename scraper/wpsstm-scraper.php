@@ -77,7 +77,7 @@ class WP_SoundSytem_Playlist_Scraper{
     function init($feed_url){
 
         if (!$feed_url) return;
-        
+
         //cache only if several post are displayed (like an archive page)
         if ( !is_admin() ){
             $this->cache_only = ( !is_singular() );
@@ -158,12 +158,28 @@ class WP_SoundSytem_Playlist_Scraper{
         //get options back from page (a preset could have changed them)
         $this->options = $this->page->options; 
         
-        //build tracklist
-        $this->tracklist->title = wpsstm_get_array_value('title', $this->datas);
-        $this->tracklist->author = wpsstm_get_array_value('author', $this->datas);
-        $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
-        $this->tracklist->location = $this->feed_url;
-
+        /*
+        Build Tracklist
+        */
+        
+        //tracklist informations
+        //set only if not already defined (eg. by a post ID)
+        if ( !$this->tracklist->title ){
+            $this->tracklist->title = wpsstm_get_array_value('title', $this->datas);
+        }
+        if ( !$this->tracklist->author ){
+            $this->tracklist->author = wpsstm_get_array_value('author', $this->datas);
+        }
+        
+        if ( !$this->tracklist->timestamp ){
+            $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
+        }
+        
+        if ( !$this->tracklist->location ){
+            $this->tracklist->location = $this->feed_url;
+        }
+        
+        //tracks
         if ( $tracks = wpsstm_get_array_value('tracks', $this->datas) ){
             $this->tracklist->add($tracks);
         }
