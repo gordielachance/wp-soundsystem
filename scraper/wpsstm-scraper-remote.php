@@ -258,6 +258,10 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
     
+    /*
+    Get the title tag of the page as playlist title.  Could be overriden in presets.
+    */
+    
     public function get_tracklist_title(){
 
         //QueryPath
@@ -269,11 +273,14 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         }
     }
     
+    /*
+    Get the playlist author.  Could be overriden in presets.
+    */
+    
     public function get_tracklist_author(){
         
     }
 
-    
     protected function get_track_nodes($body_node){
         
         //update options for XSPF
@@ -403,6 +410,12 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             }
                 
         }
+        
+        //sanitize result
+        $result = strip_tags($result);
+        $result = urldecode($result);
+        $result = htmlspecialchars_decode($result);
+        $result = trim($result);
         
         return $result;
     }
