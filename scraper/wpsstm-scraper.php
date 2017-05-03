@@ -119,7 +119,6 @@ class WP_SoundSytem_Playlist_Scraper{
                 }
             }
 
-
             if ( !is_wp_error($remote_tracks) ) {
                 
                 //lookup
@@ -138,8 +137,11 @@ class WP_SoundSytem_Playlist_Scraper{
                 
                 //format response
                 $this->datas = $this->datas_remote = array(
+                    'title'     => $this->page->get_tracklist_title(),
+                    'author'    => $this->page->get_tracklist_author(),
+                    'timestamp' => current_time( 'timestamp' ),
                     'tracks'    => $remote_tracks,
-                    'time'      => current_time( 'timestamp' )
+                    
                 );
 
                 //set cache if there is none
@@ -150,20 +152,20 @@ class WP_SoundSytem_Playlist_Scraper{
             }else{
                 $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
             }
-            
-
-
-            //repopulate author & title as we might change them depending of the page content
-            //$this->title = $this->get_station_title();
-            //$this->author = $this->get_station_author();
 
         }
         
         //get options back from page (a preset could have changed them)
         $this->options = $this->page->options; 
+        
+        //build tracklist
+        $this->tracklist->title = wpsstm_get_array_value('title', $this->datas);
+        $this->tracklist->author = wpsstm_get_array_value('author', $this->datas);
+        $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
+        $this->tracklist->location = $this->feed_url;
 
-        if ($this->datas && isset($this->datas['tracks']) ){
-            $this->tracklist->add($this->datas['tracks']);
+        if ( $tracks = wpsstm_get_array_value('tracks', $this->datas) ){
+            $this->tracklist->add($tracks);
         }
         
         
