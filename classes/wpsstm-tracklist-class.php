@@ -1,23 +1,36 @@
 <?php
 
 class WP_SoundSytem_Tracklist{
+    
+    var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
+    
+    //infos
+    
     var $title = null;
     var $author = null;
-    var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
+    var $timestamp = null;
+    var $location = null;
+    
+    //datas
+    
     var $tracks = array();
     var $tracks_count = 0;
 
     function __construct($post_id = null ){
         
         if ($post_id){
+            
             $this->post_id = $post_id;
             
             $this->title = get_the_title($post_id);
             
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
+            
+            $this->timestamp = get_post_modified_time( 'U', false, $post_id );
+            $this->location = get_permalink($post_id);
+            
         }
-
     }
     
     function load_subtracks(){
