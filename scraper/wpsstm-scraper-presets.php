@@ -2,9 +2,7 @@
 
 abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scraper_Datas{
     var $slug = null;
-
     var $name = null;
-    var $description = null;
     
     var $pattern = null; //regex pattern that would match an URL
     var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
@@ -101,15 +99,13 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playl
 class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'last-fm-website';
-
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
     var $variables = array(
         'lastfm-user' => null,
         'lastfm-page' => null
     );
+
 
     var $options = array(
         'selectors' => array(
@@ -135,8 +131,6 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
     //https://developer.spotify.com/web-api/console/get-playlist-tracks
     
     var $slug = 'spotify-playlist';
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
     var $redirect_url = 'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
@@ -243,9 +237,6 @@ class WP_SoundSytem_Playlist_Scraper_Spotify_Playlist extends WP_SoundSytem_Play
 class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Scraper_Preset{
 
     var $slug = 'radionomy';
-
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
@@ -343,9 +334,6 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
 
 class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'somafm';
-
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
@@ -379,9 +367,6 @@ class WP_SoundSytem_Playlist_Scraper_SomaFM extends WP_SoundSytem_Playlist_Scrap
 class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-station';
 
-    var $name = null;
-    var $description = null;
-
     var $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)/?~i';
     var $redirect_url= 'http://www.bbc.co.uk/%bbc-slug%/playlist';
     var $variables = array(
@@ -409,9 +394,6 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
 class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'bbc-playlist';
     
-    var $name = null;
-    var $description = null;
-    
     var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)/?$~i';
     var $variables = array(
         'bbc-playlist-id' => null
@@ -437,9 +419,6 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Playlist extends WP_SoundSytem_Playlist
 class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'slacker-station-tops';
     
-    var $name = null;
-    var $description= null;
-    
     var $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
     var $variables = array(
         'slacker-station-slug' => null
@@ -464,9 +443,7 @@ class WP_SoundSytem_Playlist_Scraper_Slacker_Station extends WP_SoundSytem_Playl
 class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_Scraper_Preset{
     
     var $slug = 'soundcloud';
-
-    var $name = null;
-    var $description = null;
+    
     var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/?([^/]+)?~i';
     var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-userid%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
     var $variables = array(
@@ -582,9 +559,7 @@ class WP_SoundSytem_Playlist_Scraper_Soundcloud extends WP_SoundSytem_Playlist_S
 class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_Scraper_Preset{
     
     var $slug = 'soundsgood';
-
-    var $name = null;
-    var $description = null;
+    
     var $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
     var $redirect_url= 'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
     var $variables = array(
@@ -628,11 +603,30 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
     
 }
 
+class WP_SoundSytem_Playlist_Scraper_Hypem extends WP_SoundSytem_Playlist_Scraper_Preset{
+    
+    var $slug = 'hypem';
+    
+    var $pattern = '~^https?://(?:www.)?hypem.com/~i';
+
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'.section-track'),
+            'track_artist'      => array('path'=>'.track_name .artist'),
+            'track_title'       => array('path'=>'.track_name .track'),
+            //'track_image'       => array('path'=>'a.thumb')
+        )
+    );
+    
+    function __construct(){
+        parent::__construct();
+        $this->name = __('Hype Machine','wpsstm');
+    } 
+ 
+}
+
 class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'twitter';
-    
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
     var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
@@ -658,9 +652,6 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
 
 class WP_SoundSytem_Playlist_Scraper_RTBF extends WP_SoundSytem_Playlist_Scraper_Preset{
     var $slug = 'rtbf';
-    
-    var $name = null;
-    var $description = null;
     
     var $pattern = '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i'; //ignore la premiere which has different selectors.
     var $redirect_url= 'https://www.rtbf.be/%rtbf-slug%/conducteur';
@@ -701,6 +692,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundsgood();
+    $presets[] = new WP_SoundSytem_Playlist_Scraper_Hypem();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_RTBF();
     
