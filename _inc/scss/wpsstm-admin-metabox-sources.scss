@@ -38,6 +38,13 @@ p.wpsstm-source{
             }
         }
     }
+    &.wpsstm-source-auto{
+        .wpsstm-source-icon{
+            &.wpsstm-source-icon-delete{
+                display:none;
+            }
+        }
+    }
     
     &:not(.wpsstm-source-blank){
         .wpsstm-source-action{
@@ -56,7 +63,7 @@ p.wpsstm-source{
         padding:0;
         font-size: 1.5em;
         p.wpsstm-source{
-            
+            padding: .5em 2em;
             input{
                 height:3em;
             }

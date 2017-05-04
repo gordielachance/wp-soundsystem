@@ -20,10 +20,13 @@ jQuery(document).ready(function($){
             empty_row.find('input').focus();
         }else{
             var new_row = row_blank.clone();
-            new_row.removeClass('wpsstm-source-blank');
+            new_row.removeClass('wpsstm-source-blank ');
             new_row.insertAfter( row_blank );
-            row_blank.find('input').val(''); //clear form
-            row_blank.find('input').focus();
+            var row_blank_input = row_blank.find('input');
+            row_blank.removeClass('wpsstm-source-auto');
+            row_blank_input.prop("disabled", false);
+            row_blank_input.val(''); //clear form
+            row_blank_input.focus();
         }
 
     });

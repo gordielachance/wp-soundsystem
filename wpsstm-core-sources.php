@@ -78,18 +78,28 @@ class WP_SoundSytem_Core_Sources{
 
         if ( empty($sources) ) $sources = array(null); //blank
         
+        $sources_auto = wpsstm_get_post_sources_auto($post_id);
+        
         $placeholder = __("Enter a track source URL",'wpsstm');
         
         $rows = array();
 
         foreach ( $sources as $key=>$source ){
+            
+            $disabled = false;
 
             $source_classes = array('wpsstm-source');
             if ($key==0){
                 $source_classes[] = 'wpsstm-source-blank';
             }
+            if ( in_array($source,$sources_auto) ){
+                $source_classes[] = 'wpsstm-source-auto';
+                $disabled = true;
+            }
+            
+            $disabled_str = disabled( $disabled, true, false );
    
-            $content = sprintf('<input type="text" name="%s[]"  value="%s" placeholder="%s" />',$field_name,$source,$placeholder);
+            $content = sprintf('<input type="text" name="%s[]"  value="%s" placeholder="%s" %s/>',$field_name,$source,$placeholder,$disabled_str);
             
             $icon_plus = '<i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>';
             $icon_minus = '<i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>';

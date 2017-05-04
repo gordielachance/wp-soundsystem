@@ -68,11 +68,32 @@ function wpsstm_get_post_sources($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
-
+    
+    $sources_auto = wpsstm_get_post_sources_auto();
+    $sources = array_merge($sources_auto,$sources);
+    
     //cleanup
     $sources = wpsstm_sources()->sanitize_sources($sources);
     return $sources;
 }
+
+/*
+Those source will be auto-populated
+*/
+
+function wpsstm_get_post_sources_auto($post_id = null){
+    
+    $sources = array();
+    
+    //allow plugins to filter this
+    $sources = apply_filters('wpsstm_get_post_sources_forced',$sources,$post_id);
+    
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
+    return $sources;
+    
+}
+
 
 function wpsstm_get_post_sources_list( $post_id ){
     global $post;
