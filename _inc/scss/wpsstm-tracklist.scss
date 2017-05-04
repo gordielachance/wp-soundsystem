@@ -60,13 +60,16 @@
             }
 
             thead {
-                    display: table-header-group;
-                    vertical-align: middle;
-                    border-color: inherit;
-                    th{
-                        border-bottom: 1px solid #e1e1e1;
-                        text-align:center;
-                    }
+                /*
+                display: table-header-group;
+                vertical-align: middle;
+                border-color: inherit;
+                th{
+                    border-bottom: 1px solid #e1e1e1;
+                    text-align:center;
+                }
+                */
+                display:none;
             }
             tfoot {
                 th {

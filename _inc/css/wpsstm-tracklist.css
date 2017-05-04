@@ -61,20 +61,22 @@
 }
 /* line 62, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table thead {
+  /*
   display: table-header-group;
   vertical-align: middle;
   border-color: inherit;
+  th{
+      border-bottom: 1px solid #e1e1e1;
+      text-align:center;
+  }
+  */
+  display: none;
 }
-/* line 66, ../scss/wpsstm-tracklist.scss */
-.wpsstm-tracklist.wpsstm-tracklist-table table thead th {
-  border-bottom: 1px solid #e1e1e1;
-  text-align: center;
-}
-/* line 72, ../scss/wpsstm-tracklist.scss */
+/* line 75, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tfoot th {
   border-top: 1px solid #e1e1e1;
 }
-/* line 77, ../scss/wpsstm-tracklist.scss */
+/* line 80, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr {
   -moz-transition-property: background;
   -o-transition-property: background;
@@ -85,25 +87,25 @@
   -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;
 }
-/* line 82, ../scss/wpsstm-tracklist.scss */
+/* line 85, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr:nth-child(odd) {
   background: rgba(0, 0, 0, 0.0125);
 }
-/* line 85, ../scss/wpsstm-tracklist.scss */
+/* line 88, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr:hover {
   background: rgba(0, 0, 0, 0.025);
 }
-/* line 87, ../scss/wpsstm-tracklist.scss */
+/* line 90, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr:hover td.column-image img {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
 }
-/* line 93, ../scss/wpsstm-tracklist.scss */
+/* line 96, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr td.column-image {
   width: 50px;
   padding: 0;
 }
-/* line 96, ../scss/wpsstm-tracklist.scss */
+/* line 99, ../scss/wpsstm-tracklist.scss */
 .wpsstm-tracklist.wpsstm-tracklist-table table tbody tr td.column-image img {
   max-width: 100%;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=20);
