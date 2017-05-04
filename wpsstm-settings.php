@@ -199,15 +199,19 @@ class WP_SoundSytem_Settings {
             'settings-musicbrainz'//section
         );
         
-        //playlists
+        /*
+        tracklists
+        */
         add_settings_section(
             'tracklist_settings', // ID
             __('Tracklists','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        //live playlists
+
+        /*
+        live playlists
+        */
         add_settings_section(
             'live_playlists_settings', // ID
             __('Live Playlists','wpsstm'), // Title
@@ -240,7 +244,9 @@ class WP_SoundSytem_Settings {
             'live_playlists_settings'
         );
         
-        //APIs
+        /*
+        APIs
+        */
         
         add_settings_section(
             'settings_apis', // ID
@@ -265,7 +271,9 @@ class WP_SoundSytem_Settings {
             'settings_apis'
         );
         
-        //system
+        /*
+        System
+        */
 
         add_settings_section(
             'settings_system', // ID

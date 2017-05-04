@@ -213,7 +213,7 @@ informations overriden
 * fixed bug when deleting subtracks
 * populate track sources only once
 * Add title support for albums, artists & tracks (wasn't showing the 'View Post' or permalink on the post page)
-* tracklist table : add 'data-tracks-count' attribute
+* tracklists : add 'data-tracks-count' attribute
 
 * WIP : audio player
 * Show a play button in tracklist tables
