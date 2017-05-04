@@ -44,7 +44,6 @@ class WP_SoundSytem_Core_Albums{
         global $wp_query;
 
         $post_types = array(
-            wpsstm()->post_type_album,
             wpsstm()->post_type_track
         );
         

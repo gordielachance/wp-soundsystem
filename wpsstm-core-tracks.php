@@ -45,8 +45,8 @@ class WP_SoundSytem_Core_Tracks{
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_save'), 5); 
         
-        add_filter('manage_posts_columns', array($this,'column_track_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'column_track_content'), 10, 2 );
+        //add_filter('manage_posts_columns', array($this,'column_track_register'), 10, 2 );
+        //add_action( 'manage_posts_custom_column', array($this,'column_track_content'), 10, 2 );
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
@@ -160,14 +160,14 @@ class WP_SoundSytem_Core_Tracks{
     function column_track_register($defaults) {
         global $post;
 
-        $post_types = array(
+        $allowed_post_types = array(
             wpsstm()->post_type_track
         );
         
         $before = array();
         $after = array();
         
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
             $after['track'] = __('Track','wpsstm');
         }
         

@@ -36,8 +36,8 @@ class WP_SoundSytem_Core_Artists{
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
         add_action( 'save_post', array($this,'metabox_artist_save'), 5); 
         
-        add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
+        //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
+        //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
     }
 
     function column_artist_register($defaults) {
