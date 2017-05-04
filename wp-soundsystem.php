@@ -80,7 +80,7 @@ class WP_SoundSytem {
             'live_playlists_cache_min'          => '10',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'soundcloud_client_id'              => null,
-            'player_enabled'                    => 'off'
+            //'player_enabled'                    => 'off'
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
