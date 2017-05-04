@@ -30,7 +30,14 @@ jQuery(document).ready(function($){
     
     $('.wpsstm-source-icon-delete').live("click", function(event){
         var row = $(this).closest('.wpsstm-source');
-        row.remove();
+        
+        if ( row.hasClass('wpsstm-source-blank') ){
+            row.find('input').val('');
+        }else{
+            row.remove();
+        }
+        
+        
     });
 })
 

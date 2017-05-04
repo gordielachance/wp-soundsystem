@@ -67,8 +67,23 @@ function wpsstm_get_post_track($post_id = null){
 function wpsstm_get_post_sources($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
+    $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
+
+    return $sources;
+}
+
+function wpsstm_get_post_sources_list( $post_id ){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $sources = wpsstm_get_post_sources($post_id);
     
-    return get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
+    $li_els = array();
+    foreach ( (array)$sources as $source ){
+        $li_els[] = sprintf('<li>%s</li>',$source);
+    }
+    if ( !empty($li_els) ){
+        return sprintf( '<ul class="wpsstm-sources-list">%s</ul>',implode("\n",$li_els) );
+    }
 }
 
 function wpsstm_get_post_album($post_id = null){

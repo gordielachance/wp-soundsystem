@@ -34,6 +34,7 @@ function wpsstm_ajax_tracklist_row_action(){
         'title'             => isset($_REQUEST['track']) ? $_REQUEST['track'] : null,
         'album'             => isset($_REQUEST['album']) ? $_REQUEST['album'] : null,
         'mbid'              => isset($_REQUEST['mbid']) ? $_REQUEST['mbid'] : null,
+        'source_urls'       => isset($_REQUEST['source_urls']) ? $_REQUEST['source_urls'] : null,
     );
     
     $track = new WP_SoundSystem_Subtrack($track_args);

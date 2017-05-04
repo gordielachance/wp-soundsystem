@@ -288,7 +288,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     $display_el = sprintf( '<strong>%s</strong>',$display_html);
 
-                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
+                    return sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
 
                 break;
 
@@ -309,7 +309,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     $display_el = sprintf( '<strong>%s</strong>',$display_html);
 
-                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
+                    return sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
 
                 break;
 
@@ -327,7 +327,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     $display_el = sprintf( '<strong>%s</strong>',$display_html);
 
-                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
+                    return sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
 
                 break;
                     
@@ -344,18 +344,18 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     $display_el = sprintf( '<strong>%s</strong>',$mbid);
                     
-                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
+                    return sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                     
                 break;
                     
                 case 'trackitem_sources':
 
-                    $display_el = 'coucou';
-                    $field_name = $this->get_field_name('sources');
+                    $display_el = wpsstm_get_post_sources_list( $item->post_id );
+                    $field_name = $this->get_field_name('source_urls');
                     
                     $edit_el = wpsstm_sources()->get_sources_field_editable( $item->post_id, $field_name );
                     
-                    return sprintf( '<p%s>%s</p>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
+                    return sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                 break;
                     
                 case 'trackitem_action':

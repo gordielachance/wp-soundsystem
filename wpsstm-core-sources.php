@@ -2,7 +2,7 @@
 
 class WP_SoundSytem_Core_Sources{
     
-    var $sources_metakey = 'wpsstm_sources';
+    var $sources_metakey = '_wpsstm_source_urls';
     
     /**
     * @var The one true Instance
@@ -68,29 +68,27 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
-        echo $this->get_sources_field_editable($post->ID,'wpsstm_sources');
+        echo $this->get_sources_field_editable($post->ID,'wpsstm_source_urls');
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
     }
     
     function get_sources_field_editable( $post_id, $field_name ){
-        
-        $track_sources = array(null); //blank line
 
-        $track_sources_db = wpsstm_get_post_sources($post_id);
-        $track_sources = array_merge($track_sources,(array)$track_sources_db);
+        $sources = wpsstm_get_post_sources($post_id);
+
+        if ( empty($sources) ) $sources = array(null); //blank
         
         $placeholder = __("Enter a track source URL",'wpsstm');
         
-        foreach ( (array)$track_sources as $key=>$source ){
-            $source_key = $key;
+        $rows = array();
+
+        foreach ( $sources as $key=>$source ){
+
             $source_classes = array('wpsstm-source');
             if ($key==0){
                 $source_classes[] = 'wpsstm-source-blank';
             }
-            ?>
-                
-            <?php
-            
+   
             $content = sprintf('<input type="text" name="%s[]"  value="%s" placeholder="%s" />',$field_name,$source,$placeholder);
             
             $icon_plus = '<i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>';
@@ -98,8 +96,10 @@ class WP_SoundSytem_Core_Sources{
             
             $content .= sprintf('<span class="wpsstm-source-action">%s%s</span>',$icon_plus,$icon_minus);
 
-            return sprintf('<p %s>%s</p>',wpsstm_get_classes_attr($source_classes),$content);
+            $rows[] = sprintf('<p %s>%s</p>',wpsstm_get_classes_attr($source_classes),$content);
         }
+        
+        return implode("\n",$rows);
 
     }
     
@@ -128,18 +128,20 @@ class WP_SoundSytem_Core_Sources{
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_sources_meta_box_nonce']);
 
-        $sources = ( isset($_POST[ 'wpsstm_sources' ]) ) ? $_POST[ 'wpsstm_sources' ] : array();
+        $sources = ( isset($_POST[ 'wpsstm_source_urls' ]) ) ? $_POST[ 'wpsstm_source_urls' ] : array();
+
+        $this->update_post_sources($post_id,$sources);
+    }
+    
+    function update_post_sources($post_id,$sources){
         $sources = array_filter($sources);
+        $sources = array_unique($sources);
         
-        
-
         if (!$sources){
-            delete_post_meta( $post_id, $this->sources_metakey );
+            return delete_post_meta( $post_id, $this->sources_metakey );
         }else{
-            $sources = array_unique($sources);
-            update_post_meta( $post_id, $this->sources_metakey, $sources );
+            return update_post_meta( $post_id, $this->sources_metakey, $sources );
         }
-
     }
     
     function column_sources_register($defaults) {

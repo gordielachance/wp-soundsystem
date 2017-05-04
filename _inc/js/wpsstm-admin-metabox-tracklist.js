@@ -117,6 +117,11 @@ function wpsstm_tracklist_row_action(row_action_link){
     var track_id = uri_args.subtrack_id;
     var tracklist_id = uri_args.post;
     var track_action = uri_args.subtrack_action;
+    
+    var track_source_urls = [];
+    row.find('.wpsstm-source input').each(function() {
+        track_source_urls.push( jQuery(this).val() );
+    });
 
     var ajax_data = {
         'action':           'wpsstm_tracklist_row_action',
@@ -124,6 +129,7 @@ function wpsstm_tracklist_row_action(row_action_link){
         'track':            row.find('.trackitem_track input').val(),
         'album':            row.find('.trackitem_album input').val(),
         'mbid':             row.find('.trackitem_mbid input').val(),
+        'source_urls':      track_source_urls,
         'track_id':         track_id,
         'tracklist_id':     tracklist_id,
         'subtrack_order':   row.find('.trackitem_order input').val(),

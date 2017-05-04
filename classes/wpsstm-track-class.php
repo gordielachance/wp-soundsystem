@@ -10,8 +10,9 @@ class WP_SoundSystem_Track{
     public $location;
     public $mbid = null;
     public $duration;
+    public $source_urls = null; //set 'null' so we can check later it has been populated
     public $did_lookup = false; // TO FIX
-    protected $source_urls = null; //set 'null' so we can check later it has been populated
+    
     
     function __construct( $args = array() ){
         
@@ -24,6 +25,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
+                $this->source_urls = wpsstm_get_post_sources($track_id);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -35,7 +37,7 @@ class WP_SoundSystem_Track{
         //only for keys that exists in $args_default
         foreach ((array)$args_default as $param=>$dummy){
             if ( !$args[$param] ) continue; //empty value
-            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
+            $this->$param = $args[$param];
         }
 
     }
@@ -50,6 +52,7 @@ class WP_SoundSystem_Track{
             'location'      =>null,
             'mbid'          =>null,
             'duration'      =>null,
+            'source_urls'   =>null
         );
     }
 
@@ -156,15 +159,12 @@ class WP_SoundSystem_Track{
         $post_track_id = null;
         
         $meta_input = array(
-            wpsstm_artists()->metakey       => $this->artist,
-            wpsstm_tracks()->metakey        => $this->title,
-            wpsstm_albums()->metakey        => $this->album
+            wpsstm_artists()->metakey           => $this->artist,
+            wpsstm_tracks()->metakey            => $this->title,
+            wpsstm_albums()->metakey            => $this->album,
+            wpsstm_sources()->sources_metakey   => $this->source_urls,
         );
-        
-        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
-            $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;
-        }
-        
+
         $meta_input = array_filter($meta_input);
 
         $post_track_args = array('meta_input' => $meta_input);
