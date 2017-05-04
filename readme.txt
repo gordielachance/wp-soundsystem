@@ -27,9 +27,9 @@ Create and manage tracklists easily with the Tracklist metabox.
 Import a tracklist from a file or a music service like Spotify using the Tracklist Importer (see below).
 Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
-= Audio player =
-In the future (not implemented yet), an audio player will show up to play your tracks if they have supported sources, as described below.
-It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
+= Audio player (not implemented yet) =
+In the future, an audio player will show up to play your tracks if they have supported sources, as described below.
+It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686).
 
 = Music Sources Metabox =
 Set one or several music sources for your tracks when editing them; as on screenshot #8.
@@ -146,6 +146,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.7 =
+* varioux fixes
+* improved shortenTables
+* mute unecessary columns in the backend listings
+* improved frontend tracklists
 
 = 0.9.8.6 =
 * new "sources" metabox - don't use Post Bookmarks for this anymore.
