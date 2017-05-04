@@ -299,7 +299,7 @@ function wpsstm_get_post_tracklist($post_id=null){
 }
 
 //TO FIX use home_url('?p=' . $post->ID) here so link is not broken when post slug changes ?
-function wpsstm_get_xspf_link($post_id=null,$download=true){
+function wpsstm_get_xspf_link($post_id=null,$download=false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
 

@@ -413,7 +413,7 @@ class WP_SoundSytem_Core_Tracks{
         
         $track = new WP_SoundSystem_Track(  array('post_id'=>$atts['post_id']) );
         $tracks = array($track);
-        $tracklist = new WP_SoundSytem_Tracklist();
+        $tracklist = new WP_SoundSytem_Tracklist( $atts['post_id'] );
 
         $tracklist->add($tracks);
         return $tracklist->get_tracklist_table();

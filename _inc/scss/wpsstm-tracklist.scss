@@ -5,93 +5,109 @@
     font-size:.8em;
 }
 
-.wpsstm-tracklist-table {
-    position:relative;
-    font-family: sans-serif;
-    width: 100%;
-    margin-bottom:1.5em;
-    font-size:0.8em;
-
-    .tablenav{
-        padding:.5em;
-        .tablenav-pages{
-            line-height:3em;
+.wpsstm-tracklist{
+    &[data-tracks-count="1"]{
+        .tracklist-nav{
+            display:none;
         }
+        
     }
-
-    table{
+    
+    &.wpsstm-tracklist-table {
+        position:relative;
+        font-family: sans-serif;
         width: 100%;
-        display: table;
-        border: none;
-        margin:0;
-        
-        .column-trackitem_order{
-            width:2em;
-            text-align:center;
-        }
-        
-        .column-trackitem_play_bt{
-            width:2em;
-            text-align:center;
-        }
-        
-        .column-trackitem_image{
-            width:2em;
-            img{
-                max-width:100%;
-            }
-        }
-        
-        th,td{
-            border:none;
-        }
-        
-        th{
-            font-weight: 400;
-        }
+        margin-bottom:1.5em;
+        font-size:0.8em;
 
-        thead {
-                display: table-header-group;
-                vertical-align: middle;
-                border-color: inherit;
-                th{
-                    border-bottom: 1px solid #e1e1e1;
-                    text-align:center;
-                }
-        }
-        tfoot {
-            th {
-                border-top: 1px solid #e1e1e1;
+        .tracklist-nav{
+            padding:.5em;
+            .tablenav-pages{
+                line-height:3em;
             }
-        }
-
-	   tbody tr {
-            
-            @include transition-property(background);
-            @include transition-duration(.4s);
-
-            &:nth-child(odd) {
-                    background: rgba(0,0,0,0.0125);
-            }
-            &:hover {
-                    background: rgba(0,0,0,0.025);
-                    td.column-image img{
-                        @include opacity(0.8);
-                    }
-            }
-
-            td{
-                &.column-image{
-                    width: 50px;
-                    padding:0;
-                    img {
-                        max-width: 100%;
-                        @include opacity(0.2);
-                        @include transition-property(opacity);
-                        @include transition-duration(.4s);
-                    }
+            .wpsstm-tracklist-actions{
+                font-size:0.8em;
+                a{
+                    text-decoration: none;
                 }
             }
-	   }
+        }
+
+        table{
+            width: 100%;
+            display: table;
+            border: none;
+            margin:0;
+
+            .column-trackitem_order{
+                width:2em;
+                text-align:center;
+            }
+
+            .column-trackitem_play_bt{
+                width:2em;
+                text-align:center;
+            }
+
+            .column-trackitem_image{
+                width:2em;
+                img{
+                    max-width:100%;
+                }
+            }
+
+            th,td{
+                border:none;
+            }
+
+            th{
+                font-weight: 400;
+            }
+
+            thead {
+                    display: table-header-group;
+                    vertical-align: middle;
+                    border-color: inherit;
+                    th{
+                        border-bottom: 1px solid #e1e1e1;
+                        text-align:center;
+                    }
+            }
+            tfoot {
+                th {
+                    border-top: 1px solid #e1e1e1;
+                }
+            }
+
+           tbody tr {
+
+                @include transition-property(background);
+                @include transition-duration(.4s);
+
+                &:nth-child(odd) {
+                        background: rgba(0,0,0,0.0125);
+                }
+                &:hover {
+                        background: rgba(0,0,0,0.025);
+                        td.column-image img{
+                            @include opacity(0.8);
+                        }
+                }
+
+                td{
+                    &.column-image{
+                        width: 50px;
+                        padding:0;
+                        img {
+                            max-width: 100%;
+                            @include opacity(0.2);
+                            @include transition-property(opacity);
+                            @include transition-duration(.4s);
+                        }
+                    }
+                }
+           }
+        }
     }
+    
 }

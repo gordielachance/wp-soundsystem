@@ -58,7 +58,7 @@ class WP_SoundSytem_Core_Tracklists{
         add_filter('manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
 
-        add_action( 'post_submitbox_start', array($this,'publish_metabox_xspf_link') );
+        add_action( 'post_submitbox_start', array($this,'publish_metabox_download_link') );
         
         //scraper
         add_action( 'admin_init', array($this,'scraper_wizard_init') );
@@ -73,7 +73,7 @@ class WP_SoundSytem_Core_Tracklists{
 
     }
 
-    function publish_metabox_xspf_link(){
+    function publish_metabox_download_link(){
 
         //check post type
         $allowed_post_types = array(
@@ -88,7 +88,7 @@ class WP_SoundSytem_Core_Tracklists{
         $tracklist = wpsstm_get_post_tracklist();
         if ( !count($tracklist->tracks) ) return;
         
-        if ( !$xpsf_link = wpsstm_get_xspf_link() ) return;
+        if ( !$xpsf_link = wpsstm_get_xspf_link(null,true) ) return;
         
         ?>
         <div id="export-xspf">

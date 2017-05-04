@@ -113,7 +113,7 @@ class WP_SoundSytem_TracksList_Table{
     
     function get_columns(){
         
-        $columns['trackitem_order']     = '#';
+        $columns['trackitem_order']     = '';
         
 
         //play button
@@ -231,9 +231,9 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
             <?php $this->display_tablenav( 'top' );?>
-            <table data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
+            <table>
                     <thead>
                     <tr>
                             <?php $this->print_column_headers(); ?>
@@ -259,22 +259,51 @@ class WP_SoundSytem_TracksList_Table{
 	}
     
     protected function extra_tablenav($which){
+        global $post;
+        
+        $tracklist_title = $this->tracklist->title;
+        $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$tracklist_title);
+        $tracklist_title = sprintf('<strong class="wpsstm-tracklist-title">%s</strong>',$tracklist_title);
+        
+        //don't show title if post = tracklist
+        if ($post->ID == $this->tracklist->post_id){
+            $tracklist_title = '';
+        }
+        
     ?>
-            <div class="alignright actions">
+        <div>
+            <?php echo $tracklist_title;?>
+            <div class="alignright actions wpsstm-tracklist-actions">
                 <?php
-                if ( !is_admin() ){
-                    ?>
-                    <a href="<?php echo wpsstm_get_xspf_link();?>" class="link-xspf-download button"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Dowload XSPF', 'wpsstm'); ?></a>
-                    <?php
-                }
+
+                    if ( !is_admin() ){
+                        ?>
+                        <a href="<?php echo wpsstm_get_xspf_link($this->tracklist->post_id);?>" class="wpsstm-tracklist-action-download"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
+
+                        <a href="<?php echo wpsstm_get_xspf_link($this->tracklist->post_id,true);?>" class="wpsstm-tracklist-action-download"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Download XSPF', 'wpsstm'); ?></a>
+                        <?php
+                    }
+
                 ?>
             </div>
+        </div>
+
     <?php
     }
         
     protected function display_tablenav( $which ) {
+        
+        $post_type = get_post_type($this->tracklist->post_id);
+        
+        $classes = array(
+            'tracklist-nav',
+            'tracklist-' . $post_type,
+            esc_attr( $which )
+            
+        );
+
         ?>
-        <div class="tablenav <?php echo esc_attr( $which ); ?>">
+        <div <?php echo wpsstm_get_classes_attr($classes);?>>
 
         <?php
                 $this->extra_tablenav( $which );
