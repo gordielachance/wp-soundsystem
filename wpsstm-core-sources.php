@@ -74,11 +74,12 @@ class WP_SoundSytem_Core_Sources{
     
     function get_sources_field_editable( $post_id, $field_name ){
 
-        $sources = wpsstm_get_post_sources($post_id);
+        $sources = wpsstm_get_post_sources($post_id, true); //include suggested sources
 
         if ( empty($sources) ) $sources = array(null); //blank
         
         $sources_auto = wpsstm_get_post_sources_auto($post_id);
+        $sources_suggested = wpsstm_get_post_sources_suggested($post_id);
         
         $placeholder = __("Enter a track source URL",'wpsstm');
         
@@ -92,9 +93,16 @@ class WP_SoundSytem_Core_Sources{
             if ($key==0){
                 $source_classes[] = 'wpsstm-source-blank';
             }
+            
+            //auto
             if ( in_array($source,$sources_auto) ){
                 $source_classes[] = 'wpsstm-source-auto';
                 $disabled = true;
+            }
+            //suggested
+            if ( in_array($source,$sources_suggested) ){
+                $disabled = true;
+                $source_classes[] = 'wpsstm-source-suggested';
             }
             
             $disabled_str = disabled( $disabled, true, false );

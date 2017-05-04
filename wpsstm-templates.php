@@ -64,13 +64,19 @@ function wpsstm_get_post_track($post_id = null){
     return get_post_meta( $post_id, wpsstm_tracks()->metakey, true );
 }
 
-function wpsstm_get_post_sources($post_id = null){
+function wpsstm_get_post_sources($post_id = null, $suggestions = false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
     
-    $sources_auto = wpsstm_get_post_sources_auto();
-    $sources = array_merge($sources_auto,$sources);
+    $sources_auto = wpsstm_get_post_sources_auto($post_id);
+    $sources = array_merge((array)$sources,(array)$sources_auto);
+    
+    //include source suggestions
+    if ( $suggestions ){
+        $sources_suggested = wpsstm_get_post_sources_suggested($post_id);
+        $sources = array_merge((array)$sources,(array)$sources_suggested);
+    }
     
     //cleanup
     $sources = wpsstm_sources()->sanitize_sources($sources);
@@ -87,6 +93,24 @@ function wpsstm_get_post_sources_auto($post_id = null){
     
     //allow plugins to filter this
     $sources = apply_filters('wpsstm_get_post_sources_forced',$sources,$post_id);
+    
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
+    return $sources;
+    
+}
+
+
+/*
+Those source will be suggested but user will need to confirm them
+*/
+
+function wpsstm_get_post_sources_suggested($post_id = null){
+    
+    $sources = array();
+    
+    //allow plugins to filter this
+    $sources = apply_filters('wpsstm_get_post_sources_suggested',$sources,$post_id);
     
     //cleanup
     $sources = wpsstm_sources()->sanitize_sources($sources);
