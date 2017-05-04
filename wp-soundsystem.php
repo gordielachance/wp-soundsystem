@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 0.9.8.5
+Version: 0.9.8.6
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '0.9.8.5';
+    public $version = '0.9.8.6';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '100';
+    public $db_version = '101';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -80,7 +80,7 @@ class WP_SoundSytem {
             'live_playlists_cache_min'          => '10',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'soundcloud_client_id'              => null,
-            'player_enabled'                    => 'off'
+            //'player_enabled'                    => 'off'
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
@@ -96,6 +96,7 @@ class WP_SoundSytem {
         require $this->plugin_dir . 'wpsstm-settings.php';
         require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
+        require $this->plugin_dir . 'wpsstm-core-sources.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
@@ -155,6 +156,7 @@ class WP_SoundSytem {
         global $wpdb;
 
         $current_version = get_option("_wpsstm-db_version");
+
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
@@ -164,6 +166,46 @@ class WP_SoundSytem {
             */
 
         }else{
+
+            if ($current_version < 101){
+                
+                //update sources from plugin Post_Bookmarks
+                if ( class_exists('Post_Bookmarks') ){
+
+                    //get tracks
+                    $tracks_args = array(
+                        'post_type'     => wpsstm()->post_type_track,
+                        'post_status'   => 'any',
+                        'posts_per_page'    => -1,
+                        'fields'            => 'ids'
+                    );
+
+                    $query = new WP_Query( $tracks_args );
+                    
+                    $sources_cat = get_term_by( 'slug', 'wpsstm-sources', 'link_category');
+                    $sources_cat_id = $sources_cat->term_id;
+                    
+                    $bookmarks_args = array(
+                        'category' => $sources_cat_id
+                    );
+
+                    foreach ($query->posts as $track_id){
+
+                        $new_sources = array();
+                        $old_sources = post_bkmarks_get_post_links($track_id, $bookmarks_args);
+
+                        foreach ((array)$old_sources as $bookmark){
+                            $new_sources[] = $bookmark->link_url;
+                        }
+                        
+                        if ($new_sources){
+                            wpsstm_sources()->update_post_sources($track_id,$new_sources,true);
+                        }
+                        
+                    }
+                }
+
+            }
 
         }
         

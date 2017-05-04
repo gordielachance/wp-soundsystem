@@ -31,9 +31,9 @@ Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_
 In the future (not implemented yet), an audio player will show up to play your tracks if they have supported sources, as described below.
 It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete.
 
-= Music Sources =
-If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, you'll be able to set one or several music sources for your tracks when editing them; as on screenshot #8.
-Just enter the URL of this source and be sure you checked the 'Music Sources' category before saving it.
+= Music Sources Metabox =
+Set one or several music sources for your tracks when editing them; as on screenshot #8.
+It could be a local audio file or a link to a music service.
 
 Those links will be used by the audio player (see above) to play the track - if the source URL is supported.
 We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
@@ -76,6 +76,8 @@ To embed the tracklist from the post #160.
 Works for albums, playlists and live playlists.
 Optional arguments : *post_id*,*max_rows*.
 
+= Post Bookmarks plugin =
+If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, links from MusicBrainz will be suggested in the Post Bookmarks metabox.
 
 = Donate! =
 It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
@@ -142,6 +144,9 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.6 =
+* new "sources" metabox - don't use Post Bookmarks for this anymore.
 
 = 0.9.8.5 =
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its

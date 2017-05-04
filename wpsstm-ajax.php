@@ -21,48 +21,47 @@ function wpsstm_ajax_tracklist_row_action(){
         'new_html'  => null,
         'success'   => false
     );
-    
-    $result['tracklist_id'] =   $tracklist_id =     isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
-    $result['post_id'] =        $post_id =          isset($_REQUEST['track_id']) ? $_REQUEST['track_id'] : null;
-    $result['action'] =         $action =           isset($_REQUEST['track_action']) ? $_REQUEST['track_action'] : null;
-    $result['subtrack_order'] = $subtrack_order =   isset($_REQUEST['subtrack_order']) ? $_REQUEST['subtrack_order'] : null;
 
-    $track_args = array(
-        'tracklist_id'      => $tracklist_id,
-        'post_id'           => $post_id,
-        'artist'            => isset($_REQUEST['artist']) ? $_REQUEST['artist'] : null,
-        'title'             => isset($_REQUEST['track']) ? $_REQUEST['track'] : null,
-        'album'             => isset($_REQUEST['album']) ? $_REQUEST['album'] : null,
-        'mbid'              => isset($_REQUEST['mbid']) ? $_REQUEST['mbid'] : null,
-    );
-    
+    $track_action       = isset($_REQUEST['track_action']) ? $_REQUEST['track_action'] : null;
+    $track_args = isset($_REQUEST['track']) ? $_REQUEST['track'] : null;
+    $track_order        = isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
+
     $track = new WP_SoundSystem_Subtrack($track_args);
     $result['track'] = $track;
     $success = false;
     
-    switch($action){
+    switch($track_action){
         case 'save':
             if ( $post_id = $track->save_track() ){
-
-                $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
-                $tracklist->add(array($track));
-
-                require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-                $entries_table = new WP_SoundSytem_TracksList_Admin_Table();
-                $entries_table->items = $tracklist->tracks;
-                $entries_table->prepare_items();
-
-                ob_start();
-                $item = end($entries_table->items);
-                $item->subtrack_order = $subtrack_order;
                 
-                $entries_table->single_row_columns( $item );
-                $result['new_html'] = ob_get_clean();
+                if ( is_wp_error($post_id) ){
+                    $result['message'] = $post_id->get_error_message();
+                }else{
+                    wpsstm()->debug_log("ajax save:"); 
+                    wpsstm()->debug_log($post_id); 
 
-                $result['success'] = true;
-                $result['post_id'] = $post_id;
+                    $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
+                    $tracklist->add(array($track));
+
+                    require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
+                    $entries_table = new WP_SoundSytem_TracksList_Admin_Table();
+                    $entries_table->items = $tracklist->tracks;
+                    $entries_table->prepare_items();
+
+                    ob_start();
+                    $item = end($entries_table->items);
+                    $item->subtrack_order = $track_order;
+
+                    $entries_table->single_row_columns( $item );
+                    $result['new_html'] = ob_get_clean();
+
+                    $result['success'] = true;
+                    $result['post_id'] = $post_id;
+
+                    $result['output'] = $success;
+                }
                 
-                $result['output'] = $success;
+
 
             }
         break;

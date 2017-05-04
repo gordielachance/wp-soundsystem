@@ -10,8 +10,9 @@ class WP_SoundSystem_Track{
     public $location;
     public $mbid = null;
     public $duration;
+    public $source_urls = null; //set 'null' so we can check later it has been populated
     public $did_lookup = false; // TO FIX
-    protected $source_urls = null; //set 'null' so we can check later it has been populated
+    
     
     function __construct( $args = array() ){
         
@@ -24,6 +25,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
+                $this->source_urls = wpsstm_get_post_sources($track_id, true);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -35,7 +37,7 @@ class WP_SoundSystem_Track{
         //only for keys that exists in $args_default
         foreach ((array)$args_default as $param=>$dummy){
             if ( !$args[$param] ) continue; //empty value
-            $this->$param = apply_filters('wpsstm_get_track_'.$param,$args[$param]);
+            $this->$param = $args[$param];
         }
 
     }
@@ -50,6 +52,7 @@ class WP_SoundSystem_Track{
             'location'      =>null,
             'mbid'          =>null,
             'duration'      =>null,
+            'source_urls'   =>null
         );
     }
 
@@ -156,15 +159,16 @@ class WP_SoundSystem_Track{
         $post_track_id = null;
         
         $meta_input = array(
-            wpsstm_artists()->metakey       => $this->artist,
-            wpsstm_tracks()->metakey        => $this->title,
-            wpsstm_albums()->metakey        => $this->album
+            wpsstm_artists()->metakey           => $this->artist,
+            wpsstm_tracks()->metakey            => $this->title,
+            wpsstm_albums()->metakey            => $this->album,
+            wpsstm_sources()->sources_metakey   => $this->source_urls,
         );
         
-        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
-            $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;
+        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){		
+                $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;		
         }
-        
+
         $meta_input = array_filter($meta_input);
 
         $post_track_args = array('meta_input' => $meta_input);
@@ -275,35 +279,6 @@ class WP_SoundSystem_Track{
         
         return $api_response;
         
-    }
-    
-    /*
-    Get the music sources links for a track
-    */
-
-    function get_source_urls(){
-        
-        if ($this->source_urls === null ){
-            
-            $links = array();
-
-            if ( $this->post_id && class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
-                $args = array(
-                    'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
-                );
-                $bookmarks = post_bkmarks_get_post_links($this->post_id, $args);
-
-                foreach ((array)$bookmarks as $bookmark){
-                    $links[] = $bookmark->link_url;
-                }
-
-            }
-
-            $this->source_urls = apply_filters('wpsstm_get_track_source_urls',$links,$this);
-            
-        }
-        
-        return $this->source_urls;
     }
 
 }

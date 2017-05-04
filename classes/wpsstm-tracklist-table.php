@@ -120,7 +120,7 @@ class WP_SoundSytem_TracksList_Table{
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             foreach ($this->items as $item){
                 //only if at least one track of the tracklist has sources
-                if ( $item->get_source_urls() ){
+                if ( $item->source_urls ){
                     $columns['trackitem_play_bt']     = '';
                     break;
                 }

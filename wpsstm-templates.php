@@ -64,6 +64,79 @@ function wpsstm_get_post_track($post_id = null){
     return get_post_meta( $post_id, wpsstm_tracks()->metakey, true );
 }
 
+function wpsstm_get_post_sources($post_id = null, $auto = false, $suggestions = false){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
+    
+    //include forced sources
+    if ( $auto ){
+        $sources_auto = wpsstm_get_post_sources_auto($post_id);
+        $sources = array_merge((array)$sources,(array)$sources_auto);
+    }
+
+    
+    //include source suggestions
+    if ( $suggestions ){
+        $sources_suggested = wpsstm_get_post_sources_suggested($post_id);
+        $sources = array_merge((array)$sources,(array)$sources_suggested);
+    }
+    
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
+    return $sources;
+}
+
+/*
+Those source will be auto-populated
+*/
+
+function wpsstm_get_post_sources_auto($post_id = null){
+    
+    $sources = array();
+    
+    //allow plugins to filter this
+    $sources = apply_filters('wpsstm_get_post_sources_forced',$sources,$post_id);
+    
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
+    return $sources;
+    
+}
+
+
+/*
+Those source will be suggested but user will need to confirm them
+*/
+
+function wpsstm_get_post_sources_suggested($post_id = null){
+    
+    $sources = array();
+    
+    //allow plugins to filter this
+    $sources = apply_filters('wpsstm_get_post_sources_suggested',$sources,$post_id);
+    
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
+    return $sources;
+    
+}
+
+
+function wpsstm_get_post_sources_list( $post_id ){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $sources = wpsstm_get_post_sources($post_id, true);
+    
+    $li_els = array();
+    foreach ( (array)$sources as $source ){
+        $li_els[] = sprintf('<li>%s</li>',$source);
+    }
+    if ( !empty($li_els) ){
+        return sprintf( '<ul class="wpsstm-sources-list">%s</ul>',implode("\n",$li_els) );
+    }
+}
+
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
@@ -226,6 +299,7 @@ function wpsstm_get_post_tracklist($post_id=null){
     
 }
 
+//TO FIX use home_url('?p=' . $post->ID) here so link is not broken when post slug changes ?
 function wpsstm_get_xspf_link($post_id=null,$download=true){
     global $post;
     if (!$post_id) $post_id = $post->ID;
