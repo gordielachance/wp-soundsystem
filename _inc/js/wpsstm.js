@@ -2,6 +2,6 @@
 
   $(document).ready(function(){
 
-      $('.wpsstm-tracklist-table table').shortenTable('tbody tr');
+      $('.wpsstm-tracklist-table table').shortenTable(3,'tbody tr');
   });  
 })(jQuery);

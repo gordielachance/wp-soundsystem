@@ -1,7 +1,6 @@
 jQuery(document).ready(function($){
     
-    $('.wpsstm-sources-list').shortenTable();
-    $('.postbox#wpsstm-track-sources .inside').shortenTable();
+    $('.wpsstm-sources').shortenTable(1);
     
     $('.wpsstm-source-icon-add').live("click", function(event){
         event.preventDefault();
