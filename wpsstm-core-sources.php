@@ -68,7 +68,11 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
-        echo $this->get_sources_field_editable($post->ID,'wpsstm_source_urls');
+        $desc = __('Add sources to this tracks.  It could be a local audio file or a link to a music service.','wpsstm');
+        printf('<p>%s</p>',$desc);
+        
+        $links = $this->get_sources_field_editable($post->ID,'wpsstm_source_urls');
+        printf('<div>%s</div>',$links);
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
     }
     
