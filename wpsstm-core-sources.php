@@ -71,8 +71,8 @@ class WP_SoundSytem_Core_Sources{
         $desc = __('Add sources to this tracks.  It could be a local audio file or a link to a music service.','wpsstm');
         printf('<p>%s</p>',$desc);
         
-        $links = $this->get_sources_field_editable($post->ID,'wpsstm_source_urls');
-        printf('<div>%s</div>',$links);
+        echo $this->get_sources_field_editable($post->ID,'wpsstm_source_urls');
+        
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
     }
     
@@ -121,7 +121,8 @@ class WP_SoundSytem_Core_Sources{
             $rows[] = sprintf('<p %s>%s</p>',wpsstm_get_classes_attr($source_classes),$content);
         }
         
-        return implode("\n",$rows);
+        $rows = implode("\n",$rows);
+        return sprintf('<div class="wpsstm-sources">%s</div>',$rows);
 
     }
     
