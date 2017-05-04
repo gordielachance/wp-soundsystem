@@ -182,7 +182,7 @@ class WP_SoundSytem_Core_Sources{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            $after['source'] = __('Sources','wpsstm');
+            $after['sources'] = __('Sources','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
@@ -194,8 +194,8 @@ class WP_SoundSytem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                if ($sources = wpsstm_get_post_sources($post_id, true) ){
-                    $output = $sources;
+                if ($sources = wpsstm_get_post_sources_list( $post_id, true ) ){
+                    $output = count($sources);
                 }
                 echo $output;
             break;
