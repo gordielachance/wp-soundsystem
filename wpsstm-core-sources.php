@@ -38,9 +38,9 @@ class WP_SoundSytem_Core_Sources{
 
         add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
-        
+
     }
-    
+
     function sources_backend_script_styles(){
         
         //CSS
@@ -134,8 +134,7 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function update_post_sources($post_id,$sources){
-        $sources = array_filter($sources);
-        $sources = array_unique($sources);
+        $sources = $this->sanitize_sources($sources);
         
         if (!$sources){
             return delete_post_meta( $post_id, $this->sources_metakey );
@@ -173,6 +172,12 @@ class WP_SoundSytem_Core_Sources{
                 echo $output;
             break;
         }
+    }
+    
+    function sanitize_sources($sources){
+        $sources = array_filter($sources);
+        $sources = array_unique($sources);
+        return $sources;
     }
     
 }

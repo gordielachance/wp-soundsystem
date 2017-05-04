@@ -69,6 +69,8 @@ function wpsstm_get_post_sources($post_id = null){
     if (!$post_id) $post_id = $post->ID;
     $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
 
+    //cleanup
+    $sources = wpsstm_sources()->sanitize_sources($sources);
     return $sources;
 }
 
