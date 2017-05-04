@@ -203,6 +203,7 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function sanitize_sources($sources){
+	$sources = (array)$sources;
         $sources = array_filter($sources);
         $sources = array_unique($sources);
         return $sources;
