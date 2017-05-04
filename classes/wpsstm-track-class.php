@@ -25,7 +25,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
-                $this->source_urls = wpsstm_get_post_sources($track_id);
+                $this->source_urls = wpsstm_get_post_sources($track_id, true);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -275,35 +275,6 @@ class WP_SoundSystem_Track{
         
         return $api_response;
         
-    }
-    
-    /*
-    Get the music sources links for a track
-    */
-
-    function get_source_urls(){
-        
-        if ($this->source_urls === null ){
-            
-            $links = array();
-
-            if ( $this->post_id && class_exists( 'WP_SoundSytem_Post_Bookmarks' ) ){
-                $args = array(
-                    'category' => WP_SoundSytem_Post_Bookmarks::get_sources_category()
-                );
-                $bookmarks = post_bkmarks_get_post_links($this->post_id, $args);
-
-                foreach ((array)$bookmarks as $bookmark){
-                    $links[] = $bookmark->link_url;
-                }
-
-            }
-
-            $this->source_urls = apply_filters('wpsstm_get_track_source_urls',$links,$this);
-            
-        }
-        
-        return $this->source_urls;
     }
 
 }

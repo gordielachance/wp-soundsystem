@@ -74,7 +74,7 @@ class WP_SoundSytem_Core_Sources{
     
     function get_sources_field_editable( $post_id, $field_name ){
 
-        $sources = wpsstm_get_post_sources($post_id, true); //include suggested sources
+        $sources = wpsstm_get_post_sources($post_id, true, true); //include suggested sources
 
         if ( empty($sources) ) $sources = array(null); //blank
         
@@ -151,7 +151,13 @@ class WP_SoundSytem_Core_Sources{
         $this->update_post_sources($post_id,$sources);
     }
     
-    function update_post_sources($post_id,$sources){
+    function update_post_sources($post_id,$sources,$append=false){
+        
+        if ($append){
+            $existing_sources = wpsstm_get_post_sources($post_id);
+            $sources = array_merge((array)$existing_sources,$sources);
+        }
+        
         $sources = $this->sanitize_sources($sources);
         
         if (!$sources){
@@ -184,7 +190,7 @@ class WP_SoundSytem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                if ($sources = wpsstm_get_post_sources($post_id) ){
+                if ($sources = wpsstm_get_post_sources($post_id, true) ){
                     $output = $sources;
                 }
                 echo $output;

@@ -64,13 +64,17 @@ function wpsstm_get_post_track($post_id = null){
     return get_post_meta( $post_id, wpsstm_tracks()->metakey, true );
 }
 
-function wpsstm_get_post_sources($post_id = null, $suggestions = false){
+function wpsstm_get_post_sources($post_id = null, $auto = false, $suggestions = false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
     
-    $sources_auto = wpsstm_get_post_sources_auto($post_id);
-    $sources = array_merge((array)$sources,(array)$sources_auto);
+    //include forced sources
+    if ( $auto ){
+        $sources_auto = wpsstm_get_post_sources_auto($post_id);
+        $sources = array_merge((array)$sources,(array)$sources_auto);
+    }
+
     
     //include source suggestions
     if ( $suggestions ){
@@ -122,7 +126,7 @@ function wpsstm_get_post_sources_suggested($post_id = null){
 function wpsstm_get_post_sources_list( $post_id ){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $sources = wpsstm_get_post_sources($post_id);
+    $sources = wpsstm_get_post_sources($post_id, true);
     
     $li_els = array();
     foreach ( (array)$sources as $source ){
