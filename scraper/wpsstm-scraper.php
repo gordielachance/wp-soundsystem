@@ -96,7 +96,7 @@ class WP_SoundSytem_Playlist_Scraper{
         
         //we got cached tracks, but do ignore them in wizard
         if ( count($this->datas['tracks']) && $this->is_wizard ){
-            $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['time'])) );
+            $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['timestamp'])) );
         }
         
         //load page preset

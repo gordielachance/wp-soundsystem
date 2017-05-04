@@ -293,8 +293,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
             $this->add_wizard_field(
                 'track_location_selector', 
-                __('File Selector','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_location_selector_callback' ), 
+                __('Source URL','wpsstm').' '.$this->regex_link(), 
+                array( $this, 'track_sources_selector_callback' ), 
                 'wpsstm-wizard-step-single-track',
                 'wizard-section-single-track'
             );
@@ -663,7 +663,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->css_selector_block('track_image');
     }
     
-    function track_location_selector_callback(){
+    function track_sources_selector_callback(){
         $this->css_selector_block('track_location');
     }
     
