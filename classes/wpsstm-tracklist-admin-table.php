@@ -349,8 +349,10 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 break;
                     
                 case 'trackitem_sources':
+                    
+                    $sources_display =  wpsstm_get_post_sources( $item->post_id, true );
 
-                    $display_el = wpsstm_get_post_sources_list( $item->post_id );
+                    $display_el = ( $sources_display ) ?  count($sources_display) : '—';
                     $field_name = $this->get_field_name('source_urls');
                     
                     $edit_el = wpsstm_sources()->get_sources_field_editable( $item->post_id, $field_name );

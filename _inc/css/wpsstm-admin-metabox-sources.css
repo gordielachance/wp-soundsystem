@@ -73,15 +73,19 @@ p.wpsstm-source.wpsstm-source-auto .wpsstm-source-icon.wpsstm-source-icon-delete
   margin: 0;
   padding: 0;
 }
-/* line 92, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 90, ../scss/wpsstm-admin-metabox-sources.scss */
+#wpsstm-tracklist td.column-trackitem_sources .metabox-table-cell-display {
+  text-align: center;
+}
+/* line 95, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank {
   border-bottom: 1px solid #DDD;
 }
-/* line 94, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 97, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank.wpsstm-source-icon-add {
   display: inline;
 }
-/* line 97, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 100, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank.wpsstm-source-icon-delete {
   display: none;
 }

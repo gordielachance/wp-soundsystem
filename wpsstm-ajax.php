@@ -40,7 +40,7 @@ function wpsstm_ajax_tracklist_row_action(){
                     wpsstm()->debug_log("ajax save:"); 
                     wpsstm()->debug_log($post_id); 
 
-                    $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
+                    $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
                     $tracklist->add(array($track));
 
                     require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';

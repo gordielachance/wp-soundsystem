@@ -78,7 +78,7 @@
                     
                     .metabox-table-cell-toggle{
                         &.metabox-table-cell-display{
-                            display:inherit;
+                            display:block;
                         }
                         &.metabox-table-cell-edit{
                             display:none;
@@ -97,7 +97,7 @@
                                 display:none;
                             }
                             &.metabox-table-cell-edit{
-                                display:inherit;
+                                display:block;
                             }
                         }
 

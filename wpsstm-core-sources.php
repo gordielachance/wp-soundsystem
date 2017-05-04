@@ -194,7 +194,7 @@ class WP_SoundSytem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                if ($sources = wpsstm_get_post_sources_list( $post_id, true ) ){
+                if ($sources = wpsstm_get_post_sources( $post_id, true ) ){
                     $output = count($sources);
                 }
                 echo $output;
