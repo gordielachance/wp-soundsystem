@@ -11,11 +11,14 @@ class WP_SoundSytem_TracksList_Table{
     var $per_page = 0;
     var $track_index = 0;
     var $paged_var = 'tracklist_page';
+    var $no_items_label = null;
     
     function __construct($tracklist){
         global $status, $page;
         
         $this->tracklist = $tracklist;
+        
+        $this->no_items_label = __( 'No tracks found.','wpsstm');
 
         $this->page = ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1;
 
@@ -633,7 +636,7 @@ class WP_SoundSytem_TracksList_Table{
      * @access public
      */
     public function no_items() {
-            _e( 'No tracks found.','wpsstm');
+        echo $this->no_items_label;
     }
     
     

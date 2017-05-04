@@ -190,9 +190,10 @@ class WP_SoundSytem_Tracklist{
             if ( $this->post_id && ( get_post_type($this->post_id) == wpsstm()->post_type_live_playlist ) && $cache_only ){
                 $link = get_permalink($this->post_id);
                 $link = sprintf('<a href="%s">%s</a>',$link,__('here','wpsstm') );
-                $link = sprintf( __('Click %s to load the live tracklist','wpsstm'), $link);
-                return sprintf('<p class="notice wpsstm-notice-load-tracklist">%s</p>',$link );
+                $link = sprintf( __('Click %s to load the live tracklist.','wpsstm'), $link);
+                $tracklist_table->no_items_label = $link;
             }
+            
         }
 
         ob_start();
