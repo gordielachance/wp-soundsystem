@@ -304,13 +304,6 @@ function wpsstm_get_xspf_link($post_id=null,$download=false){
     if (!$post_id) $post_id = $post->ID;
     
     $xspf_url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
-    
-    if (!$download){
-        //keep old url style here; so if the post has its slug changed, the link will remain available if user is subscribed to it.
-        $xspf_url = home_url();
-        $xspf_url = add_query_arg(array('p' => $post_id, wpsstm_tracklists()->qvar_xspf => true), $xspf_url);
-    }
-
     $xspf_url = apply_filters('wpsstm_get_xspf_link',$xspf_url,$post_id);
 
     if($download){
