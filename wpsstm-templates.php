@@ -314,3 +314,18 @@ function wpsstm_get_xspf_link($post_id=null,$download=false){
 
 }
 
+function get_live_playlist_timestamp($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $post_type = get_post_type($post_id);
+    
+    if ( $post_type!=wpsstm()->post_type_live_playlist ) return;
+
+    $scraper = new WP_SoundSytem_Playlist_Scraper();
+    $scraper->init_post($post_id);
+    
+    if ( !$cache = $scraper->get_cache() ) return;
+    
+    return $cache['timestamp'];
+}
+

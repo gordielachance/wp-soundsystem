@@ -275,7 +275,23 @@ class WP_SoundSytem_TracksList_Table{
         
     ?>
         <div>
-            <?php echo $tracklist_title;?>
+            <?php 
+        
+            echo $tracklist_title;
+        
+            if ( $timestamp = get_live_playlist_timestamp($this->tracklist->post_id) ){
+                $date = date_i18n( get_option( 'date_format' ) , $timestamp );
+                $time = date_i18n( get_option( 'time_format' ) , $timestamp );
+
+                $text = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
+
+                printf('<small> <i class="fa fa-clock-o" aria-hidden="true"></i> %s</small>',$text);
+            }
+        
+
+            ?>
+        
+
             <div class="alignright actions wpsstm-tracklist-actions">
                 <?php
 

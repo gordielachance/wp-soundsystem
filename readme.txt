@@ -7,11 +7,11 @@ Tested up to: 4.7.4
 Stable tag: trunk
 License: GPLv2 or later
 
-Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
+Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  The perfect fit for your music blog !
 
 == Description ==
 
-Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
+Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  The perfect fit for your music blog !
 
 = Several new post types =
 Tracks, artists, albums, playlists and live playlists uses each a custom post type, so you can easily manage them.
