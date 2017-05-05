@@ -147,6 +147,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.8.8 =
+* improved wizard GUI
+* scraper : now we can query an element's attribute (disabled if not HTML content)
+* scraper : improved options
+* scraper : now uses a dynamic selector for the tracklist title
+
 = 0.9.8.7 =
 * varioux fixes
 * improved shortenTables
