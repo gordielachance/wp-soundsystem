@@ -71,7 +71,7 @@ class WP_SoundSytem_Playlist_Scraper{
                 'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
                 'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
                 'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_location'    => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
                 'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null)
             ),
             'tracks_order'              => 'desc',

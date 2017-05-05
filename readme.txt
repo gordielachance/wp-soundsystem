@@ -29,7 +29,7 @@ Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_
 
 = Audio player (not implemented yet) =
 In the future, an audio player will show up to play your tracks if they have supported sources, as described below.
-It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686).
+It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).
 
 = Music Sources Metabox =
 Set one or several music sources for your tracks when editing them; as on screenshot #8.
@@ -146,6 +146,9 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.8.9 =
+* scraper now able to get an array of sources urls for each track.
 
 = 0.9.8.8 =
 * improved wizard GUI

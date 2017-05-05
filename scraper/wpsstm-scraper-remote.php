@@ -187,7 +187,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                                 'track_artist'      => array('path'=>'creator'),
                                 'track_title'       => array('path'=>'title'),
                                 'track_album'       => array('path'=>'album'),
-                                'track_location'    => array('path'=>'location'),
+                                'track_source_urls' => array('path'=>'location'),
                                 'track_image'       => array('path'=>'image')
                             )
                         );
@@ -332,13 +332,13 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         foreach($track_nodes as $key=>$single_track_node) {
 
             $args = array(
-                'artist'    => $this->get_track_node_content($single_track_node,'artist'),
-                'title'     => $this->get_track_node_content($single_track_node,'title'),
-                'album'     => $this->get_track_node_content($single_track_node,'album'),
-                'location'  => $this->get_track_node_content($single_track_node,'location'),
-                'image'     => $this->get_track_node_content($single_track_node,'image')
+                'artist'        => $this->get_track_node_content($single_track_node,'artist'),
+                'title'         => $this->get_track_node_content($single_track_node,'title'),
+                'album'         => $this->get_track_node_content($single_track_node,'album'),
+                'image'         => $this->get_track_node_content($single_track_node,'image'),
+                'source_urls'   => $this->get_track_node_content($single_track_node,'source_urls',false),
             );
-            
+
             $tracks_arr[] = $args;
 
         }
@@ -352,12 +352,12 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
 
-    protected function get_track_node_content($track_node,$slug){
+    protected function get_track_node_content($track_node,$slug,$single_value=true){
 
         $node = $track_node;
-        $result = null;
         $pattern = null;
-        $string = null;
+        $strings = array();
+        $result = array();
         
         $selector_slug  = 'track_'.$slug;
         $selector_css   = $this->get_options(array('selectors',$selector_slug,'path'));
@@ -373,56 +373,75 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         
         try{
 
-            if ($selector_css) $node = $track_node->find($selector_css);
+            if ($selector_css) $nodes = $track_node->find($selector_css);
+            
+            //get the first tag found only
+            if ($single_value){
+                $nodes = $nodes->eq(0);
+            }
 
-            if ($selector_attr){
-                $string = $node->attr($selector_attr);
-            }else{
-                $string = $node->innerHTML();
+            foreach ($nodes as $node){
+                if ($selector_attr){
+                    $strings[] = $node->attr($selector_attr);
+                }else{
+                    $strings[] = $node->innerHTML();
+                }
             }
 
         }catch(Exception $e){
             return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
         }
+
+        foreach($strings as $key=>$string){
+            
+            if (!$string = trim($string)) continue;
+
+            if( ($slug == 'image' ) || ($slug == 'source_urls' ) ){
+
+                if (filter_var((string)$string, FILTER_VALIDATE_URL) === false) {
+                    continue;
+                }
+
+            }
+            
+            //CDATA fix
+            $string = $this->sanitize_cdata_string($string);
+            
+            //regex pattern
+            if ( $selector_regex ){
+                $pattern = $selector_regex;
+            }
+
+            if($pattern) {
+
+                $pattern = sprintf('~%s~m',$pattern);
+                preg_match($pattern, $string, $matches);
+
+                if (isset($matches[1])){
+                    $string = strip_tags($matches[1]);
+                }
+
+            }
+            
+            //sanitize result
+            $string = strip_tags($string);
+            $string = urldecode($string);
+            $string = htmlspecialchars_decode($string);
+            $string = trim($string);
+            
+            $result[] = $string;
+            
+        }
         
-        if (!$string = trim($string)) return;
-
-        if( ($slug == 'image' ) || ($slug == 'location' ) ){
-
-            if (filter_var((string)$string, FILTER_VALIDATE_URL) === false) {
-                $string = '';
+        if ($result){
+            if ($single_value){
+                return $result[0];
+            }else{
+                return $result;
             }
             
         }
-
-        //CDATA fix
-        $string = $this->sanitize_cdata_string($string);
-
-        //regex pattern
-        if ( $selector_regex ){
-            $pattern = $selector_regex;
-        }
-
-        if(!$pattern) {
-            $result = $string;
-        }else{
-
-            $pattern = sprintf('~%s~m',$pattern);
-            preg_match($pattern, $string, $matches);
-            
-            if (isset($matches[1])){
-                $result = strip_tags($matches[1]);
-            }
-                
-        }
         
-        //sanitize result
-        $result = strip_tags($result);
-        $result = urldecode($result);
-        $result = htmlspecialchars_decode($result);
-        $result = trim($result);
-        
-        return $result;
     }
     
     protected function sanitize_cdata_string($string){

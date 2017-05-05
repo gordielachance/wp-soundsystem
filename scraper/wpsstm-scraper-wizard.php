@@ -309,7 +309,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             );
 
             $this->add_wizard_field(
-                'track_location_selector', 
+                'track_source_urls', 
                 __('Source URL','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_sources_selector_callback' ), 
                 'wpsstm-wizard-step-single-track',
@@ -468,7 +468,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                             '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
-                    case 'track_location':
+                    case 'track_source_urls':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>audio source</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
@@ -704,7 +704,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     }
     
     function track_sources_selector_callback(){
-        $this->css_selector_block('track_location');
+        $this->css_selector_block('track_source_urls');
     }
     
     function feedback_tracklist_callback(){

@@ -570,7 +570,8 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
         'selectors' => array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
-            'track_title'       => array('path'=>'title')
+            'track_title'       => array('path'=>'title'),
+            'track_source_urls' => array('path'=>'sources permalink')
         )
     );
     
