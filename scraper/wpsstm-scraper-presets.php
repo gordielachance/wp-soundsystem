@@ -112,7 +112,7 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
             'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-            'track_image'      => array('path'=>'.chartlist-play-image')
+            'track_image'      => array('path'=>'img.cover-art','attr'=>'src')
         )
     );
 
@@ -251,7 +251,7 @@ class WP_SoundSytem_Playlist_Scraper_Radionomy extends WP_SoundSytem_Playlist_Sc
             'tracks'            => array('path'=>'div.titre'),
             'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),
             'track_title'       => array('path'=>'table td i'),
-            'track_image'       => array('path'=>'img')
+            'track_image'       => array('path'=>'img','attr'=>'src')
         )
     );
 
@@ -378,7 +378,7 @@ class WP_SoundSytem_Playlist_Scraper_BBC_Station extends WP_SoundSytem_Playlist_
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
             'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
             'track_title'       => array('path'=>'.pll-playlist-item-details .pll-playlist-item-title'),
-            'track_image'       => array('path'=>'img.pll-playlist-item-image')
+            'track_image'       => array('path'=>'img.pll-playlist-item-image','attr'=>'src')
         )
     );
 
@@ -614,7 +614,7 @@ class WP_SoundSytem_Playlist_Scraper_Hypem extends WP_SoundSytem_Playlist_Scrape
             'tracks'            => array('path'=>'.section-track'),
             'track_artist'      => array('path'=>'.track_name .artist'),
             'track_title'       => array('path'=>'.track_name .track'),
-            //'track_image'       => array('path'=>'a.thumb')
+            //'track_image'       => array('path'=>'a.thumb','attr'=>'src')
         )
     );
     
@@ -663,7 +663,7 @@ class WP_SoundSytem_Playlist_Scraper_RTBF extends WP_SoundSytem_Playlist_Scraper
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
             'track_title'       => array('path'=>'span[itemprop="name"]'),
-            'track_image'       => array('path'=>'span[itemprop="inAlbum"]')
+            'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
         )
     );
     

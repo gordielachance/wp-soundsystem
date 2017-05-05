@@ -44,7 +44,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
 
     public function get_tracks(){
-        
+
         //url
         $url = $this->redirect_url = $this->get_remote_url();
         if ( is_wp_error($url) ) return $url;
@@ -71,12 +71,12 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $track_nodes = $this->get_track_nodes($this->body_node);
         if ( is_wp_error($track_nodes) ) return $track_nodes;
         $this->track_nodes = $track_nodes;
-        
+
         //tracks
         $tracks = $this->get_tracks_array($track_nodes);
         if ( is_wp_error($tracks) ) return $tracks;
         $this->tracks = $tracks;
-        
+
         return $this->tracks;
     }
     
@@ -177,7 +177,23 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                     }catch(Exception $e){}
                     
                     if ($is_xspf){
+                        
                         $this->response_type = 'text/xspf+xml';
+                        
+                        $xspf_options = array(
+                            'selectors' => array(
+                                'tracklist_title'   => array('path'=>'title'),
+                                'tracks'            => array('path'=>'trackList track'),
+                                'track_artist'      => array('path'=>'creator'),
+                                'track_title'       => array('path'=>'title'),
+                                'track_album'       => array('path'=>'album'),
+                                'track_location'    => array('path'=>'location'),
+                                'track_image'       => array('path'=>'image')
+                            )
+                        );
+                        
+                        $this->options = array_replace_recursive($this->options, $xspf_options);
+                        
                     }
                 }
 
@@ -263,10 +279,12 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     */
     
     public function get_tracklist_title(){
+        
+        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title', 'path') ) ) return;
 
         //QueryPath
         try{
-            $title_node = qp( $this->body_node, null, self::$querypath_options )->find('title');
+            $title_node = qp( $this->body_node, null, self::$querypath_options )->find($selector_title);
             return $title_node->innerHTML();
         }catch(Exception $e){
             return;
@@ -282,21 +300,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
 
     protected function get_track_nodes($body_node){
-        
-        //update options for XSPF
-        if ($this->response_type == 'text/xspf+xml'){
-            $xspf_options = array(
-                'selectors' => array(
-                    'tracks'            => array('path'=>'trackList track'),
-                    'track_artist'      => array('path'=>'creator'),
-                    'track_title'       => array('path'=>'title'),
-                    'track_album'       => array('path'=>'album'),
-                    'track_location'    => array('path'=>'location'),
-                    'track_image'       => array('path'=>'image')
-                )
-            );
-            $this->options = array_replace_recursive($this->options, $xspf_options);
-        }
 
         $selector = $this->get_options( array('selectors','tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing','spiff') );
@@ -319,10 +322,10 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     protected function get_tracks_array($track_nodes){
 
         $selector_artist = $this->get_options( array('selectors','track_artist') );
-        if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing','xspf') );
+        if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing','wpsstm') );
         
         $selector_title = $this->get_options( array('selectors','track_title') );
-        if (!$selector_title) return new WP_Error( 'no_track_selector', __('Required track title selector is missing','xspf') );
+        if (!$selector_title) return new WP_Error( 'no_track_selector', __('Required track title selector is missing','wpsstm') );
 
         $tracks_arr = array();
         
@@ -350,7 +353,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
 
     protected function get_track_node_content($track_node,$slug){
-        
+
         $node = $track_node;
         $result = null;
         $pattern = null;
@@ -359,6 +362,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $selector_slug  = 'track_'.$slug;
         $selector_css   = $this->get_options(array('selectors',$selector_slug,'path'));
         $selector_regex = $this->get_options(array('selectors',$selector_slug,'regex'));
+        $selector_attr = $this->get_options(array('selectors',$selector_slug,'attr'));
 
         //abord
         if ( !$selector_css && !$selector_regex ){
@@ -366,10 +370,17 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         }
 
         //QueryPath
+        
         try{
+
             if ($selector_css) $node = $track_node->find($selector_css);
-            $string = $node->innerHTML();
-            
+
+            if ($selector_attr){
+                $string = $node->attr($selector_attr);
+            }else{
+                $string = $node->innerHTML();
+            }
+
         }catch(Exception $e){
             return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
         }
@@ -377,12 +388,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if (!$string = trim($string)) return;
 
         if( ($slug == 'image' ) || ($slug == 'location' ) ){
-
-            if ($url = $node->attr('src')){ //is an image or audio tag
-                $string = $url;
-            }elseif ($url = $node->attr('href')){ //is a link
-                $string = $url;
-            }
 
             if (filter_var((string)$string, FILTER_VALIDATE_URL) === false) {
                 $string = '';

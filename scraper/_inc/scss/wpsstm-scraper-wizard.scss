@@ -61,40 +61,49 @@
                         }
                 }
                 .wpsstm-wizard-step-content{
-                    .wizard-selector{
+                    .wpsstm-wizard-selector{
                         input[type="text"]{
                             min-width:50%;
                         }
-                        .regex-row {
-                                display: none;
-                                &.active{
-                                        display: table;
+                        .wpsstm-wizard-selector-advanced{
+                            display: none;
+                            &.active{
+                                display: block;
+                            }
+                            .wpsstm-wizard-track-selector-desc{
+                                padding: 1em;
+                                font-style:italic;
+                                code{
+                                    font-style:normal;
                                 }
+                            }
+                            table{
                                 td {
-                                        color: #999;
-                                        padding: 5px;
-                                        font-family: Consolas, Monaco, monospace;
+                                    color: #999;
+                                    padding: 5px;
+                                    font-family: Consolas, Monaco, monospace;
                                 }
-                                .regex-field {
-                                        &:before {
-                                                text-align: center;
-                                                width: 20px;
-                                                content: '~';
-                                        }
-                                        &:after {
-                                                text-align: center;
-                                                width: 20px;
-                                                content: '~m';
-                                        }
-                                        input {
-                                                width: 90%;
-                                                color: #999;
-                                        }
+                                .wpsstm-wizard-selector-regex {
+                                    &:before {
+                                            text-align: center;
+                                            width: 20px;
+                                            content: '~';
+                                    }
+                                    &:after {
+                                            text-align: center;
+                                            width: 20px;
+                                            content: '~m';
+                                    }
+                                    input {
+                                            width: 90%;
+                                            color: #999;
+                                    }
                                 }
+                            }
                         }
                     }
                     &#wpsstm-wizard-step-tracks-content{
-                        .wizard-selector{
+                        .wpsstm-wizard-selector{
                             input[type="text"]{
                                 min-width:100%;
                             }
@@ -102,7 +111,7 @@
                     }
                 }
         }
-        .regex-link {
+        .wpsstm-wizard-selector-toggle-advanced {
                 text-decoration: none;
         }
 

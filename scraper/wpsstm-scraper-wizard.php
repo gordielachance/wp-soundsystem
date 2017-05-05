@@ -101,22 +101,31 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
             //save wizard settings
             $wizard_settings = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
-            $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
+            
+            if ($wizard_settings){
+                
+                $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
-            $wizard_settings_new = array();
-            $default_args = $this->scraper->get_default_options();
+                $wizard_settings_new = array();
+                $default_args = $this->scraper->get_default_options();
 
-            //ignore default values
-            foreach ( $default_args as $slug => $default ){
-                if ( !isset($wizard_settings[$slug]) ) continue;
-                if ($wizard_settings[$slug]==$default) continue;
-                $wizard_settings_new[$slug] = $wizard_settings[$slug];
-            }
+                //clean input (keep only keys from default options)
+                $wizard_settings = array_replace_recursive($default_args,$wizard_settings);
 
-            if ($success = update_post_meta( $post_id, WP_SoundSytem_Playlist_Scraper::$meta_key_options_scraper, $wizard_settings_new )){
-                do_action('spiff_save_wizard_settings', $wizard_settings_new, $post_id);
+                //store only NOT default values
+                //TO FIX should be recursive ?
+                foreach ( $default_args as $slug => $default ){
+                    if ( $wizard_settings[$slug] != $default )  continue;
+                    unset($wizard_settings[$slug]);
+                }
+
+                if ($success = update_post_meta( $post_id, WP_SoundSytem_Playlist_Scraper::$meta_key_options_scraper, $wizard_settings )){
+                    do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
+
+                }
                 
             }
+
         }
         
         if ( isset($_POST['import-tracks'])){
@@ -290,19 +299,19 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 'wpsstm-wizard-step-single-track',
                 'wizard-section-single-track'
             );
-
+            
             $this->add_wizard_field(
-                'track_location_selector', 
-                __('Source URL','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_sources_selector_callback' ), 
+                'track_image_selector', 
+                __('Image Selector','wpsstm').' '.$this->regex_link(), 
+                array( $this, 'track_image_selector_callback' ), 
                 'wpsstm-wizard-step-single-track',
                 'wizard-section-single-track'
             );
 
             $this->add_wizard_field(
-                'track_image_selector', 
-                __('Image Selector','wpsstm'), 
-                array( $this, 'track_image_selector_callback' ), 
+                'track_location_selector', 
+                __('Source URL','wpsstm').' '.$this->regex_link(), 
+                array( $this, 'track_sources_selector_callback' ), 
                 'wpsstm-wizard-step-single-track',
                 'wizard-section-single-track'
             );
@@ -378,6 +387,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             if ( isset($value['path']) ) {
                 $value['path'] = trim($value['path']);
             }
+            
+            //attr
+            if ( isset($value['attr']) ) {
+                $value['attr'] = trim($value['attr']);
+            }
 
             //regex
             if ( isset($value['regex']) ) {
@@ -400,7 +414,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function regex_link(){
         return sprintf(
-            '<a href="#" title="%1$s" class="regex-link">[...^]</a>',
+            '<a href="#" title="%1$s" class="wpsstm-wizard-selector-toggle-advanced"><i class="fa fa-cog" aria-hidden="true"></i></a>',
             __('Use Regular Expression','wpsstm')
         );
     }
@@ -408,18 +422,21 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     function css_selector_block($selector){
         
         ?>
-        <div class="wizard-selector">
+        <div class="wpsstm-wizard-selector">
             <?php
 
             //path
             $path = $this->scraper->get_options( array('selectors',$selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
-            
-        
+
             //regex
             $regex = $this->scraper->get_options( array('selectors',$selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
-            
+        
+            //attr
+            $attr_disabled = ( $this->scraper->page->response_type != 'text/html');
+            $attr = $this->scraper->get_options( array('selectors',$selector,'attr') );
+            $attr = ( $attr ? htmlentities($attr) : null);
             
 
             //build info
@@ -448,13 +465,13 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                     case 'track_image':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
-                            '<code>.album-art img</code> '.__('or an url','wpsstm')
+                            '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
                     case 'track_location':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
-                            '<code>audio</code> '.__('or an url','wpsstm')
+                            '<code>audio source</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
             }
@@ -464,39 +481,59 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             }
             
             printf(
-                '<input type="text" name="%1$s[selectors][%2$s][path]" value="%3$s" />',
+                '<input type="text" class="wpsstm-wizard-selector-jquery" name="%1$s[selectors][%2$s][path]" value="%3$s" />',
                 'wpsstm_wizard',
                 $selector,
                 $path
             );
-        
-            if ($info){
-                printf('<span class="wizard-field-desc">%s</span>',$info);
-            }
 
             //regex
             //uses a table so the style matches with the global form (WP-core styling)
             ?>
-            <table class="form-table regex-row">
-                <tbody>
-                    <tr>
-                        <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
-                        <td>        
-                            <div>
-                                <?php
+            <div class="wpsstm-wizard-selector-advanced">
+                <?php
+                if ($info){
+                    printf('<p class="wpsstm-wizard-track-selector-desc">%s</p>',$info);
+                }
+                ?>
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row"><?php _e('Tag attribute','wpsstm');?></th>
+                            <td>        
+                                <div>
+                                    <?php
 
-                                printf(
-                                    '<span class="regex-field"><input class="regex" name="%1$s[selectors][%2$s][regex]" type="text" value="%3$s"/></span>',
-                                    'wpsstm_wizard',
-                                    $selector,
-                                    $regex
-                                );
-                                ?>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                    printf(
+                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        'wpsstm_wizard',
+                                        $selector,
+                                        $attr,
+                                        disabled( $attr_disabled, true, false )
+                                    );
+                                    ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
+                            <td>        
+                                <div>
+                                    <?php
+
+                                    printf(
+                                        '<span class="wpsstm-wizard-selector-regex"><input class="regex" name="%1$s[selectors][%2$s][regex]" type="text" value="%3$s"/></span>',
+                                        'wpsstm_wizard',
+                                        $selector,
+                                        $regex
+                                    );
+                                    ?>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <?php
         
@@ -579,7 +616,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     function section_tracks_desc(){
 
         printf(
-            __('Enter a <a href="%1$s" target="_blank">jQuery selector</a> to target each track item from the tracklist page, for example: %2$s.','wpsstm'),
+            __('Enter a <a href="%s" target="_blank">jQuery selector</a> to target each track item from the tracklist page, for example: %s.','wpsstm'),
             'http://www.w3schools.com/jquery/jquery_ref_selectors.asp',
             '<code>#content #tracklist .track</code>'
         );
@@ -627,10 +664,13 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     }
 
     function section_single_track_desc(){
+        
+        $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
+        $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
 
-        _e('Enter a <a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">jQuery selectors</a> to extract the artist, title, album (optional) and image (optional) for each track.','spiff');
+        printf(__('Enter a %s to extract the data for each track.','wpsstm'),$jquery_selectors_link);
         echo"<br/>";
-        _e('Advanced users can eventually use <a href="http://regex101.com/" target="_blank">regular expressions</a> to refine your matches, using the links <strong>[...^]</strong>.','spiff');
+        printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
         
         $this->scraper->display_notices('wizard-step-single-track');
         

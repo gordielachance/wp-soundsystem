@@ -53,7 +53,7 @@ class WP_SoundSytem_Playlist_Scraper{
     }
 
     function setup_globals(){
-
+        $this->options = self::get_default_options();
         $this->tracklist = new WP_SoundSytem_Tracklist();
         $this->page = new WP_SoundSytem_Playlist_Scraper_Datas();
     }
@@ -61,13 +61,39 @@ class WP_SoundSytem_Playlist_Scraper{
     function setup_actions(){
         
     }
+    
+    static function get_default_options($keys = null){
+        
+        $default = array(
+            'selectors' => array(
+                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_location'    => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null)
+            ),
+            'tracks_order'              => 'desc',
+            'datas_cache_min'           => (int)wpsstm()->get_options('live_playlists_cache_min'), //time tracklist is cached - if set to null, will take plugin value
+            'musicbrainz'               => wpsstm()->get_options('mb_auto_id') //should we use musicbrainz to get the tracks data ? - if set to null, will take plugin value
+        );
+        
+        return wpsstm_get_array_value($keys,$default);
+    }
+
+    function get_options($keys = null){
+        return wpsstm_get_array_value($keys,$this->options);
+    }
 
     function init_post($post_id){
 
         $this->tracklist = new WP_SoundSytem_Tracklist($post_id);
         
+        $default_options = self::get_default_options();
         $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
-        $this->options = wp_parse_args($db_options, self::get_default_options() );
+
+        $this->options = array_replace_recursive($default_options,(array)$db_options);
 
         $feed_url = get_post_meta( $post_id, self::$meta_key_scraper_url, true );
         $this->init($feed_url);
@@ -98,13 +124,14 @@ class WP_SoundSytem_Playlist_Scraper{
         if ( count($this->datas['tracks']) && $this->is_wizard ){
             $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['timestamp'])) );
         }
-        
+
         //load page preset
         if ( $page_preset = $this->populate_scraper_presets($this) ){
             $this->page = $page_preset;
             $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->name.'</em>') );
         }
         //populate page
+
         $this->page->init($this->feed_url,$this->options);
 
         //get remote tracks
@@ -112,7 +139,7 @@ class WP_SoundSytem_Playlist_Scraper{
 
             $this->datas_remote = false; // so we can detect that we ran a remote request
             $remote_tracks = $this->page->get_tracks();
-            
+
             if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
                 if ( $this->feed_url != $this->page->redirect_url ){
                     $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->page->redirect_url.'</em>') );
@@ -155,9 +182,11 @@ class WP_SoundSytem_Playlist_Scraper{
 
         }
         
+        
+        
         //get options back from page (a preset could have changed them)
         $this->options = $this->page->options; 
-        
+
         /*
         Build Tracklist
         */
@@ -188,8 +217,6 @@ class WP_SoundSytem_Playlist_Scraper{
         if ( $this->datas_remote !==null ){ //we made a remote request
             new WP_SoundSytem_Live_Playlist_Stats($this->tracklist);
         }
-
-        
 
     }
     
@@ -222,29 +249,6 @@ class WP_SoundSytem_Playlist_Scraper{
 
     function delete_cache(){
         delete_transient( $this->transient_name_cache );
-    }
-
-    static function get_default_options($keys = null){
-        
-        $default = array(
-            'selectors' => array(
-                'tracks'           => array('path'=>null,'regex'=>null),
-                'track_artist'     => array('path'=>null,'regex'=>null),
-                'track_title'      => array('path'=>null,'regex'=>null),
-                'track_album'      => array('path'=>null,'regex'=>null),
-                'track_location'   => array('path'=>null,'regex'=>null),
-                'track_image'      => array('path'=>null,'regex'=>null)
-            ),
-            'tracks_order'              => 'desc',
-            'datas_cache_min'          => (int)wpsstm()->get_options('live_playlists_cache_min'),
-            'musicbrainz'               => false //check tracks with musicbrainz
-        );
-        
-        return wpsstm_get_array_value($keys,$default);
-    }
-
-    function get_options($keys = null){
-        return wpsstm_get_array_value($keys,$this->options);
     }
 
     static function get_available_presets(){

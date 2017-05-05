@@ -3,19 +3,19 @@ jQuery(document).ready(function($){
     $("#wpsstm-wizard-tabs").tabs();
 
     //regex
-    $('.wpsstm-wizard-step-content a.regex-link').click(function(e) {
+    $('.wpsstm-wizard-step-content a.wpsstm-wizard-selector-toggle-advanced').click(function(e) {
         e.preventDefault();
         var selector_row = $(this).parents('tr');
-        var regex_row = selector_row.find('.regex-row');
-        regex_row.toggleClass('active');
+        var advanced_row = selector_row.find('.wpsstm-wizard-selector-advanced');
+        advanced_row.toggleClass('active');
     });
     //default show regex
-    $('.wpsstm-wizard-step-content a.regex-link').each(function() {
+    $('.wpsstm-wizard-step-content a.wpsstm-wizard-selector-toggle-advanced').each(function() {
         var selector_row = $(this).parents('tr');
-        var regex_row = selector_row.find('.regex-row');
-        var input = regex_row.find('input');
+        var advanced_row = selector_row.find('.wpsstm-wizard-selector-advanced');
+        var input = advanced_row.find('input');
         if ( (input.val() != "") || input.hasClass('required') ){
-            regex_row.addClass('active');
+            advanced_row.addClass('active');
         }
     });
     
