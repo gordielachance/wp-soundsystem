@@ -280,8 +280,8 @@ class WP_SoundSytem_TracksList_Table{
             echo $tracklist_title;
         
             if ( $timestamp = get_live_playlist_timestamp($this->tracklist->post_id) ){
-                $date = date_i18n( get_option( 'date_format' ) , $timestamp );
-                $time = date_i18n( get_option( 'time_format' ) , $timestamp );
+                $date = date_i18n( get_option( 'date_format' ) , $timestamp, true );
+                $time = date_i18n( get_option( 'time_format' ) , $timestamp, true );
 
                 $text = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
 
