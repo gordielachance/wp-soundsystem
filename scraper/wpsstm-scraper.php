@@ -52,9 +52,10 @@ class WP_SoundSytem_Playlist_Scraper{
         
         //populate post ID or URL
         if ( $post_id_or_feed_url ){
-            if ( ctype_digit($post_id_or_feed_url) ) { //post ID
+            if ( is_int($post_id_or_feed_url) )  { //post ID
                 $this->init_post($post_id_or_feed_url);
             }else{ //url
+                
                 $this->init($post_id_or_feed_url);
             }
         }
