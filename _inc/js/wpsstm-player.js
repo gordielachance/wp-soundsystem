@@ -1,3 +1,5 @@
+var bottom_block;
+var bottom_notice_refresh;
 var wpsstm_player;
 var wpsstm_player_do_play;
 var wpsstm_current_media;
@@ -6,13 +8,16 @@ var wpsstm_current_bt;
 var page_buttons;
 var wpsstm_countdown_s = 5; //seconds for the redirection notice
 var wpsstm_countdown_timer; //redirection timer
+var wpsstm_next_tracklist_url;
 
 (function($){
 
     $(document).ready(function(){
 
-        var bottom_block = $('#wpsstm-bottom');
-        var bottom_notice_refresh = $('#wpsstm-bottom-refresh-notice');
+        bottom_block = $('#wpsstm-bottom');
+        bottom_notice_refresh = $('#wpsstm-bottom-refresh-notice');
+        
+        wpsstm_next_tracklist_url = wpsstm_tracklist_get_redirection();
         
         page_buttons = $( "[data-wpsstm-sources]" );
         
@@ -169,7 +174,11 @@ var wpsstm_countdown_timer; //redirection timer
                                     $(next_bt).trigger( "click" );
                                 }else{
                                     console.log('MediaElement.js - playlist finished');
-                                    wpsstm_redirection_countdown();
+                                    if ( wpsstm_next_tracklist_url ){
+                                        console.log('MediaElement.js - redirection countdown');
+                                        wpsstm_redirection_countdown();
+                                    }
+                                    
                                 }
 
                             });
@@ -221,8 +230,8 @@ var wpsstm_countdown_timer; //redirection timer
                     container.html(message_end);
 
             // And fire the callback passing our container as `this`
-            console.log("do redirection");
-            //window.location = "http://msdn.microsoft.com";
+            console.log("redirect to:" + wpsstm_next_tracklist_url);
+            window.location = wpsstm_next_tracklist_url;
         }
     // Run interval every 1000ms (1 second)
     }, 1000);
@@ -254,13 +263,36 @@ function wpsstm_toggle_playpause(media){
 
 }
 
-function wpsstm_nav_previous(){
-    console.log('wpsstm_nav_previous()');
-    var previous_track_link = jQuery('#wpsstm-player .nav-previous a');
-    if ( previous_track_link.length ){
-        var url = previous_track_link.attr('href');
-        window.location.replace(url);
-    }
+function wpsstm_tracklist_get_redirection(){
+    
+    var ajax_data = {
+        'action':           'wpsstm_tracklist_get_redirection'
+        
+    };
+
+    jQuery.ajax({
+
+        type: "post",
+        url: wpsstmL10n.ajaxurl,
+        data:ajax_data,
+        dataType: 'json',
+        beforeSend: function() {
+            console.log("getting tracklist redirect URL...");
+        },
+        success: function(data){
+            console.log(data);
+            if (data.output === false) {
+                console.log(data);
+            }else{
+                console.log("tracklist redirect URL: " + data.output);
+                wpsstm_next_tracklist_url = data.output;
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        }
+    })
 }
 
 
