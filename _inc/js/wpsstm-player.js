@@ -88,6 +88,7 @@ var page_buttons;
                 $('#wpsstm-bottom-player').html(media);
 
                 new MediaElementPlayer('wpsstm-bottom-player-audio', {
+                    classPrefix: 'mejs-',
                     // All the config related to HLS
                     hls: {
                         debug: true,
