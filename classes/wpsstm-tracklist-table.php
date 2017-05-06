@@ -12,7 +12,7 @@ class WP_SoundSytem_TracksList_Table{
     var $track_index = 0;
     var $paged_var = 'tracklist_page';
     var $no_items_label = null;
-    
+
     function __construct($tracklist){
         global $status, $page;
         
@@ -279,13 +279,15 @@ class WP_SoundSytem_TracksList_Table{
         
             echo $tracklist_title;
         
-            if ( $timestamp = get_live_playlist_timestamp($this->tracklist->post_id) ){
-                $date = date_i18n( get_option( 'date_format' ) , $timestamp, true );
-                $time = date_i18n( get_option( 'time_format' ) , $timestamp, true );
+            if ( $this->tracklist->timestamp ){
+
+                $date = date_i18n( get_option( 'date_format' ) , $this->tracklist->timestamp, true );
+                $time = date_i18n( get_option( 'time_format' ) , $this->tracklist->timestamp, true );
 
                 $text = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
 
                 printf('<small> <i class="fa fa-clock-o" aria-hidden="true"></i> %s</small>',$text);
+                    
             }
         
 

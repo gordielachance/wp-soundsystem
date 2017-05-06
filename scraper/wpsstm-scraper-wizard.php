@@ -12,17 +12,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function __construct($post_id_or_feed_url = null){
         
-        $this->scraper = new WP_SoundSytem_Playlist_Scraper();
+        $this->scraper = new WP_SoundSytem_Playlist_Scraper($post_id_or_feed_url);
         $this->scraper->is_wizard = true;
-
-        //populate post ID or URL
-        if ( $post_id_or_feed_url ){
-            if ( ctype_digit($post_id_or_feed_url) ) { //post ID
-                $this->scraper->init_post($post_id_or_feed_url);
-            }else{ //url
-                $this->scraper->init($post_id_or_feed_url);
-            }
-        }
 
         $tracklist_validated = clone $this->scraper->tracklist;
         $tracklist_validated->validate_tracks();
@@ -40,10 +31,6 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->wizard_register_scripts_styles();  //so we can enqueue them both frontend and backend
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_scripts_styles_backend' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
-        
-
-        
-
     }
     
     function wizard_register_scripts_styles(){

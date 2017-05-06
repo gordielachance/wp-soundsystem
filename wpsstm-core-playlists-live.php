@@ -202,8 +202,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         $post_type = get_post_type($post_id);
         if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;
 
-        $scraper = new WP_SoundSytem_Playlist_Scraper();
-        $scraper->init_post($post_id);
+        $scraper = new WP_SoundSytem_Playlist_Scraper($post_id);
         $tracklist = $scraper->tracklist;
 
         return $tracklist;

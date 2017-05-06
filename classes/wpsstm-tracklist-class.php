@@ -31,6 +31,7 @@ class WP_SoundSytem_Tracklist{
             $this->location = get_permalink($post_id);
             
         }
+        
     }
     
     function load_subtracks(){
@@ -171,7 +172,7 @@ class WP_SoundSytem_Tracklist{
     **/
     function get_tracklist_table($admin = false){
         
-        if ($admin){
+        if ( $admin) {
             require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
             $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
             $tracklist_table->items = $this->tracks;
@@ -179,7 +180,7 @@ class WP_SoundSytem_Tracklist{
             require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
             $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
             
-            //cache only if several post are displayed (like an archive page)
+            //live playlists : cache only if several post are displayed (like an archive page)
             if ( !is_admin() ){
                 $cache_only = ( !is_singular() );
             }else{ // is_singular() does not exists backend

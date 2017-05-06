@@ -43,13 +43,22 @@ class WP_SoundSytem_Playlist_Scraper{
     public $notices = array();
 
     
-    function __construct() {
+    function __construct($post_id_or_feed_url = null) {
         
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
 
         $this->setup_globals();
         $this->setup_actions();
         
+        //populate post ID or URL
+        if ( $post_id_or_feed_url ){
+            if ( ctype_digit($post_id_or_feed_url) ) { //post ID
+                $this->init_post($post_id_or_feed_url);
+            }else{ //url
+                $this->init($post_id_or_feed_url);
+            }
+        }
+
     }
 
     function setup_globals(){
