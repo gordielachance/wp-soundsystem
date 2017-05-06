@@ -112,7 +112,8 @@ class WP_SoundSytem_Playlist_Scraper_LastFM extends WP_SoundSytem_Playlist_Scrap
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
             'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-            'track_image'      => array('path'=>'img.cover-art','attr'=>'src')
+            'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+            'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
         )
     );
 
