@@ -6,33 +6,15 @@ var wpsstm_current_bt;
 var page_buttons;
 
 (function($){
-    
-    //tests
-    /*
-    $(document).ready(function(){
-        console.log("docready");
-        track_players = $('audio.wpsstm-track-player');
-        
-        $(track_players).mediaelementplayer({
-            pauseOtherPlayers: false,
-            features: ['playpause','sourcechooser'],
-            success: function (player, node) {
-                $(player).removeClass('buffering');
-              player.pause();
-             }
-        });
-        
-        
-        
-    });
-    */
-    $(document).ready(function(){
-        
-        track_players = $('audio.wpsstm-track-player');
-        console.log(track_players);
 
-        
+    $(document).ready(function(){
+
+        var player_wrapper = $('#wpsstm-bottom-player');
         page_buttons = $( "[data-wpsstm-sources]" );
+        
+        if ( page_buttons.length > 0 ){
+            player_wrapper.show();
+        }
 
         page_buttons.live( "click", function(e) {
             

@@ -60,11 +60,12 @@ a.wpsstm-play-track.playing .wpsstm-player-icon-pause {
 
 /* line 64, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-player {
+  display: none;
   position: fixed;
   width: 100%;
   background-color: #DDD;
   border-top: 1px solid #b7b7b7;
-  padding: 1em;
+  padding: 0;
   bottom: 0;
   z-index: 50;
   min-height: 0em;
