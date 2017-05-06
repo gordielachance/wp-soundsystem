@@ -253,10 +253,11 @@ class WP_SoundSytem {
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);
         
         $datas = array(
-            'debug' => (WP_DEBUG)
+            'debug'     => (WP_DEBUG),
+            'ajaxurl'   => admin_url( 'admin-ajax.php' )
         );
         
-        wp_localize_script( 'wpsstm', 'wpsstm', $datas );
+        wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
         wp_enqueue_script( 'wpsstm' );
         
         wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
