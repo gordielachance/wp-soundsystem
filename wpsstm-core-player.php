@@ -58,7 +58,17 @@ class WP_SoundSytem_Core_Player{
 
     function player_html(){
        ?>
-        <div id="wpsstm-bottom-player"></div>
+        <div id="wpsstm-bottom">
+            <p id="wpsstm-bottom-refresh-notice" class="active">
+                <strong></strong>
+                <?php
+                $icon = '<i class="fa fa-refresh fa-spin fa-fw"></i>';
+                $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
+                echo $icon  . ' ' . __("Redirecting to next tracklist... Click to abord.",'wpsstm');
+                ?>
+            </p>
+            <div id="wpsstm-bottom-player"></div>
+        </div>
         <?php
     }
     

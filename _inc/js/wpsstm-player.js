@@ -4,17 +4,35 @@ var wpsstm_current_media;
 var wpsstm_current_source;
 var wpsstm_current_bt;
 var page_buttons;
+var wpsstm_countdown_s = 5; //seconds for the redirection notice
+var wpsstm_countdown_timer; //redirection timer
 
 (function($){
 
     $(document).ready(function(){
 
-        var player_wrapper = $('#wpsstm-bottom-player');
+        var bottom_block = $('#wpsstm-bottom');
+        var bottom_notice_refresh = $('#wpsstm-bottom-refresh-notice');
+        
         page_buttons = $( "[data-wpsstm-sources]" );
         
         if ( page_buttons.length > 0 ){
-            player_wrapper.show();
+            bottom_block.show();
         }
+
+        bottom_notice_refresh.click(function() {
+            
+            if ( wpsstm_countdown_s == 0 ) return;
+            
+            if ( $(this).hasClass('active') ){
+                clearInterval(wpsstm_countdown_timer);
+            }else{
+                wpsstm_redirection_countdown();
+            }
+            
+            $(this).toggleClass('active');
+            $(this).find('i.fa').toggleClass('fa-spin');
+        });
 
         page_buttons.live( "click", function(e) {
             
@@ -151,6 +169,7 @@ var page_buttons;
                                     $(next_bt).trigger( "click" );
                                 }else{
                                     console.log('MediaElement.js - playlist finished');
+                                    wpsstm_redirection_countdown();
                                 }
 
                             });
@@ -176,9 +195,46 @@ var page_buttons;
         var first_button = $(page_buttons).first();
         first_button.trigger('click');
         
+        function wpsstm_redirection_countdown(){
+            
+            bottom_notice_refresh.show();
+            
+            var container = bottom_notice_refresh.find('strong');
+            var message = "";
+            var message_end = "";
+
+            // Get reference to container, and set initial content
+            container.html(wpsstm_countdown_s + message);
+            // Get reference to the interval doing the countdown
+            wpsstm_countdown_timer = setInterval(function () {
+                container.html(wpsstm_countdown_s + message);
+                // If seconds remain
+                if (--wpsstm_countdown_s) {
+                    // Update our container's message
+                    container.html(wpsstm_countdown_s + message);
+                // Otherwise
+                } else {
+                    wpsstm_countdown_s = 0;
+                    // Clear the countdown interval
+                    clearInterval(wpsstm_countdown_timer);
+                    // Update our container's message
+                    container.html(message_end);
+
+            // And fire the callback passing our container as `this`
+            console.log("do redirection");
+            //window.location = "http://msdn.microsoft.com";
+        }
+    // Run interval every 1000ms (1 second)
+    }, 1000);
+
+}
+        
       
     });
+    
 })(jQuery);
+
+
 
 function wpsstm_toggle_playpause(media){
 
@@ -206,3 +262,6 @@ function wpsstm_nav_previous(){
         window.location.replace(url);
     }
 }
+
+
+

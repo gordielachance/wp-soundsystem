@@ -61,7 +61,7 @@ a.wpsstm-play-track{
 
 }
 
-#wpsstm-bottom-player{
+#wpsstm-bottom{
     display:none;
     position:fixed;
     width:100%;
@@ -71,5 +71,15 @@ a.wpsstm-play-track{
     bottom: 0;
     z-index: 50;
     min-height:0em;
-    
+    #wpsstm-bottom-refresh-notice{
+        display:none;
+        font-size:0.8em;
+        margin: 0;
+        padding: .5em 1em;
+        background-color:#fcf8e3;
+        cursor: pointer;
+        cursor: hand;
+    }
+    #wpsstm-bottom-player{
+    }
 }
