@@ -350,7 +350,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     
                 case 'trackitem_sources':
                     
-                    $sources_display =  wpsstm_get_post_sources( $item->post_id, true );
+                    $sources_display =  wpsstm_sources()->get_track_sources( $item );
 
                     $display_el = ( $sources_display ) ?  count($sources_display) : '—';
                     $field_name = $this->get_field_name('source_urls');
