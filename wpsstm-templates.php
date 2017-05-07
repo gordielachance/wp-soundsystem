@@ -256,7 +256,7 @@ function wpsstm_get_player_redirection_url(){
     }else{
         $post_type = get_post_type();
         
-        if ( get_the_ID() == wpsstm_live_playlists()->frontend_wizard_page_id ){ //frontend wizard
+        if ( ( wpsstm()->get_options('live_playlists_enabled') == 'on' ) && ( get_the_ID() == wpsstm_live_playlists()->frontend_wizard_page_id ) ){ //frontend wizard
             
             $wizard_url = get_permalink();
             
