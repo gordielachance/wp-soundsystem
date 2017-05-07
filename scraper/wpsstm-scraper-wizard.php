@@ -11,9 +11,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     var $wizard_fields = array();
     
     function __construct($post_id_or_feed_url = null){
-        
-        $this->scraper = new WP_SoundSytem_Playlist_Scraper($post_id_or_feed_url);
-        $this->scraper->is_wizard = true;
+        //init scraper ans declare it is a wizard one.
+        $scraper = new WP_SoundSytem_Playlist_Scraper();
+        $scraper->is_wizard = true;
+        $scraper->__construct($post_id_or_feed_url);
+        $this->scraper = $scraper;
 
         $tracklist_validated = clone $this->scraper->tracklist;
         $tracklist_validated->validate_tracks();
@@ -85,7 +87,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $feed_url = ( isset($_POST[ 'wpsstm_feed_url' ]) ) ? $_POST[ 'wpsstm_feed_url' ] : null;
             $feed_url = trim($feed_url);
             update_post_meta( $post_id, WP_SoundSytem_Playlist_Scraper::$meta_key_scraper_url, $feed_url );
-
+            
             //save wizard settings
             $wizard_settings = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
             
