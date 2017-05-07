@@ -46,7 +46,7 @@ For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Last.FM, Spotify, Radionomy, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine.
+Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine.
 
 = Live Playlists =
 

@@ -605,6 +605,33 @@ class WP_SoundSytem_Playlist_Scraper_Soundsgood extends WP_SoundSytem_Playlist_S
     
 }
 
+class WP_SoundSytem_Playlist_Scraper_Deezer extends WP_SoundSytem_Playlist_Scraper_Preset{
+    var $slug = 'deezer';
+    
+    var $pattern = '~^https?://(?:www.)?deezer.com/playlist/([^/]+)~i';
+    
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
+            'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
+            'track_title'       => array('path'=>'pan[itemprop="name"]'),
+            'track_album'       => array('path'=>'[itemprop="inAlbum"]')
+        )
+    );
+    
+    function __construct(){
+        parent::__construct();
+        $this->name = __('Deezer Playlist','wpsstm');
+    }
+    /*
+    function get_body_node($content){
+        print_r("<xmp>");
+        print_r($content);
+        print_r("</xmp>");
+    }
+    */
+}
+
 class WP_SoundSytem_Playlist_Scraper_Hypem extends WP_SoundSytem_Playlist_Scraper_Preset{
     
     var $slug = 'hypem';
@@ -623,7 +650,7 @@ class WP_SoundSytem_Playlist_Scraper_Hypem extends WP_SoundSytem_Playlist_Scrape
     function __construct(){
         parent::__construct();
         $this->name = __('Hype Machine','wpsstm');
-    } 
+    }
  
 }
 
@@ -694,6 +721,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Slacker_Station();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundcloud();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Soundsgood();
+    $presets[] = new WP_SoundSytem_Playlist_Scraper_Deezer();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Hypem();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_Twitter();
     $presets[] = new WP_SoundSytem_Playlist_Scraper_RTBF();
