@@ -147,6 +147,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.9.0 =
+* new Deezer preset
+* Youtube sources (if any) for Last.FM preset
+* improved player
+* improved sources
+
 = 0.9.8.9 =
 * scraper now able to get an array of sources urls for each track.
 * get_track_node_content() : new argument '$single_value' (default to TRUE)
