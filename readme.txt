@@ -16,16 +16,18 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 = Several new post types =
 Tracks, artists, albums, playlists and live playlists uses each a custom post type, so you can easily manage them.
 
+= Playlists =
+
+Managing the playlist tracks is a piece of cake using the Tracklist metabox :
+Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
+
+Import a tracklist from a file or a music service like Spotify using the Tracklist Importer (see below).
+Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
+
 = MusicBrainz =
 When managing a track, artist or album, the plugin can search for its MusicBrainz ID.
 It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) (an open data music database).
 For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
-
-= Playlists =
-Create and manage tracklists easily with the Tracklist metabox.
-
-Import a tracklist from a file or a music service like Spotify using the Tracklist Importer (see below).
-Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
 
 = Audio player (not implemented yet) =
 In the future, an audio player will show up to play your tracks if they have supported sources, as described below.
