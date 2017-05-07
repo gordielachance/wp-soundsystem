@@ -249,10 +249,10 @@ When the player has finished playing tracks, we need to move on to the previous 
 function wpsstm_get_player_redirection_url(){
     global $wp_query;
 
-    $redirection_url = null;
+    $redirect_url = null;
 
     if ( !is_singular() ){
-        $redirection_url = get_previous_posts_page_link();
+        $redirect_url = get_previous_posts_page_link();
     }else{
         $post_type = get_post_type();
         
@@ -277,7 +277,7 @@ function wpsstm_get_player_redirection_url(){
                 break;
                 default:
                     $prev_post = get_previous_post();
-                    $redirection_url = get_permalink($prev_post);
+                    $redirect_url = get_permalink($prev_post);
                 break;
             }
         }
