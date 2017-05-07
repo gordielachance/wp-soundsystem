@@ -321,7 +321,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
 
-        $frontend_wizard_url = isset( $wp_query->query[$this->qvar_frontend_wizard_url] ) ? $wp_query->query[$this->qvar_frontend_wizard_url] : null;
+        $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
 
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
         $this->frontend_wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($frontend_wizard_url);
@@ -344,7 +344,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         if ( $post_id != $this->frontend_wizard_page_id ) return $link;
         
-        $frontend_wizard_url = isset( $wp_query->query[$this->qvar_frontend_wizard_url] ) ? $wp_query->query[$this->qvar_frontend_wizard_url] : null;
+        $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
 
         if ( $frontend_wizard_url ) {
             $link = add_query_arg(array($this->qvar_frontend_wizard_url=>$frontend_wizard_url),$link);

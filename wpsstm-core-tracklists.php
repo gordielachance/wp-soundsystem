@@ -155,7 +155,7 @@ class WP_SoundSytem_Core_Tracklists{
         global $wp_query;
         global $post;
 
-        if( isset( $wp_query->query[$this->qvar_xspf] ) ){
+        if( $wp_query->get($this->qvar_xspf) ){
             $file = 'playlist-xspf.php';
             if ( file_exists( wpsstm_locate_template( $file ) ) ){
                 $template = wpsstm_locate_template( $file );
