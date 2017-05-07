@@ -75,7 +75,7 @@ class WP_SoundSytem_Core_Player{
                 if ( $is_refresh ){
                     $text = __("Refreshing current tracklist... Click to abord.",'wpsstm');
                 }else{
-                    $text = __("Redirecting to previous tracklist... Click to abord.",'wpsstm');
+                    $text = __("Redirecting to get more tunes to play... Click to abord.",'wpsstm');
                 }
                 
                 printf('<p id="wpsstm-bottom-notice-redirection" class="active wpsstm-bottom-notice" data-tracklist-redirection="%s">%s %s %s</p>',esc_url($redirection_url),$icon,$countdown,$text);
