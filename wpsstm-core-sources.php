@@ -79,12 +79,14 @@ class WP_SoundSytem_Core_Sources{
     function get_sources_field_editable( $post_id, $field_name ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = $this->get_track_sources($track, true, true); //include suggested sources
+        $sources = $this->get_track_sources($track);
 
         if ( empty($sources) ) $sources = array(null); //blank
         
         $sources_auto = $this->get_track_sources_auto($sources,$track);
         $sources_suggested = $this->get_track_sources_suggested($sources,$track);
+        
+        $sources = array_merge((array)$sources,(array)$sources_suggested);
         
         $placeholder = __("Enter a track source URL",'wpsstm');
         
@@ -161,8 +163,14 @@ class WP_SoundSytem_Core_Sources{
         
         if ($append){
             $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-            $existing_sources = $this->get_track_sources($track, false, false);
-            $sources = array_merge((array)$existing_sources,$sources);
+            
+            //remove auto-populated sources from input
+            $sources_auto = $this->get_track_sources_auto($sources,$track);
+            $sources = array_diff((array)$sources,(array)$sources_auto);
+            
+            $sources_db = $this->get_track_sources_db($track);
+            $sources = array_merge((array)$sources_db,$sources);
+
         }
         
         $sources = $this->sanitize_sources($sources);
@@ -206,39 +214,41 @@ class WP_SoundSytem_Core_Sources{
         }
     }
     
-    function get_track_sources($track, $auto = true, $suggestions = false){
+    function get_track_sources_db($track){
+        $sources = null;
+        
+        //stored in DB
+        if ($track->post_id){
+            $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
+            $sources = $this->sanitize_sources($sources);
+        }
+        
+        return $sources;
+    }
+    
+    function get_track_sources($track){
 
         if ($track->source_urls === null){
 
             $track->source_urls = false;
-
-            //stored in DB
-            if ($track->post_id){
-                $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
-            }
             
-            //include other sources
-            if ( $auto ){
-                $sources_auto = $this->get_track_sources_auto($sources,$track);
-                $sources = array_merge((array)$sources,(array)$sources_auto);
-            }
+            //stored sources
+            $sources = $this->get_track_sources_db($track);
 
-            //include source suggestions
-            if ( $suggestions ){
-                $sources_suggested = $this->get_track_sources_suggested($sources,$track);
-                $sources = array_merge((array)$sources,(array)$sources_suggested);
-            }
+            //include auto-populated sources
+            $sources_auto = $this->get_track_sources_auto($sources,$track);
+            $sources = array_merge((array)$sources,(array)$sources_auto);
 
             //cleanup
             $sources = $this->sanitize_sources($sources);
-            return $sources;
+            $track->source_urls = $sources;
             
         }
         return $track->source_urls;
     }
     
     /*
-    Those source will be auto-populated; and user will not be able to edit them.
+    Those source will be auto-populated; user will not be able to edit them backend.
     */
 
     function get_track_sources_auto($sources,$track){
@@ -250,13 +260,14 @@ class WP_SoundSytem_Core_Sources{
 
         //cleanup
         $sources = wpsstm_sources()->sanitize_sources($sources);
+
         return $sources;
 
     }
 
 
     /*
-    Those source will be suggested; user will need to confirm them.
+    Those source will be suggested backend; user will need to confirm them.
     */
 
     function get_track_sources_suggested($sources,$track){
@@ -268,6 +279,7 @@ class WP_SoundSytem_Core_Sources{
 
         //cleanup
         $sources = $this->sanitize_sources($sources);
+
         return $sources;
 
     }
