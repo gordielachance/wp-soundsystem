@@ -20,7 +20,6 @@ var wpsstm_countdown_timer; //redirection timer
         
         if ( page_buttons.length > 0 ){
             bottom_block.show();
-            wpsstm_redirection_countdown();
         }
 
         bottom_notice_refresh.click(function() {
