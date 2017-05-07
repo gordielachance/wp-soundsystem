@@ -106,7 +106,7 @@ class WP_SoundSytem_Core_Player{
 
     function get_track_button($track){
 
-        if ( !$sources = $track->source_urls ) return;
+        if ( !$sources = wpsstm_sources()->get_track_sources($track) ) return;
 
         $provider_slugs = wpsstm_player()->providers;
 

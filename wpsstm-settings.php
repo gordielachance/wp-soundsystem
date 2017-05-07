@@ -257,20 +257,20 @@ class WP_SoundSytem_Settings {
         
         add_settings_field(
             'spotify_client', 
-            __('Spotify','wpsstm'), 
+            __('Spotify'), 
             array( $this, 'spotify_client_callback' ), 
             'wpsstm-settings-page', 
             'settings_apis'
         );
         
         add_settings_field(
-            'soundcloud_client_id', 
-            __('Soundcloud','wpsstm'), 
+            'soundcloud_client', 
+            __('Soundcloud'), 
             array( $this, 'soundcloud_client_id_callback' ), 
             'wpsstm-settings-page', 
             'settings_apis'
         );
-        
+
         /*
         System
         */

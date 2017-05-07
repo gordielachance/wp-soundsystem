@@ -77,13 +77,14 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function get_sources_field_editable( $post_id, $field_name ){
-
-        $sources = wpsstm_get_post_sources($post_id, true, true); //include suggested sources
+        
+        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+        $sources = $this->get_track_sources($track, true, true); //include suggested sources
 
         if ( empty($sources) ) $sources = array(null); //blank
         
-        $sources_auto = wpsstm_get_post_sources_auto($post_id);
-        $sources_suggested = wpsstm_get_post_sources_suggested($post_id);
+        $sources_auto = $this->get_track_sources_auto($sources,$track);
+        $sources_suggested = $this->get_track_sources_suggested($sources,$track);
         
         $placeholder = __("Enter a track source URL",'wpsstm');
         
@@ -159,7 +160,8 @@ class WP_SoundSytem_Core_Sources{
     function update_post_sources($post_id,$sources,$append=false){
         
         if ($append){
-            $existing_sources = wpsstm_get_post_sources($post_id);
+            $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+            $existing_sources = $this->get_track_sources($track, false, false);
             $sources = array_merge((array)$existing_sources,$sources);
         }
         
@@ -195,7 +197,8 @@ class WP_SoundSytem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                if ($sources = wpsstm_get_post_sources( $post_id, true ) ){
+                $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+                if ($sources = $this->get_track_sources( $track ) ){
                     $output = count($sources);
                 }
                 echo $output;
@@ -203,8 +206,74 @@ class WP_SoundSytem_Core_Sources{
         }
     }
     
+    function get_track_sources($track, $auto = true, $suggestions = false){
+
+        if ($track->source_urls === null){
+
+            $track->source_urls = false;
+
+            //stored in DB
+            if ($track->post_id){
+                $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
+            }
+            
+            //include other sources
+            if ( $auto ){
+                $sources_auto = $this->get_track_sources_auto($sources,$track);
+                $sources = array_merge((array)$sources,(array)$sources_auto);
+            }
+
+            //include source suggestions
+            if ( $suggestions ){
+                $sources_suggested = $this->get_track_sources_suggested($sources,$track);
+                $sources = array_merge((array)$sources,(array)$sources_suggested);
+            }
+
+            //cleanup
+            $sources = $this->sanitize_sources($sources);
+            return $sources;
+            
+        }
+        return $track->source_urls;
+    }
+    
+    /*
+    Those source will be auto-populated; and user will not be able to edit them.
+    */
+
+    function get_track_sources_auto($sources,$track){
+
+        $sources = array();
+
+        //allow plugins to filter this
+        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$track);
+
+        //cleanup
+        $sources = wpsstm_sources()->sanitize_sources($sources);
+        return $sources;
+
+    }
+
+
+    /*
+    Those source will be suggested; user will need to confirm them.
+    */
+
+    function get_track_sources_suggested($sources,$track){
+
+        $sources = array();
+
+        //allow plugins to filter this
+        $sources = apply_filters('wpsstm_get_track_sources_suggested',$sources,$track);
+
+        //cleanup
+        $sources = $this->sanitize_sources($sources);
+        return $sources;
+
+    }
+    
     function sanitize_sources($sources){
-	$sources = (array)$sources;
+        $sources = (array)$sources;
         $sources = array_filter($sources);
         $sources = array_unique($sources);
         return $sources;
