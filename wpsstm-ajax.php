@@ -110,21 +110,6 @@ function wpsstm_ajax_tracklist_update_order(){
     die(); 
 }
 
-function wpsstm_ajax_tracklist_get_redirection(){
-    
-    $result = array(
-        'message'   => null,
-        'success'   => false,
-        'input'     => $_POST,
-        'output'    => home_url()
-    );
-    
-    header('Content-type: application/json');
-    echo json_encode($result);
-    die(); 
-
-}
-
 //artist
 add_action('wp_ajax_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
 add_action('wp_ajax_nopriv_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
@@ -136,10 +121,6 @@ add_action('wp_ajax_nopriv_wpsstm_tracklist_row_action', 'wpsstm_ajax_tracklist_
 //order
 //add_action('wp_ajax_wpsstm_tracklist_update_order', 'wpsstm_ajax_tracklist_update_order');
 //add_action('wp_ajax_nopriv_wpsstm_tracklist_update_order', 'wpsstm_ajax_tracklist_update_order');
-
-//tracklists
-add_action('wp_ajax_wpsstm_tracklist_get_redirection', 'wpsstm_ajax_tracklist_get_redirection');
-add_action('wp_ajax_nopriv_wpsstm_tracklist_get_redirection', 'wpsstm_ajax_tracklist_get_redirection');
 
 
 ?>

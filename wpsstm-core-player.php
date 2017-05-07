@@ -57,16 +57,31 @@ class WP_SoundSytem_Core_Player{
     }
 
     function player_html(){
-       ?>
+        ?>
         <div id="wpsstm-bottom">
-            <p id="wpsstm-bottom-refresh-notice" class="active">
-                <strong></strong>
-                <?php
+            <?php
+        
+            //redirection notice
+            if ( $redirection_url = wpsstm_get_player_redirection_url() ){
+                global $wp;
+                $current_url = home_url(add_query_arg(array(),$wp->request));
+                $countdown = '<strong></strong>';
                 $icon = '<i class="fa fa-refresh fa-spin fa-fw"></i>';
                 $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
-                echo $icon  . ' ' . __("Redirecting to next tracklist... Click to abord.",'wpsstm');
-                ?>
-            </p>
+
+                //TO FIX not working (eg. for wizard)
+                $is_refresh = ( trailingslashit($current_url) == trailingslashit($redirection_url) );
+                
+                if ( $is_refresh ){
+                    $text = __("Refreshing current tracklist... Click to abord.",'wpsstm');
+                }else{
+                    $text = __("Redirecting to previous tracklist... Click to abord.",'wpsstm');
+                }
+                
+                printf('<p id="wpsstm-bottom-notice-redirection" class="active wpsstm-bottom-notice" data-tracklist-redirection="%s">%s %s %s</p>',esc_url($redirection_url),$icon,$countdown,$text);
+            }
+            ?>
+
             <div id="wpsstm-bottom-player"></div>
         </div>
         <?php

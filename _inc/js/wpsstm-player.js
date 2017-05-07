@@ -8,21 +8,19 @@ var wpsstm_current_bt;
 var page_buttons;
 var wpsstm_countdown_s = 5; //seconds for the redirection notice
 var wpsstm_countdown_timer; //redirection timer
-var wpsstm_next_tracklist_url;
 
 (function($){
 
     $(document).ready(function(){
 
         bottom_block = $('#wpsstm-bottom');
-        bottom_notice_refresh = $('#wpsstm-bottom-refresh-notice');
-        
-        wpsstm_next_tracklist_url = wpsstm_tracklist_get_redirection();
-        
+        bottom_notice_refresh = $('#wpsstm-bottom-notice-redirection');
+
         page_buttons = $( "[data-wpsstm-sources]" );
         
         if ( page_buttons.length > 0 ){
             bottom_block.show();
+            wpsstm_redirection_countdown();
         }
 
         bottom_notice_refresh.click(function() {
@@ -135,6 +133,9 @@ var wpsstm_next_tracklist_url;
                                         }
                                     }
                                     
+                                    //No more sources - Play next song if any
+                                    wpsstm_play_next_track();
+                                    
                                 }
                                 
                             });
@@ -163,23 +164,7 @@ var wpsstm_next_tracklist_url;
                                 $(wpsstm_current_bt).removeClass('playing active');
 
                                 //Play next song if any
-
-                                var bt_index = $( "[data-wpsstm-sources]" ).index( wpsstm_current_bt );
-                                var bt_new_index = bt_index + 1;
-                                var next_bt = $(page_buttons).get(bt_new_index);
-
-                                if ( $(next_bt).length ){ //there is more tracks
-                                    console.log('MediaElement.js - simulate click on button #' + bt_new_index);
-                                    //fire
-                                    $(next_bt).trigger( "click" );
-                                }else{
-                                    console.log('MediaElement.js - playlist finished');
-                                    if ( wpsstm_next_tracklist_url ){
-                                        console.log('MediaElement.js - redirection countdown');
-                                        wpsstm_redirection_countdown();
-                                    }
-                                    
-                                }
+                                wpsstm_play_next_track();
 
                             });
 
@@ -204,8 +189,45 @@ var wpsstm_next_tracklist_url;
         var first_button = $(page_buttons).first();
         first_button.trigger('click');
         
+        function wpsstm_play_next_track(){
+            console.log('wpsstm_play_next_track()');
+            var bt_index = $( "[data-wpsstm-sources]" ).index( wpsstm_current_bt );
+            var bt_new_index = bt_index + 1;
+            var next_bt = $(page_buttons).get(bt_new_index);
+
+            if ( $(next_bt).length ){ //there is more tracks
+                console.log('MediaElement.js - simulate click on button #' + bt_new_index);
+                //fire
+                $(next_bt).trigger( "click" );
+            }else{
+                console.log('MediaElement.js - no more tracks to play.');
+                wpsstm_redirection_countdown();
+            }
+        }
+
+        function wpsstm_toggle_playpause(media){
+
+            if (media.paused !== null) {
+                wpsstm_player_do_play = media.paused;
+            }else{
+                wpsstm_player_do_play = true;
+            }
+
+            console.log("wpsstm_toggle_playpause - doplay: " + wpsstm_player_do_play);
+
+            if ( wpsstm_player_do_play ){
+                wpsstm_player.play();
+            }else{
+                wpsstm_player.pause();
+            }
+
+        }
+        
         function wpsstm_redirection_countdown(){
             
+            if ( bottom_notice_refresh.length == 0) return;
+            
+            var redirect_url = bottom_notice_refresh.attr('data-tracklist-redirection');
             bottom_notice_refresh.show();
             
             var container = bottom_notice_refresh.find('strong');
@@ -229,71 +251,14 @@ var wpsstm_next_tracklist_url;
                     // Update our container's message
                     container.html(message_end);
 
-            // And fire the callback passing our container as `this`
-            console.log("redirect to:" + wpsstm_next_tracklist_url);
-            window.location = wpsstm_next_tracklist_url;
+                    // And fire the callback passing our container as `this`
+                    console.log("redirect to:" + redirect_url);
+                    window.location = redirect_url;
+                }
+            }, 1000); // Run interval every 1000ms (1 second)
         }
-    // Run interval every 1000ms (1 second)
-    }, 1000);
-
-}
         
       
     });
     
 })(jQuery);
-
-
-
-function wpsstm_toggle_playpause(media){
-
-    if (media.paused !== null) {
-        wpsstm_player_do_play = media.paused;
-    }else{
-        wpsstm_player_do_play = true;
-    }
-                
-    console.log("wpsstm_toggle_playpause - doplay: " + wpsstm_player_do_play);
-
-    if ( wpsstm_player_do_play ){
-        wpsstm_player.play();
-    }else{
-        wpsstm_player.pause();
-    }
-
-}
-
-function wpsstm_tracklist_get_redirection(){
-    
-    var ajax_data = {
-        'action':           'wpsstm_tracklist_get_redirection'
-        
-    };
-
-    jQuery.ajax({
-
-        type: "post",
-        url: wpsstmL10n.ajaxurl,
-        data:ajax_data,
-        dataType: 'json',
-        beforeSend: function() {
-            console.log("getting tracklist redirect URL...");
-        },
-        success: function(data){
-            console.log(data);
-            if (data.output === false) {
-                console.log(data);
-            }else{
-                console.log("tracklist redirect URL: " + data.output);
-                wpsstm_next_tracklist_url = data.output;
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            console.log(xhr.status);
-            console.log(thrownError);
-        }
-    })
-}
-
-
-

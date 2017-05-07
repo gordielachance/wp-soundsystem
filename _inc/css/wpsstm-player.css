@@ -71,7 +71,7 @@ a.wpsstm-play-track.playing .wpsstm-player-icon-pause {
   min-height: 0em;
 }
 /* line 74, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-bottom-refresh-notice {
+#wpsstm-bottom #wpsstm-bottom-notice-redirection {
   display: none;
   font-size: 0.8em;
   margin: 0;

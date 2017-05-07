@@ -298,7 +298,6 @@ function wpsstm_get_post_tracklist($post_id=null){
     
 }
 
-
 function wpsstm_get_xspf_link($post_id=null,$download=false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
@@ -312,4 +311,52 @@ function wpsstm_get_xspf_link($post_id=null,$download=false){
 
     return $xspf_url;
 
+}
+
+/*
+When the player has finished playing tracks, we need to move on to the previous page/post so music keeps streaming.
+//WIP TO FIX TO CHECK not working well
+*/
+
+function wpsstm_get_player_redirection_url(){
+    global $wp_query;
+
+    $redirection_url = null;
+
+    if ( !is_singular() ){
+        $redirection_url = get_previous_posts_page_link();
+    }else{
+        $post_type = get_post_type();
+        
+        if ( get_the_ID() == wpsstm_live_playlists()->frontend_wizard_page_id ){ //frontend wizard
+            
+            $wizard_url = get_permalink();
+            
+            if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_frontend_wizard_url) ){
+                $redirect_url = add_query_arg(
+                    array(
+                        wpsstm_live_playlists()->qvar_frontend_wizard_url => $feed_url
+                    ),
+                    $wizard_url
+                );
+            }
+
+        }else{
+            switch ($post_type){
+                case wpsstm()->post_type_live_playlist:
+                    //just refresh the current page
+                    $redirect_url = get_permalink();
+                break;
+                default:
+                    $prev_post = get_previous_post();
+                    $redirection_url = get_permalink($prev_post);
+                break;
+            }
+        }
+
+
+    }
+
+    return $redirect_url;
+    
 }
