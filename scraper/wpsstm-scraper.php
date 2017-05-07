@@ -52,14 +52,12 @@ class WP_SoundSytem_Playlist_Scraper{
         
         //populate post ID or URL
         if ( $post_id_or_feed_url ){
-            if ( is_int($post_id_or_feed_url) )  { //post ID
+            if ( ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
                 $this->init_post($post_id_or_feed_url);
             }else{ //url
-                
                 $this->init($post_id_or_feed_url);
             }
         }
-
     }
 
     function setup_globals(){
