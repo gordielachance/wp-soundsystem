@@ -118,6 +118,7 @@ class WP_SoundSytem_Core_Player{
         //localize vars
         $localize_vars=array();
         $localize_vars['autoskip']  = (int)wpsstm()->get_options('autoskip');
+        $localize_vars['autoplay']  = ( wpsstm()->get_options('autoplay') == 'on' );
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }

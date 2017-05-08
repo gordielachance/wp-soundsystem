@@ -111,6 +111,7 @@ class WP_SoundSytem_Settings {
             */
             
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
+            $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
             
             if ( isset ($input['autoskip']) && ctype_digit($input['autoskip']) ){
                 $new_input['autoskip'] = $input['autoskip'];
@@ -248,9 +249,17 @@ class WP_SoundSytem_Settings {
         );
         
         add_settings_field(
-            'player_autoskyip', 
+            'autoplay', 
+            __('Autoplay','wpsstm'), 
+            array( $this, 'autoplay_callback' ), 
+            'wpsstm-settings-page', 
+            'player_settings'
+        );
+        
+        add_settings_field(
+            'autoskip', 
             __('Autoskip','wpsstm'), 
-            array( $this, 'autoskip_enabled_callback' ), 
+            array( $this, 'autoskip_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
@@ -404,7 +413,18 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function autoskip_enabled_callback(){
+    function autoplay_callback(){
+        $option = wpsstm()->get_options('autoplay');
+
+        printf(
+            '<input type="checkbox" name="%s[autoplay]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Auto-play the first track displayed.","wpsstm")
+        );
+    }
+    
+    function autoskip_callback(){
         $option = wpsstm()->get_options('autoskip');
         
         $desc = sprintf(__('%s = disabled','wpsstm'),'<code>0</code>');
@@ -414,7 +434,7 @@ class WP_SoundSytem_Settings {
             '<input type="number" name="%s[autoskip]" value="%s"/> %s %s',
             wpsstm()->meta_name_options,
             $option,
-            __("seconds","wpsstm"),
+            __("seconds","wpsstm").'<br/>'.__("Well the last track has finished playing frontend, auto-redirect to keep play music.","wpsstm"),
             $desc
         );
     }

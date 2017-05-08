@@ -188,9 +188,12 @@ var wpsstm_countdown_timer; //redirection timer
         });
         
         //autoplay first track
-        console.log("autoplay first track");
-        var first_button = $(page_buttons).first();
-        first_button.trigger('click');
+        if ( wpsstmPlayer.autoplay ){
+            console.log("autoplay first track");
+            var first_button = $(page_buttons).first();
+            first_button.trigger('click');
+        }
+
         
         function wpsstm_play_next_track(){
             console.log('wpsstm_play_next_track()');

@@ -84,6 +84,7 @@ class WP_SoundSytem {
             'soundcloud_client_id'              => null,
             'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
+            'autoplay'                          => 'on',
             'autoskip'                          => 5 //seconds
         );
         
