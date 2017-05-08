@@ -373,8 +373,12 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         
         try{
 
-            if ($selector_css) $nodes = $track_node->find($selector_css);
-            
+            if ($selector_css){
+                $nodes = $track_node->find($selector_css);
+            }else{
+                $nodes = $track_node;
+            }
+
             //get the first tag found only
             if ($single_value){
                 $nodes = $nodes->eq(0);
