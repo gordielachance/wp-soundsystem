@@ -407,7 +407,7 @@ class WP_SoundSytem_Settings {
     function autoskip_enabled_callback(){
         $option = wpsstm()->get_options('autoskip');
         
-        $desc = __('','wppsm');
+        $desc = sprintf(__('%s = disabled','wpsstm'),'<code>0</code>');
         $desc = sprintf('— <small>%s</small>',$desc);
         
         printf(
