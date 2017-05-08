@@ -675,7 +675,16 @@ class WP_SoundSytem_Playlist_Scraper_Twitter extends WP_SoundSytem_Playlist_Scra
 
         $this->name = __('Twitter','wpsstm');
 
-    } 
+    }
+    
+    function get_request_args(){
+        $args = parent::get_request_args();
+
+        //it seems that the request fails with our default user agent, remove it.
+        $args['headers']['User-Agent'] = '';
+
+        return $args;
+    }
 
 }
 
