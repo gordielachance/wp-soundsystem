@@ -149,6 +149,9 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.9.1 =
+* sources : now an array (url,title,description) instead of just an url.
+
 = 0.9.9.0 =
 * new Deezer preset
 * Youtube sources (if any) for Last.FM preset

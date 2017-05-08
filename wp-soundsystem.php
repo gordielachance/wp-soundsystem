@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 0.9.9.0
+Version: 0.9.9.1
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '0.9.9.0';
+    public $version = '0.9.9.1';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '102';
+    public $db_version = '103';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -208,6 +208,32 @@ class WP_SoundSytem {
                     }
                 }
 
+            }
+            
+            if ($current_version < 103){
+                
+                //sources : update from a string -> an array 
+                
+                $sources_meta_key = wpsstm_sources()->sources_metakey;
+                
+                $metas_query = $wpdb->get_results( $wpdb->prepare( "
+                    SELECT post_id,meta_value FROM {$wpdb->postmeta} pm
+                    LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                    WHERE pm.meta_key = '%s'
+                ", $sources_meta_key ) );
+                
+                foreach((array)$metas_query as $post_sources){
+                    $post_id = $post_sources->post_id;
+                    $meta_value = $post_sources->meta_value;
+                    $meta_value = maybe_unserialize( $meta_value );
+                    foreach((array)$meta_value as $key=>$post_source){
+                        $new_source = wpsstm_sources()->source_blank;
+                        $new_source['url'] = $post_source;
+                        $new_source = array_filter($new_source);
+                        $meta_value[$key] = $new_source;
+                    }
+                    wpsstm_sources()->update_post_sources($post_id,$meta_value);
+                }
             }
 
         }

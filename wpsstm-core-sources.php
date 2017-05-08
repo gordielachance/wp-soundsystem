@@ -1,8 +1,13 @@
 <?php
-
 class WP_SoundSytem_Core_Sources{
     
     var $sources_metakey = '_wpsstm_source_urls';
+    
+    var $source_blank = array(
+        'url'           => null,
+        'title'         => null,
+        'description'   => null
+    );
     
     /**
     * @var The one true Instance
@@ -87,7 +92,7 @@ class WP_SoundSytem_Core_Sources{
         $sources_suggested = $this->get_track_sources_suggested($sources,$track);
         
         $sources = array_merge((array)$sources,(array)$sources_suggested);
-        
+
         $placeholder = __("Enter a track source URL",'wpsstm');
         
         $rows = array();
@@ -114,14 +119,15 @@ class WP_SoundSytem_Core_Sources{
             
             $disabled_str = disabled( $disabled, true, false );
    
-            $content = sprintf('<input type="text" name="%s[]"  value="%s" placeholder="%s" %s/>',$field_name,$source,$placeholder,$disabled_str);
+            $content_url = sprintf('<input type="text" name="%s[][url]"  value="%s" placeholder="%s" %s/>',$field_name,$source['url'],$placeholder,$disabled_str);
             
             $icon_plus = '<i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>';
             $icon_minus = '<i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>';
             
-            $content .= sprintf('<span class="wpsstm-source-action">%s%s</span>',$icon_plus,$icon_minus);
+            $content_url .= sprintf('<span class="wpsstm-source-action">%s%s</span>',$icon_plus,$icon_minus);
+            $content_url = sprintf('<p class="wpsstm-source-url">%s</p>',$content_url);
 
-            $rows[] = sprintf('<p %s>%s</p>',wpsstm_get_classes_attr($source_classes),$content);
+            $rows[] = sprintf('<div %s>%s</div>',wpsstm_get_classes_attr($source_classes),$content_url);
         }
         
         $rows = implode("\n",$rows);
@@ -159,8 +165,22 @@ class WP_SoundSytem_Core_Sources{
         $this->update_post_sources($post_id,$sources);
     }
     
+    function sanitize_sources($sources){
+        $sources = (array)$sources;
+
+        foreach($sources as $key=>$source){
+            $new_source = wp_parse_args($source,$this->source_blank);
+            $new_source = array_filter($new_source);
+            $sources[$key] = $new_source;
+        }
+
+        $sources = array_unique($sources, SORT_REGULAR);
+
+        return $sources;
+    }
+    
     function update_post_sources($post_id,$sources,$append=false){
-        
+
         if ($append){
             $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
             
@@ -172,9 +192,9 @@ class WP_SoundSytem_Core_Sources{
             $sources = array_merge((array)$sources_db,$sources);
 
         }
-        
+
         $sources = $this->sanitize_sources($sources);
-        
+
         if (!$sources){
             return delete_post_meta( $post_id, $this->sources_metakey );
         }else{
@@ -242,7 +262,7 @@ class WP_SoundSytem_Core_Sources{
             //cleanup
             $sources = $this->sanitize_sources($sources);
             $track->source_urls = $sources;
-            
+
         }
         return $track->source_urls;
     }
@@ -282,13 +302,6 @@ class WP_SoundSytem_Core_Sources{
 
         return $sources;
 
-    }
-    
-    function sanitize_sources($sources){
-        $sources = (array)$sources;
-        $sources = array_filter($sources);
-        $sources = array_unique($sources);
-        return $sources;
     }
     
 }

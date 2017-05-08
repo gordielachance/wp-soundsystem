@@ -1,15 +1,22 @@
 @import "compass/css3";
 
-p.wpsstm-source{
+div.wpsstm-source{
     
     position:relative;
     padding:.5em;
     margin:0;
-    input{
-        
-        width: calc(100% - 3em)!important; //.wpsstm-source-action
-        display:inline-block;
+    
+    p{
+        margin:0;
+        padding:0;
+        &.wpsstm-source-url{
+            input{
+                width: calc(100% - 3em)!important; //.wpsstm-source-action
+                display:inline-block;
+            }
+        }
     }
+
     .wpsstm-source-action{
         font-size:1.5em;
         width:2em;

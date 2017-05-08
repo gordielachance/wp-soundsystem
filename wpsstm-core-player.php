@@ -111,39 +111,21 @@ class WP_SoundSytem_Core_Player{
         $provider_slugs = wpsstm_player()->providers;
 
         $sources_attr_arr = array();
-        $sources_el_arr = array();
 
-        foreach( $sources as $key => $url){
-            
+        foreach( (array)$sources as $source){
+
             foreach( (array)$this->providers as $provider ){
 
-                if ( !$source = $provider->get_source($url) ) continue; //cannot play source
+                if ( !$provider_source = $provider->get_source($source['url']) ) continue; //cannot play source
 
-                $sources_el_arr[] = sprintf('<source src="%s" type="%s" />',esc_url($source['src']),$source['type']);
-                
                 $sources_attr_arr[] = array(
-                    'type'  => $source['type'],
-                    'src'   => esc_url($source['src'])
+                    'type'  => $provider_source['type'],
+                    'src'   => esc_url($provider_source['src'])
                 );
 
             }
 
         }
-        
-        //TO FIX TO REMOVE ? test with a single player by track
-        
-        /*
-        if ( $sources_el_arr ) {
-
-            $player_classes = array('wpsstm-track-player');
-            $player_id = 'wpsstm-track-player-';
-            $player_sources_str = implode("\n",$sources_el_arr);
-
-            $player = sprintf('<audio id="%s" %s>%s</audio>',$player_id,wpsstm_get_classes_attr($player_classes),$player_sources_str);
-
-            return $player;
-        }
-        */
 
         if ( $sources_attr_arr ) {
 
