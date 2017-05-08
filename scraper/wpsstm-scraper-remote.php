@@ -353,8 +353,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     }
 
     protected function get_track_node_content($track_node,$slug,$single_value=true){
-
-        $node = $track_node;
         $pattern = null;
         $strings = array();
         $result = array();
@@ -365,7 +363,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $selector_attr = $this->get_options(array('selectors',$selector_slug,'attr'));
 
         //abord
-        if ( !$selector_css && !$selector_regex ){
+        if ( !$selector_css && !$selector_regex && !$selector_attr ){
             return false;
         }
 
