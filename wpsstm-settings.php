@@ -392,7 +392,7 @@ class WP_SoundSytem_Settings {
     function player_enabled_callback(){
         $option = wpsstm()->get_options('player_enabled');
         
-        $desc = __('','wppsm');
+        $desc = __('Requires Wordpress 4.8','wppsm');
         $desc = sprintf('— <small>%s</small>',$desc);
         
         printf(
