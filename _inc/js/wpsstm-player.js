@@ -6,7 +6,7 @@ var wpsstm_current_media;
 var wpsstm_current_source;
 var wpsstm_current_bt;
 var page_buttons;
-var wpsstm_countdown_s = 5; //seconds for the redirection notice
+var wpsstm_countdown_s = wpsstmPlayer.autoskip; //seconds for the redirection notice
 var wpsstm_countdown_timer; //redirection timer
 
 (function($){
@@ -15,6 +15,10 @@ var wpsstm_countdown_timer; //redirection timer
 
         bottom_block = $('#wpsstm-bottom');
         bottom_notice_refresh = $('#wpsstm-bottom-notice-redirection');
+        if (wpsstm_countdown_timer > 0){
+            bottom_notice_refresh.addClass('active');
+            $(this).find('i.fa').toggleClass('fa-spin');
+        }
 
         page_buttons = $( "[data-wpsstm-sources]" );
         
@@ -226,7 +230,13 @@ var wpsstm_countdown_timer; //redirection timer
             
             if ( bottom_notice_refresh.length == 0) return;
             
-            var redirect_url = bottom_notice_refresh.attr('data-tracklist-redirection');
+            var redirect_url = null;
+            var redirect_link = bottom_notice_refresh.find('a#wpsstm-bottom-notice-link');
+
+            if (redirect_link.length > 0){
+                redirect_url = redirect_link.attr('href');
+            }
+
             bottom_notice_refresh.show();
             
             var container = bottom_notice_refresh.find('strong');
@@ -235,6 +245,9 @@ var wpsstm_countdown_timer; //redirection timer
 
             // Get reference to container, and set initial content
             container.html(wpsstm_countdown_s + message);
+            
+            if ( wpsstm_countdown_s <= 0) return;
+            
             // Get reference to the interval doing the countdown
             wpsstm_countdown_timer = setInterval(function () {
                 container.html(wpsstm_countdown_s + message);

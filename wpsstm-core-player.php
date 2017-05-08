@@ -62,23 +62,35 @@ class WP_SoundSytem_Core_Player{
             <?php
         
             //redirection notice
-            if ( $redirection_url = wpsstm_get_player_redirection_url() ){
+            if ( $redirection = wpsstm_get_player_redirection() ){
                 global $wp;
+                
+                $redirection_url = $redirection['url'];
+                $redirection_title = $redirection['title'];
+                
                 $current_url = home_url(add_query_arg(array(),$wp->request));
                 $countdown = '<strong></strong>';
-                $icon = '<i class="fa fa-refresh fa-spin fa-fw"></i>';
+                $icon = '<i class="fa fa-refresh fa-fw"></i>';
                 $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
 
                 //TO FIX not working (eg. for wizard)
                 $is_refresh = ( trailingslashit($current_url) == trailingslashit($redirection_url) );
                 
                 if ( $is_refresh ){
-                    $text = __("Refreshing current tracklist... Click to abord.",'wpsstm');
+                    
+                    
+                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirection_url,__('current tracklist','wppstm'));
+                    $text = sprintf(__("Refreshing %s... ",'wpsstm'),$link);
                 }else{
-                    $text = __("Redirecting to get more tunes to play... Click to abord.",'wpsstm');
+                    
+                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirection_url,$redirection_title);
+                    $text = sprintf( __("On the next page : %s",'wpsstm'),$link );
                 }
                 
-                printf('<p id="wpsstm-bottom-notice-redirection" class="active wpsstm-bottom-notice" data-tracklist-redirection="%s">%s %s %s</p>',esc_url($redirection_url),$icon,$countdown,$text);
+                $abord_link = sprintf( __("Click to abord.",'wpsstm'),$link );
+                $text.= ' ' . $abord_link;
+                
+                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
 
@@ -102,6 +114,12 @@ class WP_SoundSytem_Core_Player{
         wp_register_script('mediaelement-plugin-source-chooser','https://cdnjs.cloudflare.com/ajax/libs/mediaelement-plugins/2.1.1/source-chooser/source-chooser.js',array('wp-mediaelement'), '2.1.1');
 
         wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser'),wpsstm()->version);
+        
+        //localize vars
+        $localize_vars=array();
+        $localize_vars['autoskip']  = (int)wpsstm()->get_options('autoskip');
+        wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
+        
     }
 
     function get_track_button($track){

@@ -83,7 +83,8 @@ class WP_SoundSytem {
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
             'soundcloud_client_secret'          => null,
-            //'player_enabled'                    => 'on'
+            'player_enabled'                    => 'on',
+            'autoskip'                          => 5 //seconds
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
@@ -263,7 +264,7 @@ class WP_SoundSytem {
 
             //localize vars
             $localize_vars=array();
-            $localize_vars['ajaxurl']=admin_url( 'admin-ajax.php' );
+            $localize_vars['ajaxurl']   = admin_url( 'admin-ajax.php' );
             wp_localize_script('wpsstm_admin','wpsstmL10n', $localize_vars);
 
             wp_enqueue_script( 'wpsstm_admin' );

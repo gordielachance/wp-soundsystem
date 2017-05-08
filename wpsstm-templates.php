@@ -246,7 +246,7 @@ When the player has finished playing tracks, we need to move on to the previous 
 //WIP TO FIX TO CHECK not working well
 */
 
-function wpsstm_get_player_redirection_url(){
+function wpsstm_get_player_redirection(){
     global $wp_query;
 
     $redirect_url = null;
@@ -285,6 +285,6 @@ function wpsstm_get_player_redirection_url(){
 
     }
 
-    return $redirect_url;
+    return array('title'=>'','url'=>$redirect_url);
     
 }

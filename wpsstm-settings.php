@@ -105,6 +105,16 @@ class WP_SoundSytem_Settings {
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
             $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
             $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
+            
+            /*
+            Player
+            */
+            
+            $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
+            
+            if ( isset ($input['autoskip']) && ctype_digit($input['autoskip']) ){
+                $new_input['autoskip'] = $input['autoskip'];
+            }
 
             /*
             Live playlists
@@ -161,12 +171,20 @@ class WP_SoundSytem_Settings {
             array( $this, 'settings_sanitize' ) // Sanitize
          );
         
+        /*
+        General
+        */
+        
         add_settings_section(
             'settings_general', // ID
             __('General','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
+        
+        /*
+        MusicBrainz
+        */
 
         add_settings_section(
             'settings-musicbrainz', // ID
@@ -200,13 +218,41 @@ class WP_SoundSytem_Settings {
         );
         
         /*
-        tracklists
-        */
+        Tracklists
+        
         add_settings_section(
             'tracklist_settings', // ID
             __('Tracklists','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        */
+        
+        /*
+        Player
+        */
+        add_settings_section(
+            'player_settings', // ID
+            __('Audio Player','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'player_enabled', 
+            __('Enabled','wpsstm'), 
+            array( $this, 'player_enabled_callback' ), 
+            'wpsstm-settings-page', 
+            'player_settings'
+        );
+        
+        add_settings_field(
+            'player_autoskyip', 
+            __('Autoskip','wpsstm'), 
+            array( $this, 'autoskip_enabled_callback' ), 
+            'wpsstm-settings-page', 
+            'player_settings'
         );
 
         /*
@@ -342,15 +388,49 @@ class WP_SoundSytem_Settings {
         );
         echo '  <small> ' . sprintf(__('Can be ignored by setting %s for input value.','wpsstm'),'<code>-</code>') . '</small>';
     }
-
+    
+    function player_enabled_callback(){
+        $option = wpsstm()->get_options('player_enabled');
+        
+        $desc = __('','wppsm');
+        $desc = sprintf('— <small>%s</small>',$desc);
+        
+        printf(
+            '<input type="checkbox" name="%s[player_enabled]" value="on" %s /> %s %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Enable Audio Player","wpsstm"),
+            $desc
+        );
+    }
+    
+    function autoskip_enabled_callback(){
+        $option = wpsstm()->get_options('autoskip');
+        
+        $desc = __('','wppsm');
+        $desc = sprintf('— <small>%s</small>',$desc);
+        
+        printf(
+            '<input type="number" name="%s[autoskip]" value="%s"/> %s %s',
+            wpsstm()->meta_name_options,
+            $option,
+            __("seconds","wpsstm"),
+            $desc
+        );
+    }
+    
     function live_playlists_enabled_callback(){
         $option = wpsstm()->get_options('live_playlists_enabled');
         
+        $desc = __('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
+        $desc = sprintf('<small>%s</small>',$desc);
+        
         printf(
-            '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable Live Playlists","wpsstm")
+            __("Enable Live Playlists","wpsstm"),
+            '— '.$desc
         );
     }
     
