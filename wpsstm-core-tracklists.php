@@ -357,7 +357,7 @@ class WP_SoundSytem_Core_Tracklists{
         $tracklist = wpsstm_get_post_tracklist($post->ID);
         $tracklist->validate_tracks();
 
-        return $content . $tracklist->get_tracklist_table();
+        return $tracklist->get_tracklist_table() . $content;
     }
     
     function shortcode_tracklist( $atts ) {
