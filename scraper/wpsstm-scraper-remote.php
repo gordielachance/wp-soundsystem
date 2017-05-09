@@ -332,16 +332,16 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         foreach($track_nodes as $key=>$single_track_node) {
             
             $sources = array();
-            $source_urls = $this->get_track_node_content($single_track_node,'source_urls',false);
+            $source_urls = $this->get_track_source_urls($single_track_node);
             foreach ((array)$source_urls as $source_url){
                 $sources[] = array('url'=>$source_url);
             }
 
             $args = array(
-                'artist'        => $this->get_track_node_content($single_track_node,'artist'),
-                'title'         => $this->get_track_node_content($single_track_node,'title'),
-                'album'         => $this->get_track_node_content($single_track_node,'album'),
-                'image'         => $this->get_track_node_content($single_track_node,'image'),
+                'artist'        => $this->get_track_artist($single_track_node),
+                'title'         => $this->get_track_title($single_track_node),
+                'album'         => $this->get_track_album($single_track_node),
+                'image'         => $this->get_track_image($single_track_node),
                 'sources'       => $sources
             );
 
@@ -357,16 +357,41 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         return $tracks_arr;
 
     }
+    
+    protected function get_track_artist($track_node){
+        $selectors = $this->get_options(array('selectors','track_artist'));
+        return $this->get_track_node_content($track_node,$selectors);
+    }
+    
+    protected function get_track_title($track_node){
+        $selectors = $this->get_options(array('selectors','track_title'));
+        return $this->get_track_node_content($track_node,$selectors);
+    }
+    
+    protected function get_track_album($track_node){
+        $selectors = $this->get_options(array('selectors','track_album'));
+        return $this->get_track_node_content($track_node,$selectors);
+    }
+    
+    protected function get_track_image($track_node){
+        $selectors = $this->get_options(array('selectors','track_image'));
+        return $this->get_track_node_content($track_node,$selectors);
+    }
+    
+    protected function get_track_source_urls($track_node){
+        $selectors = $this->get_options(array('selectors','track_source_urls'));
+        $source_urls = $this->get_track_node_content($track_node,$selectors,false);
+        return $this->get_track_node_content($track_node,$selectors);
+    }
 
-    protected function get_track_node_content($track_node,$slug,$single_value=true){
+    private function get_track_node_content($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
-        
-        $selector_slug  = 'track_'.$slug;
-        $selector_css   = $this->get_options(array('selectors',$selector_slug,'path'));
-        $selector_regex = $this->get_options(array('selectors',$selector_slug,'regex'));
-        $selector_attr = $this->get_options(array('selectors',$selector_slug,'attr'));
+
+        $selector_css   = wpsstm_get_array_value('path',$selectors);
+        $selector_regex = wpsstm_get_array_value('regex',$selectors);
+        $selector_attr  = wpsstm_get_array_value('attr',$selectors);
 
         //abord
         if ( !$selector_css && !$selector_regex && !$selector_attr ){
