@@ -10,10 +10,9 @@ class WP_SoundSystem_Track{
     public $location;
     public $mbid = null;
     public $duration;
-    public $source_urls = null; //set 'null' so we can check later it has been populated
+    public $sources = null; //set 'null' so we can check later it has been populated
     public $did_lookup = false; // TO FIX
-    
-    
+
     function __construct( $args = array() ){
         
         //has track ID
@@ -51,7 +50,7 @@ class WP_SoundSystem_Track{
             'location'      =>null,
             'mbid'          =>null,
             'duration'      =>null,
-            'source_urls'   =>null
+            'sources'       =>null
         );
     }
 
@@ -161,7 +160,7 @@ class WP_SoundSystem_Track{
             wpsstm_artists()->metakey           => $this->artist,
             wpsstm_tracks()->metakey            => $this->title,
             wpsstm_albums()->metakey            => $this->album,
-            wpsstm_sources()->sources_metakey   => $this->source_urls,
+            wpsstm_sources()->sources_metakey   => $this->sources,
         );
         
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){		
@@ -278,6 +277,11 @@ class WP_SoundSystem_Track{
         
         return $api_response;
         
+    }
+    
+    //useful eg. for transients
+    function get_unique_id($prefix = null){
+        return md5( $prefix . $this->artist . $this->title . $this->album );
     }
 
 }

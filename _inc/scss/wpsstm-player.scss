@@ -4,6 +4,11 @@ a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
     
+    &[data-wpsstm-sources=""]{
+        pointer-events: none;
+        @include opacity(.1);
+    }
+    
     .wpsstm-player-icon{
         display:none;
         &.wpsstm-player-icon-play{

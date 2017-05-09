@@ -62,7 +62,7 @@ class WP_SoundSytem_Core_Player{
             <?php
         
             //redirection notice
-            if ( $redirection = wpsstm_get_player_redirection() ){
+            if ( wpsstm()->get_options('autoredirect') && ( $redirection = wpsstm_get_player_redirection() ) ){
                 global $wp;
                 
                 $redirection_url = $redirection['url'];
@@ -117,25 +117,29 @@ class WP_SoundSytem_Core_Player{
         
         //localize vars
         $localize_vars=array();
-        $localize_vars['autoskip']  = (int)wpsstm()->get_options('autoskip');
+        $localize_vars['autoredirect']  = (int)wpsstm()->get_options('autoredirect');
         $localize_vars['autoplay']  = ( wpsstm()->get_options('autoplay') == 'on' );
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }
 
-    function get_track_button($track){
-
-        if ( !$sources = wpsstm_sources()->get_track_sources($track) ) return;
-
-        $provider_slugs = wpsstm_player()->providers;
-
+    function get_track_button($track,$query_sources = false){
+        
+        $sources = wpsstm_sources()->get_track_sources_db($track);
         $sources_attr_arr = array();
+        $data_attr_str = null;
+        
+        if ( $query_sources && ($remote_sources = wpsstm_sources()->get_track_sources_remote($track) ) ){
+            $sources = array_merge((array)$sources,(array)$remote_sources);
+            $sources = wpsstm_sources()->sanitize_sources($sources);
+        }
 
+        //check if any provider can use the source
         foreach( (array)$sources as $source){
 
             foreach( (array)$this->providers as $provider ){
 
-                if ( !$provider_source = $provider->get_source($source['url']) ) continue; //cannot play source
+                if ( !$provider_source = $provider->get_source_attr($source['url']) ) continue; //cannot play source
 
                 $sources_attr_arr[] = array(
                     'type'  => $provider_source['type'],
@@ -146,13 +150,13 @@ class WP_SoundSytem_Core_Player{
 
         }
 
-        if ( $sources_attr_arr ) {
-
-            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS ); //https://wordpress.stackexchange.com/a/162945/70449
-            $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
-            
-            return $link;
+        if ($sources_attr_arr){
+            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS );
         }
+         //https://wordpress.stackexchange.com/a/162945/70449
+        $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+
+        return $link;
 
     }
 }
@@ -179,7 +183,26 @@ abstract class WP_SoundSytem_Player_Provider{
     The mime types or pseudo-mime types should match http://www.mediaelementjs.com/.
     */
     
-    abstract function get_source($url);
+    abstract function get_source_attr($url);
+    
+    /*
+    Search a source from this provider
+    */
+    
+    function single_source_lookup($track,$args=null){
+        if ( $sources = $this->sources_lookup($track,$args) ){
+            return $sources[0];
+        }
+        
+    }
+    
+    /*
+    Search sources from this provider
+    */
+    
+    function sources_lookup($track,$args=null){
+        
+    }
     
 }
 
@@ -189,7 +212,7 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
     var $slug = 'wp';
     var $icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
     
-    function get_source($url){
+    function get_source_attr($url){
         
         //check file is supported
         $filetype = wp_check_filetype($url);
@@ -214,7 +237,7 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
     var $slug = 'youtube';
     var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
-    function get_source($url){
+    function get_source_attr($url){
 
         //youtube
         $pattern = '~(?:youtube.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu.be/)([^"&?/ ]{11})~i';
@@ -227,6 +250,10 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
             'src'   => $url
         );
 
+    }
+    
+    function sources_lookup($track,$args=null){
+        return wpsstm_get_soundsgood_sources($track,'youtube',$args);
     }
 
     
@@ -243,7 +270,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
     }
     
-    function get_source($url){
+    function get_source_attr($url){
 
         //soundcloud
         $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
@@ -261,6 +288,10 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         
     }
     
+    function sources_lookup($track,$args=null){
+        return wpsstm_get_soundsgood_sources($track,'soundcloud',$args);
+    }
+    
     
 }
 
@@ -270,7 +301,7 @@ class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provid
     var $slug = 'mixcloud';
     var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
     
-    function get_source($url){
+    function get_source_attr($url){
 
         //mixcloud
         $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';

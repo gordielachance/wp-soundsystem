@@ -113,8 +113,8 @@ class WP_SoundSytem_Settings {
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
             
-            if ( isset ($input['autoskip']) && ctype_digit($input['autoskip']) ){
-                $new_input['autoskip'] = $input['autoskip'];
+            if ( isset ($input['autoredirect']) && ctype_digit($input['autoredirect']) ){
+                $new_input['autoredirect'] = $input['autoredirect'];
             }
 
             /*
@@ -257,9 +257,9 @@ class WP_SoundSytem_Settings {
         );
         
         add_settings_field(
-            'autoskip', 
-            __('Autoskip','wpsstm'), 
-            array( $this, 'autoskip_callback' ), 
+            'autoredirect', 
+            __('Auto-redirect','wpsstm'), 
+            array( $this, 'autoredirect_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
@@ -401,7 +401,8 @@ class WP_SoundSytem_Settings {
     function player_enabled_callback(){
         $option = wpsstm()->get_options('player_enabled');
         
-        $desc = __('Requires Wordpress 4.8','wppsm');
+        $buglink = sprintf('<a target="_blank" href="%s">%s</a>','https://core.trac.wordpress.org/ticket/39686',__('this bug','wpsstm'));
+        $desc = sprintf( __('Requires Wordpress 4.8 - see %s.','wppsm'),$buglink);
         $desc = sprintf('— <small>%s</small>',$desc);
         
         printf(
@@ -424,14 +425,14 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function autoskip_callback(){
-        $option = wpsstm()->get_options('autoskip');
+    function autoredirect_callback(){
+        $option = wpsstm()->get_options('autoredirect');
         
         $desc = sprintf(__('%s = disabled','wpsstm'),'<code>0</code>');
         $desc = sprintf('— <small>%s</small>',$desc);
         
         printf(
-            '<input type="number" name="%s[autoskip]" value="%s"/> %s %s',
+            '<input type="number" name="%s[autoredirect]" value="%s"/> %s %s',
             wpsstm()->meta_name_options,
             $option,
             __("seconds","wpsstm").'<br/>'.__("Well the last track has finished playing frontend, auto-redirect to keep play music.","wpsstm"),

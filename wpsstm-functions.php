@@ -258,3 +258,55 @@ function wpsstm_get_class_instance($post_id){
 
     }
 }
+
+function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
+
+        $args_default = array(
+            'cache_only'    => false,
+            'max'           => 5,
+            'single_source' => true //skip after one source found
+        );
+
+        $args = wp_parse_args((array)$args,$args_default);
+
+        $sources = $remote = $cache = null;
+        $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
+        $cache = $sources = get_transient( $transient_name );
+
+        if ( !$args['cache_only'] && ( false === $cache ) ) {
+
+            $sources = array();
+
+            $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
+            $api_args = array(
+                'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
+                'limit'                     => $args['max'],
+                'platforms'                 => $platform,
+                'q'                         => urlencode($track->artist . ' ' . $track->title),
+                'skipSavingInDatabase'      => true
+            );
+            $api_url = add_query_arg($api_args,$api_url);
+            $response = wp_remote_get($api_url);
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ) return $body;
+            $api_response = json_decode( $body, true );
+
+            $items = wpsstm_get_array_value(array(0,'items'),$api_response);
+
+            foreach( (array)$items as $item ){
+                $source = array(
+                    'title'     => wpsstm_get_array_value('initTitle',$item),
+                    'url'       => wpsstm_get_array_value('permalink',$item)
+                );
+                $sources[] = $source;
+            }
+
+            $remote = $sources = wpsstm_sources()->sanitize_sources($sources);
+            set_transient($transient_name,$sources, 1* WEEK_IN_SECONDS);
+        }
+
+        //wpsstm()->debug_log(json_encode(array('track'=>$track,,'platform'=>$platform,args'=>$args,'cache'=>$sources,'remote'=>$remote)),'wpsstm_get_soundsgood_sources()' ); 
+
+        return $sources;
+    }

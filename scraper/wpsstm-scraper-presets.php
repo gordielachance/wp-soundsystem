@@ -623,13 +623,6 @@ class WP_SoundSytem_Playlist_Scraper_Deezer extends WP_SoundSytem_Playlist_Scrap
         parent::__construct();
         $this->name = __('Deezer Playlist','wpsstm');
     }
-    /*
-    function get_body_node($content){
-        print_r("<xmp>");
-        print_r($content);
-        print_r("</xmp>");
-    }
-    */
 }
 
 class WP_SoundSytem_Playlist_Scraper_Hypem extends WP_SoundSytem_Playlist_Scraper_Preset{
