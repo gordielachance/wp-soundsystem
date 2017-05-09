@@ -116,6 +116,8 @@ class WP_SoundSytem_Settings {
             if ( isset ($input['autoredirect']) && ctype_digit($input['autoredirect']) ){
                 $new_input['autoredirect'] = $input['autoredirect'];
             }
+            
+            $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
 
             /*
             Live playlists
@@ -250,7 +252,7 @@ class WP_SoundSytem_Settings {
         
         add_settings_field(
             'autoplay', 
-            __('Autoplay','wpsstm'), 
+            __('Auto-play','wpsstm'), 
             array( $this, 'autoplay_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
@@ -260,6 +262,14 @@ class WP_SoundSytem_Settings {
             'autoredirect', 
             __('Auto-redirect','wpsstm'), 
             array( $this, 'autoredirect_callback' ), 
+            'wpsstm-settings-page', 
+            'player_settings'
+        );
+        
+        add_settings_field(
+            'autosource', 
+            __('Auto-source','wpsstm'), 
+            array( $this, 'autosource_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
@@ -437,6 +447,17 @@ class WP_SoundSytem_Settings {
             $option,
             __("seconds","wpsstm").'<br/>'.__("Well the last track has finished playing frontend, auto-redirect to keep play music.","wpsstm"),
             $desc
+        );
+    }
+    
+    function autosource_callback(){
+        $option = wpsstm()->get_options('autosource');
+
+        printf(
+            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("If no source is set for the track, try to find an online source automatically.","wpsstm")
         );
     }
     

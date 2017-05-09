@@ -119,6 +119,7 @@ class WP_SoundSytem_Core_Player{
         $localize_vars=array();
         $localize_vars['autoredirect']  = (int)wpsstm()->get_options('autoredirect');
         $localize_vars['autoplay']  = ( wpsstm()->get_options('autoplay') == 'on' );
+        $localize_vars['autosource']  = ( wpsstm()->get_options('autosource') == 'on' );
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }

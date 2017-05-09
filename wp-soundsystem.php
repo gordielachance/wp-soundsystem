@@ -18,7 +18,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '103';
+    public $db_version = '104';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -85,7 +85,8 @@ class WP_SoundSytem {
             'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
-            'autoskip'                          => 5 //seconds
+            'autoredirect'                      => 0, //seconds
+            'autosource'                        => 'on',
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
@@ -195,17 +196,17 @@ class WP_SoundSytem {
                     );
 
                     foreach ($query->posts as $track_id){
-
-                        $new_sources = array();
-                        $old_sources = post_bkmarks_get_post_links($track_id, $bookmarks_args);
-
-                        foreach ((array)$old_sources as $bookmark){
-                            $new_sources[] = $bookmark->link_url;
-                        }
                         
-                        if ($new_sources){
-                            wpsstm_sources()->update_post_sources($track_id,$new_sources,true);
+                        if ( !$bookmarks = post_bkmarks_get_post_links($track_id, $bookmarks_args) ) continue;
+                        
+                        $track = new WP_SoundSystem_Track( array('post_id'=>$track_id) );
+                        $sources_db = $this->get_track_sources_db($track,false); //without filters
+
+                        foreach ((array)$bookmarks as $bookmark){
+                            $sources_db[] = $bookmark->link_url;
                         }
+
+                        wpsstm_sources()->update_post_sources($track_id,$sources_db);
                         
                     }
                 }
@@ -236,6 +237,17 @@ class WP_SoundSytem {
                     }
                     wpsstm_sources()->update_post_sources($post_id,$meta_value);
                 }
+            }
+            
+            if ($current_version < 104){
+                
+                //rename post metas
+                $update_posts = $wpdb->prepare( 
+                    "UPDATE `".$wpdb->prefix . "postmeta` SET meta_key = '%s' WHERE meta_key = '%s'",
+                    wpsstm_sources()->sources_metakey,
+                    '_wpsstm_source_urls'
+                );
+                $wpdb->query($update_posts);
             }
 
         }

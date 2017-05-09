@@ -46,74 +46,78 @@ var wpsstm_countdown_timer; //redirection timer
         var tracks = $('.wpsstm-tracklist tbody tr');
         var page_buttons = $( "[data-wpsstm-sources!=''][data-wpsstm-sources]" );
         
-        $(tracks).each(function() {
-            var track_el = $(this);
-            var track_bt_wrapper = track_el.find('.trackitem_play_bt');
-            var track_bt = track_bt_wrapper.find('.wpsstm-play-track');
-            var has_sources = track_bt.attr('data-wpsstm-sources');
-            if (has_sources) return true; //continue                                      
-            
-            var track = {
-                artist: $(this).find('.trackitem_artist').text(),
-                title:  $(this).find('.trackitem_track').text(),
-                album:  $(this).find('.trackitem_album').text()
-            }
-            
-            if ( !track.artist || !track.title) return;
-            
-            var ajax_data = {
-                'action':           'wpsstm_player_get_provider_sources',
-                'track':            track,
+        if (wpsstmPlayer.autosource){
+            $(tracks).each(function() {
+                var track_el = $(this);
+                var track_bt_wrapper = track_el.find('.trackitem_play_bt');
+                var track_bt = track_bt_wrapper.find('.wpsstm-play-track');
+                var has_sources = track_bt.attr('data-wpsstm-sources');
+                if (has_sources) return true; //continue                                      
 
-            };
-            
-            jQuery.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
-                beforeSend: function() {
-                    track_el.addClass('loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                    }else{
-                        if ( data.new_html ){
-                            var new_bt = $(data.new_html);
-                            var new_sources_json = new_bt.attr('data-wpsstm-sources');
-                            
-                            if (new_sources_json){
-                                console.log('new sources populated');
-
-                                track_bt_wrapper.html(new_bt);
-
-                                //append to our list of buttons
-                                //TO FIX push only the single button
-                                //page_buttons.add(new_bt); 
-                                page_buttons = $( "[data-wpsstm-sources!=''][data-wpsstm-sources]" );
-
-                                if(!wpsstm_current_bt){
-                                    $(new_bt).trigger( "click" );
-                                }
-                            }
-                            
-
-                            
-                        }
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    track_el.removeClass('loading');
+                var track = {
+                    artist: $(this).find('.trackitem_artist').text(),
+                    title:  $(this).find('.trackitem_track').text(),
+                    album:  $(this).find('.trackitem_album').text()
                 }
-            })
-            
-        }); 
+
+                if ( !track.artist || !track.title) return;
+
+                var ajax_data = {
+                    'action':           'wpsstm_player_get_provider_sources',
+                    'track':            track,
+
+                };
+
+                jQuery.ajax({
+
+                    type: "post",
+                    url: wpsstmL10n.ajaxurl,
+                    data:ajax_data,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        track_el.addClass('loading');
+                    },
+                    success: function(data){
+                        if (data.success === false) {
+                            console.log(data);
+                        }else{
+                            if ( data.new_html ){
+                                var new_bt = $(data.new_html);
+                                var new_sources_json = new_bt.attr('data-wpsstm-sources');
+
+                                if (new_sources_json){
+                                    console.log('new sources populated');
+
+                                    track_bt_wrapper.html(new_bt);
+
+                                    //append to our list of buttons
+                                    //TO FIX push only the single button
+                                    //page_buttons.add(new_bt); 
+                                    page_buttons = $( "[data-wpsstm-sources!=''][data-wpsstm-sources]" );
+
+                                    if(!wpsstm_current_bt){
+                                        $(new_bt).trigger( "click" );
+                                    }
+                                }
+
+
+
+                            }
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log(xhr.status);
+                        console.log(thrownError);
+                    },
+                    complete: function() {
+                        track_el.removeClass('loading');
+                    }
+                })
+
+            }); 
+        }
+        
+        
 
         //add soures
         page_buttons.live( "click", function(e) {
