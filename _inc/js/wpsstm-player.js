@@ -203,18 +203,22 @@ var wpsstm_countdown_timer; //redirection timer
                                     console.log("try to get next source or next media");
                                     
                                     //https://github.com/mediaelement/mediaelement/issues/2179#issuecomment-297090067
-                                    /*
+
                                     var mediaFiles = node.childNodes;
-                                    for (var i = 0, total = mediaFiles.length; i < total; i++) {
-                                        if (mediaFiles[i].nodeType !== Node.TEXT_NODE &&
-                                            mediaFiles[i].tagName.toLowerCase() === 'source' && media.getSrc() !== mediaFiles[i].getAttribute('src')) {
-                                            media.setSrc(mediaFiles[i].getAttribute('src'));
-                                            media.load();
-                                            media.play();
-                                            break;
+                                    media.addEventListener('error', function (e) {
+                                        for (var i = 0, total = mediaFiles.length; i < total; i++) {
+                                            if (mediaFiles[i].nodeType !== Node.TEXT_NODE &&
+                                                mediaFiles[i].tagName.toLowerCase() === 'source' && media.getSrc() !== mediaFiles[i].getAttribute('src')) {
+                                                media.pause();
+                                                media.setSrc(mediaFiles[i].getAttribute('src'));
+                                                media.load();
+                                                media.play();
+                                                mediaFiles[i].remove();
+                                                break;
+                                            }
                                         }
-                                    }
-                                    */
+                                    });
+
                                     
                                     //No more sources - Play next song if any
                                     wpsstm_play_next_track();
