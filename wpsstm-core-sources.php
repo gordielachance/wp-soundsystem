@@ -96,6 +96,8 @@ class WP_SoundSytem_Core_Sources{
         
         $sources = array_merge((array)$sources,(array)$sources_remote);
         $sources = wpsstm_sources()->sanitize_sources($sources);
+        
+        $sources[] = $this->source_blank; //add blank row
 
         $placeholder = __("Enter a track source URL",'wpsstm');
         
