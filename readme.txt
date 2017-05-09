@@ -29,16 +29,22 @@ When managing a track, artist or album, the plugin can search for its MusicBrain
 It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) (an open data music database).
 For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
 
-= Audio player (not implemented yet) =
-In the future, an audio player will show up to play your tracks if they have supported sources, as described below.
-It will use the native [MediaElement.js](http://www.mediaelementjs.com/) media framework; but we are waiting Wordpress to upgrade it as the current version that is shipped with Wordpress is obsolete (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).
+= Audio player =
+When viewing a post that contains a tracklist, an audio player will show up to play your tracks !
+
+The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
+The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).  It should be OK when Wordpress 4.8 is released.
+
+Supported sources : regular audio files, Youtube, Soundcloud.
+
+= Auto-source =
+If you didn't set sources for your tracks (see below) and that the "auto-source" setting is checked; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
 = Music Sources Metabox =
 Set one or several music sources for your tracks when editing them; as on screenshot #8.
 It could be a local audio file or a link to a music service.
 
-Those links will be used by the audio player (see above) to play the track - if the source URL is supported.
-We plan to support : regular audio files, Youtube, Soundcloud, Mixcloud.
+Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
 = Tracklist Importer Metabox =
 
@@ -117,16 +123,17 @@ echo $tracklist->get_tracklist_table();
 ?>`
 
 = How can I alter the music sources for a track ? =
-Hook a custom function on the filter *wpsstm_get_track_sources_auto* or *wpsstm_get_track_sources_suggested*.
+Hook a custom function on the filter *wpsstm_get_track_sources_db* or *wpsstm_get_track_sources_remote*.
 
-The difference between those two hooks is that *wpsstm_get_track_sources_auto* will populate the sources while *wpsstm_get_track_sources_suggested* will suggest sources in the backend; but the user will need to confirm them manually.
+* use *wpsstm_get_track_sources_db* when populating sources from your database
+* use *wpsstm_get_track_sources_remote* when populating sources from a remote URl - like an API (slower and thus requested through ajax).
 
 `<?php
-function my_filter_get_source_urls_auto($source_urls,$$track){
+function my_filter_get_source_db($sources,$track){
     //...your code here...
-    return $source_urls;
+    return $sources;
 }
-add_filter('wpsstm_get_track_sources_auto','my_filter_get_source_urls_auto',10,2);
+add_filter('wpsstm_get_track_sources_db','my_filter_get_source_db',10,2);
 ?>`
 
 = Standalone tracks vs Subtracks vs Live Playlist tracks ? =
@@ -148,6 +155,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.9.2 =
+* new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
+* player : new settings : "enabled", "auto-play", "auto-redirect" and "auto-source".
 
 = 0.9.9.1 =
 * sources : now an array (url,title,description) instead of just an url.
