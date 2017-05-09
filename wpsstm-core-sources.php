@@ -91,8 +91,8 @@ class WP_SoundSytem_Core_Sources{
         //array diff can only compare strings so convert them
         $sources_filters = array_diff(array_map('serialize',(array)$sources),array_map('serialize',(array)$sources_strict));
 
-        //suggest remote sources (cached only)
-        $sources_remote = $this->get_track_sources_remote( $track,array('cache_only'=>true,'single_source'=>false) );
+        //suggested remote sources (cached only)
+        $sources_remote = $this->get_track_sources_remote( $track,false,array('cache_only'=>true) );
         
         $sources = array_merge((array)$sources,(array)$sources_remote);
         $sources = wpsstm_sources()->sanitize_sources($sources);
@@ -262,7 +262,7 @@ class WP_SoundSytem_Core_Sources{
     Those source will be suggested backend; user will need to confirm them.
     */
 
-    function get_track_sources_remote($track,$args=null){
+    function get_track_sources_remote($track,$single_provider=true,$args=null){
 
         $sources = array();
 
@@ -270,7 +270,7 @@ class WP_SoundSytem_Core_Sources{
             if ( !$provider_source = $provider->single_source_lookup( $track,$args ) ) continue; //cannot play source
             $sources[] = $provider_source;
             
-            if ( isset($args['single_source']) ){ //skip if a source has been found
+            if ( $single_provider ){ //skip if a source has been found
                 break;
             }
             

@@ -124,15 +124,23 @@ class WP_SoundSytem_Core_Player{
         
     }
 
-    function get_track_button($track,$query_sources = false){
+    function get_track_button($track,$database_only = true){
         
         $sources = wpsstm_sources()->get_track_sources_db($track);
+        
         $sources_attr_arr = array();
         $data_attr_str = null;
         
-        if ( $query_sources && ($remote_sources = wpsstm_sources()->get_track_sources_remote($track) ) ){
-            $sources = array_merge((array)$sources,(array)$remote_sources);
-            $sources = wpsstm_sources()->sanitize_sources($sources);
+        if ($database_only){
+            if ($cached_sources = wpsstm_sources()->get_track_sources_remote( $track,false,array('cache_only'=>true) ) ){
+                $sources = array_merge((array)$sources,(array)$cached_sources);
+                $sources = wpsstm_sources()->sanitize_sources($sources);
+            }
+        }else{
+            if ($remote_sources = wpsstm_sources()->get_track_sources_remote($track) ){
+                $sources = array_merge((array)$sources,(array)$remote_sources);
+                $sources = wpsstm_sources()->sanitize_sources($sources);
+            } 
         }
 
         //check if any provider can use the source

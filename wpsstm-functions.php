@@ -263,8 +263,7 @@ function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
 
         $args_default = array(
             'cache_only'    => false,
-            'max'           => 5,
-            'single_source' => true //skip after one source found
+            'max'           => 5
         );
 
         $args = wp_parse_args((array)$args,$args_default);
