@@ -156,6 +156,11 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.9.3 =
+* player buttons : previous/next track & previous/next page
+* splitter presets into multiple files
+* improved scraper-remote.php
+
 = 0.9.9.2 =
 * new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
 * player : new settings : "enabled", "auto-play", "auto-redirect" and "auto-source".
