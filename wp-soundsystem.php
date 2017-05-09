@@ -87,11 +87,12 @@ class WP_SoundSytem {
             'autoplay'                          => 'on',
             'autoredirect'                      => 0, //seconds
             'autosource'                        => 'on',
+            'autosource_cache'                  => 1* WEEK_IN_SECONDS
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
-
     }
+    
     function includes(){
         
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';

@@ -303,7 +303,7 @@ function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
             }
 
             $remote = $sources = wpsstm_sources()->sanitize_sources($sources);
-            set_transient($transient_name,$sources, 1* WEEK_IN_SECONDS);
+            set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
         }
 
         //wpsstm()->debug_log(json_encode(array('track'=>$track,,'platform'=>$platform,args'=>$args,'cache'=>$sources,'remote'=>$remote)),'wpsstm_get_soundsgood_sources()' ); 
