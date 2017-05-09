@@ -4,9 +4,8 @@ a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
     
-    &[data-wpsstm-sources=""]{
-        pointer-events: none;
-        @include opacity(.1);
+    &[data-wpsstm-sources=""]:not(:hover){
+        @include opacity(.2);
     }
     
     .wpsstm-player-icon{
