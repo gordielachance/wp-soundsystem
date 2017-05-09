@@ -240,7 +240,7 @@ var wpsstm_countdown_timer; //redirection timer
 
                             $(wpsstm_current_media).on('play', function() {
                                 console.log('MediaElement.js event - play');
-                                $(wpsstm_current_bt).addClass('playing');
+                                $(wpsstm_current_bt).addClass('playing has-played');
                                 $(wpsstm_current_bt).removeClass('error buffering ended');
                             });
 

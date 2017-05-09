@@ -15,8 +15,7 @@ a.wpsstm-play-track{
             display:inline;
         }
     }
-    
-    
+
     .wpsstm-player-icon{
             @include opacity(.25);
     }
@@ -62,6 +61,10 @@ a.wpsstm-play-track{
         .wpsstm-player-icon-pause{
             display:inline;
         }
+    }
+    
+    &.has-played{
+        color:#00b511;
     }
 
 }
