@@ -75,12 +75,12 @@ class WP_SoundSytem_Playlist_Scraper{
         $default = array(
             'selectors' => array(
                 'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
+                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="track"]'
+                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="byArtist"]'
+                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="name"]'
+                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="inAlbum"]'
                 'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null)
+                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
             ),
             'tracks_order'              => 'desc',
             'datas_cache_min'           => (int)wpsstm()->get_options('live_playlists_cache_min'), //time tracklist is cached - if set to null, will take plugin value
