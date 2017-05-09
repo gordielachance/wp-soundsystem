@@ -75,7 +75,7 @@ var wpsstm_countdown_timer; //redirection timer
                     data:ajax_data,
                     dataType: 'json',
                     beforeSend: function() {
-                        track_el.addClass('loading');
+                        track_bt.addClass('buffering');
                     },
                     success: function(data){
                         if (data.success === false) {
@@ -110,7 +110,7 @@ var wpsstm_countdown_timer; //redirection timer
                         console.log(thrownError);
                     },
                     complete: function() {
-                        track_el.removeClass('loading');
+                        track_bt.removeClass('buffering');
                     }
                 })
 
