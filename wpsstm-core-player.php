@@ -61,29 +61,60 @@ class WP_SoundSytem_Core_Player{
         <div id="wpsstm-bottom">
             <?php
         
+            $redirect_previous = $redirect_auto = wpsstm_get_player_redirection('previous');
+            $redirect_next = wpsstm_get_player_redirection('next');
+        
+            //live playlist or frontend wizard
+            if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
+                
+                $post_id = get_the_ID();
+                $post_type = get_post_type();
+                
+                $is_frontend_wizard = ( $post_id == wpsstm_live_playlists()->frontend_wizard_page_id );
+                $is_live_playlist = ( $post_type == wpsstm()->post_type_live_playlist  );
+                
+                if ( $is_frontend_wizard || $is_live_playlist ){
+
+                    $refresh_permalink = get_permalink();
+
+                    if ( $is_frontend_wizard ){
+
+                        if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_frontend_wizard_url) ){
+                            $refresh_permalink = add_query_arg(
+                                array(
+                                    wpsstm_live_playlists()->qvar_frontend_wizard_url => $feed_url
+                                ),
+                                $refresh_permalink
+                            );
+                        }
+                    }
+                    
+                    $redirect_auto = array('title'=>get_the_title($post_id),'url'=>$refresh_permalink,'is_refresh'=>true);
+                    
+                }
+                
+                
+            }
+
             //redirection notice
-            if ( wpsstm()->get_options('autoredirect') && ( $redirection = wpsstm_get_player_redirection() ) ){
+            if ( wpsstm()->get_options('autoredirect') && $redirect_auto ){
                 global $wp;
-                
-                $redirection_url = $redirection['url'];
-                $redirection_title = $redirection['title'];
-                
+
                 $current_url = home_url(add_query_arg(array(),$wp->request));
                 $countdown = '<strong></strong>';
                 $icon = '<i class="fa fa-refresh fa-fw"></i>';
                 $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
 
                 //TO FIX not working (eg. for wizard)
-                $is_refresh = ( trailingslashit($current_url) == trailingslashit($redirection_url) );
+                $is_refresh = ( trailingslashit($current_url) == trailingslashit($redirect_auto['url']) );
                 
-                if ( $is_refresh ){
-                    
-                    
-                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirection_url,__('current tracklist','wppstm'));
+                $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirect_auto['url'],$redirect_auto['title']);
+                
+                if ( isset($redirect_auto['is_refresh']) ){
                     $text = sprintf(__("Refreshing %s... ",'wpsstm'),$link);
                 }else{
                     
-                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirection_url,$redirection_title);
+                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirect_auto['url'],$redirect_auto['title']);
                     $text = sprintf( __("On the next page : %s",'wpsstm'),$link );
                 }
                 
@@ -94,7 +125,13 @@ class WP_SoundSytem_Core_Player{
             }
             ?>
 
-            <div id="wpsstm-bottom-player"></div>
+            <div id="wpsstm-player-wrapper">
+                <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
+                <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
+                <div id="wpsstm-player"></div>
+                <div id="wpsstm-player-nav-next-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
+                <div id="wpsstm-player-nav-next-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+            </div>
         </div>
         <?php
     }

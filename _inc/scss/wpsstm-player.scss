@@ -85,6 +85,27 @@ a.wpsstm-play-track{
         cursor: pointer;
         cursor: hand;
     }
-    #wpsstm-bottom-player{
+    #wpsstm-player-wrapper{
+        background:#222;
+        position:relative;
+        overflow: auto;
+        a{
+            color:white;
+        }
+        
+        > * {
+            display: block;
+            height: 40px;
+            float: left;
+            line-height:40px;
+        }
+        .wpsstm-player-nav{
+            width:5%;
+            text-align:center;
+        }
+        #wpsstm-player{
+            width:80%;
+            margin:auto;
+        }
     }
 }

@@ -86,3 +86,30 @@ a.wpsstm-play-track.playing .wpsstm-player-icon-pause {
   cursor: pointer;
   cursor: hand;
 }
+/* line 88, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-wrapper {
+  background: #222;
+  position: relative;
+  overflow: auto;
+}
+/* line 92, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-wrapper a {
+  color: white;
+}
+/* line 96, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-wrapper > * {
+  display: block;
+  height: 40px;
+  float: left;
+  line-height: 40px;
+}
+/* line 102, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-wrapper .wpsstm-player-nav {
+  width: 5%;
+  text-align: center;
+}
+/* line 106, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-wrapper #wpsstm-player {
+  width: 80%;
+  margin: auto;
+}

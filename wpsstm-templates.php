@@ -246,45 +246,38 @@ When the player has finished playing tracks, we need to move on to the previous 
 //WIP TO FIX TO CHECK not working well
 */
 
-function wpsstm_get_player_redirection(){
+function wpsstm_get_player_redirection($which){
     global $wp_query;
 
-    $redirect_url = null;
+    $redirect_url = $redirect_title = null;
 
     if ( !is_singular() ){
-        $redirect_url = get_previous_posts_page_link();
-    }else{
-        $post_type = get_post_type();
-        
-        if ( ( wpsstm()->get_options('live_playlists_enabled') == 'on' ) && ( get_the_ID() == wpsstm_live_playlists()->frontend_wizard_page_id ) ){ //frontend wizard
-            
-            $wizard_url = get_permalink();
-            
-            if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_frontend_wizard_url) ){
-                $redirect_url = add_query_arg(
-                    array(
-                        wpsstm_live_playlists()->qvar_frontend_wizard_url => $feed_url
-                    ),
-                    $wizard_url
-                );
-            }
-
-        }else{
-            switch ($post_type){
-                case wpsstm()->post_type_live_playlist:
-                    //just refresh the current page
-                    $redirect_url = get_permalink();
-                break;
-                default:
-                    $prev_post = get_previous_post();
-                    $redirect_url = get_permalink($prev_post);
-                break;
-            }
+        switch($which){
+            case 'previous':
+                $redirect_url = get_previous_posts_page_link();
+            break;
+            case 'next':
+                $redirect_url = get_next_posts_page_link();
+            break;
         }
+    }else{
+        
+        $nav_post = null;
 
+        switch($which){
+            case 'previous':
+                $nav_post = get_previous_post();
+            break;
+            case 'next':
+                $nav_post = get_next_post();
+            break;
+        }
+        
+        $redirect_url = get_permalink($nav_post);
+        $redirect_title = get_the_title($nav_post);
 
     }
 
-    return array('title'=>'','url'=>$redirect_url);
+    return array('title'=>$redirect_title,'url'=>$redirect_url);
     
 }
