@@ -126,8 +126,8 @@ function wpsstm_ajax_player_get_provider_sources(){
 
     $track = $result['track'] = new WP_SoundSystem_Track($args);
     
-    if ( $bt = wpsstm_player()->get_track_button($track,false) ){
-        $result['new_html'] = $bt;
+    if ( $bt = wpsstm_player()->get_track_sources($track,false) ){
+        $result['sources'] = $bt;
         $result['success'] = true;
     }
 

@@ -150,7 +150,7 @@ class WP_SoundSytem_Core_Player{
         //sourcechooser plugin
         wp_register_script('mediaelement-plugin-source-chooser','https://cdnjs.cloudflare.com/ajax/libs/mediaelement-plugins/2.1.1/source-chooser/source-chooser.js',array('wp-mediaelement'), '2.1.1');
 
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser'),wpsstm()->version); //TO FIX should add shortenTable as dependecy since it uses it
         
         //localize vars
         $localize_vars=array();
@@ -160,9 +160,8 @@ class WP_SoundSytem_Core_Player{
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }
-
-    function get_track_button($track,$database_only = true){
-        
+    
+    function get_track_sources($track,$database_only = true){
         $sources = wpsstm_sources()->get_track_sources_db($track);
         
         $sources_attr_arr = array();
@@ -195,6 +194,13 @@ class WP_SoundSytem_Core_Player{
             }
 
         }
+        
+        return $sources_attr_arr;
+    }
+
+    function get_track_button($track,$database_only = true){
+        
+        $sources_attr_arr = $this->get_track_sources($track,$database_only);
 
         if ($sources_attr_arr){
             $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS );
