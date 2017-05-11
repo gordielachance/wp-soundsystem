@@ -125,7 +125,7 @@ class WP_SoundSytem_Core_Player{
                 printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
-
+            <div id="wpsstm-player-source"></div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                 <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
@@ -188,17 +188,20 @@ class WP_SoundSytem_Core_Player{
 
                 if ( !$provider_source = $provider->get_source_attr($source['url']) ) continue; //cannot play source
 
-                $sources_attr_arr[] = array(
-                    'type'  => $provider_source['type'],
-                    'src'   => esc_url($provider_source['src'])
+                $source_attr =  array(
+                    'title'     => $source['title'],
+                    'type'      => $provider_source['type'],
+                    'src'       => esc_url($provider_source['src'])
                 );
 
+                $sources_attr_arr[] = $source_attr;
+                
             }
 
         }
 
         if ($sources_attr_arr){
-            $data_attr_str = filter_var( json_encode($sources_attr_arr), FILTER_SANITIZE_SPECIAL_CHARS );
+            $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
         }
          //https://wordpress.stackexchange.com/a/162945/70449
         $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);

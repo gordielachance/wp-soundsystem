@@ -164,9 +164,8 @@ var wpsstm_countdown_timer; //redirection timer
                 
                 $(sources).each(function(i, source_attr) {
                     var source_el = $('<source />');
-                    var source_url = source_attr.src; //TO FIX problems with special chars here
                     source_el.attr({
-                        src:    source_url,
+                        src:    source_attr.src,
                         type:   source_attr.type
                     });
                     media.append(source_el);
