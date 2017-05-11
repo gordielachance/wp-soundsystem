@@ -281,7 +281,8 @@ class WP_SoundSystem_Track{
     
     //useful eg. for transients
     function get_unique_id($prefix = null){
-        return md5( $prefix . $this->artist . $this->title . $this->album );
+        $title = sanitize_title($prefix . $this->artist . $this->title . $this->album);
+        return md5( $title );
     }
 
 }
