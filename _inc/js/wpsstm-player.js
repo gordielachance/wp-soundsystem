@@ -279,24 +279,40 @@ var wpsstm_source_requests = [];
         }
         */
 
-        //create media
-        var media = $('<audio />');
-        media.attr({
+        var media_wrapper = $('<audio />');
+        media_wrapper.attr({
             id:    'wpsstm-player-audio',
         });
 
-        $(track_obj.sources).each(function(i, source_attr) {
-            var source_el = $('<source />');
-            var source_url = source_attr.src; //TO FIX problems with special chars here
-            source_el.attr({
-                src:    source_url,
-                type:   source_attr.type
-            });
-            media.append(source_el);
+        //create trackinfo
+        var trackinfo_wrapper = $('<ul />');
+        trackinfo_wrapper.attr({
+            //id:    'wpsstm-player-audio',
         });
 
-        //switch 
-        $('#wpsstm-player').html(media);
+        $(track_obj.sources).each(function(i, source_attr) {
+            //media
+            var source_el = $('<source />');
+            source_el.attr({
+                src:    source_attr.src,
+                type:   source_attr.type
+            });
+            media_wrapper.append(source_el);
+
+            //trackinfo
+            var trackinfo_el = $('<li />');
+            var trackinfo_link_el = $('<a />');
+            trackinfo_link_el.html(source_attr.title);
+            trackinfo_link_el.attr({
+                href:    source_attr.src
+            });
+            trackinfo_el.append(trackinfo_link_el);
+            //trackinfo_wrapper.append(trackinfo_el.clone());
+            trackinfo_wrapper.append(trackinfo_el);
+        });
+
+        $('#wpsstm-player').html(media_wrapper);
+        $('#wpsstm-player-sources').html(trackinfo_wrapper);
         
         //display bottom block if not done yet
         bottom_block.show();
