@@ -278,8 +278,8 @@ class WP_SoundSytem_TracksList_Table{
         
             if ( $this->tracklist->timestamp ){
 
-                $date = date_i18n( get_option( 'date_format' ) , $this->tracklist->timestamp, true );
-                $time = date_i18n( get_option( 'time_format' ) , $this->tracklist->timestamp, true );
+                $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'date_format' ) );
+                $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'time_format' ) );
 
                 $text = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
 
