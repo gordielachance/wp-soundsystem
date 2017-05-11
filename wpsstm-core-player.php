@@ -57,6 +57,7 @@ class WP_SoundSytem_Core_Player{
     }
 
     function player_html(){
+	global $wp_query;
         ?>
         <div id="wpsstm-bottom">
             <?php
