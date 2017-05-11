@@ -3,12 +3,11 @@
 a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
-    /*
+
     &[data-wpsstm-sources=""]:not(:hover){
-        @include opacity(.2);
+        @include opacity(.25);
     }
-    */
-    
+
     .wpsstm-player-icon{
         display:none;
         &.wpsstm-player-icon-play{

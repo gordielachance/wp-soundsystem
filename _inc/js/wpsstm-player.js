@@ -8,8 +8,9 @@ var wpsstm_countdown_s = wpsstmPlayer.autoredirect; //seconds for the redirectio
 var wpsstm_countdown_timer; //redirection timer
 var wpsstm_preload_max = 5;
 
-var page_queue = [];
-var current_track_idx = -1;
+var wpsstm_page_tracks = [];
+var wpsstm_current_track_idx = -1;
+var wpsstm_source_requests = [];
 
 (function($){
 
@@ -68,13 +69,13 @@ var current_track_idx = -1;
                 track.sources = JSON.parse(sources);
             }
 
-            page_queue.push(track);
+            wpsstm_page_tracks.push(track);
             
         });
         
         //autoplay first track
         if ( wpsstmPlayer.autoplay ){
-            var first_track = page_queue[0];
+            var first_track = wpsstm_page_tracks[0];
             console.log("autoplay first track");
             wpsstm_init_track(0);
         }
@@ -108,7 +109,7 @@ var current_track_idx = -1;
         track_idx = Number(track_idx); //cast to number
         
         //we already did try to init that track
-        if ( current_track_idx && ( current_track_idx == track_idx ) ) return;
+        if ( wpsstm_current_track_idx && ( wpsstm_current_track_idx == track_idx ) ) return;
         
         console.log("wpsstm_init_track #" + track_idx);
         
@@ -116,42 +117,87 @@ var current_track_idx = -1;
         wpsstm_skip_current_track();
 
         //new track
-        current_track_idx = track_idx;
+        wpsstm_current_track_idx = track_idx;
         
-        var track_obj = page_queue[track_idx];
+        var track_obj = wpsstm_page_tracks[track_idx];
         var track_el = $(track_obj.row);
         var track_bt_wrapper = track_el.find('.trackitem_play_bt');
         var track_bt = track_bt_wrapper.find('a.wpsstm-play-track');
         track_bt.addClass('active');
-
+        
+        //current track
         if (track_obj.sources){
             wpsstm_switch_player(track_idx);
         }else{
-            var deferred = wpsstm_get_track_sources(track_idx);
-            $.when( deferred ).then(function( data, textStatus, jqXHR ) {
-                //track could have been switched since, so check if this is still the track to play
-                if (current_track_idx == track_idx){
-                    current_track_idx = -1;
-                    wpsstm_init_track(track_idx);
-                }
-            });
+            wpsstm_source_requests.getTrackSourceRequest(track_idx);
         }
+        
+        //get sources for following tracks if needed
+        wpsstm_source_requests.cancelTrackSourceRequests(track_idx); //abord current requests
+        
+        var following_tracks = $(wpsstm_page_tracks).slice(track_idx+1,track_idx+5);
+        following_tracks.each(function(i, val) {
+            var following_track_idx = track_idx + 1 + i;
+            var track_obj = wpsstm_page_tracks[following_track_idx];
+            if (!track_obj.sources){
+                wpsstm_source_requests.getTrackSourceRequest(following_track_idx);
+            }
+        });
     }
+    
+    //http://stackoverflow.com/questions/42271167/break-out-of-ajax-loop
+    wpsstm_source_requests.getTrackSourceRequest = function(track_idx) {
+        var xhr = wpsstm_get_track_sources(track_idx);
+        wpsstm_source_requests.push(xhr);
+
+        xhr.fail(function(data, textStatus, jqXHR) {
+            wpsstm_source_requests.handleError(data, textStatus, jqXHR);
+        })
+        .done(function(data) {
+            //track could have been switched since, so check if this is still the track to play
+            if (wpsstm_current_track_idx == track_idx){
+                wpsstm_current_track_idx = -1;
+                wpsstm_init_track(track_idx);
+            }
+        })
+        .then(function(data, textStatus, jqXHR) {})
+        .always(function(data, textStatus, jqXHR) {
+            //item.statusText = null;
+            //wpsstm_source_requests.$apply();
+        })
+    }
+    
+    wpsstm_source_requests.cancelTrackSourceRequests = function() {
+        for (var i = 0; i < wpsstm_source_requests.length; i++) {
+            wpsstm_source_requests[i].abort();
+        }
+
+        wpsstm_source_requests.length = 0;
+    };
+    
+    wpsstm_source_requests.handleError = function(data, textStatus, jqXHR) {
+        console.log("error");
+        console.log(data);
+    };
     
     function wpsstm_skip_current_track(){
 
-        if (current_track_idx == -1) return;
+        if (wpsstm_current_track_idx == -1) return;
         
-        console.log("wpsstm_skip_current_track() #" + current_track_idx);
+        console.log("wpsstm_skip_current_track() #" + wpsstm_current_track_idx);
 
-        var old_track_obj = page_queue[current_track_idx];
+        var old_track_obj = wpsstm_page_tracks[wpsstm_current_track_idx];
         var old_track_el = $(old_track_obj.row);
         var old_track_bt_wrapper = old_track_el.find('.trackitem_play_bt');
         var old_track_bt = old_track_bt_wrapper.find('a.wpsstm-play-track');
         old_track_bt.removeClass('active');
+        old_track_bt.addClass('has-played');
         
         //mediaElement
-        wpsstm_current_media.pause();
+        if (wpsstm_current_media){
+            wpsstm_current_media.pause();
+        }
+
 
     }
 
@@ -159,7 +205,7 @@ var current_track_idx = -1;
         
         console.log("wpsstm_get_track_sources(): " + track_idx);
         
-        var track_obj = page_queue[track_idx];
+        var track_obj = wpsstm_page_tracks[track_idx];
         var track_el = $(track_obj.row);
         var track_bt_wrapper = track_el.find('.trackitem_play_bt');
         var track_bt = track_bt_wrapper.find('a.wpsstm-play-track');
@@ -193,7 +239,7 @@ var current_track_idx = -1;
                     if ( data.sources ){
                         console.log("found sources for track#" + track_idx);
                         console.log(data.sources);
-                        page_queue[track_idx].sources = data.sources;
+                        wpsstm_page_tracks[track_idx].sources = data.sources;
                         track_bt.attr('data-wpsstm-sources',JSON.stringify(data.sources));
                     }
                 }
@@ -203,7 +249,7 @@ var current_track_idx = -1;
                 console.log(thrownError);
             },
             complete: function() {
-                //track_bt.removeClass('buffering');
+                track_bt.removeClass('buffering');
             }
         })
         
@@ -213,16 +259,16 @@ var current_track_idx = -1;
     function wpsstm_switch_player(track_idx){
         console.log("wpsstm_switch_player()  #" + track_idx);
         
-        var track_obj = page_queue[track_idx];
+        var track_obj = wpsstm_page_tracks[track_idx];
         var track_el = $(track_obj.row);
         var track_bt_wrapper = track_el.find('.trackitem_play_bt');
         var track_bt = track_bt_wrapper.find('a.wpsstm-play-track');
 
-        //init
         track_bt.addClass('buffering');
         $('.wpsstm-tracklist-list').shortenTable(3);
         
         //shortenTable
+        /*
         var tracklist = track_el.closest('.wpsstm-tracklist');
         var shortened_table = tracklist.find('.shortened-table');
         if ( shortened_table.length > 0){
@@ -231,6 +277,7 @@ var current_track_idx = -1;
                 shortened_table.shortenTable(track_idx+1,'tbody tr');
             }
         }
+        */
 
         //create media
         var media = $('<audio />');
@@ -295,7 +342,7 @@ var current_track_idx = -1;
 
                     $(wpsstm_current_media).on('play', function() {
                         console.log('player - play');
-                        track_bt.addClass('playing has-played');
+                        track_bt.addClass('playing');
                         track_bt.removeClass('error buffering ended');
                     });
 
@@ -308,6 +355,7 @@ var current_track_idx = -1;
 
                         console.log('MediaElement.js event - ended');
                         track_bt.removeClass('playing');
+                        track_bt.addClass('has-played');
 
                         //Play next song if any
                         wpsstm_play_next_track();
@@ -350,12 +398,12 @@ var current_track_idx = -1;
     }
     
     function wpsstm_play_previous_track(){
-        var previous_idx = current_track_idx - 1;
+        var previous_idx = wpsstm_current_track_idx - 1;
         wpsstm_init_track(previous_idx);
     }
 
     function wpsstm_play_next_track(){
-        var next_idx = current_track_idx + 1;
+        var next_idx = wpsstm_current_track_idx + 1;
         wpsstm_init_track(next_idx);
     }
 
