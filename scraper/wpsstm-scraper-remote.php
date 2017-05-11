@@ -159,8 +159,22 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
         switch ($this->response_type){
             
-            case 'application/xspf+xml':
             case 'text/xspf+xml':
+            case 'application/xspf+xml':
+                $xspf_options = array(
+                    'selectors' => array(
+                        'tracklist_title'   => array('path'=>'title'),
+                        'tracks'            => array('path'=>'trackList track'),
+                        'track_artist'      => array('path'=>'creator'),
+                        'track_title'       => array('path'=>'title'),
+                        'track_album'       => array('path'=>'album'),
+                        'track_source_urls' => array('path'=>'location'),
+                        'track_image'       => array('path'=>'image')
+                    )
+                );
+
+                $this->options = array_replace_recursive($this->options, $xspf_options);
+            
             case 'application/xml':
             case 'text/xml':
                 
@@ -177,23 +191,8 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                     }catch(Exception $e){}
                     
                     if ($is_xspf){
-                        
                         $this->response_type = 'text/xspf+xml';
-                        
-                        $xspf_options = array(
-                            'selectors' => array(
-                                'tracklist_title'   => array('path'=>'title'),
-                                'tracks'            => array('path'=>'trackList track'),
-                                'track_artist'      => array('path'=>'creator'),
-                                'track_title'       => array('path'=>'title'),
-                                'track_album'       => array('path'=>'album'),
-                                'track_source_urls' => array('path'=>'location'),
-                                'track_image'       => array('path'=>'image')
-                            )
-                        );
-                        
-                        $this->options = array_replace_recursive($this->options, $xspf_options);
-                        
+                        $this->get_body_node($content);
                     }
                 }
 
