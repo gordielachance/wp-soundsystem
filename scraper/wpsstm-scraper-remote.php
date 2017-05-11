@@ -374,13 +374,26 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     
     protected function get_track_image($track_node){
         $selectors = $this->get_options(array('selectors','track_image'));
-        return $this->get_track_node_content($track_node,$selectors);
+        $image = $this->get_track_node_content($track_node,$selectors);
+        
+        if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
+        
+        return $image;
     }
     
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_options(array('selectors','track_source_urls'));
         $source_urls = $this->get_track_node_content($track_node,$selectors,false);
-        return $this->get_track_node_content($track_node,$selectors);
+        $sources = $this->get_track_node_content($track_node,$selectors);
+        
+        foreach ((array)$sources as $key=>$source){
+            if (filter_var((string)$source, FILTER_VALIDATE_URL) === false) {
+                unset($sources[$key]);
+            }
+        }
+        
+        return $sources;
+        
     }
 
     private function get_track_node_content($track_node,$selectors,$single_value=true){
@@ -428,14 +441,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             
             if (!$string = trim($string)) continue;
 
-            if( ($slug == 'image' ) || ($slug == 'source_urls' ) ){
-
-                if (filter_var((string)$string, FILTER_VALIDATE_URL) === false) {
-                    continue;
-                }
-
-            }
-            
             //CDATA fix
             $string = $this->sanitize_cdata_string($string);
             
