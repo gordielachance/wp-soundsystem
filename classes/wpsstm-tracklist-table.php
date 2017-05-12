@@ -138,10 +138,6 @@ class WP_SoundSytem_TracksList_Table{
         if ( $this->show_property_column('album') ){
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
-        
-        if ( $this->show_property_column('duration') ){
-            $columns['trackitem_duration']     = __('Duration','wpsstm');
-        }
 
         return $columns;
     }
