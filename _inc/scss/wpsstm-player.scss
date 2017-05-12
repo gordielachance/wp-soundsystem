@@ -114,6 +114,12 @@ a.wpsstm-play-track{
                         @include opacity(1);
                         display:block;
                     }
+                    a{
+                        i{ //icon
+                            font-size:2em;
+                        }
+                    }
+
                 }
             }
         }

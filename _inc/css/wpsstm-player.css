@@ -121,33 +121,37 @@ a.wpsstm-play-track.has-played {
   opacity: 1;
   display: block;
 }
-/* line 123, ../scss/wpsstm-player.scss */
+/* line 118, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li a i {
+  font-size: 2em;
+}
+/* line 129, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper.expanded #wpsstm-player-sources ul li {
   display: block;
 }
-/* line 132, ../scss/wpsstm-player.scss */
+/* line 138, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper {
   background: #222;
   position: relative;
   overflow: auto;
 }
-/* line 136, ../scss/wpsstm-player.scss */
+/* line 142, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper a {
   color: white;
 }
-/* line 140, ../scss/wpsstm-player.scss */
+/* line 146, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper > * {
   display: block;
   height: 40px;
   float: left;
   line-height: 40px;
 }
-/* line 146, ../scss/wpsstm-player.scss */
+/* line 152, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper .wpsstm-player-nav {
   width: 5%;
   text-align: center;
 }
-/* line 150, ../scss/wpsstm-player.scss */
+/* line 156, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper #wpsstm-player {
   width: 80%;
   margin: auto;
