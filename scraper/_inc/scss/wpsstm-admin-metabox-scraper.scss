@@ -1,0 +1,118 @@
+body {
+    .postbox#wpsstm-scraper-simple,.postbox#wpsstm-scraper-advanced{
+        position:relative;
+        .inside{
+            overflow:auto;
+        }
+        input.fullwidth{
+            width:100%;
+        }
+        
+
+        
+    }
+    .postbox#wpsstm-scraper-advanced{
+
+        table#wizard-regexes{
+            width:100%;
+            tr:first-child,td:first-child{
+                width:70%;
+            }
+        }
+
+        pre.spiff-raw, pre.spiff-raw code {
+            //Instead of the line below you could use @includebox-sizing($bs)
+            box-sizing: border-box;
+            webkit-box-sizing: border-box;
+            display: block;
+            white-space: pre-wrap;
+            white-space: -pre-wrap;
+            word-wrap: break-word;
+            width: 100%;
+            overflow: auto;
+        }
+
+        .tracks-selector-prefix {
+                color: lightgrey;
+                padding-right: 0.5em;
+        }
+        #wpsstm-wizard-tabs{
+                border-bottom: 1px solid #eee;
+                margin-bottom: 1em;
+                #wpsstm-wizard-tabs-header li {
+                        display: inline-block;
+                        &.ui-tabs-active a {
+                                background: white;
+                                border-bottom: 0;
+                        }
+                }
+                .wpsstm-wizard-step-content{
+                    .wizard-selector{
+                        input[type="text"]{
+                            min-width:50%;
+                        }
+                        .regex-row {
+                                display: none;
+                                &.active{
+                                        display: table;
+                                }
+                                td {
+                                        color: #999;
+                                        padding: 5px;
+                                        font-family: Consolas, Monaco, monospace;
+                                }
+                                .regex-field {
+                                        &:before {
+                                                text-align: center;
+                                                width: 20px;
+                                                content: '~';
+                                        }
+                                        &:after {
+                                                text-align: center;
+                                                width: 20px;
+                                                content: '~m';
+                                        }
+                                        input {
+                                                width: 90%;
+                                                color: #999;
+                                        }
+                                }
+                        }
+                    }
+                    &#wpsstm-wizard-step-tracks-content{
+                        .wizard-selector{
+                            input[type="text"]{
+                                min-width:100%;
+                            }
+                        }
+                    }
+                }
+        }
+        .regex-link {
+                text-decoration: none;
+        }
+
+        #spiff-station-tracks-raw{
+            max-height: calc(3 * 211px);
+            overflow-y: auto;
+        }
+
+        pre.spiff-raw {
+                max-height: 200px;
+                border: 1px solid lightgrey;
+                padding: 10px;
+                code {
+                        background: none;
+                }
+        }
+        .ui-tabs-panel > h3:first-of-type {
+                display: none;
+        }
+        .js &{
+            
+        }
+        .no-js &{
+            
+        }
+    }
+}

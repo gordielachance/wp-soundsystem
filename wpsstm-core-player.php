@@ -1,6 +1,5 @@
 <?php
 
-
 class WP_SoundSytem_Core_Player{
     
     /**
@@ -103,7 +102,7 @@ class WP_SoundSytem_Core_Player{
 
                 $current_url = home_url(add_query_arg(array(),$wp->request));
                 $countdown = '<strong></strong>';
-                $icon = '<i class="fa fa-refresh fa-fw"></i>';
+                $icon = '<i class="fa fa-refresh fa-fw fa-spin"></i>';
                 $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
 
                 //TO FIX not working (eg. for wizard)
@@ -122,12 +121,11 @@ class WP_SoundSytem_Core_Player{
                 $abord_link = sprintf( __("Click to abord.",'wpsstm'),$link );
                 $text.= ' ' . $abord_link;
                 
-                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice">%s %s %s</p>',$icon,$countdown,$text);
+                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
-            <div id="wpsstm-player-sources">
-                <div id="wpsstm-player-providers"></div>
-                <ul></ul>
+            <div id="wpsstm-player-sources-wrapper">
+                <div id="wpsstm-player-sources"></div>
             </div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
@@ -143,37 +141,29 @@ class WP_SoundSytem_Core_Player{
     function enqueue_player_scripts_styles(){
         
         //CSS
-        
-        //sourcechooser plugin
-        wp_register_style('mediaelement-plugin-source-chooser','https://cdnjs.cloudflare.com/ajax/libs/mediaelement-plugins/2.1.1/source-chooser/source-chooser.min.css',array('wp-mediaelement'));
-
-        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement','mediaelement-plugin-source-chooser'), wpsstm()->version );
+        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
         
         //JS
-        
-        //sourcechooser plugin
-        wp_register_script('mediaelement-plugin-source-chooser','https://cdnjs.cloudflare.com/ajax/libs/mediaelement-plugins/2.1.1/source-chooser/source-chooser.js',array('wp-mediaelement'), '2.1.1');
-
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement','mediaelement-plugin-source-chooser'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement',),wpsstm()->version, true); //TO FIX should add shortenTable as dependecy since it uses it
         
         //localize vars
-        $localize_vars=array();
-        $localize_vars['autoredirect']  = (int)wpsstm()->get_options('autoredirect');
-        $localize_vars['autoplay']  = ( wpsstm()->get_options('autoplay') == 'on' );
-        $localize_vars['autosource']  = ( wpsstm()->get_options('autosource') == 'on' );
+        $localize_vars=array(
+            'autoredirect'      => (int)wpsstm()->get_options('autoredirect'),
+            'autoplay'          => ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'        => ( wpsstm()->get_options('autosource') == 'on' ),
+            'leave_page_text'   => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm')
+        );
+
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }
-
-    function get_track_button($track,$database_only = true){
-        
+    
+    function get_playable_sources($track,$database_only = true){
         $sources = wpsstm_sources()->get_track_sources_db($track);
-        
-        $sources_attr_arr = array();
-        $data_attr_str = null;
+        $provider_sources = array();
         
         if ($database_only){
-            if ($cached_sources = wpsstm_sources()->get_track_sources_remote( $track,false,array('cache_only'=>true) ) ){
+            if ($cached_sources = wpsstm_sources()->get_track_sources_remote( $track,array('cache_only'=>true) ) ){
                 $sources = array_merge((array)$sources,(array)$cached_sources);
                 $sources = wpsstm_sources()->sanitize_sources($sources);
             }
@@ -189,24 +179,34 @@ class WP_SoundSytem_Core_Player{
 
             foreach( (array)$this->providers as $provider ){
 
-                if ( !$provider_source = $provider->get_source_attr($source['url']) ) continue; //cannot play source
+                if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
 
-                $source_attr =  array(
-                    'title'     => $source['title'],
-                    'type'      => $provider_source['type'],
-                    'src'       => esc_url($provider_source['src'])
+                $provider_source = array(
+                    'type'  => $provider_source_type,
+                    'title' => $provider->format_source_title($source['title']),
+                    'icon'  => $provider->format_source_icon(),
+                    'src'   => $provider->format_source_url($source['url']),
                 );
 
-                $sources_attr_arr[] = $source_attr;
+                $provider_sources[] = $provider_source;
                 
             }
 
         }
 
+        return $provider_sources;
+    }
+
+    function get_track_button($track,$database_only = true){
+        
+        $sources_attr_arr = $this->get_playable_sources($track,$database_only);
+
+        $data_attr_str = null;
         if ($sources_attr_arr){
             $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
         }
-         //https://wordpress.stackexchange.com/a/162945/70449
+
+        //https://wordpress.stackexchange.com/a/162945/70449
         $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
 
         return $link;
@@ -232,23 +232,27 @@ abstract class WP_SoundSytem_Player_Provider{
     }
 
     /*
-    Get the source based on an URL, 
+    This is the function that checks if the provider can handle the source.
     The mime types or pseudo-mime types should match http://www.mediaelementjs.com/.
     */
     
-    abstract function get_source_attr($url);
+    abstract public function get_source_type($url);
     
-    /*
-    Search a source from this provider
-    */
-    
-    function single_source_lookup($track,$args=null){
-        if ( $sources = $this->sources_lookup($track,$args) ){
-            return $sources[0];
+    function format_source_icon(){
+        if ( !$prefix = $this->icon ){
+            $prefix = sprintf('[%s]',$this->name);
         }
-        
+        return $prefix;
     }
     
+    function format_source_title($title){
+        return $title;
+    }
+    
+    function format_source_url($url){
+        return $url;
+    }
+
     /*
     Search sources from this provider
     */
@@ -265,7 +269,7 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
     var $slug = 'wp';
     var $icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
     
-    function get_source_attr($url){
+    function get_source_type($url){
         
         //check file is supported
         $filetype = wp_check_filetype($url);
@@ -273,15 +277,11 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
         
         $audio_extensions = wp_get_audio_extensions();
         if ( !in_array($ext,$audio_extensions) ) return;
-
-        return array(
-            'type'  => sprintf('audio/%s',$ext), //$filetype['type'],
-            'src'   => $url
-        );
+        
+        return sprintf('audio/%s',$ext);//$filetype['type'],
         
     }
 
-    
 }
 
 class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provider{
@@ -290,21 +290,17 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
     var $slug = 'youtube';
     var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
-    function get_source_attr($url){
+    function get_source_type($url){
 
         //youtube
         $pattern = '~(?:youtube.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu.be/)([^"&?/ ]{11})~i';
         preg_match($pattern, $url, $url_matches);
 
         if (!$url_matches) return;
-
-        return array(
-            'type'  => 'video/youtube',
-            'src'   => $url
-        );
-
+        
+        return 'video/youtube';
     }
-    
+
     function sources_lookup($track,$args=null){
         return wpsstm_get_soundsgood_sources($track,'youtube',$args);
     }
@@ -323,22 +319,20 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
     }
     
-    function get_source_attr($url){
-
+    function get_source_type($url){
         //soundcloud
         $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
         preg_match($pattern, $url, $url_matches);
 
         if (!$url_matches) return;
         
+        return 'video/soundcloud';
+    }
+
+    function format_source_url($url){
         $url = sprintf('https://w.soundcloud.com/player/?url=%s',$url);
         $url = add_query_arg(array('auto_play'=>false),$url);
-        
-        return array(
-            'type'  => 'video/soundcloud',
-            'src'   => $url
-        );
-        
+        return $url;
     }
     
     function sources_lookup($track,$args=null){
@@ -354,16 +348,14 @@ class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provid
     var $slug = 'mixcloud';
     var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
     
-    function get_source_attr($url){
-
+    function get_source_type($url){
         //mixcloud
         $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
         preg_match($pattern, $url, $url_matches);
 
-        if ($url_matches){
-            return 'audio/mixcloud';
-        }
-
+        if (!$url_matches) return;
+        
+        return 'audio/mixcloud';
     }
 
 }
@@ -373,3 +365,4 @@ function wpsstm_player() {
 }
 
 wpsstm_player();
+
