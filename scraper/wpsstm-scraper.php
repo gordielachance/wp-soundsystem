@@ -127,10 +127,12 @@ class WP_SoundSytem_Playlist_Scraper{
 
         //try to get cache first
         $this->datas = $this->datas_cache = $this->get_cache();
-        
-        //we got cached tracks, but do ignore them in wizard
-        if ( count($this->datas['tracks']) && $this->is_wizard ){
-            $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),count($this->datas['tracks']),gmdate(DATE_ISO8601,$this->datas['timestamp'])) );
+        if ($this->datas_cache){
+            $this->tracklist->add($this->datas_cache['tracks']);
+            //we got cached tracks, but do ignore them in wizard
+            if ( ( $cached_tracks_count = count($this->tracklist->tracks) ) && $this->is_wizard ){
+                $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_tracks_count,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
+            }
         }
 
         //load page preset
@@ -143,7 +145,7 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->page->init($this->feed_url,$this->options);
 
         //get remote tracks
-        if ( ( !$this->datas && (!$this->cache_only) ) || $this->is_wizard ){
+        if ( ( !$this->tracklist->tracks && (!$this->cache_only) ) || $this->is_wizard ){
 
             $this->datas_remote = false; // so we can detect that we ran a remote request
             $remote_tracks = $this->page->get_tracks();
@@ -154,21 +156,26 @@ class WP_SoundSytem_Playlist_Scraper{
                 }
             }
 
-            if ( !is_wp_error($remote_tracks) ) {
-                
-                //lookup
+            if ( $remote_tracks && !is_wp_error($remote_tracks) ) {
+
+                $this->tracklist->add($remote_tracks);
+
+                //Musicbrainz lookup
+                //TO FIX quite slow for big playlists. Think about a way to handle this.
                 /*
-                if ( ($this->get_options('musicbrainz')) && ( !$this->is_wizard ) ){
+                if ( $this->get_options('musicbrainz') == 'on'  ){
                     foreach ($this->tracklist->tracks as $track){
                         $track->musicbrainz();
                     }
                 }
                 */
-                
+
                 //populate page notices
                 foreach($this->page->notices as $notice){
                     $this->notices[] = $notice;
                 }
+                
+                $tracks_arr = $this->tracklist->array_export();
                 
                 //format response
                 $this->datas = $this->datas_remote = array(
@@ -189,9 +196,7 @@ class WP_SoundSytem_Playlist_Scraper{
             }
 
         }
-        
-        
-        
+
         //get options back from page (a preset could have changed them)
         $this->options = $this->page->options; 
 
@@ -214,13 +219,7 @@ class WP_SoundSytem_Playlist_Scraper{
         if ( !$this->tracklist->location ){
             $this->tracklist->location = $this->feed_url;
         }
-        
-        //tracks
-        if ( $tracks = wpsstm_get_array_value('tracks', $this->datas) ){
-            $this->tracklist->add($tracks);
-        }
-        
-        
+
         //stats
         if ( $this->datas_remote !==null ){ //we made a remote request
             new WP_SoundSytem_Live_Playlist_Stats($this->tracklist);
