@@ -87,7 +87,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     protected function get_remote_url(){
         
         if ($this->redirect_url){
-            $this->redirect_url = $this->variables_fill_string($this->redirect_url);
             return $this->redirect_url;
         }else{
             return $this->url;
