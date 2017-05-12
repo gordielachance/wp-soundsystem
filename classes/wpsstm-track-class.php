@@ -8,10 +8,9 @@ class WP_SoundSystem_Track{
     public $album;
     public $image;
     public $location;
-    public $mbid = null;
+    public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $duration;
-    public $sources = null; //set 'null' so we can check later it has been populated
-    public $did_lookup = false; // TO FIX
+    public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
 
     function __construct( $args = array() ){
         
@@ -226,7 +225,7 @@ class WP_SoundSystem_Track{
     function musicbrainz(){
         //abord
         if( !$this->artist || !$this->title ) return;
-        if( $this->mbid ) return;
+        if( $this->mbid !== null ) return;
         
         //query
         $mzb_args = '"'.rawurlencode($this->title).'"';
@@ -242,8 +241,6 @@ class WP_SoundSystem_Track{
         */
         $api_type = wpsstm_tracks()->mbtype;
         $api_response = wpsstm_mb()->get_musicbrainz_api_entry($api_type,null,$mzb_args);
-        
-        $this->did_lookup = true;
 
         if (is_wp_error($api_response)) return;
 
