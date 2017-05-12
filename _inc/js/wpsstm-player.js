@@ -136,6 +136,14 @@ var wpsstm_source_requests = [];
 
     });
     
+    //Confirmation popup is a media is playing and that we leave the page
+    
+    $(window).bind('beforeunload', function(){
+        if (!wpsstm_current_media.paused){
+            return wpsstmPlayer.leave_page_text;
+        }
+    });
+    
     /*
     Play or preload + play track
     */
