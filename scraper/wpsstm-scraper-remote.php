@@ -83,9 +83,22 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
+
     protected function get_remote_url(){
         
+        $url_parsed = parse_url($this->url);
+        if ( !isset($url_parsed['host']) ) return;
+            
+        $host_with_subdomain = $url_parsed['host'];
+        $host_split = explode(".", $host_with_subdomain);
+        $host = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
+
+        //dropbox : convert to raw link
+        if ($host=='dropbox'){
+            $url_no_args = strtok($this->url, '?');
+            $this->redirect_url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
+        }
+
         if ($this->redirect_url){
             return $this->redirect_url;
         }else{
