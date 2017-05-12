@@ -784,7 +784,6 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 }
             }
 
-
             $submit_bt_txt = (!$this->is_advanced) ? __('Load URL','wpsstm') : __('Save Changes');
             $this->submit_button($submit_bt_txt,'primary','save-scraper-settings');
 
@@ -796,6 +795,12 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                     checked($reset_checked, true, false),
                     __('Clear wizard','wpsstm')
                 );
+            }
+        
+            if ($this->is_advanced){
+                ?>
+                <input type="hidden" name="advanced_wizard" value="1" />
+                <?php
             }
 
             wp_nonce_field('wpsstm_scraper_wizard','wpsstm_scraper_wizard_nonce',false);
