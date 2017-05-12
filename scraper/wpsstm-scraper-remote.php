@@ -343,9 +343,10 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         foreach($track_nodes as $key=>$single_track_node) {
             
             $sources = array();
-            $source_urls = $this->get_track_source_urls($single_track_node);
-            foreach ((array)$source_urls as $source_url){
-                $sources[] = array('url'=>$source_url);
+            if ( $source_urls = $this->get_track_source_urls($single_track_node) ){
+                foreach ((array)$source_urls as $source_url){
+                    $sources[] = array('url'=>$source_url);
+                }
             }
 
             $args = array(
@@ -356,7 +357,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
                 'sources'       => $sources
             );
 
-            $tracks_arr[] = $args;
+            $tracks_arr[] = array_filter($args);
 
         }
         
