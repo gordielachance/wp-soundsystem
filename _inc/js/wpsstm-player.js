@@ -15,35 +15,11 @@ var wpsstm_source_requests = [];
 (function($){
 
     $(document).ready(function(){
-
-        /*
-        bottom block
-        */
-
+        
         bottom_block = $('#wpsstm-bottom');
         bt_prev_track = $('#wpsstm-player-nav-previous-track');
         bt_next_track = $('#wpsstm-player-nav-next-track');
         bottom_notice_refresh = $('#wpsstm-bottom-notice-redirection');
-        
-        //timer notice
-        if (wpsstm_countdown_timer > 0){
-            bottom_notice_refresh.addClass('active');
-            $(this).find('i.fa').toggleClass('fa-spin');
-        }
-
-        bottom_notice_refresh.click(function() {
-            
-            if ( wpsstm_countdown_s == 0 ) return;
-            
-            if ( $(this).hasClass('active') ){
-                clearInterval(wpsstm_countdown_timer);
-            }else{
-                wpsstm_redirection_countdown();
-            }
-            
-            $(this).toggleClass('active');
-            $(this).find('i.fa').toggleClass('fa-spin');
-        });
         
         /* tracklist */
         
@@ -79,7 +55,11 @@ var wpsstm_source_requests = [];
             console.log("autoplay first track");
             wpsstm_init_track(0);
         }
-
+        
+        /*
+        page buttons
+        */
+        
         //track buttons
         $( ".wpsstm-play-track" ).live( "click", function(e) {
             e.preventDefault();
@@ -88,7 +68,9 @@ var wpsstm_source_requests = [];
             wpsstm_init_track(track_idx);
         });
         
-        //player buttons
+        /*
+        bottom player
+        */
         
         bt_prev_track.click(function(e) {
             e.preventDefault();
@@ -130,12 +112,32 @@ var wpsstm_source_requests = [];
                 wpsstm_current_media.play();
                 $(this).addClass('wpsstm-active-source');
             }
+        });
+        
+        /*
+        timer notice
+        */
+        if (wpsstm_countdown_timer > 0){
+            bottom_notice_refresh.addClass('active');
+            $(this).find('i.fa').toggleClass('fa-spin');
+        }
 
-
+        bottom_notice_refresh.click(function() {
+            
+            if ( wpsstm_countdown_s == 0 ) return;
+            
+            if ( $(this).hasClass('active') ){
+                clearInterval(wpsstm_countdown_timer);
+            }else{
+                wpsstm_redirection_countdown();
+            }
+            
+            $(this).toggleClass('active');
+            $(this).find('i.fa').toggleClass('fa-spin');
         });
 
     });
-    
+
     //Confirmation popup is a media is playing and that we leave the page
     
     $(window).bind('beforeunload', function(){
