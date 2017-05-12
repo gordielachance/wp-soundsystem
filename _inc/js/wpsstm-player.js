@@ -15,7 +15,7 @@ var wpsstm_source_requests = [];
 (function($){
 
     $(document).ready(function(){
-        
+
         /*
         bottom block
         */
@@ -88,6 +88,8 @@ var wpsstm_source_requests = [];
             wpsstm_init_track(track_idx);
         });
         
+        //player buttons
+        
         bt_prev_track.click(function(e) {
             e.preventDefault();
             wpsstm_play_previous_track();
@@ -96,6 +98,36 @@ var wpsstm_source_requests = [];
         bt_next_track.click(function(e) {
             e.preventDefault();
             wpsstm_play_next_track();
+        });
+        
+        //source switch
+        $( "#wpsstm-player-switch-sources" ).click(function(e) {
+            e.preventDefault();
+            $('#wpsstm-player-sources-wrapper').toggleClass('expanded');
+        });
+
+        //source item
+        $( "#wpsstm-player-sources-wrapper li" ).live( "click", function(e) {
+            e.preventDefault();
+            
+            //old one
+            var sources = $('#wpsstm-player-sources-wrapper li');
+            sources.removeClass('wpsstm-active-source');
+            
+            //new one
+            var lis = $(this).closest('ul').find('li');
+            var idx = lis.index(this);
+            var source_url = $(wpsstm_player.node).find('source').eq(idx);
+
+            console.log(wpsstm_player);
+            console.log(wpsstm_current_media);
+            
+            wpsstm_current_media.pause();
+            wpsstm_current_media.setSrc(source_url);
+            wpsstm_current_media.load();
+            wpsstm_current_media.play();
+            
+            $(this).addClass('wpsstm-active-source');
         });
 
     });
@@ -291,16 +323,23 @@ var wpsstm_source_requests = [];
         });
 
         $(track_obj.sources).each(function(i, source_attr) {
+            console.log(track_obj.sources);
             //media
             var source_el = $('<source />');
             source_el.attr({
                 src:    source_attr.src,
                 type:   source_attr.type
             });
+            
             media_wrapper.append(source_el);
 
             //trackinfo
             var trackinfo_el = $('<li />');
+            
+            if (i==0){
+                trackinfo_el.addClass('wpsstm-active-source');
+            }
+
             var trackinfo_link_el = $('<a />');
             trackinfo_link_el.html(source_attr.title);
             trackinfo_link_el.attr({
@@ -328,7 +367,7 @@ var wpsstm_source_requests = [];
             pluginPath: 'https://cdnjs.com/libraries/mediaelement/',
             //audioWidth: '100%',
             stretching: 'responsive',
-            features: ['playpause','loop','progress','current','duration','volume','sourcechooser'],
+            features: ['playpause','loop','progress','current','duration','volume'],
             loop: false,
             success: function(media, node, player) {
                     console.log("MediaElementPlayer ready");

@@ -263,7 +263,7 @@ function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
 
         $args_default = array(
             'cache_only'    => false,
-            'max'           => 5
+            'limit'         => 3
         );
 
         $args = wp_parse_args((array)$args,$args_default);
@@ -279,7 +279,7 @@ function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
             $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
             $api_args = array(
                 'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
-                'limit'                     => $args['max'],
+                'limit'                     => $args['limit'],
                 'platforms'                 => $platform,
                 'q'                         => urlencode($track->artist . ' ' . $track->title),
                 'skipSavingInDatabase'      => true
@@ -304,7 +304,7 @@ function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
             $remote = $sources = wpsstm_sources()->sanitize_sources($sources);
             set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
             
-            wpsstm()->debug_log(json_encode(array('track'=>$track,'platform'=>$platform,'args'=>$args,'cache'=>$sources,'remote'=>$remote)),'wpsstm_get_soundsgood_sources()' ); 
+            wpsstm()->debug_log(json_encode(array('track'=>$track,'platform'=>$platform,'args'=>$args,'cached'=>$sources)),'wpsstm_get_soundsgood_sources()' ); 
             
         }
 
