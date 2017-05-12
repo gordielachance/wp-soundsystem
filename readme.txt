@@ -156,6 +156,20 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.9.4 =
+* WP_SoundSystem_Track:: get_unique_id() : use sanitize_title
+* Tracklists Table : share link
+* Tracklists Table : fixed time scraped
+* Scraper : handle Dropbox links
+* Scraper : Fix get_track_image() and get_track_source_urls()
+* Scraper : fixed XSPF options when xpsf content is loaded
+* Player : tracks sources preloads
+* Player : track infos (track title, provider link)
+* Player : sources switch
+* Player : redirection notice with timer
+* Player : confirmation popup when leaving the page with a media playing
+* Player : track button : new 'has-played' class
+
 = 0.9.9.3 =
 * player buttons : previous/next track & previous/next page
 * splitter presets into multiple files
