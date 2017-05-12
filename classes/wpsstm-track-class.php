@@ -163,7 +163,7 @@ class WP_SoundSystem_Track{
         );
         
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){		
-                $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;		
+            $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;		
         }
 
         $meta_input = array_filter($meta_input);
