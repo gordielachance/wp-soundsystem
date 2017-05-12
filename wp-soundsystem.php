@@ -297,8 +297,9 @@ class WP_SoundSytem {
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);
         
         $datas = array(
-            'debug'     => (WP_DEBUG),
-            'ajaxurl'   => admin_url( 'admin-ajax.php' )
+            'debug'         => (WP_DEBUG),
+            'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+            'clipboardtext' => __('You can copy and share this link:','wpsstm')
         );
         
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );

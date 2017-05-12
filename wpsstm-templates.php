@@ -226,18 +226,23 @@ function wpsstm_get_post_tracklist($post_id=null){
     
 }
 
-function wpsstm_get_xspf_link($post_id=null,$download=false){
+function wpsstm_get_tracklist_link($post_id=null,$xspf=false,$download=false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    $xspf_url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
-    $xspf_url = apply_filters('wpsstm_get_xspf_link',$xspf_url,$post_id);
-
-    if($download){
-        $xspf_url = add_query_arg(array('download'=>true),$xspf_url);
+    $url = get_permalink($post_id);
+    
+    if ($xspf){
+        $url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
     }
 
-    return $xspf_url;
+    $url = apply_filters('wpsstm_get_tracklist_link',$url,$post_id,$xspf,$download);
+
+    if($download){
+        $url = add_query_arg(array('download'=>true),$url);
+    }
+
+    return $url;
 
 }
 

@@ -92,7 +92,7 @@ class WP_SoundSytem_Core_Sources{
         $sources_filters = array_diff(array_map('serialize',(array)$sources),array_map('serialize',(array)$sources_strict));
 
         //suggested remote sources (cached only)
-        $sources_remote = $this->get_track_sources_remote( $track,false,array('cache_only'=>true) );
+        $sources_remote = $this->get_track_sources_remote( $track,array('cache_only'=>true) );
         
         $sources = array_merge((array)$sources,(array)$sources_remote);
         $sources = wpsstm_sources()->sanitize_sources($sources);
@@ -237,43 +237,33 @@ class WP_SoundSytem_Core_Sources{
     
     function get_track_sources_db($track,$filters=true){
         $sources = null;
-        
-        if ($track->sources === null){
-            
-            $track->sources = false;
-        
-            //stored in DB
-            if ($track->post_id){
-                $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
-          
-                if ($filters){
-                    $sources = apply_filters('wpsstm_get_track_sources_db',$sources,$track);
-                }
 
-                $track->sources = $this->sanitize_sources($sources);
+        //stored in DB
+        if ($track->post_id){
+            $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
 
+            if ($filters){
+                $sources = apply_filters('wpsstm_get_track_sources_db',$sources,$track);
             }
+
+            $sources = $this->sanitize_sources($sources);
+
         }
 
-        return $track->sources;
+        return $sources;
     }
 
     /*
     Those source will be suggested backend; user will need to confirm them.
     */
 
-    function get_track_sources_remote($track,$single_provider=true,$args=null){
+    function get_track_sources_remote($track,$args=null){
 
         $sources = array();
 
         foreach( (array)wpsstm_player()->providers as $provider ){
-            if ( !$provider_source = $provider->single_source_lookup( $track,$args ) ) continue; //cannot play source
-            $sources[] = $provider_source;
-            
-            if ( $single_provider ){ //skip if a source has been found
-                break;
-            }
-            
+            if ( !$provider_sources = $provider->sources_lookup( $track,$args ) ) continue; //cannot play source
+            $sources = array_merge($sources,(array)$provider_sources);
         }
 
         //allow plugins to filter this

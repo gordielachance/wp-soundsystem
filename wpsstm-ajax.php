@@ -114,11 +114,11 @@ function wpsstm_ajax_player_get_provider_sources(){
     $result = array(
         'input'     => $_POST,
         'message'   => null,
-        'new_html'  => null,
+        'sources'  => null,
         'success'   => false
     );
     
-    $args = array(
+    $args = $result['args'] = array(
         'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
         'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
         'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
@@ -126,8 +126,8 @@ function wpsstm_ajax_player_get_provider_sources(){
 
     $track = $result['track'] = new WP_SoundSystem_Track($args);
     
-    if ( $bt = wpsstm_player()->get_track_button($track,false) ){
-        $result['new_html'] = $bt;
+    if ( $sources = wpsstm_player()->get_playable_sources($track,false) ){
+        $result['sources'] = $sources;
         $result['success'] = true;
     }
 

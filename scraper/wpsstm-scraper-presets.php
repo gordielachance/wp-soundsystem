@@ -75,6 +75,17 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playl
 
     }
     
+    protected function get_remote_url(){
+        
+        if ($this->redirect_url){
+            $this->redirect_url = $this->variables_fill_string($this->redirect_url);
+            return $this->redirect_url;
+        }else{
+            return $this->url;
+        }
+
+    }
+    
     /*
     Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
     */

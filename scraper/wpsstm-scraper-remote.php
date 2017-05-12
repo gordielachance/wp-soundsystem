@@ -83,11 +83,23 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     public function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
+
     protected function get_remote_url(){
         
+        $url_parsed = parse_url($this->url);
+        if ( !isset($url_parsed['host']) ) return;
+            
+        $host_with_subdomain = $url_parsed['host'];
+        $host_split = explode(".", $host_with_subdomain);
+        $host = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
+
+        //dropbox : convert to raw link
+        if ($host=='dropbox'){
+            $url_no_args = strtok($this->url, '?');
+            $this->redirect_url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
+        }
+
         if ($this->redirect_url){
-            $this->redirect_url = $this->variables_fill_string($this->redirect_url);
             return $this->redirect_url;
         }else{
             return $this->url;
@@ -374,13 +386,26 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     
     protected function get_track_image($track_node){
         $selectors = $this->get_options(array('selectors','track_image'));
-        return $this->get_track_node_content($track_node,$selectors);
+        $image = $this->get_track_node_content($track_node,$selectors);
+        
+        if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
+        
+        return $image;
     }
     
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_options(array('selectors','track_source_urls'));
         $source_urls = $this->get_track_node_content($track_node,$selectors,false);
-        return $this->get_track_node_content($track_node,$selectors);
+        $sources = $this->get_track_node_content($track_node,$selectors);
+        
+        foreach ((array)$sources as $key=>$source){
+            if (filter_var((string)$source, FILTER_VALIDATE_URL) === false) {
+                unset($sources[$key]);
+            }
+        }
+        
+        return $sources;
+        
     }
 
     private function get_track_node_content($track_node,$selectors,$single_value=true){
@@ -428,14 +453,6 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             
             if (!$string = trim($string)) continue;
 
-            if( ($slug == 'image' ) || ($slug == 'source_urls' ) ){
-
-                if (filter_var((string)$string, FILTER_VALIDATE_URL) === false) {
-                    continue;
-                }
-
-            }
-            
             //CDATA fix
             $string = $this->sanitize_cdata_string($string);
             

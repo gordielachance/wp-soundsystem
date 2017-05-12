@@ -373,4 +373,3 @@ function wpsstm_player() {
 }
 
 wpsstm_player();
-

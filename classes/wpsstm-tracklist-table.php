@@ -296,9 +296,10 @@ class WP_SoundSytem_TracksList_Table{
 
                     if ( !is_admin() ){
                         ?>
-                        <a href="<?php echo wpsstm_get_xspf_link($this->tracklist->post_id);?>" class="wpsstm-tracklist-action-download"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
+                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id);?>" target="_blank" class="wpsstm-tracklist-action-share"><i class="fa fa-share-alt" aria-hidden="true"></i> <?php _e('Share', 'wpsstm'); ?></a>
+                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,true);?>" class="wpsstm-tracklist-action-xspf"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
 
-                        <a href="<?php echo wpsstm_get_xspf_link($this->tracklist->post_id,true);?>" class="wpsstm-tracklist-action-download"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Download XSPF', 'wpsstm'); ?></a>
+                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,true,true);?>" class="wpsstm-tracklist-action-xspf-download"><?php _e('Download XSPF', 'wpsstm'); ?></a>
                         <?php
                     }
 

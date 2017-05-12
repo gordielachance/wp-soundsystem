@@ -88,7 +88,7 @@ class WP_SoundSytem_Core_Tracklists{
         $tracklist = wpsstm_get_post_tracklist();
         if ( !count($tracklist->tracks) ) return;
         
-        if ( !$xpsf_link = wpsstm_get_xspf_link(null,true) ) return;
+        if ( !$xpsf_link = wpsstm_get_tracklist_link(null,true,true) ) return;
         
         ?>
         <div id="export-xspf">
