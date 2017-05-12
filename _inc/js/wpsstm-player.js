@@ -168,6 +168,8 @@ var wpsstm_source_requests = [];
         //play current track if it has sources
         if (track_obj.sources){
             wpsstm_switch_player(track_idx);
+        }else if (track_obj.did_lookup){ //no sources and had lookup
+            wpsstm_play_next_track();
         }
 
     }
