@@ -102,7 +102,7 @@ class WP_SoundSytem_Core_Player{
 
                 $current_url = home_url(add_query_arg(array(),$wp->request));
                 $countdown = '<strong></strong>';
-                $icon = '<i class="fa fa-refresh fa-fw"></i>';
+                $icon = '<i class="fa fa-refresh fa-fw fa-spin"></i>';
                 $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
 
                 //TO FIX not working (eg. for wizard)
@@ -121,12 +121,11 @@ class WP_SoundSytem_Core_Player{
                 $abord_link = sprintf( __("Click to abord.",'wpsstm'),$link );
                 $text.= ' ' . $abord_link;
                 
-                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice">%s %s %s</p>',$icon,$countdown,$text);
+                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
             <div id="wpsstm-player-sources-wrapper">
                 <div id="wpsstm-player-sources"></div>
-                <a id="wpsstm-player-switch-sources" href="#"><?php _e('Switch source','wpsstm');?> <i class="fa fa-cog" aria-hidden="true"></i></a>
             </div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
@@ -185,6 +184,7 @@ class WP_SoundSytem_Core_Player{
                 $provider_source = array(
                     'type'  => $provider_source_type,
                     'title' => $provider->format_source_title($source['title']),
+                    'icon'  => $provider->format_source_icon(),
                     'src'   => $provider->format_source_url($source['url']),
                 );
 
@@ -238,11 +238,15 @@ abstract class WP_SoundSytem_Player_Provider{
     
     abstract public function get_source_type($url);
     
-    function format_source_title($title){
+    function format_source_icon(){
         if ( !$prefix = $this->icon ){
             $prefix = sprintf('[%s]',$this->name);
         }
-        return sprintf('%s %s',$prefix,$title);
+        return $prefix;
+    }
+    
+    function format_source_title($title){
+        return $title;
     }
     
     function format_source_url($url){

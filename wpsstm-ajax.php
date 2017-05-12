@@ -118,7 +118,7 @@ function wpsstm_ajax_player_get_provider_sources(){
         'success'   => false
     );
     
-    $args = array(
+    $args = $result['args'] = array(
         'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
         'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
         'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null

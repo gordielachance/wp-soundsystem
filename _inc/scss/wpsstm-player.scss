@@ -27,15 +27,6 @@ a.wpsstm-play-track{
                 @include opacity(1);
         }
     }
-
-    &.error{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-error{
-            display:inline-block;
-        }
-    }
     
     &.buffering{
         pointer-events: none;
@@ -53,6 +44,15 @@ a.wpsstm-play-track{
             display:none;
         }
         .wpsstm-player-icon-pause{
+            display:inline-block;
+        }
+    }
+
+    &.error{
+        .wpsstm-player-icon{
+            display:none;
+        }
+        .wpsstm-player-icon-error{
             display:inline-block;
         }
     }
@@ -110,14 +110,26 @@ a.wpsstm-play-track{
                 li{
                     @include opacity(.8);
                     display:none;
+                    .wpsstm-trackinfo-title{
+                        cursor: pointer;
+                        cursor: hand;
+                        &:hover{
+                           @include opacity(1); 
+                        }
+                    }
+
                     &.wpsstm-active-source{
                         @include opacity(1);
                         display:block;
                     }
-                    a{
-                        i{ //icon
-                            font-size:2em;
-                        }
+                    &.wpsstm-bad-source{
+                        //text-decoration: line-through;
+                        display:none!important;
+                    }
+
+                    a.wpsstm-trackinfo-provider-link{
+                        margin-left:.5em;
+                        font-size:2em;
                     }
 
                 }
