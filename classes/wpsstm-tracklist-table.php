@@ -12,6 +12,8 @@ class WP_SoundSytem_TracksList_Table{
     var $track_index = 0;
     var $paged_var = 'tracklist_page';
     var $no_items_label = null;
+    var $can_player = true;
+    var $sources_db_only = true;
 
     function __construct($tracklist){
         global $status, $page;
@@ -22,7 +24,7 @@ class WP_SoundSytem_TracksList_Table{
 
         $this->page = ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1;
 
-        
+        $this->can_player = ( !is_admin() && wpsstm()->get_options('player_enabled') == 'on' );
     }
     
     function prepare_items() {
@@ -120,7 +122,7 @@ class WP_SoundSytem_TracksList_Table{
         
 
         //play button
-        if ( !is_admin() && wpsstm()->get_options('player_enabled') == 'on' ){
+        if ( $this->can_player ){
             foreach ($this->items as $item){
                 $columns['trackitem_play_bt']     = '';
                 break;
@@ -562,8 +564,19 @@ class WP_SoundSytem_TracksList_Table{
      * @param object $item The current item
      */
     public function single_row( $item ) {
+        
+            $data_attr_str = null;
+        
+            if ( $this->can_player ){
+                $sources_attr_arr = wpsstm_player()->get_playable_sources($item,$this->sources_db_only);
+
+                if ($sources_attr_arr){
+                    $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
+                }
+            }
+        
             $track_classes = array();
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s>',wpsstm_get_classes_attr($track_classes) );
+            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-sources="%s">',wpsstm_get_classes_attr($track_classes),$data_attr_str);
             $this->single_row_columns( $item );
             echo '</tr>';
     }

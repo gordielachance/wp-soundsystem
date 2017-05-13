@@ -1,12 +1,20 @@
 @import "compass/css3";
 
+.wpsstm-tracklist-table{
+    tbody{
+        tr{
+            &[data-wpsstm-sources=""] a.wpsstm-play-track:not(:hover){
+                @include opacity(.25);
+            }
+        }
+    }
+}
+
 a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
 
-    &[data-wpsstm-sources=""]:not(:hover){
-        @include opacity(.25);
-    }
+
 
     .wpsstm-player-icon{
         display:none;

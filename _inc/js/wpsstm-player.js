@@ -39,7 +39,7 @@ var wpsstm_source_requests = [];
             }
             
             //get sources from HTML if any
-            var sources = $(this).attr('data-wpsstm-sources');
+            var sources = track_el.attr('data-wpsstm-sources');
             if (sources) {
                 track.sources = JSON.parse(sources);
             }
@@ -306,7 +306,7 @@ var wpsstm_source_requests = [];
                     if ( data.sources ){
                         console.log("found "+data.sources.length+" sources for track#" + track_idx);
                         wpsstm_page_tracks[track_idx].sources = data.sources;
-                        track_bt.attr('data-wpsstm-sources',JSON.stringify(data.sources));
+                        track_el.attr('data-wpsstm-sources',JSON.stringify(data.sources));
                     }
                 }
             },
