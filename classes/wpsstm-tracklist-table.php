@@ -218,7 +218,7 @@ class WP_SoundSytem_TracksList_Table{
 
             $this->_pagination_args = $args;
     }
-    
+
 	/**
 	 * Display the table
 	 *
@@ -227,7 +227,7 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -256,21 +256,18 @@ class WP_SoundSytem_TracksList_Table{
     
     protected function extra_tablenav($which){
         global $post;
-        
-        $tracklist_title = $this->tracklist->title;
-        $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$tracklist_title);
-        $tracklist_title = sprintf('<strong class="wpsstm-tracklist-title">%s</strong>',$tracklist_title);
-        
-        //don't show title if post = tracklist
-        if ($post->ID == $this->tracklist->post_id){
-            $tracklist_title = '';
-        }
-        
-    ?>
+        ?>
         <div>
-            <?php 
+            <?php
+            if ($post->ID == $this->tracklist->post_id){ //don't show title if post = tracklist
+                printf('<meta itemprop="name" content="%s" />',$this->tracklist->title);
+            }else{
+                $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
+                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s</strong>',$tracklist_link);
+            }
+            
+            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->tracks_count);
         
-            echo $tracklist_title;
         
             if ( $this->tracklist->timestamp ){
 
@@ -565,7 +562,8 @@ class WP_SoundSytem_TracksList_Table{
      * @param object $item The current item
      */
     public function single_row( $item ) {
-            echo '<tr>';
+            $track_classes = array();
+            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s>',wpsstm_get_classes_attr($track_classes) );
             $this->single_row_columns( $item );
             echo '</tr>';
     }
@@ -582,24 +580,40 @@ class WP_SoundSytem_TracksList_Table{
             list( $columns, $hidden ) = $this->get_column_info();
 
             foreach ( $columns as $column_name => $column_display_name ) {
-                    $class = "class='$column_name column-$column_name'";
+                
+                $attr_str = null;
+                $attr = array();
 
-                    $style = '';
-                    if ( in_array( $column_name, $hidden ) )
-                            $style = ' style="display:none;"';
+                $classes = array($column_name,'column-'.$column_name);
+                $attr['class'] = implode(' ',$classes);
 
-                    $attributes = "$class$style";
+                $attr['style'] = ( in_array( $column_name, $hidden ) ) ? 'display:none;' : null;
 
-                    if ( method_exists( $this, 'column_' . $column_name ) ) {
-                            echo "<td $attributes>";
-                            echo call_user_func( array( $this, 'column_' . $column_name ), $item );
-                            echo "</td>";
-                    }
-                    else {
-                            echo "<td $attributes>";
-                            echo $this->column_default( $item, $column_name );
-                            echo "</td>";
-                    }
+                switch($column_name){
+                    case 'trackitem_artist':
+                        $attr['itemprop'] = 'byArtist';
+                    break;
+                    case 'trackitem_track':
+                        $attr['itemprop'] = 'name';
+                    break;
+                    case 'trackitem_album':
+                        $attr['itemprop'] = 'inAlbum';
+                    break;
+                }
+
+                foreach ($attr as $key=>$value){
+                    $attr_str.=sprintf(' %s="%s"',$key,$value);
+                }
+
+                printf('<td %s>',$attr_str);
+
+                if ( method_exists( $this, 'column_' . $column_name ) ) {
+                    echo call_user_func( array( $this, 'column_' . $column_name ), $item );
+                }else {
+                    echo $this->column_default( $item, $column_name );
+                }
+
+                echo '</td>';
             }
     }
     
