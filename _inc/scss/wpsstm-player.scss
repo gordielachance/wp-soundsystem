@@ -6,6 +6,51 @@
             &[data-wpsstm-sources=""] a.wpsstm-play-track:not(:hover){
                 @include opacity(.25);
             }
+            &:not(.active) .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    @include opacity(.25);
+                }
+
+            }
+
+            &:hover .wpsstm-play-track{
+                .wpsstm-player-icon{
+                        @include opacity(1);
+                }
+            }
+
+            &.buffering .wpsstm-play-track{
+                pointer-events: none;
+
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-buffering{
+                    display:inline-block;
+                }
+            }
+
+            &.playing .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-pause{
+                    display:inline-block;
+                }
+            }
+
+            &.error .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-error{
+                    display:inline-block;
+                }
+            }
+
+            &.has-played .wpsstm-play-track{
+                color:#00b511;
+            }
         }
     }
 }
@@ -14,61 +59,12 @@ a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
 
-
-
     .wpsstm-player-icon{
         display:none;
         &.wpsstm-player-icon-play{
             display:inline-block;
         }
     }
-
-    &:not(.active){
-        .wpsstm-player-icon{
-            @include opacity(.25);
-        }
-        
-    }
-    
-    &:hover{
-        .wpsstm-player-icon{
-                @include opacity(1);
-        }
-    }
-    
-    &.buffering{
-        pointer-events: none;
-        
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-buffering{
-            display:inline-block;
-        }
-    }
-    
-    &.playing{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-pause{
-            display:inline-block;
-        }
-    }
-
-    &.error{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-error{
-            display:inline-block;
-        }
-    }
-    
-    &.has-played{
-        color:#00b511;
-    }
-
 }
 
 #wpsstm-bottom{
