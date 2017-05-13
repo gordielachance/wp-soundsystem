@@ -197,17 +197,10 @@ class WP_SoundSytem_Core_Player{
         return $provider_sources;
     }
 
-    function get_track_button($track,$database_only = true){
-        
-        $sources_attr_arr = $this->get_playable_sources($track,$database_only);
-
-        $data_attr_str = null;
-        if ($sources_attr_arr){
-            $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
-        }
-
+    //TO FIX all those attributes should be moved to the tracklist <tr>
+    function get_track_button(){
         //https://wordpress.stackexchange.com/a/162945/70449
-        $link = sprintf('<a class="wpsstm-play-track" data-wpsstm-sources="%s" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>',$data_attr_str);
+        $link = '<a class="wpsstm-play-track" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
 
         return $link;
 

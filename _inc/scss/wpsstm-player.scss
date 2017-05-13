@@ -1,12 +1,63 @@
 @import "compass/css3";
 
+.wpsstm-tracklist-table{
+    tbody{
+        tr{
+            &[data-wpsstm-sources=""] a.wpsstm-play-track:not(:hover){
+                @include opacity(.25);
+            }
+            &:not(.active) .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    @include opacity(.25);
+                }
+
+            }
+
+            &:hover .wpsstm-play-track{
+                .wpsstm-player-icon{
+                        @include opacity(1);
+                }
+            }
+
+            &.buffering .wpsstm-play-track{
+                pointer-events: none;
+
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-buffering{
+                    display:inline-block;
+                }
+            }
+
+            &.playing .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-pause{
+                    display:inline-block;
+                }
+            }
+
+            &.error .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-error{
+                    display:inline-block;
+                }
+            }
+
+            &.has-played .wpsstm-play-track{
+                color:#00b511;
+            }
+        }
+    }
+}
+
 a.wpsstm-play-track{
     text-decoration:none;
     border-bottom:none!important; //twentyfifteen fix
-
-    &[data-wpsstm-sources=""]:not(:hover){
-        @include opacity(.25);
-    }
 
     .wpsstm-player-icon{
         display:none;
@@ -14,53 +65,6 @@ a.wpsstm-play-track{
             display:inline-block;
         }
     }
-
-    &:not(.active){
-        .wpsstm-player-icon{
-            @include opacity(.25);
-        }
-        
-    }
-    
-    &:hover{
-        .wpsstm-player-icon{
-                @include opacity(1);
-        }
-    }
-    
-    &.buffering{
-        pointer-events: none;
-        
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-buffering{
-            display:inline-block;
-        }
-    }
-    
-    &.playing{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-pause{
-            display:inline-block;
-        }
-    }
-
-    &.error{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-error{
-            display:inline-block;
-        }
-    }
-    
-    &.has-played{
-        color:#00b511;
-    }
-
 }
 
 #wpsstm-bottom{
