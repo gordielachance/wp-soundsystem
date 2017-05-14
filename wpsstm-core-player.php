@@ -125,6 +125,9 @@ class WP_SoundSytem_Core_Player{
             }
             ?>
             <div id="wpsstm-player-sources-wrapper">
+                <div id="wpsstm-player-sources-title">
+                    <i class="wpsstm-player-sources-toggle fa fa-times" aria-hidden="true"></i>
+                    <?php _e('Choose a source','wpsstm');?></div>
                 <div id="wpsstm-player-sources"></div>
             </div>
             <div id="wpsstm-player-wrapper">

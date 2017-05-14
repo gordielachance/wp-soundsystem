@@ -88,6 +88,11 @@ var wpsstm_source_requests = [];
             e.preventDefault();
             wpsstm_play_next_track();
         });
+        
+        //sources block title
+        $('#wpsstm-player-sources-title').click(function() {
+            $('#wpsstm-player-sources-wrapper').toggleClass('expanded');
+        });
 
         //source item
         $( "#wpsstm-player-sources-wrapper li span.wpsstm-trackinfo-title" ).live( "click", function(e) {
@@ -102,8 +107,6 @@ var wpsstm_source_requests = [];
             }
             
             $('#wpsstm-player-sources-wrapper').toggleClass('expanded');
-            
-
         });
         
         /*

@@ -71,8 +71,6 @@ a.wpsstm-play-track{
     display:none;
     position:fixed;
     width:100%;
-    background-color: #DDD;
-    border-top: 1px solid #b7b7b7;
     padding:0;
     bottom: 0;
     z-index: 50;
@@ -95,17 +93,26 @@ a.wpsstm-play-track{
         font-size:.8em;
         font-family:sans-serif;
         position:relative;
-        padding-top: .5em;
+        
         a{
             color:white;
         }
-        #wpsstm-player-switch-sources{
-            position:absolute;
-            right:0;
-            padding-right: .5em;
-            top:.5em;
+        
+        #wpsstm-player-sources-title{
+            font-size:1.4em;
+            font-weight: 100;
+            line-height:2em;
+            text-align:left;
+            padding: 0 1em;
+            display:none;
+            .wpsstm-player-sources-toggle{
+                cursor: pointer;
+                cursor: hand;
+            }
         }
+        
         #wpsstm-player-sources{
+            padding-top: .5em;
             ul{
                 margin:0;
                 padding:0;
@@ -140,7 +147,12 @@ a.wpsstm-play-track{
             }
         }
         &.expanded{
+            #wpsstm-player-sources-title{
+                background:#222;
+                display:block;
+            }
             #wpsstm-player-sources{
+                background:#272727;
                 ul{
                     li{
                         display:block;
