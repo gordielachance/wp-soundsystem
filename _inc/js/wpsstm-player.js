@@ -321,11 +321,9 @@ var wpsstm_source_requests = [];
         var track_obj = wpsstm_page_tracks[track_idx];
         var track_el = $(track_obj.row);
 
-        track_el.addClass('buffering');
-        $('.wpsstm-tracklist-list').shortenTable(3);
-        
         //shortenTable
         /*
+        $('.wpsstm-tracklist-list').shortenTable(3);
         var tracklist = track_el.closest('.wpsstm-tracklist');
         var shortened_table = tracklist.find('.shortened-table');
         if ( shortened_table.length > 0){
@@ -338,7 +336,12 @@ var wpsstm_source_requests = [];
 
         var media_wrapper = $('<audio />');
         media_wrapper.attr({
-            id:    'wpsstm-player-audio',
+            id:     'wpsstm-player-audio'
+        });
+        
+        media_wrapper.prop({
+            //autoplay:     true,
+            //muted:        true
         });
 
         //create trackinfo
