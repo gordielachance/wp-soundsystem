@@ -259,6 +259,17 @@ function wpsstm_get_class_instance($post_id){
     }
 }
 
+function wpsstm_get_url_domain($url){
+    $url_parsed = parse_url($url);
+    if ( !isset($url_parsed['host']) ) return;
+
+    $host_with_subdomain = $url_parsed['host'];
+    $host_split = explode(".", $host_with_subdomain);
+    $domain = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
+    
+    return $domain;
+}
+
 function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
 
         $args_default = array(
