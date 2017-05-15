@@ -60,16 +60,16 @@ var wpsstm_source_requests = [];
         //track buttons
         $( ".wpsstm-play-track" ).live( "click", function(e) {
             e.preventDefault();
+            var track_el = $(this).closest('tr');
+            var track_idx = $(track_el).attr('data-wpsstm-track-idx');
             
-            if ( $(this).hasClass('active') ){
-                if ( $(this).hasClass('playing') ){
+            if ( $(track_el).hasClass('active') ){
+                if ( $(track_el).hasClass('playing') ){
                     wpsstm_current_media.pause();
                 }else{
                     wpsstm_current_media.play();
                 }
             }else{
-                var track_el = $(this).closest('tr');
-                var track_idx = $(track_el).attr('data-wpsstm-track-idx');
                 wpsstm_init_track(track_idx);
             }
 
