@@ -37,10 +37,10 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function wizard_register_scripts_styles(){
         // CSS
-        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-scraper-wizard.css',null,wpsstm()->version );
+        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . '_inc/css/wpsstm-scraper-wizard.css',null,wpsstm()->version );
         
         // JS
-        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . 'scraper/_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
+        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs'),wpsstm()->version);
     }
     
     function wizard_scripts_styles_backend(){
