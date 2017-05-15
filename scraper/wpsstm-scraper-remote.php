@@ -34,8 +34,8 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     );
     
     public function __construct(){
-        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php');
-        require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
+        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
+        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
     }
     
     public function init($url,$options){

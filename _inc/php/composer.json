@@ -1,9 +1,0 @@
-{
-    "require": {
-        "querypath/QueryPath": ">=3.0.0",
-        "matto1990/lastfm-api": "^1.5"
-    },
-    "config": {
-        "vendor-dir": ""
-    }
-}
