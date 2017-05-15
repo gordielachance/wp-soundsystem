@@ -142,6 +142,11 @@ class WP_SoundSytem_Settings {
             /*
             APIs
             */
+            
+            //last.fm
+            $new_input['lastfm_client_id'] = ( isset($input['lastfm_client_id']) ) ? trim($input['lastfm_client_id']) : null;
+            $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
+            
             //spotify
             $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
             $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
@@ -149,7 +154,6 @@ class WP_SoundSytem_Settings {
             //soundcloud
             $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
             $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
-
     
         }
         
@@ -318,6 +322,14 @@ class WP_SoundSytem_Settings {
             __('APIs','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'lastfm_client_id', 
+            __('Last.FM'), 
+            array( $this, 'lastfm_client_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
         );
         
         add_settings_field(
@@ -504,6 +516,32 @@ class WP_SoundSytem_Settings {
     }
     
     //APIs
+    
+    function lastfm_client_callback(){
+        $client_id = wpsstm()->get_options('lastfm_client_id');
+        $client_secret = wpsstm()->get_options('lastfm_client_secret');
+        $new_app_link = 'https://www.last.fm/api/account/create';
+        
+        $desc = sprintf(__('Required for the Last.FM preset, and used by the audio player to scrobble / love tracks.  Get an API account %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[lastfm_client_id]" value="%s" /></p>',
+            __('Api key:','wppstm'),
+            wpsstm()->meta_name_options,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[lastfm_client_secret]" value="%s" /></p>',
+            __('Shared secret:','wppstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
+
+    }
     
     function spotify_client_callback(){
         $client_id = wpsstm()->get_options('spotify_client_id');
