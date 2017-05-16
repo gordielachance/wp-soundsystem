@@ -120,6 +120,9 @@ class WP_SoundSytem {
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';
+            if ( wpsstm()->get_options('lastfm_client_id') ){
+                require $this->plugin_dir . 'wpsstm-core-lastfm.php';
+            }
         }
         
         if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
