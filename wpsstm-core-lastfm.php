@@ -9,20 +9,15 @@ use LastFmApi\Api\TrackApi;
 
 class WP_SoundSytem_Core_LastFM{
     
-    var $username_meta_name = '_wpsstm_lastfm_username';
-    var $session_meta_name = '_wpsstm_lastfm_session';
-    var $subscriber_meta_name = '_wpsstm_lastfm_subscriber';
+    var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
     var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
     private $api_key = null;
     private $api_secret = null;
-    
-    public $username = null;
-    public $subscriber = null;
+
+    public $user_api_metas = null;
+    public $is_auth = null;
     private $token = null;
-    private $session = null;
-    private $session_key = null;
-    
 
     /**
     * @var The one true Instance
@@ -69,7 +64,6 @@ class WP_SoundSytem_Core_LastFM{
 
         add_filter( 'query_vars', array($this,'add_query_var_token'));
         add_action( 'wp', array($this,'after_app_auth_set_user_token') );
-        //add_action( 'wp', array($this,'check_is_user_auth') );
         add_action( 'wp', array($this,'tests') );
 
     }
@@ -123,7 +117,7 @@ class WP_SoundSytem_Core_LastFM{
         $url = $this->get_user_auth_url();
         print_r($url);die();
         
-        $session = $this->populate_user_session();
+        $session = $this->populate_api_metas();
         print_r($session);die();
 
         die();
@@ -153,14 +147,14 @@ class WP_SoundSytem_Core_LastFM{
     }
     
     function check_is_user_auth(){
-
-        if ( !$user_id = get_current_user_id() ) return false;
-
-        if ( !$this->is_user_auth() ) {
+        
+        if ($this->is_auth === null) {
             
+            $is_auth = false;
+        
             $auth = $this->get_auth(true);
 
-            if ( is_wp_error($auth) ){
+            if ( $auth && is_wp_error($auth) ){
                 $code = $auth->get_error_code();
                 $api_code = $auth->get_error_data($code);
 
@@ -168,12 +162,11 @@ class WP_SoundSytem_Core_LastFM{
                     case 4: //'Unauthorized Token - This token has not been issued' - probably expired
                         $token_name = $this->get_transient_token_name();
                         delete_transient( $token_name );
-                        $this->check_is_user_auth(); //redo
+                        $is_auth = $this->check_is_user_auth(); //redo
                     break;
                     case 14: //'Unauthorized Token - This token has not been authorized'
-                        
-                        delete_user_meta( $user_id, $this->username_meta_name );
-                        delete_user_meta( $user_id, $this->session_meta_name );
+
+                        $this->delete_lastfm_user_api_metas(); //TO FIX at the right place ?
 
                         $redirect_url = home_url();
 
@@ -192,16 +185,13 @@ class WP_SoundSytem_Core_LastFM{
                 }
 
             }
-            
+            $this->is_auth = true;
         }
+        
+        return $this->is_auth;
 
     }
-    
-    function is_user_auth(){
-        $auth = $this->get_auth(true);
-        return ( !is_wp_error($auth) );
-    }
-    
+
     function get_transient_token_name(){
         if ( !$user_id = get_current_user_id() ) return false;
         return sprintf( 'wpsstm_lastfm_usertoken_%s',$user_id );
@@ -283,25 +273,21 @@ class WP_SoundSytem_Core_LastFM{
 
             if ( !$this->api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API secret missing", "wpsstm" ) );
             
-            $user_session =     $this->get_session_key();
-            $user_name =        $this->get_user_name();
-            $subscriber =       $this->get_subscriber();
-
-            if ( is_wp_error($user_session) ) return $user_session;
-            if ( is_wp_error($user_name) ) return $user_name;
+            $api_metas = $this->get_lastfm_user_api_metas();
+            if ( is_wp_error($api_metas) ) return $api_metas;
 
             $advanced_auth_args = array(
                 'apiSecret' =>  $this->api_secret,
-                'sessionKey' => $user_session,
-                'username' =>   $user_name,
-                'subscriber' => $subscriber
+                'sessionKey' => ( isset($api_metas['sessionkey']) ) ? $api_metas['sessionkey'] : null,
+                'username' =>   ( isset($api_metas['username']) ) ? $api_metas['username'] : null,
+                'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
             );
 
             $auth_args = array_merge($auth_args,$advanced_auth_args);
 
         }
 
-        wpsstm()->debug_log($auth_args,"lastfm - get_auth()"); 
+        wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_auth()"); 
 
         try{
             return new AuthApi('setsession', $auth_args);
@@ -311,118 +297,64 @@ class WP_SoundSytem_Core_LastFM{
 
     }
     
-    
-    public function get_session_key(){
-
+    public function get_lastfm_user_api_metas(){
         $user_id = get_current_user_id();
         if (!$user_id) return false;
         
-        if ( $this->session_key === null ) {
-            $this->session_key = false;
+        if ( $this->user_api_metas === null ) {
+            $this->user_api_metas = false;
 
-            if ( $sessionkey = get_user_meta( $user_id, $this->session_meta_name, true ) ){
-                $this->session_key = $sessionkey;
+            if ( $api_metas = get_user_meta( $user_id, $this->lastfm_user_api_metas_name, true ) ){
+                $this->user_api_metas = $api_metas;
             }else{
                 //try to populate it
-                $authorization = $this->populate_user_session();
-                if ( is_wp_error($authorization) ) return $authorization;
+                $remote_api_metas = $this->populate_api_metas();
+                if ( is_wp_error($remote_api_metas) ) return $remote_api_metas;
+                 $this->user_api_metas = $remote_api_metas;
             }
         }
-        
-        return $this->session_key;
 
+        return $this->user_api_metas;
     }
-    
-    public function get_user_name(){
-        
-        $user_id = get_current_user_id();
-        if (!$user_id) return false;
-        
-        if ( $this->username === null ) {
-            $this->username = false;
 
-            if ( $username = get_user_meta( $user_id, $this->username_meta_name, true ) ){
-                $this->username = $username;
-            }else{
-                //try to populate it
-                $authorization = $this->populate_user_session();
-                if ( is_wp_error($authorization) ) return $authorization;
-            }
-            
-        }
-        return $this->username;
-    }
-    
-    /*
-    Not sure what's the purpose of this.  But anyway, auth does not work if it is not set.
-    */
-    public function get_subscriber(){
+    private function populate_api_metas(){
         $user_id = get_current_user_id();
         if (!$user_id) return false;
 
-        if ( $this->subscriber === null ) {
-            $this->subscriber = false;
+        $token = $this->get_user_token();
 
-            if ( $subscriber = get_user_meta( $user_id, $this->subscriber_meta_name, true ) ){
-                $this->subscriber = $subscriber;
-            }else{
-                //try to populate it
-                $authorization = $this->populate_user_session();
-                if ( is_wp_error($authorization) ) return $authorization;
-            }
-            
-        }
-        return $this->subscriber;
-    }
+        if ( is_wp_error($token) ) return $token;
+        if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.FM PHP Api Error: You must provilde a valid api token','wpsstm') );
 
-    public function populate_user_session(){
-        $user_id = get_current_user_id();
-        if (!$user_id) return false;
-        
-        if ($this->session === null) {
+        $auth_args = array(
+            'apiKey' =>     $this->api_key,
+            'apiSecret' =>  $this->api_secret,
+            'token' =>      $token
+        );
 
-            $token = $this->get_user_token();
+        wpsstm()->debug_log($auth_args,"lastfm - populate_api_metas()"); 
 
-            if ( is_wp_error($token) ) return $token;
-            if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.FM PHP Api Error: You must provilde a valid api token','wpsstm') );
+        try {
 
-            $auth_args = array(
-                'apiKey' =>     $this->api_key,
-                'apiSecret' =>  $this->api_secret,
-                'token' =>      $token
+            $session = new AuthApi('getsession', $auth_args);
+
+            $user_api_metas = array(
+                'username'      => $session->username,
+                'subscriber'    => $session->subscriber,
+                'sessionkey'    => $session->sessionKey,
+
             );
 
-            wpsstm()->debug_log($auth_args,"lastfm - populate_user_session()"); 
+            wpsstm()->debug_log(json_encode($user_api_metas),"lastfm - populate_api_metas()");
 
-            try {
-                
-                $this->session = new AuthApi('getsession', $auth_args);
-                wpsstm()->debug_log($this->session,"lastfm - populate_user_session()");
-
-                if ( $username = $this->session->username ){
-                    $this->username = $username;
-                    update_user_meta( $user_id, $this->username_meta_name, $username );
-                }
-
-                if ( $sessionkey = $this->session->sessionKey ){
-                    $this->session_key = $sessionkey;
-                    update_user_meta( $user_id, $this->session_meta_name, $sessionkey );
-                }
-                
-                if ( $subscriber = $this->session->subscriber ){
-                    $this->subscriber = $subscriber;
-                    update_user_meta( $user_id, $this->subscriber_meta_name, $subscriber );
-                }
+            update_user_meta( $user_id, $this->lastfm_user_api_metas_name, $user_api_metas );
 
 
-            }catch(Exception $e){
-                $this->session = false;
-                return $this->handle_exception($e);
-            }
-
+        }catch(Exception $e){
+            return $this->handle_exception($e);
         }
 
-        return $this->session;
+        return $user_api_metas;
 
     }
 
@@ -468,6 +400,8 @@ class WP_SoundSytem_Core_LastFM{
     
     public function love_track(WP_SoundSystem_Track $track){
 
+        $this->check_is_user_auth();
+
         $auth = $this->get_auth(true);
         if ( !$auth || is_wp_error($auth) ) return $auth;
 
@@ -488,6 +422,14 @@ class WP_SoundSytem_Core_LastFM{
     
     private function handle_exception($e){
         return new WP_Error( 'lastfm_php_api', sprintf(__('Last.FM PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage()),$e->getCode() );
+    }
+    
+    function delete_lastfm_user_api_metas(){
+        $user_id = get_current_user_id();
+        if (!$user_id) return false;
+        if ( delete_user_meta( $user_id, $this->lastfm_user_api_metas_name ) ){
+            $this->user_api_metas = false;
+        }
     }
     
 }
