@@ -90,7 +90,7 @@ var wpsstm_source_requests = [];
         });
         
         //sources block title
-        $('#wpsstm-player-sources-title').click(function() {
+        $('#wpsstm-player-sources-header').click(function() {
             $('#wpsstm-player-sources-wrapper').toggleClass('expanded');
         });
 

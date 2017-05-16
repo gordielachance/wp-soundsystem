@@ -113,7 +113,7 @@ a.wpsstm-play-track{
             color:white;
         }
         
-        #wpsstm-player-sources-title{
+        #wpsstm-player-sources-header{
             font-size:1.4em;
             font-weight: 100;
             line-height:2em;
@@ -162,7 +162,7 @@ a.wpsstm-play-track{
             }
         }
         &.expanded{
-            #wpsstm-player-sources-title{
+            #wpsstm-player-sources-header{
                 background:#222;
                 display:block;
             }
