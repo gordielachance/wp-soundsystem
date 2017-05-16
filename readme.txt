@@ -113,6 +113,11 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
+= The audio player does not go to the next track ! =
+
+This only happens with Chrome: due to a restriction of this browser, the player will not be able to load the next track if it is opened in a background tab. 
+Here's [how to fix it](https://github.com/gordielachance/wp-soundsystem/issues/18).
+
 = How can I display the tracklist of a post in my templates ? =
 
 Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates :
