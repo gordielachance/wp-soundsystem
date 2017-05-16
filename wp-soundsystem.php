@@ -79,6 +79,10 @@ class WP_SoundSytem {
             'frontend_scraper_page_id'          => null,
             'live_playlists_cache_min'          => '2',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
+            'lastfm_client_id'                  => null,
+            'lastfm_client_secret'              => null,
+            'lastfm_scrobbling'                 => 'on',
+            'lastfm_favorites'                  => 'on',
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,

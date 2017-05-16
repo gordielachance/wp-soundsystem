@@ -97,14 +97,6 @@ class WP_SoundSytem_Settings {
             $new_input = wpsstm()->options_default;
             
         }else{ //sanitize values
-
-            /* 
-            Musicbrainz 
-            */
-            
-            $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
-            $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
-            $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
             
             /*
             Player
@@ -138,14 +130,26 @@ class WP_SoundSytem_Settings {
             if ( isset ($input['live_playlists_cache_min']) && ctype_digit($input['live_playlists_cache_min']) ){
                 $new_input['live_playlists_cache_min'] = $input['live_playlists_cache_min'];
             }
-
-            /*
-            APIs
+            
+            /* 
+            Musicbrainz 
             */
             
-            //last.fm
+            $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
+            $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
+            $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
+            
+            /* 
+            Last.FM 
+            */
             $new_input['lastfm_client_id'] = ( isset($input['lastfm_client_id']) ) ? trim($input['lastfm_client_id']) : null;
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
+            $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
+            $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
+
+            /*
+            Other APIs
+            */
             
             //spotify
             $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
@@ -177,53 +181,7 @@ class WP_SoundSytem_Settings {
             wpsstm()->meta_name_options, // Option name
             array( $this, 'settings_sanitize' ) // Sanitize
          );
-        
-        /*
-        General
-        */
-        
-        add_settings_section(
-            'settings_general', // ID
-            __('General','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        /*
-        MusicBrainz
-        */
 
-        add_settings_section(
-            'settings-musicbrainz', // ID
-            __('MusicBrainz','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'musicbrainz_enabled', 
-            __('Enabled','wpsstm'), 
-            array( $this, 'musicbrainz_enabled_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-
-        add_settings_field(
-            'mb_auto_id', 
-            __('MusicBrainz auto ID','wpsstm'), 
-            array( $this, 'mb_auto_id_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-
-        add_settings_field(
-            'mb_suggest_bookmarks', 
-            __('Suggest links','wpsstm'), 
-            array( $this, 'mb_suggest_bookmarks_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-        
         /*
         Tracklists
         
@@ -279,12 +237,13 @@ class WP_SoundSytem_Settings {
         );
 
         /*
-        live playlists
+        Live Playlists
         */
+        
         add_settings_section(
             'live_playlists_settings', // ID
             __('Live Playlists','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
+            array( $this, 'section_live_playlists_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -314,22 +273,84 @@ class WP_SoundSytem_Settings {
         );
         
         /*
-        APIs
+        MusicBrainz
+        */
+
+        add_settings_section(
+            'settings-musicbrainz', // ID
+            __('MusicBrainz','wpsstm'), // Title
+            array( $this, 'section_musicbrainz_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'musicbrainz_enabled', 
+            __('Enabled','wpsstm'), 
+            array( $this, 'musicbrainz_enabled_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings-musicbrainz'//section
+        );
+
+        add_settings_field(
+            'mb_auto_id', 
+            __('MusicBrainz auto ID','wpsstm'), 
+            array( $this, 'mb_auto_id_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings-musicbrainz'//section
+        );
+
+        add_settings_field(
+            'mb_suggest_bookmarks', 
+            __('Suggest links','wpsstm'), 
+            array( $this, 'mb_suggest_bookmarks_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings-musicbrainz'//section
+        );
+        
+        /*
+        Last.FM
         */
         
         add_settings_section(
-            'settings_apis', // ID
-            __('APIs','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
+            'lastfm_settings', // ID
+            'Last.FM', // Title
+            array( $this, 'section_lastfm_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
         add_settings_field(
             'lastfm_client_id', 
-            __('Last.FM'), 
+            __('API','wpsstm'), 
             array( $this, 'lastfm_client_callback' ), 
             'wpsstm-settings-page', 
-            'settings_apis'
+            'lastfm_settings'
+        );
+        
+        add_settings_field(
+            'lastfm_scrobbling', 
+            __('Scrobbling','wpsstm'), 
+            array( $this, 'lastfm_scrobbling_callback' ), 
+            'wpsstm-settings-page', 
+            'lastfm_settings'
+        );
+        
+        add_settings_field(
+            'lastfm_love', 
+            __('Mark tracks as favorites','wpsstm'), 
+            array( $this, 'lastfm_favorites_callback' ), 
+            'wpsstm-settings-page', 
+            'lastfm_settings'
+        );
+        
+        /*
+        APIs
+        */
+        
+        add_settings_section(
+            'settings_apis', // ID
+            __('Other APIs','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
         );
         
         add_settings_field(
@@ -382,15 +403,19 @@ class WP_SoundSytem_Settings {
         
     }
     
+    function section_musicbrainz_desc(){
+        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">Musicbrainz</a>';
+        printf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post with this plugin, and will for example try to get the unique MusicBrainz ID of each item.','wpsstm'),$mb_link);
+    }
+    
     function musicbrainz_enabled_callback(){
         $option = wpsstm()->get_options('musicbrainz_enabled');
         
         printf(
-            '<input type="checkbox" name="%s[musicbrainz_enabled]" value="on" %s /> %s %s',
+            '<input type="checkbox" name="%s[musicbrainz_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable MusicBrainz","wpsstm"),
-            '— <small>'.sprintf(__('MusicBrainz is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post with this plugin, and will for example try to get the unique MusicBrainz ID of each item.','wpsstm')).'</small>'
+            __("Enable MusicBrainz","wpsstm")
         );
     }
     
@@ -473,18 +498,45 @@ class WP_SoundSytem_Settings {
         );
     }
     
+    function section_lastfm_desc(){
+        $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
+        printf(__('Required for the Last.FM preset and Last.FM features.  Get an API account %s.','wpsstm'),$api_link );
+    }
+    
+    function lastfm_scrobbling_callback(){
+        $option = wpsstm()->get_options('lastfm_scrobbling');
+
+        printf(
+            '<input type="checkbox" name="%s[lastfm_scrobbling]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Allow users to scrobble songs to their Last.FM account.","wpsstm")
+        );
+    }
+    
+    function lastfm_favorites_callback(){
+        $option = wpsstm()->get_options('lastfm_favorites');
+        
+        printf(
+            '<input type="checkbox" name="%s[lastfm_favorites]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Allow users to mark tracks as favorites and sync them with their Last.FM account.","wpsstm")
+        );
+    }
+    
+    function section_live_playlists_desc(){
+        _e('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
+    }
+
     function live_playlists_enabled_callback(){
         $option = wpsstm()->get_options('live_playlists_enabled');
         
-        $desc = __('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
-        $desc = sprintf('<small>%s</small>',$desc);
-        
         printf(
-            '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s %s',
+            '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable Live Playlists","wpsstm"),
-            '— '.$desc
+            __("Enable Live Playlists","wpsstm")
         );
     }
     
@@ -521,9 +573,6 @@ class WP_SoundSytem_Settings {
         $client_id = wpsstm()->get_options('lastfm_client_id');
         $client_secret = wpsstm()->get_options('lastfm_client_secret');
         $new_app_link = 'https://www.last.fm/api/account/create';
-        
-        $desc = sprintf(__('Required for the Last.FM preset, and used by the audio player to scrobble / love tracks.  Get an API account %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
-        printf('<p><small>%s</small></p>',$desc);
 
         //client ID
         printf(

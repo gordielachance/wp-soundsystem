@@ -134,14 +134,14 @@ class WP_SoundSytem_TracksList_Table{
         
         $columns['trackitem_artist']    = __('Artist','wpsstm');
         $columns['trackitem_track']     = __('Title','wpsstm');
-        
+
         
         if ( $this->show_property_column('album') ){
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
         
         //favorite icon
-        if ( wpsstm()->get_options('lastfm_client_id') ){
+        if ( wpsstm()->get_options('lastfm_favorites') ){
             $columns['favorite']     = '';
         }
 
