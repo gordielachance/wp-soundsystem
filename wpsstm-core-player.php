@@ -130,6 +130,26 @@ class WP_SoundSytem_Core_Player{
                     <?php _e('Choose a source','wpsstm');?></div>
                 <div id="wpsstm-player-sources"></div>
             </div>
+            <div id="wpsstm-player-track-actions">
+                <?php 
+                //scrobbling
+                if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                    ?>
+                    <a href="#" id="wpsstm-player-scrobbler-toggle" title="<?php _e('Toggle scrobbling','wpsstm');?>">
+                        <i class="fa fa-lastfm" aria-hidden="true"></i>
+                    </a>
+                    <?php
+                }
+                //favorites
+                if ( wpsstm()->get_options('lastfm_favorites') ){
+                    ?>
+                    <a href="#" id="wpsstm-player-favorite-toggle" title="<?php _e('Love/Unlove track','wpsstm');?>">
+                        <i class="fa fa-heart-o" aria-hidden="true"></i>
+                    </a>
+                    <?php
+                }
+                ?>
+            </div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                 <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>

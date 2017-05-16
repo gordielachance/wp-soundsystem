@@ -75,6 +75,7 @@ a.wpsstm-play-track{
     bottom: 0;
     z-index: 50;
     min-height:0em;
+    background:#222;
     
     #wpsstm-bottom-notice-redirection{
         display:none;
@@ -84,6 +85,20 @@ a.wpsstm-play-track{
         background-color:#fcf8e3;
         cursor: pointer;
         cursor: hand;
+    }
+    
+    #wpsstm-player-track-actions{
+        position: absolute;
+        right: 1em;
+        top: 0;
+        a{
+            @include opacity(0.9);
+            font-size:1.25em;
+            color:white;
+            &:hover{
+                @include opacity(1);
+            }
+        }
     }
     
     #wpsstm-player-sources-wrapper{
