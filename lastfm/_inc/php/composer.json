@@ -1,0 +1,8 @@
+{
+    "require": {
+        "matto1990/lastfm-api": "^1.5"
+    },
+    "config": {
+        "vendor-dir": ""
+    }
+}
