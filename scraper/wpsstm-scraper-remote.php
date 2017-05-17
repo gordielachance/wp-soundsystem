@@ -461,6 +461,9 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
                 $pattern = sprintf('~%s~m',$pattern);
                 preg_match($pattern, $string, $matches);
+                
+                $matches = array_filter($matches);
+                $matches = array_values($matches);
 
                 if (isset($matches[1])){
                     $string = strip_tags($matches[1]);
