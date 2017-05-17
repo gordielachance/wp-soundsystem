@@ -392,15 +392,14 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_options(array('selectors','track_source_urls'));
         $source_urls = $this->get_track_node_content($track_node,$selectors,false);
-        $sources = $this->get_track_node_content($track_node,$selectors);
-        
-        foreach ((array)$sources as $key=>$source){
-            if (filter_var((string)$source, FILTER_VALIDATE_URL) === false) {
-                unset($sources[$key]);
+
+        foreach ((array)$source_urls as $key=>$url){
+            if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
+                unset($source_urls[$key]);
             }
         }
-        
-        return $sources;
+
+        return $source_urls;
         
     }
 

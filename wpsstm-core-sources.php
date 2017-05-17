@@ -83,10 +83,10 @@ class WP_SoundSytem_Core_Sources{
     function get_sources_field_editable( $post_id, $field_name ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = $this->get_track_sources_db($track);
+        $sources = $track->sources;
 
         //find the sources that have been added by filters
-        $sources_strict = $this->get_track_sources_db($track,false);
+        $sources_strict = $this->get_track_sources_db($post_id,false);
 
         //array diff can only compare strings so convert them
         $sources_filters = array_diff(array_map('serialize',(array)$sources),array_map('serialize',(array)$sources_strict));
@@ -192,7 +192,7 @@ class WP_SoundSytem_Core_Sources{
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         
-        $sources_strict = $this->get_track_sources_db($track,false);
+        $sources_strict = $this->get_track_sources_db($post_id,false);
         $sources = array_merge((array)$sources_strict,(array)$sources_input);
         $sources = $this->sanitize_sources($sources_input);
 
@@ -227,28 +227,22 @@ class WP_SoundSytem_Core_Sources{
             case 'sources':
                 $output = '—';
                 $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-                if ($sources = $this->get_track_sources_db( $track ) ){
-                    $output = count($sources);
-                }
-                echo $output;
+                echo count($track->sources);
             break;
         }
     }
     
-    function get_track_sources_db($track,$filters=true){
+    function get_track_sources_db($post_id,$filters=true){
         $sources = null;
 
         //stored in DB
-        if ($track->post_id){
-            $sources = get_post_meta( $track->post_id, wpsstm_sources()->sources_metakey, true );
+        $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
 
-            if ($filters){
-                $sources = apply_filters('wpsstm_get_track_sources_db',$sources,$track);
-            }
-
-            $sources = $this->sanitize_sources($sources);
-
+        if ($filters){
+            $sources = apply_filters('wpsstm_get_track_sources_db',$sources,$post_id);
         }
+
+        $sources = $this->sanitize_sources($sources);
 
         return $sources;
     }

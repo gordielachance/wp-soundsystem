@@ -206,7 +206,7 @@ class WP_SoundSytem {
                         if ( !$bookmarks = post_bkmarks_get_post_links($track_id, $bookmarks_args) ) continue;
                         
                         $track = new WP_SoundSystem_Track( array('post_id'=>$track_id) );
-                        $sources_db = $this->get_track_sources_db($track,false); //without filters
+                        $sources_db = $this->get_track_sources_db($track_id,false); //without filters
 
                         foreach ((array)$bookmarks as $bookmark){
                             $sources_db[] = $bookmark->link_url;

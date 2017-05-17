@@ -194,7 +194,9 @@ class WP_SoundSytem_Core_Player{
     }
     
     function get_playable_sources($track,$database_only = true){
-        $sources = wpsstm_sources()->get_track_sources_db($track);
+        
+        $sources = $track->sources;
+
         $provider_sources = array();
         
         if ($database_only){

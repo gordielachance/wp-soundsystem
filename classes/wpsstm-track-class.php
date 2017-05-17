@@ -23,6 +23,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
+                $this->sources = wpsstm_sources()->get_track_sources_db($track_id);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
