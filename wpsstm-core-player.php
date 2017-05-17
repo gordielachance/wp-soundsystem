@@ -95,6 +95,26 @@ class WP_SoundSytem_Core_Player{
                 
                 
             }
+        
+            //track action - WP auth notice
+            if ( !get_current_user_id() ){
+                $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+                $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+                $wp_auth_text = sprintf(__('Track actions requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice active">%s %s </p>',$wp_auth_icon,$wp_auth_text);
+            }
+
+            //Last.FM track action - API auth notice
+            if ( wpsstm()->get_options('lastfm_scrobbling') || wpsstm()->get_options('lastfm_favorites') ){
+
+                if ( !wpsstm_lastfm()->is_user_api_logged() ){
+                    $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+                    $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+                    $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+                    $lastfm_auth_text = sprintf(__('Please authorize this website to Last.FM: click %s.','wpsstm'),$lastfm_auth_link);
+                    printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice active">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
+                }
+            }
 
             //redirection notice
             if ( wpsstm()->get_options('autoredirect') && $redirect_auto ){
@@ -125,30 +145,30 @@ class WP_SoundSytem_Core_Player{
             }
             ?>
             <div id="wpsstm-player-sources-wrapper">
+                <div id="wpsstm-player-track-actions">
+                    <?php 
+                    //scrobbling
+                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                        ?>
+                        <a href="#" id="wpsstm-track-action-scrobble" class="wpsstm-track-action wpsstm-track-action-lastfm" title="<?php _e('Toggle scrobbling','wpsstm');?>">
+                            <i class="fa fa-lastfm" aria-hidden="true"></i>
+                        </a>
+                        <?php
+                    }
+                    //favorites
+                    if ( wpsstm()->get_options('lastfm_favorites') ){
+                        ?>
+                        <a href="#" id="wpsstm-track-action-favorite" class="wpsstm-track-action wpsstm-track-action-lastfm" title="<?php _e('Love/Unlove track','wpsstm');?>">
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                        </a>
+                        <?php
+                    }
+                    ?>
+                </div>
                 <div id="wpsstm-player-sources-header">
                     <i class="wpsstm-player-sources-toggle fa fa-times" aria-hidden="true"></i>
                     <?php _e('Choose a source','wpsstm');?></div>
                 <div id="wpsstm-player-sources"></div>
-            </div>
-            <div id="wpsstm-player-track-actions">
-                <?php 
-                //scrobbling
-                if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                    ?>
-                    <a href="#" id="wpsstm-player-scrobbler-toggle" title="<?php _e('Toggle scrobbling','wpsstm');?>">
-                        <i class="fa fa-lastfm" aria-hidden="true"></i>
-                    </a>
-                    <?php
-                }
-                //favorites
-                if ( wpsstm()->get_options('lastfm_favorites') ){
-                    ?>
-                    <a href="#" id="wpsstm-player-favorite-toggle" title="<?php _e('Love/Unlove track','wpsstm');?>">
-                        <i class="fa fa-heart-o" aria-hidden="true"></i>
-                    </a>
-                    <?php
-                }
-                ?>
             </div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>

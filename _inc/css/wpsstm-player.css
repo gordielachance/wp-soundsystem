@@ -69,18 +69,52 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   bottom: 0;
   z-index: 50;
   min-height: 0em;
+  background: #222;
 }
-/* line 79, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-bottom-notice-redirection {
-  display: none;
+/* line 80, ../scss/wpsstm-player.scss */
+#wpsstm-bottom .wpsstm-bottom-notice {
   font-size: 0.8em;
   margin: 0;
   padding: .5em 1em;
   background-color: #fcf8e3;
+}
+/* line 86, ../scss/wpsstm-player.scss */
+#wpsstm-bottom .wpsstm-bottom-notice a {
+  text-decoration: underline;
+}
+/* line 90, ../scss/wpsstm-player.scss */
+#wpsstm-bottom .wpsstm-bottom-notice#wpsstm-bottom-notice-redirection {
+  display: none;
   cursor: pointer;
   cursor: hand;
 }
-/* line 89, ../scss/wpsstm-player.scss */
+/* line 95, ../scss/wpsstm-player.scss */
+#wpsstm-bottom .wpsstm-bottom-notice#wpsstm-bottom-notice-wp-auth {
+  display: none;
+}
+/* line 98, ../scss/wpsstm-player.scss */
+#wpsstm-bottom .wpsstm-bottom-notice#wpsstm-bottom-notice-lastfm-auth {
+  display: none;
+}
+/* line 103, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-track-actions {
+  position: absolute;
+  right: 1em;
+  top: 0;
+}
+/* line 107, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-track-actions a {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  opacity: 0.9;
+  font-size: 1.25em;
+  color: white;
+}
+/* line 111, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-track-actions a:hover {
+  filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
+  opacity: 1;
+}
+/* line 117, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper {
   background: #222;
   text-align: center;
@@ -89,12 +123,12 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   font-family: sans-serif;
   position: relative;
 }
-/* line 97, ../scss/wpsstm-player.scss */
+/* line 125, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper a {
   color: white;
 }
-/* line 101, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources-title {
+/* line 129, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources-header {
   font-size: 1.4em;
   font-weight: 100;
   line-height: 2em;
@@ -102,89 +136,89 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   padding: 0 1em;
   display: none;
 }
-/* line 108, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources-title .wpsstm-player-sources-toggle {
+/* line 136, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources-header .wpsstm-player-sources-toggle {
   cursor: pointer;
   cursor: hand;
 }
-/* line 114, ../scss/wpsstm-player.scss */
+/* line 142, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources {
   padding-top: .5em;
 }
-/* line 116, ../scss/wpsstm-player.scss */
+/* line 144, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul {
   margin: 0;
   padding: 0;
   line-height: 2em;
   list-style-type: none;
 }
-/* line 121, ../scss/wpsstm-player.scss */
+/* line 149, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
   display: none;
 }
-/* line 124, ../scss/wpsstm-player.scss */
+/* line 152, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li .wpsstm-trackinfo-title {
   cursor: pointer;
   cursor: hand;
 }
-/* line 127, ../scss/wpsstm-player.scss */
+/* line 155, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li .wpsstm-trackinfo-title:hover {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
 }
-/* line 132, ../scss/wpsstm-player.scss */
+/* line 160, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li.wpsstm-active-source {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
   display: block;
 }
-/* line 136, ../scss/wpsstm-player.scss */
+/* line 164, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li.wpsstm-bad-source {
   display: none !important;
 }
-/* line 141, ../scss/wpsstm-player.scss */
+/* line 169, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper #wpsstm-player-sources ul li a.wpsstm-trackinfo-provider-link {
   margin-left: .5em;
   font-size: 2em;
 }
-/* line 150, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-player-sources-wrapper.expanded #wpsstm-player-sources-title {
+/* line 178, ../scss/wpsstm-player.scss */
+#wpsstm-bottom #wpsstm-player-sources-wrapper.expanded #wpsstm-player-sources-header {
   background: #222;
   display: block;
 }
-/* line 154, ../scss/wpsstm-player.scss */
+/* line 182, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper.expanded #wpsstm-player-sources {
   background: #272727;
 }
-/* line 157, ../scss/wpsstm-player.scss */
+/* line 185, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-sources-wrapper.expanded #wpsstm-player-sources ul li {
   display: block;
 }
-/* line 166, ../scss/wpsstm-player.scss */
+/* line 194, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper {
   background: #222;
   position: relative;
   overflow: auto;
 }
-/* line 170, ../scss/wpsstm-player.scss */
+/* line 198, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper a {
   color: white;
 }
-/* line 174, ../scss/wpsstm-player.scss */
+/* line 202, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper > * {
   display: block;
   height: 40px;
   float: left;
   line-height: 40px;
 }
-/* line 180, ../scss/wpsstm-player.scss */
+/* line 208, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper .wpsstm-player-nav {
   width: 5%;
   text-align: center;
 }
-/* line 184, ../scss/wpsstm-player.scss */
+/* line 212, ../scss/wpsstm-player.scss */
 #wpsstm-bottom #wpsstm-player-wrapper #wpsstm-player {
   width: 80%;
   margin: auto;

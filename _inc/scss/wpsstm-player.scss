@@ -77,16 +77,29 @@ a.wpsstm-play-track{
     min-height:0em;
     background:#222;
     
-    #wpsstm-bottom-notice-redirection{
-        display:none;
+    .wpsstm-bottom-notice{
         font-size:0.8em;
         margin: 0;
         padding: .5em 1em;
         background-color:#fcf8e3;
-        cursor: pointer;
-        cursor: hand;
+        
+        a{
+            text-decoration: underline;
+        }
+
+        &#wpsstm-bottom-notice-redirection{
+            display:none;
+            cursor: pointer;
+            cursor: hand;
+        }
+        &#wpsstm-bottom-notice-wp-auth{
+            display:none;
+        }
+        &#wpsstm-bottom-notice-lastfm-auth{
+            display:none;
+        }
     }
-    
+
     #wpsstm-player-track-actions{
         position: absolute;
         right: 1em;

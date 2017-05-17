@@ -126,6 +126,27 @@ var wpsstm_source_requests = [];
             $(this).toggleClass('active');
             $(this).find('i.fa').toggleClass('fa-spin');
         });
+        
+        /*
+        track actions
+        */
+        var wp_auth_notice = $('#wpsstm-bottom-notice-wp-auth');
+        
+        
+        $('.wpsstm-track-action').click(function(e) {
+            if (wp_auth_notice.length == 0) return;
+            e.preventDefault();
+            wp_auth_notice.show();
+        });
+        
+        var lastm_auth_notice = $('#wpsstm-bottom-notice-lastfm-auth');
+        
+        $('.wpsstm-track-action-lastfm').click(function(e) {
+            if (lastm_auth_notice.length == 0) return;
+            e.preventDefault();
+            lastm_auth_notice.show();
+        });
+        
 
     });
 
