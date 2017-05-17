@@ -10,6 +10,7 @@ var toggle_scrobble_el = null;
         //LAST.FM : toggle scrobbling
         $('#wpsstm-player-toggle-scrobble a').click(function(e) {
             e.preventDefault();
+            if ( !wpsstm_is_lastfm_api_logged() ) return;
             
             var link = $(this);
             var link_wrapper = $('#wpsstm-player-toggle-scrobble');
