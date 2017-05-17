@@ -126,11 +126,9 @@ function wpsstm_register_scraper_presets($presets){
     require_once( $presets_path . 'soundsgood.php' );
     require_once( $presets_path . 'spotify.php' );
     require_once( $presets_path . 'twitter.php' );
-    //require_once( $presets_path . 'reddit.php' );
     
     $presets[] = new WP_SoundSytem_Playlist_LastFM_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_Spotify_Playlist_Api();
-    //$presets[] = new WP_SoundSytem_Playlist_Reddit_Api();
     $presets[] = new WP_SoundSytem_Playlist_Radionomy_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_SomaFM_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_BBC_Station_Scraper();
