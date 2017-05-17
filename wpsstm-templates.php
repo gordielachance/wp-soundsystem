@@ -293,7 +293,23 @@ Ajax should query the love/unlove status, then add the 'wpsstm-is-loved' class t
 */
 
 function wpsstm_get_track_loveunlove_icons(){
+    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
     $love_link = sprintf('<a href="#" title="%s" class="wpsstm-love-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart-o" aria-hidden="true"></i></a>',__('Love track','wpsstm'));
     $unlove_link = sprintf('<a href="#" title="%s" class="wpsstm-unlove-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart" aria-hidden="true"></i></a>',__('Unlove track','wpsstm'));
-    return sprintf('<span class="wpsstm-love-unlove-links">%s%s</span>',$love_link,$unlove_link);
+    return sprintf('<span class="wpsstm-love-unlove-links">%s%s%s</span>',$loading,$love_link,$unlove_link);
+}
+
+function wpsstm_get_scrobbler_icons(){
+    $scrobbling_classes = array();
+
+    if ( wpsstm_lastfm()->is_scrobbler_active() ){
+        $scrobbling_classes[] = 'active';
+    }
+    $scrobbling_classes_str = wpsstm_get_classes_attr($scrobbling_classes);
+    
+    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+    $icon_scrobbler =  '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+    $enabled_link = sprintf('<a id="wpsstm-enable-scrobbling" href="#" title="%s" class="wpsstm-track-action wpsstm-track-action-lastfm wpsstm-track-action-lastfm-scrobbling">%s</a>',__('Enable scrobbling','wpsstm'),$icon_scrobbler);
+    $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-track-action wpsstm-track-action-lastfm wpsstm-track-action-lastfm-scrobbling">%s</a>',__('Disable scrobbling','wpsstm'),$icon_scrobbler);
+    return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
 }

@@ -10,6 +10,7 @@ use LastFmApi\Api\TrackApi;
 class WP_SoundSytem_Core_LastFM{
     
     var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
+    var $lastfm_scrobbling_meta_name = '_wpsstm_lastfm_scrobbling';
     var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
     private $api_key = null;
@@ -42,6 +43,19 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
+        
+        //toggle scrobbling
+        add_action('wp_ajax_wpsstm_toggle_scrobbling', array($this,'ajax_toggle_scrobbling'));
+        
+        //love & unlove
+        add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
+        
+        //updateNowPlaying
+        add_action('wp_ajax_wpsstm_lastfm_update_now_playing_track', array($this,'ajax_update_now_playing_track'));
+        
+        //scrobble
+        add_action('wp_ajax_wpsstm_lastfm_scrobble_track', array($this,'ajax_scrobble_track'));
+        
     }
     
     function setup_globals(){
@@ -69,9 +83,9 @@ class WP_SoundSytem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'is_api_logged'          => (int)$this->is_user_api_logged(),
-            //'lastfm_client_id'      => wpsstm()->get_options('lastfm_client_id'),
-            //'lastfm_client_secret'  => wpsstm()->get_options('lastfm_client_secret'),
+            'is_api_logged'             => (int)$this->is_user_api_logged(),
+            //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
+            //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -131,6 +145,24 @@ class WP_SoundSytem_Core_LastFM{
         
         return $this->is_user_api_logged;
 
+    }
+    
+    public function is_scrobbler_active(){
+        if ( !$user_id = get_current_user_id() ) return false;
+        
+        $option = wpsstm()->get_options('lastfm_scrobbling');
+        
+        $enabled = null;
+        
+        if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name ) ){
+            $enabled = ($user_option == 'on');
+        }else{
+            $enabled = ($option == 'on');
+        }
+        
+        //var_dump($enabled);die();
+        
+        return $enabled;
     }
     
     /*
@@ -432,7 +464,7 @@ class WP_SoundSytem_Core_LastFM{
 
         $results = null;
         
-        $track_args = array(
+        $api_args = array(
             'artist' => $track->artist,
             'track' =>  $track->title
         );
@@ -440,15 +472,169 @@ class WP_SoundSytem_Core_LastFM{
         try {
             $track_api = new TrackApi($auth);
             if ($love){
-                $results = $track_api->love($track_args);
+                $results = $track_api->love($api_args);
             }else{
-                $results = $track_api->unlove($track_args);
+                $results = $track_api->unlove($api_args);
             }
         }catch(Exception $e){
             return $this->handle_api_exception($e);
         }
         
         return $results;
+    }
+    
+    public function now_playing_track(WP_SoundSystem_Track $track){
+
+        if ( !get_current_user_id() ) return false;
+        if ( !$this->is_user_api_logged() ) return false;
+
+        $auth = $this->get_user_api_auth();
+        if ( !$auth || is_wp_error($auth) ) return $auth;
+
+        $results = null;
+        
+        $api_args = array(
+            'artist' => $track->artist,
+            'track' =>  $track->title
+        );
+        
+        try {
+            $track_api = new TrackApi($auth);
+            $results = $track_api->updateNowPlaying($api_args);
+        }catch(Exception $e){
+            return $this->handle_api_exception($e);
+        }
+        
+        return $results;
+    }
+    
+    public function scrobble_track(WP_SoundSystem_Track $track, $timestamp){
+
+        if ( !get_current_user_id() ) return false;
+        if ( !$this->is_user_api_logged() ) return false;
+
+        $auth = $this->get_user_api_auth();
+        if ( !$auth || is_wp_error($auth) ) return $auth;
+
+        $results = null;
+        
+        $api_args = array(
+            'artist'    => $track->artist,
+            'track'     => $track->title,
+            'timestamp' => $timestamp
+        );
+        
+        try {
+            $track_api = new TrackApi($auth);
+            $results = $track_api->updateNowPlaying($api_args);
+        }catch(Exception $e){
+            return $this->handle_api_exception($e);
+        }
+        
+        return $results;
+    }
+    
+    function toggle_user_scrobbling($do_scrobble){
+        if ( !$user_id = get_current_user_id() ) return false;
+        
+        $option = ($do_scrobble) ? 'on' : 'off';
+        
+        update_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, $option );
+        
+        return true;
+        
+    }
+    
+    function ajax_toggle_scrobbling(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+        
+        $result['user_id'] = get_current_user_id();
+        
+        $do_scrobble = $result['do_scrobble'] = filter_var($_POST['do_scrobble'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
+        
+        $result['success'] = $this->toggle_user_scrobbling($do_scrobble);
+        
+        echo json_encode($result);
+        die();
+    }
+    
+
+    
+    function ajax_love_unlove_track(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+
+        $track_args = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+
+        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $love = $result['love'] = filter_var($_POST['love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
+
+        $success = wpsstm_lastfm()->love_track($track,$love);
+
+        if ($success && !is_wp_error($success) ){
+            $result['success'] = true;
+        }
+
+        echo json_encode($result);
+        die();
+
+    }
+    
+    function ajax_update_now_playing_track(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+        
+        $track_args = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+
+        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        
+        $success = wpsstm_lastfm()->now_playing_track($track);
+
+        if ($success && !is_wp_error($success) ){
+            $result['success'] = true;
+        }
+        
+        echo json_encode($result);
+        die();
+    }
+    
+    function ajax_scrobble_track(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+        
+        $track_args = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+
+        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        
+        //$success = wpsstm_lastfm()->scrobble_track($track);
+
+        if ($success && !is_wp_error($success) ){
+            $result['success'] = true;
+        }
+        
+        echo json_encode($result);
+        die();
     }
     
 }

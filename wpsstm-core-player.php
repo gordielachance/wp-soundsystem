@@ -149,11 +149,7 @@ class WP_SoundSytem_Core_Player{
                     <?php 
                     //scrobbling
                     if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_scrobbling') ){
-                        ?>
-                        <a href="#" id="wpsstm-track-action-scrobble" class="wpsstm-track-action wpsstm-track-action-lastfm" title="<?php _e('Toggle scrobbling','wpsstm');?>">
-                            <i class="fa fa-lastfm" aria-hidden="true"></i>
-                        </a>
-                        <?php
+                        echo wpsstm_get_scrobbler_icons();
                     }
                     //favorites
                     if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_favorites') ){
