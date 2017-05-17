@@ -1,0 +1,45 @@
+<?php
+class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
+    
+    /*
+    
+    ([^-]+)(?: -+ )([^\[]+).*$
+    
+    The Yawpers - Bartleby the Womanizer [Rock] (2016)
+    Cacique'97 - Epidemia [World]
+    ONUKA - 19 86 [electro-folk / chillstep] (2016)
+    Charley Patton -- Prayer of Death [US, Delta Blues] (1929)
+    
+    (.*)(?:, by )(.*)
+    Ambient, by Hyperwizard
+    
+    
+    
+    */
+    
+    var $slug = 'reddit';
+
+    var $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
+    var $redirect_url= 'https://www.reddit.com/r/%subredit-slug%.json?limit=50';
+    var $variables = array(
+        'subredit-slug' => null
+    );
+
+    var $options = array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'>data >children'),
+            'track_artist'     => array('path'=>'title','regex'=> '^(?:.*)(?:, by )(.*)|^([^-|–]+)(?: -+|–+ )'), // '^.*, by .*|^([^-]+) -+ '),
+            'track_title'      => array('path'=>'title','regex'=>'^(.*),(?: by )|(?: -+|–+ )([^\[]+)'),
+            //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+            'track_source_urls' => array('path'=>'url'),
+        )
+    );
+
+    function __construct(){
+        parent::__construct();
+
+        $this->name = __('Reddit (for music subs)','wpsstm');
+
+    }
+
+}
