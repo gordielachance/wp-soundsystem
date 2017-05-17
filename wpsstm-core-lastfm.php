@@ -150,18 +150,22 @@ class WP_SoundSytem_Core_LastFM{
     public function is_scrobbler_active(){
         if ( !$user_id = get_current_user_id() ) return false;
         
-        $option = wpsstm()->get_options('lastfm_scrobbling');
+        $enabled = $plugin_option = $user_option = $api_logged = null;
         
-        $enabled = null;
-        
-        if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name ) ){
+        $plugin_option = wpsstm()->get_options('lastfm_scrobbling');
+
+        if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, true ) ){
             $enabled = ($user_option == 'on');
         }else{
-            $enabled = ($option == 'on');
+            $enabled = ($plugin_option == 'on');
         }
         
-        //var_dump($enabled);die();
+        if ($enabled){
+            if ( !$api_logged = $this->is_user_api_logged() ) $enabled = false;
+        }
         
+        wpsstm()->debug_log(json_encode(array('plugin'=>$plugin_option,'user'=>$user_option,'api_logged'=>$api_logged,'enabled'=>$enabled)),"lastfm - is_scrobbler_active()");
+
         return $enabled;
     }
     
