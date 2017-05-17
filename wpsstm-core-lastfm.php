@@ -21,7 +21,6 @@ class WP_SoundSytem_Core_LastFM{
     
     private $basic_auth = null;
     private $user_auth = null;
-    
 
     /**
     * @var The one true Instance
@@ -42,6 +41,7 @@ class WP_SoundSytem_Core_LastFM{
         require_once(wpsstm()->plugin_dir . 'lastfm/_inc/php/autoload.php');
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
+        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
     }
     
     function setup_globals(){
@@ -57,6 +57,24 @@ class WP_SoundSytem_Core_LastFM{
     
     function setup_actions(){
         add_action( 'wp', array($this,'after_app_auth_set_user_token') );
+    }
+    
+    function enqueue_lastfm_scripts_styles(){
+
+        //CSS
+        //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . 'lastfm/_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
+        
+        //JS
+        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . 'lastfm/_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
+        
+        //localize vars
+        $localize_vars=array(
+            'is_api_logged'          => (int)$this->is_user_api_logged(),
+            //'lastfm_client_id'      => wpsstm()->get_options('lastfm_client_id'),
+            //'lastfm_client_secret'  => wpsstm()->get_options('lastfm_client_secret'),
+        );
+
+        wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
     }
 
     /*
@@ -405,6 +423,7 @@ class WP_SoundSytem_Core_LastFM{
     
     public function love_track(WP_SoundSystem_Track $track,$love = null){
 
+        if ( !get_current_user_id() ) return false;
         if ( !$this->is_user_api_logged() ) return false;
         if ($love === null) return;
 
