@@ -56,9 +56,15 @@ var toggle_scrobble_el = null;
 
         //LAST.FM : user is not logged
         $('.wpsstm-track-action-lastfm').click(function(e) {
-            if ( !wpsstm_is_lastfm_api_logged() ) return;
-            e.preventDefault();
-            $('#wpsstm-bottom-notice-lastfm-auth').show();
+            if ( !wpsstm_get_current_user_id() ){
+                e.preventDefault();
+                $('#wpsstm-bottom-notice-wp-auth').show();
+                return;
+            }
+            if ( !wpsstm_is_lastfm_api_logged() ){
+                e.preventDefault();
+                $('#wpsstm-bottom-notice-lastfm-auth').show();
+            }
         });
         
         //LAST.FM : love / unlove track

@@ -237,24 +237,24 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
 }
 /* line 229, ../scss/wpsstm-player.scss */
 #wpsstm-player-toggle-scrobble > :nth-child(2) {
+  display: none;
+}
+/* line 233, ../scss/wpsstm-player.scss */
+#wpsstm-player-toggle-scrobble > :nth-child(3) {
   display: inline-block;
 }
-/* line 230, ../scss/wpsstm-player.scss */
-#wpsstm-player-toggle-scrobble > :nth-child(2) i {
+/* line 235, ../scss/wpsstm-player.scss */
+#wpsstm-player-toggle-scrobble > :nth-child(3) i {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
-/* line 236, ../scss/wpsstm-player.scss */
-#wpsstm-player-toggle-scrobble > :nth-child(3) {
-  display: none;
-}
 /* line 241, ../scss/wpsstm-player.scss */
 #wpsstm-player-toggle-scrobble.active > :nth-child(2) {
-  display: none;
+  display: inline-block;
 }
 /* line 244, ../scss/wpsstm-player.scss */
 #wpsstm-player-toggle-scrobble.active > :nth-child(3) {
-  display: inline-block;
+  display: none;
 }
 /* line 248, ../scss/wpsstm-player.scss */
 #wpsstm-player-toggle-scrobble.loading {

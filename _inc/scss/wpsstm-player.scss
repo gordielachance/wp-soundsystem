@@ -226,23 +226,23 @@ a.wpsstm-play-track{
     > :nth-child(1){ //loading
         display:none;
     }
-    > :nth-child(2){ //disabled
+    > :nth-child(2){ //disable
+        display:none;
+        
+    }
+    > :nth-child(3){ //enable
+        display:inline-block;
         i{
             @include opacity(.25);
         }
-        
-        display:inline-block;
-    }
-    > :nth-child(3){ //enabled
-        display:none;
     }
 
     &.active{
-        > :nth-child(2){ //disabled
-            display:none;
-        }
-        > :nth-child(3){ //enabled
+        > :nth-child(2){ //disable
             display:inline-block;
+        }
+        > :nth-child(3){ //enable
+            display:none;
         }
     }
     &.loading{
@@ -250,10 +250,10 @@ a.wpsstm-play-track{
         > :nth-child(1){ //loading
             display:inline-block;
         }
-        > :nth-child(2){ //disabled
+        > :nth-child(2){ //disable
             display:none;
         }
-        > :nth-child(3){ //enabled
+        > :nth-child(3){ //enable
             display:none;
         }
     }
