@@ -582,6 +582,8 @@ class WP_SoundSytem_TracksList_Table{
             }
         
             $track_classes = array();
+            if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
+        
             printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-sources="%s">',wpsstm_get_classes_attr($track_classes),$data_attr_str);
             $this->single_row_columns( $item );
             echo '</tr>';
@@ -603,7 +605,11 @@ class WP_SoundSytem_TracksList_Table{
                 $attr_str = null;
                 $attr = array();
 
-                $classes = array($column_name,'column-'.$column_name);
+                $classes = array(
+                    $column_name,
+                    'column-'.$column_name
+                );
+
                 $attr['class'] = implode(' ',$classes);
 
                 $attr['style'] = ( in_array( $column_name, $hidden ) ) ? 'display:none;' : null;

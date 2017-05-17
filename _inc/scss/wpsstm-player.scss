@@ -3,6 +3,11 @@
 .wpsstm-tracklist-table{
     tbody{
         tr{
+            
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
+            }
+            
             &[data-wpsstm-sources=""] a.wpsstm-play-track:not(:hover){
                 @include opacity(.25);
             }
