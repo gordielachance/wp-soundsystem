@@ -141,7 +141,7 @@ class WP_SoundSytem_TracksList_Table{
         }
         
         //favorite icon
-        if ( wpsstm()->get_options('lastfm_favorites') ){
+        if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_favorites') ){
             $columns['trackitem_loveunlove']     = '';
         }
 

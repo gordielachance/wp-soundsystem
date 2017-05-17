@@ -148,7 +148,7 @@ class WP_SoundSytem_Core_Player{
                 <div id="wpsstm-player-track-actions">
                     <?php 
                     //scrobbling
-                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                    if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_scrobbling') ){
                         ?>
                         <a href="#" id="wpsstm-track-action-scrobble" class="wpsstm-track-action wpsstm-track-action-lastfm" title="<?php _e('Toggle scrobbling','wpsstm');?>">
                             <i class="fa fa-lastfm" aria-hidden="true"></i>
@@ -156,7 +156,7 @@ class WP_SoundSytem_Core_Player{
                         <?php
                     }
                     //favorites
-                    if ( wpsstm()->get_options('lastfm_favorites') ){
+                    if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_favorites') ){
                         echo wpsstm_get_track_loveunlove_icons();
                     }
                     ?>
