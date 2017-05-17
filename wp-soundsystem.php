@@ -282,8 +282,10 @@ class WP_SoundSytem {
             wp_register_script( 'wpsstm_admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shortenTables'),$this->version);
 
             //localize vars
-            $localize_vars=array();
-            $localize_vars['ajaxurl']   = admin_url( 'admin-ajax.php' );
+            $localize_vars=array(
+                'ajaxurl'           => admin_url( 'admin-ajax.php' )
+            );
+        
             wp_localize_script('wpsstm_admin','wpsstmL10n', $localize_vars);
 
             wp_enqueue_script( 'wpsstm_admin' );
@@ -302,9 +304,10 @@ class WP_SoundSytem {
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);
         
         $datas = array(
-            'debug'         => (WP_DEBUG),
-            'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-            'clipboardtext' => __('You can copy and share this link:','wpsstm')
+            'debug'             => (WP_DEBUG),
+            'ajaxurl'           => admin_url( 'admin-ajax.php' ),
+            'logged_user_id'    => get_current_user_id(),
+            'clipboardtext'     => __('You can copy and share this link:','wpsstm')
         );
         
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );

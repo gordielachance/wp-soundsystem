@@ -183,16 +183,14 @@ class WP_SoundSytem_Core_Player{
         wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement',),wpsstm()->version, true); //TO FIX should add shortenTable as dependecy since it uses it
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement'),wpsstm()->version, true); //TO FIX should add shortenTable as dependecy since it uses it
         
         //localize vars
         $localize_vars=array(
             'autoredirect'          => (int)wpsstm()->get_options('autoredirect'),
             'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
-            'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
-            'lastfm_client_id'      => wpsstm()->get_options('lastfm_client_id'),
-            'lastfm_client_secret'  => wpsstm()->get_options('lastfm_client_secret'),
+            'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm')
         );
 
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
