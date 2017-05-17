@@ -202,12 +202,10 @@ class WP_SoundSytem_Core_Player{
         if ($database_only){
             if ($cached_sources = wpsstm_sources()->get_track_sources_remote( $track,array('cache_only'=>true) ) ){
                 $sources = array_merge((array)$sources,(array)$cached_sources);
-                $sources = wpsstm_sources()->sanitize_sources($sources);
             }
         }else{
             if ($remote_sources = wpsstm_sources()->get_track_sources_remote($track) ){
                 $sources = array_merge((array)$sources,(array)$remote_sources);
-                $sources = wpsstm_sources()->sanitize_sources($sources);
             } 
         }
 
@@ -217,12 +215,18 @@ class WP_SoundSytem_Core_Player{
             foreach( (array)$this->providers as $provider ){
 
                 if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
-
+                
+                //if no source title set (supposed it has been scraped / set by user)
+                if ( !$title = $source['title'] ){
+                    $title = sprintf(__('%s, by %s','wpsstm'),$track->title,$track->artist);
+                }
+                
                 $provider_source = array(
-                    'type'  => $provider_source_type,
-                    'title' => $provider->format_source_title($source['title']),
-                    'icon'  => $provider->format_source_icon(),
-                    'src'   => $provider->format_source_url($source['url']),
+                    'type'      => $provider_source_type,
+                    'title'     => $title,
+                    'provider'  => $provider->slug,
+                    'icon'      => $provider->icon,
+                    'src'       => $provider->format_source_url($source['url']),
                 );
 
                 $provider_sources[] = $provider_source;
