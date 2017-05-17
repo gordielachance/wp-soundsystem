@@ -215,3 +215,29 @@ a.wpsstm-play-track{
         }
     }
 }
+
+.wpsstm-love-unlove-links{
+    a{
+        text-decoration: none;
+        border:none!important;
+        &:nth-of-type(1){ //love
+            display:inline;
+        }
+        &:nth-of-type(2){ //unlove
+            display:none;
+        }
+    }
+    &.loading{
+        pointer-events: none;
+    }
+    &.wpsstm-is-loved{
+        a{
+            &:nth-of-type(1){ //love
+                display:none;
+            }
+            &:nth-of-type(2){ //unlove
+                display:inline;
+            }
+        }
+    }
+}

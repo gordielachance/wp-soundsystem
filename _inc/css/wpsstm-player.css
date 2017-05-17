@@ -223,3 +223,29 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   width: 80%;
   margin: auto;
 }
+
+/* line 220, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links a {
+  text-decoration: none;
+  border: none !important;
+}
+/* line 223, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links a:nth-of-type(1) {
+  display: inline;
+}
+/* line 226, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links a:nth-of-type(2) {
+  display: none;
+}
+/* line 230, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links.loading {
+  pointer-events: none;
+}
+/* line 235, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links.wpsstm-is-loved a:nth-of-type(1) {
+  display: none;
+}
+/* line 238, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-links.wpsstm-is-loved a:nth-of-type(2) {
+  display: inline;
+}

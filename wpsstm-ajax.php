@@ -136,6 +136,32 @@ function wpsstm_ajax_player_get_provider_sources(){
 
 }
 
+function wpsstm_ajax_love_unlove_track(){
+    $result = array(
+        'input'     => $_POST,
+        'success'   => false
+    );
+    
+    $track_args = array(
+        'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+        'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+        'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+    );
+
+    $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+    $love = $result['love'] = filter_var($_POST['love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
+
+    $success = wpsstm_lastfm()->love_track($track,$love);
+
+    if ($success && !is_wp_error($success) ){
+        $result['success'] = true;
+    }
+
+    echo json_encode($result);
+    die();
+
+}
+
 //artist
 add_action('wp_ajax_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
 add_action('wp_ajax_nopriv_wpsstm_artist_lookup', 'wpsstm_ajax_artist_lookup');
@@ -151,5 +177,9 @@ add_action('wp_ajax_nopriv_wpsstm_tracklist_row_action', 'wpsstm_ajax_tracklist_
 //player
 add_action('wp_ajax_wpsstm_player_get_provider_sources', 'wpsstm_ajax_player_get_provider_sources');
 add_action('wp_ajax_nopriv_wpsstm_player_get_provider_sources', 'wpsstm_ajax_player_get_provider_sources');
+
+//love & unlove
+add_action('wp_ajax_wpsstm_love_unlove_track', 'wpsstm_ajax_love_unlove_track');
+add_action('wp_ajax_nopriv_wpsstm_love_unlove_track', 'wpsstm_ajax_love_unlove_track');
 
 ?>

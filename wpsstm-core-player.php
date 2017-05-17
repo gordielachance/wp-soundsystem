@@ -157,11 +157,7 @@ class WP_SoundSytem_Core_Player{
                     }
                     //favorites
                     if ( wpsstm()->get_options('lastfm_favorites') ){
-                        ?>
-                        <a href="#" id="wpsstm-track-action-favorite" class="wpsstm-track-action wpsstm-track-action-lastfm" title="<?php _e('Love/Unlove track','wpsstm');?>">
-                            <i class="fa fa-heart-o" aria-hidden="true"></i>
-                        </a>
-                        <?php
+                        echo wpsstm_get_track_loveunlove_icons();
                     }
                     ?>
                 </div>

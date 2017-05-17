@@ -403,21 +403,28 @@ class WP_SoundSytem_Core_LastFM{
         return $results;
     }
     
-    public function love_track(WP_SoundSystem_Track $track){
+    public function love_track(WP_SoundSystem_Track $track,$love = null){
 
         if ( !$this->is_user_api_logged() ) return false;
+        if ($love === null) return;
 
         $auth = $this->get_user_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
 
         $results = null;
         
+        $track_args = array(
+            'artist' => $track->artist,
+            'track' =>  $track->title
+        );
+        
         try {
             $track_api = new TrackApi($auth);
-            $results = $track_api->love(array(
-                'artist' => $track->artist,
-                'track' =>  $track->title
-            ));
+            if ($love){
+                $results = $track_api->love($track_args);
+            }else{
+                $results = $track_api->unlove($track_args);
+            }
         }catch(Exception $e){
             return $this->handle_api_exception($e);
         }

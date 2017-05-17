@@ -286,3 +286,14 @@ function wpsstm_get_player_redirection($which){
     return array('title'=>$redirect_title,'url'=>$redirect_url);
     
 }
+
+/*
+Get love/unlove icons.
+Ajax should query the love/unlove status, then add the 'wpsstm-is-loved' class to the wrapper.
+*/
+
+function wpsstm_get_track_loveunlove_icons(){
+    $love_link = sprintf('<a href="#" title="%s" class="wpsstm-love-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart-o" aria-hidden="true"></i></a>',__('Love track','wpsstm'));
+    $unlove_link = sprintf('<a href="#" title="%s" class="wpsstm-unlove-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart" aria-hidden="true"></i></a>',__('Unlove track','wpsstm'));
+    return sprintf('<span class="wpsstm-love-unlove-links">%s%s</span>',$love_link,$unlove_link);
+}

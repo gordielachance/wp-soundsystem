@@ -349,6 +349,5 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         }
         
         return $tracklist->set_subtrack_ids($subtrack_ids);
-    }
-    
+    }    
 }

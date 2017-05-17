@@ -142,7 +142,7 @@ class WP_SoundSytem_TracksList_Table{
         
         //favorite icon
         if ( wpsstm()->get_options('lastfm_favorites') ){
-            $columns['favorite']     = '';
+            $columns['trackitem_loveunlove']     = '';
         }
 
         return $columns;
@@ -660,10 +660,8 @@ class WP_SoundSytem_TracksList_Table{
                     return sprintf('<img src="%s"/>',$item->image);
                 }
             break;
-            case 'favorite':
-                $favorite_icon = '<i class="wpsstm-favorite-icon fa fa-heart-o" aria-hidden="true"></i>';
-                $unfavorite_icon = '<i class="wpsstm-unfavorite-icon fa fa-heart" aria-hidden="true"></i>';
-                return $favorite_icon.$unfavorite_icon;
+            case 'trackitem_loveunlove':
+                return wpsstm_get_track_loveunlove_icons();
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
