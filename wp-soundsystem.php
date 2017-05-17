@@ -79,6 +79,10 @@ class WP_SoundSytem {
             'frontend_scraper_page_id'          => null,
             'live_playlists_cache_min'          => '2',
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
+            'lastfm_client_id'                  => null,
+            'lastfm_client_secret'              => null,
+            'lastfm_scrobbling'                 => 'on',
+            'lastfm_favorites'                  => 'on',
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
@@ -107,6 +111,7 @@ class WP_SoundSytem {
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
+        require $this->plugin_dir . 'wpsstm-core-lastfm.php';
 
         require $this->plugin_dir . 'wpsstm-ajax.php';
 
@@ -277,8 +282,10 @@ class WP_SoundSytem {
             wp_register_script( 'wpsstm_admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shortenTables'),$this->version);
 
             //localize vars
-            $localize_vars=array();
-            $localize_vars['ajaxurl']   = admin_url( 'admin-ajax.php' );
+            $localize_vars=array(
+                'ajaxurl'           => admin_url( 'admin-ajax.php' )
+            );
+        
             wp_localize_script('wpsstm_admin','wpsstmL10n', $localize_vars);
 
             wp_enqueue_script( 'wpsstm_admin' );
@@ -297,9 +304,10 @@ class WP_SoundSytem {
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);
         
         $datas = array(
-            'debug'         => (WP_DEBUG),
-            'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-            'clipboardtext' => __('You can copy and share this link:','wpsstm')
+            'debug'             => (WP_DEBUG),
+            'ajaxurl'           => admin_url( 'admin-ajax.php' ),
+            'logged_user_id'    => get_current_user_id(),
+            'clipboardtext'     => __('You can copy and share this link:','wpsstm')
         );
         
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );

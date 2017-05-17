@@ -90,7 +90,7 @@ var wpsstm_source_requests = [];
         });
         
         //sources block title
-        $('#wpsstm-player-sources-title').click(function() {
+        $('#wpsstm-player-sources-header').click(function() {
             $('#wpsstm-player-sources-wrapper').toggleClass('expanded');
         });
 
@@ -125,6 +125,19 @@ var wpsstm_source_requests = [];
             
             $(this).toggleClass('active');
             $(this).find('i.fa').toggleClass('fa-spin');
+        });
+        
+        /*
+        track actions
+        */
+
+        //user is not logged
+        $('.wpsstm-track-action').click(function(e) {
+            if ( !wpsstm_get_current_user_id() ){
+                e.preventDefault();
+                $('#wpsstm-bottom-notice-wp-auth').show();
+            }
+
         });
 
     });
@@ -416,11 +429,16 @@ var wpsstm_source_requests = [];
                     $(wpsstm_current_media).on('loadeddata', function() {
                         console.log('player event - loadeddata');
                         wpsstm_update_track_button(track_obj,'loadeddata');
+                        $( document ).trigger( "wpsstmPlayerMediaEvent", ['loadeddata',media, node, player,track_obj] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                        
                         wpsstm_player.play();
                         
                     });
 
                     $(wpsstm_current_media).on('play', function() {
+                        if (media.duration <= 0) return; //quick fix because it was fired twice.
+                        track_obj.duration = Math.floor(media.duration);
+                        track_obj.playback_start = $.now(); //used by lastFM
                         console.log('player event - play');
                         wpsstm_update_track_button(track_obj,'play');
                         wpsstm_had_tracks_played = true;
@@ -435,6 +453,9 @@ var wpsstm_source_requests = [];
                         console.log('MediaElement.js event - ended');
                         wpsstm_update_track_button(track_obj,'ended');
                         wpsstm_current_media = null;
+
+                        $( document ).trigger( "wpsstmPlayerMediaEvent", ['ended',media, node, player,track_obj] ); //register custom event - used by lastFM for the track.scrobble call
+                        
                         //Play next song if any
                         wpsstm_play_next_track();
                     });
@@ -566,6 +587,10 @@ var wpsstm_source_requests = [];
             wpsstm_init_track(next_idx);
         }
 
+    }
+    
+    function wpsstm_get_current_user_id(){
+        return parseInt(wpsstmL10n.logged_user_id);
     }
 
     function wpsstm_redirection_countdown(){

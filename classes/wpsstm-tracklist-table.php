@@ -119,7 +119,6 @@ class WP_SoundSytem_TracksList_Table{
     function get_columns(){
         
         $columns['trackitem_order']     = '';
-        
 
         //play button
         if ( $this->can_player ){
@@ -135,11 +134,18 @@ class WP_SoundSytem_TracksList_Table{
         
         $columns['trackitem_artist']    = __('Artist','wpsstm');
         $columns['trackitem_track']     = __('Title','wpsstm');
-        
+
         
         if ( $this->show_property_column('album') ){
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
+        
+        //favorite icon
+        /*
+        if ( wpsstm()->get_options('lastfm_favorites') ){
+            $columns['trackitem_loveunlove']     = '';
+        }
+        */
 
         return $columns;
     }
@@ -656,6 +662,8 @@ class WP_SoundSytem_TracksList_Table{
                     return sprintf('<img src="%s"/>',$item->image);
                 }
             break;
+            case 'trackitem_loveunlove':
+                return wpsstm_get_track_loveunlove_icons();
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
