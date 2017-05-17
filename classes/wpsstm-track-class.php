@@ -141,11 +141,17 @@ class WP_SoundSystem_Track{
 
         if ($strict){
             //keep only tracks having artist AND title
-            return ($this->artist && $this->title);
+            $valid = ($this->artist && $this->title);
+            //artists & title would probably not be equal
+            if ( $valid && ($this->artist == $this->title) ) {
+                $valid = false;
+            }
         }else{
             //keep only tracks having artist OR title (Wizard)
-            return ($this->artist || $this->title);
+            $valid = ($this->artist || $this->title);
         }
+
+        return $valid;
 
     }
 
