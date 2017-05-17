@@ -148,11 +148,11 @@ class WP_SoundSytem_Core_Player{
                 <div id="wpsstm-player-track-actions">
                     <?php 
                     //scrobbling
-                    if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_scrobbling') ){
+                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
                         echo wpsstm_get_scrobbler_icons();
                     }
                     //favorites
-                    if ( current_user_can('administrator') && wpsstm()->get_options('lastfm_favorites') ){
+                    if ( wpsstm()->get_options('lastfm_favorites') ){
                         echo wpsstm_get_track_loveunlove_icons();
                     }
                     ?>

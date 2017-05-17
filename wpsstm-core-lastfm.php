@@ -84,6 +84,7 @@ class WP_SoundSytem_Core_LastFM{
         //localize vars
         $localize_vars=array(
             'is_api_logged'             => (int)$this->is_user_api_logged(),
+            'is_scrobbler_active'       => $this->is_scrobbler_active(),
             //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
             //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
         );
@@ -148,23 +149,23 @@ class WP_SoundSytem_Core_LastFM{
     }
     
     public function is_scrobbler_active(){
-        if ( !$user_id = get_current_user_id() ) return false;
-        
         $enabled = $plugin_option = $user_option = $api_logged = null;
         
-        $plugin_option = wpsstm()->get_options('lastfm_scrobbling');
+        if ( $user_id = get_current_user_id() ){
+            $plugin_option = wpsstm()->get_options('lastfm_scrobbling');
 
-        if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, true ) ){
-            $enabled = ($user_option == 'on');
-        }else{
-            $enabled = ($plugin_option == 'on');
+            if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, true ) ){
+                $enabled = ($user_option == 'on');
+            }else{
+                $enabled = ($plugin_option == 'on');
+            }
+
+            if ($enabled){
+                if ( !$api_logged = $this->is_user_api_logged() ) $enabled = false;
+            }
         }
-        
-        if ($enabled){
-            if ( !$api_logged = $this->is_user_api_logged() ) $enabled = false;
-        }
-        
-        wpsstm()->debug_log(json_encode(array('plugin'=>$plugin_option,'user'=>$user_option,'api_logged'=>$api_logged,'enabled'=>$enabled)),"lastfm - is_scrobbler_active()");
+
+        wpsstm()->debug_log(json_encode(array('plugin'=>$plugin_option,'user'=>$user_option,'user_id'=>$user_id,'api_logged'=>$api_logged,'enabled'=>$enabled)),"lastfm - is_scrobbler_active()");
 
         return $enabled;
     }
@@ -502,6 +503,8 @@ class WP_SoundSytem_Core_LastFM{
             'track' =>  $track->title
         );
         
+        wpsstm()->debug_log(json_encode($api_args),"lastfm - now_playing_track()");
+        
         try {
             $track_api = new TrackApi($auth);
             $results = $track_api->updateNowPlaying($api_args);
@@ -522,15 +525,22 @@ class WP_SoundSytem_Core_LastFM{
 
         $results = null;
         
+        //http://www.last.fm/api/show/track.scrobble
+        
         $api_args = array(
-            'artist'    => $track->artist,
-            'track'     => $track->title,
-            'timestamp' => $timestamp
+            'artist'        => $track->artist,
+            'track'         => $track->title,
+            'timestamp'     => $timestamp,
+            'album'         => $track->album,
+            'chosenByUser'  => 0,
+            'duration'      => $track->duration
         );
+        
+        wpsstm()->debug_log(json_encode($api_args),"lastfm - scrobble_track()");
         
         try {
             $track_api = new TrackApi($auth);
-            $results = $track_api->updateNowPlaying($api_args);
+            $results = $track_api->scrobble($api_args);
         }catch(Exception $e){
             return $this->handle_api_exception($e);
         }
@@ -626,12 +636,14 @@ class WP_SoundSytem_Core_LastFM{
         $track_args = array(
             'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
             'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null,
+            'duration'  => ( isset($_POST['track']['duration']) ) ? $_POST['track']['duration'] : null
         );
 
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $start_timestamp = ( isset($_POST['playback_start']) ) ? $_POST['playback_start'] : null;
         
-        //$success = wpsstm_lastfm()->scrobble_track($track);
+        $success = wpsstm_lastfm()->scrobble_track($track,$start_timestamp);
 
         if ($success && !is_wp_error($success) ){
             $result['success'] = true;

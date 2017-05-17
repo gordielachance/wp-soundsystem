@@ -437,6 +437,8 @@ var wpsstm_source_requests = [];
 
                     $(wpsstm_current_media).on('play', function() {
                         if (media.duration <= 0) return; //quick fix because it was fired twice.
+                        track_obj.duration = Math.floor(media.duration);
+                        track_obj.playback_start = $.now(); //used by lastFM
                         console.log('player event - play');
                         wpsstm_update_track_button(track_obj,'play');
                         wpsstm_had_tracks_played = true;
@@ -451,9 +453,11 @@ var wpsstm_source_requests = [];
                         console.log('MediaElement.js event - ended');
                         wpsstm_update_track_button(track_obj,'ended');
                         wpsstm_current_media = null;
+
+                        $( document ).trigger( "wpsstmPlayerMediaEvent", ['ended',media, node, player,track_obj] ); //register custom event - used by lastFM for the track.scrobble call
+                        
                         //Play next song if any
                         wpsstm_play_next_track();
-                        $( document ).trigger( "wpsstmPlayerMediaEvent", ['ended',media, node, player,track_obj] ); //register custom event - used by lastFM for the track.scrobble call
                     });
 
                 },error(media) {

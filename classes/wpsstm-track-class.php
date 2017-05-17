@@ -9,7 +9,7 @@ class WP_SoundSystem_Track{
     public $image;
     public $location;
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
-    public $duration;
+    public $duration; //in seconds
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
 
     function __construct( $args = array() ){

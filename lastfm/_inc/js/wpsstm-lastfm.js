@@ -1,7 +1,12 @@
+var is_scrobbler_active = wpsstmLastFM.is_scrobbler_active;
+var toggle_scrobble_el = null;
+
 (function($){
 
     $(document).ready(function(){
         
+        toggle_scrobble_el = $('#wpsstm-player-toggle-scrobble');
+
         //LAST.FM : toggle scrobbling
         $('#wpsstm-player-toggle-scrobble a').click(function(e) {
             e.preventDefault();
@@ -31,8 +36,10 @@
                         console.log(data);
                     }else{
                         if (do_scrobble){
+                            is_scrobbler_active = true;
                             link_wrapper.addClass('active');
                         }else{
+                            is_scrobbler_active = false;
                             link_wrapper.removeClass('active');
                         }
                         
@@ -116,83 +123,18 @@
     $( document ).on( "wpsstmPlayerMediaEvent", function( event,mediaEvent,media,node,player,track_obj ) {
 
         switch(mediaEvent) {
-            case 'loadeddataAA':
+            case 'loadeddata':
                 
-                /*
-                last.fm API - track.updateNowPlaying
-                */
-
-                var track = {
-                    artist: track_obj.artist,
-                    title:  track_obj.title,
-                    album:  track_obj.album
+                if (is_scrobbler_active){
+                    wpsstm_updateNowPlaying(media,node,player,track_obj);
                 }
-
-                var ajax_data = {
-                    action:           'wpsstm_lastfm_update_now_playing_track',
-                    track:            track
-                };
-
-                console.log("lastfm - ajax track.updateNowPlaying:");
-                console.log(ajax_data);
-
-                return $.ajax({
-
-                    type: "post",
-                    url: wpsstmL10n.ajaxurl,
-                    data:ajax_data,
-                    dataType: 'json',
-                    beforeSend: function() {
-                    },
-                    success: function(data){
-                        if (data.success === false) {
-                            console.log(data);
-                        }
-                    },
-                    complete: function() {
-                    }
-                })
                 
                 
             break;
             case 'ended':
                 
-                /*
-                last.fm API - track.scrobble
-                */
-                
-                if ( media.duration > 30) {
-                    var track = {
-                        artist: track_obj.artist,
-                        title:  track_obj.title,
-                        album:  track_obj.album
-                    }
-
-                    var ajax_data = {
-                        action:           'wpsstm_lastfm_scrobble_track',
-                        track:            track
-                    };
-
-                    console.log("lastfm - ajax track.scrobble:");
-                    console.log(ajax_data);
-                    
-                    return $.ajax({
-
-                        type: "post",
-                        url: wpsstmL10n.ajaxurl,
-                        data:ajax_data,
-                        dataType: 'json',
-                        beforeSend: function() {
-                        },
-                        success: function(data){
-                            if (data.success === false) {
-                                console.log(data);
-                            }
-                        },
-                        complete: function() {
-                        }
-                    })
-                
+                if (is_scrobbler_active){
+                    wpsstm_scrobble(media,node,player,track_obj);
                 }
                 
 
@@ -202,6 +144,89 @@
     
     function wpsstm_is_lastfm_api_logged(){
         return parseInt(wpsstmLastFM.is_api_logged);
+    }
+    
+    /*
+    last.fm API - track.updateNowPlaying
+    */
+    
+    function wpsstm_updateNowPlaying(media,node,player,track_obj){
+        var track = {
+            artist: track_obj.artist,
+            title:  track_obj.title,
+            album:  track_obj.album
+        }
+
+        var ajax_data = {
+            action:           'wpsstm_lastfm_update_now_playing_track',
+            track:            track
+        };
+
+        console.log("lastfm - ajax track.updateNowPlaying:");
+        console.log(ajax_data);
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(toggle_scrobble_el).addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }
+            },
+            complete: function() {
+                $(toggle_scrobble_el).removeClass('loading');
+            }
+        })
+    }
+    
+    /*
+    last.fm API - track.scrobble
+    */
+    
+    function wpsstm_scrobble(media,node,player,track_obj){
+
+        if ( media.duration <= 30) return;
+        
+        var track = {
+            artist:     track_obj.artist,
+            title:      track_obj.title,
+            album:      track_obj.album,
+            duration:   track_obj.duration
+        }
+
+        var ajax_data = {
+            action:             'wpsstm_lastfm_scrobble_track',
+            track:              track,
+            playback_start:     track_obj.playback_start
+        };
+
+        console.log("lastfm - ajax track.scrobble:");
+        console.log(ajax_data);
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(toggle_scrobble_el).addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }
+            },
+            complete: function() {
+                $(toggle_scrobble_el).removeClass('loading');
+            }
+        })
     }
 
 
