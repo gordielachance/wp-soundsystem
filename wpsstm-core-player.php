@@ -218,7 +218,7 @@ class WP_SoundSytem_Core_Player{
                 
                 //if no source title set (supposed it has been scraped / set by user)
                 if ( !$title = $source['title'] ){
-                    $title = sprintf(__('%s, by %s','wpsstm'),$track->title,$track->artist);
+                    $title = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$track->artist,$track->title);
                 }
                 
                 $provider_source = array(

@@ -95,7 +95,7 @@ var wpsstm_source_requests = [];
         });
 
         //source item
-        $( "#wpsstm-player-sources-wrapper li span.wpsstm-trackinfo-title" ).live( "click", function(e) {
+        $( "#wpsstm-player-sources-wrapper li span.wpsstm-source-title" ).live( "click", function(e) {
             e.preventDefault();
             
             var li_el = $(this).closest('li');
@@ -379,9 +379,16 @@ var wpsstm_source_requests = [];
             if (i==0){
                 trackinfo_el.addClass('wpsstm-active-source');
             }
-
+            
             //source title
-            var trackinfo_title_el = $('<span class="wpsstm-trackinfo-title">'+source_attr.title+'</span>');
+            var trackinfo_title_el = $('<span />');
+            trackinfo_title_el.attr({
+                class:      'wpsstm-source-title',
+                itemprop:   'track',
+                itemscope:  '',
+                itemtype:   'http://schema.org/MusicRecording'
+            });
+            trackinfo_title_el.html(source_attr.title);
             trackinfo_el.append(trackinfo_title_el);
 
             //provider icon

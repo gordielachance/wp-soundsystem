@@ -1,5 +1,16 @@
 @import "compass/css3";
 
+[itemprop="track"]{
+    [itemprop="byArtist"]{
+        font-weight: bold;
+    }
+    [itemprop="name"]{
+    }
+    [itemprop="inAlbum"]{
+        font-size:.8em;
+    }
+}
+
 .wpsstm-tracklist-table{
     tbody{
         tr{
@@ -160,11 +171,15 @@ a.wpsstm-play-track{
                 li{
                     @include opacity(.8);
                     display:none;
-                    .wpsstm-trackinfo-title{
+                    .wpsstm-source-title{
                         cursor: pointer;
                         cursor: hand;
                         &:hover{
                            @include opacity(1); 
+                        }
+                        [itemprop="name"]:before{
+                            content:"\002014";
+                            padding:0 .5em;
                         }
                     }
 

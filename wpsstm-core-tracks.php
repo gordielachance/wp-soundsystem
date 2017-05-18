@@ -226,7 +226,7 @@ class WP_SoundSytem_Core_Tracks{
 
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
-        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$title) );
+        $post_title = sanitize_text_field( sprintf('<span itemprop="byArtist">%s</span> <span itemprop="inAlbum">%s</span>',$artist,$title) );
 
         //use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;

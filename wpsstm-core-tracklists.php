@@ -197,7 +197,8 @@ class WP_SoundSytem_Core_Tracklists{
         foreach($tracklist->tracks as $entry){
             $artist = $entry->artist; //wpsstm_get_post_artist_link_by_name($entry->artist);
             $track = $entry->title; //wpsstm_get_post_track_link_by_name($entry->artist,$entry->title,null);
-            $entry_html[] =  sprintf('<li>"%s" by %s</li>',$track,$artist);
+            $track_title_artist = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$artist,$track);
+            $entry_html[] =  sprintf('<li>%s</li>',$track_title_artist);
         }
 
         $output = sprintf('<ol class="wpsstm-tracklist-list">%s</ol>',implode("\n",$entry_html));
