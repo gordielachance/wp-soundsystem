@@ -1,11 +1,28 @@
 <?php
 
+/*
+How the scraper works :
+
+It would be too much queries to save the real tracks history for a live playlist : 
+it would require to query each remote playlist URL every ~30sec to check if a new track has been played, 
+which would use a LOT of resources; and create thousands and thousands of track posts.
+
+Also, we want live playlists tracklists to be related to an URL rather than to a post ID, allowin us to setup 'services'.
+Services are playlists were the sources URL contains regular expressions.  
+They are meant to fetch different tracklists depending on the input URL (eg. for Spotify or Last.FM)
+
+So live playlists do not create track posts, but we use the WordPress Transients API to temporary store the tracklist.
+When the live playlist is viewed, we refresh the tracklist only if the transient is expired.
+
+The transient name is based on the parser URL, not on the parser ID; which allows us more flexibility.
+
+*/
+
 class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     //preset infos
-    var $slug = 'default';
-    var $name = null;
-    var $description = null;
+    var $preset_slug = 'default';
+    var $preset_name = null;
 
     //input
     public $options = array();
@@ -55,6 +72,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     public function __construct($post_id_or_feed_url = null) {
         
+        $this->preset_name = __('HTML Scraper','wpsstm');
         
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
@@ -708,7 +726,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     /*
     Use a custom function to display our notices since natice WP function add_settings_error() works only backend.
-    We'll get those back in WP_SoundSytem_Playlist_Scraper.
     */
     function add_notice($slug,$code,$message,$error = false){
         

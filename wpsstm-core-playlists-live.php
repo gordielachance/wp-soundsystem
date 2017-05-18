@@ -197,8 +197,64 @@ class WP_SoundSytem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
     
-    public function init_live_playlist($url){
+    public function init_live_playlist($post_id_or_feed_url = null){
+
+        $post_id = null;
+        $feed_url = null;
         
+        if ( $post_id_or_feed_url ){
+            if ( $post_id = ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
+                $post_id = $post_id;
+                $feed_url = get_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, true );
+            }else{ //url
+                $feed_url = $post_id_or_feed_url;
+                
+            }
+        }
+        
+        $tracklist = new WP_SoundSytem_Remote_Tracklist();
+        
+        //load page preset
+        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($feed_url) ){
+            $tracklist = $live_tracklist_preset;
+            $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
+        }
+        
+        return $tracklist;
+    }
+    
+    function get_live_tracklist_preset($feed_url){
+        
+        $enabled_presets = array();
+
+        $available_presets = self::get_available_presets();
+
+        //get matching presets
+        foreach((array)$available_presets as $preset){
+
+            if ( $preset->can_load_tracklist_url($feed_url) ){
+                $enabled_presets[] = $preset;
+            }
+
+        }
+        
+        //return last (highest priority) preset
+        return end($enabled_presets);
+
+    }
+    
+    static function get_available_presets(){
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        
+        $available_presets = array();
+        $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
+        
+        foreach((array)$available_presets as $key=>$preset){
+            if ( !$preset->can_use_preset ) unset($available_presets[$key]);
+        }
+
+        return $available_presets;
     }
     
     public function get_live_playlist_tracklist($tracklist,$post_id){
@@ -206,8 +262,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         $post_type = get_post_type($post_id);
         if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;
 
-        $scraper = new WP_SoundSytem_Playlist_Scraper($post_id);
-        $tracklist = $scraper->tracklist;
+        $tracklist = $this->init_live_playlist($post_id);
 
         return $tracklist;
     }
@@ -359,7 +414,7 @@ class WP_SoundSytem_Core_Live_Playlists{
     
     function get_frontend_wizard_tracklist($tracklist,$post_id){
         if ( ( $post_id == $this->frontend_wizard_page_id ) && ( $this->frontend_wizard ) ) {
-            $tracklist = $this->frontend_wizard->scraper->tracklist;
+            $tracklist = $this->frontend_wizard->tracklist;
         }
         return $tracklist;
     }
