@@ -12,15 +12,6 @@ class WP_SoundSytem_TracksList_Table{
     var $no_items_label = null;
     var $can_player = true;
     var $sources_db_only = true;
-    
-    var $_pagination_args = array(
-        'total_items'   => 0,
-        'total_pages'   => 0,
-        'per_page'      => 0,
-        'total_pages'   => 0
-    );
-
-    var $total_items = null;
 
     function __construct($tracklist){
         global $page;
@@ -86,13 +77,6 @@ class WP_SoundSytem_TracksList_Table{
          */
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        if ($per_page > -1) {
-            $this->set_pagination_args( array(
-                'total_items' => $total_tracks,                     //WE have to calculate the total number of items
-                'per_page'    => $per_page,                         //WE have to determine how many items to show on a page
-                'total_pages' => ceil($total_tracks/$per_page)      //WE have to calculate the total number of pages
-            ) );
-        }
     }
     
     function get_columns(){
@@ -167,26 +151,6 @@ class WP_SoundSytem_TracksList_Table{
         
         return true;
     }    
-
-    /**
-     * An internal method that sets all the necessary pagination arguments
-     *
-     * @param array $args An associative array with information about the pagination
-     * @access protected
-     */
-
-    protected function set_pagination_args( $args ) {
-            $args = wp_parse_args( $args, array(
-                    'total_items' => 0,
-                    'total_pages' => 0,
-                    'per_page' => 0,
-            ) );
-
-            if ( !$args['total_pages'] && $args['per_page'] > 0 )
-                    $args['total_pages'] = ceil( $args['total_items'] / $args['per_page'] );
-
-            $this->_pagination_args = $args;
-    }
 
 	/**
 	 * Display the table
@@ -273,9 +237,9 @@ class WP_SoundSytem_TracksList_Table{
                     if ( !is_admin() ){
                         ?>
                         <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id);?>" target="_blank" class="wpsstm-tracklist-action-share"><i class="fa fa-share-alt" aria-hidden="true"></i> <?php _e('Share', 'wpsstm'); ?></a>
-                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,true);?>" class="wpsstm-tracklist-action-xspf"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
+                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');?>" class="wpsstm-tracklist-action-xspf"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
 
-                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,true,true);?>" class="wpsstm-tracklist-action-xspf-download"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Download XSPF', 'wpsstm'); ?></a>
+                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf',true);?>" class="wpsstm-tracklist-action-xspf-download"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Download XSPF', 'wpsstm'); ?></a>
                         <?php
                     }
 
@@ -318,80 +282,17 @@ class WP_SoundSytem_TracksList_Table{
      * @param string $which
      */
     protected function pagination( $which ) {
-
-            if ( empty( $this->_pagination_args ) ) {
-                    return;
-            }        
-
-
-            $total_items = $this->_pagination_args['total_items'];
-            $total_pages = $this->_pagination_args['total_pages'];
-            $infinite_scroll = false;
-            if ( isset( $this->_pagination_args['infinite_scroll'] ) ) {
-                    $infinite_scroll = $this->_pagination_args['infinite_scroll'];
-            }
-
-            $output = '<span class="displaying-num">' . sprintf( _n( '1 item', '%s items', $total_items ), number_format_i18n( $total_items ) ) . '</span>';
-
-            $current = $this->get_pagenum();
-            $paged_var = WP_SoundSytem_Tracklist::$paged_var;
         
-            $current_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
+            $big = 999999999; // need an unlikely integer
 
-            $page_links = array();
-
-            $disable_first = $disable_last = '';
-            if ( $current == 1 ) {
-                    $disable_first = ' disabled';
-            }
-            if ( $current == $total_pages ) {
-                    $disable_last = ' disabled';
-            }
-            $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
-                    'first-page' . $disable_first,
-                    esc_attr__( 'Go to the first page' ),
-                    esc_url( remove_query_arg( $paged_var, $current_url ) ),
-                    '&laquo;'
+            $pagination_args = array(
+                'base' => str_replace( $big, '%#%', esc_url( wpsstm_get_tracklist_link( $this->tracklist->post_id, $big ) ) ),
+                'format' => sprintf('?%s=%#%',WP_SoundSytem_Tracklist::$paged_var),
+                'current' => max( 1,$this->tracklist->pagination['current_page']  ),
+                'total' => $this->tracklist->pagination['total_pages']
             );
-
-            $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
-                    'prev-page' . $disable_first,
-                    esc_attr__( 'Go to the previous page' ),
-                    esc_url( add_query_arg( $paged_var, max( 1, $current-1 ), $current_url ) ),
-                    '&lsaquo;'
-            );
-
-            $html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $total_pages ) );
-            $page_links[] = '<span class="paging-input">' . sprintf( _x( '%1$s of %2$s', 'paging' ), $current, $html_total_pages ) . '</span>';
-
-            $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
-                    'next-page' . $disable_last,
-                    esc_attr__( 'Go to the next page' ),
-                    esc_url( add_query_arg( $paged_var, min( $total_pages, $current+1 ), $current_url ) ),
-                    '&rsaquo;'
-            );
-
-            $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
-                    'last-page' . $disable_last,
-                    esc_attr__( 'Go to the last page' ),
-                    esc_url( add_query_arg( $paged_var, $total_pages, $current_url ) ),
-                    '&raquo;'
-            );
-
-            $pagination_links_class = 'pagination-links';
-            if ( ! empty( $infinite_scroll ) ) {
-                    $pagination_links_class = ' hide-if-js';
-            }
-            $output .= "\n<span class='$pagination_links_class'>" . join( "\n", $page_links ) . '</span>';
-
-            if ( $total_pages ) {
-                    $page_class = $total_pages < 2 ? ' one-page' : '';
-            } else {
-                    $page_class = ' no-pages';
-            }
-            $this->_pagination = "<div class='tablenav-pages{$page_class}'>$output</div>";
-
-            echo $this->_pagination;
+        
+            echo paginate_links( $pagination_args );
     }
     
     /**

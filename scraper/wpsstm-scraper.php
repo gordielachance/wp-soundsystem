@@ -134,8 +134,8 @@ class WP_SoundSytem_Playlist_Scraper{
         if ($this->datas_cache){
             $this->tracklist->add($this->datas_cache['tracks']);
             //we got cached tracks, but do ignore them in wizard
-            if ( ( $cached_total_tracks = count($this->tracklist->tracks) ) && $this->is_wizard ){
-                $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_tracks,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
+            if ( ( $cached_total_items = count($this->tracklist->tracks) ) && $this->is_wizard ){
+                $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
 
@@ -153,50 +153,51 @@ class WP_SoundSytem_Playlist_Scraper{
         if ( ( !$this->tracklist->tracks && (!$this->cache_only) ) || $this->is_wizard ){
 
             $this->datas_remote = false; // so we can detect that we ran a remote request
-            $remote_tracks = $this->tracklist->get_all_raw_tracks();
+            if ( $remote_tracks = $this->tracklist->get_all_raw_tracks() ){
 
-            if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
-                if ( $this->feed_url != $this->tracklist->redirect_url ){
-                    $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->tracklist->redirect_url.'</em>') );
-                }
-            }
+                if ( !is_wp_error($remote_tracks) ) {
 
-            if ( $remote_tracks && !is_wp_error($remote_tracks) ) {
- 
-                $this->tracklist->add($remote_tracks);
-
-                //Musicbrainz lookup
-                //TO FIX quite slow for big playlists. Think about a way to handle this.
-                /*
-                if ( $this->get_options('musicbrainz') == 'on'  ){
-                    foreach ($this->tracklist->tracks as $track){
-                        $track->musicbrainz();
+                    if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                        if ( $this->feed_url != $this->tracklist->redirect_url ){
+                            $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->tracklist->redirect_url.'</em>') );
+                        }
                     }
-                }
-                */
 
-                //populate page notices
-                foreach($this->tracklist->notices as $notice){
-                    $this->notices[] = $notice;
-                }
-                
-                $tracks_arr = $this->tracklist->array_export();
+                    $this->tracklist->add($remote_tracks);
 
-                //format response
-                $this->datas = $this->datas_remote = array(
-                    'title'         => $this->tracklist->get_tracklist_title(),
-                    'author'        => $this->tracklist->get_tracklist_author(),
-                    'tracks'        => $remote_tracks,
-                    'timestamp'     => current_time( 'timestamp' )
-                );
+                    //Musicbrainz lookup
+                    //TO FIX quite slow for big playlists. Think about a way to handle this.
+                    /*
+                    if ( $this->get_options('musicbrainz') == 'on'  ){
+                        foreach ($this->tracklist->tracks as $track){
+                            $track->musicbrainz();
+                        }
+                    }
+                    */
 
-                //set cache if there is none
-                if ( !$this->datas_cache ){
-                    $this->set_cache();
+                    //populate page notices
+                    foreach($this->tracklist->notices as $notice){
+                        $this->notices[] = $notice;
+                    }
+
+                    $tracks_arr = $this->tracklist->array_export();
+
+                    //format response
+                    $this->datas = $this->datas_remote = array(
+                        'title'         => $this->tracklist->get_tracklist_title(),
+                        'author'        => $this->tracklist->get_tracklist_author(),
+                        'tracks'        => $remote_tracks,
+                        'timestamp'     => current_time( 'timestamp' )
+                    );
+
+                    //set cache if there is none
+                    if ( !$this->datas_cache ){
+                        $this->set_cache();
+                    }
+
+                }else{
+                    $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
                 }
-                
-            }else{
-                $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
             }
 
         }

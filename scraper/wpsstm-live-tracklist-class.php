@@ -19,10 +19,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     //response
     var $request_pagination = array(
-        'total_tracks'          => 0,
-        'total_pages'           => 0,
-        'max_page_tracks'       => 0,
-        'current_page'          => 1
+        'total_items'       => null, //When possible (eg. APIs), return the count of total tracks so we know how much tracks we should request.  Override this in your preset.
+        'total_pages'       => 1,
+        'page_items_limit'  => -1, //When possible (eg. APIs), set the limit of tracks each request can get
+        'current_page'      => 1
     );
     public $response = null;
     public $response_type = null;
@@ -52,14 +52,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     public function get_all_raw_tracks(){
-        
-        $pagination_request_args = array(
-            'total_tracks'      =>  ( $tracks_count !== null) ? $tracks_count : null,
-            'max_page_tracks'   =>  $this->max_page_tracks
-        );
-        
-        $tracks_count = $this->get_remote_track_count();
-        $this->set_request_pagination( );
 
         $raw_tracks = array();
         
@@ -553,8 +545,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         $args = wp_parse_args( $args, $this->request_pagination );
 
-        if ( $args['max_page_tracks'] > 0 ){
-            $args['total_pages'] = ceil( $args['total_tracks'] / $args['max_page_tracks'] );
+        if ( $args['page_items_limit'] > 0 ){
+            $args['total_pages'] = ceil( $args['total_items'] / $args['page_items_limit'] );
         }
 
         $this->request_pagination = $args;

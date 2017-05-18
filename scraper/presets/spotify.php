@@ -30,7 +30,6 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         parent::__construct();
 
         $this->remote_name = __('Spotify Playlist','wpsstm');
-        $this->max_page_tracks = 100; //API limit
 
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');
@@ -38,6 +37,19 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         if ( !$client_id || !$client_secret ){
             $this->can_use_preset = false;
         }
+    }
+    
+    function get_all_raw_tracks(){
+        
+        //init pagination before request
+        $pagination_args = array(
+            'total_items'       => $this->get_spotify_playlist_track_count(),
+            'page_items_limit'  => 100
+        );
+
+        $this->set_request_pagination( $pagination_args );
+        
+        return parent::get_all_raw_tracks();
     }
     
     function get_tracklist_title(){
@@ -59,7 +71,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         return $this->get_variable_value('spotify-user');
     }
     
-    protected function get_remote_track_count(){
+    protected function get_spotify_playlist_track_count(){
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
         
@@ -79,8 +91,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         
         //handle pagination
         $pagination_args = array(
-            'limit'     => $this->max_page_tracks,
-            'offset'    => ($request_pagination['current_page'] - 1) * $this->max_page_tracks
+            'limit'     => $this->request_pagination['page_items_limit'],
+            'offset'    => ($this->request_pagination['current_page'] - 1) * $this->request_pagination['page_items_limit']
         );
         
         $url = add_query_arg($pagination_args,$url);

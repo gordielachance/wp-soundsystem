@@ -17,7 +17,7 @@ class WP_SoundSytem_Tracklist{
     var $expire_time = null;
     
     var $pagination = array(
-        'total_tracks'  => null,
+        'total_items'  => null,
         'total_pages'   => null,
         'per_page'      => null,
         'current_page'  => null
@@ -26,13 +26,14 @@ class WP_SoundSytem_Tracklist{
     static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
-
-        $this->set_tracklist_pagination = array(
-            'total_tracks'  => null,
+        
+        $pagination_args = array(
             'per_page'      => 84, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
         );
-        
+
+        $this->set_tracklist_pagination($pagination_args);
+
         if ($post_id){
             
             $this->post_id = $post_id;
@@ -116,6 +117,8 @@ class WP_SoundSytem_Tracklist{
     
     function add($tracks){
         
+        $tracks_count = null;
+        
         //force array
         if ( !is_array($tracks) ){
             $tracks = array($tracks);
@@ -133,19 +136,14 @@ class WP_SoundSytem_Tracklist{
             $track->tracklist_id = $this->post_id;
 
             //increment count
-            $this->total_tracks++;
-            $track->subtrack_order = $this->total_tracks;
+            $tracks_count++;
+            $track->subtrack_order = $tracks_count;
 
             $this->tracks[] = $track;
         }
+        
+        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
 
-    }
-    
-    /*
-    When possible (eg. APIs), return the count of total tracks so we know how much tracks we should request.  Override this in your preset.
-    */
-    protected function get_remote_track_count(){
-        return null;
     }
 
     function validate_tracks($strict = true){
@@ -160,7 +158,8 @@ class WP_SoundSytem_Tracklist{
         }
         
         $this->tracks = $valid_tracks;
-        $this->total_tracks = count($valid_tracks);
+        $tracks_count = count($valid_tracks);
+        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
 
     }
 
@@ -233,8 +232,8 @@ class WP_SoundSytem_Tracklist{
 
         $args = wp_parse_args( $args, $this->pagination );
 
-        if ( $args['per_page'] > 0 ){
-            $args['total_pages'] = ceil( $args['total_tracks'] / $args['per_page'] );
+        if ( ( $args['per_page'] > 0 ) && ( $args['total_items'] ) ){
+            $args['total_pages'] = ceil( $args['total_items'] / $args['per_page'] );
         }
 
         $this->pagination = $args;
