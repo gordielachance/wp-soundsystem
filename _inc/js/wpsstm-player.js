@@ -445,7 +445,7 @@ var wpsstm_source_requests = [];
                     $(wpsstm_current_media).on('play', function() {
                         if (media.duration <= 0) return; //quick fix because it was fired twice.
                         track_obj.duration = Math.floor(media.duration);
-                        track_obj.playback_start = $.now(); //used by lastFM
+                        track_obj.playback_start = Math.round( $.now() /1000); //seconds - used by lastFM
                         console.log('player event - play');
                         wpsstm_update_track_button(track_obj,'play');
                         wpsstm_had_tracks_played = true;
