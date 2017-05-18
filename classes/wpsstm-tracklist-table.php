@@ -197,7 +197,7 @@ class WP_SoundSytem_TracksList_Table{
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
         
             $text_time = $text_refresh = null;
-
+ 
             if ( $this->tracklist->updated_time ){
 
                 $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );

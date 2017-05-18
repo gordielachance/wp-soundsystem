@@ -217,7 +217,7 @@ class WP_SoundSytem_Core_Player{
                 if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
                 
                 //if no source title set (supposed it has been scraped / set by user)
-                if ( !$title = $source['title'] ){
+                if ( !isset($source['title']) || (!$title = trim($source['title']) ) ){
                     $title = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$track->artist,$track->title);
                 }
                 

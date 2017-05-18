@@ -55,7 +55,7 @@ class WP_SoundSytem_Playlist_Scraper{
             if ( ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
                 $this->init_post($post_id_or_feed_url);
             }else{ //url
-                $this->init($post_id_or_feed_url);
+                $this->populate_remote_tracklist($post_id_or_feed_url);
             }
         }
     }
@@ -102,11 +102,11 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->options = array_replace_recursive($default_options,(array)$db_options);
 
         $feed_url = get_post_meta( $post_id, self::$meta_key_scraper_url, true );
-        $this->init($feed_url);
+        $this->populate_remote_tracklist($feed_url);
 
     }
     
-    function init($feed_url){
+    function populate_remote_tracklist($feed_url){
 
         if (!$feed_url) return;
         
@@ -143,7 +143,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //load page preset
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($this) ){
             $this->tracklist = $live_tracklist_preset;
-            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->remote_name.'</em>') );
+            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->remote_name.'</em>') );
         }
 
         //populate page
