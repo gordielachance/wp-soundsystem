@@ -123,10 +123,6 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->feed_url = $feed_url;
         $this->id = md5( $this->feed_url ); //unique ID based on URL
         $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
-        
-        //set expire time
-        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
-        $this->tracklist->expire_time = get_option ( $transient_timeout_name );
 
         //try to get cache first
 
@@ -144,6 +140,10 @@ class WP_SoundSytem_Playlist_Scraper{
             $this->tracklist = $live_tracklist_preset;
             $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->remote_name.'</em>') );
         }
+        
+        //set expire time
+        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
+        $this->tracklist->expire_time = get_option( $transient_timeout_name );
 
         //populate page
 
@@ -204,7 +204,7 @@ class WP_SoundSytem_Playlist_Scraper{
 
         //get options back from page (a preset could have changed them)
         $this->options = $this->tracklist->options; 
-
+    
         /*
         Build Tracklist
         */
