@@ -10,7 +10,6 @@ use LastFmApi\Api\TrackApi;
 class WP_SoundSytem_Core_LastFM{
     
     var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
-    var $lastfm_scrobbling_meta_name = '_wpsstm_lastfm_scrobbling';
     var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
     private $api_key = null;
@@ -43,10 +42,7 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
-        
-        //toggle scrobbling
-        add_action('wp_ajax_wpsstm_toggle_scrobbling', array($this,'ajax_toggle_scrobbling'));
-        
+
         //love & unlove
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
@@ -84,7 +80,6 @@ class WP_SoundSytem_Core_LastFM{
         //localize vars
         $localize_vars=array(
             'is_api_logged'             => (int)$this->is_user_api_logged(),
-            'is_scrobbler_active'       => $this->is_scrobbler_active(),
             //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
             //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
         );
@@ -146,28 +141,6 @@ class WP_SoundSytem_Core_LastFM{
         
         return $this->is_user_api_logged;
 
-    }
-    
-    public function is_scrobbler_active(){
-        $enabled = $plugin_option = $user_option = $api_logged = null;
-        
-        if ( $user_id = get_current_user_id() ){
-            $plugin_option = wpsstm()->get_options('lastfm_scrobbling');
-
-            if ( $user_option = get_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, true ) ){
-                $enabled = ($user_option == 'on');
-            }else{
-                $enabled = ($plugin_option == 'on');
-            }
-
-            if ($enabled){
-                if ( !$api_logged = $this->is_user_api_logged() ) $enabled = false;
-            }
-        }
-
-        wpsstm()->debug_log(json_encode(array('plugin'=>$plugin_option,'user'=>$user_option,'user_id'=>$user_id,'api_logged'=>$api_logged,'enabled'=>$enabled)),"lastfm - is_scrobbler_active()");
-
-        return $enabled;
     }
     
     /*
@@ -547,36 +520,7 @@ class WP_SoundSytem_Core_LastFM{
         
         return $results;
     }
-    
-    function toggle_user_scrobbling($do_scrobble){
-        if ( !$user_id = get_current_user_id() ) return false;
-        
-        $option = ($do_scrobble) ? 'on' : 'off';
-        
-        update_user_meta( $user_id, $this->lastfm_scrobbling_meta_name, $option );
-        
-        return true;
-        
-    }
-    
-    function ajax_toggle_scrobbling(){
-        $result = array(
-            'input'     => $_POST,
-            'success'   => false
-        );
-        
-        $result['user_id'] = get_current_user_id();
-        
-        $do_scrobble = $result['do_scrobble'] = filter_var($_POST['do_scrobble'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
-        
-        $result['success'] = $this->toggle_user_scrobbling($do_scrobble);
-        
-        echo json_encode($result);
-        die();
-    }
-    
 
-    
     function ajax_love_unlove_track(){
         $result = array(
             'input'     => $_POST,

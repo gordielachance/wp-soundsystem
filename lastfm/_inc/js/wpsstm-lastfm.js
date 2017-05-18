@@ -1,57 +1,35 @@
-var is_scrobbler_active = wpsstmLastFM.is_scrobbler_active;
 var toggle_scrobble_el = null;
+var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings);
 
 (function($){
 
     $(document).ready(function(){
         
+        //LAST.FM : toggle scrobbling
         toggle_scrobble_el = $('#wpsstm-player-toggle-scrobble');
 
-        //LAST.FM : toggle scrobbling
+        if (is_scrobbler_active === null) { //default
+            is_scrobbler_active = true;
+        }
+        
+        if ( !wpsstm_is_lastfm_api_logged() ) is_scrobbler_active = false;
+        
+        if (is_scrobbler_active){
+            toggle_scrobble_el.addClass('active');
+        }
+
         $('#wpsstm-player-toggle-scrobble a').click(function(e) {
             e.preventDefault();
             if ( !wpsstm_is_lastfm_api_logged() ) return;
             
             var link = $(this);
             var link_wrapper = $('#wpsstm-player-toggle-scrobble');
-            var do_scrobble = !link_wrapper.hasClass('active');
+            is_scrobbler_active = !link_wrapper.hasClass('active');
 
-            var ajax_data = {
-                action:             'wpsstm_toggle_scrobbling',
-                do_scrobble:        do_scrobble,
-            };
+            localStorage.setItem("wpsstm-scrobble", is_scrobbler_active);
             
-            console.log("toggle_scrobbling:" + do_scrobble);
+            link_wrapper.toggleClass('active');
 
-            return $.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
-                beforeSend: function() {
-                    link_wrapper.addClass('loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                    }else{
-                        if (do_scrobble){
-                            is_scrobbler_active = true;
-                            link_wrapper.addClass('active');
-                        }else{
-                            is_scrobbler_active = false;
-                            link_wrapper.removeClass('active');
-                        }
-                        
-                    }
-                },
-                complete: function() {
-                    link_wrapper.removeClass('loading');
-                }
-            })
-            
-            
         });
 
         //LAST.FM : user is not logged
@@ -132,7 +110,10 @@ var toggle_scrobble_el = null;
         switch(mediaEvent) {
             case 'loadeddata':
                 
+                console.log("IS SCROBBLER ACTIBE:" + is_scrobbler_active);
+                
                 if (is_scrobbler_active){
+                    console.log("CCA");
                     wpsstm_updateNowPlaying(media,node,player,track_obj);
                 }
                 
