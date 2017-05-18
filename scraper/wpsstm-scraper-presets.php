@@ -126,6 +126,7 @@ function wpsstm_register_scraper_presets($presets){
     require_once( $presets_path . 'soundsgood.php' );
     require_once( $presets_path . 'spotify.php' );
     require_once( $presets_path . 'twitter.php' );
+    require_once( $presets_path . 'reddit.php' );
     
     $presets[] = new WP_SoundSytem_Playlist_LastFM_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_Spotify_Playlist_Api();
@@ -140,6 +141,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Playlist_Hypem_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_Twitter_Scraper();
     $presets[] = new WP_SoundSytem_Playlist_RTBF_Scraper();
+    $presets[] = new WP_SoundSytem_Playlist_Reddit_Scraper();
     
     return $presets;
 }
