@@ -202,6 +202,22 @@ class WP_SoundSytem_Tracklist{
         $tracklist_table->display();
         return ob_get_clean();
     }
+    
+    /*
+    Return the number of minutes before the tracklist gets refreshed (live playlists - scrapers)
+    */
+    
+    function get_refresh_time(){
+        $post_type = get_post_type($this->post_id);
+        $is_live = ( ( $post_type == wpsstm()->post_type_live_playlist ) || ($this->post_id == $this->frontend_wizard_page_id) );
+        if (!$is_live) return;
+        
+        //TO FIX TO FINISH
+        //https://wordpress.stackexchange.com/questions/50842/get-the-timout-value-of-a-saved-transient
+        //$transient = '_transient_timeout_' . $_your_transient_name;
+        //$transient_timeout = get_option ( $transient );
+        
+    }
 
 
 }

@@ -276,16 +276,29 @@ class WP_SoundSytem_TracksList_Table{
             
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->tracks_count);
         
-        
+            $text_time = $text_refresh = null;
+
             if ( $this->tracklist->timestamp ){
 
                 $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'date_format' ) );
                 $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'time_format' ) );
 
-                $text = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
-
-                printf('<small> <i class="fa fa-clock-o" aria-hidden="true"></i> %s</small>',$text);
+                $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+                $text_time = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
+                $text_time = sprintf('<small class="wpsstm-tracklist-published">%s %s</small>',$icon_time,$text_time);
+                
+                $post_type = get_post_type($this->tracklist->post_id);
+                
+                if ( $refresh_time = $this->tracklist->get_refresh_time() ) {
                     
+                    $refresh_time= sprintf('<span class="wpsstm-tracklist-refresh-minutes">%s</span>',$refresh_time);
+                    
+                    $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
+                    $text_refresh = sprintf(__('refresh in %s minutes','wpsstm'),$refresh_time);
+                    $text_refresh = sprintf('<small class="wpsstm-tracklist-next-refresh">%s %s</small>',$icon_refresh,$text_refresh);
+                }
+                
+                printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);    
             }
         
 
