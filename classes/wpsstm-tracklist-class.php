@@ -8,13 +8,15 @@ class WP_SoundSytem_Tracklist{
     
     var $title = null;
     var $author = null;
-    var $timestamp = null;
     var $location = null;
     
     //datas
     
     var $tracks = array();
     var $tracks_count = 0;
+    
+    var $updated_time = null;
+    var $expire_time = null;
 
     function __construct($post_id = null ){
         
@@ -27,7 +29,7 @@ class WP_SoundSytem_Tracklist{
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
             
-            $this->timestamp = get_post_modified_time( 'U', false, $post_id );
+            $this->updated_time = get_post_modified_time( 'U', false, $post_id );
             $this->location = get_permalink($post_id);
             
         }
@@ -50,6 +52,10 @@ class WP_SoundSytem_Tracklist{
         }
         
         $this->add($subtracks);
+    }
+    
+    function load_transient(){
+        
     }
     
     
@@ -202,22 +208,5 @@ class WP_SoundSytem_Tracklist{
         $tracklist_table->display();
         return ob_get_clean();
     }
-    
-    /*
-    Return the number of minutes before the tracklist gets refreshed (live playlists - scrapers)
-    */
-    
-    function get_refresh_time(){
-        $post_type = get_post_type($this->post_id);
-        $is_live = ( ( $post_type == wpsstm()->post_type_live_playlist ) || ($this->post_id == $this->frontend_wizard_page_id) );
-        if (!$is_live) return;
-        
-        //TO FIX TO FINISH
-        //https://wordpress.stackexchange.com/questions/50842/get-the-timout-value-of-a-saved-transient
-        //$transient = '_transient_timeout_' . $_your_transient_name;
-        //$transient_timeout = get_option ( $transient );
-        
-    }
-
 
 }

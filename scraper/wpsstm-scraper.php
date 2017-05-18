@@ -124,6 +124,11 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->feed_url = $feed_url;
         $this->id = md5( $this->feed_url ); //unique ID based on URL
         $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
+        
+        //set expire time
+        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
+        $this->tracklist->expire_time = get_option ( $transient_timeout_name );
+        
 
         //try to get cache first
         $this->datas = $this->datas_cache = $this->get_cache();
@@ -207,7 +212,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //tracklist informations
         //set only if not already defined (eg. by a post ID); except for timestamp
         
-        $this->tracklist->timestamp = wpsstm_get_array_value('timestamp', $this->datas);
+        $this->tracklist->updated_time = wpsstm_get_array_value('timestamp', $this->datas);
         
         if ( !$this->tracklist->title ){
             $this->tracklist->title = wpsstm_get_array_value('title', $this->datas);

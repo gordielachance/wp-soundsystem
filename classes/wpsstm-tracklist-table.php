@@ -235,7 +235,7 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>" data-expire_timediff="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -278,10 +278,10 @@ class WP_SoundSytem_TracksList_Table{
         
             $text_time = $text_refresh = null;
 
-            if ( $this->tracklist->timestamp ){
+            if ( $this->tracklist->updated_time ){
 
-                $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'date_format' ) );
-                $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->timestamp ), get_option( 'time_format' ) );
+                $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );
+                $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'time_format' ) );
 
                 $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
                 $text_time = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
@@ -289,12 +289,13 @@ class WP_SoundSytem_TracksList_Table{
                 
                 $post_type = get_post_type($this->tracklist->post_id);
                 
-                if ( $refresh_time = $this->tracklist->get_refresh_time() ) {
+                if ( $expire_timestamp = $this->tracklist->expire_time ) {
                     
-                    $refresh_time= sprintf('<span class="wpsstm-tracklist-refresh-minutes">%s</span>',$refresh_time);
+                    $remaining = human_time_diff( current_time('timestamp',true), $expire_timestamp );
+                    $remaining = sprintf('<span class="wpsstm-tracklist-refresh-minutes">%s</span>',$remaining);
                     
                     $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                    $text_refresh = sprintf(__('refresh in %s minutes','wpsstm'),$refresh_time);
+                    $text_refresh = sprintf(__('refresh in %s','wpsstm'),$remaining);
                     $text_refresh = sprintf('<small class="wpsstm-tracklist-next-refresh">%s %s</small>',$icon_refresh,$text_refresh);
                 }
                 
