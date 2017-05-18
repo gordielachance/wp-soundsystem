@@ -4,7 +4,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
     //TO FIX is limited to 100 tracks.  Find a way to get more.
     //https://developer.spotify.com/web-api/console/get-playlist-tracks
     
-    var $slug = 'spotify-playlist';
+    var $remote_slug = 'spotify-playlist';
     
     var $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
     var $redirect_url = 'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
@@ -27,7 +27,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Spotify Playlist','wpsstm');
+        $this->remote_name = __('Spotify Playlist','wpsstm');
+        $this->tracks_per_page = 100;
 
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');
@@ -35,7 +36,6 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         if ( !$client_id || !$client_secret ){
             $this->can_use_preset = false;
         }
-
     }
     
     function get_tracklist_title(){
@@ -55,6 +55,21 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
     
     function get_tracklist_author(){
         return $this->get_variable_value('spotify-user');
+    }
+    
+    function get_total_tracks(){
+        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
+        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
+        
+        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
+        
+        $json = wp_remote_retrieve_body($response);
+        
+        if ( is_wp_error($json) ) return $json;
+        
+        $api = json_decode($json,true);
+
+        return wpsstm_get_array_value(array('tracks','total'), $api);
     }
     
     function get_request_args(){

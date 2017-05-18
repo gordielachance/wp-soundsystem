@@ -1,7 +1,7 @@
 <?php
 class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
 
-    var $slug = 'radionomy';
+    var $remote_slug = 'radionomy';
     
     var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
@@ -23,7 +23,7 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Sc
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Radionomy Station','wpsstm');
+        $this->remote_name = __('Radionomy Station','wpsstm');
     }
     
     protected function get_remote_url(){
@@ -60,14 +60,14 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Sc
 
             //QueryPath
             try{
-                $title = htmlqp( $content, 'head meta[property="og:title"]', WP_SoundSytem_Playlist_Scraper_Datas::$querypath_options )->attr('content');
+                $title = htmlqp( $content, 'head meta[property="og:title"]', WP_SoundSytem_Remote_Tracklist::$querypath_options )->attr('content');
                 if ($title) $this->radionomy_title = $title;
             }catch(Exception $e){
             }
 
             //QueryPath
             try{
-                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSytem_Playlist_Scraper_Datas::$querypath_options )->attr('content');
+                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSytem_Remote_Tracklist::$querypath_options )->attr('content');
             }catch(Exception $e){
                 return false;
             }

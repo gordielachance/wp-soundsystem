@@ -1,8 +1,8 @@
 <?php
 
-abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Playlist_Scraper_Datas{
-    var $slug = null;
-    var $name = null;
+abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Remote_Tracklist{
+    var $remote_slug = null;
+    var $remote_name = null;
     
     var $pattern = null; //regex pattern that would match an URL
     var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.

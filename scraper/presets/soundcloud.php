@@ -1,7 +1,7 @@
 <?php
 class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
     
-    var $slug = 'soundcloud';
+    var $remote_slug = 'soundcloud';
     
     var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/?([^/]+)?~i';
     var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-userid%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
@@ -23,7 +23,7 @@ class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Playlist_Scrap
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Soundcloud user tracks or likes','wpsstm');
+        $this->remote_name = __('Soundcloud user tracks or likes','wpsstm');
         
         if ( $client_id = wpsstm()->get_options('soundcloud_client_id') ){
             $this->set_variable_value('soundcloud-client-id',$client_id);

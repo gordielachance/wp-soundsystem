@@ -215,7 +215,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.8.5 =
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSytem_Playlist_Scraper_Datas::get_track_node_content()
+* sanitize string at the end of WP_SoundSytem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =

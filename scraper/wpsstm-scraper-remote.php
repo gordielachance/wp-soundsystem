@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     //preset infos
     var $slug = 'default';
@@ -34,6 +34,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     );
     
     public function __construct(){
+        parent::__construct();
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
     }
@@ -43,7 +44,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         if ($options) $this->options = array_replace_recursive($options, $this->options);
     }
 
-    public function get_tracks(){
+    public function get_raw_tracks(){
 
         //url
         $url = $this->redirect_url = $this->get_remote_url();
@@ -73,11 +74,8 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $this->track_nodes = $track_nodes;
 
         //tracks
-        $tracks = $this->get_tracks_array($track_nodes);
-        if ( is_wp_error($tracks) ) return $tracks;
-        $this->tracks = $tracks;
-
-        return $this->tracks;
+        $tracks = $this->parse_track_nodes($track_nodes);
+        return $tracks;
     }
     
     public function get_options($keys = null){
@@ -325,7 +323,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
 
-    protected function get_tracks_array($track_nodes){
+    protected function parse_track_nodes($track_nodes){
 
         $selector_artist = $this->get_options( array('selectors','track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing','wpsstm') );
@@ -507,7 +505,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     */
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Playlist_Scraper_Datas notice]: ' . $message ); 
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Remote_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,

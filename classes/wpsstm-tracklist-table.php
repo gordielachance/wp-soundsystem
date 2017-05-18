@@ -7,24 +7,31 @@
 
 class WP_SoundSytem_TracksList_Table{
     var $tracklist;
-    var $page;
-    var $per_page = 0;
-    var $track_index = 0;
-    var $paged_var = 'tracklist_page';
+    var $curr_track_idx = 0;
+    
     var $no_items_label = null;
     var $can_player = true;
     var $sources_db_only = true;
+    
+    var $_pagination_args = array(
+        'total_items'   => 0,
+        'total_pages'   => 0,
+        'per_page'      => 0,
+        'total_pages'   => 0
+    );
+
+    var $total_items = null;
 
     function __construct($tracklist){
-        global $status, $page;
+        global $page;
         
         $this->tracklist = $tracklist;
-        
+
         $this->no_items_label = __( 'No tracks found.','wpsstm');
 
-        $this->page = ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1;
-
         $this->can_player = ( !is_admin() && wpsstm()->get_options('player_enabled') == 'on' );
+        
+        
     }
     
     function prepare_items() {
@@ -60,24 +67,6 @@ class WP_SoundSytem_TracksList_Table{
          * your own package classes.
          */
         $current_page = $this->get_pagenum();
-        
-        /**
-         * REQUIRED for pagination. Let's check how many items are in our data array. 
-         * In real-world use, this would be the total number of items in your database, 
-         * without filtering. We'll need this later, so you should always include it 
-         * in your own package classes.
-         */
-        $total_items = count($tracks);
-        
-        
-        /**
-         * The WP_List_Table class does not handle pagination for us, so we need
-         * to ensure that the data is trimmed to only the current page. We can use
-         * array_slice() to 
-         */
-        if ($this->per_page > 0){
-            $tracks = array_slice((array)$tracks,(($current_page-1)*$this->per_page),$this->per_page);
-        }
 
         /**
          * REQUIRED. Now we can add our *sorted* data to the items property, where 
@@ -96,8 +85,7 @@ class WP_SoundSytem_TracksList_Table{
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
-        
-        
+
         /**
          * REQUIRED. Finally, we build an array to be used by the class for column 
          * headers. The $this->_column_headers property takes an array which contains
@@ -105,13 +93,14 @@ class WP_SoundSytem_TracksList_Table{
          * for sortable columns.
          */
         $this->_column_headers = array($columns, $hidden, $sortable);
-        
-        
-        if ($this->per_page > 0) {
+        $per_page = $this->tracklist->tracks_per_page;
+        $total_tracks = $this->tracklist->get_total_tracks();
+
+        if ($per_page > -1) {
             $this->set_pagination_args( array(
-                'total_items' => $total_items,                  //WE have to calculate the total number of items
-                'per_page'    => $this->per_page,                     //WE have to determine how many items to show on a page
-                'total_pages' => ceil($total_items/$this->per_page)   //WE have to calculate the total number of pages
+                'total_items' => $total_tracks,                     //WE have to calculate the total number of items
+                'per_page'    => $per_page,                         //WE have to determine how many items to show on a page
+                'total_pages' => ceil($total_tracks/$per_page)      //WE have to calculate the total number of pages
             ) );
         }
     }
@@ -199,7 +188,7 @@ class WP_SoundSytem_TracksList_Table{
      */
     public function get_pagenum() {
         
-            $pagenum = $this->page -1;
+            $pagenum = $this->tracklist->current_page -1;
 
             if( isset( $this->_pagination_args['total_pages'] ) && $pagenum > $this->_pagination_args['total_pages'] )
                     $pagenum = $this->_pagination_args['total_pages'];
@@ -214,6 +203,7 @@ class WP_SoundSytem_TracksList_Table{
      * @param array $args An associative array with information about the pagination
      * @access protected
      */
+
     protected function set_pagination_args( $args ) {
             $args = wp_parse_args( $args, array(
                     'total_items' => 0,
@@ -235,7 +225,7 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->tracks_count;?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->get_total_tracks();?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -274,7 +264,7 @@ class WP_SoundSytem_TracksList_Table{
                 printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s</strong>',$tracklist_link);
             }
             
-            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->tracks_count);
+            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->get_total_tracks());
         
             $text_time = $text_refresh = null;
 
@@ -333,7 +323,6 @@ class WP_SoundSytem_TracksList_Table{
             'tracklist-nav',
             'tracklist-' . $post_type,
             esc_attr( $which )
-            
         );
 
         ?>
@@ -358,9 +347,11 @@ class WP_SoundSytem_TracksList_Table{
      * @param string $which
      */
     protected function pagination( $which ) {
+
             if ( empty( $this->_pagination_args ) ) {
                     return;
-            }
+            }        
+
 
             $total_items = $this->_pagination_args['total_items'];
             $total_pages = $this->_pagination_args['total_pages'];
@@ -372,10 +363,9 @@ class WP_SoundSytem_TracksList_Table{
             $output = '<span class="displaying-num">' . sprintf( _n( '1 item', '%s items', $total_items ), number_format_i18n( $total_items ) ) . '</span>';
 
             $current = $this->get_pagenum();
-
-            $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-
-            $current_url = remove_query_arg( array( 'hotkeys_highlight_last', 'hotkeys_highlight_first' ), $current_url );
+            $paged_var = WP_SoundSytem_Tracklist::$paged_var;
+        
+            $current_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
 
             $page_links = array();
 
@@ -389,14 +379,14 @@ class WP_SoundSytem_TracksList_Table{
             $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
                     'first-page' . $disable_first,
                     esc_attr__( 'Go to the first page' ),
-                    esc_url( remove_query_arg( $this->page, $current_url ) ),
+                    esc_url( remove_query_arg( $paged_var, $current_url ) ),
                     '&laquo;'
             );
 
             $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
                     'prev-page' . $disable_first,
                     esc_attr__( 'Go to the previous page' ),
-                    esc_url( add_query_arg( $this->page, max( 1, $current-1 ), $current_url ) ),
+                    esc_url( add_query_arg( $paged_var, max( 1, $current-1 ), $current_url ) ),
                     '&lsaquo;'
             );
 
@@ -406,14 +396,14 @@ class WP_SoundSytem_TracksList_Table{
             $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
                     'next-page' . $disable_last,
                     esc_attr__( 'Go to the next page' ),
-                    esc_url( add_query_arg( $this->page, min( $total_pages, $current+1 ), $current_url ) ),
+                    esc_url( add_query_arg( $paged_var, min( $total_pages, $current+1 ), $current_url ) ),
                     '&rsaquo;'
             );
 
             $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
                     'last-page' . $disable_last,
                     esc_attr__( 'Go to the last page' ),
-                    esc_url( add_query_arg( $this->page, $total_pages, $current_url ) ),
+                    esc_url( add_query_arg( $paged_var, $total_pages, $current_url ) ),
                     '&raquo;'
             );
 
@@ -445,7 +435,7 @@ class WP_SoundSytem_TracksList_Table{
             list( $columns, $hidden, $sortable ) = $this->get_column_info();
 
             $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-            $current_url = remove_query_arg( $this->page, $current_url );
+            $current_url = remove_query_arg( WP_SoundSytem_Tracklist::$paged_var, $current_url );
 
             if ( isset( $_GET['orderby'] ) )
                     $current_orderby = $_GET['orderby'];
@@ -659,8 +649,8 @@ class WP_SoundSytem_TracksList_Table{
     function column_default($item, $column_name){
         switch($column_name){
             case 'trackitem_order':
-                $this->track_index++;
-                return $this->track_index;
+                $this->curr_track_idx++;
+                return $this->curr_track_idx;
             case 'trackitem_play_bt':
                 return wpsstm_player()->get_track_button($item);
             case 'trackitem_track':

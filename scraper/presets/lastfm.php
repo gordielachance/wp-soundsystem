@@ -1,14 +1,13 @@
 <?php
 class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
 
-    var $slug = 'last-fm-website';
+    var $remote_slug = 'last-fm-website';
     
     var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
     var $variables = array(
         'lastfm-user' => null,
         'lastfm-page' => null
     );
-
 
     var $options = array(
         'selectors' => array(
@@ -23,7 +22,7 @@ class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Playlist_Scrap
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Last.FM website','wpsstm');
+        $this->remote_name = __('Last.FM website','wpsstm');
 
     }
 
