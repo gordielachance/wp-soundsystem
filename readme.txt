@@ -178,7 +178,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.9.3 =
 * player buttons : previous/next track & previous/next page
 * splitter presets into multiple files
-* improved scraper-remote.php
+* improved wpsstm-live-tracklist-class.php
 
 = 0.9.9.2 =
 * new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
@@ -215,7 +215,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.8.5 =
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSytem_Playlist_Scraper_Datas::get_track_node_content()
+* sanitize string at the end of WP_SoundSytem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =

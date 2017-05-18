@@ -21,17 +21,6 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             $sortable = $this->get_sortable_columns();
             $this->_column_headers = array($columns, $hidden, $sortable);
 
-            $current_page = $this->get_pagenum();
-            $total_items = count($this->items);
-
-            if ($this->links_per_page > 0){
-                $this->items = array_slice((array)$this->items,(($current_page-1)*$this->links_per_page),$this->links_per_page);
-            }
-
-            $this->set_pagination_args( array(
-            'total_items' => $total_items,
-            'per_page'    => $this->links_per_page
-            ) );
             $this->items = $this->items;
             
             //TO FIX CAP

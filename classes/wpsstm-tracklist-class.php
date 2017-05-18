@@ -5,21 +5,35 @@ class WP_SoundSytem_Tracklist{
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     
     //infos
-    
     var $title = null;
     var $author = null;
     var $location = null;
     
     //datas
-    
     var $tracks = array();
-    var $tracks_count = 0;
+    var $total_tracks = 0;
     
     var $updated_time = null;
     var $expire_time = null;
+    
+    var $pagination = array(
+        'total_items'  => null,
+        'total_pages'   => null,
+        'per_page'      => null,
+        'current_page'  => null
+    );
+    
+    static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
         
+        $pagination_args = array(
+            'per_page'      => 0, //TO FIX default option
+            'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
+        );
+
+        $this->set_tracklist_pagination($pagination_args);
+
         if ($post_id){
             
             $this->post_id = $post_id;
@@ -33,7 +47,7 @@ class WP_SoundSytem_Tracklist{
             $this->location = get_permalink($post_id);
             
         }
-        
+
     }
     
     function load_subtracks(){
@@ -103,13 +117,15 @@ class WP_SoundSytem_Tracklist{
     
     function add($tracks){
         
+        $tracks_count = null;
+        
         //force array
         if ( !is_array($tracks) ){
             $tracks = array($tracks);
         }
 
         foreach ($tracks as $track){
-            
+
             if ( !is_a($track, 'WP_SoundSystem_Subtrack') ){
                 if ( is_array($track) ){
                     $track = new WP_SoundSystem_Subtrack($track);
@@ -120,11 +136,13 @@ class WP_SoundSytem_Tracklist{
             $track->tracklist_id = $this->post_id;
 
             //increment count
-            $this->tracks_count++;
-            $track->subtrack_order = $this->tracks_count;
+            $tracks_count++;
+            $track->subtrack_order = $tracks_count;
 
             $this->tracks[] = $track;
         }
+        
+        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
 
     }
 
@@ -140,10 +158,11 @@ class WP_SoundSytem_Tracklist{
         }
         
         $this->tracks = $valid_tracks;
+        $tracks_count = count($valid_tracks);
+        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
 
     }
 
-    //TO FIX do we need this ?
     function array_export(){
         $export = array();
         foreach ($this->tracks as $track){
@@ -207,6 +226,17 @@ class WP_SoundSytem_Tracklist{
         $tracklist_table->prepare_items();
         $tracklist_table->display();
         return ob_get_clean();
+    }
+    
+    public function set_tracklist_pagination( $args ) {
+
+        $args = wp_parse_args( $args, $this->pagination );
+
+        if ( ( $args['per_page'] > 0 ) && ( $args['total_items'] ) ){
+            $args['total_pages'] = ceil( $args['total_items'] / $args['per_page'] );
+        }
+
+        $this->pagination = $args;
     }
 
 }

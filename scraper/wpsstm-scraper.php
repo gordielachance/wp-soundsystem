@@ -45,7 +45,7 @@ class WP_SoundSytem_Playlist_Scraper{
     
     function __construct($post_id_or_feed_url = null) {
         
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-live-tracklist-class.php');
 
         $this->setup_globals();
         $this->setup_actions();
@@ -55,7 +55,7 @@ class WP_SoundSytem_Playlist_Scraper{
             if ( ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
                 $this->init_post($post_id_or_feed_url);
             }else{ //url
-                $this->init($post_id_or_feed_url);
+                $this->populate_remote_tracklist($post_id_or_feed_url);
             }
         }
     }
@@ -63,7 +63,6 @@ class WP_SoundSytem_Playlist_Scraper{
     function setup_globals(){
         $this->options = self::get_default_options();
         $this->tracklist = new WP_SoundSytem_Tracklist();
-        $this->page = new WP_SoundSytem_Playlist_Scraper_Datas();
     }
     
     function setup_actions(){
@@ -96,21 +95,21 @@ class WP_SoundSytem_Playlist_Scraper{
 
     function init_post($post_id){
 
-        $this->tracklist = new WP_SoundSytem_Tracklist($post_id);
-        
         $default_options = self::get_default_options();
         $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
 
         $this->options = array_replace_recursive($default_options,(array)$db_options);
 
         $feed_url = get_post_meta( $post_id, self::$meta_key_scraper_url, true );
-        $this->init($feed_url);
+        $this->populate_remote_tracklist($feed_url);
 
     }
     
-    function init($feed_url){
+    function populate_remote_tracklist($feed_url){
 
         if (!$feed_url) return;
+        
+        $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
 
         //cache only if several post are displayed (like an archive page)
         if ( !is_admin() ){
@@ -124,87 +123,88 @@ class WP_SoundSytem_Playlist_Scraper{
         $this->feed_url = $feed_url;
         $this->id = md5( $this->feed_url ); //unique ID based on URL
         $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
-        
-        //set expire time
-        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
-        $this->tracklist->expire_time = get_option ( $transient_timeout_name );
-        
 
         //try to get cache first
+
         $this->datas = $this->datas_cache = $this->get_cache();
         if ($this->datas_cache){
             $this->tracklist->add($this->datas_cache['tracks']);
             //we got cached tracks, but do ignore them in wizard
-            if ( ( $cached_tracks_count = count($this->tracklist->tracks) ) && $this->is_wizard ){
-                $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_tracks_count,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
+            if ( ( $cached_total_items = count($this->tracklist->tracks) ) && $this->is_wizard ){
+                $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
 
         //load page preset
-        if ( $page_preset = $this->populate_scraper_presets($this) ){
-            $this->page = $page_preset;
-            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->name.'</em>') );
+        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($this) ){
+            $this->tracklist = $live_tracklist_preset;
+            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->remote_name.'</em>') );
         }
+        
+        //set expire time
+        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
+        $this->tracklist->expire_time = get_option( $transient_timeout_name );
+
         //populate page
 
-        $this->page->init($this->feed_url,$this->options);
+        $this->tracklist->init($this->feed_url,$this->options);
 
         //get remote tracks
         if ( ( !$this->tracklist->tracks && (!$this->cache_only) ) || $this->is_wizard ){
 
             $this->datas_remote = false; // so we can detect that we ran a remote request
-            $remote_tracks = $this->page->get_tracks();
+            if ( $remote_tracks = $this->tracklist->get_all_raw_tracks() ){
 
-            if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
-                if ( $this->feed_url != $this->page->redirect_url ){
-                    $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->page->redirect_url.'</em>') );
-                }
-            }
+                if ( !is_wp_error($remote_tracks) ) {
 
-            if ( $remote_tracks && !is_wp_error($remote_tracks) ) {
-
-                $this->tracklist->add($remote_tracks);
-
-                //Musicbrainz lookup
-                //TO FIX quite slow for big playlists. Think about a way to handle this.
-                /*
-                if ( $this->get_options('musicbrainz') == 'on'  ){
-                    foreach ($this->tracklist->tracks as $track){
-                        $track->musicbrainz();
+                    if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                        if ( $this->feed_url != $this->tracklist->redirect_url ){
+                            $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->tracklist->redirect_url.'</em>') );
+                        }
                     }
-                }
-                */
 
-                //populate page notices
-                foreach($this->page->notices as $notice){
-                    $this->notices[] = $notice;
-                }
-                
-                $tracks_arr = $this->tracklist->array_export();
-                
-                //format response
-                $this->datas = $this->datas_remote = array(
-                    'title'     => $this->page->get_tracklist_title(),
-                    'author'    => $this->page->get_tracklist_author(),
-                    'timestamp' => current_time( 'timestamp' ),
-                    'tracks'    => $remote_tracks,
-                    
-                );
+                    $this->tracklist->add($remote_tracks);
 
-                //set cache if there is none
-                if ( !$this->datas_cache ){
-                    $this->set_cache();
+                    //Musicbrainz lookup
+                    //TO FIX quite slow for big playlists. Think about a way to handle this.
+                    /*
+                    if ( $this->get_options('musicbrainz') == 'on'  ){
+                        foreach ($this->tracklist->tracks as $track){
+                            $track->musicbrainz();
+                        }
+                    }
+                    */
+
+                    //populate page notices
+                    foreach($this->tracklist->notices as $notice){
+                        $this->notices[] = $notice;
+                    }
+
+                    $tracks_arr = $this->tracklist->array_export();
+
+                    //format response
+                    $this->datas = $this->datas_remote = array(
+                        'title'         => $this->tracklist->get_tracklist_title(),
+                        'author'        => $this->tracklist->get_tracklist_author(),
+                        'tracks'        => $remote_tracks,
+                        'timestamp'     => current_time( 'timestamp' )
+                    );
+
+                    //set cache if there is none
+                    if ( !$this->datas_cache ){
+                        $this->set_cache();
+                    }
+
+                }else{
+                    $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
                 }
-                
-            }else{
-                $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
             }
 
         }
 
         //get options back from page (a preset could have changed them)
-        $this->options = $this->page->options; 
-
+        $this->options = $this->tracklist->options; 
+    
         /*
         Build Tracklist
         */
@@ -241,7 +241,10 @@ class WP_SoundSytem_Playlist_Scraper{
         }
 
         if ( $cache = get_transient( $this->transient_name_cache ) ){
-            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache)),"WP_SoundSytem_Playlist_Scraper_Datas::get_cache()"); 
+            $cache_debug = $cache;
+            $cache_debug['tracks_count'] = ( isset($cache['tracks']) ) ? count($cache['tracks']) : null;
+            unset($cache_debug['tracks']);
+            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache_debug)),"WP_SoundSytem_Remote_Tracklist::get_cache()"); 
         }
         
         return $cache;
@@ -254,8 +257,12 @@ class WP_SoundSytem_Playlist_Scraper{
         
         $duration = $duration_min * MINUTE_IN_SECONDS;
         $success = set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
-
-        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($this->datas_remote)),"WP_SoundSytem_Playlist_Scraper_Datas::set_cache()"); 
+        
+        $debug_cache = $this->datas_remote;
+        $debug_cache['tracks_count'] = ( isset($debug_cache['tracks']) ) ? count($debug_cache['tracks']) : null;
+        unset($debug_cache['tracks']);
+            
+        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSytem_Remote_Tracklist::set_cache()"); 
         
     }
 
@@ -277,7 +284,7 @@ class WP_SoundSytem_Playlist_Scraper{
         return $available_presets;
     }
 
-    function populate_scraper_presets($scraper){
+    function get_live_tracklist_preset($scraper){
         
         $enabled_presets = array();
 

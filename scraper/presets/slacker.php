@@ -1,6 +1,6 @@
 <?php
 class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
-    var $slug = 'slacker-station-tops';
+    var $remote_slug = 'slacker-station-tops';
     
     var $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
     var $variables = array(
@@ -17,7 +17,7 @@ class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Playl
     function __construct(){
         parent::__construct();
 
-        $this->name = __('Slacker.com station tops','wpsstm');
+        $this->remote_name = __('Slacker.com station tops','wpsstm');
 
     } 
 

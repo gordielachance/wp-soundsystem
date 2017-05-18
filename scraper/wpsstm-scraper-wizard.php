@@ -182,7 +182,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             Source feedback
             */
 
-            if ( $this->scraper->page->variables ){
+            if ( $this->scraper->tracklist->variables ){
                 $this->add_wizard_field(
                     'regex_matches', 
                     __('Regex matches','wpsstm'), 
@@ -364,7 +364,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         }
         
         //cache has been disabled, delete existing cache
-        if ( !isset($new_input['datas_cache_min']) && isset($previous_values['datas_cache_min']) && ( $this->scraper->page->datas_cache ) ) {
+        if ( !isset($new_input['datas_cache_min']) && isset($previous_values['datas_cache_min']) && ( $this->scraper->tracklist->datas_cache ) ) {
             $this->scraper->delete_cache();
         }
 
@@ -423,7 +423,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
-            $attr_disabled = ( $this->scraper->page->response_type != 'text/html');
+            $attr_disabled = ( $this->scraper->tracklist->response_type != 'text/html');
             $attr = $this->scraper->get_options( array('selectors',$selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
@@ -547,7 +547,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $presets_list_str = null;
         foreach ((array)WP_SoundSytem_Playlist_Scraper::get_available_presets() as $preset){
             if ( !$preset->wizard_suggest ) continue;
-            $presets_list[] = $preset->name;
+            $presets_list[] = $preset->remote_name;
         }
 
         if ( !empty($presets_list) ){
@@ -564,8 +564,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         $output = "—";
 
-        if ( $this->scraper->page->response_type ){
-            $output = $this->scraper->page->response_type;
+        if ( $this->scraper->tracklist->response_type ){
+            $output = $this->scraper->tracklist->response_type;
         }
         
         echo $output;
@@ -574,7 +574,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function feedback_regex_matches_callback(){
 
-        foreach($this->scraper->page->variables as $variable_slug => $variable){
+        foreach($this->scraper->tracklist->variables as $variable_slug => $variable){
             $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
             printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
         }
@@ -585,7 +585,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         $output = "—";
         
-        if ( $body_node = $this->scraper->page->body_node ){
+        if ( $body_node = $this->scraper->tracklist->body_node ){
             
             $content = $body_node->html();
 
@@ -622,7 +622,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $output = "—"; //none
         $tracks_output = array();
         
-        if ( $track_nodes = $this->scraper->page->track_nodes ){
+        if ( $track_nodes = $this->scraper->tracklist->track_nodes ){
 
             foreach ($track_nodes as $single_track_node){
                 
@@ -890,7 +890,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         if ($this->can_show_step('source')){
 
             $icon_source_tab = $status_icons[0];
-            if ( $this->scraper->page->body_node ){
+            if ( $this->scraper->tracklist->body_node ){
                 $icon_source_tab = $status_icons[1];
             }
             
@@ -904,7 +904,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         if ($this->can_show_step('tracks_selector')){
             
             $icon_tracks_tab = $status_icons[0];
-            if ( $this->scraper->page->track_nodes ){
+            if ( $this->scraper->tracklist->track_nodes ){
                 $icon_tracks_tab = $status_icons[1];
             }
             
@@ -978,8 +978,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             case 'tracks_selector':
                 
                 //TO FIX TO UNCOMMENT
-                //if ( !$this->scraper->page ) break;
-                //if ( !$this->scraper->page->body_node ) break;
+                //if ( !$this->scraper->tracklist ) break;
+                //if ( !$this->scraper->tracklist->body_node ) break;
                 
                 return true;
             break;

@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Playlist_Scraper_Datas{
+class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     //preset infos
     var $slug = 'default';
@@ -9,6 +9,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     //input
     public $options = array();
+    public $can_paginate = false;
     public $url = null;
     
     //url stuff
@@ -17,12 +18,18 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     var $redirect_url = null; //if needed, a redirect URL.  Can use variables extracted from the pattern using the %variable% format.
 
     //response
+    var $request_pagination = array(
+        'total_items'       => null, //When possible (eg. APIs), return the count of total tracks so we know how much tracks we should request.  Override this in your preset.
+        'total_pages'       => 1,
+        'page_items_limit'  => -1, //When possible (eg. APIs), set the limit of tracks each request can get
+        'current_page'      => 1
+    );
     public $response = null;
     public $response_type = null;
     public $body_node = null;
     public $track_nodes = array();
     public $tracks = array();
-    
+
     public $notices = array();
     
     //request
@@ -34,6 +41,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     );
     
     public function __construct(){
+        parent::__construct();
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
     }
@@ -42,12 +50,31 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $this->url = $url;
         if ($options) $this->options = array_replace_recursive($options, $this->options);
     }
+    
+    public function get_all_raw_tracks(){
 
-    public function get_tracks(){
+        $raw_tracks = array();
+        
+        while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
+            if ( $page_raw_tracks = $this->get_page_raw_tracks() ){
+                $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
+            }
+            $this->request_pagination['current_page']++;
+        }
+        
+        return $raw_tracks;
+        
+    }
+
+    private function get_page_raw_tracks(){
+
+        wpsstm()->debug_log(json_encode($this->pagination),'get_page_raw_tracks() pagination' );
 
         //url
-        $url = $this->redirect_url = $this->get_remote_url();
+        $url = $this->redirect_url = $this->get_request_url();
         if ( is_wp_error($url) ) return $url;
+        
+        wpsstm()->debug_log($url,'get_page_raw_tracks() request_url' );
 
         //response
         $response = $this->get_remote_response($url);
@@ -73,18 +100,15 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
         $this->track_nodes = $track_nodes;
 
         //tracks
-        $tracks = $this->get_tracks_array($track_nodes);
-        if ( is_wp_error($tracks) ) return $tracks;
-        $this->tracks = $tracks;
-
-        return $this->tracks;
+        $tracks = $this->parse_track_nodes($track_nodes);
+        return $tracks;
     }
     
     public function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
 
-    protected function get_remote_url(){
+    protected function get_request_url(){
         
         $domain = wpsstm_get_url_domain($this->url);
 
@@ -325,7 +349,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
 
     }
 
-    protected function get_tracks_array($track_nodes){
+    protected function parse_track_nodes($track_nodes){
 
         $selector_artist = $this->get_options( array('selectors','track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing','wpsstm') );
@@ -507,7 +531,7 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
     */
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Playlist_Scraper_Datas notice]: ' . $message ); 
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Remote_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -515,6 +539,17 @@ class WP_SoundSytem_Playlist_Scraper_Datas{
             'message'   => $message,
             'error'     => $error
         );
+    }
+    
+    public function set_request_pagination( $args ) {
+
+        $args = wp_parse_args( $args, $this->request_pagination );
+
+        if ( $args['page_items_limit'] > 0 ){
+            $args['total_pages'] = ceil( $args['total_items'] / $args['page_items_limit'] );
+        }
+
+        $this->request_pagination = $args;
     }
 
 }

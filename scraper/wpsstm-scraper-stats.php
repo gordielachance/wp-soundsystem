@@ -78,7 +78,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
         if (!$post_id) $post_id = $post->ID;
 
         $time = current_time( 'timestamp' );
-        $transient_log_prefix = sprintf('wpsstm_%s_tracks_count_',$post_id);
+        $transient_log_prefix = sprintf('wpsstm_%s_total_tracks_',$post_id);
         $transient_log_name = $transient_log_prefix . $time;
 
         //get health log
@@ -176,7 +176,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
 
         $time = current_time( 'timestamp' );
         $transient_name_freeze = sprintf('wpsstm_%s_freeze_health',$post_id);
-        $transient_log_prefix = sprintf('wpsstm_%s_tracks_count_',$post_id);
+        $transient_log_prefix = sprintf('wpsstm_%s_total_tracks_',$post_id);
         $transient_log_name = $transient_log_prefix . $time;
         
         //abord if last updated <10 min
@@ -193,7 +193,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
         //update health
         $log_success_pc = 0;
         if ( $log_count = count($log) ){
-            $log_success = array_filter($log, function($tracks_count){return ($tracks_count);} ); //remove items where tracks count is null
+            $log_success = array_filter($log, function($total_tracks){return ($total_tracks);} ); //remove items where tracks count is null
             $log_success_count = count($log_success);
             $log_success_pc = $log_success_count / $log_count;
             $log_success_pc = round($log_success_pc, 1);
