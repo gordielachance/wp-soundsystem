@@ -530,7 +530,7 @@ class WP_SoundSytem_Core_LastFM{
         $api_args = array(
             'artist'        => $track->artist,
             'track'         => $track->title,
-            'timestamp'     => $timestamp,
+            'timestamp'     => $timestamp, //in seconds
             'album'         => $track->album,
             'chosenByUser'  => 0,
             'duration'      => $track->duration
