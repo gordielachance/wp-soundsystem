@@ -28,7 +28,7 @@ class WP_SoundSytem_Tracklist{
     function __construct($post_id = null ){
         
         $pagination_args = array(
-            'per_page'      => 84, //TO FIX default option
+            'per_page'      => 50, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
         );
 

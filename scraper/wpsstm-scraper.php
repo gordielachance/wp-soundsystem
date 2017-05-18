@@ -62,7 +62,6 @@ class WP_SoundSytem_Playlist_Scraper{
 
     function setup_globals(){
         $this->options = self::get_default_options();
-        $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
     }
     
     function setup_actions(){
@@ -140,9 +139,11 @@ class WP_SoundSytem_Playlist_Scraper{
         }
 
         //load page preset
-        if ( $page_preset = $this->populate_scraper_presets($this) ){
-            $this->tracklist = $page_preset;
+        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($this) ){
+            $this->tracklist = $live_tracklist_preset;
             $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->remote_name.'</em>') );
+        }else{
+            $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
         }
 
         //populate page
@@ -284,7 +285,7 @@ class WP_SoundSytem_Playlist_Scraper{
         return $available_presets;
     }
 
-    function populate_scraper_presets($scraper){
+    function get_live_tracklist_preset($scraper){
         
         $enabled_presets = array();
 

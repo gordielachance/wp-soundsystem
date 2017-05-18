@@ -283,16 +283,18 @@ class WP_SoundSytem_TracksList_Table{
      */
     protected function pagination( $which ) {
         
-            $big = 999999999; // need an unlikely integer
+        if ( !$this->tracklist->pagination['per_page'] ) return;
 
-            $pagination_args = array(
-                'base' => str_replace( $big, '%#%', esc_url( wpsstm_get_tracklist_link( $this->tracklist->post_id, $big ) ) ),
-                'format' => sprintf('?%s=%#%',WP_SoundSytem_Tracklist::$paged_var),
-                'current' => max( 1,$this->tracklist->pagination['current_page']  ),
-                'total' => $this->tracklist->pagination['total_pages']
-            );
-        
-            echo paginate_links( $pagination_args );
+        $big = 999999999; // need an unlikely integer
+
+        $pagination_args = array(
+            'base' => str_replace( $big, '%#%', esc_url( wpsstm_get_tracklist_link( $this->tracklist->post_id, $big ) ) ),
+            'format' => sprintf('?%s=%#%',WP_SoundSytem_Tracklist::$paged_var),
+            'current' => max( 1,$this->tracklist->pagination['current_page']  ),
+            'total' => $this->tracklist->pagination['total_pages']
+        );
+
+        echo paginate_links( $pagination_args );
     }
     
     /**
