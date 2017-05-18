@@ -29,8 +29,8 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             }
 
             $this->set_pagination_args( array(
-            'total_items' => $total_items,
-            'per_page'    => $this->links_per_page
+                'total_items' => $total_items,
+                'per_page'    => $this->links_per_page
             ) );
             $this->items = $this->items;
             

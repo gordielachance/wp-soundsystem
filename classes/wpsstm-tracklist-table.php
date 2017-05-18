@@ -94,7 +94,7 @@ class WP_SoundSytem_TracksList_Table{
          */
         $this->_column_headers = array($columns, $hidden, $sortable);
         $per_page = $this->tracklist->tracks_per_page;
-        $total_tracks = $this->tracklist->get_total_tracks();
+        $total_tracks = $this->tracklist->get_tracks_count();
 
         if ($per_page > -1) {
             $this->set_pagination_args( array(
@@ -225,7 +225,7 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->get_total_tracks();?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->get_tracks_count();?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -264,7 +264,7 @@ class WP_SoundSytem_TracksList_Table{
                 printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s</strong>',$tracklist_link);
             }
             
-            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->get_total_tracks());
+            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->get_tracks_count());
         
             $text_time = $text_refresh = null;
 

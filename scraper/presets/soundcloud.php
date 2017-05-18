@@ -33,7 +33,7 @@ class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Playlist_Scrap
 
     }
 
-    function get_remote_url(){
+    function get_request_url(){
         
         //get soundcloud user ID
         $user_id = $this->get_user_id();
@@ -52,7 +52,7 @@ class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Playlist_Scrap
         }
         $this->set_variable_value('soundcloud-api-page',$this->page_api);
         
-        return parent::get_remote_url();
+        return parent::get_request_url();
     }
     
     function get_user_id(){

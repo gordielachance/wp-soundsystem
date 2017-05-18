@@ -13,6 +13,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         'spotify-playlist' => null
     );
     
+    var $can_paginate = true;
+    
     var $token = null;
 
     var $options = array(
@@ -28,7 +30,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         parent::__construct();
 
         $this->remote_name = __('Spotify Playlist','wpsstm');
-        $this->tracks_per_page = 100;
+        $this->tracks_per_page = 100; //API limit
 
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');
@@ -57,7 +59,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         return $this->get_variable_value('spotify-user');
     }
     
-    function get_total_tracks(){
+    function get_tracks_count(){
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
         
@@ -72,14 +74,28 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         return wpsstm_get_array_value(array('tracks','total'), $api);
     }
     
+    protected function get_request_url(){
+        
+        $url = parent::get_request_url();
+        
+        //handle pagination
+        $pagination_args = array(
+            'limit'     => $this->tracks_per_page,
+            'offset'    => ($this->pagination['current_page'] - 1) * $this->tracks_per_page
+        );
+        
+        $url = add_query_arg($pagination_args,$url);
+        return $url;
+
+    }
+    
     function get_request_args(){
         $args = parent::get_request_args();
 
         if ( $token = $this->get_access_token() ){
 
             $args['headers']['Authorization'] = 'Bearer ' . $token;
-            $this->set_variable_value('spotify-token',$token);
-            
+            $this->set_variable_value('spotify-token',$token);            
         }
         
         $args['headers']['Accept'] = 'application/json';

@@ -9,6 +9,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     //input
     public $options = array();
+    public $can_paginate = false;
     public $url = null;
     
     //url stuff
@@ -22,7 +23,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public $body_node = null;
     public $track_nodes = array();
     public $tracks = array();
-    
+
     public $notices = array();
     
     //request
@@ -43,12 +44,37 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $this->url = $url;
         if ($options) $this->options = array_replace_recursive($options, $this->options);
     }
+    
+    public function get_all_raw_tracks(){
+        $tracks_count = $this->get_tracks_count();
+        
+        //set a limit in case the tracklist is too big (eg. while parsing a last.fm profile)
+        if ($tracks_count > 500) $tracks_count;
+        
+        $this->set_tracklist_pagination( array('total_tracks'=>$tracks_count,'per_page'=>$this->tracks_per_page,'current_page'=>1) );
 
-    public function get_raw_tracks(){
+        $raw_tracks = array();
+        
+        while ($this->pagination['current_page'] <= $this->pagination['total_pages']) {
+            if ( $page_raw_tracks = $this->get_page_raw_tracks() ){
+                $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
+            }
+            $this->pagination['current_page']++;
+        }
+        
+        return $raw_tracks;
+        
+    }
+
+    private function get_page_raw_tracks(){
+
+        wpsstm()->debug_log(json_encode($this->pagination),'get_page_raw_tracks() pagination' );
 
         //url
-        $url = $this->redirect_url = $this->get_remote_url();
+        $url = $this->redirect_url = $this->get_request_url();
         if ( is_wp_error($url) ) return $url;
+        
+        wpsstm()->debug_log($url,'get_page_raw_tracks() request_url' );
 
         //response
         $response = $this->get_remote_response($url);
@@ -82,7 +108,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         return wpsstm_get_array_value($keys,$this->options);
     }
 
-    protected function get_remote_url(){
+    protected function get_request_url(){
         
         $domain = wpsstm_get_url_domain($this->url);
 

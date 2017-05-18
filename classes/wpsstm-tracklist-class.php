@@ -17,13 +17,20 @@ class WP_SoundSytem_Tracklist{
     var $updated_time = null;
     var $expire_time = null;
     
+    var $pagination = array(
+        'total_tracks'  => 0,
+        'total_pages'   => 0,
+        'per_page'      => 0,
+        'current_page'  => 1
+    );
+    
     var $current_page = null;
     static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
         
         $this->tracks_per_page = 84; //TO FIX default option
-        $this->current_page = ( $_REQUEST[self::$paged_var] ) ? $_REQUEST[self::$paged_var] : 1;
+        $this->current_page = ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1;
         
         if ($post_id){
             
@@ -133,7 +140,7 @@ class WP_SoundSytem_Tracklist{
 
     }
     
-    function get_total_tracks(){
+    function get_tracks_count(){
         return $this->total_tracks;
     }
 
@@ -149,6 +156,7 @@ class WP_SoundSytem_Tracklist{
         }
         
         $this->tracks = $valid_tracks;
+        $this->total_tracks = count($valid_tracks);
 
     }
 
@@ -215,6 +223,17 @@ class WP_SoundSytem_Tracklist{
         $tracklist_table->prepare_items();
         $tracklist_table->display();
         return ob_get_clean();
+    }
+    
+    public function set_tracklist_pagination( $args ) {
+
+        $args = wp_parse_args( $args, $this->pagination );
+
+        if ( $args['per_page'] > 0 ){
+            $args['total_pages'] = ceil( $args['total_tracks'] / $args['per_page'] );
+        }
+
+        $this->pagination = $args;
     }
 
 }

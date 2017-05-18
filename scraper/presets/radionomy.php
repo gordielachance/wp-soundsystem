@@ -26,14 +26,14 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Sc
         $this->remote_name = __('Radionomy Station','wpsstm');
     }
     
-    protected function get_remote_url(){
+    protected function get_request_url(){
 
         //set station ID
         if ( $station_id = $this->get_station_id() ){
             $this->set_variable_value('radionomy-id',$station_id);
         }
         
-        return parent::get_remote_url();
+        return parent::get_request_url();
 
     }
 
