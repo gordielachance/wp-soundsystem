@@ -1,6 +1,6 @@
 <?php
 class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
-    var $remote_slug = 'rtbf';
+    var $preset_slug = 'rtbf';
     
     var $pattern = '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i'; //ignore la premiere which has different selectors.
     var $redirect_url= 'https://www.rtbf.be/%rtbf-slug%/conducteur';
@@ -21,7 +21,7 @@ class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Playlist_Scraper
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('RTBF radios','wpsstm');
+        $this->preset_name = __('RTBF radios','wpsstm');
 
     } 
 

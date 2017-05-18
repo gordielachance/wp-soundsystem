@@ -17,7 +17,7 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Playlist_Scraper_P
     
     */
     
-    var $remote_slug = 'reddit';
+    var $preset_slug = 'reddit';
 
     var $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
     var $redirect_url= 'https://www.reddit.com/r/%subredit-slug%.json?limit=50';
@@ -38,7 +38,7 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Playlist_Scraper_P
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('Reddit (for music subs)','wpsstm');
+        $this->preset_name = __('Reddit (for music subs)','wpsstm');
 
     }
 

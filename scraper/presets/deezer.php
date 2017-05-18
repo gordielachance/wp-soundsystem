@@ -1,6 +1,6 @@
 <?php
 class WP_SoundSytem_Playlist_Deezer_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
-    var $remote_slug = 'deezer';
+    var $preset_slug = 'deezer';
     
     var $pattern = '~^https?://(?:www.)?deezer.com/playlist/([^/]+)~i';
     
@@ -15,6 +15,6 @@ class WP_SoundSytem_Playlist_Deezer_Scraper extends WP_SoundSytem_Playlist_Scrap
     
     function __construct(){
         parent::__construct();
-        $this->remote_name = __('Deezer Playlist','wpsstm');
+        $this->preset_name = __('Deezer Playlist','wpsstm');
     }
 }

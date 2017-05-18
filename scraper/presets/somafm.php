@@ -1,6 +1,6 @@
 <?php
 class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
-    var $remote_slug = 'somafm';
+    var $preset_slug = 'somafm';
     
     var $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
     var $redirect_url = 'http://somafm.com/songs/%somafm-slug%.xml';
@@ -20,7 +20,7 @@ class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scrap
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('Soma FM Station','wpsstm');
+        $this->preset_name = __('Soma FM Station','wpsstm');
 
     }
     

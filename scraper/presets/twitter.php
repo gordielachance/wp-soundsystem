@@ -1,6 +1,6 @@
 <?php
 class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
-    var $remote_slug = 'twitter';
+    var $preset_slug = 'twitter';
     
     var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
     var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
@@ -18,7 +18,7 @@ class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scra
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('Twitter','wpsstm');
+        $this->preset_name = __('Twitter','wpsstm');
 
     }
     

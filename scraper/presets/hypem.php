@@ -1,7 +1,7 @@
 <?php
 class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
     
-    var $remote_slug = 'hypem';
+    var $preset_slug = 'hypem';
     
     var $pattern = '~^https?://(?:www.)?hypem.com/~i';
 
@@ -16,7 +16,7 @@ class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Playlist_Scrape
     
     function __construct(){
         parent::__construct();
-        $this->remote_name = __('Hype Machine','wpsstm');
+        $this->preset_name = __('Hype Machine','wpsstm');
     }
  
 }

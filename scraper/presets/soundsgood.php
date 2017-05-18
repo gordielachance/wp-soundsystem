@@ -1,7 +1,7 @@
 <?php
 class WP_SoundSytem_Playlist_Soundsgood_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
     
-    var $remote_slug = 'soundsgood';
+    var $preset_slug = 'soundsgood';
     
     var $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
     var $redirect_url= 'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
@@ -21,7 +21,7 @@ class WP_SoundSytem_Playlist_Soundsgood_Api extends WP_SoundSytem_Playlist_Scrap
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('Soundsgood playlists','wpsstm');
+        $this->preset_name = __('Soundsgood playlists','wpsstm');
 
     } 
 

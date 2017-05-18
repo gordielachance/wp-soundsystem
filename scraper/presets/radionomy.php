@@ -1,7 +1,7 @@
 <?php
 class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
 
-    var $remote_slug = 'radionomy';
+    var $preset_slug = 'radionomy';
     
     var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
     var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
@@ -23,7 +23,7 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Playlist_Sc
     function __construct(){
         parent::__construct();
 
-        $this->remote_name = __('Radionomy Station','wpsstm');
+        $this->preset_name = __('Radionomy Station','wpsstm');
     }
     
     protected function get_request_url(){

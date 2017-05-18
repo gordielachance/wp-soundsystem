@@ -547,7 +547,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $presets_list_str = null;
         foreach ((array)WP_SoundSytem_Playlist_Scraper::get_available_presets() as $preset){
             if ( !$preset->wizard_suggest ) continue;
-            $presets_list[] = $preset->remote_name;
+            $presets_list[] = $preset->preset_name;
         }
 
         if ( !empty($presets_list) ){

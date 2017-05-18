@@ -138,7 +138,7 @@ class WP_SoundSytem_Playlist_Scraper{
         //load page preset
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($this) ){
             $this->tracklist = $live_tracklist_preset;
-            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->remote_name.'</em>') );
+            $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
         }
         
         //set expire time
