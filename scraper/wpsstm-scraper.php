@@ -109,6 +109,8 @@ class WP_SoundSytem_Playlist_Scraper{
     function init($feed_url){
 
         if (!$feed_url) return;
+        
+        $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
 
         //cache only if several post are displayed (like an archive page)
         if ( !is_admin() ){
@@ -142,8 +144,6 @@ class WP_SoundSytem_Playlist_Scraper{
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($this) ){
             $this->tracklist = $live_tracklist_preset;
             $this->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$page_preset->remote_name.'</em>') );
-        }else{
-            $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
         }
 
         //populate page

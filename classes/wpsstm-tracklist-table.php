@@ -7,7 +7,7 @@
 
 class WP_SoundSytem_TracksList_Table{
     var $tracklist;
-    var $curr_track_idx = 0;
+    var $curr_track_idx = null;
     
     var $no_items_label = null;
     var $can_player = true;
@@ -26,37 +26,32 @@ class WP_SoundSytem_TracksList_Table{
     }
     
     function prepare_items() {
+
         
-        /**
-         * Instead of querying a database, we're going to fetch the example data
-         * property we created for use in this plugin. This makes this example 
-         * package slightly different than one you might build on your own. In 
-         * this example, we'll be using array manipulation to sort and paginate 
-         * our data. In a real-world implementation, you will probably want to 
-         * use sort and pagination data to build a custom query instead, as you'll
-         * be able to use your precisely-queried data immediately.
-         */
-        $tracks = $this->tracklist->tracks;
-        
-        /***********************************************************************
-         * ---------------------------------------------------------------------
-         * vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-         * 
-         * In a real-world situation, this is where you would place your query.
-         *
-         * For information on making queries in WordPress, see this Codex entry:
-         * http://codex.wordpress.org/Class_Reference/wpdb
-         * 
-         * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-         * ---------------------------------------------------------------------
-         **********************************************************************/
 
         /**
          * REQUIRED. Now we can add our *sorted* data to the items property, where 
          * it can be used by the rest of the class.
          */
-        $this->items = $tracks;
+        $this->items = $this->tracklist->tracks;
         
+        /**
+         * The WP_List_Table class does not handle pagination for us, so we need
+         * to ensure that the data is trimmed to only the current page. We can use
+         * array_slice() to 
+         */
+        
+        $current_page = $this->tracklist->pagination['current_page'];
+        $per_page = $this->tracklist->pagination['per_page'];
+        
+        if ( $per_page > 0 ){
+            $current_page = $this->tracklist->pagination['current_page'];
+            $this->items = array_slice((array)$this->items,(($current_page-1)*$per_page),$per_page);
+        }
+        
+        $this->curr_track_idx = $per_page * ( $current_page - 1 );
+        
+
 
         /**
          * REQUIRED. Now we need to define our column headers. This includes a complete
