@@ -12,25 +12,26 @@ class WP_SoundSytem_Tracklist{
     //datas
     var $tracks = array();
     var $total_tracks = 0;
-    var $tracks_per_page = null;
     
     var $updated_time = null;
     var $expire_time = null;
     
     var $pagination = array(
-        'total_tracks'  => 0,
-        'total_pages'   => 0,
-        'per_page'      => 0,
-        'current_page'  => 1
+        'total_tracks'  => null,
+        'total_pages'   => null,
+        'per_page'      => null,
+        'current_page'  => null
     );
     
-    var $current_page = null;
     static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
-        
-        $this->tracks_per_page = 84; //TO FIX default option
-        $this->current_page = ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1;
+
+        $this->set_tracklist_pagination = array(
+            'total_tracks'  => null,
+            'per_page'      => 84, //TO FIX default option
+            'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
+        );
         
         if ($post_id){
             
@@ -140,8 +141,11 @@ class WP_SoundSytem_Tracklist{
 
     }
     
-    function get_tracks_count(){
-        return $this->total_tracks;
+    /*
+    When possible (eg. APIs), return the count of total tracks so we know how much tracks we should request.  Override this in your preset.
+    */
+    protected function get_remote_track_count(){
+        return null;
     }
 
     function validate_tracks($strict = true){

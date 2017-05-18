@@ -59,14 +59,6 @@ class WP_SoundSytem_TracksList_Table{
          * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
          * ---------------------------------------------------------------------
          **********************************************************************/
-        
-                
-        /**
-         * REQUIRED for pagination. Let's figure out what page the user is currently 
-         * looking at. We'll need this later, so you should always include it in 
-         * your own package classes.
-         */
-        $current_page = $this->get_pagenum();
 
         /**
          * REQUIRED. Now we can add our *sorted* data to the items property, where 
@@ -93,8 +85,6 @@ class WP_SoundSytem_TracksList_Table{
          * for sortable columns.
          */
         $this->_column_headers = array($columns, $hidden, $sortable);
-        $per_page = $this->tracklist->tracks_per_page;
-        $total_tracks = $this->tracklist->get_tracks_count();
 
         if ($per_page > -1) {
             $this->set_pagination_args( array(
@@ -176,26 +166,7 @@ class WP_SoundSytem_TracksList_Table{
         if ($all_values_count == 1) return false;
         
         return true;
-    }
-    
-    /**
-     * Get the current page number
-     *
-     * @since 3.1.0
-     * @access public
-     *
-     * @return int
-     */
-    public function get_pagenum() {
-        
-            $pagenum = $this->tracklist->current_page -1;
-
-            if( isset( $this->_pagination_args['total_pages'] ) && $pagenum > $this->_pagination_args['total_pages'] )
-                    $pagenum = $this->_pagination_args['total_pages'];
-
-            return max( 1, $pagenum );
-    }
-    
+    }    
 
     /**
      * An internal method that sets all the necessary pagination arguments
@@ -225,7 +196,7 @@ class WP_SoundSytem_TracksList_Table{
 	 */
 	public function display() {
         ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->get_tracks_count();?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
+        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->pagination['total_items'];?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -264,7 +235,7 @@ class WP_SoundSytem_TracksList_Table{
                 printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s</strong>',$tracklist_link);
             }
             
-            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->get_tracks_count());
+            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
         
             $text_time = $text_refresh = null;
 

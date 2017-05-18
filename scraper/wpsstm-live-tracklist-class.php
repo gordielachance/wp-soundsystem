@@ -18,6 +18,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     var $redirect_url = null; //if needed, a redirect URL.  Can use variables extracted from the pattern using the %variable% format.
 
     //response
+    var $request_pagination = array(
+        'total_tracks'          => 0,
+        'total_pages'           => 0,
+        'max_page_tracks'       => 0,
+        'current_page'          => 1
+    );
     public $response = null;
     public $response_type = null;
     public $body_node = null;
@@ -46,20 +52,22 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     public function get_all_raw_tracks(){
-        $tracks_count = $this->get_tracks_count();
         
-        //set a limit in case the tracklist is too big (eg. while parsing a last.fm profile)
-        if ($tracks_count > 500) $tracks_count;
+        $pagination_request_args = array(
+            'total_tracks'      =>  ( $tracks_count !== null) ? $tracks_count : null,
+            'max_page_tracks'   =>  $this->max_page_tracks
+        );
         
-        $this->set_tracklist_pagination( array('total_tracks'=>$tracks_count,'per_page'=>$this->tracks_per_page,'current_page'=>1) );
+        $tracks_count = $this->get_remote_track_count();
+        $this->set_request_pagination( );
 
         $raw_tracks = array();
         
-        while ($this->pagination['current_page'] <= $this->pagination['total_pages']) {
+        while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
             if ( $page_raw_tracks = $this->get_page_raw_tracks() ){
                 $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
             }
-            $this->pagination['current_page']++;
+            $this->request_pagination['current_page']++;
         }
         
         return $raw_tracks;
@@ -539,6 +547,17 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             'message'   => $message,
             'error'     => $error
         );
+    }
+    
+    public function set_request_pagination( $args ) {
+
+        $args = wp_parse_args( $args, $this->request_pagination );
+
+        if ( $args['max_page_tracks'] > 0 ){
+            $args['total_pages'] = ceil( $args['total_tracks'] / $args['max_page_tracks'] );
+        }
+
+        $this->request_pagination = $args;
     }
 
 }

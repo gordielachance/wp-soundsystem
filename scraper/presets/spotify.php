@@ -30,7 +30,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         parent::__construct();
 
         $this->remote_name = __('Spotify Playlist','wpsstm');
-        $this->tracks_per_page = 100; //API limit
+        $this->max_page_tracks = 100; //API limit
 
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');
@@ -59,7 +59,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         return $this->get_variable_value('spotify-user');
     }
     
-    function get_tracks_count(){
+    protected function get_remote_track_count(){
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
         
@@ -67,11 +67,10 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         
         $json = wp_remote_retrieve_body($response);
         
-        if ( is_wp_error($json) ) return $json;
-        
-        $api = json_decode($json,true);
-
-        return wpsstm_get_array_value(array('tracks','total'), $api);
+        if ( !is_wp_error($json) ){
+            $api = json_decode($json,true);
+            return wpsstm_get_array_value(array('tracks','total'), $api);
+        }
     }
     
     protected function get_request_url(){
@@ -80,8 +79,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         
         //handle pagination
         $pagination_args = array(
-            'limit'     => $this->tracks_per_page,
-            'offset'    => ($this->pagination['current_page'] - 1) * $this->tracks_per_page
+            'limit'     => $this->max_page_tracks,
+            'offset'    => ($request_pagination['current_page'] - 1) * $this->max_page_tracks
         );
         
         $url = add_query_arg($pagination_args,$url);

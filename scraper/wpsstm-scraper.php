@@ -45,7 +45,7 @@ class WP_SoundSytem_Playlist_Scraper{
     
     function __construct($post_id_or_feed_url = null) {
         
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-remote.php');
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-live-tracklist-class.php');
 
         $this->setup_globals();
         $this->setup_actions();
@@ -181,15 +181,7 @@ class WP_SoundSytem_Playlist_Scraper{
                 }
                 
                 $tracks_arr = $this->tracklist->array_export();
-                
-                //reset pagination
-                $this->tracklist->set_tracklist_pagination( array(
-                        'total_tracks' =>   $this->tracklist->total_tracks,
-                        'per_page' =>       $this->tracklist->tracks_per_page,
-                        'current_page' =>   1
-                    ) 
-                );
-                
+
                 //format response
                 $this->datas = $this->datas_remote = array(
                     'title'         => $this->tracklist->get_tracklist_title(),
