@@ -75,7 +75,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             //feed url
             if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSytem_Playlist_Scraper::$meta_key_scraper_url, $settings["feed_url"] );
+                update_post_meta( $settings_post->ID, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
                 unset($settings["feed_url"]);
             }
             
@@ -100,7 +100,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             $settings['selectors'] = $new_settings['selectors'];
 
-            update_post_meta($settings_post->ID,WP_SoundSytem_Playlist_Scraper::$meta_key_options_scraper,$settings);
+            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$meta_key_options_scraper,$settings);
             
         }
         
@@ -197,7 +197,11 @@ class WP_SoundSytem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
     
-    function get_live_playlist_tracklist($tracklist,$post_id){
+    public function init_live_playlist($url){
+        
+    }
+    
+    public function get_live_playlist_tracklist($tracklist,$post_id){
         
         $post_type = get_post_type($post_id);
         if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;

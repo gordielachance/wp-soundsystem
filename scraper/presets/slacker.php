@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'slacker-station-tops';
     
     var $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';

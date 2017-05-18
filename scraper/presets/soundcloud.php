@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Live_Playlist_Preset{
     
     var $preset_slug = 'soundcloud';
     

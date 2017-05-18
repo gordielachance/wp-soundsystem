@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
 
     var $preset_slug = 'last-fm-website';
     

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'twitter';
     
     var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Playlist_Preset{
 
     //TO FIX is limited to 100 tracks.  Find a way to get more.
     //https://developer.spotify.com/web-api/console/get-playlist-tracks

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'somafm';
     
     var $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'rtbf';
     
     var $pattern = '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i'; //ignore la premiere which has different selectors.

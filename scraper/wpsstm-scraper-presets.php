@@ -1,6 +1,6 @@
 <?php
 
-abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Remote_Tracklist{
+abstract class WP_SoundSytem_Live_Playlist_Preset extends WP_SoundSytem_Remote_Tracklist{
     var $preset_slug = null;
     var $preset_name = null;
     
@@ -17,7 +17,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Remot
         //populate variables from URL
         if ($this->pattern){
             
-            preg_match($this->pattern, $this->url, $url_matches);
+            preg_match($this->pattern, $this->feed_url, $url_matches);
             if ( $url_matches ){
                 
                 array_shift($url_matches); //remove first item (full match)
@@ -81,7 +81,7 @@ abstract class WP_SoundSytem_Playlist_Scraper_Preset extends WP_SoundSytem_Remot
             $this->redirect_url = $this->variables_fill_string($this->redirect_url);
             return $this->redirect_url;
         }else{
-            return $this->url;
+            return $this->feed_url;
         }
 
     }

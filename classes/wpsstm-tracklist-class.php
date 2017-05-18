@@ -3,7 +3,8 @@
 class WP_SoundSytem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
-    
+    var $options = array();
+
     //infos
     var $title = null;
     var $author = null;
@@ -31,6 +32,8 @@ class WP_SoundSytem_Tracklist{
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
         );
+        
+        $this->options = $this->get_default_options();
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -67,11 +70,6 @@ class WP_SoundSytem_Tracklist{
         
         $this->add($subtracks);
     }
-    
-    function load_transient(){
-        
-    }
-    
     
     /*
     Return the subtracks IDs for a tracklist.
@@ -237,6 +235,56 @@ class WP_SoundSytem_Tracklist{
         }
 
         $this->pagination = $args;
+    }
+    
+    static function get_default_options($keys = null){
+
+        $options = array();
+
+        return wpsstm_get_array_value($keys,$options);
+    }
+    
+    function get_options($keys = null){
+        return wpsstm_get_array_value($keys,$this->options);
+    }
+    
+    /*
+    Use a custom function to display our notices since natice WP function add_settings_error() works only backend.
+    */
+    
+    function add_notice($slug,$code,$message,$error = false){
+        
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Tracklist notice]: ' . $message ); 
+        
+        $this->notices[] = array(
+            'slug'      => $slug,
+            'code'      => $code,
+            'message'   => $message,
+            'error'     => $error
+        );
+
+    }
+       
+    /*
+    Render notices as WP settings_errors() would.
+    */
+    
+    function display_notices($slug){
+ 
+        foreach ($this->notices as $notice){
+            if ( $notice['slug'] != $slug ) continue;
+            
+            $notice_classes = array(
+                'inline',
+                'settings-error',
+                'notice',
+                'is-dismissible'
+            );
+            
+            $notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
+            
+            printf('<div %s><p><strong>%s</strong></p></div>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
+        }
     }
 
 }
