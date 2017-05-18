@@ -62,6 +62,7 @@ class WP_SoundSytem_Playlist_Scraper{
 
     function setup_globals(){
         $this->options = self::get_default_options();
+        $this->tracklist = new WP_SoundSytem_Tracklist();
     }
     
     function setup_actions(){
@@ -94,8 +95,6 @@ class WP_SoundSytem_Playlist_Scraper{
 
     function init_post($post_id){
 
-        $this->tracklist = new WP_SoundSytem_Tracklist($post_id);
-        
         $default_options = self::get_default_options();
         $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
 
