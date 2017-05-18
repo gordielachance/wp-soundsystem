@@ -18,8 +18,8 @@ class WP_SoundSytem_Playlist_Soundsgood_Api extends WP_SoundSytem_Live_Playlist_
         )
     );
     
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url = null);
 
         $this->preset_name = __('Soundsgood playlists','wpsstm');
 

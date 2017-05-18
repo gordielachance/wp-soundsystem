@@ -201,25 +201,16 @@ class WP_SoundSytem_Core_Live_Playlists{
 
         $post_id = null;
         $feed_url = null;
-        
-        if ( $post_id_or_feed_url ){
-            if ( $post_id = ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
-                $post_id = $post_id;
-                $feed_url = get_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, true );
-            }else{ //url
-                $feed_url = $post_id_or_feed_url;
-                
-            }
-        }
-        
-        $tracklist = new WP_SoundSytem_Remote_Tracklist();
-        
+
+        $tracklist = new WP_SoundSytem_Remote_Tracklist($post_id_or_feed_url);
+
         //load page preset
-        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($feed_url) ){
+        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
             $tracklist = $live_tracklist_preset;
+            $tracklist->__construct($post_id_or_feed_url);
             $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
         }
-        
+
         return $tracklist;
     }
     

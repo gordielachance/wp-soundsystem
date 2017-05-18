@@ -14,8 +14,8 @@ class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Live_
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url = null);
 
         $this->preset_name = __('Slacker.com station tops','wpsstm');
 

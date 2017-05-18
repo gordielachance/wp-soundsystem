@@ -17,8 +17,8 @@ class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Live_Play
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url = null);
 
         $this->preset_name = __('BBC station','wpsstm');
 
@@ -42,8 +42,8 @@ class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Live_Pla
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url = null);
 
         $this->preset_name = __('BBC playlist','wpsstm');
 

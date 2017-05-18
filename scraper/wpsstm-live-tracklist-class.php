@@ -71,48 +71,35 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     );
     
     public function __construct($post_id_or_feed_url = null) {
-        
+
+        parent::__construct();
         $this->preset_name = __('HTML Scraper','wpsstm');
-        
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
         
-        //check if is a post ID or an URL
-        $this->post_id = null;
+        $post_id = $feed_url = null;
+
         if ( $post_id_or_feed_url ){
-            if ( $post_id = ctype_digit(strval($post_id_or_feed_url)) )  { //check is integer (post ID)
-                $this->post_id = $post_id;
-                //$this->init_post($post_id_or_feed_url);
-            }else{ //url
-                $this->feed_url = $post_id_or_feed_url;
-                //$this->load_remote_tracks($post_id_or_feed_url);
-            }
+            $post_id = ( ctype_digit(strval($post_id_or_feed_url)) ) ? $post_id_or_feed_url : null;
+            $feed_url = filter_var($post_id_or_feed_url, FILTER_SANITIZE_URL);
         }
-        
-        parent::__construct($this->post_id);
         
         if ($post_id){
-            
-            $db_options = get_post_meta($post_id,self::$meta_key_options_scraper,true);
-
+            parent::__construct($post_id);
+            $db_options = get_post_meta($this->post_id,self::$meta_key_options_scraper,true);
             $this->options = array_replace_recursive($this->options,(array)$db_options);
-
-            $this->feed_url = get_post_meta( $post_id, self::$meta_key_scraper_url, true );
-            
+            $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
         }
         
-        $this->init_feed_url($feed_url);
+        if ($feed_url){
+            //set feed url
+            $this->feed_url = $feed_url;
+            $this->id = md5( $this->feed_url ); //unique ID based on URL
+            $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
+        }
 
     }
-    
-    function init_feed_url($feed_url = null){
-        if (!$feed_url) return;
-        
-        //set feed url
-        $this->feed_url = $feed_url;
-        $this->id = md5( $this->feed_url ); //unique ID based on URL
-        $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
-    }
+
 
     static function get_default_options($keys = null){
         
