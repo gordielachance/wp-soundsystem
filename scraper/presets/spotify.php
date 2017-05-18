@@ -12,9 +12,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         'spotify-user' => null,
         'spotify-playlist' => null
     );
-    
-    var $can_paginate = true;
-    
+
     var $token = null;
 
     var $options = array(

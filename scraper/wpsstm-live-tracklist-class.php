@@ -9,7 +9,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     //input
     public $options = array();
-    public $can_paginate = false;
     public $url = null;
     
     //url stuff
