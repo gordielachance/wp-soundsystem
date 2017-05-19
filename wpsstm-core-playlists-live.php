@@ -37,7 +37,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_live_playlist_tracklist'), 10, 2);
         
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_stations'));
@@ -203,11 +202,12 @@ class WP_SoundSytem_Core_Live_Playlists{
         $feed_url = null;
 
         $tracklist = new WP_SoundSytem_Remote_Tracklist($post_id_or_feed_url);
-
+ 
         //load page preset
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
             $tracklist = $live_tracklist_preset;
             $tracklist->__construct($post_id_or_feed_url);
+
             $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
         }
 

@@ -21,7 +21,7 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Live_Playli
     );
 
     function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url = null);
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Radionomy Station','wpsstm');
     }

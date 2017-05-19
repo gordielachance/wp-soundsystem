@@ -25,7 +25,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
     );
 
     function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url = null);
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Spotify Playlist','wpsstm');
 
@@ -44,6 +44,9 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
             'total_items'       => $this->get_spotify_playlist_track_count(),
             'page_items_limit'  => 100
         );
+        
+        print_r($pagination_args);
+        print_r("dada");
 
         $this->set_request_pagination( $pagination_args );
         

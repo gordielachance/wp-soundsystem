@@ -19,7 +19,7 @@ class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Live_Playlist_Pr
     var $wizard_suggest = false;
 
     function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url = null);
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('RTBF radios','wpsstm');
 

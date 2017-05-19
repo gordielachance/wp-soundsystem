@@ -16,7 +16,7 @@ class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Live_Playlist
     var $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
     function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url = null);
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Twitter','wpsstm');
 

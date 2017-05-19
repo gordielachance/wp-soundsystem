@@ -20,10 +20,8 @@ class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Live_Playlist_
     );
 
     function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url = null);
-
+        parent::__construct($post_id_or_feed_url);
         $this->preset_name = __('Last.FM website','wpsstm');
-
     }
 
 }

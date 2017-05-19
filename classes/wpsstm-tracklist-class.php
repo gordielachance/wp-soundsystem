@@ -32,8 +32,6 @@ class WP_SoundSytem_Tracklist{
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
         );
-        
-        $this->options = $this->get_default_options();
 
         $this->set_tracklist_pagination($pagination_args);
 

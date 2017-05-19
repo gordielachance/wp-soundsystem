@@ -73,6 +73,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public function __construct($post_id_or_feed_url = null) {
 
         parent::__construct();
+        
         $this->preset_name = __('HTML Scraper','wpsstm');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
@@ -92,6 +93,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         }
         
         if ($feed_url){
+            print_r($this->options);die();
             //set feed url
             $this->feed_url = $feed_url;
             $this->id = md5( $this->feed_url ); //unique ID based on URL
@@ -99,7 +101,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         }
 
     }
-
 
     static function get_default_options($keys = null){
         
@@ -138,7 +139,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         }
 
         //try to get cache first
-
+        /*
         $this->datas = $this->datas_cache = $this->get_cache();
         if ($this->datas_cache){
             $this->add($this->datas_cache['tracks']);
@@ -147,9 +148,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                 $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
+        */
 
-
-        
         //set expire time
         $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
         $this->expire_time = get_option( $transient_timeout_name );
@@ -242,7 +242,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $raw_tracks = array();
         
         while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
-            if ( $page_raw_tracks = $this->get_page_raw_tracks() ){
+            if ( ( $page_raw_tracks = $this->get_page_raw_tracks() ) && !is_wp_error($page_raw_tracks) ) {
                 $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
             }
             $this->request_pagination['current_page']++;
@@ -258,6 +258,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         //url
         $url = $this->redirect_url = $this->get_request_url();
+
         if ( is_wp_error($url) ) return $url;
         
         wpsstm()->debug_log($url,'get_page_raw_tracks() request_url' );
@@ -266,7 +267,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $response = $this->get_remote_response($url);
         if ( is_wp_error($response) ) return $response;
         $this->response = $response;
-        
+
         //response type
         $response_type = $this->get_response_type($this->response);
         if ( is_wp_error($response_type) ) return $response_type;
