@@ -241,7 +241,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $raw_tracks = array();
 
         while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
-            if ( ( $page_raw_tracks = $this->get_page_raw_tracks() ) && !is_wp_error($page_raw_tracks) ) {
+            if ( $page_raw_tracks = $this->get_page_raw_tracks() ) {
+                if ( is_wp_error($page_raw_tracks) ) return $page_raw_tracks;
                 $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
                 
             }
