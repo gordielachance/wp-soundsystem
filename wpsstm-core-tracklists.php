@@ -84,10 +84,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         $post_type = get_post_type();
         if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        $tracklist = wpsstm_get_post_tracklist();
-        if ( !count($tracklist->tracks) ) return;
-        
+
         if ( !$xpsf_link = wpsstm_get_tracklist_link(null,'xspf',true) ) return;
         
         ?>

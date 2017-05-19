@@ -37,7 +37,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_live_playlist_tracklist'), 10, 2);
         
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_stations'));
@@ -49,7 +48,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
         add_action( 'wp', array($this,'frontend_wizard_populate' ) );
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_frontend_wizard_tracklist'), 10, 2);
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
         add_filter( 'wpsstm_get_tracklist_link', array($this,'frontend_wizard_get_tracklist_link'), 10, 4);
 
@@ -75,7 +73,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             //feed url
             if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSytem_Playlist_Scraper::$meta_key_scraper_url, $settings["feed_url"] );
+                update_post_meta( $settings_post->ID, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
                 unset($settings["feed_url"]);
             }
             
@@ -100,7 +98,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             $settings['selectors'] = $new_settings['selectors'];
 
-            update_post_meta($settings_post->ID,WP_SoundSytem_Playlist_Scraper::$meta_key_options_scraper,$settings);
+            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
             
         }
         
@@ -197,13 +195,64 @@ class WP_SoundSytem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
     
-    function get_live_playlist_tracklist($tracklist,$post_id){
+    public function init_live_playlist($post_id_or_feed_url = null){
+
+        $post_id = null;
+        $feed_url = null;
+
+        $tracklist = new WP_SoundSytem_Remote_Tracklist($post_id_or_feed_url);
+ 
+        //load page preset
+        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
+            $tracklist = $live_tracklist_preset;
+            $tracklist->__construct($post_id_or_feed_url);
+
+            $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
+        }
+
+        return $tracklist;
+    }
+    
+    function get_live_tracklist_preset($feed_url){
+        
+        $enabled_presets = array();
+
+        $available_presets = self::get_available_presets();
+
+        //get matching presets
+        foreach((array)$available_presets as $preset){
+
+            if ( $preset->can_load_tracklist_url($feed_url) ){
+                $enabled_presets[] = $preset;
+            }
+
+        }
+        
+        //return last (highest priority) preset
+        return end($enabled_presets);
+
+    }
+    
+    static function get_available_presets(){
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        
+        $available_presets = array();
+        $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
+        
+        foreach((array)$available_presets as $key=>$preset){
+            if ( !$preset->can_use_preset ) unset($available_presets[$key]);
+        }
+
+        return $available_presets;
+    }
+    
+    public function get_live_playlist_tracklist($tracklist,$post_id){
         
         $post_type = get_post_type($post_id);
         if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;
 
-        $scraper = new WP_SoundSytem_Playlist_Scraper($post_id);
-        $tracklist = $scraper->tracklist;
+        $tracklist = $this->init_live_playlist($post_id);
 
         return $tracklist;
     }
@@ -355,7 +404,7 @@ class WP_SoundSytem_Core_Live_Playlists{
     
     function get_frontend_wizard_tracklist($tracklist,$post_id){
         if ( ( $post_id == $this->frontend_wizard_page_id ) && ( $this->frontend_wizard ) ) {
-            $tracklist = $this->frontend_wizard->scraper->tracklist;
+            $tracklist = $this->frontend_wizard->tracklist;
         }
         return $tracklist;
     }

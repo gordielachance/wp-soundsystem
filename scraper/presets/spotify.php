@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Playlist_Preset{
 
     //TO FIX is limited to 100 tracks.  Find a way to get more.
     //https://developer.spotify.com/web-api/console/get-playlist-tracks
@@ -15,7 +15,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
 
     var $token = null;
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),
@@ -24,8 +24,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Spotify Playlist','wpsstm');
 
@@ -39,9 +39,11 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
     
     function get_all_raw_tracks(){
         
+        $tracks_count = $this->get_spotify_playlist_track_count();
+        
         //init pagination before request
         $pagination_args = array(
-            'total_items'       => $this->get_spotify_playlist_track_count(),
+            'total_items'       => $tracks_count,
             'page_items_limit'  => 100
         );
 
@@ -70,9 +72,10 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Playlist
     }
     
     protected function get_spotify_playlist_track_count(){
+
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
-        
+
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
         $json = wp_remote_retrieve_body($response);

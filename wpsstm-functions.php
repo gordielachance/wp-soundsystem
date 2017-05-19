@@ -272,52 +272,72 @@ function wpsstm_get_url_domain($url){
 
 function wpsstm_get_soundsgood_sources($track,$platform,$args=null){
 
-        $args_default = array(
-            'cache_only'    => false,
-            'limit'         => 3
+    $args_default = array(
+        'cache_only'    => false,
+        'limit'         => 3
+    );
+
+    $args = wp_parse_args((array)$args,$args_default);
+
+    $sources = $remote = $cache = null;
+    $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
+    $cache = $sources = get_transient( $transient_name );
+
+    if ( !$args['cache_only'] && ( false === $cache ) ) {
+
+        $sources = array();
+
+        $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
+        $api_args = array(
+            'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
+            'limit'                     => $args['limit'],
+            'platforms'                 => $platform,
+            'q'                         => urlencode($track->artist . ' ' . $track->title),
+            'skipSavingInDatabase'      => true
         );
+        $api_url = add_query_arg($api_args,$api_url);
+        $response = wp_remote_get($api_url);
+        $body = wp_remote_retrieve_body($response);
 
-        $args = wp_parse_args((array)$args,$args_default);
+        if ( is_wp_error($body) ) return $body;
+        $api_response = json_decode( $body, true );
 
-        $sources = $remote = $cache = null;
-        $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
-        $cache = $sources = get_transient( $transient_name );
+        $items = wpsstm_get_array_value(array(0,'items'),$api_response);
 
-        if ( !$args['cache_only'] && ( false === $cache ) ) {
-
-            $sources = array();
-
-            $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
-            $api_args = array(
-                'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
-                'limit'                     => $args['limit'],
-                'platforms'                 => $platform,
-                'q'                         => urlencode($track->artist . ' ' . $track->title),
-                'skipSavingInDatabase'      => true
+        foreach( (array)$items as $item ){
+            $source = array(
+                'title'     => wpsstm_get_array_value('initTitle',$item),
+                'url'       => wpsstm_get_array_value('permalink',$item)
             );
-            $api_url = add_query_arg($api_args,$api_url);
-            $response = wp_remote_get($api_url);
-            $body = wp_remote_retrieve_body($response);
-
-            if ( is_wp_error($body) ) return $body;
-            $api_response = json_decode( $body, true );
-
-            $items = wpsstm_get_array_value(array(0,'items'),$api_response);
-
-            foreach( (array)$items as $item ){
-                $source = array(
-                    'title'     => wpsstm_get_array_value('initTitle',$item),
-                    'url'       => wpsstm_get_array_value('permalink',$item)
-                );
-                $sources[] = $source;
-            }
-
-            $remote = $sources = wpsstm_sources()->sanitize_sources($sources);
-            set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
-            
-            wpsstm()->debug_log(json_encode(array('track'=>$track,'platform'=>$platform,'args'=>$args,'cached'=>$sources)),'wpsstm_get_soundsgood_sources()' ); 
-            
+            $sources[] = $source;
         }
 
-        return $sources;
+        $remote = $sources = wpsstm_sources()->sanitize_sources($sources);
+        set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
+
+        wpsstm()->debug_log(json_encode(array('track'=>$track,'platform'=>$platform,'args'=>$args,'cached'=>$sources)),'wpsstm_get_soundsgood_sources()' ); 
+
     }
+
+    return $sources;
+}
+
+function wpsstm_array_recursive_diff($aArray1, $aArray2) {
+  $aReturn = array();
+
+  foreach ($aArray1 as $mKey => $mValue) {
+    if (array_key_exists($mKey, $aArray2)) {
+      if (is_array($mValue)) {
+        $aRecursiveDiff = wpsstm_array_recursive_diff($mValue, $aArray2[$mKey]);
+        if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+      } else {
+        if ($mValue != $aArray2[$mKey]) {
+          $aReturn[$mKey] = $mValue;
+        }
+      }
+    } else {
+      $aReturn[$mKey] = $mValue;
+    }
+  }
+  return $aReturn;
+} 

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'twitter';
     
     var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
@@ -7,7 +7,7 @@ class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scra
     var $variables = array(
         'twitter-username' => null
     );
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )
@@ -15,8 +15,8 @@ class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Playlist_Scra
     
     var $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Twitter','wpsstm');
 

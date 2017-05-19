@@ -1,11 +1,11 @@
 <?php
-class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     
     var $preset_slug = 'hypem';
     
     var $pattern = '~^https?://(?:www.)?hypem.com/~i';
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.section-track'),
             'track_artist'      => array('path'=>'.track_name .artist'),
@@ -14,8 +14,8 @@ class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Playlist_Scrape
         )
     );
     
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
         $this->preset_name = __('Hype Machine','wpsstm');
     }
  

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'bbc-station';
 
     var $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)/?~i';
@@ -8,7 +8,7 @@ class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Playlist_
         'bbc-slug' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
             'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
@@ -17,8 +17,8 @@ class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Playlist_
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('BBC station','wpsstm');
 
@@ -26,7 +26,7 @@ class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Playlist_
 
 }
 
-class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'bbc-playlist';
     
     var $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)/?$~i';
@@ -34,7 +34,7 @@ class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Playlist
         'bbc-playlist-id' => null
     );
     
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
@@ -42,8 +42,8 @@ class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Playlist
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('BBC playlist','wpsstm');
 

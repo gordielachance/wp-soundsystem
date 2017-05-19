@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scraper_Preset{
+class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug = 'somafm';
     
     var $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
@@ -8,7 +8,7 @@ class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scrap
         'somafm-slug' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'song'),
             'track_artist'      => array('path'=>'artist'),
@@ -17,8 +17,8 @@ class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Playlist_Scrap
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Soma FM Station','wpsstm');
 

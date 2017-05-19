@@ -217,12 +217,16 @@ function wpsstm_get_post_tracklist($post_id=null){
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         $tracklist->add($track);
         
+    }elseif ( ($post_type == wpsstm()->post_type_live_playlist) || ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id) ){
+        $tracklist = wpsstm_live_playlists()->init_live_playlist($post_id);
+        $tracklist->load_remote_tracks();
+        
     }else{ //playlist or album
         
         $tracklist->load_subtracks();
     }
     
-    return apply_filters('wpsstm_get_post_tracklist',$tracklist,$post_id);
+    return $tracklist;
     
 }
 
