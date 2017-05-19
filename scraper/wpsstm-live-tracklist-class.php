@@ -36,6 +36,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public $is_wizard = false;
     public $cache_only = true;
     
+    var $expire_time = null;
 
     //response
     var $request_pagination = array(

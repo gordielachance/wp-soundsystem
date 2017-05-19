@@ -17,7 +17,6 @@ class WP_SoundSytem_Tracklist{
     var $total_tracks = 0;
     
     var $updated_time = null;
-    var $expire_time = null;
     
     var $pagination = array(
         'total_items'  => null,

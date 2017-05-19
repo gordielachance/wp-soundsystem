@@ -206,11 +206,9 @@ class WP_SoundSytem_TracksList_Table{
                 $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
                 $text_time = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
                 $text_time = sprintf('<small class="wpsstm-tracklist-published">%s %s</small>',$icon_time,$text_time);
-                
-                $post_type = get_post_type($this->tracklist->post_id);
-                
-                if ( $expire_timestamp = $this->tracklist->expire_time ) {
-                    
+
+                if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
+
                     $remaining = human_time_diff( current_time('timestamp',true), $expire_timestamp );
                     $remaining = sprintf('<span class="wpsstm-tracklist-refresh-minutes">%s</span>',$remaining);
                     
