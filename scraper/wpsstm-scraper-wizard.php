@@ -106,7 +106,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                     unset($wizard_settings[$slug]);
                 }
 
-                if ($success = update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_options_scraper, $wizard_settings )){
+                if ($success = update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings )){
                     do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
 
                 }
@@ -123,7 +123,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         if ( isset($_POST[ 'wpsstm_wizard' ]['reset']) ){
             delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
-            delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_options_scraper );
+            delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
             $this->tracklist->delete_cache();
         }
 
@@ -576,8 +576,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
             printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
         }
-    }
-    
+    }   
 
     function feedback_source_content_callback(){
 
@@ -838,36 +837,18 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 <?php $this->do_wizard_sections( 'wpsstm-wizard-step-source' );?>
             </div>
 
-            <?php
-       
-            if ($this->can_show_step('tracks_selector')){
-                ?>
-                <div id="wpsstm-wizard-step-tracks-content" class="wpsstm-wizard-step-content">
-                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-tracks' );?>
-                </div>
-                <?php
-            }
-            ?>
+            <div id="wpsstm-wizard-step-tracks-content" class="wpsstm-wizard-step-content">
+                <?php $this->do_wizard_sections( 'wpsstm-wizard-step-tracks' );?>
+            </div>
 
-            <?php         
-            if ($this->can_show_step('track_details')){
-                ?>
-                <div id="wpsstm-wizard-step-single-track-content" class="wpsstm-wizard-step-content">
-                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-single-track' );?>
-                </div>
-                <?php
-            }
-            ?>
+            <div id="wpsstm-wizard-step-single-track-content" class="wpsstm-wizard-step-content">
+                <?php $this->do_wizard_sections( 'wpsstm-wizard-step-single-track' );?>
+            </div>
 
-            <?php
-            if ($this->can_show_step('playlist_options')){
-                ?>
-                <div id="wpsstm-wizard-step-options" class="wpsstm-wizard-step-content">
-                    <?php $this->do_wizard_sections( 'wpsstm-wizard-step-options' );?>
-                </div>
-                <?php
-            }
-            ?>
+            <div id="wpsstm-wizard-step-options" class="wpsstm-wizard-step-content">
+                <?php $this->do_wizard_sections( 'wpsstm-wizard-step-options' );?>
+            </div>
+
         </div>
         <?php
     }
@@ -884,57 +865,45 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             '<i class="fa fa-times-circle" aria-hidden="true"></i>',
             '<i class="fa fa-check-circle" aria-hidden="true"></i>'
         );
-                    
-        if ($this->can_show_step('source')){
 
-            $icon_source_tab = $status_icons[0];
-            if ( $this->tracklist->body_node ){
-                $icon_source_tab = $status_icons[1];
-            }
-            
-            $source_tab = array(
-                'icon'    => $icon_source_tab,
-                'title'     => __('Source','spiff'),
-                'href'      => '#wpsstm-wizard-step-source-content'
-            );
+        $icon_source_tab = $status_icons[0];
+        if ( $this->tracklist->body_node ){
+            $icon_source_tab = $status_icons[1];
         }
 
-        if ($this->can_show_step('tracks_selector')){
-            
-            $icon_tracks_tab = $status_icons[0];
-            if ( $this->tracklist->track_nodes ){
-                $icon_tracks_tab = $status_icons[1];
-            }
-            
-            $tracks_selector_tab = array(
-                'icon'    => $icon_tracks_tab,
-                'title'  => __('Tracks','spiff'),
-                'href'  => '#wpsstm-wizard-step-tracks-content'
-            );
-        }
-        
-        if ($this->can_show_step('track_details')){
-            
-            $icon_track_details_tab = $status_icons[0];
-            
-            if ( $this->tracklist->tracks ){
-                $icon_track_details_tab = $status_icons[1];
-            }
-            
-            $track_details_tab = array(
-                'icon'    => $icon_track_details_tab,
-                'title'  => __('Track details','spiff'),
-                'href'  => '#wpsstm-wizard-step-single-track-content'
-            );
-        }
-        
-        if ($this->can_show_step('playlist_options')){
-            $options_tab = array(
-                'title'  => __('Options','spiff'),
-                'href'  => '#wpsstm-wizard-step-options'
-            );
+        $source_tab = array(
+            'icon'    => $icon_source_tab,
+            'title'     => __('Source','spiff'),
+            'href'      => '#wpsstm-wizard-step-source-content'
+        );
+
+        $icon_tracks_tab = $status_icons[0];
+        if ( $this->tracklist->track_nodes ){
+            $icon_tracks_tab = $status_icons[1];
         }
 
+        $tracks_selector_tab = array(
+            'icon'    => $icon_tracks_tab,
+            'title'  => __('Tracks','spiff'),
+            'href'  => '#wpsstm-wizard-step-tracks-content'
+        );
+
+        $icon_track_details_tab = $status_icons[0];
+
+        if ( $this->tracklist->tracks ){
+            $icon_track_details_tab = $status_icons[1];
+        }
+
+        $track_details_tab = array(
+            'icon'    => $icon_track_details_tab,
+            'title'  => __('Track details','spiff'),
+            'href'  => '#wpsstm-wizard-step-single-track-content'
+        );
+
+        $options_tab = array(
+            'title'  => __('Options','spiff'),
+            'href'  => '#wpsstm-wizard-step-options'
+        );
 
         $tabs = array(
             $source_tab,
@@ -962,38 +931,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         echo $tabs_html;
     }
-    
-    function can_show_step($slug){
-        
-        return true;
 
-        switch ($slug){
-            case 'source':
-                return true;
-            break;
-            case 'tracks_selector':
-                
-                //TO FIX TO UNCOMMENT
-                //if ( !$this->tracklist ) break;
-                //if ( !$this->tracklist->body_node ) break;
-                
-                return true;
-            break;
-            case 'track_details':
-                if ( !$this->can_show_step('tracks_selector') ) break;
-                return true;
-                
-            break;
-            
-            case 'playlist_options':
-                if ( !$this->post_id ) break;
-                return true;
-            break;
-            
-        }
-        return false;
-    }
-    
     /*
     Inspired by WP function add_settings_section()
     */

@@ -98,7 +98,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             $settings['selectors'] = $new_settings['selectors'];
 
-            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$meta_key_options_scraper,$settings);
+            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
             
         }
         

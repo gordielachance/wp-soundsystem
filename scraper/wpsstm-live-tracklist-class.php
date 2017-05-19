@@ -54,7 +54,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public $tracks = array();
     
     static $meta_key_scraper_url = '_wpsstm_scraper_url';
-    static $meta_key_options_scraper = '_wpsstm_scraper_options';
+    static $live_playlist_options_meta_name = '_wpsstm_scraper_options';
 
     public $datas_cache = null;
     public $datas_remote = null;
@@ -87,8 +87,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         
         if ($post_id){
             parent::__construct($post_id);
-            $db_options = get_post_meta($this->post_id,self::$meta_key_options_scraper,true);
-            $this->options = array_replace_recursive((array)$db_options,$this->options); //last one has priority
             $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
         }
 
@@ -99,6 +97,14 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
         }
 
+    }
+
+    function get_options($keys = null){
+        //$db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
+        //$this->options = array_replace_recursive((array)$db_options,$this->options); //last one has priority
+        $default_options = $this->get_default_options();
+        $this->options = array_replace_recursive($default_options,$this->options); //last one has priority
+        return wpsstm_get_array_value($keys,$this->options);
     }
 
     static function get_default_options($keys = null){
@@ -289,10 +295,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
         return $tracks;
-    }
-    
-    public function get_options($keys = null){
-        return wpsstm_get_array_value($keys,$this->options);
     }
 
     protected function get_request_url(){
