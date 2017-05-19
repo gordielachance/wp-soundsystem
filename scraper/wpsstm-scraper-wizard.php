@@ -93,18 +93,9 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 
                 $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
-                $wizard_settings_new = array();
+                //keep only NOT default values
                 $default_args = $this->tracklist->get_default_options();
-
-                //clean input (keep only keys from default options)
-                $wizard_settings = array_replace_recursive($default_args,$wizard_settings);
-
-                //store only NOT default values
-                //TO FIX should be recursive ?
-                foreach ( $default_args as $slug => $default ){
-                    if ( $wizard_settings[$slug] != $default )  continue;
-                    unset($wizard_settings[$slug]);
-                }
+                $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
                 if ($success = update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings )){
                     do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
@@ -390,11 +381,14 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             
         }
 
-         //order
-         $new_input['tracks_order'] = ( isset($input['tracks_order']) ) ? $input['tracks_order'] : null;
+        //order
+        $new_input['tracks_order'] = ( isset($input['tracks_order']) ) ? $input['tracks_order'] : null;
 
-         //musicbrainz
-         $new_input['musicbrainz'] = ( isset($input['musicbrainz']) ) ? $input['musicbrainz'] : null;
+        //musicbrainz
+        $new_input['musicbrainz'] = ( isset($input['musicbrainz']) ) ? $input['musicbrainz'] : null;
+        
+        $default_args = $default_args = $this->tracklist->get_default_options();
+        $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
 
         return $new_input;
     }

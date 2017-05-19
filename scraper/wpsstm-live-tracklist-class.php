@@ -25,7 +25,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     var $preset_name = null;
 
     //input
-    public $options = array();
+    public $options = null;
     
     //url stuff
     var $pattern = null; //pattern used to check if the scraper URL matches the preset.
@@ -100,10 +100,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
 
     function get_options($keys = null){
-        //$db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
-        //$this->options = array_replace_recursive((array)$db_options,$this->options); //last one has priority
-        $default_options = $this->get_default_options();
-        $this->options = array_replace_recursive($default_options,$this->options); //last one has priority
+        if ($this->options === null){
+            $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
+            $default_options = $this->get_default_options();
+            $this->options = array_replace_recursive($default_options,$db_options); //last one has priority
+        }
+
         return wpsstm_get_array_value($keys,$this->options);
     }
 
