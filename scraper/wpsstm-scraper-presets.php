@@ -11,11 +11,11 @@ abstract class WP_SoundSytem_Live_Playlist_Preset extends WP_SoundSytem_Remote_T
     var $can_use_preset = true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
     var $wizard_suggest = true; //suggest or not this preset in the wizard
 
-    public function init($url,$options){
-        parent::init($url,$options);
+    public function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
         
         //populate variables from URL
-        if ($this->pattern){
+        if ($this->feed_url && $this->pattern){
             
             preg_match($this->pattern, $this->feed_url, $url_matches);
             if ( $url_matches ){

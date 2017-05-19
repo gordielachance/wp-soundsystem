@@ -48,7 +48,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
         add_action( 'wp', array($this,'frontend_wizard_populate' ) );
-        add_filter( 'wpsstm_get_post_tracklist', array($this,'get_frontend_wizard_tracklist'), 10, 2);
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
         add_filter( 'wpsstm_get_tracklist_link', array($this,'frontend_wizard_get_tracklist_link'), 10, 4);
 

@@ -39,14 +39,13 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
     
     function get_all_raw_tracks(){
         
+        $tracks_count = $this->get_spotify_playlist_track_count();
+        
         //init pagination before request
         $pagination_args = array(
-            'total_items'       => $this->get_spotify_playlist_track_count(),
+            'total_items'       => $tracks_count,
             'page_items_limit'  => 100
         );
-        
-        print_r($pagination_args);
-        print_r("dada");
 
         $this->set_request_pagination( $pagination_args );
         
@@ -73,9 +72,10 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
     }
     
     protected function get_spotify_playlist_track_count(){
+
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
-        
+
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
         $json = wp_remote_retrieve_body($response);

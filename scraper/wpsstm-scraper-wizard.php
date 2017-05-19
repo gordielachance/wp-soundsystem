@@ -14,6 +14,8 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
 
         $this->tracklist = wpsstm_live_playlists()->init_live_playlist($post_id_or_feed_url);
         $this->tracklist->is_wizard = true;
+        $this->tracklist->load_remote_tracks();
+
         $this->tracklist->validate_tracks();
         
         $this->is_frontend = ( !is_admin() );

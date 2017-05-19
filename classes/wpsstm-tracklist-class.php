@@ -243,6 +243,8 @@ class WP_SoundSytem_Tracklist{
     }
     
     function get_options($keys = null){
+        $default_options = $this->get_default_options();
+        $this->options = array_replace_recursive($default_options,$this->options); //last one has priority
         return wpsstm_get_array_value($keys,$this->options);
     }
     

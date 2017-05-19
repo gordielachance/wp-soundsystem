@@ -88,12 +88,11 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         if ($post_id){
             parent::__construct($post_id);
             $db_options = get_post_meta($this->post_id,self::$meta_key_options_scraper,true);
-            $this->options = array_replace_recursive($this->options,(array)$db_options);
+            $this->options = array_replace_recursive((array)$db_options,$this->options); //last one has priority
             $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
         }
-        
+
         if ($feed_url){
-            print_r($this->options);die();
             //set feed url
             $this->feed_url = $feed_url;
             $this->id = md5( $this->feed_url ); //unique ID based on URL
@@ -134,12 +133,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         if ( !is_admin() ){
             $this->cache_only = ( !is_singular() );
         }else{ // is_singular() does not exists backend
-            $screen = get_current_screen();
-            $this->cache_only = ( $screen->parent_base != 'edit' );
+            //$screen = get_current_screen();
+            $this->cache_only = ( $_REQUEST['action'] != 'edit' );
         }
 
         //try to get cache first
-        /*
+
         $this->datas = $this->datas_cache = $this->get_cache();
         if ($this->datas_cache){
             $this->add($this->datas_cache['tracks']);
@@ -148,7 +147,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                 $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
-        */
+
 
         //set expire time
         $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
@@ -240,10 +239,11 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public function get_all_raw_tracks(){
 
         $raw_tracks = array();
-        
+
         while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
             if ( ( $page_raw_tracks = $this->get_page_raw_tracks() ) && !is_wp_error($page_raw_tracks) ) {
                 $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
+                
             }
             $this->request_pagination['current_page']++;
         }
@@ -254,7 +254,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     private function get_page_raw_tracks(){
 
-        wpsstm()->debug_log(json_encode($this->pagination),'get_page_raw_tracks() pagination' );
+        wpsstm()->debug_log(json_encode($this->request_pagination),'get_page_raw_tracks() request_pagination' );
 
         //url
         $url = $this->redirect_url = $this->get_request_url();
