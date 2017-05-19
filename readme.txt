@@ -168,10 +168,9 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.9.5 =
 * remove WP_SoundSytem_Playlist_Scraper class, new class WP_SoundSytem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
-* Reddit preset (to be improved)
 * tracklists pagination !
 * live tracklists : new expire_time var
-* new Reddit preset
+* new Reddit preset (to be improved)
 * improved validate_track() 
 * last.FM scrobbling
 * settings : last.FM client ID & secret
