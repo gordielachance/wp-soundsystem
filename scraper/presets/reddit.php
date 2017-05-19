@@ -12,9 +12,7 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
     
     (.*)(?:, by )(.*)
     Ambient, by Hyperwizard
-    
-    
-    
+
     */
     
     var $preset_slug = 'reddit';
@@ -26,6 +24,7 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
     );
 
     var $options = array(
+        'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),
             'track_artist'     => array('path'=>'title','regex'=> '^(?:.*)(?:, by )(.*)|^([^-|–]+)(?: -+|–+ )'), // '^.*, by .*|^([^-]+) -+ '),
@@ -35,8 +34,8 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
         )
     );
 
-    function __construct(){
-        parent::__construct();
+    function __construct($post_id_or_feed_url = null){
+        parent::__construct($post_id_or_feed_url);
 
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
 
