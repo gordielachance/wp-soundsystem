@@ -8,7 +8,7 @@ class WP_SoundSytem_Playlist_SomaFM_Scraper extends WP_SoundSytem_Live_Playlist_
         'somafm-slug' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'song'),
             'track_artist'      => array('path'=>'artist'),

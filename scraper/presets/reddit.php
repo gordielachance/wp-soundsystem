@@ -23,7 +23,7 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
         'subredit-slug' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),

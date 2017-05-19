@@ -3,6 +3,8 @@
 class WP_SoundSytem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
+    
+    var $options_default = null;
     var $options = array();
 
     //infos
@@ -38,7 +40,7 @@ class WP_SoundSytem_Tracklist{
         if ($post_id){
             
             $this->post_id = $post_id;
-            
+
             $this->title = get_the_title($post_id);
             
             $post_author_id = get_post_field( 'post_author', $post_id );
@@ -48,6 +50,8 @@ class WP_SoundSytem_Tracklist{
             $this->location = get_permalink($post_id);
             
         }
+
+        $this->options = array_replace_recursive((array)$this->options_default,$this->options); //last one has priority
 
     }
     
@@ -234,17 +238,8 @@ class WP_SoundSytem_Tracklist{
 
         $this->pagination = $args;
     }
-    
-    static function get_default_options($keys = null){
 
-        $options = array();
-
-        return wpsstm_get_array_value($keys,$options);
-    }
-    
     function get_options($keys = null){
-        $default_options = $this->get_default_options();
-        $this->options = array_replace_recursive($default_options,$this->options); //last one has priority
         return wpsstm_get_array_value($keys,$this->options);
     }
     

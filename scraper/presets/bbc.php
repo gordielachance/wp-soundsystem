@@ -8,7 +8,7 @@ class WP_SoundSytem_Playlist_BBC_Station_Scraper extends WP_SoundSytem_Live_Play
         'bbc-slug' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
             'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
@@ -34,7 +34,7 @@ class WP_SoundSytem_Playlist_BBC_Playlist_Scraper extends WP_SoundSytem_Live_Pla
         'bbc-playlist-id' => null
     );
     
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),

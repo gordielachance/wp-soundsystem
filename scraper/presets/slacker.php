@@ -6,7 +6,7 @@ class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Live_
     var $variables = array(
         'slacker-station-slug' => null
     );
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
             'track_artist'      => array('path'=>'span.artist'),

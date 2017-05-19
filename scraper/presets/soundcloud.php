@@ -11,7 +11,7 @@ class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Live_Playlist_
     );
     var $page_api = null;
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),

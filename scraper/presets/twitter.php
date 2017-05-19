@@ -7,7 +7,7 @@ class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Live_Playlist
     var $variables = array(
         'twitter-username' => null
     );
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )

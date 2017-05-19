@@ -4,7 +4,7 @@ class WP_SoundSytem_Playlist_Deezer_Scraper extends WP_SoundSytem_Live_Playlist_
     
     var $pattern = '~^https?://(?:www.)?deezer.com/playlist/([^/]+)~i';
     
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
             'track_artist'      => array('path'=>'[itemprop="byArtist"]'),

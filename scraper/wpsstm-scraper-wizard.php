@@ -94,14 +94,17 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
                 //keep only NOT default values
-                $default_args = $this->tracklist->get_default_options();
+                $default_args = $this->tracklist->options_default;
                 $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
-                if ($success = update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings )){
-                    do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
-
+                if (!$wizard_settings){
+                    delete_post_meta($post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name);
+                }else{
+                    update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings );
                 }
-                
+
+                do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
+
             }
 
         }
@@ -387,7 +390,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         //musicbrainz
         $new_input['musicbrainz'] = ( isset($input['musicbrainz']) ) ? $input['musicbrainz'] : null;
         
-        $default_args = $default_args = $this->tracklist->get_default_options();
+        $default_args = $default_args = $this->tracklist->options_default;
         $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
 
         return $new_input;

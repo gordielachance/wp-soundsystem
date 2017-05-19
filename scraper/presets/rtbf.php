@@ -7,7 +7,7 @@ class WP_SoundSytem_Playlist_RTBF_Scraper extends WP_SoundSytem_Live_Playlist_Pr
     var $variables = array(
         'rtbf-slug' => null
     );
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),

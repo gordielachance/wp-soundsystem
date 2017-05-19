@@ -15,7 +15,7 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
 
     var $token = null;
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),

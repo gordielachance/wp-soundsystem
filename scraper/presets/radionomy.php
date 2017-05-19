@@ -11,7 +11,7 @@ class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Live_Playli
         'radionomy-id' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'div.titre'),
             'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),

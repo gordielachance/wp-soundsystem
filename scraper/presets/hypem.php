@@ -5,7 +5,7 @@ class WP_SoundSytem_Playlist_Hypem_Scraper extends WP_SoundSytem_Live_Playlist_P
     
     var $pattern = '~^https?://(?:www.)?hypem.com/~i';
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'.section-track'),
             'track_artist'      => array('path'=>'.track_name .artist'),

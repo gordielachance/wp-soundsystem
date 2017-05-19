@@ -9,7 +9,7 @@ class WP_SoundSytem_Playlist_Soundsgood_Api extends WP_SoundSytem_Live_Playlist_
         'soundsgood-playlist-slug' => null,
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),

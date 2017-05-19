@@ -9,7 +9,7 @@ class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Live_Playlist_
         'lastfm-page' => null
     );
 
-    var $options = array(
+    var $options_default = array(
         'selectors' => array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
