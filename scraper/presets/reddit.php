@@ -28,39 +28,6 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
     }
     
-    protected function get_track_artist($track_node){
-        $artist = parent::get_track_artist($track_node);
-        $artist = trim($artist,'"'); //remove quotation marks
-        $artist = trim($artist,"'"); //remove quotation marks
-        $artist = preg_replace('~\[.*\]~', '', $artist); //remove comments like [Hip-Hop]
-        return $artist;
-    }
-    
-    protected function get_track_title($track_node){
-        $title = parent::get_track_title($track_node);
-        $title = trim($title,'"'); //remove quotation marks
-        $title = trim($title,"'"); //remove quotation marks
-        $title = preg_replace('~\(\d{4}\)~', '', $title); //remove dates like (1968)
-        $title = preg_replace('~\[.*\]~', '', $title); //remove comments like [Hip-Hop]
-        
-        $remove_strings = array(
-            '(Audio)',
-            '(Official)',
-            '(Official Video)',
-            '(Official Videoclip)',
-            '(Clip officiel)',
-            '(Lyric Video)',
-            '(Official Music Video)'
-        );
-        
-        foreach((array)$remove_strings as $remove_str){
-            $title = str_ireplace($remove_str, "", $title);
-        }
-        
-        
-        return $title;
-    }
-    
     /*
     //TO FIX
     Keep only reddit posts that have a media
@@ -89,5 +56,69 @@ class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Pres
         return $media_posts_wrapper;
     }
     */
+    
+    /*
+    function get_all_raw_tracks(){
+        //init pagination before request
+        $pagination_args = array(
+            'page_items_limit'  => 50
+        );
+
+        $this->set_request_pagination( $pagination_args );
+        
+        return parent::get_all_raw_tracks();
+    }
+
+    
+    protected function get_request_url(){
+        
+        $url = parent::get_request_url();
+        
+        //handle pagination
+        $pagination_args = array(
+            'limit'     => $this->request_pagination['page_items_limit']
+        );
+        
+        $url = add_query_arg($pagination_args,$url);
+        return $url;
+
+    }
+    */
+    
+    
+    protected function get_track_artist($track_node){
+        $artist = parent::get_track_artist($track_node);
+        $artist = trim($artist,'"'); //remove quotation marks
+        $artist = trim($artist,"'"); //remove quotation marks
+        $artist = preg_replace('~\[.*\]~', '', $artist); //remove comments like [Hip-Hop]
+        return $artist;
+    }
+    
+    protected function get_track_title($track_node){
+        $title = parent::get_track_title($track_node);
+
+        $title = trim($title,'"'); //remove quotation marks
+        $title = trim($title,"'"); //remove quotation marks
+        
+        $remove_strings = array(
+            '(Audio)',
+            '(Official)',
+            '(Official Video)',
+            '(Official Videoclip)',
+            '(Clip officiel)',
+            '(Lyric Video)',
+            '(Official Music Video)'
+        );
+        
+        $title = preg_replace('~\[.*\]~', '', $title); //remove comments like [Hip-Hop]
+        $title = preg_replace('~\(\d{4}\)~', '', $title); //remove dates like (1968)
+        $title = preg_replace('~\d{4} ?$~', '', $title); //remove dates like 2005 at the end of the string
+
+        foreach((array)$remove_strings as $remove_str){
+            $title = str_ireplace($remove_str, "", $title);
+        }
+
+        return $title;
+    }
 
 }
