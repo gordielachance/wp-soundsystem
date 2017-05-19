@@ -40,6 +40,9 @@ Supported sources : regular audio files, Youtube, Soundcloud.
 = Auto-source =
 If you didn't set sources for your tracks (see below) and that the "auto-source" setting is checked; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
+= Last.FM =
+The audio player can scrobble tracks to your Last.fm account; or add tracks to your Last.fm favorites.
+
 = Music Sources Metabox =
 Set one or several music sources for your tracks when editing them; as on screenshot #8.
 It could be a local audio file or a link to a music service.
@@ -54,7 +57,7 @@ For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine.
+Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit.
 
 = Live Playlists =
 
@@ -96,6 +99,7 @@ This would be very appreciated — Thanks !
 
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [URI.js](https://github.com/medialize/URI.js) - Javascript URL mutation library
+* [PHP Last.FM API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 
 = Contributors =
 
@@ -160,6 +164,20 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 0.9.9.5 =
+* remove WP_SoundSytem_Playlist_Scraper class, new class WP_SoundSytem_Remote_Tracklist instead (much simplier)
+* improved saving wizard options
+* Reddit preset (to be improved)
+* tracklists pagination !
+* live tracklists : new expire_time var
+* new Reddit preset
+* improved validate_track() 
+* last.FM scrobbling
+* settings : last.FM client ID & secret
+* Player: 'Choose a source'
+* improved tracklist table (schema.org) 
+* removed tracklist duration column
 
 = 0.9.9.4 =
 * WP_SoundSystem_Track:: get_unique_id() : use sanitize_title
