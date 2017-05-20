@@ -70,7 +70,31 @@ class WP_SoundSytem_Core_Tracklists{
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
         
+        //toggle love tracklist
+        add_action('wp_ajax_wpsstm_love_unlove_tracklist', array($this,'ajax_love_unlove_tracklist'));
+        
 
+    }
+    
+    function ajax_love_unlove_tracklist(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+        $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+        $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
+        
+        if ($tracklist_id && ($do_love!==null) ){
+            $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
+            $success = $tracklist->love_tracklist($do_love);
+            if ($success && !is_wp_error($success) ){
+                $result['success'] = true;
+            }
+        }
+
+
+        echo json_encode($result);
+        die();
     }
 
     function publish_metabox_download_link(){

@@ -279,8 +279,10 @@ a.wpsstm-play-track{
     }
 }
 
-.wpsstm-love-unlove-links{
-    
+.wpsstm-love-unlove-playlist-links,.wpsstm-love-unlove-track-links{
+    span{
+        display:none;
+    }
     > :nth-child(1){ //loading
         display:none;
     }

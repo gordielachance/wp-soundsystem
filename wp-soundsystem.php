@@ -112,6 +112,7 @@ class WP_SoundSytem {
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-lastfm.php';
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
         require $this->plugin_dir . 'wpsstm-ajax.php';
 
