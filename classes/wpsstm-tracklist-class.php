@@ -293,17 +293,17 @@ class WP_SoundSytem_Tracklist{
         }
     }
     
-    function get_loved_by($tracklist_id){
+    function get_tracklist_loved_by($tracklist_id){
         if ( !$this->post_id ) return false;
         return get_post_meta($this->post_id, $this->favorited_tracklist_meta_key);
     }
     
-    function is_loved_by($user_id = null){
+    function is_tracklist_loved_by($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
         if ( !$this->post_id ) return false;
         
-        $loved_by = $this->get_loved_by($this->post_id);
+        $loved_by = $this->get_tracklist_loved_by($this->post_id);
         return in_array($user_id,(array)$loved_by);
     }
 

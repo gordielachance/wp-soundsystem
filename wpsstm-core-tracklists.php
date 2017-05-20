@@ -92,9 +92,8 @@ class WP_SoundSytem_Core_Tracklists{
             }
         }
 
-
-        echo json_encode($result);
-        die();
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
 
     function publish_metabox_download_link(){

@@ -98,12 +98,9 @@ class WP_SoundSytem_TracksList_Table{
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
         
-        //favorite icon
-        /*
-        if ( wpsstm()->get_options('lastfm_favorites') ){
-            $columns['trackitem_loveunlove']     = '';
+        if ( current_user_can('administrator') ){ //TO FIX remove this condition when feature ready
+             $columns['trackitem_actions']     = '';
         }
-        */
 
         return $columns;
     }
@@ -468,7 +465,11 @@ class WP_SoundSytem_TracksList_Table{
             $track_classes = array();
             if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
         
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-sources="%s">',wpsstm_get_classes_attr($track_classes),$data_attr_str);
+            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources="%s">',
+                   wpsstm_get_classes_attr($track_classes),
+                   $item->post_id,
+                   $data_attr_str
+            );
             $this->single_row_columns( $item );
             echo '</tr>';
     }
@@ -552,8 +553,9 @@ class WP_SoundSytem_TracksList_Table{
                     return sprintf('<img src="%s"/>',$item->image);
                 }
             break;
-            case 'trackitem_loveunlove':
-                return wpsstm_get_track_loveunlove_icons();
+            case 'trackitem_actions':
+                $love_unlove = wpsstm_get_track_loveunlove_icons($item->post_id);
+                return $love_unlove;
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes

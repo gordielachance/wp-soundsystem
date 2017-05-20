@@ -153,7 +153,7 @@ class WP_SoundSytem_Core_Player{
                     }
                     //favorites
                     if ( wpsstm()->get_options('lastfm_favorites') ){
-                        echo wpsstm_get_track_loveunlove_icons();
+                        //TO FIX echo wpsstm_get_track_loveunlove_icons();
                     }
                     ?>
                 </div>

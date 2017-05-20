@@ -11,6 +11,8 @@ class WP_SoundSystem_Track{
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $duration; //in seconds
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    
+    public $favorited_track_meta_key = '_wpsstm_user_favorite';
 
     function __construct( $args = array() ){
         
@@ -288,6 +290,36 @@ class WP_SoundSystem_Track{
         $title = sanitize_title($prefix . $this->artist . $this->title . $this->album);
         return md5( $title );
     }
+    
+    function love_track($do_love){
+        
+        if ( !$this->artist || !$this->title ) return false;
+        if ( !$user_id = get_current_user_id() ) return false;
+        
+        if ( $this->post_id ){
+            if ($do_love){
+                $success = add_post_meta( $this->post_id, $this->favorited_track_meta_key, $user_id );
+            }else{
+                $success = delete_post_meta( $this->post_id, $this->favorited_track_meta_key, $user_id );
+            }
+        }
+
+        do_action('wpsstm_love_track',$this,$do_love);
+    }
+    
+    function get_track_loved_by($tracklist_id){
+        if ( !$this->post_id ) return false;
+        return get_post_meta($this->post_id, $this->favorited_track_meta_key);
+    }
+    
+    function is_track_loved_by($user_id = null){
+        if (!$user_id) $user_id = get_current_user_id();
+        if (!$user_id) return;
+        if ( !$this->post_id ) return false;
+        
+        $loved_by = $this->get_track_loved_by($this->post_id);
+        return in_array($user_id,(array)$loved_by);
+    }
 
 }
 
@@ -356,5 +388,6 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         }
         
         return $tracklist->set_subtrack_ids($subtrack_ids);
-    }    
+    }
+    
 }
