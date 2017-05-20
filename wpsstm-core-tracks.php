@@ -8,6 +8,7 @@ class WP_SoundSytem_Core_Tracks{
     public $mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
+    public $favorited_track_meta_key = '_wpsstm_user_favorite';
 
     /**
     * @var The one true Instance
