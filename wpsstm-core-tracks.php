@@ -56,6 +56,10 @@ class WP_SoundSytem_Core_Tracks{
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
+        
+        //ajax toggle love tracklist
+        add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
+        
     }
     
     /*
@@ -419,6 +423,44 @@ class WP_SoundSytem_Core_Tracks{
         return $tracklist->get_tracklist_table();
 
     }
+    
+    function ajax_love_unlove_track(){
+        
+        
+        //TO FIX weird encoding that fucks up our code eg. 'Patrick S\u00e9bastien'
+        //header("Content-Type", "application/json; charset=ISO-8859-1");
+
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false
+        );
+        
+        //TO FIX TO UNCOMMENT
+        //$track_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+        $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
+        
+        $track_args = $result['track_args'] = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+
+        wpsstm()->debug_log( json_encode($track_args), "ajax_love_unlove_track()"); 
+
+        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        
+        if ( ($do_love!==null) ){
+            
+            $success = $track->love_track($do_love);
+            if ($success && !is_wp_error($success) ){
+                $result['success'] = true;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
     
 }
 

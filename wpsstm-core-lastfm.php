@@ -44,7 +44,7 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
 
         //love & unlove
-        add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
+        add_action( 'wpsstm_love_track',array($this,'lastfm_love_track') );
         
         //updateNowPlaying
         add_action('wp_ajax_wpsstm_lastfm_update_now_playing_track', array($this,'ajax_update_now_playing_track'));
@@ -431,11 +431,11 @@ class WP_SoundSytem_Core_LastFM{
         return $results;
     }
     
-    public function love_track(WP_SoundSystem_Track $track,$love = null){
+    public function lastfm_love_track(WP_SoundSystem_Track $track,$do_love = null){
 
         if ( !get_current_user_id() ) return false;
         if ( !$this->is_user_api_logged() ) return false;
-        if ($love === null) return;
+        if ($do_love === null) return;
 
         $auth = $this->get_user_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
@@ -447,9 +447,11 @@ class WP_SoundSytem_Core_LastFM{
             'track' =>  $track->title
         );
         
+        wpsstm()->debug_log(json_encode($api_args),"lastfm - lastfm_love_track()");
+        
         try {
             $track_api = new TrackApi($auth);
-            if ($love){
+            if ($do_love){
                 $results = $track_api->love($api_args);
             }else{
                 $results = $track_api->unlove($api_args);
@@ -520,32 +522,6 @@ class WP_SoundSytem_Core_LastFM{
         
         return $results;
     }
-
-    function ajax_love_unlove_track(){
-        $result = array(
-            'input'     => $_POST,
-            'success'   => false
-        );
-
-        $track_args = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
-        );
-
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
-        $love = $result['love'] = filter_var($_POST['love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
-
-        $success = wpsstm_lastfm()->love_track($track,$love);
-
-        if ($success && !is_wp_error($success) ){
-            $result['success'] = true;
-        }
-
-        echo json_encode($result);
-        die();
-
-    }
     
     function ajax_update_now_playing_track(){
         $result = array(
@@ -567,8 +543,8 @@ class WP_SoundSytem_Core_LastFM{
             $result['success'] = true;
         }
         
-        echo json_encode($result);
-        die();
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
     function ajax_scrobble_track(){
@@ -593,8 +569,8 @@ class WP_SoundSytem_Core_LastFM{
             $result['success'] = true;
         }
         
-        echo json_encode($result);
-        die();
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
 }

@@ -79,8 +79,8 @@ function wpsstm_ajax_tracklist_row_action(){
         break;
     }
 
-    echo json_encode($result);
-    die();
+    header('Content-type: application/json');
+    wp_send_json( $result ); 
 
 }
 
@@ -106,8 +106,7 @@ function wpsstm_ajax_tracklist_update_order(){
     }
     
     header('Content-type: application/json');
-    echo json_encode($result);
-    die(); 
+    wp_send_json( $result ); 
 }
 
 function wpsstm_ajax_player_get_provider_sources(){
@@ -131,8 +130,8 @@ function wpsstm_ajax_player_get_provider_sources(){
         $result['success'] = true;
     }
 
-    echo json_encode($result);
-    die();
+    header('Content-type: application/json');
+    wp_send_json( $result ); 
 
 }
 
