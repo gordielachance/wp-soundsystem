@@ -295,15 +295,37 @@ function wpsstm_get_player_redirection($which){
 }
 
 /*
-Get love/unlove icons.
+Get playlist love/unlove icons.
+*/
+
+function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
+    
+    $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
+
+    $wrapper_classes = array(
+        'wpsstm-love-unlove-playlist-links'
+    );
+    
+    if ( $tracklist->is_loved_by() ){
+        $wrapper_classes[] = 'wpsstm-is-loved';
+    }
+    
+    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-love-playlist wpsstm-track-action wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add playlist to favorites','wpsstm'));
+    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-unlove-playlist wpsstm-track-action wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove playlist from favorites','wpsstm'));
+    return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
+}
+
+/*
+Get track love/unlove icons.
 Ajax should query the love/unlove status, then add the 'wpsstm-is-loved' class to the wrapper.
 */
 
 function wpsstm_get_track_loveunlove_icons(){
     $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%s" class="wpsstm-love-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart-o" aria-hidden="true"></i></a>',__('Love track on Last.fm','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%s" class="wpsstm-unlove-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart" aria-hidden="true"></i></a>',__('Unlove track on Last.fm','wpsstm'));
-    return sprintf('<span class="wpsstm-love-unlove-links">%s%s%s</span>',$loading,$love_link,$unlove_link);
+    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-love-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Love track on Last.fm','wpsstm'));
+    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-unlove-track wpsstm-track-action wpsstm-track-action-lastfm"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Unlove track on Last.fm','wpsstm'));
+    return sprintf('<span class="wpsstm-love-unlove-track-links">%s%s%s</span>',$loading,$love_link,$unlove_link);
 }
 
 function wpsstm_get_scrobbler_icons(){

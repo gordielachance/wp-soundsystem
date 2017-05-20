@@ -291,39 +291,43 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   display: none;
 }
 
-/* line 284, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links > :nth-child(1) {
+/* line 283, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links span, .wpsstm-love-unlove-track-links span {
   display: none;
 }
-/* line 287, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links > :nth-child(2) {
+/* line 286, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links > :nth-child(1), .wpsstm-love-unlove-track-links > :nth-child(1) {
+  display: none;
+}
+/* line 289, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links > :nth-child(2), .wpsstm-love-unlove-track-links > :nth-child(2) {
   display: inline-block;
 }
-/* line 290, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links > :nth-child(3) {
+/* line 292, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links > :nth-child(3), .wpsstm-love-unlove-track-links > :nth-child(3) {
   display: none;
 }
-/* line 295, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.wpsstm-is-loved > :nth-child(2) {
+/* line 297, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links.wpsstm-is-loved > :nth-child(2), .wpsstm-love-unlove-track-links.wpsstm-is-loved > :nth-child(2) {
   display: none;
 }
-/* line 298, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.wpsstm-is-loved > :nth-child(3) {
+/* line 300, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links.wpsstm-is-loved > :nth-child(3), .wpsstm-love-unlove-track-links.wpsstm-is-loved > :nth-child(3) {
   display: inline-block;
-}
-/* line 302, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.loading {
-  pointer-events: none;
 }
 /* line 304, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.loading > :nth-child(1) {
+.wpsstm-love-unlove-playlist-links.loading, .wpsstm-love-unlove-track-links.loading {
+  pointer-events: none;
+}
+/* line 306, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links.loading > :nth-child(1), .wpsstm-love-unlove-track-links.loading > :nth-child(1) {
   display: inline-block;
 }
-/* line 307, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.loading > :nth-child(2) {
+/* line 309, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links.loading > :nth-child(2), .wpsstm-love-unlove-track-links.loading > :nth-child(2) {
   display: none;
 }
-/* line 310, ../scss/wpsstm-player.scss */
-.wpsstm-love-unlove-links.loading > :nth-child(3) {
+/* line 312, ../scss/wpsstm-player.scss */
+.wpsstm-love-unlove-playlist-links.loading > :nth-child(3), .wpsstm-love-unlove-track-links.loading > :nth-child(3) {
   display: none;
 }

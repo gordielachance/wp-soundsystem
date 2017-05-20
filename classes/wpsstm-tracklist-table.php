@@ -154,8 +154,8 @@ class WP_SoundSytem_TracksList_Table{
 	 * @access public
 	 */
 	public function display() {
-        ?>
-        <div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracks-count="<?php echo $this->tracklist->pagination['total_items'];?>" data-expire-seconds="<?php echo $this->tracklist->expire_time - current_time('timestamp',true);?>">
+        $expire_seconds = $this->tracklist->expire_time - current_time('timestamp',true);
+        printf('<div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-expire-seconds="%s">',$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$expire_seconds); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -219,32 +219,38 @@ class WP_SoundSytem_TracksList_Table{
                 
                 printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);    
             }
-            ?>
+            
+            if ( !is_admin() ){
+                ?>
 
-            <div class="alignright actions wpsstm-tracklist-actions">
-                <?php
-        
-                    $tracklist_links = array();
+                <div class="alignright actions wpsstm-tracklist-actions">
+                    <?php
 
-                    if ( !is_admin() ){
-                        
+                        $tracklist_links = array();
+                
+                        //share
                         $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
                         $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
                         $share_text = __('Share', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s %s</a>',$share_url,$share_icon,$share_text);
-                        
+                        $tracklist_links[] = sprintf('<a title="%2$s" href="%3$s" target="_blank" class="wpsstm-tracklist-action-share">%1$s<span> %2$s</span></a>',$share_icon,$share_text,$share_url);
+
+                        //xspf
                         $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
                         $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
                         $xspf_text = __('XSPF', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s %s</a>',$xspf_url,$xspf_icon,$xspf_text);
+                        $tracklist_links[] = sprintf('<a title="%2$s" href="%3$s" target="_blank" class="wpsstm-tracklist-action-xspf">%1$s<span> %2$s</span></a>',$xspf_icon,$xspf_text,$xspf_url);
+
+                        //favorite
+                        if ( current_user_can('administrator') ) { //TO FIX remove this condition when feature is ready
+                            $tracklist_links[] = wpsstm_get_tracklist_loveunlove_icons($this->tracklist->post_id);
+                        }
                         
                         $tracklist_links = apply_filters('wpsstm_tracklist_links',$tracklist_links);
-                        
-                        echo implode("\n",$tracklist_links);
-                    }
 
-                ?>
-            </div>
+                        echo implode("\n",$tracklist_links);
+                    ?>
+                </div>
+            <?php } ?>
         </div>
 
     <?php
