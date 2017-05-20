@@ -3,7 +3,6 @@
 class WP_SoundSytem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
-    public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     
     var $options_default = null;
     var $options = array();
@@ -287,15 +286,15 @@ class WP_SoundSytem_Tracklist{
         if ( !$this->post_id ) return false;
         
         if ($do_love){
-            return add_post_meta( $this->post_id, $this->favorited_tracklist_meta_key, $user_id );
+            return add_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
         }else{
-            return delete_post_meta( $this->post_id, $this->favorited_tracklist_meta_key, $user_id );
+            return delete_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
         }
     }
     
     function get_tracklist_loved_by($tracklist_id){
         if ( !$this->post_id ) return false;
-        return get_post_meta($this->post_id, $this->favorited_tracklist_meta_key);
+        return get_post_meta($this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key);
     }
     
     function is_tracklist_loved_by($user_id = null){

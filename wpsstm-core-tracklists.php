@@ -8,6 +8,7 @@ class WP_SoundSytem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
     public $allowed_post_types = array();
+    public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     
     /**
     * @var The one true Instance
