@@ -244,9 +244,9 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     }
 
     $url = apply_filters('wpsstm_get_tracklist_link',$url,$post_id,$pagenum,$download);
-
-    if($download){
-        $url = add_query_arg(array('download'=>true),$url);
+    
+    if ($pagenum == 'xspf'){
+        $url = add_query_arg(array('dl'=>(int)($download)),$url);
     }
 
     return $url;

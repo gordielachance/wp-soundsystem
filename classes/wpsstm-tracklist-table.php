@@ -219,21 +219,28 @@ class WP_SoundSytem_TracksList_Table{
                 
                 printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);    
             }
-        
-
             ?>
-        
 
             <div class="alignright actions wpsstm-tracklist-actions">
                 <?php
+        
+                    $tracklist_links = array();
 
                     if ( !is_admin() ){
-                        ?>
-                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id);?>" target="_blank" class="wpsstm-tracklist-action-share"><i class="fa fa-share-alt" aria-hidden="true"></i> <?php _e('Share', 'wpsstm'); ?></a>
-                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');?>" class="wpsstm-tracklist-action-xspf"><i class="fa fa-rss" aria-hidden="true"></i> <?php _e('XSPF', 'wpsstm'); ?></a>
-
-                        <a href="<?php echo wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf',true);?>" class="wpsstm-tracklist-action-xspf-download"><i class="fa fa-download" aria-hidden="true"></i> <?php _e('Download XSPF', 'wpsstm'); ?></a>
-                        <?php
+                        
+                        $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
+                        $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
+                        $share_text = __('Share', 'wpsstm');
+                        $tracklist_links[] = sprintf('<a href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s %s</a>',$share_url,$share_icon,$share_text);
+                        
+                        $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
+                        $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
+                        $xspf_text = __('XSPF', 'wpsstm');
+                        $tracklist_links[] = sprintf('<a href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s %s</a>',$xspf_url,$xspf_icon,$xspf_text);
+                        
+                        $tracklist_links = apply_filters('wpsstm_tracklist_links',$tracklist_links);
+                        
+                        echo implode("\n",$tracklist_links);
                     }
 
                 ?>
