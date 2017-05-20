@@ -52,7 +52,7 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
             e.preventDefault();
             
             var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-love-unlove-links');
+            var link_wrapper = link.closest('.wpsstm-love-unlove-track-links');
             var track_obj = wpsstm_page_tracks[wpsstm_current_track_idx];
 
             var track = {
@@ -109,22 +109,16 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
 
         switch(mediaEvent) {
             case 'loadeddata':
-                
-                console.log("IS SCROBBLER ACTIBE:" + is_scrobbler_active);
-                
                 if (is_scrobbler_active){
-                    console.log("CCA");
                     wpsstm_updateNowPlaying(media,node,player,track_obj);
                 }
-                
-                
+
             break;
             case 'ended':
                 
                 if (is_scrobbler_active){
                     wpsstm_scrobble(media,node,player,track_obj);
                 }
-                
 
             break;
         }
