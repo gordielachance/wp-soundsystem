@@ -19,7 +19,7 @@
                 background:rgba(255, 0, 0, 0.10);
             }
             
-            &[data-wpsstm-sources=""] a.wpsstm-play-track:not(:hover){
+            &[data-wpsstm-sources-count="0"] a.wpsstm-play-track:not(:hover){
                 @include opacity(.25);
             }
             &:not(.active) .wpsstm-play-track{
@@ -103,8 +103,9 @@ a.wpsstm-play-track{
         margin: 0;
         padding: .5em 1em;
         background-color:#fcf8e3;
-        
+        color:#222;
         a{
+            color:#222;
             text-decoration: underline;
         }
 
@@ -283,6 +284,9 @@ a.wpsstm-play-track{
 .wpsstm-love-unlove-playlist-links,.wpsstm-love-unlove-track-links{
     span{
         display:none;
+    }
+    a{
+        border:none!important;
     }
     > :nth-child(1){ //loading
         display:none;

@@ -30,12 +30,13 @@ var wpsstm_source_requests = [];
 
             var track_obj = {
                 row:        track_el.get(0),
+                post_id:    track_el.attr('data-wpsstm-track-id'),
                 artist:     track_el.find('.trackitem_artist').text(),
                 title:      track_el.find('.trackitem_track').text(),
                 album:      track_el.find('.trackitem_album').text(),
                 sources:    null
             }
-
+            
             wpsstm_populate_track_sources(track_obj); //get sources from HTML if any
             wpsstm_page_tracks.push(track_obj);
 
@@ -88,9 +89,11 @@ var wpsstm_source_requests = [];
         $( ".wpsstm-player-sources-list li .wpsstm-source-title" ).live( "click", function(e) {
             e.preventDefault();
 
-            var sources_list = $(this).closest('ul');
-            if ( sources_list.find('li').length < 2 ) return;
+            var track_el = $(this).closest('[itemprop="track"]');
+            var track_sources_count = track_el.attr('data-wpsstm-sources-count');
+            if ( track_sources_count < 2 ) return;
             
+            var sources_list = $(this).closest('ul');
             var sources_list_wrapper = sources_list.closest('td.trackitem_sources');
             var li_el = $(this).closest('li');
             sources_list.closest('ul').append(li_el); //move it at the bottom
@@ -133,7 +136,7 @@ var wpsstm_source_requests = [];
         */
 
         //user is not logged
-        $('.wpsstm-track-action').click(function(e) {
+        $('.wpsstm-requires-auth').click(function(e) {
             if ( !wpsstm_get_current_user_id() ){
                 e.preventDefault();
                 $('#wpsstm-bottom-notice-wp-auth').show();
@@ -350,9 +353,8 @@ var wpsstm_source_requests = [];
         
         if (sources.length > 0){
             track_obj.sources = sources;
-            console.log("populated sources:");
-            console.log(sources);
         }
+        track_el.attr('data-wpsstm-sources-count',sources.length);
     }
 
     function wpsstm_switch_player(track_idx){
@@ -364,7 +366,6 @@ var wpsstm_source_requests = [];
         //track infos
         var trackinfo = $(track_el).clone();
         trackinfo.find('td.trackitem_play_bt').remove();
-        trackinfo.removeAttr('data-wpsstm-sources');
         $('#wpsstm-player-trackinfo').html(trackinfo);
 
         //player sources

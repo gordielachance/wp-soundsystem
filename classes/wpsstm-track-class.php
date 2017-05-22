@@ -291,18 +291,18 @@ class WP_SoundSystem_Track{
     
     function love_track($do_love){
         
-        if ( !$this->artist || !$this->title ) return false;
-        if ( !$user_id = get_current_user_id() ) return false;
+        if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
+        if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
         
-        if ( $this->post_id ){
+        if ( !$this->post_id ){
+            return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
+        }else{
             if ($do_love){
-                $success = add_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+                return add_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
             }else{
-                $success = delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+                return delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
             }
         }
-
-        do_action('wpsstm_love_track',$this,$do_love);
     }
     
     function get_track_loved_by($tracklist_id){

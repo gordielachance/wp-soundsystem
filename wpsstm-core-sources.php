@@ -294,7 +294,7 @@ class WP_SoundSytem_Core_Sources{
             $lis[] = sprintf('<li data-wpsstm-source-idx="%s" data-wpsstm-source-type="%s" %s>%s %s</li>',$key,$source['type'],$li_classes,$provider_link,$source_title);
         }
         if ($lis){
-            return sprintf('<ul class="wpsstm-player-sources-list" data-wpsstm-sources-count="%s">%s</ul>',count($lis),implode("",$lis));
+            return sprintf('<ul class="wpsstm-player-sources-list">%s</ul>',implode("",$lis));
         }
     }
     

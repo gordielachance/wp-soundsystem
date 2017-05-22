@@ -454,15 +454,15 @@ class WP_SoundSytem_TracksList_Table{
      */
     public function single_row( $item ) {
         
-            $data_attr_str = null;
+            $sources = wpsstm_player()->get_playable_sources($item,true);
 
             $track_classes = array();
             if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
         
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources="%s">',
+            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources-count="%s">',
                    wpsstm_get_classes_attr($track_classes),
                    $item->post_id,
-                   $data_attr_str
+                   count($sources)
             );
             $this->single_row_columns( $item );
             echo '</tr>';

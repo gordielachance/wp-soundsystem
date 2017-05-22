@@ -78,18 +78,26 @@ class WP_SoundSytem_Core_Tracklists{
     }
     
     function ajax_love_unlove_tracklist(){
+        
         $result = array(
             'input'     => $_POST,
-            'success'   => false
+            'success'   => false,
+            'message'   => null
         );
+        
         $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
         $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         if ($tracklist_id && ($do_love!==null) ){
             $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
             $success = $tracklist->love_tracklist($do_love);
-            if ($success && !is_wp_error($success) ){
-                $result['success'] = true;
+            if ( $success ){
+                if( is_wp_error($success) ){
+                    $code = $success->get_error_code();
+                    $result['message'] = $success->get_error_message($code); 
+                }else{
+                   $result['success'] = true; 
+                }
             }
         }
 

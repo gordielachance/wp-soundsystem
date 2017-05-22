@@ -426,35 +426,38 @@ class WP_SoundSytem_Core_Tracks{
     }
     
     function ajax_love_unlove_track(){
-        
-        
+
         //TO FIX weird encoding that fucks up our code eg. 'Patrick S\u00e9bastien'
         //header("Content-Type", "application/json; charset=ISO-8859-1");
 
         $result = array(
             'input'     => $_POST,
+            'message'   => null,
             'success'   => false
         );
-        
-        //TO FIX TO UNCOMMENT
-        //$track_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+
         $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         $track_args = $result['track_args'] = array(
+            'post_id'   => ( isset($_POST['track']['post_id']) ) ? $_POST['track']['post_id'] : null,
             'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
             'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
             'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
         );
 
-        wpsstm()->debug_log( json_encode($track_args), "ajax_love_unlove_track()"); 
-
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
         
+        wpsstm()->debug_log( json_encode($track), "ajax_love_unlove_track()"); 
+        
         if ( ($do_love!==null) ){
-            
-            $success = $track->love_track($do_love);
-            if ($success && !is_wp_error($success) ){
-                $result['success'] = true;
+
+            if ( $success = $track->love_track($do_love) ){
+                if( is_wp_error($success) ){
+                    $code = $success->get_error_code();
+                    $result['message'] = $success->get_error_message($code); 
+                }else{
+                    $result['success'] = true; 
+                }
             }
         }
 
