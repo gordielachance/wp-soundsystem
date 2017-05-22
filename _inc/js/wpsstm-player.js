@@ -339,6 +339,7 @@ var wpsstm_source_requests = [];
         //track infos
         var trackinfo = $(track_el).clone();
         trackinfo.find('td.trackitem_play_bt').remove();
+        trackinfo.removeAttr('data-wpsstm-sources');
         $('#wpsstm-player-trackinfo').html(trackinfo);
         
         //track sources

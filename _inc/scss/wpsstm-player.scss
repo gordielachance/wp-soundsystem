@@ -162,6 +162,7 @@ a.wpsstm-play-track{
         font-size:.7em;
         position:absolute;
         bottom:40px; //player height
+        @include opacity(.3);
             
         ul{
             padding: 0 2em;
@@ -199,7 +200,11 @@ a.wpsstm-play-track{
 
             }
         }
+        &:hover{
+            @include opacity(0.4);
+        }
         &.expanded{
+            @include opacity(1);
             ul{
                 padding: 1em 2em;
                 padding-bottom:0;
