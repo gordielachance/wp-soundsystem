@@ -206,7 +206,7 @@ function wpsstm_get_post_mb_link_for_post($post_id){
 Get a post tracklist.
 */
 
-function wpsstm_get_post_tracklist($post_id=null,$ajaxed=true){
+function wpsstm_get_post_tracklist($post_id=null){
     global $post;
     
     if (!$post_id && $post) $post_id = $post->ID;
@@ -219,10 +219,9 @@ function wpsstm_get_post_tracklist($post_id=null,$ajaxed=true){
         $tracklist->add($track);
         
     }elseif ( ($post_type == wpsstm()->post_type_live_playlist) || ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id) ){
-        
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(!$ajaxed);
-        
+        $tracklist->is_ajaxed = true;
+        //do not populate remote tracks for now, we'll use ajax for this or it will be too slow.
     }else{ //playlist or album
         $tracklist->load_subtracks();
     }

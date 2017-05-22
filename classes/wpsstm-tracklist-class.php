@@ -26,6 +26,7 @@ class WP_SoundSytem_Tracklist{
     );
     
     var $tracks_strict = true; //requires a title AND an artist
+    var $is_ajaxed = false;
     
     static $paged_var = 'tracklist_page';
 

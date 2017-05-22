@@ -17,15 +17,16 @@ class WP_SoundSytem_TracksList_Table{
         global $page;
         
         $this->tracklist = $tracklist;
-
         $this->no_items_label = __( 'No tracks found.','wpsstm');
-
+        
+        if ($this->tracklist->is_ajaxed){
+            $this->no_items_label = '<i class="fa fa-refresh fa-fw fa-spin"></i> ' . __( 'Loading tracks...','wpsstm');
+        }
+        
         $this->can_player = ( !$this->tracklist->is_wizard && wpsstm()->get_options('player_enabled') == 'on' );
     }
     
     function prepare_items() {
-
-        
 
         /**
          * REQUIRED. Now we can add our *sorted* data to the items property, where 
@@ -151,8 +152,15 @@ class WP_SoundSytem_TracksList_Table{
 	 * @access public
 	 */
 	public function display() {
+        $classes = array(
+            'wpsstm-tracklist',
+            'wpsstm-tracklist-table'
+        );
+        if ($this->tracklist->is_ajaxed) $classes[] = 'wpsstm-ajaxed-tracklist';
+        $classes_str = wpsstm_get_classes_attr($classes);
+        
         $expire_seconds = $this->tracklist->expire_time - current_time('timestamp',true);
-        printf('<div class="wpsstm-tracklist wpsstm-tracklist-table" itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-expire-seconds="%s">',$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$expire_seconds); ?>
+        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-expire-seconds="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$expire_seconds); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>

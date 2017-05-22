@@ -238,7 +238,6 @@ informations overriden
 = 0.9.8.4 =
 * XSPF output : added title, author, timestamp, location and annotation nodes
 * xspf urls : moved download argument at the end
-* hook on 'wpsstm_get_post_tracklist' to get a live playlist tracklist
 * added rewrite rule for frontend wizard
 
 = 0.9.8.3 =

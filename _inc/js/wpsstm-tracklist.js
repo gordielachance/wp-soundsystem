@@ -12,31 +12,11 @@ var wpsstm_source_requests = [];
         
         /* tracklist */
         
-        //display tracklists
-        $( ".wpsstm-tracklist-table" ).each(function(i, source_attr) {
-            var tracklist_wrapper = $(this);
-            wpsstm_load_tracklist(tracklist_wrapper);
-        });
+        //prepare tracks queue for non-ajaxed tracklists
+        $( ".wpsstm-tracklist:not(.wpsstm-ajaxed-tracklist)" ).wpsstm_init_tracklist_tracks();
         
-        //prepare tracks queue
-        $( ".wpsstm-play-track" ).each(function(i, source_attr) {
-            
-            var track_el = $(this).closest('tr');
-            track_el.attr('data-wpsstm-track-idx',i);
-
-            var track_obj = {
-                row:        track_el.get(0),
-                post_id:    track_el.attr('data-wpsstm-track-id'),
-                artist:     track_el.find('.trackitem_artist').text(),
-                title:      track_el.find('.trackitem_track').text(),
-                album:      track_el.find('.trackitem_album').text(),
-                sources:    null
-            }
-            
-            wpsstm_populate_track_sources(track_obj); //get sources from HTML if any
-            wpsstm_page_tracks.push(track_obj);
-
-        });
+        //load ajaxed tracklists
+        $( ".wpsstm-tracklist.wpsstm-ajaxed-tracklist" ).wpsstm_load_tracklist();
 
         /*
         track actions
@@ -176,44 +156,7 @@ var wpsstm_source_requests = [];
         
         
     }
-    
-    function wpsstm_load_tracklist(tracklist_wrapper){
-        
-        var tracklist_id = tracklist_wrapper.attr('data-tracklist-id');
-        
-        var ajax_data = {
-            'action':           'wpsstm_load_tracklist',
-            'post_id':          tracklist_id
-        };
-        
-        console.log(ajax_data);
-        
-        return $.ajax({
 
-            type: "post",
-            url: wpsstmL10n.ajaxurl,
-            data:ajax_data,
-            dataType: 'json',
-            beforeSend: function() {
-                tracklist_wrapper.addClass('loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    tracklist_wrapper.addClass('error');
-                    console.log(data);
-                }else{
-                    if ( data.new_html ){
-                        console.log(data);
-                        tracklist_wrapper.replaceWith(data.new_html);
-                    }
-                }
-            },
-            complete: function() {
-                tracklist_wrapper.removeClass('loading');
-            }
-        })
-    }
-    
     function wpsstm_populate_track_sources(track_obj){
         var track_el = $(track_obj.row);
         
@@ -262,5 +205,78 @@ var wpsstm_source_requests = [];
         }
         
     }
+    
+    $.fn.wpsstm_load_tracklist = function() {
+
+        this.each(function() {
+            
+            var tracklist_wrapper = $(this);
+            
+            var tracklist_id = tracklist_wrapper.attr('data-tracklist-id');
+        
+            var ajax_data = {
+                'action':           'wpsstm_load_tracklist',
+                'post_id':          tracklist_id
+            };
+
+            return $.ajax({
+
+                type: "post",
+                url: wpsstmL10n.ajaxurl,
+                data:ajax_data,
+                dataType: 'json',
+                beforeSend: function() {
+                    tracklist_wrapper.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        tracklist_wrapper.addClass('error');
+                        console.log(data);
+                    }else{
+                        if ( data.new_html ){
+                            var new_tracklist_wrapper = $(data.new_html);
+                            tracklist_wrapper.replaceWith(new_tracklist_wrapper);
+                            new_tracklist_wrapper.wpsstm_init_tracklist_tracks();
+                        }
+                    }
+                },
+                complete: function() {
+                    tracklist_wrapper.removeClass('loading');
+                }
+            })
+
+        });
+            
+    };
+    
+    $.fn.wpsstm_init_tracklist_tracks = function() {
+
+        this.each(function() {
+            
+            var tracklist = $(this);
+            var tracks_el = tracklist.find('[itemprop="track"]');
+            $.each(tracks_el, function( i, track_el ) {
+                track_el = $(track_el);
+                
+                var track_idx = wpsstm_page_tracks.length + i;
+                track_el.attr('data-wpsstm-track-idx',track_idx);
+
+                var track_obj = {
+                    row:        track_el.get(0),
+                    post_id:    track_el.attr('data-wpsstm-track-id'),
+                    artist:     track_el.find('.trackitem_artist').text(),
+                    title:      track_el.find('.trackitem_track').text(),
+                    album:      track_el.find('.trackitem_album').text(),
+                    sources:    null
+                }
+
+                wpsstm_populate_track_sources(track_obj); //get sources from HTML if any
+                wpsstm_page_tracks.push(track_obj);
+                
+            });
+        });  
+    };
+    
+    
 
 })(jQuery);

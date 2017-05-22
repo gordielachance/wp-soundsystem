@@ -76,7 +76,6 @@ class WP_SoundSytem_Core_Tracklists{
         
         //ajax : load tracklist
         add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
-        
 
     }
     
@@ -118,6 +117,7 @@ class WP_SoundSytem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id,false) ){
+                $tracklist->load_remote_tracks(true);
                 $result['success'] = true;
                 $result['new_html'] = $tracklist->get_tracklist_table(); 
             }
