@@ -195,7 +195,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
     
-    public function init_live_playlist($post_id_or_feed_url = null){
+    public function get_preset_tracklist($post_id_or_feed_url = null){
 
         $post_id = null;
         $feed_url = null;
@@ -206,7 +206,6 @@ class WP_SoundSytem_Core_Live_Playlists{
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
             $tracklist = $live_tracklist_preset;
             $tracklist->__construct($post_id_or_feed_url);
-
             $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
         }
 
@@ -246,17 +245,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
         return $available_presets;
     }
-    
-    public function get_live_playlist_tracklist($tracklist,$post_id){
-        
-        $post_type = get_post_type($post_id);
-        if ($post_type != wpsstm()->post_type_live_playlist) return $tracklist;
 
-        $tracklist = $this->init_live_playlist($post_id);
-
-        return $tracklist;
-    }
-    
     function post_column_register($columns){
         
         $columns['health'] = __('Live','spiff');

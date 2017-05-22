@@ -12,7 +12,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
     
     function __construct($post_id_or_feed_url = null){
 
-        $this->tracklist = wpsstm_live_playlists()->init_live_playlist($post_id_or_feed_url);
+        $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
         $this->tracklist->is_wizard = true;
         $this->tracklist->tracks_strict = false;
         $this->tracklist->load_remote_tracks();

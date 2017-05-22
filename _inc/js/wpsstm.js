@@ -140,5 +140,8 @@ http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-java
 function wpsstm_clipboard_box(text) {
     window.prompt(wpsstmL10n.clipboardtext, text);
 }
+function wpsstm_get_current_user_id(){
+    return parseInt(wpsstmL10n.logged_user_id);
+}
 
 

@@ -34,7 +34,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public $transient_name_cache;
     
     public $is_wizard = false;
-    public $cache_only = true;
     
     var $expire_time = null;
 
@@ -123,20 +122,9 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
     }
 
-    function load_remote_tracks(){
+    function load_remote_tracks($remote_request = false){
 
         if (!$this->feed_url) return;
-
-        //cache only if several post are displayed (like an archive page)
-        if ( !is_admin() ){
-            $this->cache_only = ( !is_singular() );
-        }else{ // is_singular() does not exists backend
-            if ( did_action('screen') ){
-                $screen = get_current_screen();
-                $this->cache_only = ( $screen->parent_base != 'edit' );
-            }
-
-        }
 
         //try to get cache first
 
@@ -149,13 +137,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             }
         }
 
-
         //set expire time
         $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
         $this->expire_time = get_option( $transient_timeout_name );
 
         //get remote tracks
-        if ( ( !$this->tracks && (!$this->cache_only) ) || $this->is_wizard ){
+        if ( !$this->tracks && $remote_request ){
 
             $this->datas_remote = false; // so we can detect that we ran a remote request
             if ( $remote_tracks = $this->get_all_raw_tracks() ){

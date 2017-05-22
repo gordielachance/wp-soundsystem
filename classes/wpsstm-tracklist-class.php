@@ -198,35 +198,24 @@ class WP_SoundSytem_Tracklist{
         }
     }
     
+    function get_tracklist_admin_table(){
+        require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
+        $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
+        $tracklist_table->items = $this->tracks;
+        
+        ob_start();
+        $tracklist_table->prepare_items();
+        $tracklist_table->display();
+        return ob_get_clean();
+    }
+    
     /**
     Read-only tracklist table
     **/
-    function get_tracklist_table($admin = false){
-        
-        if ( $admin) {
-            require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-            $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
-            $tracklist_table->items = $this->tracks;
-        }else{
-            require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
-            $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
-            
-            //live playlists : cache only if several post are displayed (like an archive page)
-            if ( !is_admin() ){
-                $cache_only = ( !is_singular() );
-            }else{ // is_singular() does not exists backend
-                $screen = get_current_screen();
-                $cache_only = ( $screen->parent_base != 'edit' );
-            }
-            
-            if ( $this->post_id && ( get_post_type($this->post_id) == wpsstm()->post_type_live_playlist ) && $cache_only ){
-                $link = get_permalink($this->post_id);
-                $link = sprintf('<a href="%s">%s</a>',$link,__('here','wpsstm') );
-                $link = sprintf( __('Click %s to load the live tracklist.','wpsstm'), $link);
-                $tracklist_table->no_items_label = $link;
-            }
-            
-        }
+    function get_tracklist_table(){
+
+        require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
+        $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
 
         ob_start();
         $tracklist_table->prepare_items();

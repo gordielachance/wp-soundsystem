@@ -43,13 +43,13 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
 
-        //love & unlove
+        //ajax : love & unlove
         add_action( 'wp_ajax_wpsstm_lastfm_love_unlove_track',array($this,'ajax_love_unlove_track') );
         
-        //updateNowPlaying
+        //ajax : updateNowPlaying
         add_action('wp_ajax_wpsstm_lastfm_update_now_playing_track', array($this,'ajax_update_now_playing_track'));
         
-        //scrobble
+        //ajax : scrobble
         add_action('wp_ajax_wpsstm_lastfm_scrobble_track', array($this,'ajax_scrobble_track'));
         
     }
