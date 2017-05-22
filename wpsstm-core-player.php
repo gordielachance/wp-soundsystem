@@ -144,23 +144,23 @@ class WP_SoundSytem_Core_Player{
                 printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
-            <div id="wpsstm-player-sources-wrapper">
-                <div id="wpsstm-player-track-actions">
-                    <?php 
-                    //scrobbling
-                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                        echo wpsstm_get_scrobbler_icons();
-                    }
-                    //favorites
-                    if ( wpsstm()->get_options('lastfm_favorites') ){
-                        //TO FIX echo wpsstm_get_track_loveunlove_icons();
-                    }
+            <div id="wpsstm-player-actions">
+                <?php 
+                //scrobbling
+                if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                    echo wpsstm_get_scrobbler_icons();
+                }
+                //favorites
+                if ( wpsstm()->get_options('lastfm_favorites') ){
                     ?>
-                </div>
-                <div id="wpsstm-player-sources-header">
-                    <i class="wpsstm-player-sources-toggle fa fa-times" aria-hidden="true"></i>
-                    <?php _e('Choose a source','wpsstm');?></div>
-                <div id="wpsstm-player-sources"></div>
+                    <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
+                    <?php
+                }
+                ?>
+            </div>
+            <div id="wpsstm-player-trackinfo-wrapper">
+                <div id="wpsstm-player-trackinfo"></div>
+                <div id="wpsstm-player-sources-list"><!--this will be filled by ajax--></div>
             </div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
@@ -216,9 +216,11 @@ class WP_SoundSytem_Core_Player{
 
                 if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
                 
-                //if no source title set (supposed it has been scraped / set by user)
+                //if no source title set; set a default one
+
                 if ( !isset($source['title']) || (!$title = trim($source['title']) ) ){
-                    $title = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$track->artist,$track->title);
+                    $title = sprintf(__('%s — %s','wpsstm'),$track->artist,$track->title);
+                    $title = 'null'; //TO FIX
                 }
                 
                 $provider_source = array(

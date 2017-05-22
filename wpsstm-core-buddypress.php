@@ -1,8 +1,6 @@
 <?php
 
 class WP_SoundSytem_Core_BuddyPress{
-    
-    var $favorited_user_meta_key = '_wpsstm_user_favorite';
 
     /**
     * @var The one true Instance
@@ -38,7 +36,7 @@ class WP_SoundSytem_Core_BuddyPress{
         global $bp;
         
         // Determine user to use.
-        $user_id = $displayed_user->id;
+        $user_id = bp_displayed_user_id();
         
         $menu_tracks_slug = 'tracks';
         $submenu_favorite_tracks_slug = 'favorite';
@@ -51,7 +49,7 @@ class WP_SoundSytem_Core_BuddyPress{
         Tracks Menu
         */
 		$favorite_track_count = $this->member_get_favorite_tracks_count($user_id);
-		$favorite_track_class = ( 0 === $count ) ? 'no-count' : 'count';
+		$favorite_track_class = ( 0 === $favorite_track_count ) ? 'no-count' : 'count';
 
 		$menu_tracks_name = sprintf(
 			__( 'Favorite tracks %s', 'wpsstm' ),
@@ -101,7 +99,7 @@ class WP_SoundSytem_Core_BuddyPress{
         Playlist Menu
         */
 		$all_playlists_count = $this->member_get_playlist_count($user_id);
-		$all_playlists_class = ( 0 === $count ) ? 'no-count' : 'count';
+		$all_playlists_class = ( 0 === $all_playlists_count ) ? 'no-count' : 'count';
 
 		$menu_playlists_name = sprintf(
 			__( 'Playlists %s', 'wpsstm' ),
@@ -131,7 +129,7 @@ class WP_SoundSytem_Core_BuddyPress{
         //static
         
 		$static_playlists_count = $this->member_get_playlist_count($user_id,'static');
-		$static_playlists_class = ( 0 === $count ) ? 'no-count' : 'count';
+		$static_playlists_class = ( 0 === $static_playlists_count ) ? 'no-count' : 'count';
 
 		$submenu_playlists_name = sprintf(
 			__( 'Playlists %s', 'wpsstm' ),
@@ -153,7 +151,7 @@ class WP_SoundSytem_Core_BuddyPress{
         
         //live playlists
 		$live_playlists_count = $this->member_get_playlist_count($user_id,'live');
-		$live_playlists_class = ( 0 === $count ) ? 'no-count' : 'count';
+		$live_playlists_class = ( 0 === $live_playlists_count ) ? 'no-count' : 'count';
         
         
 
@@ -177,7 +175,7 @@ class WP_SoundSytem_Core_BuddyPress{
         
         //favorites
 		$favorite_playlists_count = $this->member_get_playlist_count($user_id,'favorite');
-		$favorite_playlists_class = ( 0 === $count ) ? 'no-count' : 'count';
+		$favorite_playlists_class = ( 0 === $favorite_playlists_count ) ? 'no-count' : 'count';
 
 		$submenu_favorite_playlists_name = sprintf(
 			__( 'Favorites %s', 'wpsstm' ),
@@ -253,7 +251,7 @@ class WP_SoundSytem_Core_BuddyPress{
     }
 
     function user_playlists_loop($type){
-        $user_id = $displayed_user->id;
+        $user_id = bp_displayed_user_id();
         $args = $this->member_get_playlists_query_args($user_id,$type);
         query_posts($args);
         
@@ -295,18 +293,18 @@ class WP_SoundSytem_Core_BuddyPress{
     }
     
     function user_favorite_tracks_subnav_content(){
-        $user_id = $displayed_user->id;
+        $user_id = bp_displayed_user_id();
 
         $track_args = array(
             'post_type'         => wpsstm()->post_type_track,
-            /*
+
             'meta_query'        => array(
                 array(
-                     'key'     => $this->favorited_user_meta_key,
+                     'key'     => wpsstm_tracks()->favorited_track_meta_key,
                      'value'   => $user_id
                 )
             )
-            */
+
         );
 
         query_posts($track_args);
@@ -355,7 +353,7 @@ class WP_SoundSytem_Core_BuddyPress{
         }else{
             $meta_query = array();
             $args['meta_query'][] = array(
-                 'key'     => $this->favorited_user_meta_key,
+                 'key'     => wpsstm_tracklists()->favorited_tracklist_meta_key,
                  'value'   => $user_id
             );
         }
@@ -421,7 +419,7 @@ class WP_SoundSytem_Core_BuddyPress{
             'post_type'         => wpsstm()->post_type_track,
             'meta_query'        => array(
                 array(
-                     'key'     => $this->favorited_user_meta_key,
+                     'key'     => wpsstm_tracks()->favorited_track_meta_key,
                      'value'   => $user_id
                 )
             )

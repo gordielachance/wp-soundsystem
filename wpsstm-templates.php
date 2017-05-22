@@ -322,15 +322,13 @@ function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
 Get track love/unlove icons.
 */
 
-function wpsstm_get_track_loveunlove_icons($track_id){
+function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
 
-    $track = new WP_SoundSystem_Track( array('post_id'=>$track_id) );
-    
     $wrapper_classes = array(
         'wpsstm-love-unlove-track-links'
     );
     
-    if ( $track->is_track_loved_by() ){
+    if ( $track && $track->is_track_loved_by() ){
         $wrapper_classes[] = 'wpsstm-is-loved';
     }
 

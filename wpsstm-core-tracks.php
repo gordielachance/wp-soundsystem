@@ -461,7 +461,7 @@ class WP_SoundSytem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
+
     
 }
 

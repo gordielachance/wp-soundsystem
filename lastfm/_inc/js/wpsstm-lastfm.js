@@ -95,6 +95,7 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
             dataType: 'json',
+            contentType:"application/x-javascript; charset:UTF-8",
             beforeSend: function() {
                 $(toggle_scrobble_el).addClass('loading');
             },

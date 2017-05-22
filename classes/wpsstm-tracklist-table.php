@@ -98,6 +98,8 @@ class WP_SoundSytem_TracksList_Table{
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
         
+        $columns['trackitem_sources']     = __('Sources','wpsstm');
+        
         if ( current_user_can('administrator') ){ //TO FIX remove this condition when feature ready
              $columns['trackitem_actions']     = '';
         }
@@ -453,15 +455,7 @@ class WP_SoundSytem_TracksList_Table{
     public function single_row( $item ) {
         
             $data_attr_str = null;
-        
-            if ( $this->can_player ){
-                $sources_attr_arr = wpsstm_player()->get_playable_sources($item,$this->sources_db_only);
 
-                if ($sources_attr_arr){
-                    $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
-                }
-            }
-        
             $track_classes = array();
             if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
         
@@ -550,11 +544,35 @@ class WP_SoundSytem_TracksList_Table{
             break;
             case 'trackitem_image':
                 if ( $item->image ){
-                    return sprintf('<img src="%s"/>',$item->image);
+                    return sprintf('<img src="%s" itemprop="image"/>',$item->image);
                 }
             break;
+            case 'trackitem_sources':
+                if ( $sources = wpsstm_player()->get_playable_sources($item,$this->sources_db_only) ){
+                    $lis = array();
+                    foreach($sources as $key=>$source){
+                        $title = sprintf('<span class="wpsstm-source-title">%s</span>',$source['title']);
+
+                        //get provider
+                        $source_provider = $source_icon = null;
+                        $source_provider_slug = $source['provider'];
+                        foreach( (array)wpsstm_player()->providers as $provider ){
+                            if ($provider->slug != $source_provider_slug) continue;
+                            $source_icon = $provider->icon;
+                        }
+
+                        $provider_link = sprintf('<a class="wpsstm-trackinfo-provider-link" href="%s" target="_blank">%s</a>',$source['src'],$source_icon);
+                        
+                        $li_classes = null;
+                        if ($key==0) $li_classes= 'class="wpsstm-active-source"';
+                        $lis[] = sprintf('<li data-wpsstm-source-idx="%s" %s>%s %s</li>',$key,$li_classes,$title,$provider_link);
+                    }
+                    printf('<ul>%s</ul>',implode("",$lis));
+                }
+
+            break;
             case 'trackitem_actions':
-                $love_unlove = wpsstm_get_track_loveunlove_icons($item->post_id);
+                $love_unlove = wpsstm_get_track_loveunlove_icons($item);
                 return $love_unlove;
             default:
                 if ( !is_admin() ) break;

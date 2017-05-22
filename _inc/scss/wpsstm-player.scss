@@ -91,7 +91,12 @@ a.wpsstm-play-track{
     bottom: 0;
     z-index: 50;
     min-height:0em;
-    background:#222;
+    color:white;
+    font-family:sans-serif;
+    
+    a{
+       color:white; 
+    }
     
     .wpsstm-bottom-notice{
         font-size:0.8em;
@@ -116,7 +121,7 @@ a.wpsstm-play-track{
         }
     }
 
-    #wpsstm-player-track-actions{
+    #wpsstm-player-actions{
         position: absolute;
         right: 1em;
         top: 0;
@@ -136,86 +141,76 @@ a.wpsstm-play-track{
         }
     }
     
-    #wpsstm-player-sources-wrapper{
+    #wpsstm-player-trackinfo-wrapper{
+        line-height:40px; //player height
         background:#222;
-        text-align:center;
-        color:white;
-        font-size:.8em;
-        font-family:sans-serif;
-        position:relative;
-        
-        a{
-            color:white;
-        }
-        
-        #wpsstm-player-sources-header{
-            font-size:1.4em;
-            font-weight: 100;
-            line-height:2em;
-            text-align:left;
-            padding: 0 1em;
-            display:none;
-            .wpsstm-player-sources-toggle{
-                cursor: pointer;
-                cursor: hand;
+        #wpsstm-player-trackinfo{
+            display:inline-block;
+            tr{
+                display:inline;
+                td{
+                    display:inline;
+                }
             }
         }
-        
-        #wpsstm-player-sources{
-            padding-top: .5em;
-            ul{
-                margin:0;
-                padding:0;
-                line-height: 2em;
-                list-style-type: none;
-                li{
-                    @include opacity(.8);
-                    display:none;
-                    .wpsstm-source-title{
-                        cursor: pointer;
-                        cursor: hand;
-                        &:hover{
-                           @include opacity(1); 
-                        }
-                        [itemprop="name"]:before{
-                            content:"\002014";
-                            padding:0 .5em;
-                        }
-                    }
+    }
 
-                    &.wpsstm-active-source{
-                        @include opacity(1);
-                        display:block;
+    #wpsstm-player-sources-list{
+        background:rgba(34, 34, 34, 0.95);
+        position:relative;
+        display:inline-block;
+        font-size:.7em;
+        position:absolute;
+        bottom:40px; //player height
+            
+        ul{
+            padding: 0 2em;
+            margin:0;
+            line-height: 2em;
+            list-style-type: none;
+            li{
+                display:none;
+                @include opacity(.8);
+                .wpsstm-source-title{
+                    cursor: pointer;
+                    cursor: hand;
+                    &:hover{
+                       @include opacity(1); 
                     }
-                    &.wpsstm-bad-source{
-                        //text-decoration: line-through;
-                        display:none!important;
+                    [itemprop="name"]:before{
+                        content:"\002014";
+                        padding:0 .5em;
                     }
-
-                    a.wpsstm-trackinfo-provider-link{
-                        margin-left:.5em;
-                        font-size:2em;
-                    }
-
                 }
+
+                &.wpsstm-active-source{
+                    @include opacity(1);
+                    display:inline-block;
+                }
+                &.wpsstm-bad-source{
+                    //text-decoration: line-through;
+                    display:none!important;
+                }
+
+                a.wpsstm-trackinfo-provider-link{
+                    margin-left:.5em;
+                    font-size:2em;
+                }
+
             }
         }
         &.expanded{
-            #wpsstm-player-sources-header{
-                background:#222;
-                display:block;
-            }
-            #wpsstm-player-sources{
-                background:#272727;
-                ul{
-                    li{
-                        display:block;
-                    }
+            ul{
+                padding: 1em 2em;
+                padding-bottom:0;
+                li{
+                    display:block;
                 }
             }
         }
-
+        
     }
+
     
     #wpsstm-player-wrapper{
         background:#222;
