@@ -21,11 +21,13 @@ var wpsstm_current_track_idx = -1;
         /* tracklist */
 
         //autoplay first track
+        /*
         if ( wpsstmPlayer.autoplay ){
             if(typeof wpsstm_page_tracks[0] === 'undefined') return; //track does not exists
             console.log("autoplay first track");
             wpsstm_init_track(0);
         }
+        */
 
         /*
         bottom player
@@ -127,8 +129,8 @@ var wpsstm_current_track_idx = -1;
         track_idx = Number(track_idx); //cast to number
         if(typeof wpsstm_page_tracks[track_idx] === 'undefined') return; //track does not exists
         
-        var track_obj = wpsstm_page_tracks[track_idx];
-        var track_el = $(track_obj.row);
+        var track_obj   = wpsstm_page_tracks[track_idx];
+        var track_el    = wpsstm_get_tracklist_track_el(track_idx);
         track_el.addClass('active');
 
         //wpsstm_init_track() is called a second time after tracks sources have been populated.  Do not run this code again.
@@ -161,8 +163,10 @@ var wpsstm_current_track_idx = -1;
         
         console.log("wpsstm_end_current_track() #" + wpsstm_current_track_idx);
 
-        var old_track_obj = wpsstm_page_tracks[wpsstm_current_track_idx];
-        var old_track_el = $(old_track_obj.row);
+        var old_track_obj   = wpsstm_page_tracks[wpsstm_current_track_idx];
+        var old_track_idx   = old_track_obj.track_idx;
+        var old_track_el    = wpsstm_get_tracklist_track_el(old_track_idx);
+        
         old_track_el.removeClass('active');
         old_track_el.addClass('has-played');
         
@@ -180,8 +184,8 @@ var wpsstm_current_track_idx = -1;
     function wpsstm_switch_player(track_idx){
         console.log("wpsstm_switch_player()  #" + track_idx);
         
-        var track_obj = wpsstm_page_tracks[track_idx];
-        var track_el = $(track_obj.row);
+        var track_obj   = wpsstm_page_tracks[track_idx];
+        var track_el    = wpsstm_get_tracklist_track_el(track_idx);
         
         //track infos
         var trackinfo = $(track_el).clone();
@@ -353,7 +357,7 @@ var wpsstm_current_track_idx = -1;
             
             //No valid source found
             var track_obj = wpsstm_page_tracks[wpsstm_current_track_idx];
-            var track_el = $(track_obj.row);
+            var track_el    = wpsstm_get_tracklist_track_el(wpsstm_current_track_idx);
             track_el.addClass('error');
 
             //No more sources - Play next song if any

@@ -1,5 +1,6 @@
 
 var wpsstm_track_source_requests_limit = 5; //number of following tracks we want to populate the sources for when clicking a track
+var wpsstm_page_tracklists = [];
 var wpsstm_page_tracks = [];
 var wpsstm_source_requests = [];
 
@@ -101,11 +102,16 @@ var wpsstm_source_requests = [];
 
         wpsstm_source_requests.length = 0;
     };
+    
+    function wpsstm_get_tracklist_track_el(track_obj){
+        var track_el = $('.wpsstm-tracklist[data-wpsstm-tracklist-idx="'+track_obj.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+track_obj.track_idx+'"]');
+        return track_el;
+    }
 
     function wpsstm_get_track_sources(track_idx) {
 
-        var track_obj = wpsstm_page_tracks[track_idx];
-        var track_el = $(track_obj.row);
+        var track_obj   = wpsstm_page_tracks[track_idx];
+        var track_el    = wpsstm_get_tracklist_track_el(track_idx);
         
         var track = {
             artist: track_obj.artist,
@@ -158,7 +164,8 @@ var wpsstm_source_requests = [];
     }
 
     function wpsstm_populate_track_sources(track_obj){
-        var track_el = $(track_obj.row);
+        var track_idx   = track_obj.track_idx;
+        var track_el    = wpsstm_get_tracklist_track_el(track_idx);
         
         //append sources to track obj
         var source_lis = track_el.find('.trackitem_sources li');
@@ -183,7 +190,8 @@ var wpsstm_source_requests = [];
     
     function wpsstm_update_track_button(track_obj,event){
         
-        var track_el = $(track_obj.row);
+        var track_idx   = track_obj.track_idx;
+        var track_el    = wpsstm_get_tracklist_track_el(track_idx);
         
         switch(event) {
             case 'loadeddata':
@@ -208,12 +216,13 @@ var wpsstm_source_requests = [];
     
     $.fn.wpsstm_load_tracklist = function() {
 
-        this.each(function() {
+        this.each(function( i, tracklist_el ) {
             
-            var tracklist_wrapper = $(this);
+            var tracklist_el = $(tracklist_el);
             
-            var tracklist_id = tracklist_wrapper.attr('data-tracklist-id');
-        
+            var tracklist_id =      tracklist_el.attr('data-tracklist-id');
+            var tracklist_idx =     tracklist_el.attr('data-wpsstm-tracklist-idx');
+
             var ajax_data = {
                 'action':           'wpsstm_load_tracklist',
                 'post_id':          tracklist_id
@@ -226,22 +235,34 @@ var wpsstm_source_requests = [];
                 data:ajax_data,
                 dataType: 'json',
                 beforeSend: function() {
-                    tracklist_wrapper.addClass('loading');
+                    tracklist_el.addClass('loading');
                 },
                 success: function(data){
                     if (data.success === false) {
-                        tracklist_wrapper.addClass('error');
+                        tracklist_el.addClass('error');
                         console.log(data);
                     }else{
                         if ( data.new_html ){
-                            var new_tracklist_wrapper = $(data.new_html);
-                            tracklist_wrapper.replaceWith(new_tracklist_wrapper);
-                            new_tracklist_wrapper.wpsstm_init_tracklist_tracks();
+                            var new_tracklist_el = $(data.new_html);
+                            
+                            if(typeof tracklist_idx === 'undefined') tracklist_idx = wpsstm_page_tracklists.length + i; //new tracklist idx
+                            new_tracklist_el.attr('data-wpsstm-tracklist-idx',tracklist_idx);
+                            
+                            tracklist_el.replaceWith(new_tracklist_el);
+                            
+                            var tracklist_obj = {
+                                tracklist_idx:  tracklist_idx,
+                                post_id:        tracklist_el.attr('data-tracklist-id'),
+                                tracks:         []
+                            }
+                            
+                            wpsstm_page_tracklists.push(tracklist_obj);
+                            new_tracklist_el.wpsstm_init_tracklist_tracks();
                         }
                     }
                 },
                 complete: function() {
-                    tracklist_wrapper.removeClass('loading');
+                    tracklist_el.removeClass('loading');
                 }
             })
 
@@ -251,29 +272,39 @@ var wpsstm_source_requests = [];
     
     $.fn.wpsstm_init_tracklist_tracks = function() {
 
-        this.each(function() {
+        this.each( function( i, tracklist_el ) {
             
-            var tracklist = $(this);
-            var tracks_el = tracklist.find('[itemprop="track"]');
+            //tracklist
+            var tracklist_el = $(tracklist_el);
+            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+            var new_tracks = [];
+ 
+            var tracks_el = tracklist_el.find('[itemprop="track"]');
+            
+            //tracks
             $.each(tracks_el, function( i, track_el ) {
                 track_el = $(track_el);
                 
-                var track_idx = wpsstm_page_tracks.length + i;
+                var track_idx = i;
                 track_el.attr('data-wpsstm-track-idx',track_idx);
 
                 var track_obj = {
-                    row:        track_el.get(0),
-                    post_id:    track_el.attr('data-wpsstm-track-id'),
-                    artist:     track_el.find('.trackitem_artist').text(),
-                    title:      track_el.find('.trackitem_track').text(),
-                    album:      track_el.find('.trackitem_album').text(),
-                    sources:    null
+                    tracklist_idx:  tracklist_idx,
+                    track_idx:      track_idx,
+                    post_id:        track_el.attr('data-wpsstm-track-id'),
+                    artist:         track_el.find('.trackitem_artist').text(),
+                    title:          track_el.find('.trackitem_track').text(),
+                    album:          track_el.find('.trackitem_album').text(),
+                    sources:        null
                 }
 
                 wpsstm_populate_track_sources(track_obj); //get sources from HTML if any
-                wpsstm_page_tracks.push(track_obj);
+                new_tracks.push(track_obj);
                 
             });
+            
+            wpsstm_page_tracklists[tracklist_idx].tracks = new_tracks;
+            
         });  
     };
     
