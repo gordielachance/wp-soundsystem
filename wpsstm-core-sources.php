@@ -270,6 +270,30 @@ class WP_SoundSytem_Core_Sources{
 
     }
     
+    function list_track_sources(WP_SoundSystem_Track $track,$database_only){
+        if ( !$sources = wpsstm_player()->get_playable_sources($track,$database_only) ) return;
+        $lis = array();
+        foreach($sources as $key=>$source){
+            $title = sprintf('<span class="wpsstm-source-title">%s</span>',$source['title']);
+
+            //get provider
+            $source_provider = $source_icon = null;
+            $source_provider_slug = $source['provider'];
+            foreach( (array)wpsstm_player()->providers as $provider ){
+                if ($provider->slug != $source_provider_slug) continue;
+                $source_icon = $provider->icon;
+            }
+
+            $provider_link = sprintf('<a class="wpsstm-trackinfo-provider-link" href="%s" target="_blank">%s</a>',$source['src'],$source_icon);
+
+            $li_classes = null;
+            if ($key==0) $li_classes= 'class="wpsstm-active-source"';
+            $lis[] = sprintf('<li data-wpsstm-source-idx="%s" %s>%s %s</li>',$key,$li_classes,$title,$provider_link);
+        }
+        printf('<ul>%s</ul>',implode("",$lis));
+    }
+    
+    
 }
 
 
