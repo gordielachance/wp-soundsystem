@@ -97,12 +97,12 @@ class WP_SoundSytem_TracksList_Table{
         if ( $this->show_property_column('album') ){
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
-        
-        $columns['trackitem_sources']     = __('Sources','wpsstm');
-        
+
         if ( current_user_can('administrator') ){ //TO FIX remove this condition when feature ready
              $columns['trackitem_actions']     = '';
         }
+        
+        $columns['trackitem_sources']     = __('Sources','wpsstm');
 
         return $columns;
     }
@@ -548,7 +548,7 @@ class WP_SoundSytem_TracksList_Table{
                 }
             break;
             case 'trackitem_sources':
-                wpsstm_sources()->list_track_sources($item,$this->sources_db_only);
+                return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
                 $love_unlove = wpsstm_get_track_loveunlove_icons($item);

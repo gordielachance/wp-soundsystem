@@ -140,83 +140,84 @@ a.wpsstm-play-track{
             }
         }
     }
-    
-    #wpsstm-player-trackinfo-wrapper{
-        line-height:40px; //player height
+
+    #wpsstm-player-trackinfo{
         background:#222;
-        #wpsstm-player-trackinfo{
-            display:inline-block;
-            tr{
+        line-height:40px; //player height
+        tr{
+            display:inline;
+            td{
                 display:inline;
-                td{
-                    display:inline;
-                }
             }
         }
-    }
+        [itemprop="image"]{
+            max-height:3em;
+        }
+        [itemprop="name"]:before{
+            content:"\002014";
+            padding-right:.5em;
+        }
 
-    #wpsstm-player-sources-list{
-        background:rgba(34, 34, 34, 0.95);
-        position:relative;
-        display:inline-block;
-        font-size:.7em;
-        position:absolute;
-        bottom:40px; //player height
-        @include opacity(.3);
-            
-        ul{
-            padding: 0 2em;
+        .column-trackitem_sources{
+            padding: 0;
             margin:0;
+            @include opacity(.3);
             line-height: 2em;
-            list-style-type: none;
-            li{
-                display:none;
-                @include opacity(.8);
-                .wpsstm-source-title{
-                    cursor: pointer;
-                    cursor: hand;
+            ul.wpsstm-player-sources-list{
+
+                position:relative;
+                display:inline-block;
+                font-size:.7em;
+                padding: 0 2em;
+                margin:0;
+                list-style-type: none;
+                li{
+                    display:none;
+                    @include opacity(.8);
+                    .wpsstm-source-title{
+                        cursor: pointer;
+                        cursor: hand;
+                    }
                     &:hover{
                        @include opacity(1); 
                     }
-                    [itemprop="name"]:before{
-                        content:"\002014";
-                        padding:0 .5em;
+
+                    &.wpsstm-active-source{
+                        @include opacity(1);
+                        display:inline-block;
+                    }
+                    &.wpsstm-bad-source{
+                        //text-decoration: line-through;
+                        display:none!important;
+                    }
+
+                    a.wpsstm-trackinfo-provider-link{
+                        margin-left:.5em;
+                        font-size:2em;
+                    }
+
+                }        
+            }
+            &:hover{
+                @include opacity(1);
+            }
+            &.expanded{
+                position:absolute;
+                bottom:40px; //player height
+                background:rgba(34, 34, 34, 0.95);
+                @include opacity(1);
+                
+                ul{
+                    padding-top:1em;
+                    li{
+                        display:block;
                     }
                 }
 
-                &.wpsstm-active-source{
-                    @include opacity(1);
-                    display:inline-block;
-                }
-                &.wpsstm-bad-source{
-                    //text-decoration: line-through;
-                    display:none!important;
-                }
-
-                a.wpsstm-trackinfo-provider-link{
-                    margin-left:.5em;
-                    font-size:2em;
-                }
-
             }
         }
-        &:hover{
-            @include opacity(0.4);
-        }
-        &.expanded{
-            @include opacity(1);
-            ul{
-                padding: 1em 2em;
-                padding-bottom:0;
-                li{
-                    display:block;
-                }
-            }
-        }
-        
     }
 
-    
     #wpsstm-player-wrapper{
         background:#222;
         position:relative;

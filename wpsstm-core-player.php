@@ -158,10 +158,7 @@ class WP_SoundSytem_Core_Player{
                 }
                 ?>
             </div>
-            <div id="wpsstm-player-trackinfo-wrapper">
-                <div id="wpsstm-player-trackinfo"></div>
-                <div id="wpsstm-player-sources-list"><!--this will be filled by ajax--></div>
-            </div>
+            <div id="wpsstm-player-trackinfo"></div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                 <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
