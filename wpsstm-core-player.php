@@ -100,7 +100,7 @@ class WP_SoundSytem_Core_Player{
             if ( !get_current_user_id() ){
                 $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                 $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-                $wp_auth_text = sprintf(__('Track actions requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+                $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
                 printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice active">%s %s </p>',$wp_auth_icon,$wp_auth_text);
             }
 
@@ -111,7 +111,7 @@ class WP_SoundSytem_Core_Player{
                     $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
                     $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
                     $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                    $lastfm_auth_text = sprintf(__('Please authorize this website to Last.FM: click %s.','wpsstm'),$lastfm_auth_link);
+                    $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
                     printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice active">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
                 }
             }
@@ -144,24 +144,21 @@ class WP_SoundSytem_Core_Player{
                 printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
             }
             ?>
-            <div id="wpsstm-player-sources-wrapper">
-                <div id="wpsstm-player-track-actions">
-                    <?php 
-                    //scrobbling
-                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                        echo wpsstm_get_scrobbler_icons();
-                    }
-                    //favorites
-                    if ( wpsstm()->get_options('lastfm_favorites') ){
-                        //TO FIX echo wpsstm_get_track_loveunlove_icons();
-                    }
+            <div id="wpsstm-player-actions">
+                <?php 
+                //scrobbling
+                if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                    echo wpsstm_get_scrobbler_icons();
+                }
+                //favorites
+                if ( wpsstm()->get_options('lastfm_favorites') ){
                     ?>
-                </div>
-                <div id="wpsstm-player-sources-header">
-                    <i class="wpsstm-player-sources-toggle fa fa-times" aria-hidden="true"></i>
-                    <?php _e('Choose a source','wpsstm');?></div>
-                <div id="wpsstm-player-sources"></div>
+                    <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
+                    <?php
+                }
+                ?>
             </div>
+            <div id="wpsstm-player-trackinfo"></div>
             <div id="wpsstm-player-wrapper">
                 <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                 <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
@@ -216,9 +213,11 @@ class WP_SoundSytem_Core_Player{
 
                 if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
                 
-                //if no source title set (supposed it has been scraped / set by user)
+                //if no source title set; set a default one
+
                 if ( !isset($source['title']) || (!$title = trim($source['title']) ) ){
-                    $title = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$track->artist,$track->title);
+                    $title = sprintf(__('%s — %s','wpsstm'),$track->artist,$track->title);
+                    $title = 'null'; //TO FIX
                 }
                 
                 $provider_source = array(

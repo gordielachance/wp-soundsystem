@@ -44,7 +44,7 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
 
         //love & unlove
-        add_action( 'wpsstm_love_track',array($this,'lastfm_love_track') );
+        add_action( 'wp_ajax_wpsstm_lastfm_love_unlove_track',array($this,'ajax_love_unlove_track') );
         
         //updateNowPlaying
         add_action('wp_ajax_wpsstm_lastfm_update_now_playing_track', array($this,'ajax_update_now_playing_track'));
@@ -431,7 +431,7 @@ class WP_SoundSytem_Core_LastFM{
         return $results;
     }
     
-    public function lastfm_love_track(WP_SoundSystem_Track $track,$do_love = null){
+    public function love_track(WP_SoundSystem_Track $track,$do_love = null){
 
         if ( !get_current_user_id() ) return false;
         if ( !$this->is_user_api_logged() ) return false;
@@ -465,8 +465,8 @@ class WP_SoundSytem_Core_LastFM{
     
     public function now_playing_track(WP_SoundSystem_Track $track){
 
-        if ( !get_current_user_id() ) return false;
-        if ( !$this->is_user_api_logged() ) return false;
+        if ( !get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
+        if ( !$this->is_user_api_logged() ) return new WP_Error('lastfm_not_api_logged',__("User is not logged onto Last.fm",'wpsstm'));
 
         $auth = $this->get_user_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
@@ -492,8 +492,8 @@ class WP_SoundSytem_Core_LastFM{
     
     public function scrobble_track(WP_SoundSystem_Track $track, $timestamp){
 
-        if ( !get_current_user_id() ) return false;
-        if ( !$this->is_user_api_logged() ) return false;
+        if ( !get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
+        if ( !$this->is_user_api_logged() ) return new WP_Error('lastfm_not_api_logged',__("User is not logged onto Last.fm",'wpsstm'));
 
         $auth = $this->get_user_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
@@ -523,9 +523,38 @@ class WP_SoundSytem_Core_LastFM{
         return $results;
     }
     
+    function ajax_love_unlove_track(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false,
+            'message'   => null
+        );
+        $track_args = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $do_love = $result['do_love'] = filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
+        $success = $this->love_track($track,$do_love);
+        
+        if ( $success ){
+            if ( is_wp_error($success) ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code); 
+            }else{
+                $result['success'] = true;
+            }
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
     function ajax_update_now_playing_track(){
         $result = array(
             'input'     => $_POST,
+            'message'   => null,
             'success'   => false
         );
         
@@ -539,10 +568,15 @@ class WP_SoundSytem_Core_LastFM{
         
         $success = wpsstm_lastfm()->now_playing_track($track);
 
-        if ($success && !is_wp_error($success) ){
-            $result['success'] = true;
+        if ( $success ){
+            if ( is_wp_error() ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code); 
+            }else{
+                $result['success'] = true;
+            }
         }
-        
+
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
@@ -550,6 +584,7 @@ class WP_SoundSytem_Core_LastFM{
     function ajax_scrobble_track(){
         $result = array(
             'input'     => $_POST,
+            'message'   => null,
             'success'   => false
         );
         
@@ -565,8 +600,13 @@ class WP_SoundSytem_Core_LastFM{
         
         $success = wpsstm_lastfm()->scrobble_track($track,$start_timestamp);
 
-        if ($success && !is_wp_error($success) ){
-            $result['success'] = true;
+        if ( $success ){
+            if ( is_wp_error() ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code); 
+            }else{
+                $result['success'] = true;
+            }
         }
         
         header('Content-type: application/json');

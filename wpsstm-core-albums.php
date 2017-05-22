@@ -151,7 +151,7 @@ class WP_SoundSytem_Core_Albums{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','editor','author','thumbnail', 'comments' ),
+            'supports' => array( 'title','thumbnail','comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,

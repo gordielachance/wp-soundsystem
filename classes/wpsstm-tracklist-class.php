@@ -282,9 +282,10 @@ class WP_SoundSytem_Tracklist{
     }
     
     function love_tracklist($do_love){
-        if ( !$user_id = get_current_user_id() ) return false;
-        if ( !$this->post_id ) return false;
         
+        if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
+        if ( !$this->post_id ) return new WP_Error('no_tracklist_id',__("This tracklist does not exists in the database",'wpsstm'));
+
         if ($do_love){
             return add_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
         }else{

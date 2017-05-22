@@ -97,10 +97,12 @@ class WP_SoundSytem_TracksList_Table{
         if ( $this->show_property_column('album') ){
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
-        
+
         if ( current_user_can('administrator') ){ //TO FIX remove this condition when feature ready
              $columns['trackitem_actions']     = '';
         }
+        
+        $columns['trackitem_sources']     = __('Sources','wpsstm');
 
         return $columns;
     }
@@ -216,13 +218,11 @@ class WP_SoundSytem_TracksList_Table{
                 
                 printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);    
             }
-            
+        
             if ( !is_admin() ){
                 ?>
-
                 <div class="alignright actions wpsstm-tracklist-actions">
                     <?php
-
                         $tracklist_links = array();
                 
                         //share
@@ -247,7 +247,9 @@ class WP_SoundSytem_TracksList_Table{
                         echo implode("\n",$tracklist_links);
                     ?>
                 </div>
-            <?php } ?>
+            <?php 
+            }
+            ?>
         </div>
 
     <?php
@@ -452,23 +454,15 @@ class WP_SoundSytem_TracksList_Table{
      */
     public function single_row( $item ) {
         
-            $data_attr_str = null;
-        
-            if ( $this->can_player ){
-                $sources_attr_arr = wpsstm_player()->get_playable_sources($item,$this->sources_db_only);
+            $sources = wpsstm_player()->get_playable_sources($item,true);
 
-                if ($sources_attr_arr){
-                    $data_attr_str = esc_attr( json_encode($sources_attr_arr) );
-                }
-            }
-        
             $track_classes = array();
             if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
         
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources="%s">',
+            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources-count="%s">',
                    wpsstm_get_classes_attr($track_classes),
                    $item->post_id,
-                   $data_attr_str
+                   count($sources)
             );
             $this->single_row_columns( $item );
             echo '</tr>';
@@ -550,11 +544,14 @@ class WP_SoundSytem_TracksList_Table{
             break;
             case 'trackitem_image':
                 if ( $item->image ){
-                    return sprintf('<img src="%s"/>',$item->image);
+                    return sprintf('<img src="%s" itemprop="image"/>',$item->image);
                 }
             break;
+            case 'trackitem_sources':
+                return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
+            break;
             case 'trackitem_actions':
-                $love_unlove = wpsstm_get_track_loveunlove_icons($item->post_id);
+                $love_unlove = wpsstm_get_track_loveunlove_icons($item);
                 return $love_unlove;
             default:
                 if ( !is_admin() ) break;
