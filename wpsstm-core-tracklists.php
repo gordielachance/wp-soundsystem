@@ -385,7 +385,6 @@ class WP_SoundSytem_Core_Tracklists{
         if ( !in_array($post_type,$this->allowed_post_types) ) return $content;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
-        $tracklist->validate_tracks();
 
         return $tracklist->get_tracklist_table() . $content;
     }

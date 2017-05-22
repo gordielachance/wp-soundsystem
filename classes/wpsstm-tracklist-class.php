@@ -25,6 +25,8 @@ class WP_SoundSytem_Tracklist{
         'current_page'  => null
     );
     
+    var $tracks_strict = true; //requires a title AND an artist
+    
     static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
@@ -115,9 +117,7 @@ class WP_SoundSytem_Tracklist{
     }
     
     function add($tracks){
-        
-        $tracks_count = null;
-        
+
         //force array
         if ( !is_array($tracks) ){
             $tracks = array($tracks);
@@ -134,25 +134,32 @@ class WP_SoundSytem_Tracklist{
             //set tracklist ID
             $track->tracklist_id = $this->post_id;
 
-            //increment count
-            $tracks_count++;
-            $track->subtrack_order = $tracks_count;
+
 
             $this->tracks[] = $track;
         }
         
-        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
+        $this->validate_tracks();
+        
+        $tracks_count = null;
+        foreach((array)$this->tracks as $key=>$track){
+            //increment count
+            $tracks_count++;
+            $this->tracks[$key]->subtrack_order = $tracks_count;
+        }
+
+        $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
 
     }
 
-    function validate_tracks($strict = true){
+    protected function validate_tracks(){
         
         //array unique
         $pending_tracks = array_unique($this->tracks, SORT_REGULAR);
         $valid_tracks = array();
         
         foreach($pending_tracks as $track){
-            if ( !$track->validate_track($strict) ) continue;
+            if ( !$track->validate_track($this->tracks_strict) ) continue;
             $valid_tracks[] = $track;
         }
         
