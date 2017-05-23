@@ -8,6 +8,11 @@
         
     }
     
+    &.loading{
+        pointer-events: none;
+        @include opacity(.5);
+    }
+    
     &.wpsstm-tracklist-table {
         position:relative;
         font-family: sans-serif;

@@ -36,12 +36,12 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
         $('.wpsstm-requires-lastfm-auth').click(function(e) {
             if ( !wpsstm_get_current_user_id() ){
                 e.preventDefault();
-                $('#wpsstm-bottom-notice-wp-auth').show();
+                $('#wpsstm-bottom-notice-wp-auth').addClass('active');
                 return;
             }
             if ( !wpsstm_is_lastfm_api_logged() ){
                 e.preventDefault();
-                $('#wpsstm-bottom-notice-lastfm-auth').show();
+                $('#wpsstm-bottom-notice-lastfm-auth').addClass('active');
             }
         });
 

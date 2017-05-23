@@ -69,9 +69,16 @@
             var link = $(this);
             var link_wrapper = link.closest('.wpsstm-love-unlove-track-links');
             
+            var tracklist_el = link.closest('.wpsstm-tracklist');
+            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+            
             var track_el = link.closest('[itemprop="track"]');
             var track_idx = track_el.attr('data-wpsstm-track-idx');
-            var track_obj = wpsstm_page_tracks[track_idx];
+            
+            var track_obj   = wpsstm_get_track_obj(tracklist_idx,track_idx);
+            if (!$track_obj) return;
+            
+            
             var track_id = track_obj.post_id;
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
@@ -139,6 +146,9 @@ http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-java
 */
 function wpsstm_clipboard_box(text) {
     window.prompt(wpsstmL10n.clipboardtext, text);
+}
+function wpsstm_get_current_user_id(){
+    return parseInt(wpsstmL10n.logged_user_id);
 }
 
 

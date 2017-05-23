@@ -101,7 +101,7 @@ class WP_SoundSytem_Core_Player{
                 $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                 $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
                 $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice active">%s %s </p>',$wp_auth_icon,$wp_auth_text);
+                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice">%s %s </p>',$wp_auth_icon,$wp_auth_text);
             }
 
             //Last.FM track action - API auth notice
@@ -112,12 +112,14 @@ class WP_SoundSytem_Core_Player{
                     $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
                     $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
                     $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-                    printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice active">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
+                    printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
                 }
             }
 
             //redirection notice
             if ( wpsstm()->get_options('autoredirect') && $redirect_auto ){
+                //TO FIX : if the tracklists of the page have been read, we should move to another page
+                /*
                 global $wp;
 
                 $current_url = home_url(add_query_arg(array(),$wp->request));
@@ -142,29 +144,32 @@ class WP_SoundSytem_Core_Player{
                 $text.= ' ' . $abord_link;
                 
                 printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
+                */
             }
             ?>
-            <div id="wpsstm-player-actions">
-                <?php 
-                //scrobbling
-                if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                    echo wpsstm_get_scrobbler_icons();
-                }
-                //favorites
-                if ( wpsstm()->get_options('lastfm_favorites') ){
+            <div id="wpsstm-bottom-player">
+                <div id="wpsstm-player-actions">
+                    <?php 
+                    //scrobbling
+                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                        echo wpsstm_get_scrobbler_icons();
+                    }
+                    //favorites
+                    if ( wpsstm()->get_options('lastfm_favorites') ){
+                        ?>
+                        <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
+                        <?php
+                    }
                     ?>
-                    <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
-                    <?php
-                }
-                ?>
-            </div>
-            <div id="wpsstm-player-trackinfo"></div>
-            <div id="wpsstm-player-wrapper">
-                <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
-                <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
-                <div id="wpsstm-player"></div>
-                <div id="wpsstm-player-nav-next-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
-                <div id="wpsstm-player-nav-next-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                </div>
+                <div id="wpsstm-player-trackinfo"></div>
+                <div id="wpsstm-player-wrapper">
+                    <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player"></div>
+                    <div id="wpsstm-player-nav-next-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-nav-next-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                </div>
             </div>
         </div>
         <?php
@@ -176,7 +181,8 @@ class WP_SoundSytem_Core_Player{
         wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement'),wpsstm()->version, true); //TO FIX should add shortenTable as dependecy since it uses it
+        wp_register_script( 'wpsstm-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklist.js', array('jquery'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wpsstm-tracklist','wp-mediaelement'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
@@ -237,7 +243,6 @@ class WP_SoundSytem_Core_Player{
         return $provider_sources;
     }
 
-    //TO FIX all those attributes should be moved to the tracklist <tr>
     function get_track_button(){
         //https://wordpress.stackexchange.com/a/162945/70449
         $link = '<a class="wpsstm-play-track" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
