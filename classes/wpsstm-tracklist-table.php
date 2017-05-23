@@ -18,11 +18,6 @@ class WP_SoundSytem_TracksList_Table{
         
         $this->tracklist = $tracklist;
         $this->no_items_label = __( 'No tracks found.','wpsstm');
-        
-        if ($this->tracklist->is_ajaxed){
-            $this->no_items_label = '<i class="fa fa-refresh fa-fw fa-spin"></i> ' . __( 'Loading tracks...','wpsstm');
-        }
-        
         $this->can_player = ( !$this->tracklist->is_wizard && wpsstm()->get_options('player_enabled') == 'on' );
     }
     
@@ -156,7 +151,7 @@ class WP_SoundSytem_TracksList_Table{
             'wpsstm-tracklist',
             'wpsstm-tracklist-table'
         );
-        if ($this->tracklist->is_ajaxed) $classes[] = 'wpsstm-ajaxed-tracklist';
+        if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
         $classes_str = wpsstm_get_classes_attr($classes);
 
         printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-next-refresh="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$this->tracklist->expire_time); ?>
@@ -203,7 +198,7 @@ class WP_SoundSytem_TracksList_Table{
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
         
             $text_time = $text_refresh = null;
- 
+
             if ( $this->tracklist->updated_time ){
 
                 $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );
@@ -212,23 +207,24 @@ class WP_SoundSytem_TracksList_Table{
                 $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
                 $text_time = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
                 $text_time = sprintf('<small class="wpsstm-tracklist-published">%s %s</small>',$icon_time,$text_time);
-
-                if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
-
-                    $remaining = $this->tracklist->expire_time - current_time( 'timestamp', true );
-                    $expire_hours = floor($remaining / 3600);
-                    $expire_minutes = floor(($remaining / 60) % 60);
-                    $expire_seconds = $remaining % 60;
-                    
-                    $remaining = sprintf('<span class="wpsstm-tracklist-refresh-time"><span class="wpsstm-tracklist-refresh-hours">%s</span>:<span class="wpsstm-tracklist-refresh-minutes">%s</span>:<span class="wpsstm-tracklist-refresh-seconds">%s</span></span>',sprintf("%02d", $expire_hours),sprintf("%02d", $expire_minutes),sprintf("%02d", $expire_seconds));
-                    
-                    $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                    $text_refresh = sprintf(__('refresh in %s','wpsstm'),$remaining);
-                    $text_refresh = sprintf('<small class="wpsstm-tracklist-next-refresh">%s %s</small>',$icon_refresh,$text_refresh);
-                }
                 
-                printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);    
             }
+
+            if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
+
+                $remaining = $this->tracklist->expire_time - current_time( 'timestamp', true );
+                $expire_hours = floor($remaining / 3600);
+                $expire_minutes = floor(($remaining / 60) % 60);
+                $expire_seconds = $remaining % 60;
+
+                $remaining = sprintf('<span class="wpsstm-tracklist-refresh-time"><span class="wpsstm-tracklist-refresh-hours">%s</span>:<span class="wpsstm-tracklist-refresh-minutes">%s</span>:<span class="wpsstm-tracklist-refresh-seconds">%s</span></span>',sprintf("%02d", $expire_hours),sprintf("%02d", $expire_minutes),sprintf("%02d", $expire_seconds));
+
+                $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
+                $text_refresh = sprintf(__('refresh in %s','wpsstm'),$remaining);
+                $text_refresh = sprintf('<small class="wpsstm-tracklist-next-refresh">%s %s</small>',$icon_refresh,$text_refresh);
+            }
+
+            printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);   
         
             if ( !$this->tracklist->is_wizard ){
                 ?>

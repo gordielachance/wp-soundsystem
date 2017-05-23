@@ -31,7 +31,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     public $feed_url;
     public $id;
-    public $transient_name_cache;
+    public $transient_name_cache; 
     
     public $is_wizard = false;
     
@@ -64,7 +64,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         'omit_xml_declaration'      => true,
         'ignore_parser_warnings'    => true,
         'convert_from_encoding'     => 'auto',
-        //'convert_to_encoding'       => 'ISO-8859-1'
+        'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
     
     public function __construct($post_id_or_feed_url = null) {
@@ -94,7 +94,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         
         //options
         $options_parent = $this->options_default;
-        $this->options_default = array_replace_recursive((array)$options_parent,(array)$options_default,(array)$this->options_default); //last one has priority
+        $this->options_default = $this->options = array_replace_recursive((array)$options_parent,(array)$options_default,(array)$this->options_default); //last one has priority
 
         $post_id = $feed_url = null;
 
@@ -117,12 +117,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             //set feed url
             $this->feed_url = $feed_url;
             $this->id = md5( $this->feed_url ); //unique ID based on URL
-            $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
+            $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //172 characters or less
         }
-        
-        //expiration time
-        $time = current_time( 'timestamp', true );
-        $this->expire_time = $time + MINUTE_IN_SECONDS * $this->options['datas_cache_min'];
 
     }
 
@@ -140,11 +136,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                 $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
-
-        //set expire time
-        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
-        $this->expire_time = get_option( $transient_timeout_name );
-
+        
         //get remote tracks
         if ( !$this->tracks && $remote_request ){
 
@@ -209,6 +201,14 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //set only if not already defined (eg. by a post ID); except for timestamp
         
         $this->updated_time = wpsstm_get_array_value('timestamp', $this->datas);
+        
+        //expiration
+        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
+        if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
+            $this->expire_time = $cache_expire_time;
+        }else{
+            $this->expire_time = current_time( 'timestamp', true ); //now
+        }
         
         if ( !$this->title ){
             $this->title = wpsstm_get_array_value('title', $this->datas);
@@ -749,10 +749,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     function set_cache(){
 
         if ( !$duration_min = $this->get_options('datas_cache_min') ) return;
-        
+
         $duration = $duration_min * MINUTE_IN_SECONDS;
         $success = set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
-        
+
         $debug_cache = $this->datas_remote;
         $debug_cache['tracks_count'] = ( isset($debug_cache['tracks']) ) ? count($debug_cache['tracks']) : null;
         unset($debug_cache['tracks']);

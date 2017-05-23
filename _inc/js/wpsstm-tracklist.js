@@ -6,13 +6,7 @@ var wpsstm_source_requests = [];
 
     $(document).ready(function(){
 
-        bt_prev_track = $('#wpsstm-player-nav-previous-track');
-        bt_next_track = $('#wpsstm-player-nav-next-track');
-        
-        /* tracklist */
 
-        //init tracklists
-        $( ".wpsstm-tracklist" ).wpsstm_init_tracklists();
 
         //user is not logged
         $('.wpsstm-requires-auth').click(function(e) {

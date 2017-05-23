@@ -116,7 +116,7 @@ class WP_SoundSytem_Core_Tracklists{
         $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
 
         if ($tracklist_id){
-            if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id,false) ){
+            if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
                 $tracklist->load_remote_tracks(true);
                 $result['success'] = true;
                 $result['new_html'] = $tracklist->get_tracklist_table(); 

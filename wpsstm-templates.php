@@ -220,8 +220,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         
     }elseif ( ($post_type == wpsstm()->post_type_live_playlist) || ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id) ){
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->is_ajaxed = true;
-        //do not populate remote tracks for now, we'll use ajax for this or it will be too slow.
+        $tracklist->load_remote_tracks(); //load cache only
     }else{ //playlist or album
         $tracklist->load_subtracks();
     }
