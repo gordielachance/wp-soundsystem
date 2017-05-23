@@ -68,7 +68,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     );
     
     public function __construct($post_id_or_feed_url = null) {
-        
+
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
         require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
 
@@ -119,6 +119,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $this->id = md5( $this->feed_url ); //unique ID based on URL
             $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //WARNING this must be 40 characters max !  md5 returns 32 chars.
         }
+        
+        //expiration time
+        $time = current_time( 'timestamp', true );
+        $this->expire_time = $time + MINUTE_IN_SECONDS * $this->options['datas_cache_min'];
 
     }
 

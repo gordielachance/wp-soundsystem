@@ -108,17 +108,14 @@ a.wpsstm-play-track{
             color:#222;
             text-decoration: underline;
         }
+        
+        &.active{
+            display:block;
+        }
 
         &#wpsstm-bottom-notice-redirection{
-            display:none;
             cursor: pointer;
             cursor: hand;
-        }
-        &#wpsstm-bottom-notice-wp-auth{
-            display:none;
-        }
-        &#wpsstm-bottom-notice-lastfm-auth{
-            display:none;
         }
     }
 

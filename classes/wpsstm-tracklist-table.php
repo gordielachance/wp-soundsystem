@@ -158,9 +158,8 @@ class WP_SoundSytem_TracksList_Table{
         );
         if ($this->tracklist->is_ajaxed) $classes[] = 'wpsstm-ajaxed-tracklist';
         $classes_str = wpsstm_get_classes_attr($classes);
-        
-        $expire_seconds = $this->tracklist->expire_time - current_time('timestamp',true);
-        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-expire-seconds="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$expire_seconds); ?>
+
+        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-next-refresh="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$this->tracklist->expire_time); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -216,8 +215,12 @@ class WP_SoundSytem_TracksList_Table{
 
                 if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
 
-                    $remaining = human_time_diff( current_time('timestamp',true), $expire_timestamp );
-                    $remaining = sprintf('<span class="wpsstm-tracklist-refresh-minutes">%s</span>',$remaining);
+                    $remaining = $this->tracklist->expire_time - current_time( 'timestamp', true );
+                    $expire_hours = floor($remaining / 3600);
+                    $expire_minutes = floor(($remaining / 60) % 60);
+                    $expire_seconds = $remaining % 60;
+                    
+                    $remaining = sprintf('<span class="wpsstm-tracklist-refresh-time"><span class="wpsstm-tracklist-refresh-hours">%s</span>:<span class="wpsstm-tracklist-refresh-minutes">%s</span>:<span class="wpsstm-tracklist-refresh-seconds">%s</span></span>',sprintf("%02d", $expire_hours),sprintf("%02d", $expire_minutes),sprintf("%02d", $expire_seconds));
                     
                     $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
                     $text_refresh = sprintf(__('refresh in %s','wpsstm'),$remaining);
