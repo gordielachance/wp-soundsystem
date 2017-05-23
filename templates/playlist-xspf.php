@@ -15,7 +15,6 @@ require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 $xspf = new mptre\Xspf();
 
 $tracklist = wpsstm_get_post_tracklist();
-$tracklist->validate_tracks();
 
 //playlist
 if ( $title = $tracklist->title ){

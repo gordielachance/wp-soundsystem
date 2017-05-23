@@ -71,9 +71,11 @@ class WP_SoundSytem_Core_Tracklists{
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
         
-        //toggle love tracklist
+        //ajax : toggle love tracklist
         add_action('wp_ajax_wpsstm_love_unlove_tracklist', array($this,'ajax_love_unlove_tracklist'));
         
+        //ajax : load tracklist
+        add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
 
     }
     
@@ -81,8 +83,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         $result = array(
             'input'     => $_POST,
-            'success'   => false,
-            'message'   => null
+            'success'   => false
         );
         
         $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
@@ -98,6 +99,27 @@ class WP_SoundSytem_Core_Tracklists{
                 }else{
                    $result['success'] = true; 
                 }
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_load_tracklist(){
+        $result = array(
+            'input'     => $_POST,
+            'success'   => false,
+            'new_html'  => null
+        );
+        
+        $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+
+        if ($tracklist_id){
+            if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
+                $tracklist->load_remote_tracks(true);
+                $result['success'] = true;
+                $result['new_html'] = $tracklist->get_tracklist_table(); 
             }
         }
 
@@ -256,9 +278,8 @@ class WP_SoundSytem_Core_Tracklists{
         <div id="wpsstm-subtracks-list" data-wpsstm-tracklist-id="<?php echo $post->ID;?>">
             
             <?php
-        
                 $tracklist = wpsstm_get_post_tracklist($post->ID);
-                echo $tracklist->get_tracklist_table(true);
+                echo $tracklist->get_tracklist_admin_table(true);
             ?>
         </div>
 
@@ -385,7 +406,6 @@ class WP_SoundSytem_Core_Tracklists{
         if ( !in_array($post_type,$this->allowed_post_types) ) return $content;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
-        $tracklist->validate_tracks();
 
         return $tracklist->get_tracklist_table() . $content;
     }

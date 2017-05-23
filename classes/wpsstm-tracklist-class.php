@@ -25,6 +25,8 @@ class WP_SoundSytem_Tracklist{
         'current_page'  => null
     );
     
+    var $tracks_strict = true; //requires a title AND an artist
+    
     static $paged_var = 'tracklist_page';
 
     function __construct($post_id = null ){
@@ -115,9 +117,7 @@ class WP_SoundSytem_Tracklist{
     }
     
     function add($tracks){
-        
-        $tracks_count = null;
-        
+
         //force array
         if ( !is_array($tracks) ){
             $tracks = array($tracks);
@@ -134,25 +134,32 @@ class WP_SoundSytem_Tracklist{
             //set tracklist ID
             $track->tracklist_id = $this->post_id;
 
-            //increment count
-            $tracks_count++;
-            $track->subtrack_order = $tracks_count;
+
 
             $this->tracks[] = $track;
         }
         
-        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
+        $this->validate_tracks();
+        
+        $tracks_count = null;
+        foreach((array)$this->tracks as $key=>$track){
+            //increment count
+            $tracks_count++;
+            $this->tracks[$key]->subtrack_order = $tracks_count;
+        }
+
+        $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
 
     }
 
-    function validate_tracks($strict = true){
+    protected function validate_tracks(){
         
         //array unique
         $pending_tracks = array_unique($this->tracks, SORT_REGULAR);
         $valid_tracks = array();
         
         foreach($pending_tracks as $track){
-            if ( !$track->validate_track($strict) ) continue;
+            if ( !$track->validate_track($this->tracks_strict) ) continue;
             $valid_tracks[] = $track;
         }
         
@@ -191,35 +198,24 @@ class WP_SoundSytem_Tracklist{
         }
     }
     
+    function get_tracklist_admin_table(){
+        require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
+        $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
+        $tracklist_table->items = $this->tracks;
+        
+        ob_start();
+        $tracklist_table->prepare_items();
+        $tracklist_table->display();
+        return ob_get_clean();
+    }
+    
     /**
     Read-only tracklist table
     **/
-    function get_tracklist_table($admin = false){
-        
-        if ( $admin) {
-            require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-            $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
-            $tracklist_table->items = $this->tracks;
-        }else{
-            require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
-            $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
-            
-            //live playlists : cache only if several post are displayed (like an archive page)
-            if ( !is_admin() ){
-                $cache_only = ( !is_singular() );
-            }else{ // is_singular() does not exists backend
-                $screen = get_current_screen();
-                $cache_only = ( $screen->parent_base != 'edit' );
-            }
-            
-            if ( $this->post_id && ( get_post_type($this->post_id) == wpsstm()->post_type_live_playlist ) && $cache_only ){
-                $link = get_permalink($this->post_id);
-                $link = sprintf('<a href="%s">%s</a>',$link,__('here','wpsstm') );
-                $link = sprintf( __('Click %s to load the live tracklist.','wpsstm'), $link);
-                $tracklist_table->no_items_label = $link;
-            }
-            
-        }
+    function get_tracklist_table(){
+
+        require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
+        $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
 
         ob_start();
         $tracklist_table->prepare_items();
