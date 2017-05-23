@@ -12,7 +12,7 @@ var wpsstm_source_requests = [];
         $('.wpsstm-requires-auth').click(function(e) {
             if ( !wpsstm_get_current_user_id() ){
                 e.preventDefault();
-                $('#wpsstm-bottom-notice-wp-auth').show();
+                $('#wpsstm-bottom-notice-wp-auth').addClass('active');
             }
 
         });

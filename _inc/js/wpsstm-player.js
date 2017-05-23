@@ -438,7 +438,7 @@ class WpsstmTrack {
 
         var self = this;
         var track_el = self.get_track_el();
-        var tracklist = wpsstm_tracklists[this.tracklist_idx];
+        var tracklist_obj = wpsstm_tracklists[this.tracklist_idx];
         jQuery(track_el).addClass('active');
 
         //is called a second time after tracks sources have been populated.
@@ -449,11 +449,11 @@ class WpsstmTrack {
         console.log("WpsstmTrack::play_or_skip() tracklist#" + self.tracklist_idx + ", track#" + self.track_idx);
         
         //skip the current track if any
-        tracklist.end_current_track();
+        tracklist_obj.end_current_track();
 
         //set global
         wpsstm_current_tracklist_idx = self.tracklist_idx;
-        tracklist.current_track_idx = self.track_idx;
+        tracklist_obj.current_track_idx = self.track_idx;
 
         //play current track if it has sources
 
@@ -462,7 +462,7 @@ class WpsstmTrack {
             self.fill_player();
         }else if (self.did_lookup){ //no sources and had lookup
             console.log("WpsstmTrack::play_or_skip() - skip");
-            self.play_next_track();
+            tracklist_obj.play_next_track();
         }
     }
     
