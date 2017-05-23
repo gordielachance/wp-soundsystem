@@ -192,52 +192,7 @@ var wpsstm_current_tracklist_idx = -1;
         
     }
 
-    function wpsstm_redirection_countdown(){
-        
-        // No tracks have been played on the page.  Avoid infinite redirection loop.
-        if ( !wpsstm_had_tracks_played ) return;
 
-        if ( bottom_notice_refresh.length == 0) return;
-
-        var redirect_url = null;
-        var redirect_link = bottom_notice_refresh.find('a#wpsstm-bottom-notice-link');
-
-        if (redirect_link.length > 0){
-            redirect_url = redirect_link.attr('href');
-        }
-
-        bottom_notice_refresh.show();
-
-        var container = bottom_notice_refresh.find('strong');
-        var message = "";
-        var message_end = "";
-
-        // Get reference to container, and set initial content
-        container.html(wpsstm_countdown_s + message);
-
-        if ( wpsstm_countdown_s <= 0) return;
-
-        // Get reference to the interval doing the countdown
-        wpsstm_countdown_timer = setInterval(function () {
-            container.html(wpsstm_countdown_s + message);
-            // If seconds remain
-            if (--wpsstm_countdown_s) {
-                // Update our container's message
-                container.html(wpsstm_countdown_s + message);
-            // Otherwise
-            } else {
-                wpsstm_countdown_s = 0;
-                // Clear the countdown interval
-                clearInterval(wpsstm_countdown_timer);
-                // Update our container's message
-                container.html(message_end);
-
-                // And fire the callback passing our container as `this`
-                console.log("redirect to:" + redirect_url);
-                window.location = redirect_url;
-            }
-        }, 1000); // Run interval every 1000ms (1 second)
-    }
 
     
 })(jQuery);
@@ -380,6 +335,9 @@ class WpsstmTrack {
         var self = this;
         self.tracklist_idx = tracklist.tracklist_idx; //cast to number;
         self.track_idx = tracklist.tracks.length;
+        self.artist = jQuery(track_html).find('[itemprop="byArtist"]').text();
+        self.title = jQuery(track_html).find('[itemprop="name"]').text();
+        self.album = jQuery(track_html).find('[itemprop="inAlbum"]').text();
         self.sources = [];
         //console.log("new WpsstmTrack #" + this.track_idx + " in tracklist #" + this.tracklist_idx);
         
@@ -530,9 +488,9 @@ class WpsstmTrack {
     }
 
     fill_player(){
-        console.log("fill_player()  tracklist#" + this.tracklist_idx + ", track#" + this.track_idx);
-
         var self = this;
+        console.log("fill_player()  tracklist#" + self.tracklist_idx + ", track#" + self.track_idx);
+
         var track_el    = self.get_track_el();
 
         //track infos
@@ -628,7 +586,7 @@ class WpsstmTrack {
                         $( document ).trigger( "wpsstmPlayerMediaEvent", ['ended',media, node, player,self] ); //register custom event - used by lastFM for the track.scrobble call
 
                         //Play next song if any
-                        wpsstm_tracklists[this.tracklist_idx].play_next_track();
+                        wpsstm_tracklists[self.tracklist_idx].play_next_track();
                     });
 
                 },error(media) {
@@ -746,5 +704,52 @@ function wpsstm_end_current_track(){
 
     }
 
+}
+
+function wpsstm_redirection_countdown(){
+
+    // No tracks have been played on the page.  Avoid infinite redirection loop.
+    if ( !wpsstm_had_tracks_played ) return;
+
+    if ( bottom_notice_refresh.length == 0) return;
+
+    var redirect_url = null;
+    var redirect_link = bottom_notice_refresh.find('a#wpsstm-bottom-notice-link');
+
+    if (redirect_link.length > 0){
+        redirect_url = redirect_link.attr('href');
+    }
+
+    bottom_notice_refresh.show();
+
+    var container = bottom_notice_refresh.find('strong');
+    var message = "";
+    var message_end = "";
+
+    // Get reference to container, and set initial content
+    container.html(wpsstm_countdown_s + message);
+
+    if ( wpsstm_countdown_s <= 0) return;
+
+    // Get reference to the interval doing the countdown
+    wpsstm_countdown_timer = setInterval(function () {
+        container.html(wpsstm_countdown_s + message);
+        // If seconds remain
+        if (--wpsstm_countdown_s) {
+            // Update our container's message
+            container.html(wpsstm_countdown_s + message);
+        // Otherwise
+        } else {
+            wpsstm_countdown_s = 0;
+            // Clear the countdown interval
+            clearInterval(wpsstm_countdown_timer);
+            // Update our container's message
+            container.html(message_end);
+
+            // And fire the callback passing our container as `this`
+            console.log("redirect to:" + redirect_url);
+            window.location = redirect_url;
+        }
+    }, 1000); // Run interval every 1000ms (1 second)
 }
 
