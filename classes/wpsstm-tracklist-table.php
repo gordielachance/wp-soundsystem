@@ -18,7 +18,7 @@ class WP_SoundSytem_TracksList_Table{
         
         $this->tracklist = $tracklist;
         $this->no_items_label = __( 'No tracks found.','wpsstm');
-        $this->can_player = ( !$this->tracklist->is_wizard && wpsstm()->get_options('player_enabled') == 'on' );
+        $this->can_player = ( !wpsstm_is_backend() && wpsstm()->get_options('player_enabled') == 'on' );
     }
     
     function prepare_items() {
@@ -92,7 +92,7 @@ class WP_SoundSytem_TracksList_Table{
             $columns['trackitem_album']     = __('Album','wpsstm');
         }
 
-        if ( current_user_can('administrator') && !$this->tracklist->is_wizard ){ //TO FIX remove this condition when feature ready
+        if ( current_user_can('administrator') && !wpsstm_is_backend() ){ //TO FIX remove this condition when feature ready
              $columns['trackitem_actions']     = '';
         }
         
@@ -226,7 +226,7 @@ class WP_SoundSytem_TracksList_Table{
 
             printf('<span class="wpsstm-tracklist-time">%s %s</span>',$text_time,$text_refresh);   
         
-            if ( !$this->tracklist->is_wizard ){
+            if ( !wpsstm_is_backend() ){
                 ?>
                 <div class="alignright actions wpsstm-tracklist-actions">
                     <?php

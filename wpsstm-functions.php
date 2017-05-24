@@ -341,3 +341,7 @@ function wpsstm_array_recursive_diff($aArray1, $aArray2) {
   }
   return $aReturn;
 } 
+
+function wpsstm_is_backend(){
+    return ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) );
+}
