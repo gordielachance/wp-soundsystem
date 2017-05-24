@@ -526,6 +526,9 @@ class WP_SoundSytem_TracksList_Table{
                     case 'trackitem_album':
                         $attr['itemprop'] = 'inAlbum';
                     break;
+                    case 'trackitem_image':
+                        $attr['itemprop'] = 'image';
+                    break;
                 }
 
                 foreach ($attr as $key=>$value){
