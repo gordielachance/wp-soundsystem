@@ -15,7 +15,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
         $this->tracklist->is_wizard = true;
         $this->tracklist->tracks_strict = false;
-        $this->tracklist->load_remote_tracks();
+        $this->tracklist->load_remote_tracks(true);
 
         $this->is_frontend = ( !is_admin() );
         $this->is_advanced = ( (!$this->is_frontend) && ( ( $this->tracklist->feed_url && !$this->tracklist->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
