@@ -160,6 +160,7 @@ a.wpsstm-play-track{
                     margin: 0;
                     
                     &[itemprop="image"]{
+                        padding-left: 0;
                         img {
                             max-height:3em;
                         }

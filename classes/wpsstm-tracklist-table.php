@@ -72,6 +72,10 @@ class WP_SoundSytem_TracksList_Table{
     
     function get_columns(){
         
+        if ( $this->show_property_column('image') ){
+            $columns['trackitem_image']     = '';
+        }
+        
         $columns['trackitem_order']     = '';
 
         //play button
@@ -80,10 +84,6 @@ class WP_SoundSytem_TracksList_Table{
                 $columns['trackitem_play_bt']     = '';
                 break;
             }
-        }
-        
-        if ( $this->show_property_column('image') ){
-            $columns['trackitem_image']     = '';
         }
         
         $columns['trackitem_artist']    = __('Artist','wpsstm');

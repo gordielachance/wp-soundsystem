@@ -76,6 +76,10 @@
             display: table;
             border: none;
             margin:0;
+            
+            .column-trackitem_image{
+                display:none;
+            }
 
             .column-trackitem_order{
                 width:2em;
