@@ -884,6 +884,7 @@ class WpsstmTrackSource {
         if ( track_sources_count <= 1 ) return;
         
         var player_source_el = self.get_player_source_el();
+        var ul_el = player_source_el.closest('ul');
 
         var sources_list = player_source_el.closest('ul');
         var sources_list_wrapper = sources_list.closest('td.trackitem_sources');
@@ -891,15 +892,16 @@ class WpsstmTrackSource {
         sources_list.closest('ul').append(player_source_el); //move it at the bottom
 
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
-
-            var lis = player_source_el.closest('ul').find('li');
-            lis.removeClass('wpsstm-active-source');
+            
+            
+            var lis_el = player_source_el.closest('ul').find('li');
+            lis_el.removeClass('wpsstm-active-source');
             player_source_el.addClass('wpsstm-active-source');
 
             track_obj.switch_track_source(this.source_idx);
         }
 
-        sources_list_wrapper.toggleClass('expanded');
+        ul_el.toggleClass('expanded');
     }
    
 }

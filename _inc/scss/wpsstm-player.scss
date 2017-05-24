@@ -1,5 +1,13 @@
 @import "compass/css3";
 
+.truncate {
+    /*
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    */
+}
+
 [itemprop="track"]{
     [itemprop="byArtist"]{
         font-weight: bold;
@@ -123,8 +131,10 @@ a.wpsstm-play-track{
         font-family:sans-serif;
         #wpsstm-player-actions{
             position: absolute;
-            right: 1em;
+            right: 0;
             top: 0;
+            width: 20%;
+            text-align: right;
             > *{
                 padding: 0 .25em;
                 font-size:1.5em;
@@ -144,10 +154,16 @@ a.wpsstm-play-track{
         #wpsstm-player-trackinfo{
             background:#222;
             line-height:40px; //player height
-            tr{
-                display:inline;
+            font-size: 0.8em;
+            padding: 0;
+            [itemprop="track"]{
+                display: inline-block!important;
+                width: 80%;
+                position:relative;
                 td{
-                    display:inline;
+                    display:inline-block;
+                    padding: 0 1em;
+                    margin: 0;
                 }
             }
             [itemprop="image"]{
@@ -156,27 +172,42 @@ a.wpsstm-play-track{
             [itemprop="name"]:before{
                 content:"\002014";
                 padding-right:.5em;
+                @extend .truncate;
+            }
+            [itemprop="byArtist"]{
+                @extend .truncate;
+            }
+            [itemprop="inAlbum"]{
+                display:none;
+                @extend .truncate;
             }
 
             .column-trackitem_sources{
                 padding: 0;
                 margin:0;
-                @include opacity(.3);
                 line-height: 2em;
+                width: 20%;
+                position:relative;
                 ul.wpsstm-player-sources-list{
-
-                    position:relative;
-                    display:inline-block;
-                    font-size:.7em;
-                    padding: 0 2em;
+                    width:100%;
+                    display:block;
+                    font-size:.85em;
+                    padding: 0;
                     margin:0;
                     list-style-type: none;
+                    @include opacity(.3);
+                    padding: 0 2em;
+                    min-width: 400px;
+                    
                     li{
+                        width:100%;
                         display:none;
                         @include opacity(.8);
+                        position:relative;
                         .wpsstm-source-title{
                             cursor: pointer;
                             cursor: hand;
+                            display:inline;
                         }
                         &:hover{
                            @include opacity(1); 
@@ -192,29 +223,35 @@ a.wpsstm-play-track{
                         }
 
                         a.wpsstm-trackinfo-provider-link{
-                            margin-left:.5em;
                             font-size:2em;
+                            position:absolute;
+                        }
+                        span{
+                            padding-left:3.5em;
+                            display: inline-block;
+                            width: 100%;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
                         }
 
-                    }        
-                }
-                &:hover{
-                    @include opacity(1);
-                }
-                &.expanded{
-                    position:absolute;
-                    bottom:40px; //player height
-                    background:rgba(34, 34, 34, 0.95);
-                    @include opacity(1);
-
-                    ul{
-                        padding-top:1em;
+                    }       
+                    &:hover{
+                        @include opacity(1);
+                    }
+                    &.expanded{
+                        background:rgba(34, 34, 34, 0.95);
+                        @include opacity(1);
+                        position:absolute;
+                        bottom:0;
+                        padding: 1em 2em;
+                        padding-bottom: 0;
                         li{
-                            display:block;
+                            display:inline-block;
                         }
                     }
-
                 }
+
             }
         }
 
