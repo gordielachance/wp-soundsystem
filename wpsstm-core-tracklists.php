@@ -76,6 +76,7 @@ class WP_SoundSytem_Core_Tracklists{
         
         //ajax : load tracklist
         add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
+        add_action('wp_ajax_nopriv_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
 
     }
     
