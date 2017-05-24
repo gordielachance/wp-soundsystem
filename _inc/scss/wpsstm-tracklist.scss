@@ -13,6 +13,41 @@
         @include opacity(.5);
     }
     
+    .wpsstm-tracklist-time{
+        
+        .wpsstm-live-tracklist-expiry-countdown{
+             display:none;
+        }
+        
+        .wpsstm-refresh-playlist{
+            i.fa-exclamation-triangle{ //error
+                display:none;
+            }
+        }
+        
+        &.can-refresh{
+            .wpsstm-live-tracklist-expiry-countdown{
+                display:none;
+            }
+        }
+        &:not(.can-refresh){
+            .wpsstm-refresh-playlist{
+                display:none;
+            }
+        }
+
+    }
+    
+    &.error{
+        .wpsstm-tracklist-time{
+            .wpsstm-refresh-playlist{
+                i.fa-exclamation-triangle{ //error
+                    display:inline-block;
+                }
+            }
+        }
+    }
+    
     &.wpsstm-tracklist-table {
         position:relative;
         font-family: sans-serif;

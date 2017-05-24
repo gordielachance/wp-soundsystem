@@ -14,7 +14,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '0.9.9.5';
+    public $version = '0.9.9.5.5';
     /**
     * @public string plugin DB version
     */

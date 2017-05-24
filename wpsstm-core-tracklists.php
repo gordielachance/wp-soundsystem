@@ -118,8 +118,13 @@ class WP_SoundSytem_Core_Tracklists{
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
                 $tracklist->load_remote_tracks(true);
-                $result['success'] = true;
-                $result['new_html'] = $tracklist->get_tracklist_table(); 
+                if ( $tracklist->tracks ){
+                    $result['success'] = true;
+                    $result['new_html'] = $tracklist->get_tracklist_table(); 
+                }else{
+                    $result['message'] = 'No remote tracks found';
+                }
+
             }
         }
 

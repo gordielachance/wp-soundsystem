@@ -15,10 +15,9 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
         $this->tracklist->is_wizard = true;
         $this->tracklist->tracks_strict = false;
-        $this->tracklist->load_remote_tracks();
+        $this->tracklist->load_remote_tracks(true);
 
-        $this->is_frontend = ( !is_admin() );
-        $this->is_advanced = ( (!$this->is_frontend) && ( ( $this->tracklist->feed_url && !$this->tracklist->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
+        $this->is_advanced = ( wpsstm_is_backend() && ( ( $this->tracklist->feed_url && !$this->tracklist->tracks ) || isset($_REQUEST['advanced_wizard']) ) );
         
         //metabox
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
@@ -768,7 +767,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
                 $this->wizard_advanced();
             }
 
-            if ( !$this->is_frontend){
+            if ( wpsstm_is_backend() ){
                 $post_type = get_post_type();
                 if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($this->tracklist->tracks) ){
                     $reset_checked = true;
@@ -780,7 +779,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
             $submit_bt_txt = (!$this->is_advanced) ? __('Load URL','wpsstm') : __('Save Changes');
             $this->submit_button($submit_bt_txt,'primary','save-scraper-settings');
 
-            if ( $this->tracklist->feed_url && !$this->is_frontend ){
+            if ( $this->tracklist->feed_url && wpsstm_is_backend() ){
 
                 printf(
                     '<small><input type="checkbox" name="%1$s[reset]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span></small>',
@@ -811,7 +810,7 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         </div>
         <?php
         
-        if ( !$this->is_frontend ){
+        if ( wpsstm_is_backend() ){
             if ( $this->tracklist->feed_url && !isset($_REQUEST['advanced_wizard']) ){
                 $advanced_wizard_url = get_edit_post_link();
                 $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);

@@ -56,12 +56,12 @@ class WP_SoundSytem_Core_Player{
     }
 
     function player_html(){
-	global $wp_query;
+	   global $wp_query;
         ?>
         <div id="wpsstm-bottom">
             <?php
         
-            $redirect_previous = $redirect_auto = wpsstm_get_player_redirection('previous');
+            $redirect_previous = wpsstm_get_player_redirection('previous');
             $redirect_next = wpsstm_get_player_redirection('next');
         
             //live playlist or frontend wizard
@@ -88,9 +88,7 @@ class WP_SoundSytem_Core_Player{
                             );
                         }
                     }
-                    
-                    $redirect_auto = array('title'=>get_the_title($post_id),'url'=>$refresh_permalink,'is_refresh'=>true);
-                    
+
                 }
                 
                 
@@ -116,49 +114,17 @@ class WP_SoundSytem_Core_Player{
                 }
             }
 
-            //redirection notice
-            if ( wpsstm()->get_options('autoredirect') && $redirect_auto ){
-                //TO FIX : if the tracklists of the page have been read, we should move to another page
-                /*
-                global $wp;
-
-                $current_url = home_url(add_query_arg(array(),$wp->request));
-                $countdown = '<strong></strong>';
-                $icon = '<i class="fa fa-refresh fa-fw fa-spin"></i>';
-                $link = sprintf( '<a href="#">%s</a>',__('here','wpsstm') );
-
-                //TO FIX not working (eg. for wizard)
-                $is_refresh = ( trailingslashit($current_url) == trailingslashit($redirect_auto['url']) );
-                
-                $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirect_auto['url'],$redirect_auto['title']);
-                
-                if ( isset($redirect_auto['is_refresh']) ){
-                    $text = sprintf(__("Refreshing %s... ",'wpsstm'),$link);
-                }else{
-                    
-                    $link = sprintf('<a id="wpsstm-bottom-notice-link" href="%s">%s</a>',$redirect_auto['url'],$redirect_auto['title']);
-                    $text = sprintf( __("On the next page : %s",'wpsstm'),$link );
-                }
-                
-                $abord_link = sprintf( __("Click to abord.",'wpsstm'),$link );
-                $text.= ' ' . $abord_link;
-                
-                printf('<p id="wpsstm-bottom-notice-redirection" class="wpsstm-bottom-notice active">%s %s %s</p>',$icon,$countdown,$text);
-                */
-            }
             ?>
             <div id="wpsstm-bottom-player">
                 <div id="wpsstm-player-actions">
                     <?php 
                     //scrobbling
                     if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                        echo wpsstm_get_scrobbler_icons();
+                        echo wpsstm_lastfm()->get_scrobbler_icons();
                     }
                     //favorites
                     if ( wpsstm()->get_options('lastfm_favorites') ){
-                        ?>
-                        <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
-                        <?php
+                        echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
                     }
                     ?>
                 </div>
@@ -181,15 +147,15 @@ class WP_SoundSytem_Core_Player{
         wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
         
         //JS
-        wp_register_script( 'wpsstm-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklist.js', array('jquery'),wpsstm()->version, true);
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wpsstm-tracklist','wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
             'autoredirect'          => (int)wpsstm()->get_options('autoredirect'),
             'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
-            'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm')
+            'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
+            'refreshing_text'       => __('Refreshing','wpsstm')
         );
 
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
