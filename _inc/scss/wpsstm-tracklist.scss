@@ -19,6 +19,12 @@
              display:none;
         }
         
+        .wpsstm-refresh-playlist{
+            i.fa-exclamation-triangle{ //error
+                display:none;
+            }
+        }
+        
         &.can-refresh{
             .wpsstm-live-tracklist-expiry-countdown{
                 display:none;
@@ -30,6 +36,16 @@
             }
         }
 
+    }
+    
+    &.error{
+        .wpsstm-tracklist-time{
+            .wpsstm-refresh-playlist{
+                i.fa-exclamation-triangle{ //error
+                    display:inline-block;
+                }
+            }
+        }
     }
     
     &.wpsstm-tracklist-table {
