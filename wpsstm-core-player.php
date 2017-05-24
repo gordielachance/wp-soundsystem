@@ -56,7 +56,7 @@ class WP_SoundSytem_Core_Player{
     }
 
     function player_html(){
-	global $wp_query;
+	   global $wp_query;
         ?>
         <div id="wpsstm-bottom">
             <?php
@@ -120,13 +120,11 @@ class WP_SoundSytem_Core_Player{
                     <?php 
                     //scrobbling
                     if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                        echo wpsstm_get_scrobbler_icons();
+                        echo wpsstm_lastfm()->get_scrobbler_icons();
                     }
                     //favorites
                     if ( wpsstm()->get_options('lastfm_favorites') ){
-                        ?>
-                        <span class="wpsstm-love-unlove-track-links"><!--this will be filled with ajax when track is ready--></span>
-                        <?php
+                        echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
                     }
                     ?>
                 </div>

@@ -136,7 +136,6 @@ a.wpsstm-play-track{
             }
             a{
                 @include opacity(0.9);
-                font-size:1.25em;
                 color:white;
                 text-decoration: none;
                 border:none!important;
@@ -159,22 +158,24 @@ a.wpsstm-play-track{
                     display:inline-block;
                     padding: 0 1em;
                     margin: 0;
+                    
+                    &[itemprop="image"]{
+                        max-height:3em;
+                    }
+                    &[itemprop="name"]:before{
+                        content:"\002014";
+                        padding-right:.5em;
+                        @extend .truncate;
+                    }
+                    &[itemprop="byArtist"]{
+                        @extend .truncate;
+                    }
+                    &[itemprop="inAlbum"]{
+                        display:none;
+                        @extend .truncate;
+                    }
+                    
                 }
-            }
-            [itemprop="image"]{
-                max-height:3em;
-            }
-            [itemprop="name"]:before{
-                content:"\002014";
-                padding-right:.5em;
-                @extend .truncate;
-            }
-            [itemprop="byArtist"]{
-                @extend .truncate;
-            }
-            [itemprop="inAlbum"]{
-                display:none;
-                @extend .truncate;
             }
 
             .column-trackitem_sources{
@@ -313,7 +314,7 @@ a.wpsstm-play-track{
     }
 }
 
-.wpsstm-love-unlove-playlist-links,.wpsstm-love-unlove-track-links{
+.wpsstm-love-unlove-track-links,.wpsstm-love-unlove-playlist-links{
     span{
         display:none;
     }
@@ -349,5 +350,14 @@ a.wpsstm-play-track{
         > :nth-child(3){ //unlove
             display:none;
         }
+    }    
+}
+
+#wpsstm-lastfm-love-unlove-track-links{
+    pointer-events:none;
+    font-size:1em!important;
+    @include opacity(0);
+    &.wpsstm-is-loved,&.loading{
+        @include opacity(.3);
     }
 }

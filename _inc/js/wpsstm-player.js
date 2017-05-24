@@ -607,7 +607,7 @@ class WpsstmTrack {
 
     send_to_player(){
         var self = this;
-        var tracklist = wpsstm_tracklists[this.tracklist_idx];
+        var tracklist = wpsstm_tracklists[self.tracklist_idx];
         console.log("send_to_player()  tracklist#" + tracklist.tracklist_idx + ", track#" + self.track_idx);
 
         var track_el    = self.get_track_el();
@@ -617,6 +617,7 @@ class WpsstmTrack {
 
         //track infos
         var trackinfo = $(track_el).clone();
+        trackinfo.attr('data-wpsstm-tracklist-idx',self.tracklist_idx); //set tracklist ID for the player
         trackinfo.show();
         trackinfo.find('td.trackitem_play_bt').remove();
         $('#wpsstm-player-trackinfo').html(trackinfo);
@@ -962,4 +963,16 @@ function wpsstm_set_current_tracklist(tracklist_idx){
         return tracklist_obj;
     }
     return false;
+}
+
+function wpsstm_get_track_obj(tracklist_idx,track_idx){
+    tracklist_idx = Number(tracklist_idx);
+    var tracklist_obj = wpsstm_tracklists[tracklist_idx];
+    if(typeof tracklist_obj === 'undefined') return;
+    
+    track_idx = Number(track_idx);
+    var track_obj = tracklist_obj.tracks[track_idx];
+    if(typeof track_obj === 'undefined') return;
+    
+    return track_obj;
 }

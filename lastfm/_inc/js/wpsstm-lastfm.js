@@ -60,6 +60,7 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
                 
                 
                 var lastfm_icon = $('#wpsstm-player-toggle-scrobble');
+                var lastfm_love_icons = $('#wpsstm-lastfm-love-unlove-track-links');
                 
                 var ajax_data = {
                     action:     'wpsstm_lastfm_love_unlove_track',
@@ -82,6 +83,12 @@ var is_scrobbler_active = ( localStorage.getItem("wpsstm-scrobble") == 'true' );
                         if (data.success === false) {
                             console.log(data);
                         }else{
+                            if (args_obj.do_love){
+                                lastfm_love_icons.addClass('wpsstm-is-loved');
+                            }else{
+                                lastfm_love_icons.removeClass('wpsstm-is-loved');
+                            }
+                            
                         }
                     },
                     complete: function() {

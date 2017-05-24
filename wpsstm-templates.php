@@ -339,15 +339,3 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
-
-function wpsstm_get_scrobbler_icons(){
-    $scrobbling_classes = array();
-
-    $scrobbling_classes_str = wpsstm_get_classes_attr($scrobbling_classes);
-    
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $icon_scrobbler =  '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-    $enabled_link = sprintf('<a id="wpsstm-enable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-enable-scrobbling">%s</a>',__('Enable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
-    $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-disable-scrobbling">%s</a>',__('Disable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
-    return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
-}

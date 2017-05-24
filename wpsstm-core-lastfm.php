@@ -613,6 +613,35 @@ class WP_SoundSytem_Core_LastFM{
         wp_send_json( $result ); 
     }
     
+    function get_scrobbler_icons(){
+        $scrobbling_classes = array();
+
+        $scrobbling_classes_str = wpsstm_get_classes_attr($scrobbling_classes);
+
+        $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+        $icon_scrobbler =  '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+        $enabled_link = sprintf('<a id="wpsstm-enable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-enable-scrobbling">%s</a>',__('Enable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
+        $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-disable-scrobbling">%s</a>',__('Disable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
+        return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
+    }
+    
+    function get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
+
+        $wrapper_classes = array(
+            'wpsstm-love-unlove-track-links'
+        );
+
+        if ( $track && $track->is_track_loved_by() ){
+            $wrapper_classes[] = 'wpsstm-is-loved';
+        }
+
+
+        $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+        $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to Last.fm favorites','wpsstm'));
+        $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from Last.fm favorites','wpsstm'));
+        return sprintf('<span id="wpsstm-lastfm-love-unlove-track-links" %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
+    }
+    
 }
 
 
