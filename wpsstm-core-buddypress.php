@@ -77,7 +77,7 @@ class WP_SoundSytem_Core_BuddyPress{
         */
 
 		$submenu_loved_tracks_name = sprintf(
-			__( 'Loved tracks %s', 'wpsstm' ),
+			__( 'Favorite tracks %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $favorite_track_class ),
