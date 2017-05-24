@@ -160,6 +160,7 @@ a.wpsstm-play-track{
                     margin: 0;
                     
                     &[itemprop="image"]{
+                        padding-left: 0;
                         img {
                             max-height:3em;
                         }
@@ -267,9 +268,12 @@ a.wpsstm-play-track{
                 float: left;
                 line-height:40px;
             }
-            .wpsstm-player-nav{
-                width:5%;
+            .wpsstm-player-extra{
+                width:4%;
                 text-align:center;
+                &#wpsstm-player-random:not(.active){
+                    @include opacity(.3);
+                }
             }
             #wpsstm-player{
                 width:80%;

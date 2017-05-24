@@ -16,11 +16,11 @@ var wpsstm_track_playing;
 
         bottom_block = $('#wpsstm-bottom');
         bottom_player = bottom_block.find('#wpsstm-bottom-player');
-        bt_prev_track = $('#wpsstm-player-nav-previous-track');
-        bt_next_track = $('#wpsstm-player-nav-next-track');
+        bt_prev_track = $('#wpsstm-player-extra-previous-track');
+        bt_next_track = $('#wpsstm-player-extra-next-track');
         
-        bt_prev_track = $('#wpsstm-player-nav-previous-track');
-        bt_next_track = $('#wpsstm-player-nav-next-track');
+        bt_prev_track = $('#wpsstm-player-extra-previous-track');
+        bt_next_track = $('#wpsstm-player-extra-next-track');
 
         /* tracklist */
 
@@ -110,6 +110,32 @@ var wpsstm_track_playing;
                 $('#wpsstm-bottom-notice-wp-auth').addClass('active');
             }
 
+        });
+        
+        /*
+        Player : random
+        */
+        var shuffle_extra_el = $('#wpsstm-player-random');
+        var is_shuffle = localStorage.getItem("wpsstm-random");
+        
+        if (is_shuffle){
+            shuffle_extra_el.addClass('active');
+        }
+        
+        $('#wpsstm-player-random a').click(function(e) {
+            e.preventDefault();
+            
+            var is_active = !shuffle_extra_el.hasClass('active');
+            
+            if (is_active){
+                localStorage.setItem("wpsstm-random", true);
+                shuffle_extra_el.addClass('active');
+            }else{
+                localStorage.removeItem("wpsstm-random");
+                 shuffle_extra_el.removeClass('active');
+            }
+            
+            
         });
         
 
