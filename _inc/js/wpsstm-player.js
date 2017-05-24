@@ -101,6 +101,7 @@ var wpsstm_track_playing = null;
             var tracklist_el = $(this).closest('.wpsstm-tracklist');
             var tracklist_idx = $(tracklist_el).attr('data-wpsstm-tracklist-idx');
             var tracklist_obj = wpsstm_tracklists[tracklist_idx];
+            tracklist_obj.initialize(); //initialize but do not set track to play
             
         });
         
