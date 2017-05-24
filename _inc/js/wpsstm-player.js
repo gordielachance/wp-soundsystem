@@ -39,7 +39,9 @@ var wpsstm_track_playing = null;
             wpsstm_current_track_idx = 0;
 
             var tracklist_obj = wpsstm_tracklists[tracklist_idx];
-            tracklist_obj.initialize();
+            if(typeof tracklist_obj !== 'undefined'){
+                tracklist_obj.initialize();
+            }
         }
         
         bt_prev_track.click(function(e) {
