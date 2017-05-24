@@ -130,11 +130,12 @@ class WP_SoundSytem_Core_Player{
                 </div>
                 <div id="wpsstm-player-trackinfo"></div>
                 <div id="wpsstm-player-wrapper">
-                    <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-previous-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player"></div>
-                    <div id="wpsstm-player-nav-next-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-nav-next-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-next-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-random" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-random" aria-hidden="true"></i></a></div>
                 </div>
             </div>
         </div>

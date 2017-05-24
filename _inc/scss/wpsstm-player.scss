@@ -268,9 +268,12 @@ a.wpsstm-play-track{
                 float: left;
                 line-height:40px;
             }
-            .wpsstm-player-nav{
-                width:5%;
+            .wpsstm-player-extra{
+                width:4%;
                 text-align:center;
+                &#wpsstm-player-random:not(.active){
+                    @include opacity(.3);
+                }
             }
             #wpsstm-player{
                 width:80%;
