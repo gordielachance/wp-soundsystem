@@ -160,7 +160,9 @@ a.wpsstm-play-track{
                     margin: 0;
                     
                     &[itemprop="image"]{
-                        max-height:3em;
+                        img {
+                            max-height:3em;
+                        }
                     }
                     &[itemprop="name"]:before{
                         content:"\002014";
