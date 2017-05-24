@@ -165,6 +165,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 0.9.9.6 =
+* Ajax for live playlists refresh
+* Improved player / tracklists
+* remove editor/author support for albums, artists & tracks
+* started to implement user functions (favorite tracks / favorite playlists)
+
 = 0.9.9.5 =
 * remove WP_SoundSytem_Playlist_Scraper class, new class WP_SoundSytem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
