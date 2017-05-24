@@ -7,8 +7,8 @@ var wpsstm_track_source_requests_limit = 5; //number of following tracks we want
 var wpsstm_tracklists = [];
 
 //those are the globals for autoplay and tracks navigation
-var wpsstm_current_tracklist_idx = null;
-var wpsstm_track_playing = null;
+var wpsstm_current_tracklist_idx;
+var wpsstm_track_playing;
 
 (function($){
 
@@ -29,10 +29,7 @@ var wpsstm_track_playing = null;
         
         //define autoplay
         if ( wpsstmPlayer.autoplay ){
-            var tracklist_idx = 0;
-            //set globals - play first track of first playlist
-            var tracklist_obj = wpsstm_tracklists[tracklist_idx];
-            if(typeof tracklist_obj !== 'undefined'){
+            if ( tracklist_obj = wpsstm_set_current_tracklist(0) ){
                 tracklist_obj.initialize(0);
             }
         }
@@ -83,11 +80,9 @@ var wpsstm_track_playing = null;
                     wpsstm_current_media.play();
                 }
             }else{
-
-                console.log(track_idx);
-
-                var tracklist_obj = wpsstm_tracklists[tracklist_idx];
-                tracklist_obj.initialize(track_idx);
+                if ( tracklist_obj = wpsstm_set_current_tracklist(tracklist_idx) ){
+                    tracklist_obj.initialize(track_idx);
+                }
             }
 
         });
@@ -308,7 +303,6 @@ class WpsstmTracklist {
     initialize(track_idx){
         
         var self = this;
-        wpsstm_current_tracklist_idx = self.tracklist_idx;
 
         if (track_idx!==undefined){ //set next track to play
             self.current_track_idx = track_idx;
@@ -360,14 +354,15 @@ class WpsstmTracklist {
                 
                 //try to start next playlist if any
                 var next_tracklist_idx = self.tracklist_idx + 1;
-                var next_tracklist_obj = wpsstm_tracklists[next_tracklist_idx];
+                var next_tracklist_obj;
+                
+                next_tracklist_obj = wpsstm_set_current_tracklist(next_tracklist_idx)
                 
                 //no next playlist, get first one
-                if(typeof next_tracklist_obj === 'undefined'){
-                    next_tracklist_obj = wpsstm_tracklists[0];
+                if ( !next_tracklist_obj ){
+                    next_tracklist_obj = wpsstm_set_current_tracklist(0);
                 }
-                
-                //set globals
+
                 var track_idx = 0;
                 next_tracklist_obj.current_track_idx = track_idx;
                 
@@ -957,4 +952,15 @@ function wpsstm_end_current_track(){
     console.log("WpsstmTracklist:end_current_track() ");
     wpsstm_track_playing.end_track();
     wpsstm_track_playing = null;
+}
+
+function wpsstm_set_current_tracklist(tracklist_idx){
+    tracklist_idx = Number(tracklist_idx);
+    var tracklist_obj = wpsstm_tracklists[tracklist_idx];
+    if(typeof tracklist_obj !== 'undefined'){
+        console.log("wpsstm_set_current_tracklist() #" +  tracklist_idx);
+        wpsstm_current_tracklist_idx = tracklist_idx;
+        return tracklist_obj;
+    }
+    return false;
 }
