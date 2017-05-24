@@ -242,7 +242,7 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
 #wpsstm-bottom #wpsstm-bottom-player #wpsstm-player-trackinfo .column-trackitem_sources ul.wpsstm-player-sources-list li span {
   padding-left: 3.5em;
   display: inline-block;
-  width: 100%;
+  width: calc(100% - 3.5em);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

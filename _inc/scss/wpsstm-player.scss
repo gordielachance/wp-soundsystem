@@ -229,7 +229,7 @@ a.wpsstm-play-track{
                         span{
                             padding-left:3.5em;
                             display: inline-block;
-                            width: 100%;
+                            width: calc(100% - 3.5em);
                             white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;

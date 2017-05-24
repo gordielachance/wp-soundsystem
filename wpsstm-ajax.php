@@ -125,13 +125,12 @@ function wpsstm_ajax_player_get_provider_sources(){
 
     $track = $result['track'] = new WP_SoundSystem_Track($args);
     
-    wpsstm()->debug_log("wpsstm_ajax_player_get_provider_sources()"); 
-    wpsstm()->debug_log($track); 
+    //wpsstm()->debug_log("wpsstm_ajax_player_get_provider_sources()"); 
+    //wpsstm()->debug_log($track); 
     
     if ( $new_sources_list = wpsstm_sources()->get_track_sources_list($track,false) ){
         $result['new_html'] = $new_sources_list;
         $result['success'] = true;
-        wpsstm()->debug_log($new_sources_list);
     }
 
     header('Content-type: application/json');

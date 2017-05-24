@@ -569,7 +569,7 @@ class WP_SoundSytem_Core_LastFM{
         $success = wpsstm_lastfm()->now_playing_track($track);
 
         if ( $success ){
-            if ( is_wp_error() ){
+            if ( is_wp_error($success) ){
                 $code = $success->get_error_code();
                 $result['message'] = $success->get_error_message($code); 
             }else{

@@ -126,7 +126,7 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
 
     if (!$query_args) return;
     
-    wpsstm()->debug_log( json_encode($query_args), "wpsstm_get_post_id_by()"); 
+    //wpsstm()->debug_log( json_encode($query_args), "wpsstm_get_post_id_by()"); 
 
     $query = new WP_Query( $query_args );
     if (!$query->posts) return;
