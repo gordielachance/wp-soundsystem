@@ -790,19 +790,19 @@ class WpsstmTrack {
     
     switch_track_source(idx){
         var self = this;
-        
-        console.log("wpsstm_switch_track_source() #" + idx);
-        
-        var new_source = self.sources[idx];
 
-        var player_url = $(wpsstm_current_media).find('audio').attr('src');
-        var new_source_url = new_source.src;
+        var new_player_source = $(wpsstm_current_media).find('audio source').eq(idx);
+        var new_player_source_url = new_player_source.attr('src');
+        var current_player_source_url = $(wpsstm_current_media).find('audio').attr('src');
 
-        if (player_url == new_source_url) return false;
+        if (current_player_source_url == new_player_source_url) return false;
+        
+        var new_source_obj = self.sources[idx];
+        console.log("WpsstmTrack:switch_track_source():" + new_player_source_url);
 
         //player
         wpsstm_current_media.pause();
-        wpsstm_current_media.setSrc(new_source_url);
+        wpsstm_current_media.setSrc(new_player_source);
         wpsstm_current_media.load();
         wpsstm_current_media.play();
 
@@ -810,7 +810,7 @@ class WpsstmTrack {
         var trackinfo_sources = jQuery(bottom_player).find('#wpsstm-player-sources-wrapper li');
         jQuery(trackinfo_sources).removeClass('wpsstm-active-source');
 
-        var new_source_el = new_source.get_player_source_el();
+        var new_source_el = new_source_obj.get_player_source_el();
         jQuery(new_source_el).addClass('wpsstm-active-source');
     }
     
@@ -917,12 +917,12 @@ class WpsstmTrackSource {
     click(){
         var self = this;
         var track_obj = this.get_track_obj();
-        console.log("clicked source #" + this.source_idx + " of track #" + this.track_idx);
 
-        console.log(track_obj);
-        
         var track_sources_count = track_obj.sources.length;
         if ( track_sources_count <= 1 ) return;
+        
+        console.log("clicked source #" + this.source_idx + " of track #" + this.track_idx + " in playlist #" + self.tracklist_idx);
+        console.log(self);
         
         var player_source_el = self.get_player_source_el();
         var ul_el = player_source_el.closest('ul');
@@ -933,13 +933,12 @@ class WpsstmTrackSource {
         sources_list.closest('ul').append(player_source_el); //move it at the bottom
 
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
-            
-            
+
             var lis_el = player_source_el.closest('ul').find('li');
             lis_el.removeClass('wpsstm-active-source');
             player_source_el.addClass('wpsstm-active-source');
 
-            track_obj.switch_track_source(this.source_idx);
+            track_obj.switch_track_source(self.source_idx);
         }
 
         ul_el.toggleClass('expanded');
