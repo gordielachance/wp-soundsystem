@@ -152,7 +152,8 @@ var wpsstm_track_playing;
     $.fn.wpsstm_init_tracklists = function() {
 
         this.each(function( i, tracklist_el ) {
-            new WpsstmTracklist(tracklist_el);
+            var tracklist = new WpsstmTracklist(tracklist_el);
+            wpsstm_tracklists.push(tracklist);
         });
             
     };
@@ -171,11 +172,10 @@ class WpsstmTracklist {
         self.tracks =                   new Array();
         self.sources_requests =         [];
         self.seconds_before_refresh =   null;
-        self.tracklist_finished =       false;
         self.current_track_idx =        null;
+        self.tracks_order =             new Array();
+        self.shuffle =                  false;
         self.did_tracklist_request =    false;
-
-        wpsstm_tracklists.push(self);
         
         self.sync_html(tracklist_el);
 
@@ -319,7 +319,10 @@ class WpsstmTracklist {
         jQuery.each(tracks_html, function( index, track_html ) {
             var new_track = new WpsstmTrack(track_html,self.tracklist_idx,index);
             self.tracks.push(new_track);
+            self.tracks_order.push(index);
         });
+
+        if (self.shuffle) self.tracks_order = wpsstm_shuffle(self.tracks_order);
 
     }
     
@@ -365,34 +368,60 @@ class WpsstmTracklist {
     
     play_previous_track(){
         var self = this;
-
-        var previous_idx = self.current_track_idx - 1;
         
-        console.log("WpsstmTracklist:play_previous_track() #" + previous_idx + "in playlist#" + self.tracklist_idx);
-
-        if(typeof self.tracks[previous_idx] === 'undefined'){
-            console.log("tracklist start");
+        var queue_track_idx = self.tracks_order.indexOf(self.current_track_idx); //get current index
+        var previous_track;
+        
+        //try to get previous track
+        while (previous_track === undefined) {
+            queue_track_idx -= 1;
+            var new_track_idx = self.tracks_order.indexOf(queue_track_idx);
+            var check_track = self.tracks[new_track_idx];
+            if(typeof check_track === 'undefined'){ //not found because we are at the beginning of the tracklist
+                break;
+            }else{
+                if (check_track.can_play){
+                    previous_track = check_track;
+                }
+            }
+        }
+        
+        if (previous_track === undefined){
+            console.log("is tracklist start");
         }else{
-            self.tracks[previous_idx].play_or_skip();
+            console.log("WpsstmTracklist:play_previous_track() #" + new_track_idx + "in playlist#" + self.tracklist_idx);
+            previous_track.play_or_skip();
         }
     }
 
     play_next_track(){
 
         var self = this;
-
-        var next_idx = self.current_track_idx + 1;
         
-        console.log("WpsstmTracklist:play_next_track() #" + next_idx + "in playlist#" + self.tracklist_idx);
+        var queue_track_idx = self.tracks_order.indexOf(self.current_track_idx); //get current index
+        var next_track;
+        
+        //try to get previous track
+        while (next_track === undefined) {
+            queue_track_idx += 1;
+            var new_track_idx = self.tracks_order.indexOf(queue_track_idx);
+            var check_track = self.tracks[new_track_idx];
+            if(typeof check_track === 'undefined'){ //not found because we are at the beginning of the tracklist
+                break;
+            }else{
+                if (check_track.can_play){
+                    next_track = check_track;
+                }
+            }
+        }
 
-        if(typeof self.tracks[next_idx] === 'undefined'){
+        if(next_track === undefined){
             
             console.log("Reached tracklist end");
-            self.tracklist_finished = true;
 
             if ( wpsstmPlayer.autoplay ){
                 
-                //try to start next playlist if any
+                //try to start next traclist if any
                 var next_tracklist_idx = self.tracklist_idx + 1;
                 var next_tracklist_obj;
                 
@@ -417,7 +446,8 @@ class WpsstmTracklist {
             }
 
         }else{
-            self.tracks[next_idx].play_or_skip();
+            console.log("WpsstmTracklist:play_previous_track() #" + new_track_idx + "in playlist#" + self.tracklist_idx);
+            next_track.play_or_skip();
         }
 
     }
@@ -806,6 +836,7 @@ class WpsstmTrack {
             success: function(data){
                 if (data.success === false) {
                     jQuery(track_el).addClass('error');
+                    self.can_play = false;
                     console.log("error getting sources for track#" + self.track_idx);
                     console.log(data);
                     
@@ -911,6 +942,7 @@ class WpsstmTrack {
             console.log("WpsstmTrack:skip_bad_source() - No valid sources found - go to next track if possible");
             var track_el = self.get_track_el();
             $(track_el).addClass('error');
+            self.can_play = false;
 
             //No more sources - Play next song if any
             var tracklist = self.get_playlist_obj();
@@ -1030,4 +1062,23 @@ function wpsstm_get_track_obj(tracklist_idx,track_idx){
     if(typeof track_obj === 'undefined') return;
     
     return track_obj;
+}
+
+function wpsstm_shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
 }
