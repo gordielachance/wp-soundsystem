@@ -275,7 +275,7 @@ a.wpsstm-play-track{
             .wpsstm-player-extra{
                 width:4%;
                 text-align:center;
-                &#wpsstm-player-random:not(.active){
+                &#wpsstm-player-shuffle:not(.active){
                     @include opacity(.3);
                 }
             }

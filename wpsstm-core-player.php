@@ -135,7 +135,7 @@ class WP_SoundSytem_Core_Player{
                     <div id="wpsstm-player"></div>
                     <div id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-extra-next-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-random" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-random" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></div>
                 </div>
             </div>
         </div>

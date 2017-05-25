@@ -291,7 +291,7 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   text-align: center;
 }
 /* line 278, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-bottom-player #wpsstm-player-wrapper .wpsstm-player-extra#wpsstm-player-random:not(.active) {
+#wpsstm-bottom #wpsstm-bottom-player #wpsstm-player-wrapper .wpsstm-player-extra#wpsstm-player-shuffle:not(.active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
   opacity: 0.3;
 }
