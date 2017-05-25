@@ -107,6 +107,7 @@ a.wpsstm-play-track{
         font-size:0.8em;
         margin: 0;
         padding: .5em 1em;
+        padding-bottom:1em;
         background-color:#fcf8e3;
         color:#222;
         display:none;
@@ -150,6 +151,9 @@ a.wpsstm-play-track{
             line-height:40px; //player height
             font-size: 0.8em;
             padding: 0;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            font-size: .6em;
             [itemprop="track"]{
                 display: inline-block!important;
                 width: 80%;
