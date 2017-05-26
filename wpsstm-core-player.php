@@ -103,15 +103,12 @@ class WP_SoundSytem_Core_Player{
             }
 
             //Last.FM track action - API auth notice
-            if ( wpsstm()->get_options('lastfm_scrobbling') || wpsstm()->get_options('lastfm_favorites') ){
-
-                if ( !wpsstm_lastfm()->is_user_api_logged() ){
-                    $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-                    $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
-                    $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                    $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-                    printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
-                }
+            if ( !wpsstm_lastfm()->is_user_api_logged() ){
+                $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+                $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+                $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+                $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
+                printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
             }
 
             ?>
