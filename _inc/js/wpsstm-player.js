@@ -275,7 +275,7 @@ class WpsstmTracklist {
         
         $(bottom_block_el).prepend(refresh_notice);
         //replace 'not found' text by refresh notice
-        $(tracklist_el).find('tr.no-items td').append( refresh_notice_table );
+        $(tracklist_el).find('tr.no-items td').html( refresh_notice_table );
         $(tracklist_el).addClass('loading');
 
         var promise = $.ajax({
@@ -529,15 +529,6 @@ class WpsstmTracklist {
         console.log("WpsstmTracklist:init_tracklist() #" +  self.tracklist_idx);
         wpsstm_page_player.current_tracklist_idx = self.tracklist_idx;
 
-        //set active track if any
-        if (track_idx !== undefined){
-            track_idx = track_idx;
-        }else{
-            track_idx = self.get_maybe_shuffle_track_idx(0);
-        }
-        
-        console.log("WpsstmTracklist:init_tracklist() track#" +  track_idx);
-        
         self.tracklist_request = $.Deferred();
 
         if (self.did_tracklist_request){
@@ -552,8 +543,20 @@ class WpsstmTracklist {
             console.log({jqXHR:jqXHR,textStatus:textStatus,errorThrown:errorThrown});
         })
         .done(function() {
+            
+            //set active track if any
+            if (track_idx !== undefined){
+                track_idx = track_idx;
+            }else{
+                track_idx = self.get_maybe_shuffle_track_idx(0);
+            }
+
+            console.log("WpsstmTracklist:init_tracklist() track#" +  track_idx);
+            
             var play_track = self.get_track_obj(track_idx);
             play_track.play_or_skip();
+            
+            
         })
         .then(function(data, textStatus, jqXHR) {})
         .always(function(data, textStatus, jqXHR) {
@@ -575,9 +578,9 @@ class WpsstmTrack {
         self.title =                $(track_html).find('[itemprop="name"]').text();
         self.album =                $(track_html).find('[itemprop="inAlbum"]').text();
         self.post_id =              $(track_html).attr('data-wpsstm-track-id');
-        self.sources_request =      $.Deferred();
+        self.sources_request =      null;
         self.did_sources_request =  false;
-        self.can_play =             true;
+        self.can_play =             true; //false when no source have been populated or that none are playable
         self.sources =              [];
        
         //console.log("new WpsstmTrack #" + this.track_idx + " in tracklist #" + this.tracklist_idx);
@@ -681,95 +684,125 @@ class WpsstmTrack {
 
     }
     
+
+    
     /*
     Initialize a track : either play it if it has sources; or get the sources then call this function again (with after_ajax = true)
     */
 
-    play_or_skip(after_ajax = false){
+    play_or_skip(){
 
         var self = this;
+        
+        console.log("WpsstmTrack:play_or_skip #" + self.track_idx);
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
         var track_el = self.get_track_el();
-        
-        console.log(tracklist_obj);
 
         tracklist_obj.end_current_track();
         tracklist_obj.abord_tracks_sources_request(); //abord current requests
         tracklist_obj.current_track_idx = self.track_idx;
         
         //cannot play this track
-        if (!self.can_play) tracklist_obj.play_next_track();
-        
-        self.sources_request = $.Deferred();
-        
-        if ( self.sources.length > 0 ){
-            self.sources_request.resolve();
-        }else if (!self.did_sources_request){
-            self.sources_request = self.get_track_sources_request();
+        if (!self.can_play) {
+            tracklist_obj.play_next_track();
+            return;
         }
         
-        self.sources_request.fail(function(jqXHR, textStatus, errorThrown) {
-
-            jQuery(track_el).addClass('error');
-            self.can_play = false;
-
-            console.log("sources request failed for track #" + self.track_idx);
-            console.log({jqXHR:jqXHR,textStatus:textStatus,errorThrown:errorThrown});
-
-            var tracklist_obj = wpsstm_page_player.get_tracklist_obj(this.tracklist_idx);
-            tracklist_obj.play_next_track();
-            
-        })
-        .done(function() {
+        var deferredObject = self.preload_track();
+        
+        deferredObject.done(function() {
             self.send_to_player();
         })
-        .then(function(data, textStatus, jqXHR) {})
-        .always(function(data, textStatus, jqXHR) {
-            //item.statusText = null;
-            //self.sources_request.$apply();
-            
-            self.did_sources_request = true;
-            jQuery(track_el).removeClass('buffering');
-            
-            //preload next tracks
-            self.preload_next_tracks_sources();
+        
+        deferredObject.fail(function() {
+            var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
+            tracklist_obj.play_next_track();
         })
 
+        deferredObject.always(function(data, textStatus, jqXHR) {
+            self.preload_next_tracks();
+        })
+
+    }
+    
+    preload_track(if_no_sources = true){
+        
+        var self = this;
+
+        var track_el = self.get_track_el();
+        
+        var deferredObject = $.Deferred();
+        deferredObject = $.Deferred();
+        
+        if ( if_no_sources && self.sources.length > 0 ){
+            deferredObject.resolve();
+        }
+        
+        if (self.did_sources_request){
+            
+            if ( self.sources.length > 0 ){
+                deferredObject.resolve();
+            }else{
+                deferredObject.reject();
+            }
+            
+        }else{
+            
+            console.log("WpsstmTrack:preload_track #" + this.track_idx);
+            
+            var promise = self.get_track_sources_request();
+            jQuery(track_el).addClass('buffering');
+            
+            promise.fail(function(jqXHR, textStatus, errorThrown) {
+
+                jQuery(track_el).addClass('error');
+                self.can_play = false;
+
+                console.log("sources request failed for track #" + self.track_idx);
+                console.log({jqXHR:jqXHR,textStatus:textStatus,errorThrown:errorThrown});
+                
+                deferredObject.reject();
+
+            })
+            
+            promise.done(function() {
+                //console.log("WpsstmTrack:preload_track success #" + self.track_idx);
+                deferredObject.resolve();
+            })
+            
+            promise.always(function(data, textStatus, jqXHR) {
+                self.did_sources_request = true;
+                jQuery(track_el).removeClass('buffering');
+            })
+
+        }
+
+        return deferredObject.promise();
     }
     
     /*
     Init a sources request for this track and the X following ones (if not populated yet)
     */
     
-    preload_next_tracks_sources() {
+    preload_next_tracks() {
         
         var self = this;
         var tracklist = wpsstm_page_player.tracklists[self.tracklist_idx];
 
-        console.log("WpsstmTrack::preload_next_tracks_sources()");
+        console.log("WpsstmTrack::preload_next_tracks()");
 
-        var tracks_to_preload = [];
         var max_items = wpsstm_track_source_requests_limit;
-        var rtrack_count = 0;
         var rtrack_in = self.track_idx + 1;
         var rtrack_out = self.track_idx + max_items + 1;
+        
+        //TO FIX
+        //get X tracks that have .did_sources_request = false
 
         var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
 
-        jQuery.each(tracks_slice, function( index, rtrack_obj ) {
-            rtrack_count++;
-            if ( rtrack_obj.did_sources_request ) return true; //continue
-            if (rtrack_count > max_items){
-                return false;//break
-            }else{
-                tracks_to_preload.push(rtrack_obj);
-            }
-        });
-
-        jQuery(tracks_to_preload).each(function(index, track_to_preload) {
-            if ( track_to_preload.sources.length == 0 ){
-                track_to_preload.sources_request = self.get_track_sources_request();
-            }
+        jQuery(tracks_slice).each(function(index, track_to_preload) {
+                track_to_preload.preload_track();
+            
         });
     }
 
@@ -780,7 +813,6 @@ class WpsstmTrack {
 
         var track_el    = self.get_track_el();
         
-        wpsstm_page_player.track_playing = self;
         jQuery(track_el).addClass('active');
 
         //track infos
@@ -902,23 +934,21 @@ class WpsstmTrack {
         }
         
         //console.log("WpsstmTrack:get_track_sources_request(): #" + this.track_idx);
-        
+
         var ajax_data = {
             'action':           'wpsstm_player_get_provider_sources',
             'track':            track
         };
         
-        var promise = $.ajax({
+        self.sources_request = $.ajax({
 
             type: "post",
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
             dataType: 'json',
         });
-        
-        jQuery(track_el).addClass('buffering');
-        
-        promise.done(function(data) {
+
+        self.sources_request.done(function(data) {
             
             if ( (data.success === true) && ( data.new_html ) ){
                 jQuery(track_el).find('.trackitem_sources').html(data.new_html); //append new sources
@@ -947,11 +977,7 @@ class WpsstmTrack {
             var new_source = new WpsstmTrackSource(li_item,self);
             self.sources.push(new_source);            
         });
-        
-        if (!self.sources.length) {
-            self.can_play = false;
-        }
-        
+
         jQuery(track_el).attr('data-wpsstm-sources-count',self.sources.length);
         
     }
@@ -1115,7 +1141,6 @@ class WpsstmPagePlayer {
         var self = this;
         
         console.log("new WpsstmPagePlayer()");
-        self.track_playing;
         self.current_tracklist_idx;
         self.tracklists                 = [];
         self.tracklists_shuffle_order   = [];
