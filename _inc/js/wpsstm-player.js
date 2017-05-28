@@ -23,8 +23,7 @@ var wpsstm_page_player;
         //init tracklists
         var all_tracklists = $( ".wpsstm-tracklist" );
         wpsstm_page_player.populate_tracklists(all_tracklists);
-        
-        
+
         $( document ).trigger( "wpsstmDomReady"); //custom event
 
         /*
@@ -163,7 +162,6 @@ var wpsstm_page_player;
             }
 
         });
-        
 
     });
 
@@ -281,8 +279,6 @@ class WpsstmTracklist {
             //replace 'not found' text by refresh notice
             $(tracklist_el).find('tr.no-items td').append( refresh_notice_table );
             $(tracklist_el).addClass('loading');
-            
-            
             
         }else{ 
             //already requesting
@@ -558,10 +554,7 @@ class WpsstmTracklist {
             }
         }
         self.current_track_idx = track_idx;
-        
-        console.log("toutoune");
-        console.log(self.current_track_idx);
-        
+
         var tracklist_el = self.get_tracklist_el();
         var deferredObject = self.init_tracklist();
         
@@ -826,8 +819,7 @@ class WpsstmTrack {
         var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
 
         jQuery(tracks_slice).each(function(index, track_to_preload) {
-                track_to_preload.preload_track();
-            
+            track_to_preload.preload_track();
         });
     }
 
@@ -1171,9 +1163,7 @@ class WpsstmPagePlayer {
         self.is_shuffle                 = ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         self.is_loop                    = ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
     }
-    
-    
-    
+
     populate_tracklists(all_tracklists){
         
         var self = this;
