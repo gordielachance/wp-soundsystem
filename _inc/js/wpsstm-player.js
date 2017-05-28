@@ -1306,6 +1306,8 @@ class WpsstmPagePlayer {
             if (queue_tracklist_idx == last_tracklist_idx){
                 
                 console.log("WpsstmPagePlayer:play_next_tracklist() : is page last tracklist, go back to first tracklist");
+                self.end_current_tracklist();
+                
                 if ( !self.is_loop ){
                     break;
                 }else{
