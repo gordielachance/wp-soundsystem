@@ -390,14 +390,8 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
 }
 
 /* line 367, ../scss/wpsstm-player.scss */
-#wpsstm-lastfm-love-unlove-track-links {
-  pointer-events: none;
+.wpsstm-lastfm-love-unlove-track-links {
   font-size: 1em !important;
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-  opacity: 0;
-}
-/* line 371, ../scss/wpsstm-player.scss */
-#wpsstm-lastfm-love-unlove-track-links.wpsstm-is-loved, #wpsstm-lastfm-love-unlove-track-links.loading {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
   opacity: 0.3;
 }

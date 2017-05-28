@@ -364,11 +364,9 @@ a.wpsstm-play-track{
     }    
 }
 
-#wpsstm-lastfm-love-unlove-track-links{
-    pointer-events:none;
+.wpsstm-lastfm-love-unlove-track-links{
     font-size:1em!important;
-    @include opacity(0);
+    @include opacity(.3);
     &.wpsstm-is-loved,&.loading{
-        @include opacity(.3);
     }
 }
