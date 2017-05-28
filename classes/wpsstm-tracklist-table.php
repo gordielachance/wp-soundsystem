@@ -233,18 +233,6 @@ class WP_SoundSytem_TracksList_Table{
                     $refresh_time_human = sprintf('every %s',$refresh_time_human);
                     $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
 
-                    //countdown
-                    /*
-                    $expire_hours = floor($remaining / 3600);
-                    $expire_minutes = floor(($remaining / 60) % 60);
-                    $expire_seconds = $remaining % 60;
-
-                    $remaining = sprintf('<time><span class="wpsstm-tracklist-refresh-hours">%s</span>:<span class="wpsstm-tracklist-refresh-minutes">%s</span>:<span class="wpsstm-tracklist-refresh-seconds">%s</span></time>',sprintf("%02d", $expire_hours),sprintf("%02d", $expire_minutes),sprintf("%02d", $expire_seconds));
-
-                    $icon_refresh = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                    $text_refresh = sprintf(__('refreshes in %s','wpsstm'),$remaining);
-                    $refresh_countdown_el = sprintf('<span class="wpsstm-live-tracklist-expiry-countdown">%s %s</span>',$icon_refresh,$text_refresh);
-                    */
                 }
                 
             }

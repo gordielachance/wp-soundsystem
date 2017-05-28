@@ -163,7 +163,6 @@ class WpsstmTracklist {
         self.tracklist_idx =            tracklist_index;
         self.tracks =                   [];
         self.tracks_shuffle_order =     [];
-        self.seconds_before_refresh =   null;
         self.did_tracklist_request =    true;
         self.can_refresh =              false;
         self.can_play =                 true;
@@ -199,6 +198,9 @@ class WpsstmTracklist {
         
         var tracks_html = jQuery(tracklist_el).find('[itemprop="track"]');
         
+        self.tracks = [];
+        self.tracks_shuffle_order = [];
+        
         if ( tracks_html.length > 0 ){
             jQuery.each(tracks_html, function( index, track_html ) {
                 var new_track = new WpsstmTrack(track_html,self.tracklist_idx,index);
@@ -209,11 +211,14 @@ class WpsstmTracklist {
             self.tracks_shuffle_order = wpsstm_shuffle(self.tracks_shuffle_order);
 
         }
-        
+
         //tracklist has expired
         if ( self.expire_time && ( self.expire_time <= Math.floor( Date.now() / 1000) ) ){
             self.did_tracklist_request = false; 
             self.get_tracklist_request();
+        }else{
+            //init refresh timer
+            self.init_refresh_timer();
         }
 
     }
@@ -276,6 +281,7 @@ class WpsstmTracklist {
             self.did_tracklist_request = true; //so we can avoid running this function several times
             $('#wpsstm-bottom-refresh-notice-' + self.tracklist_idx).remove();
             $(tracklist_el).removeClass('loading');
+            
         });
         
         return deferredObject.promise();
@@ -462,40 +468,6 @@ class WpsstmTracklist {
             self.can_refresh = true;
         }
 
-        /*
-        Live-update countdown -- TO FIX disabled for now because it might take ressources and we don't really need it
-        
-
-        var tracklist_time_el = jQuery(tracklist_el).find('.wpsstm-tracklist-time');
-
-        var countdown_el = jQuery(tracklist_time_el).find('.wpsstm-live-tracklist-expiry-countdown');
-        var time_el = jQuery(countdown_el).find('time');
-        var time_hours_el = time_el.find('.wpsstm-tracklist-refresh-hours');
-        var time_minutes_el = time_el.find('.wpsstm-tracklist-refresh-minutes');
-        var time_seconds_el = time_el.find('.wpsstm-tracklist-refresh-seconds');
-
-        //https://stackoverflow.com/a/8211778/782013
-        var current_days = Math.floor((self.seconds_before_refresh % 31536000) / 86400);
-        var current_hours = Math.floor(((self.seconds_before_refresh % 31536000) % 86400) / 3600);
-        var current_minutes = Math.floor((((self.seconds_before_refresh % 31536000) % 86400) % 3600) / 60);
-        var current_seconds = (((self.seconds_before_refresh % 31536000) % 86400) % 3600) % 60;
-        
-        if (current_days < 0) current_days = 0;
-        if (current_hours < 0) current_hours = 0;
-        if (current_minutes < 0) current_minutes = 0;
-        if (current_seconds < 0) current_seconds = 0;
-        
-        //two digits
-        current_hours =     ("0" + current_hours).slice(-2);
-        current_minutes =   ("0" + current_minutes).slice(-2);
-        current_seconds =   ("0" + current_seconds).slice(-2);
-        
-        time_hours_el.text(current_hours);
-        time_minutes_el.text(current_minutes);
-        time_seconds_el.text(current_seconds);
-        
-        */
-
     }
 
     get_refresh_notice(){
@@ -526,37 +498,31 @@ class WpsstmTracklist {
     
     init_tracklist(track_idx){
         
-        wpsstm_page_player.end_current_tracklist();
-        
         var self = this;
-        self.current_track_idx = null;
-        
+
         var tracklist_el = self.get_tracklist_el();
         var deferredObject = $.Deferred();
 
-        //set active playlist
-        console.log("WpsstmTracklist:init_tracklist() #" +  self.tracklist_idx);
-        wpsstm_page_player.current_tracklist_idx = self.tracklist_idx;
-        
         //set active track
-        if (track_idx !== undefined){
-            track_idx = track_idx;
-            
-            if (self.did_tracklist_request){
-                deferredObject.resolve();
-            }else{
-                deferredObject = self.get_tracklist_request();
-            }
-            
-        }else{
+        if (track_idx === undefined){
             track_idx = self.get_maybe_shuffle_track_idx(0);
-            
+        }
+        
+        var real_track_idx = self.get_maybe_unshuffle_track_idx(track_idx);
+        
+        //is tracklist first track, maybe repopulate remote tracklist ?
+        if (real_track_idx === 0){
             if (self.did_tracklist_request && !self.can_refresh){
                 deferredObject.resolve();
             }else{
                 deferredObject = self.get_tracklist_request();
             }
-            
+        }else{
+            if (self.did_tracklist_request){
+                deferredObject.resolve();
+            }else{
+                deferredObject = self.get_tracklist_request();
+            }
         }
 
         deferredObject.fail(function(jqXHR, textStatus, errorThrown) {
@@ -570,9 +536,6 @@ class WpsstmTracklist {
         deferredObject.done(function() {
 
             console.log("WpsstmTracklist:init_tracklist() track#" +  track_idx);
-            
-            //init refresh timer
-            self.init_refresh_timer();
             
             var play_track = self.get_track_obj(track_idx);
             play_track.play_or_skip();
@@ -712,13 +675,6 @@ class WpsstmTrack {
     play_or_skip(){
 
         var self = this;
-        
-        console.log("WpsstmTrack:play_or_skip #" + self.track_idx);
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
-        var track_el = self.get_track_el();
-
-        tracklist_obj.end_current_track();
-        //tracklist_obj.abord_tracks_sources_request(); //abord current requests
 
         //cannot play this track
         if (!self.can_play) {
@@ -726,7 +682,26 @@ class WpsstmTrack {
             return;
         }
         
+        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
+        
+        //set active track
+        if ( tracklist_obj.current_track_idx !== null ){
+            if ( tracklist_obj.current_track_idx == self.track_idx ){
+                return;
+            }
+            tracklist_obj.end_current_track();
+            
+        }
         tracklist_obj.current_track_idx = self.track_idx;
+        
+        //set active tracklist
+        if (wpsstm_page_player.current_tracklist_idx !== null){
+            if ( self.tracklist_idx != wpsstm_page_player.current_tracklist_idx ){
+                wpsstm_page_player.end_current_tracklist();
+            }
+            
+        }
+        wpsstm_page_player.current_tracklist_idx = self.tracklist_idx;
         
         var deferredObject = self.preload_track();
         
@@ -1277,14 +1252,15 @@ class WpsstmPagePlayer {
             var check_tracklist = self.get_tracklist_obj(queue_tracklist_idx);
 
             if (check_tracklist.can_play){
-                new_tracklist = new_tracklist;
+                new_tracklist = check_tracklist;
                 break;
             }
         }
-        
+
         if (new_tracklist){
             console.log("WpsstmPagePlayer:play_previous_tracklist() #" + queue_tracklist_idx);
-            new_tracklist.init_tracklist();
+            var last_track_idx = new_tracklist.tracks.length -1;
+            new_tracklist.init_tracklist(last_track_idx);
         }
     }
     
@@ -1295,18 +1271,19 @@ class WpsstmPagePlayer {
         var queue_tracklist_idx = current_tracklist_idx;
         var last_tracklist_idx = self.tracklists.length -1;
         var new_tracklist;
-        
-        console.log("WpsstmPagePlayer:play_next_tracklist()");
-        console.log("current:" +current_tracklist_idx);
-        console.log("queue:" +queue_tracklist_idx);
-        console.log("last:" +last_tracklist_idx);
 
         //try to get previous track
         for (var i = 0; i < self.tracklists.length; i++) {
 
             if (queue_tracklist_idx == last_tracklist_idx){
+                
                 console.log("WpsstmPagePlayer:play_next_tracklist() : is page last tracklist, go back to first tracklist");
-                queue_tracklist_idx = 0;
+                if ( !wpsstmPlayer.autoplay ){
+                    break;
+                }else{
+                    queue_tracklist_idx = 0;
+                }
+
             }else{
                 queue_tracklist_idx = Number(queue_tracklist_idx) + 1;
             }
