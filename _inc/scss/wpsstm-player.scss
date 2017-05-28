@@ -274,9 +274,12 @@ a.wpsstm-play-track{
                 line-height:40px;
             }
             .wpsstm-player-extra{
-                width:4%;
+                width:calc(20% / 6); //number of extra icons
                 text-align:center;
                 &#wpsstm-player-shuffle:not(.active){
+                    @include opacity(.3);
+                }
+                &#wpsstm-player-loop:not(.active){
                     @include opacity(.3);
                 }
             }
