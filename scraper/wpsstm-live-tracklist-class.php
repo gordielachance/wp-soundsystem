@@ -175,7 +175,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                         'title'         => $this->get_tracklist_title(),
                         'author'        => $this->get_tracklist_author(),
                         'tracks'        => $remote_tracks,
-                        'timestamp'     => current_time( 'timestamp' )
+                        'timestamp'     => current_time( 'timestamp', true )
                     );
 
                     //set cache if there is none
