@@ -229,7 +229,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         $tracklist->load_subtracks();
     }
     
-    wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
+    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
     return $tracklist;
     
 }
@@ -332,7 +332,8 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     if ( !current_user_can($required_cap) ) return;
 
     $wrapper_classes = array(
-        'wpsstm-love-unlove-track-links'
+        'wpsstm-love-unlove-track-links',
+        'wpsstm-wp-love-unlove-track-links'
     );
     
     if ( $track && $track->is_track_loved_by() ){
