@@ -325,6 +325,11 @@ Get track love/unlove icons.
 */
 
 function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
+    
+    //capability check
+    $post_type_obj = get_post_type_object(wpsstm()->post_type_track );
+    $required_cap = $post_type_obj->cap->edit_posts;
+    if ( !current_user_can($required_cap) ) return;
 
     $wrapper_classes = array(
         'wpsstm-love-unlove-track-links'
@@ -338,4 +343,61 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
     $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
+}
+
+function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
+    
+    if ( !$user_id ) $user_id =  get_current_user_id();
+    if ( !$user_id ) return;
+    
+    //get user playlists
+    $default = array(
+        'posts_per_page'    => -1,
+    );
+    
+    $args = wp_parse_args((array)$args,$default);
+    
+    $forced = array(
+        'post_type'         => wpsstm()->post_type_playlist,
+        'author'            => $user_id,
+        'fields'            => 'ids'
+    );
+    
+    $args = wp_parse_args($forced,$args);
+
+    $query = new WP_Query( $args );
+    $post_ids = $query->posts;
+    
+    return $post_ids;
+}
+
+function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
+    
+    //capability check
+    $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist );
+    $required_cap = $post_type_obj->cap->edit_posts;
+    if ( !current_user_can($required_cap) ) return;
+
+    $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
+    $li_els = array();
+    
+    if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
+        foreach($playlist_ids as $playlist_id){
+            $title = get_the_title($playlist_id);
+            $li_els[] = sprintf('<li><input type="checkbox" /><label>%s</label>',$title);
+        }
+    }
+    
+    if (!$li_els) return;
+    
+    $header = sprintf('<header>%s</header>',__('Add to playlist','wpsstm'));
+    $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
+    
+    $list = sprintf('<ul class="wpsstm-tracklist-chooser-list">%s</ul>',implode("\n",$li_els) );
+    $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
+    $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
+    
+    $content = sprintf('<span>%s %s %s</span>',$header,$list,$footer);
+    
+    return sprintf('<span class="wpsstm-tracklist-chooser-wrapper">%s %s </span>',$icon,$content );
 }

@@ -578,7 +578,8 @@ class WP_SoundSytem_TracksList_Table{
             break;
             case 'trackitem_actions':
                 $love_unlove = wpsstm_get_track_loveunlove_icons($item);
-                return $love_unlove;
+                $add_to_playlists = wpsstm_get_track_playlist_chooser($item);
+                return $love_unlove.$add_to_playlists;
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
