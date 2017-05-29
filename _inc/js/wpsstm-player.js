@@ -197,10 +197,15 @@ class WpsstmTracklist {
         $(tracklist_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
 
         self.tracklist_id = Number( $(tracklist_el).attr('data-tracklist-id') );
-        self.expire_sec =  Number( $(tracklist_el).attr('data-wpsstm-expire-sec') );
-        
+        self.expire_sec =  $(tracklist_el).attr('data-wpsstm-expire-sec');
+
         if ( self.expire_sec !== null ){
+            
+            self.expire_sec = Number(self.expire_sec);
+            
             if ( self.expire_sec <= 0 ){
+                console.log("expire sec for playlist #" + self.tracklist_idx);
+                console.log(self.expire_sec);
                 self.did_tracklist_request = false; 
             }else{
                 self.init_refresh_timer();
@@ -308,7 +313,7 @@ class WpsstmTracklist {
 
         if (!self.tracklist_request){
             
-            console.log("WpsstmTracklist:get_tracklist_request()");
+            console.log("WpsstmTracklist:get_tracklist_request() #" + self.tracklist_idx);
             
             var ajax_data = {
                 'action':           'wpsstm_load_tracklist',
@@ -511,7 +516,7 @@ class WpsstmTracklist {
         if (self.expire_sec === null) return;
         if (self.expire_sec <= 0) return;
 
-        console.log('init_refresh_timer');
+        console.log("WpsstmTracklist:init_refresh_timer for playlist #" + self.tracklist_idx);
         
         console.log("set timer for " + self.expire_sec);
         if (self.refresh_timer){ //stop current timer if any
