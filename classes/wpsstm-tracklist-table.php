@@ -154,6 +154,14 @@ class WP_SoundSytem_TracksList_Table{
             'wpsstm-tracklist-table'
         );
         
+        $attr_arr = array(
+            'class'           =>            implode(' ',$classes),
+            'data-tracklist-id' =>          $this->tracklist->post_id,
+            'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
+            'data-wpsstm-expire-sec' =>     $next_refresh_sec,
+            'itemtype' =>                   'http://schema.org/MusicPlaylist',
+        );
+        
         if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
         
         $next_refresh_sec = null;
@@ -167,9 +175,7 @@ class WP_SoundSytem_TracksList_Table{
             }
         }
 
-        $classes_str = wpsstm_get_classes_attr($classes);
-
-        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-expire-sec="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$next_refresh_sec); ?>
+        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr)); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -481,14 +487,18 @@ class WP_SoundSytem_TracksList_Table{
         
             $sources = wpsstm_player()->get_playable_sources($item,true);
 
-            $track_classes = array();
-            if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
+            $classes = array();
+            if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';
         
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources-count="%s">',
-                   wpsstm_get_classes_attr($track_classes),
-                   $item->post_id,
-                   count($sources)
+            $attr_arr = array(
+                'class' =>                      implode(' ',$classes),
+                'data-wpsstm-track-id' =>       $item->post_id,
+                'data-wpsstm-sources-count' =>  count($sources),
+                'itemtype' =>                   'http://schema.org/MusicRecording',
+                'itemprop' =>                   'track',
             );
+        
+            printf( '<tr itemscope %s>',wpsstm_get_html_attr($attr_arr) );
             $this->single_row_columns( $item );
             echo '</tr>';
     }

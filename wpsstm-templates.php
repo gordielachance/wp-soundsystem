@@ -9,6 +9,17 @@ function wpsstm_get_classes_attr($classes){
     return' class="'.implode(' ',$classes).'"';
 }
 
+//https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
+function wpsstm_get_html_attr($array){
+    $str = join(' ', array_map(function($key) use ($array){
+       if(is_bool($array[$key])){
+          return $array[$key]?$key:'';
+       }
+       return $key.'="'.$array[$key].'"';
+    }, array_keys($array)));
+    return $str;
+}
+
 function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
         $text_bar = $bar_width = null;
