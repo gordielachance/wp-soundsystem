@@ -77,7 +77,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
         global $post;
         if (!$post_id) $post_id = $post->ID;
 
-        $time = current_time( 'timestamp' );
+        $time = current_time( 'timestamp' ); //not UTC
         $transient_log_prefix = sprintf('wpsstm_%s_total_tracks_',$post_id);
         $transient_log_name = $transient_log_prefix . $time;
 
@@ -131,7 +131,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
         if ( get_post_status($post_id) != 'publish') return;
 
         $log = array();
-        $time = current_time( 'timestamp' );
+        $time = current_time( 'timestamp' ); //not UTC
         $time_remove = strtotime('-1 month',$time); 
         
         if ($existing_log = get_post_meta($post_id, self::$meta_key_monthly_requests_log, true)){ //get month log
@@ -174,7 +174,7 @@ class WP_SoundSytem_Live_Playlist_Stats{
 
         if ( get_post_status($post_id) != 'publish') return;
 
-        $time = current_time( 'timestamp' );
+        $time = current_time( 'timestamp' ); //not UTC
         $transient_name_freeze = sprintf('wpsstm_%s_freeze_health',$post_id);
         $transient_log_prefix = sprintf('wpsstm_%s_total_tracks_',$post_id);
         $transient_log_name = $transient_log_prefix . $time;

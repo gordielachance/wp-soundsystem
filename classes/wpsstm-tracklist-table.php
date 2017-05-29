@@ -156,14 +156,20 @@ class WP_SoundSytem_TracksList_Table{
         
         if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
         
+        $next_refresh_sec = null;
+
         if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
-            $remaining = $this->tracklist->expire_time - current_time( 'timestamp', true );
-            if ($remaining <= 0) $classes[] = 'can-refresh';
+            $next_refresh_sec = $this->tracklist->expire_time - current_time( 'timestamp', true ); //UTC
+            
+            if ($next_refresh_sec <= 0){
+                $next_refresh_sec = 0;
+                $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
+            }
         }
 
         $classes_str = wpsstm_get_classes_attr($classes);
 
-        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-next-refresh="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$this->tracklist->expire_time); ?>
+        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-expire-sec="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$next_refresh_sec); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -220,12 +226,6 @@ class WP_SoundSytem_TracksList_Table{
                 
                 //live playlist refresh time
                 if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
-
-                    $remaining = $expire_timestamp - current_time( 'timestamp', true );
-
-                    if ($remaining <= 0){
-                        $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
-                    }
 
                     //expire time
                     //$refresh_time = get_date_from_gmt( date( 'Y-m-d H:i:s', $expire_timestamp ), get_option( 'time_format' ) );

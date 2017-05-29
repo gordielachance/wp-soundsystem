@@ -12,12 +12,9 @@
 .wpsstm-tracklist .wpsstm-tracklist-time .wpsstm-refresh-playlist i.fa-exclamation-triangle {
   display: none;
 }
-/* line 30, ../scss/wpsstm-tracklist.scss */
-.wpsstm-tracklist.can-refresh .wpsstm-tracklist-time .wpsstm-live-tracklist-expiry-countdown {
-  display: none;
-}
+
 /* line 35, ../scss/wpsstm-tracklist.scss */
-.wpsstm-tracklist:not(.can-refresh) .wpsstm-tracklist-time .wpsstm-refresh-playlist, .wpsstm-tracklist.loading .wpsstm-tracklist-time .wpsstm-refresh-playlist {
+.wpsstm-tracklist:not([data-wpsstm-expire-sec="0"]) .wpsstm-tracklist-time .wpsstm-refresh-playlist, .wpsstm-tracklist.loading .wpsstm-tracklist-time .wpsstm-refresh-playlist {
   display: none;
 }
 /* line 43, ../scss/wpsstm-tracklist.scss */
