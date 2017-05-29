@@ -197,18 +197,14 @@ class WpsstmTracklist {
         $(tracklist_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
 
         self.tracklist_id = Number( $(tracklist_el).attr('data-tracklist-id') );
-        self.expire_sec =  $(tracklist_el).attr('data-wpsstm-expire-sec');
+        var expire_sec_attr =  $(tracklist_el).attr('data-wpsstm-expire-sec');
 
-        if ( self.expire_sec !== null ){
+        if (typeof expire_sec_attr !== typeof undefined && expire_sec_attr !== false) { // For some browsers, `attr` is undefined; for others, `attr` is false.  Check for both.
             
-            self.expire_sec = Number(self.expire_sec);
+            self.expire_sec = Number(expire_sec_attr);
             
             if ( self.expire_sec <= 0 ){
-                console.log("expire sec for playlist #" + self.tracklist_idx);
-                console.log(self.expire_sec);
                 self.did_tracklist_request = false; 
-            }else{
-                self.init_refresh_timer();
             }
         }
         
@@ -366,6 +362,12 @@ class WpsstmTracklist {
             self.did_tracklist_request = true; //so we can avoid running this function several times
             $('#wpsstm-bottom-refresh-notice-' + self.tracklist_idx).remove();
             $(tracklist_el).removeClass('loading');
+            
+            //refresh timer
+            if (self.expire_sec !== null){
+                self.init_refresh_timer();
+            }
+            
             
         });
         
@@ -534,11 +536,15 @@ class WpsstmTracklist {
     update_refresh_timer(){
         var self = this;
         self.expire_sec = self.expire_sec - 1;
+        
+        //console.log("WpsstmTracklist:update_refresh_timer() - " + self.expire_sec);
 
         if (self.expire_sec <= 0){
-            var tracklist_el = self.get_tracklist_el();
-            $(tracklist_el).attr('data-wpsstm-expire-sec',0);
             clearInterval(self.refresh_timer);
+            self.expire_sec = 0;
+            var tracklist_el = self.get_tracklist_el();
+            $(tracklist_el).attr('data-wpsstm-expire-sec',0); //for CSS
+            self.did_tracklist_request = false;
         }
 
     }
@@ -586,7 +592,7 @@ class WpsstmTracklist {
             if (self.did_tracklist_request){
                 deferredObject.resolve();
             }else{
-                self.current_track_idx = null;
+                self.end_current_track();
                 deferredObject = self.get_tracklist_request();
             }
             
@@ -785,6 +791,9 @@ class WpsstmTrack {
             tracklist_obj.play_next_track();
             return;
         }
+        
+        var track_el = self.get_track_el();
+        $(track_el).addClass('buffering');
 
         var deferredObject = self.preload_track();
         
@@ -829,13 +838,12 @@ class WpsstmTrack {
             var promise = self.get_track_sources_request();
             $(track_el).addClass('buffering');
             
-            promise.fail(function(jqXHR, textStatus, errorThrown) {
+            promise.fail(function() {
 
                 $(track_el).addClass('error');
                 self.can_play = false;
 
                 console.log("sources request failed for track #" + self.track_idx);
-                console.log({jqXHR:jqXHR,textStatus:textStatus,errorThrown:errorThrown});
                 
                 deferredObject.reject();
 
@@ -1150,7 +1158,7 @@ class WpsstmTrack {
 
         //mediaElement
         if (wpsstm_current_media){
-            console.log("there is an active media, abord it");
+            console.log("there is an active media, stop it");
             wpsstm_current_media.pause();
             self.update_button('ended');
 
@@ -1227,10 +1235,10 @@ class WpsstmPagePlayer {
         var self = this;
 
         if ( $(all_tracklists).length <= 0 ) return;
+        
+        console.log("WpsstmPagePlayer:populate_tracklists()");
 
         $(all_tracklists).each(function( i, tracklist_el ) {
-
-            console.log("wpsstm_init_tracklists : new WpsstmTracklist #" + i);
 
             var tracklist = new WpsstmTracklist(tracklist_el,i);
             self.tracklists.push(tracklist);
