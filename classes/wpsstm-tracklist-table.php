@@ -158,7 +158,6 @@ class WP_SoundSytem_TracksList_Table{
             'class'           =>            implode(' ',$classes),
             'data-tracklist-id' =>          $this->tracklist->post_id,
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
-            'data-wpsstm-expire-sec' =>     $next_refresh_sec,
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
         
@@ -166,13 +165,15 @@ class WP_SoundSytem_TracksList_Table{
         
         $next_refresh_sec = null;
 
-        if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
+        if ( property_exists($this->tracklist,'expire_time') ) {
             $next_refresh_sec = $this->tracklist->expire_time - current_time( 'timestamp', true ); //UTC
             
             if ($next_refresh_sec <= 0){
                 $next_refresh_sec = 0;
                 $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
             }
+            
+            $attr_arr['data-wpsstm-expire-sec'] = $next_refresh_sec;
         }
 
         printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr)); ?>
