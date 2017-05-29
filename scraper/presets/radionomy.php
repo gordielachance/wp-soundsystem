@@ -1,17 +1,18 @@
 <?php
-class WP_SoundSytem_Playlist_Radionomy_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
 
-    var $preset_slug = 'radionomy';
+    var $preset_slug =      'radionomy';
+    var $preset_url =       'https://www.radionomy.com';
     
-    var $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
-    var $redirect_url = 'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
+    var $pattern =          '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
+    var $redirect_url =     'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
 
-    var $variables = array(
+    var $variables =        array(
         'radionomy-slug' => null,
         'radionomy-id' => null
     );
 
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'div.titre'),
             'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),

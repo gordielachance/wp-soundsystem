@@ -1,21 +1,17 @@
 <?php
-class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_Spotify_Playlists_Api extends WP_SoundSytem_Live_Playlist_Preset{
 
-    //TO FIX is limited to 100 tracks.  Find a way to get more.
-    //https://developer.spotify.com/web-api/console/get-playlist-tracks
+    var $preset_slug =      'spotify-playlist';
+    var $preset_url =       'https://open.spotify.com';
     
-    var $preset_slug = 'spotify-playlist';
-    
-    var $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
-    var $redirect_url = 'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
-    var $variables = array(
+    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
+    var $redirect_url =     'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
+    var $variables =        array(
         'spotify-user' => null,
         'spotify-playlist' => null
     );
 
-    var $token = null;
-
-    var $options_default = array(
+    var $options_default =  array(
         'datas_cache_min'   => 15,
         'selectors' => array(
             'tracks'           => array('path'=>'root > items'),
@@ -24,6 +20,8 @@ class WP_SoundSytem_Playlist_Spotify_Playlist_Api extends WP_SoundSytem_Live_Pla
             'track_title'      => array('path'=>'track > name'),
         )
     );
+    
+    var $token = null;
 
     function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);

@@ -73,13 +73,8 @@
             }
         }
     }
-    
-    &.can-refresh{
-        .wpsstm-tracklist-time .wpsstm-live-tracklist-expiry-countdown{
-            display:none;
-        }
-    }
-    &:not(.can-refresh), &.loading{
+
+    &:not([data-wpsstm-expire-sec="0"]), &.loading{
         .wpsstm-tracklist-time .wpsstm-refresh-playlist{
             display:none;
         }

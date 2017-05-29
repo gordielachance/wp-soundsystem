@@ -154,16 +154,29 @@ class WP_SoundSytem_TracksList_Table{
             'wpsstm-tracklist-table'
         );
         
+        $attr_arr = array(
+            'class'           =>            implode(' ',$classes),
+            'data-tracklist-id' =>          $this->tracklist->post_id,
+            'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
+            'itemtype' =>                   'http://schema.org/MusicPlaylist',
+        );
+        
         if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
         
-        if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
-            $remaining = $this->tracklist->expire_time - current_time( 'timestamp', true );
-            if ($remaining <= 0) $classes[] = 'can-refresh';
+        $next_refresh_sec = null;
+
+        if ( property_exists($this->tracklist,'expire_time') ) {
+            $next_refresh_sec = $this->tracklist->expire_time - current_time( 'timestamp', true ); //UTC
+            
+            if ($next_refresh_sec <= 0){
+                $next_refresh_sec = 0;
+                $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
+            }
+            
+            $attr_arr['data-wpsstm-expire-sec'] = $next_refresh_sec;
         }
 
-        $classes_str = wpsstm_get_classes_attr($classes);
-
-        printf('<div %s itemscope itemtype="http://schema.org/MusicPlaylist" data-tracklist-id="%s" data-tracks-count="%s" data-wpsstm-next-refresh="%s">',$classes_str,$this->tracklist->post_id,$this->tracklist->pagination['total_items'],$this->tracklist->expire_time); ?>
+        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr)); ?>
             <?php $this->display_tablenav( 'top' );?>
             <table>
                     <thead>
@@ -221,12 +234,6 @@ class WP_SoundSytem_TracksList_Table{
                 //live playlist refresh time
                 if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
 
-                    $remaining = $expire_timestamp - current_time( 'timestamp', true );
-
-                    if ($remaining <= 0){
-                        $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
-                    }
-
                     //expire time
                     //$refresh_time = get_date_from_gmt( date( 'Y-m-d H:i:s', $expire_timestamp ), get_option( 'time_format' ) );
                     $refresh_time_human = human_time_diff( $this->tracklist->updated_time, $this->tracklist->expire_time );
@@ -254,13 +261,13 @@ class WP_SoundSytem_TracksList_Table{
                         $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
                         $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
                         $share_text = __('Share', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%2$s" href="%3$s" target="_blank" class="wpsstm-tracklist-action-share">%1$s<span> %2$s</span></a>',$share_icon,$share_text,$share_url);
+                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s<span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
 
                         //xspf
                         $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
                         $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
                         $xspf_text = __('XSPF', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%2$s" href="%3$s" target="_blank" class="wpsstm-tracklist-action-xspf">%1$s<span> %2$s</span></a>',$xspf_icon,$xspf_text,$xspf_url);
+                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s<span> %s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
 
                         //favorite
                         if ( $this->tracklist->post_id && current_user_can('administrator') ) { //TO FIX remove current_user_can when feature is ready
@@ -481,14 +488,18 @@ class WP_SoundSytem_TracksList_Table{
         
             $sources = wpsstm_player()->get_playable_sources($item,true);
 
-            $track_classes = array();
-            if ( !$item->validate_track() ) $track_classes[] = 'wpsstm-invalid-track';
+            $classes = array();
+            if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';
         
-            printf( '<tr itemprop="track" itemscope itemtype="http://schema.org/MusicRecording" %s data-wpsstm-track-id="%s" data-wpsstm-sources-count="%s">',
-                   wpsstm_get_classes_attr($track_classes),
-                   $item->post_id,
-                   count($sources)
+            $attr_arr = array(
+                'class' =>                      implode(' ',$classes),
+                'data-wpsstm-track-id' =>       $item->post_id,
+                'data-wpsstm-sources-count' =>  count($sources),
+                'itemtype' =>                   'http://schema.org/MusicRecording',
+                'itemprop' =>                   'track',
             );
+        
+            printf( '<tr itemscope %s>',wpsstm_get_html_attr($attr_arr) );
             $this->single_row_columns( $item );
             echo '</tr>';
     }

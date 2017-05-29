@@ -130,6 +130,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         $this->datas = $this->datas_cache = $this->get_cache();
         if ($this->datas_cache){
+            
+            $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
+            if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
+                $this->expire_time = $cache_expire_time;
+            }
+            
             $this->add($this->datas_cache['tracks']);
             //we got cached tracks, but do ignore them in wizard
             if ( ( $cached_total_items = count($this->tracks) ) && $this->is_wizard ){
@@ -175,7 +181,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                         'title'         => $this->get_tracklist_title(),
                         'author'        => $this->get_tracklist_author(),
                         'tracks'        => $remote_tracks,
-                        'timestamp'     => current_time( 'timestamp', true )
+                        'timestamp'     => current_time( 'timestamp', true ) //UTC
                     );
 
                     //set cache if there is none
@@ -201,15 +207,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //set only if not already defined (eg. by a post ID); except for timestamp
         
         $this->updated_time = wpsstm_get_array_value('timestamp', $this->datas);
-        
-        //expiration
-        $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
-        if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
-            $this->expire_time = $cache_expire_time;
-        }else{
-            $this->expire_time = current_time( 'timestamp', true ); //now
-        }
-        
+
         if ( !$this->title ){
             $this->title = wpsstm_get_array_value('title', $this->datas);
         }
@@ -756,6 +754,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $debug_cache = $this->datas_remote;
         $debug_cache['tracks_count'] = ( isset($debug_cache['tracks']) ) ? count($debug_cache['tracks']) : null;
         unset($debug_cache['tracks']);
+        
+    $this->expire_time = current_time( 'timestamp', true ) + $duration; //UTC
             
         wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSytem_Remote_Tracklist::set_cache()"); 
         
