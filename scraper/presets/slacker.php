@@ -1,12 +1,13 @@
 <?php
-class WP_SoundSytem_Playlist_Slacker_Station_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
-    var $preset_slug = 'slacker-station-tops';
+class WP_SoundSytem_Preset_Slacker_Stations extends WP_SoundSytem_Live_Playlist_Preset{
+    var $preset_slug =      'slacker-station-tops';
+    var $preset_url =       'http://slacker.com/';
     
-    var $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
-    var $variables = array(
+    var $pattern =          '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
+    var $variables =        array(
         'slacker-station-slug' => null
     );
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
             'track_artist'      => array('path'=>'span.artist'),

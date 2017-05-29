@@ -107,6 +107,7 @@ a.wpsstm-play-track{
         font-size:0.8em;
         margin: 0;
         padding: .5em 1em;
+        padding-bottom:1.5em;
         background-color:#fcf8e3;
         color:#222;
         display:none;
@@ -122,6 +123,7 @@ a.wpsstm-play-track{
     
     #wpsstm-bottom-player{
         display:none;
+        position: relative;
         color:white;
         font-family:sans-serif;
         #wpsstm-player-actions{
@@ -150,6 +152,9 @@ a.wpsstm-play-track{
             line-height:40px; //player height
             font-size: 0.8em;
             padding: 0;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            font-size: .6em;
             [itemprop="track"]{
                 display: inline-block!important;
                 width: 80%;
@@ -160,6 +165,7 @@ a.wpsstm-play-track{
                     margin: 0;
                     
                     &[itemprop="image"]{
+                        padding-left: 0;
                         img {
                             max-height:3em;
                         }
@@ -267,9 +273,15 @@ a.wpsstm-play-track{
                 float: left;
                 line-height:40px;
             }
-            .wpsstm-player-nav{
-                width:5%;
+            .wpsstm-player-extra{
+                width:calc(20% / 6); //number of extra icons
                 text-align:center;
+                &#wpsstm-player-shuffle:not(.active){
+                    @include opacity(.3);
+                }
+                &#wpsstm-player-loop:not(.active){
+                    @include opacity(.3);
+                }
             }
             #wpsstm-player{
                 width:80%;
@@ -355,11 +367,9 @@ a.wpsstm-play-track{
     }    
 }
 
-#wpsstm-lastfm-love-unlove-track-links{
-    pointer-events:none;
+.wpsstm-lastfm-love-unlove-track-links{
     font-size:1em!important;
-    @include opacity(0);
+    @include opacity(.3);
     &.wpsstm-is-loved,&.loading{
-        @include opacity(.3);
     }
 }

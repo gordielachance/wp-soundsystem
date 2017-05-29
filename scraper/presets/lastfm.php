@@ -1,15 +1,15 @@
 <?php
-class WP_SoundSytem_Playlist_LastFM_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_LastFM_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
 
-    var $preset_slug = 'last-fm-website';
-    
-    var $pattern = '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
-    var $variables = array(
+    var $preset_slug =      'last-fm-website';
+    var $preset_url =       'https://www.last.fm';
+    var $pattern =          '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))(?:/([^/]+))?~';
+    var $variables =        array(
         'lastfm-user' => null,
         'lastfm-page' => null
     );
 
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),

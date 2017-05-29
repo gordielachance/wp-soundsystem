@@ -103,15 +103,12 @@ class WP_SoundSytem_Core_Player{
             }
 
             //Last.FM track action - API auth notice
-            if ( wpsstm()->get_options('lastfm_scrobbling') || wpsstm()->get_options('lastfm_favorites') ){
-
-                if ( !wpsstm_lastfm()->is_user_api_logged() ){
-                    $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-                    $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
-                    $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                    $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-                    printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
-                }
+            if ( !wpsstm_lastfm()->is_user_api_logged() ){
+                $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+                $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+                $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+                $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
+                printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
             }
 
             ?>
@@ -130,11 +127,13 @@ class WP_SoundSytem_Core_Player{
                 </div>
                 <div id="wpsstm-player-trackinfo"></div>
                 <div id="wpsstm-player-wrapper">
-                    <div id="wpsstm-player-nav-previous-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-nav-previous-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-previous-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player"></div>
-                    <div id="wpsstm-player-nav-next-track" class="wpsstm-player-nav"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-nav-next-page" class="wpsstm-player-nav"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-extra-next-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></div>
+                    <div id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></div>
                 </div>
             </div>
         </div>

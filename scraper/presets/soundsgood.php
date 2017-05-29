@@ -1,15 +1,16 @@
 <?php
-class WP_SoundSytem_Playlist_Soundsgood_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_Soundsgood_Playlists_Api extends WP_SoundSytem_Live_Playlist_Preset{
     
-    var $preset_slug = 'soundsgood';
+    var $preset_slug =      'soundsgood';
+    var $preset_url =       'https://soundsgood.co/';
     
-    var $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
-    var $redirect_url= 'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
-    var $variables = array(
+    var $pattern =          '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
+    var $redirect_url=      'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
+    var $variables =        array(
         'soundsgood-playlist-slug' => null,
     );
 
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),

@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Playlist_Scraper_Wizard{
+class WP_SoundSytem_Scraper_Wizard{
 
     var $tracklist;
     
@@ -540,7 +540,11 @@ class WP_SoundSytem_Playlist_Scraper_Wizard{
         $presets_list_str = null;
         foreach ((array)WP_SoundSytem_Core_Live_Playlists::get_available_presets() as $preset){
             if ( !$preset->wizard_suggest ) continue;
-            $presets_list[] = $preset->preset_name;
+            $preset_str = $preset->preset_name;
+            if ($preset->preset_url){
+                $preset_str = sprintf('<a href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_desc,$preset_str);
+            }
+            $presets_list[] = $preset_str;
         }
 
         if ( !empty($presets_list) ){

@@ -9,6 +9,17 @@ function wpsstm_get_classes_attr($classes){
     return' class="'.implode(' ',$classes).'"';
 }
 
+//https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
+function wpsstm_get_html_attr($array){
+    $str = join(' ', array_map(function($key) use ($array){
+       if(is_bool($array[$key])){
+          return $array[$key]?$key:'';
+       }
+       return $key.'="'.$array[$key].'"';
+    }, array_keys($array)));
+    return $str;
+}
+
 function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
         $text_bar = $bar_width = null;
@@ -229,7 +240,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         $tracklist->load_subtracks();
     }
     
-    wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
+    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
     return $tracklist;
     
 }
@@ -242,16 +253,15 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     
     if ($pagenum == 'xspf'){
         $url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
+        $url = add_query_arg(array('dl'=>(int)($download)),$url);
     }else{
         $pagenum = (int) $pagenum;
-        $url = add_query_arg( array(WP_SoundSytem_Tracklist::$paged_var => $pagenum) );
+        if ($pagenum > 1){
+            $url = add_query_arg( array(WP_SoundSytem_Tracklist::$paged_var => $pagenum) );
+        }
     }
 
     $url = apply_filters('wpsstm_get_tracklist_link',$url,$post_id,$pagenum,$download);
-    
-    if ($pagenum == 'xspf'){
-        $url = add_query_arg(array('dl'=>(int)($download)),$url);
-    }
 
     return $url;
 
@@ -327,7 +337,8 @@ Get track love/unlove icons.
 function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
 
     $wrapper_classes = array(
-        'wpsstm-love-unlove-track-links'
+        'wpsstm-love-unlove-track-links',
+        'wpsstm-wp-love-unlove-track-links'
     );
     
     if ( $track && $track->is_track_loved_by() ){

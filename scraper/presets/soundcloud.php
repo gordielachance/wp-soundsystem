@@ -1,17 +1,17 @@
 <?php
-class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_Soundcloud_Api extends WP_SoundSytem_Live_Playlist_Preset{
     
-    var $preset_slug = 'soundcloud';
+    var $preset_slug =      'soundcloud';
+    var $preset_url =       'https://soundcloud.com';
     
-    var $pattern = '~^https?://(?:www.)?soundcloud.com/([^/]+)/?([^/]+)?~i';
-    var $redirect_url= 'http://api.soundcloud.com/users/%soundcloud-userid%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
-    var $variables = array(
+    var $pattern =          '~^https?://(?:www.)?soundcloud.com/([^/]+)/?([^/]+)?~i';
+    var $redirect_url=      'http://api.soundcloud.com/users/%soundcloud-userid%/%soundcloud-api-page%?client_id=%soundcloud-client-id%';
+    var $variables =        array(
         'soundcloud-username' => null,
         'soundcloud-page' => null
     );
-    var $page_api = null;
 
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),
@@ -19,6 +19,8 @@ class WP_SoundSytem_Playlist_Soundcloud_Api extends WP_SoundSytem_Live_Playlist_
             'track_image'       => array('path'=>'artwork_url')
         )
     );
+    
+    var $page_api = null;
     
     function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);
