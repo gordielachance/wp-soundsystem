@@ -49,7 +49,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
         add_action( 'wp', array($this,'frontend_wizard_populate' ) );
         add_filter( 'the_content', array($this,'frontend_wizard_display'));
-        add_filter( 'wpsstm_get_tracklist_link', array($this,'frontend_wizard_get_tracklist_link'), 10, 4);
+        add_filter( 'wpsstm_get_tracklist_link', array($this,'frontend_wizard_get_tracklist_link'), 10, 2);
 
     }
     
@@ -377,7 +377,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         
     }
     
-    function frontend_wizard_get_tracklist_link($link,$post_id,$xspf,$download){
+    function frontend_wizard_get_tracklist_link($link,$post_id){
         global $wp_query;
         
         if ( $post_id != $this->frontend_wizard_page_id ) return $link;
