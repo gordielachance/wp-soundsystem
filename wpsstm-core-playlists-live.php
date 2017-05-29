@@ -362,7 +362,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
 
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        $this->frontend_wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($frontend_wizard_url);
+        $this->frontend_wizard = new WP_SoundSytem_Scraper_Wizard($frontend_wizard_url);
     }
 
     function frontend_wizard_display($content){

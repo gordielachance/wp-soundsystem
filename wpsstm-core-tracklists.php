@@ -385,7 +385,7 @@ class WP_SoundSytem_Core_Tracklists{
         if( !in_array($post_type,$this->scraper_post_types ) ) return;
         
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($post_id);
+        $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
 
     }
     
@@ -394,7 +394,7 @@ class WP_SoundSytem_Core_Tracklists{
         if( !in_array($post_type,$this->scraper_post_types ) ) return;
 
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        $wizard = new WP_SoundSytem_Playlist_Scraper_Wizard($post_id);
+        $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
         $wizard->save_wizard($post_id);
     }
     

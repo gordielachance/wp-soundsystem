@@ -1,17 +1,18 @@
 <?php
-class WP_SoundSytem_Playlist_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset{
     
     /* https://regex101.com/r/isVHq9/13 */
     
-    var $preset_slug = 'reddit';
+    var $preset_slug =      'reddit';
+    var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
-    var $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-    var $redirect_url= 'https://www.reddit.com/r/%subredit-slug%.json?limit=100';
-    var $variables = array(
+    var $pattern =          '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
+    var $redirect_url=      'https://www.reddit.com/r/%subredit-slug%.json?limit=100';
+    var $variables =        array(
         'subredit-slug' => null
     );
 
-    var $options_default = array(
+    var $options_default =  array(
         'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),

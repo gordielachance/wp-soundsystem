@@ -1,15 +1,16 @@
 <?php
-class WP_SoundSytem_Playlist_Twitter_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
-    var $preset_slug = 'twitter';
+class WP_SoundSytem_Preset_Twitter_Timelines extends WP_SoundSytem_Live_Playlist_Preset{
+    var $preset_slug =      'twitter';
+    var $preset_url =       'https://www.twitter.com/';
     
-    var $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
-    var $redirect_url= 'https://mobile.twitter.com/%twitter-username%';
-    var $variables = array(
+    var $pattern =          '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
+    var $redirect_url=      'https://mobile.twitter.com/%twitter-username%';
+    var $variables =        array(
         'twitter-username' => null
     );
-    var $options_default = array(
+    var $options_default =  array(
         'selectors' => array(
-            'tracks'            => array('path'=>'#main_content .timeline .tweet .tweet-text div')
+            'tracks'        => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )
     );
     

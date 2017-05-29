@@ -6,16 +6,16 @@ https://www.indieshuffle.com/playlists/best-songs-of-april-2017/
 https://www.indieshuffle.com/songs/hip-hop/
 */
 
-class WP_SoundSytem_Playlist_IndieShuffle_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_IndieShuffle_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
 
-    var $preset_slug = 'indie-shuffle';
-    
-    var $pattern = '~http(?:s)?://(?:www\.)?indieshuffle.com/(.+)~';
-    var $variables = array(
+    var $preset_slug =      'indie-shuffle';
+    var $preset_url =       'https://www.indieshuffle.com';
+    var $pattern =          '~http(?:s)?://(?:www\.)?indieshuffle.com/(.+)~';
+    var $variables =        array(
         'uri' => null
     );
 
-    var $options_default = array(
+    var $options_default =  array(
         'datas_cache_min'   => 1440,
         'selectors' => array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),

@@ -1,15 +1,16 @@
 <?php
 
 abstract class WP_SoundSytem_Live_Playlist_Preset extends WP_SoundSytem_Remote_Tracklist{
-    var $preset_slug = null;
-    var $preset_name = null;
+    var $preset_slug =      null;
+    var $preset_url =       null;
+    var $preset_name =      null;
+    var $preset_desc =      null;
+    var $pattern =          null; //regex pattern that would match an URL
+    var $redirect_url =     null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
+    var $variables =        array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
     
-    var $pattern = null; //regex pattern that would match an URL
-    var $redirect_url = null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
-    var $variables = array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
-    
-    var $can_use_preset = true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
-    var $wizard_suggest = true; //suggest or not this preset in the wizard
+    var $can_use_preset =   true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
+    var $wizard_suggest =   true; //suggest or not this preset in the wizard
 
     public function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);
@@ -129,21 +130,21 @@ function wpsstm_register_scraper_presets($presets){
     require_once( $presets_path . 'reddit.php' );
     require_once( $presets_path . 'indieshuffle.php' );
     
-    $presets[] = new WP_SoundSytem_Playlist_LastFM_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Spotify_Playlist_Api();
-    $presets[] = new WP_SoundSytem_Playlist_Radionomy_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_SomaFM_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_BBC_Station_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_BBC_Playlist_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Slacker_Station_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Soundcloud_Api();
-    $presets[] = new WP_SoundSytem_Playlist_Soundsgood_Api();
-    $presets[] = new WP_SoundSytem_Playlist_Deezer_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Hypem_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Twitter_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_RTBF_Scraper();
-    $presets[] = new WP_SoundSytem_Playlist_Reddit_Api();
-    $presets[] = new WP_SoundSytem_Playlist_IndieShuffle_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_LastFM_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_Spotify_Playlists_Api();
+    $presets[] = new WP_SoundSytem_Preset_Radionomy_Playlists_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_SomaFM_Stations();
+    $presets[] = new WP_SoundSytem_Preset_BBC_Stations();
+    $presets[] = new WP_SoundSytem_Preset_BBC_Playlists();
+    $presets[] = new WP_SoundSytem_Preset_Slacker_Stations();
+    $presets[] = new WP_SoundSytem_Preset_Soundcloud_Api();
+    $presets[] = new WP_SoundSytem_Preset_Soundsgood_Playlists_Api();
+    $presets[] = new WP_SoundSytem_Preset_Deezer_Playlists();
+    $presets[] = new WP_SoundSytem_Preset_Hypem_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_Twitter_Timelines();
+    $presets[] = new WP_SoundSytem_Preset_RTBF_Stations();
+    $presets[] = new WP_SoundSytem_Preset_Reddit_Api();
+    $presets[] = new WP_SoundSytem_Preset_IndieShuffle_Scraper();
     
     return $presets;
 }
