@@ -57,7 +57,7 @@ For popular services like Spotify or Radionomy, no need to go any further.
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit.
+Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle
 
 = Live Playlists =
 
@@ -164,6 +164,13 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.0.0 =
+* player.js : now uses javascript classes
+* player.js : promises & deferred objects
+* "random" button
+* "loop" button
+* new preset for indieshuffle.com
 
 = 0.9.9.6 =
 * Ajax for live playlists refresh
