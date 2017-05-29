@@ -1160,6 +1160,7 @@ class WpsstmTrack {
         if (wpsstm_current_media){
             console.log("there is an active media, stop it");
             wpsstm_current_media.pause();
+            wpsstm_current_media.currentTime = 0;
             self.update_button('ended');
 
         }
