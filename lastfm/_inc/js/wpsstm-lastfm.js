@@ -4,7 +4,7 @@ class WpsstmLastFM {
         self.icon_scrobble_el; //player scrobble icon
         self.icon_love_el;
         self.auth_notice_el;
-        self.is_scrobbler_active =   ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings);
+        self.is_scrobbler_active =   ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings
         self.is_api_logged =         parseInt(wpsstmLastFM.is_api_logged);
         self.auth_notice_el =        null;
         
@@ -18,29 +18,38 @@ class WpsstmLastFM {
         
         var self = this;
         
-        self.icon_scrobble_el =     jQuery(bottom_player_el).find('#wpsstm-player-toggle-scrobble')
-        self.icon_love_el =         jQuery(bottom_player_el).find('.wpsstm-lastfm-love-unlove-track-links');
-        self.auth_notice_el =       jQuery(bottom_block_el).find('#wpsstm-bottom-notice-lastfm-auth');
+        self.icon_scrobble_el =     $(bottom_player_el).find('#wpsstm-player-toggle-scrobble')
+        self.icon_love_el =         $(bottom_player_el).find('.wpsstm-lastfm-love-unlove-track-links');
+        self.auth_notice_el =       $(bottom_block_el).find('#wpsstm-bottom-notice-lastfm-auth');
 
         if (self.is_scrobbler_active){
-            jQuery(self.icon_scrobble_el).addClass('active');
+            $(self.icon_scrobble_el).addClass('active');
         }
 
         //click toggle scrobbling
-        jQuery(self.icon_scrobble_el).find('a').click(function(e) {
+        $(self.icon_scrobble_el).find('a').click(function(e) {
             e.preventDefault();
-            if ( !self.is_api_logged ) return;
+            
+            if ( !self.is_api_logged ){
+                self.displayAuthNotices();
+                return;
+            }
 
-            self.is_scrobbler_active = !jQuery(self.icon_scrobble_el).hasClass('active');
-            jQuery(self.icon_scrobble_el).toggleClass('active');
+            self.is_scrobbler_active = !self.is_scrobbler_active;
+            $(self.icon_scrobble_el).toggleClass('active');
 
             localStorage.setItem("wpsstm-scrobble", self.is_scrobbler_active);
 
         });
         
         //click toggle love track
-        jQuery(self.icon_love_el).find('a').click(function(e) {
+        $(self.icon_love_el).find('a').click(function(e) {
             e.preventDefault();
+            
+            if ( !self.is_api_logged ){
+                self.displayAuthNotices();
+                return;
+            }
             
             var link = $(this);
             var link_wrapper = link.closest('.wpsstm-love-unlove-track-links');
@@ -56,18 +65,17 @@ class WpsstmLastFM {
             self.love_unlove(track_obj,do_love);
         });
 
-        //LAST.FM : user is not logged
-        jQuery(self.auth_notice_el).click(function(e) {
-            if ( !wpsstm_get_current_user_id() ){
-                e.preventDefault();
-                jQuery('#wpsstm-bottom-notice-wp-auth').addClass('active');
-                return;
-            }
-            if ( !self.is_api_logged ){
-                e.preventDefault();
-                jQuery(self.auth_notice_el).addClass('active');
-            }
-        });
+    }
+    
+    displayAuthNotices(){
+        if ( !wpsstm_get_current_user_id() ){
+            $('#wpsstm-bottom-notice-wp-auth').addClass('active');
+            return;
+        }
+        if ( !self.is_api_logged ){
+            $(self.auth_notice_el).addClass('active');
+            return;
+        }
     }
         
     /*
@@ -187,16 +195,15 @@ class WpsstmLastFM {
             beforeSend: function() {
                 $(self.icon_scrobble_el).addClass('loading');
             },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                }else{
+            success: function(data){ 
+                if (data.success === true) {
                     if (do_love){
                         $(self.icon_love_el).addClass('wpsstm-is-loved');
                     }else{
                         $(self.icon_love_el).removeClass('wpsstm-is-loved');
                     }
-
+                }else{
+                   console.log(data); 
                 }
             },
             complete: function() {
