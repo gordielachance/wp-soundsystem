@@ -89,7 +89,7 @@ class WP_SoundSytem_TracksList_Table{
 
         if ( !$this->can_player ) unset($columns['trackitem_play_bt']);
         
-        if ( !current_user_can('administrator') || !wpsstm_is_backend() ) unset($columns['trackitem_actions']); //TO FIX remove this condition when feature ready
+        if ( !current_user_can('administrator') || wpsstm_is_backend() ) unset($columns['trackitem_actions']); //TO FIX remove this condition when feature ready
 
         return $columns;
     }
