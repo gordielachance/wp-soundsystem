@@ -140,16 +140,18 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //try to get cache first
 
         $this->datas = $this->datas_cache = $this->get_cache();
+        
         if ($this->datas_cache){
-            
             $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
             if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
                 $this->expire_time = $cache_expire_time;
             }
             
             $this->add($this->datas_cache['tracks']);
+            
             //we got cached tracks, but do ignore them in wizard
             if ( ( $cached_total_items = count($this->tracks) ) && $this->is_wizard ){
+                $this->datas = $this->datas_cache = null;
                 $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
