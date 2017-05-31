@@ -68,6 +68,8 @@ class WpsstmLastFM {
     }
     
     displayAuthNotices(){
+        var self = this;
+        
         if ( !wpsstm_get_current_user_id() ){
             $('#wpsstm-bottom-notice-wp-auth').addClass('active');
             return;
