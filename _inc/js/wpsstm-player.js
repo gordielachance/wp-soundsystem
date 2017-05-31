@@ -2,7 +2,6 @@ var bottom_block_el;
 var bottom_player_el;
 var wpsstm_player;
 var wpsstm_current_media;
-var wpsstm_countdown_s = wpsstmPlayer.autoredirect; //seconds for the redirection notice
 var wpsstm_track_source_requests_limit = 5; //number of following tracks we want to populate the sources for when clicking a track
 var wpsstm_player_shuffle_el; //shuffle button
 //those are the globals for autoplay and tracks navigation

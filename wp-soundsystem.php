@@ -89,7 +89,6 @@ class WP_SoundSytem {
             'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
-            'autoredirect'                      => 0, //seconds
             'autosource'                        => 'on',
             'autosource_cache'                  => 1* WEEK_IN_SECONDS
         );

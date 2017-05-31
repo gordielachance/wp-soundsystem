@@ -150,7 +150,6 @@ class WP_SoundSytem_Core_Player{
         
         //localize vars
         $localize_vars=array(
-            'autoredirect'          => (int)wpsstm()->get_options('autoredirect'),
             'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
             'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),

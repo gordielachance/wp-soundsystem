@@ -104,11 +104,7 @@ class WP_SoundSytem_Settings {
             
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
-            
-            if ( isset ($input['autoredirect']) && ctype_digit($input['autoredirect']) ){
-                $new_input['autoredirect'] = $input['autoredirect'];
-            }
-            
+
             $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
 
             /*
@@ -219,15 +215,7 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'player_settings'
         );
-        
-        add_settings_field(
-            'autoredirect', 
-            __('Auto-redirect','wpsstm'), 
-            array( $this, 'autoredirect_callback' ), 
-            'wpsstm-settings-page', 
-            'player_settings'
-        );
-        
+
         add_settings_field(
             'autosource', 
             __('Auto-source','wpsstm'), 
@@ -471,22 +459,7 @@ class WP_SoundSytem_Settings {
             __("Auto-play the first track displayed.","wpsstm")
         );
     }
-    
-    function autoredirect_callback(){
-        $option = wpsstm()->get_options('autoredirect');
-        
-        $desc = sprintf(__('%s = disabled','wpsstm'),'<code>0</code>');
-        $desc = sprintf('— <small>%s</small>',$desc);
-        
-        printf(
-            '<input type="number" name="%s[autoredirect]" value="%s"/> %s %s',
-            wpsstm()->meta_name_options,
-            $option,
-            __("seconds","wpsstm").'<br/>'.__("Well the last track has finished playing frontend, auto-redirect to keep play music.","wpsstm"),
-            $desc
-        );
-    }
-    
+
     function autosource_callback(){
         $option = wpsstm()->get_options('autosource');
 
