@@ -72,33 +72,24 @@ class WP_SoundSytem_TracksList_Table{
     
     function get_columns(){
         
-        if ( $this->show_property_column('image') ){
-            $columns['trackitem_image']     = '';
-        }
+        $columns = array(
+            'trackitem_image'   =>      '',
+            'trackitem_order'   =>      '',
+            'trackitem_play_bt' =>      '',
+            'trackitem_artist' =>       __('Artist','wpsstm'),
+            'trackitem_track' =>        __('Title','wpsstm'),
+            'trackitem_album' =>        __('Album','wpsstm'),
+            'trackitem_actions' =>      '',
+            'trackitem_sources' =>      __('Sources','wpsstm')
+        );
         
-        $columns['trackitem_order']     = '';
+        //remove properties when it is null for every track of the playlist
+        if ( !$this->show_property_column('image') ) unset($columns['trackitem_image']);
+        if ( !$this->show_property_column('album') ) unset($columns['trackitem_album']);
 
-        //play button
-        if ( $this->can_player ){
-            foreach ($this->items as $item){
-                $columns['trackitem_play_bt']     = '';
-                break;
-            }
-        }
+        if ( !$this->can_player ) unset($columns['trackitem_play_bt']);
         
-        $columns['trackitem_artist']    = __('Artist','wpsstm');
-        $columns['trackitem_track']     = __('Title','wpsstm');
-
-        
-        if ( $this->show_property_column('album') ){
-            $columns['trackitem_album']     = __('Album','wpsstm');
-        }
-
-        if ( current_user_can('administrator') && !wpsstm_is_backend() ){ //TO FIX remove this condition when feature ready
-             $columns['trackitem_actions']     = '';
-        }
-        
-        $columns['trackitem_sources']     = __('Sources','wpsstm');
+        if ( !current_user_can('administrator') || !wpsstm_is_backend() ) unset($columns['trackitem_actions']); //TO FIX remove this condition when feature ready
 
         return $columns;
     }
