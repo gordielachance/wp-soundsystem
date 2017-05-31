@@ -1,12 +1,87 @@
 <?php
-class WP_SoundSytem_Core_Sources{
+
+class WP_SoundSytem_Source {
     
-    var $sources_metakey = '_wpsstm_sources';
+    var $url; //input URL
+    var $title;
+    var $auto = false; //has this source been populated automatically ?
+    
+    var $src; //URL used in the 'source' tag (which could be not the same)
+    var $provider;
+    var $type;
+
+    static $defaults = array(
+        'url'           => null,
+        'title'         => null,
+        'auto'          => false,
+    );
+    
+    function __construct($track,$args = array()){
+        
+        //keep only values for keys contained in $defaults
+        if ($args){
+            $args = wp_parse_args((array)$args,self::$defaults);
+            foreach($args as $key=>$value){
+                if ( !array_key_exists($key,self::$defaults) ) continue;
+                $this->$key = $value;
+            }
+        }
+
+        $this->url = trim($this->url);
+        $this->populate_url();
+        
+        $this->title = trim($this->title);
+
+    }
+    
+    function populate_url(){
+
+        foreach( (array)wpsstm_player()->providers as $provider ){
+            
+            if ( !$type = $provider->get_source_type($this->url) ) continue;
+            
+            $this->provider =   $provider->slug;
+            $this->type =       $type;
+            $this->src =        $provider->format_source_url($this->url);
+                
+            break;
+            
+        }
+        
+    }
+    
+    function get_provider(){
+        foreach( (array)wpsstm_player()->providers as $provider ){
+            if ($provider->slug == $this->provider){
+                return $provider;
+            }
+        }
+    }
+    
+    //format it as an array to store it in the DB
+    function format_source_for_db(){
+        
+        if (!$this->url) return false;
+        
+        $store = array(
+            'title' => $this->title,
+            'url'   => $this->url,
+            'auto'  => $this->auto
+        );
+        $store = array_filter($store);
+        return $store;
+    }
+
+}
+
+class WP_SoundSytem_Core_Sources{
+
     var $providers = array();
     
     var $source_blank = array(
         'url'           => null,
-        'title'         => null
+        'title'         => null,
+        'auto'          => false,
     );
     
     /**
@@ -72,7 +147,7 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
-        $desc = __('Add sources to this tracks.  It could be a local audio file or a link to a music service.','wpsstm');
+        $desc = __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
         printf('<p>%s</p>',$desc);
         
         echo $this->get_sources_field_editable($post->ID,'wpsstm_sources');
@@ -83,24 +158,11 @@ class WP_SoundSytem_Core_Sources{
     function get_sources_field_editable( $post_id, $field_name ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = $track->sources;
+        $sources = $track->get_track_sources(false); //remote sources too
 
-        //find the sources that have been added by filters
-        $sources_strict = $this->get_track_sources_db($post_id,false);
+        $blank = new WP_SoundSytem_Source($track); //add blank row
+        array_unshift($sources,$blank);
 
-        //array diff can only compare strings so convert them
-        $sources_filters = array_diff(array_map('serialize',(array)$sources),array_map('serialize',(array)$sources_strict));
-
-        //suggested remote sources (cached only)
-        $sources_remote = $this->get_track_sources_remote( $track,array('cache_only'=>true) );
-        
-        $sources = array_merge((array)$sources,(array)$sources_remote);
-        $sources = wpsstm_sources()->sanitize_sources($sources);
-        
-        $sources[] = $this->source_blank; //add blank row
-
-        $placeholder = __("Enter a track source URL",'wpsstm');
-        
         $rows = array();
 
         foreach ( $sources as $key=>$source ){
@@ -112,28 +174,26 @@ class WP_SoundSytem_Core_Sources{
                 $source_classes[] = 'wpsstm-source-blank';
             }
             
-            //filters
-            if ( in_array($source,$sources_filters) ){
+            //auto
+            if ( $source->auto ){
                 $source_classes[] = 'wpsstm-source-auto';
                 $disabled = true;
-            }
-            //remote
-            if ( in_array($source,$sources_remote) ){
-                $disabled = true;
-                $source_classes[] = 'wpsstm-source-suggested';
             }
             
             $disabled_str = disabled( $disabled, true, false );
    
-            $content_url = sprintf('<small>%s</small>',$source['title']);
-            $content_url .= sprintf('<input type="text" name="%s[%s][url]"  value="%s" placeholder="%s" %s/>',$field_name,$key,$source['url'],$placeholder,$disabled_str);
+            $placeholder_title = __("Enter a title for this source",'wpsstm');
+            $input_title = sprintf('<input type="text" name="%s[%s][title]"  value="%s" placeholder="%s" %s/>',$field_name,$key,$source->title,$placeholder_title,$disabled_str);
             
+            $placeholder_url = __("Enter an URL for this source",'wpsstm');
+            $input_url = sprintf('<input type="text" name="%s[%s][url]"  value="%s" placeholder="%s" %s/>',$field_name,$key,$source->url,$placeholder_url,$disabled_str);
             
+            $content_url = sprintf('<span class="wpsstm-source-inputs">%s %s</span>',$input_title,$input_url);
+
             $icon_plus = '<i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>';
             $icon_minus = '<i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>';
             
             $content_url .= sprintf('<span class="wpsstm-source-action">%s%s</span>',$icon_plus,$icon_minus);
-            $content_url = sprintf('<p class="wpsstm-source-url">%s</p>',$content_url);
 
             $rows[] = sprintf('<div %s>%s</div>',wpsstm_get_classes_attr($source_classes),$content_url);
         }
@@ -168,41 +228,18 @@ class WP_SoundSytem_Core_Sources{
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_sources_meta_box_nonce']);
 
-        $sources = ( isset($_POST[ 'wpsstm_sources' ]) ) ? $_POST[ 'wpsstm_sources' ] : array();
-
-        $this->update_post_sources($post_id,$sources);
-    }
-    
-    function sanitize_sources($sources){
-        
-        $new_sources = array();
-
-        foreach((array)$sources as $key=>$source){
-            $new_source = wp_parse_args($source,$this->source_blank);
-            if ( !$new_source['url'] ) continue;
-            $new_sources[] = $new_source;
-        }
-        
-        $sources = array_unique($new_sources, SORT_REGULAR);
-
-        return $new_sources;
-    }
-    
-    function update_post_sources($post_id,$sources_input){
-        
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+        $sources_raw = ( isset($_POST[ 'wpsstm_sources' ]) ) ? $_POST[ 'wpsstm_sources' ] : array();
+        $sources = array();
         
-        $sources_strict = $this->get_track_sources_db($post_id,false);
-        $sources = array_merge((array)$sources_strict,(array)$sources_input);
-        $sources = $this->sanitize_sources($sources_input);
-
-        if (!$sources){
-            return delete_post_meta( $post_id, $this->sources_metakey );
-        }else{
-            return update_post_meta( $post_id, $this->sources_metakey, $sources );
+        foreach((array)$sources_raw as $source_raw){
+            $source = new WP_SoundSytem_Source($track,$source_raw);
+            $sources[] = $source;
         }
+        
+        $track->update_track_sources($sources);
     }
-    
+
     function column_sources_register($defaults) {
         global $post;
 
@@ -232,75 +269,64 @@ class WP_SoundSytem_Core_Sources{
         }
     }
     
-    function get_track_sources_db($post_id,$filters=true){
-        $sources = null;
+    function get_track_sources_list(WP_SoundSystem_Track $track,$db_only){
 
-        //stored in DB
-        $sources = get_post_meta( $post_id, wpsstm_sources()->sources_metakey, true );
-
-        if ($filters){
-            $sources = apply_filters('wpsstm_get_track_sources_db',$sources,$post_id);
-        }
-
-        $sources = $this->sanitize_sources($sources);
-
-        return $sources;
-    }
-
-    /*
-    Those source will be suggested backend; user will need to confirm them.
-    */
-
-    function get_track_sources_remote($track,$args=null){
-
-        $sources = array();
-
-        foreach( (array)wpsstm_player()->providers as $provider ){
-            if ( !$provider_sources = $provider->sources_lookup( $track,$args ) ) continue; //cannot play source
-            $sources = array_merge($sources,(array)$provider_sources);
-        }
-
-        //allow plugins to filter this
-        $sources = apply_filters('wpsstm_get_track_sources_remote',$sources,$track,$args);
-
-        //cleanup
-        $sources = $this->sanitize_sources($sources);
-
-        return $sources;
-
-    }
-    
-    function get_track_sources_list(WP_SoundSystem_Track $track,$database_only){
-        if ( !$sources = wpsstm_player()->get_playable_sources($track,$database_only) ) return;
         $lis = array();
-        foreach($sources as $key=>$source){
-
-            //get provider
-            $source_provider = $source_icon = $source_type = $source_title = null;
-            $source_provider_slug = $source['provider'];
+        
+        foreach((array)$track->sources as $key=>$source){
             
-            foreach( (array)wpsstm_player()->providers as $provider ){
-                if ($provider->slug == $source_provider_slug){
-                    $source_provider = $provider;
-                    break;
-                }
-            }
+            $provider = $source_icon = $source_type = $source_title = null;
+            
+            //get provider
+            $provider = $source->get_provider();
 
-            $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$source['title']);
-            $provider_link = sprintf('<a class="wpsstm-trackinfo-provider-link" href="%s" target="_blank">%s</a>',$source['src'],$provider->icon);
-
+            $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$source->title);
+            $provider_link = sprintf('<a class="wpsstm-trackinfo-provider-link" href="%s" target="_blank">%s</a>',$source->src,$provider->icon);
+            
+            $li_classes = array();
+            if ($key==0) $li_classes[]= 'wpsstm-active-source';
+            
+            $attr_arr = array(
+                'class' =>                      implode(' ',$li_classes),
+                'data-wpsstm-source-idx' =>     $key,
+                'data-wpsstm-source-type'   =>  $source->type,
+            );
+            
             $li_classes = null;
-            if ($key==0) $li_classes= 'class="wpsstm-active-source"';
-            $lis[] = sprintf('<li data-wpsstm-source-idx="%s" data-wpsstm-source-type="%s" %s>%s %s</li>',$key,$source['type'],$li_classes,$provider_link,$source_title);
+            $lis[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($attr_arr),$provider_link,$source_title);
+            
         }
-        if ($lis){
+        if ( !empty($lis) ){
             return sprintf('<ul class="wpsstm-player-sources-list">%s</ul>',implode("",$lis));
         }
     }
     
-    
-}
+    function sanitize_sources($sources){
+        
+        $new_sources = array();
 
+        foreach((array)$sources as $key=>$source){
+            if ( !$source->url ) continue;
+            $new_sources[] = $source;
+        }
+        
+        $new_sources = array_unique($new_sources, SORT_REGULAR);
+        
+        //TO FIX array unique based on source URL
+
+        return $new_sources;
+    }
+    
+    function format_sources_for_db($sources){
+        $new_sources = array();
+        $sources = $this->sanitize_sources($sources);
+        foreach ((array)$sources as $source){
+            $new_sources[] = $source->format_source_for_db();
+        }
+        return $new_sources;
+    }
+
+}
 
 function wpsstm_sources() {
 	return WP_SoundSytem_Core_Sources::instance();

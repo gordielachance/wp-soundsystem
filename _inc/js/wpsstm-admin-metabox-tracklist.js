@@ -189,7 +189,6 @@ function wpsstm_tracklist_order_update(){
     var wrapper = jQuery('#wpsstm-subtracks-list');
     var all_rows = wrapper.find( '#the-list tr' );
     var new_order = [];
-    var tracklist_id = 0; //TO FIX
     
     jQuery.each( all_rows, function( key, value ) {
         

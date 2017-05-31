@@ -5,92 +5,91 @@ div.wpsstm-source {
   margin: 0;
 }
 /* line 9, ../scss/wpsstm-admin-metabox-sources.scss */
-div.wpsstm-source p {
-  margin: 0;
-  padding: 0;
+div.wpsstm-source .wpsstm-source-inputs {
+  display: inline-block;
+  width: calc(100% - 3em) !important;
+  position: relative;
 }
 /* line 13, ../scss/wpsstm-admin-metabox-sources.scss */
-div.wpsstm-source p.wpsstm-source-url input {
-  width: calc(100% - 3em) !important;
-  display: inline-block;
+div.wpsstm-source .wpsstm-source-inputs input {
+  width: 49%;
 }
-/* line 20, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 18, ../scss/wpsstm-admin-metabox-sources.scss */
 div.wpsstm-source .wpsstm-source-action {
-  font-size: 1.5em;
   width: 2em;
   text-align: center;
   display: inline-block;
 }
-/* line 25, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 22, ../scss/wpsstm-admin-metabox-sources.scss */
 div.wpsstm-source .wpsstm-source-action .wpsstm-source-icon {
   width: 1em;
   display: inline-block;
   cursor: pointer;
   cursor: hand;
 }
-/* line 30, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 27, ../scss/wpsstm-admin-metabox-sources.scss */
 div.wpsstm-source .wpsstm-source-action .wpsstm-source-icon.wpsstm-source-icon-add {
   display: none;
 }
-/* line 33, ../scss/wpsstm-admin-metabox-sources.scss */
-div.wpsstm-source .wpsstm-source-action .wpsstm-source-icon.wpsstm-source-icon-delete {
-  display: inline;
-}
-/* line 40, ../scss/wpsstm-admin-metabox-sources.scss */
-div.wpsstm-source.wpsstm-source-blank .wpsstm-source-icon.wpsstm-source-icon-add, div.wpsstm-source.wpsstm-source-suggested .wpsstm-source-icon.wpsstm-source-icon-add {
-  display: inline;
-}
-/* line 43, ../scss/wpsstm-admin-metabox-sources.scss */
-div.wpsstm-source.wpsstm-source-blank .wpsstm-source-icon.wpsstm-source-icon-delete, div.wpsstm-source.wpsstm-source-suggested .wpsstm-source-icon.wpsstm-source-icon-delete {
+/* line 34, ../scss/wpsstm-admin-metabox-sources.scss */
+div.wpsstm-source.wpsstm-source-blank .wpsstm-source-icon.wpsstm-source-icon-delete {
   display: none;
 }
-/* line 50, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 37, ../scss/wpsstm-admin-metabox-sources.scss */
+div.wpsstm-source.wpsstm-source-blank .wpsstm-source-icon.wpsstm-source-icon-add {
+  display: initial;
+}
+/* line 44, ../scss/wpsstm-admin-metabox-sources.scss */
 div.wpsstm-source.wpsstm-source-auto .wpsstm-source-icon.wpsstm-source-icon-delete {
   display: none;
 }
+/* line 47, ../scss/wpsstm-admin-metabox-sources.scss */
+div.wpsstm-source.wpsstm-source-auto .wpsstm-source-icon.wpsstm-source-icon-add {
+  display: initial;
+}
 
-/* line 67, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 55, ../scss/wpsstm-admin-metabox-sources.scss */
 .postbox#wpsstm-track-sources .inside {
   margin: 0;
   padding: 0;
   font-size: 1.5em;
 }
-/* line 69, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 57, ../scss/wpsstm-admin-metabox-sources.scss */
 .postbox#wpsstm-track-sources .inside > p {
   padding: 0 1em;
   font-style: italic;
 }
-/* line 77, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 65, ../scss/wpsstm-admin-metabox-sources.scss */
 .postbox#wpsstm-track-sources .inside p.wpsstm-source {
   padding: .5em 2em;
 }
-/* line 79, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 67, ../scss/wpsstm-admin-metabox-sources.scss */
 .postbox#wpsstm-track-sources .inside p.wpsstm-source input {
   height: 3em;
 }
-/* line 83, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 71, ../scss/wpsstm-admin-metabox-sources.scss */
 .postbox#wpsstm-track-sources .inside p.wpsstm-source.wpsstm-source-blank {
   background-color: #F1F1F1;
 }
 
-/* line 94, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 82, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist td.column-trackitem_sources {
   margin: 0;
   padding: 0;
 }
-/* line 97, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 85, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist td.column-trackitem_sources .metabox-table-cell-display {
   text-align: center;
 }
-/* line 102, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 90, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank {
   border-bottom: 1px solid #DDD;
 }
-/* line 104, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 92, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank.wpsstm-source-icon-add {
   display: inline;
 }
-/* line 107, ../scss/wpsstm-admin-metabox-sources.scss */
+/* line 95, ../scss/wpsstm-admin-metabox-sources.scss */
 #wpsstm-tracklist p.wpsstm-source.wpsstm-source-blank.wpsstm-source-icon-delete {
   display: none;
 }

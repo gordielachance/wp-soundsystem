@@ -92,7 +92,10 @@
                 }
             }
             .column-trackitem_sources{
-                display:none;
+                //TO FIX31 TO UNCOMMENT display:none;
+                ul{
+                    list-style-type: none;
+                }
             }
 
             th,td{

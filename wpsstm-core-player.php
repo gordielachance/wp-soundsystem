@@ -159,53 +159,6 @@ class WP_SoundSytem_Core_Player{
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
         
     }
-    
-    function get_playable_sources($track,$database_only = true){
-        
-        $sources = $track->sources;
-
-        $provider_sources = array();
-        
-        if ($database_only){
-            if ($cached_sources = wpsstm_sources()->get_track_sources_remote( $track,array('cache_only'=>true) ) ){
-                $sources = array_merge((array)$sources,(array)$cached_sources);
-            }
-        }else{
-            if ($remote_sources = wpsstm_sources()->get_track_sources_remote($track) ){
-                $sources = array_merge((array)$sources,(array)$remote_sources);
-            } 
-        }
-
-        //check if any provider can use the source
-        foreach( (array)$sources as $source){
-
-            foreach( (array)$this->providers as $provider ){
-
-                if ( !$provider_source_type = $provider->get_source_type($source['url']) ) continue; //cannot handle source
-                
-                //if no source title set; set a default one
-
-                if ( !isset($source['title']) || (!$title = trim($source['title']) ) ){
-                    $title = sprintf(__('%s — %s','wpsstm'),$track->artist,$track->title);
-                    $title = 'null'; //TO FIX
-                }
-                
-                $provider_source = array(
-                    'type'      => $provider_source_type,
-                    'title'     => $title,
-                    'provider'  => $provider->slug,
-                    'icon'      => $provider->icon,
-                    'src'       => $provider->format_source_url($source['url']),
-                );
-
-                $provider_sources[] = $provider_source;
-                
-            }
-
-        }
-
-        return $provider_sources;
-    }
 
     function get_track_button(){
         //https://wordpress.stackexchange.com/a/162945/70449

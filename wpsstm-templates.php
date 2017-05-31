@@ -213,38 +213,6 @@ function wpsstm_get_post_mb_link_for_post($post_id){
     return $mbid;
 }
 
-/*
-Get a post tracklist.
-*/
-
-function wpsstm_get_post_tracklist($post_id=null){
-    global $post;
-    
-    if (!$post_id && $post) $post_id = $post->ID;
-    $post_type = get_post_type($post_id);
-
-    $tracklist = new WP_SoundSytem_Tracklist($post_id);
-    
-    $is_live_tracklist = ($post_type == wpsstm()->post_type_live_playlist);
-    $is_frontend_wizard = ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id);
-
-    if ($post_type == wpsstm()->post_type_track){ //single track
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $tracklist->add($track);
-        
-    }elseif ( $is_live_tracklist ){
-        $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(); //load cache only, this will be ajaxed
-        
-    }else{ //playlist or album
-        $tracklist->load_subtracks();
-    }
-    
-    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
-    return $tracklist;
-    
-}
-
 function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     global $post;
     if (!$post_id) $post_id = $post->ID;

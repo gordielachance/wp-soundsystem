@@ -479,10 +479,6 @@ class WpsstmTracklist {
             queue_track_idx = self.get_maybe_shuffle_track_idx(queue_track_idx);
             var check_track = self.get_track_obj(queue_track_idx);
 
-            console.log(current_track_idx);
-            console.log(queue_track_idx);
-            console.log(check_track);
-
             if ( check_track.can_play){
                 new_track = check_track;
                 break;
@@ -794,10 +790,16 @@ class WpsstmTrack {
         var track_el = self.get_track_el();
         $(track_el).addClass('buffering');
 
-        var deferredObject = self.preload_track();
+        var deferredObject = self.get_sources_auto();
         
         deferredObject.done(function() {
-            self.send_to_player();
+            
+            if ( self.sources.length > 0 ){
+                self.send_to_player();
+            }else{
+                tracklist_obj.play_next_track();
+            }
+            
         })
         
         deferredObject.fail(function() {
@@ -805,34 +807,30 @@ class WpsstmTrack {
         })
 
         deferredObject.always(function(data, textStatus, jqXHR) {
-            self.preload_next_tracks();
+            self.get_next_tracks_sources_auto();
         })
 
     }
     
-    preload_track(if_no_sources = true){
-        
+    get_sources_auto(){
+
         var self = this;
 
         var track_el = self.get_track_el();
         
         var deferredObject = $.Deferred();
         
-        if ( if_no_sources && self.sources.length > 0 ){
+        if ( self.sources.length > 0 ){ //we already have sources
             deferredObject.resolve();
-        }
-        
-        if (self.did_sources_request){
             
-            if ( self.sources.length > 0 ){
-                deferredObject.resolve();
-            }else{
-                deferredObject.reject();
-            }
+        } else if ( !wpsstmPlayer.autosource ) {
+            deferredObject.resolve();
             
-        }else{
+        } else if ( self.did_sources_request ) {
+            deferredObject.resolve();
+        } else{
             
-            console.log("WpsstmTrack:preload_track #" + this.track_idx);
+            console.log("WpsstmTrack:get_sources_auto #" + this.track_idx);
             
             var promise = self.get_track_sources_request();
             $(track_el).addClass('buffering');
@@ -849,7 +847,7 @@ class WpsstmTrack {
             })
             
             promise.done(function() {
-                //console.log("WpsstmTrack:preload_track success #" + self.track_idx);
+                //console.log("WpsstmTrack:get_sources_auto success #" + self.track_idx);
                 deferredObject.resolve();
             })
             
@@ -867,12 +865,12 @@ class WpsstmTrack {
     Init a sources request for this track and the X following ones (if not populated yet)
     */
     
-    preload_next_tracks() {
+    get_next_tracks_sources_auto() {
         
         var self = this;
         var tracklist = wpsstm_page_player.tracklists[self.tracklist_idx];
 
-        console.log("WpsstmTrack::preload_next_tracks()");
+        console.log("WpsstmTrack::get_next_tracks_sources_auto()");
 
         var max_items = wpsstm_track_source_requests_limit;
         var rtrack_in = self.track_idx + 1;
@@ -884,7 +882,7 @@ class WpsstmTrack {
         var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
 
         $(tracks_slice).each(function(index, track_to_preload) {
-            track_to_preload.preload_track();
+            track_to_preload.get_sources_auto();
         });
     }
 
@@ -1018,7 +1016,7 @@ class WpsstmTrack {
         //console.log("WpsstmTrack:get_track_sources_request(): #" + this.track_idx);
 
         var ajax_data = {
-            'action':           'wpsstm_player_get_provider_sources',
+            'action':           'wpsstm_player_get_track_sources_auto',
             'track':            track
         };
         
@@ -1059,6 +1057,10 @@ class WpsstmTrack {
             var new_source = new WpsstmTrackSource(li_item,self);
             self.sources.push(new_source);            
         });
+        
+        if (self.sources.length){ //we've got sources
+            self.can_play = true;
+        }
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
         
@@ -1374,6 +1376,11 @@ class WpsstmPagePlayer {
 
             }else{
                 queue_tracklist_idx = Number(queue_tracklist_idx) + 1;
+            }
+
+            if (queue_tracklist_idx == current_tracklist_idx){
+                console.log("WpsstmPagePlayer:play_next_tracklist() : Playlist loop, abord");
+                return false;
             }
 
             queue_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(queue_tracklist_idx);

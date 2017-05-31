@@ -101,7 +101,7 @@ function wpsstm_ajax_tracklist_update_order(){
         $tracklist->load_subtracks();
         $result['tracklist'] = $tracklist;
 
-        //TO FIX TO REMOVE $result['success'] = $tracklist->set_subtrack_ids($subtracks_order);
+        $result['success'] = $tracklist->set_subtrack_ids($subtracks_order);
         
     }
     
@@ -109,7 +109,7 @@ function wpsstm_ajax_tracklist_update_order(){
     wp_send_json( $result ); 
 }
 
-function wpsstm_ajax_player_get_provider_sources(){
+function wpsstm_ajax_player_get_sources_auto(){
     $result = array(
         'input'     => $_POST,
         'message'   => null,
@@ -122,16 +122,14 @@ function wpsstm_ajax_player_get_provider_sources(){
         'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
         'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
     );
+    
+    $track = new WP_SoundSystem_Track($args);
+    $track->get_track_sources(false); //populate auto-sources too
 
-    $track = $result['track'] = new WP_SoundSystem_Track($args);
+    $track = $result['track'] = $track;
     
-    //wpsstm()->debug_log("wpsstm_ajax_player_get_provider_sources()"); 
-    //wpsstm()->debug_log($track); 
-    
-    if ( $new_sources_list = wpsstm_sources()->get_track_sources_list($track,false) ){
-        $result['new_html'] = $new_sources_list;
-        $result['success'] = true;
-    }
+    $result['new_html'] = $new_sources_list;
+    $result['success'] = true;
 
     header('Content-type: application/json');
     wp_send_json( $result ); 
@@ -151,7 +149,7 @@ add_action('wp_ajax_nopriv_wpsstm_tracklist_row_action', 'wpsstm_ajax_tracklist_
 //add_action('wp_ajax_nopriv_wpsstm_tracklist_update_order', 'wpsstm_ajax_tracklist_update_order');
 
 //player
-add_action('wp_ajax_wpsstm_player_get_provider_sources', 'wpsstm_ajax_player_get_provider_sources');
-add_action('wp_ajax_nopriv_wpsstm_player_get_provider_sources', 'wpsstm_ajax_player_get_provider_sources');
+add_action('wp_ajax_wpsstm_player_get_sources_auto', 'wpsstm_ajax_player_get_sources_auto');
+add_action('wp_ajax_nopriv_wpsstm_player_get_sources_auto', 'wpsstm_ajax_player_get_sources_auto');
 
 ?>

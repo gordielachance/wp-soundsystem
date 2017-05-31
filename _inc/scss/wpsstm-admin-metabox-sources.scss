@@ -6,19 +6,16 @@ div.wpsstm-source{
     padding:.5em;
     margin:0;
     
-    p{
-        margin:0;
-        padding:0;
-        &.wpsstm-source-url{
-            input{
-                width: calc(100% - 3em)!important; //.wpsstm-source-action
-                display:inline-block;
-            }
+    .wpsstm-source-inputs{
+        display:inline-block;
+        width: calc(100% - 3em)!important; //.wpsstm-source-action
+        position:relative;
+        input{
+            width:49%;
         }
     }
 
     .wpsstm-source-action{
-        font-size:1.5em;
         width:2em;
         text-align:center;
         display:inline-block;
@@ -30,18 +27,15 @@ div.wpsstm-source{
             &.wpsstm-source-icon-add{
                 display:none;
             }
-            &.wpsstm-source-icon-delete{
-                display:inline;
-            }
         }
     }
-    &.wpsstm-source-blank,&.wpsstm-source-suggested{
+    &.wpsstm-source-blank{
         .wpsstm-source-icon{
-            &.wpsstm-source-icon-add{
-                display:inline;
-            }
             &.wpsstm-source-icon-delete{
                 display:none;
+            }
+            &.wpsstm-source-icon-add{
+                display:initial;
             }
         }
     }
@@ -50,16 +44,10 @@ div.wpsstm-source{
             &.wpsstm-source-icon-delete{
                 display:none;
             }
-        }
-    }
-    
-    &:not(.wpsstm-source-blank){
-        .wpsstm-source-action{
-            .wpsstm-source-icon{
-
+            &.wpsstm-source-icon-add{
+                display:initial;
             }
         }
-
     }
 }
 

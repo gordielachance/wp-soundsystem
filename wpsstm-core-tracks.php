@@ -9,6 +9,7 @@ class WP_SoundSytem_Core_Tracks{
     
     public $subtracks_hide = true; //default hide subtracks in track listings
     public $favorited_track_meta_key = '_wpsstm_user_favorite';
+    public $sources_metakey = '_wpsstm_sources';
 
     /**
     * @var The one true Instance

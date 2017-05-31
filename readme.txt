@@ -132,17 +132,17 @@ echo $tracklist->get_tracklist_table();
 ?>`
 
 = How can I alter the music sources for a track ? =
-Hook a custom function on the filter *wpsstm_get_track_sources_db* or *wpsstm_get_track_sources_remote*.
+Hook a custom function on the filter *wpsstm_get_track_sources_meta* or *wpsstm_get_track_sources_auto*.
 
-* use *wpsstm_get_track_sources_db* when populating sources from your database
-* use *wpsstm_get_track_sources_remote* when populating sources from a remote URl - like an API (slower and thus requested through ajax).
+* use *wpsstm_get_track_sources_meta* when populating sources from your database
+* use *wpsstm_get_track_sources_auto* when populating sources from a remote URl - like an API (slower and thus requested through ajax).
 
 `<?php
 function my_filter_get_source_db($sources,$track){
     //...your code here...
     return $sources;
 }
-add_filter('wpsstm_get_track_sources_db','my_filter_get_source_db',10,2);
+add_filter('wpsstm_get_track_sources_meta','my_filter_get_source_db',10,2);
 ?>`
 
 = Standalone tracks vs Subtracks vs Live Playlist tracks ? =

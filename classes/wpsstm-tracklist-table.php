@@ -477,7 +477,7 @@ class WP_SoundSytem_TracksList_Table{
      */
     public function single_row( $item ) {
         
-            $sources = wpsstm_player()->get_playable_sources($item,true);
+            $sources = $item->sources;
 
             $classes = array();
             if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';

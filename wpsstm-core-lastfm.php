@@ -102,12 +102,15 @@ class WP_SoundSytem_Core_LastFM{
     /*
     Checks if user can authentificate to last.fm 
     If not, clean database and return false.
+    //TO FIX run only if player is displayed
     */
 
     public function is_user_api_logged(){
+        
+        return false; //TO FIX31-05
 
         if ($this->is_user_api_logged === null) {
-            
+
             $is_user_api_logged = false;
 
             if ( $user_id = get_current_user_id() ) {
@@ -272,36 +275,39 @@ class WP_SoundSytem_Core_LastFM{
     
     /*
     Get API authentification for a user
+    TO FIX could we cache this ?
     */
 
     private function get_user_api_auth(){
         
         if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API key missing", "wpsstm" ) );
         if ( !$this->api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.FM API secret missing", "wpsstm" ) );
-        
+
         if ($this->user_auth === null){
             
             $user_auth = false;
 
             $api_metas = $this->get_lastfm_user_api_metas();
             if ( is_wp_error($api_metas) ) return $api_metas;
-
-            $auth_args = array(
-                'apiKey' => $this->api_key,
-                'apiSecret' =>  $this->api_secret,
-                'sessionKey' => ( isset($api_metas['sessionkey']) ) ? $api_metas['sessionkey'] : null,
-                'username' =>   ( isset($api_metas['username']) ) ? $api_metas['username'] : null,
-                'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
-            );
             
-            wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_user_api_auth()"); 
+            if ( $api_metas ) {
+                $auth_args = array(
+                    'apiKey' => $this->api_key,
+                    'apiSecret' =>  $this->api_secret,
+                    'sessionKey' => ( isset($api_metas['sessionkey']) ) ? $api_metas['sessionkey'] : null,
+                    'username' =>   ( isset($api_metas['username']) ) ? $api_metas['username'] : null,
+                    'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
+                );
 
-            try{
-                $user_auth = new AuthApi('setsession', $auth_args);
-            }catch(Exception $e){
-                $user_auth = $this->handle_api_exception($e);
+                wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_user_api_auth()"); 
+
+                try{
+                    $user_auth = new AuthApi('setsession', $auth_args);
+                }catch(Exception $e){
+                    $user_auth = $this->handle_api_exception($e);
+                }
             }
-            
+
             $this->user_auth = $user_auth;
             
         }
