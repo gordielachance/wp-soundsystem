@@ -372,7 +372,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         
     }elseif ( $is_live_tracklist ){
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(); //load cache only
+        $tracklist->load_remote_tracks(false); //load cache only
         
     }else{ //playlist or album
         $tracklist->load_subtracks();

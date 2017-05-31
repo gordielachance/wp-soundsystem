@@ -1029,7 +1029,7 @@ class WpsstmTrack {
         });
 
         self.sources_request.done(function(data) {
-            
+
             if ( (data.success === true) && ( data.new_html ) ){
                 $(track_el).find('.trackitem_sources').html(data.new_html); //append new sources
                 self.populate_html_sources();
@@ -1402,8 +1402,7 @@ class WpsstmPagePlayer {
         var self = this;
         var current_tracklist = self.get_tracklist_obj();
         if (current_tracklist !== false){
-            console.log("WpsstmPagePlayer:end_current_tracklist()");
-            console.log(current_tracklist);
+            console.log("WpsstmPagePlayer:end_current_tracklist() #" + current_tracklist.tracklist_idx);
             current_tracklist.abord_tracks_sources_request(); //abord current requests
             current_tracklist.end_current_track();
             self.current_tracklist_idx = null;

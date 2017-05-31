@@ -59,8 +59,12 @@ class WP_SoundSytem_Core_Tracks{
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
         
-        //ajax toggle love tracklist
+        //ajax : toggle love tracklist
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
+        
+        //ajax : get tracks source auto
+        add_action('wp_ajax_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
+        add_action('wp_ajax_nopriv_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
         
     }
     
@@ -465,7 +469,33 @@ class WP_SoundSytem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
+    
+    function ajax_get_track_sources_auto(){
+        $result = array(
+            'input'     => $_POST,
+            'message'   => null,
+            'new_html'  => null,
+            'success'   => false
+        );
 
+        $args = $result['args'] = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+
+        $track = new WP_SoundSystem_Track($args);
+        $track->sources = $track->get_track_sources(false); //not only DB sources
+
+        $track = $result['track'] = $track;
+
+        $result['new_html'] = wpsstm_sources()->get_track_sources_list($track);
+        $result['success'] = true;
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+
+    }
     
 }
 

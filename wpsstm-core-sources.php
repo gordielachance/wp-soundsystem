@@ -158,14 +158,14 @@ class WP_SoundSytem_Core_Sources{
     function get_sources_field_editable( $post_id, $field_name ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = $track->get_track_sources(false); //remote sources too
+        $track->sources = $track->get_track_sources(false); //not only DB sources
 
         $blank = new WP_SoundSytem_Source($track); //add blank row
         array_unshift($sources,$blank);
 
         $rows = array();
 
-        foreach ( $sources as $key=>$source ){
+        foreach ( (array)$track->sources as $key=>$source ){
             
             $disabled = false;
 
@@ -269,7 +269,7 @@ class WP_SoundSytem_Core_Sources{
         }
     }
     
-    function get_track_sources_list(WP_SoundSystem_Track $track,$db_only){
+    function get_track_sources_list(WP_SoundSystem_Track $track){
 
         $lis = array();
         
@@ -303,6 +303,8 @@ class WP_SoundSytem_Core_Sources{
     
     function sanitize_sources($sources){
         
+        if ( empty($sources) ) return;
+        
         $new_sources = array();
 
         foreach((array)$sources as $key=>$source){
@@ -311,7 +313,7 @@ class WP_SoundSytem_Core_Sources{
         }
         
         $new_sources = array_unique($new_sources, SORT_REGULAR);
-        
+
         //TO FIX array unique based on source URL
 
         return $new_sources;

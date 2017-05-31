@@ -38,7 +38,7 @@ class WP_SoundSystem_Track{
             $this->$param = $args[$param];
         }
         
-        $this->sources = $this->get_track_sources(true);
+        $this->sources = $this->get_track_sources(true); //DB only
     }
     
     function get_default(){
@@ -354,13 +354,11 @@ class WP_SoundSystem_Track{
         $sources_arr = get_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey, true );
 
         foreach((array)$sources_arr as $source_raw){
-            $url = ( isset($source_raw['url']) ) ? $source_raw['url'] : null;
-            $title = ( isset($source_raw['title']) ) ? $source_raw['title'] : null;
             $sources[] = new WP_SoundSytem_Source( $this,$source_raw );
         }
 
         $sources = wpsstm_sources()->sanitize_sources($sources);
-        
+
         return $sources;
     }
 
