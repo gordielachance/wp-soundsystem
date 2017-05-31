@@ -107,9 +107,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             parent::__construct($post_id);
             $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
             
-            if ( $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true) ){
-                $this->options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
-            }
+            $this->options = $this->get_options();
 
         }
 
@@ -120,6 +118,19 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $this->transient_name_cache = 'wpsstm_ltracks_'.$this->id; //172 characters or less
         }
 
+    }
+    
+    function get_options($keys=null){
+        $options = array();
+        if ( $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true) ){
+            $options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
+        }
+        
+        if ($keys){
+            return wpsstm_get_array_value($keys, $options);
+        }else{
+            return $options;
+        }
     }
 
     function load_remote_tracks($remote_request = false){
