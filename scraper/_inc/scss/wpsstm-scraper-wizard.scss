@@ -5,6 +5,12 @@
         width:100%;
     }
     
+    .wpsstm-tracklist{
+        .column-trackitem_sources {
+            display:initial;
+        }
+    }
+    
     &.wizard-wrapper-frontend{
         text-align:center;
         h2{
@@ -139,6 +145,7 @@
             
         }
     }
+
 }
 
 //metabox
