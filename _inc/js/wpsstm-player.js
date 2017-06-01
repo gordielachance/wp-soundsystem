@@ -1139,14 +1139,27 @@ class WpsstmTrack {
         if (new_source_idx > -1){
             self.skip_bad_source(new_source_idx);
         }else{
-            console.log("WpsstmTrack:skip_bad_source() - No valid sources found - go to next track if possible");
-            var track_el = self.get_track_el();
-            $(track_el).addClass('error');
-            self.can_play = false;
+            if (!self.did_sources_request){
+                console.log("WpsstmTrack:skip_bad_source() - No valid sources found but no sources requested yet - unset sources and try again");
+                console.log(self);
+                //remove sources
+                self.sources = [];
+                
+                //try again
+                self.play_or_skip();
+                return;
+                
+            }else{
+                console.log("WpsstmTrack:skip_bad_source() - No valid sources found - go to next track if possible");
+                var track_el = self.get_track_el();
+                $(track_el).addClass('error');
+                self.can_play = false;
 
-            //No more sources - Play next song if any
-            var tracklist = wpsstm_page_player.get_tracklist_obj(this.tracklist_idx);
-            tracklist.play_next_track();
+                //No more sources - Play next song if any
+                var tracklist = wpsstm_page_player.get_tracklist_obj(this.tracklist_idx);
+                tracklist.play_next_track();
+            }
+
         }
 
     }
