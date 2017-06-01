@@ -83,8 +83,7 @@ $(document).ready(function(){
 
     });
 
-    //source item
-    //TO FIX this should be under WpsstmTrackSource
+    //bottom player : click on source item
     $( ".wpsstm-player-sources-list li .wpsstm-source-title" ).live( "click", function(e) {
 
         e.preventDefault();
@@ -190,7 +189,7 @@ class WpsstmTracklist {
     populate_tracklist(tracklist_el){
         
         var self = this;
-        
+
         console.log("WpsstmTracklist:populate_tracklist() #" + self.tracklist_idx);
 
         $(tracklist_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
@@ -228,14 +227,22 @@ class WpsstmTracklist {
             self.get_tracklist_request();
             return;
         }
+        
+        self.init_tracklist_dom();
+
+    }
+    
+    init_tracklist_dom(){
+        var self = this;
+        var tracklist_el = self.get_tracklist_el();
 
         /*
         Tracklist actions
         */
         
         //refresh
-        var refresh_link = $( tracklist_el ).find("a.wpsstm-refresh-playlist" );
-        
+        var refresh_link = $(tracklist_el).find("a.wpsstm-refresh-playlist");
+
         $(refresh_link).click(function(e) {
             e.preventDefault();
             //unset request status
@@ -247,14 +254,14 @@ class WpsstmTracklist {
         });
         
         //share
-        $( tracklist_el ).find('a.wpsstm-tracklist-action-share').click(function(e) {
+        $(tracklist_el).find('a.wpsstm-tracklist-action-share').click(function(e) {
           e.preventDefault();
           var text = $(this).attr('href');
           wpsstm_clipboard_box(text);
         });
 
         //toggle love/unlove
-        $( tracklist_el ).find('.wpsstm-love-unlove-playlist-links a').click(function(e) {
+        $(tracklist_el).find('.wpsstm-love-unlove-playlist-links a').click(function(e) {
             e.preventDefault();
 
             var link = $(this);
@@ -298,7 +305,6 @@ class WpsstmTracklist {
                 }
             })
         });
-
     }
 
     get_tracklist_request(){
@@ -346,7 +352,7 @@ class WpsstmTracklist {
             }else{
                 var new_tracklist_el = $(data.new_html);
                 $(tracklist_el).replaceWith(new_tracklist_el);
-                self.populate_tracklist(new_tracklist_el);
+                self.populate_tracklist( new_tracklist_el );
                 deferredObject.resolve();
             }
 
