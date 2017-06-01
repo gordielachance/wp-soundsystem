@@ -14,11 +14,7 @@
     }
     
     .wpsstm-tracklist-time{
-        
-        .wpsstm-live-tracklist-expiry-countdown{
-             //display:none;
-        }
-        
+
         .wpsstm-refresh-playlist{
             i.fa-exclamation-triangle{ //error
                 display:none;
@@ -28,6 +24,12 @@
 
     &:not([data-wpsstm-expire-sec="0"]), &.loading{
         .wpsstm-tracklist-time .wpsstm-refresh-playlist{
+            display:none;
+        }
+    }
+    
+    &[data-wpsstm-expire-sec="0"]{
+        .wpsstm-tracklist-refresh-time{
             display:none;
         }
     }

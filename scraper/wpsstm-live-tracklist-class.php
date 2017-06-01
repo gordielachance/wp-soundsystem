@@ -779,7 +779,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     function get_refresh_link(){
-        $refresh_icon = '<i class="fa fa-refresh" aria-hidden="true"></i>';
+        $refresh_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
         $error_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         $refresh_text = __('Refresh Playlist','wpsstm');
         return sprintf('<a class="wpsstm-refresh-playlist" href="#">%s %s %s</a>',$refresh_icon,$error_icon,$refresh_text);
