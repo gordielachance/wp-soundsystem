@@ -215,7 +215,7 @@ class WP_SoundSytem_Tracklist{
     function get_tracklist_table(){
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
-        $tracklist_table = new WP_SoundSytem_TracksList_Table($this);
+        $tracklist_table = new WP_SoundSytem_Tracklist_Table($this);
 
         ob_start();
         $tracklist_table->prepare_items();

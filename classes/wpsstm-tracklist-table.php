@@ -1,11 +1,10 @@
 <?php
 
-
 /**
  * Based on class WP_List_Table
  */
 
-class WP_SoundSytem_TracksList_Table{
+class WP_SoundSytem_Tracklist_Table{
     var $tracklist;
     var $curr_track_idx = null;
     
@@ -45,6 +44,14 @@ class WP_SoundSytem_TracksList_Table{
             $this->items = array_slice((array)$this->items,(($current_page-1)*$per_page),$per_page);
         }
         
+        /*
+        populate track sources
+        */
+        
+        foreach($this->items as $item){
+            $item->sources = $item->get_track_sources(true); //DB only
+        }
+
         $this->curr_track_idx = $per_page * ( $current_page - 1 );
         
 

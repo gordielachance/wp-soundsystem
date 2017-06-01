@@ -23,7 +23,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
-                $this->sources = wpsstm_get_post_sources($track_id);
+                $this->sources = wpsstm_get_post_sources($track_id); //regular sources only (set by user, from database) - when displaying a tracklist, we'll populate extra sources (if any) within WP_SoundSytem_Tracklist_Table::prepare_items
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -337,9 +337,9 @@ class WP_SoundSystem_Track{
     
     //get an array of raw track sources from the DB
     function get_track_sources($db_only = true){
-        
+
         if (!$this->artist || !$this->title) return;
-        
+
         $sources = $this->sources;
 
         if ($db_only){
