@@ -184,6 +184,40 @@ a.wpsstm-play-track{
                     }
                     
                 }
+                
+                &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                    .wpsstm-player-sources-list{
+                        padding-left: 3em;
+                        &:before{
+                            position:absolute;
+                            font-family: FontAwesome;
+                            content: "\f077"; //chevron up
+                            left: 0;
+                            display: block;
+                            width: 3em;
+                            text-align: center;
+                            bottom: 0;
+                        }
+                    }
+                    .trackitem_sources:hover{
+                        ul.wpsstm-player-sources-list{
+                            &:before{
+                                content: "";
+                            }
+                            background:rgba(34, 34, 34, 0.95);
+                            @include opacity(1);
+                            position:absolute;
+                            bottom:-2em;
+                            padding: 1em 2em;
+                            padding-bottom: 0;
+                            li{
+                                display:inline-block;
+                                padding: .5em 0;
+                            }
+                        }
+                    }
+                }
+                
             }
 
             .column-trackitem_sources{
@@ -193,7 +227,7 @@ a.wpsstm-play-track{
                 width: 20%;
                 position:relative;
                 ul.wpsstm-player-sources-list{
-                    width:100%;
+                    position:relative;
                     display:block;
                     font-size:.85em;
                     padding: 0;
@@ -201,12 +235,10 @@ a.wpsstm-play-track{
                     list-style-type: none;
                     @include opacity(.3);
                     padding: 0 2em;
-                    min-width: 400px;
                     
                     li{
-                        width:100%;
                         display:none;
-                        @include opacity(.8);
+                        @include opacity(.75);
                         position:relative;
                         .wpsstm-source-title{
                             cursor: pointer;
@@ -214,7 +246,7 @@ a.wpsstm-play-track{
                             display:inline;
                         }
                         &:hover{
-                           @include opacity(1); 
+                            @include opacity(.9);
                         }
 
                         &.wpsstm-active-source{
@@ -239,20 +271,9 @@ a.wpsstm-play-track{
                             text-overflow: ellipsis;
                         }
 
-                    }       
+                    }
                     &:hover{
                         @include opacity(1);
-                    }
-                    &.expanded{
-                        background:rgba(34, 34, 34, 0.95);
-                        @include opacity(1);
-                        position:absolute;
-                        bottom:0;
-                        padding: 1em 2em;
-                        padding-bottom: 0;
-                        li{
-                            display:inline-block;
-                        }
                     }
                 }
 

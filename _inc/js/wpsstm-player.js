@@ -1205,8 +1205,6 @@ class WpsstmTrackSource {
         var sources_list = player_source_el.closest('ul');
         var sources_list_wrapper = sources_list.closest('td.trackitem_sources');
 
-        sources_list.closest('ul').append(player_source_el); //move it at the bottom
-
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
 
             var lis_el = player_source_el.closest('ul').find('li');
@@ -1216,7 +1214,6 @@ class WpsstmTrackSource {
             track_obj.switch_track_source(self.source_idx);
         }
 
-        ul_el.toggleClass('expanded');
     }
 
 }
