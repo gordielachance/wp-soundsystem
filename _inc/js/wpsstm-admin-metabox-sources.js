@@ -32,7 +32,7 @@ jQuery(document).ready(function($){
             empty_row.find('input:nth-of-type(2)').focus();
         }else{
             var new_row = row_blank.clone();
-            new_row.removeClass('wpsstm-source-blank ');
+            new_row.removeClass('wpsstm-source-new ');
             new_row.insertAfter( row_blank );
             var row_blank_input = row_blank.find('input');
             row_blank.removeClass('wpsstm-source-auto');
@@ -46,7 +46,7 @@ jQuery(document).ready(function($){
     $('.wpsstm-source-icon-delete').live("click", function(event){
         var row = $(this).closest('.wpsstm-source');
         
-        if ( row.hasClass('wpsstm-source-blank') ){
+        if ( row.hasClass('wpsstm-source-new') ){
             row.find('input').val('');
         }else{
             row.remove();

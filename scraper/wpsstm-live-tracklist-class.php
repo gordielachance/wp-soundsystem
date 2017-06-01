@@ -551,7 +551,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $sources = array();
             if ( $source_urls = $this->get_track_source_urls($single_track_node) ){
                 foreach ((array)$source_urls as $source_url){
-                    $sources[] = array('url'=>$source_url);
+                    $sources[] = array('url'=>$source_url,'origin'=>'scraper');
                 }
             }
 

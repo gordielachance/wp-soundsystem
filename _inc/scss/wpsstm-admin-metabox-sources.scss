@@ -29,7 +29,7 @@ div.wpsstm-source{
             }
         }
     }
-    &.wpsstm-source-blank{
+    &.wpsstm-source-new{
         .wpsstm-source-icon{
             &.wpsstm-source-icon-delete{
                 display:none;
@@ -68,7 +68,7 @@ div.wpsstm-source{
                 height:3em;
             }
             
-            &.wpsstm-source-blank{
+            &.wpsstm-source-new{
                 background-color:#F1F1F1;
 
             }
@@ -87,7 +87,7 @@ div.wpsstm-source{
         }
     }
     p.wpsstm-source{
-        &.wpsstm-source-blank{
+        &.wpsstm-source-new{
             border-bottom:1px solid #DDD;
             &.wpsstm-source-icon-add{
                 display:inline;

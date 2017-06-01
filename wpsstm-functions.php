@@ -24,6 +24,33 @@ function wpsstm_get_array_value($keys = null, $array){
 }
 
 /*
+Filter an array/object on one of its key/property value
+Eg. filter sources array by url : if several values have the same url, keep only the first value met.
+https://stackoverflow.com/a/6057401/782013
+*/
+
+function wpsstm_array_unique_by_subkey($array,$subkey){
+    
+    $temp = array();
+    
+    $unique = array_filter($array, function ($v) use (&$temp,$subkey) {
+        
+        if ( is_object($v) ) $v = (array)$v;
+        
+        if ( !array_key_exists($subkey,$v) ) return false;
+
+        if ( in_array($v[$subkey], $temp) ) {
+            return false;
+        } else {
+            array_push($temp, $v[$subkey]);
+            return true;
+        }
+    });
+    
+    return $unique;
+}
+
+/*
 Get the IDs of every tracks appearing in a tracklist (playlist or album)
 */
 
@@ -279,14 +306,14 @@ function wpsstm_get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$ar
 
     $args = wp_parse_args((array)$args,$args_default);
 
-    $sources = $sources_arr = $cache = $saved = null;
+    $sources = $cache = $saved = null;
     $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
-    $cache = $sources_arr = get_transient( $transient_name );
+    $cache = $sources = get_transient( $transient_name );
     $do_request = ( !$args['cache_only'] && ( false === $cache ) );
 
     if ( $do_request ) {
 
-        $sources_remote = array();
+        $sources = array();
 
         $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
         $api_args = array(
@@ -310,18 +337,13 @@ function wpsstm_get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$ar
             $url = wpsstm_get_array_value('permalink',$item);
             $title = wpsstm_get_array_value('initTitle',$item);
             
-            $source = new WP_SoundSytem_Source( $track,array('url'=>$url,'title'=>$title,'auto'=>true) );
-            $sources_remote[] = $source;
+            $source = array('url'=>$url,'title'=>$title,'origin'=>'auto');
+            $sources[] = $source;
         }
 
-        $sources_arr = wpsstm_sources()->format_sources_for_db($sources_remote);
-        $saved = set_transient($transient_name,$sources_arr, wpsstm()->get_options('autosource_cache') );
+        $saved = set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
 
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources_arr))),'wpsstm_get_soundsgood_sources() request'); 
-    }
-
-    foreach ( (array)$sources_arr as $source_raw ){
-        $sources[] = new WP_SoundSytem_Source( $track,$source_raw );
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources))),'wpsstm_get_soundsgood_sources() request'); 
     }
 
     return $sources;
@@ -372,7 +394,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         
     }elseif ( $is_live_tracklist ){
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(false); //load cache only
+        $tracklist->load_remote_tracks(false);
         
     }else{ //playlist or album
         $tracklist->load_subtracks();

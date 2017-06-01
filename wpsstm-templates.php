@@ -45,6 +45,13 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mb_id_meta_name, true );
 }
 
+function wpsstm_get_post_sources($post_id = null){
+
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    return get_post_meta( $post_id, wpsstm_tracks()->sources_metakey, true );
+}
+
 function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     if ( wpsstm()->get_options('musicbrainz_enabled') != 'on' ) return false;

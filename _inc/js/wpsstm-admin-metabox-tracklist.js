@@ -118,9 +118,12 @@ function wpsstm_tracklist_row_action(row_action_link){
     var tracklist_id = uri_args.post;
     var track_action = uri_args.subtrack_action;
     
-    var track_source_urls = [];
-    row.find('.wpsstm-source input').each(function() {
-        track_source_urls.push( jQuery(this).val() );
+    var track_sources = [];
+    row.find('.wpsstm-sources .wpsstm-source:not(.wpsstm-source-auto) .wpsstm-source-inputs').each(function() {
+        var source_title =  $(this).find('input').eq(0).val();
+        var source_url =    $(this).find('input').eq(1).val();
+        var source = {title:source_title,url:source_url}
+        track_sources.push(source);
     });
     
     var track = {
@@ -129,7 +132,7 @@ function wpsstm_tracklist_row_action(row_action_link){
         'title':            row.find('.trackitem_track input').val(),
         'album':            row.find('.trackitem_album input').val(),
         'mbid':             row.find('.trackitem_mbid input').val(),
-        'source_urls':      track_source_urls,
+        'sources':          track_sources,
         'tracklist_id':     tracklist_id,
     };
 
