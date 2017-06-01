@@ -44,7 +44,7 @@ class WP_SoundSytem_Source {
             
             $this->provider =       $provider;
             $this->type =           $type;
-            $this->src =            $provider->format_source_url($this->url);
+            $this->src =            $provider->format_source_src($this->url);
                 
             break;
             

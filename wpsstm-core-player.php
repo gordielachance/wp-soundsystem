@@ -204,7 +204,7 @@ abstract class WP_SoundSytem_Player_Provider{
         return $title;
     }
     
-    function format_source_url($url){
+    function format_source_src($url){
         return $url;
     }
 
@@ -284,9 +284,19 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         return 'video/soundcloud';
     }
 
-    function format_source_url($url){
-        $url = sprintf('https://w.soundcloud.com/player/?url=%s',$url);
-        $url = add_query_arg(array('auto_play'=>false),$url);
+    function format_source_src($url){
+        
+        //TO FIX extract url parts to format the URL correctly
+        
+        //eg. https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/282715465&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true
+        
+        $url = 'https://w.soundcloud.com/player/?url=%s';
+        
+        $url = add_query_arg(array(
+            'url'       =>$url,
+            'auto_play' =>false
+        ),$url);
+        
         return $url;
     }
     
