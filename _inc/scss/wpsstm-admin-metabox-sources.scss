@@ -6,12 +6,19 @@ div.wpsstm-source{
     padding:.5em;
     margin:0;
     
-    .wpsstm-source-inputs{
+    .wpsstm-source-icon{
+        width:2em;
+        text-align:center;
         display:inline-block;
-        width: calc(100% - 3em)!important; //.wpsstm-source-action
+    }
+    
+    .wpsstm-source-fields{
+        display:inline-block;
+        width: calc(100% - 6em)!important; //.wpsstm-source-icon + .wpsstm-source-action
         position:relative;
-        input{
-            width:49%;
+
+        .wpsstm-source-url{
+            width:100%;
         }
     }
 
@@ -39,7 +46,7 @@ div.wpsstm-source{
             }
         }
     }
-    &.wpsstm-source-auto{
+    &[data-wpsstm-source-origin="auto"]{
         .wpsstm-source-icon{
             &.wpsstm-source-icon-delete{
                 display:none;
@@ -78,7 +85,11 @@ div.wpsstm-source{
     }
 }
 
-#wpsstm-tracklist{
+.postbox#wpsstm-track-sources{ //sources metabox
+
+}
+
+#wpsstm-tracklist{ //tracklist metabox
     td.column-trackitem_sources{
         margin:0;
         padding:0;

@@ -237,7 +237,7 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   display: none !important;
 }
 /* line 229, ../scss/wpsstm-player.scss */
-#wpsstm-bottom #wpsstm-bottom-player #wpsstm-player-trackinfo .column-trackitem_sources ul.wpsstm-player-sources-list li a.wpsstm-trackinfo-provider-link {
+#wpsstm-bottom #wpsstm-bottom-player #wpsstm-player-trackinfo .column-trackitem_sources ul.wpsstm-player-sources-list li a.wpsstm-source-provider-link {
   font-size: 2em;
   position: absolute;
 }

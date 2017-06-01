@@ -108,24 +108,24 @@ jQuery(function($){
 })
 
 function wpsstm_tracklist_row_action(row_action_link){
-    var link = row_action_link;
-    var row = jQuery(link).parents('tr');
-            
-    //get URI args
-    var uri = new URI( jQuery(link).attr('href') );
-    var uri_args = uri.search(true);
-    var track_id = uri_args.subtrack_id;
-    var tracklist_id = uri_args.post;
-    var track_action = uri_args.subtrack_action;
-    
+    var link = jQuery(row_action_link);
+    var row = link.parents('tr');
+
+    var track_id = row.attr('data-wpsstm-track-id');
+    var tracklist_id = row.closest('[data-wpsstm-tracklist-id]').attr('data-wpsstm-tracklist-id');
+    var track_action = link.attr('data-wpsstm-subtrack-action');
+
     var track_sources = [];
-    row.find('.wpsstm-sources .wpsstm-source:not(.wpsstm-source-auto) .wpsstm-source-inputs').each(function() {
-        var source_title =  $(this).find('input').eq(0).val();
-        var source_url =    $(this).find('input').eq(1).val();
-        var source = {title:source_title,url:source_url}
+    row.find('.wpsstm-sources input.wpsstm-source-url:not(:disabled)').each(function() {
+        var source_url = $(this).val();
+        var source_title = $(this).siblings('.wpsstm-source-title').val();
+        if (!source_url) return true; //continue
+        var source = {title:source_title,url:source_url};
         track_sources.push(source);
     });
     
+    if ( track_sources.length == 0 ) track_sources = null; // we need this or arg will not be received by PHP
+
     var track = {
         'post_id':          track_id, 
         'artist':           row.find('.trackitem_artist input').val(),
@@ -143,6 +143,8 @@ function wpsstm_tracklist_row_action(row_action_link){
         'track_order':      row.find('.trackitem_order input').val(),
         
     };
+    
+    console.log(ajax_data);
 
     jQuery.ajax({
 

@@ -32,10 +32,19 @@ class WP_SoundSystem_Track{
         $args_default = $this->get_default();
         $args = wp_parse_args($args,$args_default);
 
-        //only for keys that exists in $args_default
-        foreach ((array)$args_default as $param=>$dummy){
-            if ( !$args[$param] ) continue; //empty value
+        
+        /*
+        foreach ($args as $key=>$arg){
+            if ( !array_key_exists($key,$args_default) ) continue;
             $this->$param = $args[$param];
+        }
+        */
+        
+        //set properties from args input
+        foreach ($args as $key=>$value){
+            if ( !array_key_exists($key,$args_default) ) continue;
+            if ( !isset($args[$key]) ) continue; //value has not been set
+            $this->$key = $args[$key];
         }
 
     }

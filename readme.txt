@@ -98,7 +98,6 @@ This would be very appreciated — Thanks !
 = Dependencies =
 
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
-* [URI.js](https://github.com/medialize/URI.js) - Javascript URL mutation library
 * [PHP Last.FM API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 
 = Contributors =

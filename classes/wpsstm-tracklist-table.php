@@ -147,7 +147,7 @@ class WP_SoundSytem_TracksList_Table{
         
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
-            'data-tracklist-id' =>          $this->tracklist->post_id,
+            'data-wpsstm-tracklist-id' =>          $this->tracklist->post_id,
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );

@@ -195,7 +195,7 @@ class WpsstmTracklist {
 
         $(tracklist_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
 
-        self.tracklist_id = Number( $(tracklist_el).attr('data-tracklist-id') );
+        self.tracklist_id = Number( $(tracklist_el).attr('data-wpsstm-tracklist-id') );
         var expire_sec_attr =  $(tracklist_el).attr('data-wpsstm-expire-sec');
 
         if (typeof expire_sec_attr !== typeof undefined && expire_sec_attr !== false) { // For some browsers, `attr` is undefined; for others, `attr` is false.  Check for both.
@@ -260,7 +260,7 @@ class WpsstmTracklist {
             var link = $(this);
             var link_wrapper = link.closest('.wpsstm-love-unlove-playlist-links');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist-table');
-            var tracklist_id = tracklist_wrapper.attr('data-tracklist-id');
+            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
             if (!tracklist_id) return;

@@ -106,8 +106,6 @@ class WP_SoundSytem_Core_LastFM{
     */
 
     public function is_user_api_logged(){
-        
-        return false; //TO FIX31-05
 
         if ($this->is_user_api_logged === null) {
 
