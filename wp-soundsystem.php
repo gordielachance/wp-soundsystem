@@ -117,9 +117,8 @@ class WP_SoundSytem {
             require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
         }
         
-        if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
-        }
+        
+        require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';

@@ -35,6 +35,8 @@ class WP_SoundSytem_Core_Live_Playlists{
 
     function setup_actions(){
         
+        if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
+        
         add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
