@@ -314,7 +314,6 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         }
     }
 
-    
     function get_sc_track_id($url){
 
         /*
@@ -322,7 +321,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         
         https://api.soundcloud.com/tracks/9017297
         */
-        
+
         $pattern = '~https?://api.soundcloud.com/tracks/([^/]+)~';
         preg_match($pattern, $url, $url_matches);
 
@@ -374,6 +373,8 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         $api_url = 'https://api.soundcloud.com/resolve.json';
         $api_url = add_query_arg($api_args,$api_url);
 
+        //TO FIX this slows down the page rendering.  Could we avoid it ?
+        
         $response = wp_remote_get( $api_url );
         $json = wp_remote_retrieve_body( $response );
         if ( is_wp_error($json) ) return;
@@ -383,7 +384,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
 
     function format_source_src($url){
         if ( !$track_id = $this->get_sc_track_id($url) ) return;
-        
+
         if ( $this->client_id ){ //stream url
             return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$this->client_id);
         }else{ //widget url
