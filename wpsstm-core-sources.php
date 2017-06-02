@@ -1,66 +1,5 @@
 <?php
 
-
-
-class WP_SoundSytem_Source {
-    
-    var $url; //input URL
-    var $title;
-    var $origin = null; //origin of the source (auto, scraper,user...)
-    
-    var $src; //URL used in the 'source' tag (which could be not the same)
-    var $provider;
-    var $type;
-
-    static $defaults = array(
-        'url'           => null,
-        'title'         => null,
-        'origin'        => null, 
-    );
-    
-    function __construct($track,$args = null){
-
-        //set properties from args input
-
-        $args = wp_parse_args((array)$args,self::$defaults);
-        foreach($args as $key=>$value){
-            if ( !array_key_exists($key,self::$defaults) ) continue;
-            if ( !isset($args[$key]) ) continue; //value has not been set
-            $this->$key = $value;
-        }
-
-        $this->url = trim($this->url);
-        $this->populate_url();
-        
-        $this->title = trim($this->title);
-
-    }
-    
-    function populate_url(){
-
-        foreach( (array)wpsstm_player()->providers as $provider ){
-            
-            if ( !$type = $provider->get_source_type($this->url) ) continue;
-            
-            $this->provider =       $provider;
-            $this->type =           $type;
-            $this->src =            $provider->format_source_src($this->url);
-                
-            break;
-            
-        }
-
-    }
-
-    function get_provider_icon_link(){
-        if ( !$this->provider ) return;
-        
-        $title = ($this->title) ? $this->title : null;
-        return sprintf('<a class="wpsstm-source-provider-link" href="%s" target="_blank" title="%s">%s</a>',$this->url,$title,$this->provider->icon);
-    }
-
-}
-
 class WP_SoundSytem_Core_Sources{
 
     var $providers = array();
@@ -332,3 +271,62 @@ function wpsstm_sources() {
 }
 
 wpsstm_sources();
+
+class WP_SoundSytem_Source {
+    
+    var $url; //input URL
+    var $title;
+    var $origin = null; //origin of the source (auto, scraper,user...)
+    
+    var $src; //URL used in the 'source' tag (which could be not the same)
+    var $provider;
+    var $type;
+
+    static $defaults = array(
+        'url'           => null,
+        'title'         => null,
+        'origin'        => null, 
+    );
+    
+    function __construct($track,$args = null){
+
+        //set properties from args input
+
+        $args = wp_parse_args((array)$args,self::$defaults);
+        foreach($args as $key=>$value){
+            if ( !array_key_exists($key,self::$defaults) ) continue;
+            if ( !isset($args[$key]) ) continue; //value has not been set
+            $this->$key = $value;
+        }
+
+        $this->url = trim($this->url);
+        $this->populate_url();
+        
+        $this->title = trim($this->title);
+
+    }
+    
+    function populate_url(){
+
+        foreach( (array)wpsstm_player()->providers as $provider ){
+            
+            if ( !$type = $provider->get_source_type($this->url) ) continue;
+            
+            $this->provider =       $provider;
+            $this->type =           $type;
+            $this->src =            $provider->format_source_src($this->url);
+                
+            break;
+            
+        }
+
+    }
+
+    function get_provider_icon_link(){
+        if ( !$this->provider ) return;
+        
+        $title = ($this->title) ? $this->title : null;
+        return sprintf('<a class="wpsstm-source-provider-link" href="%s" target="_blank" title="%s">%s</a>',$this->url,$title,$this->provider->icon);
+    }
+
+}
