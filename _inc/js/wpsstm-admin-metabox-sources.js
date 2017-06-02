@@ -2,7 +2,7 @@ jQuery(document).ready(function($){
     
     $('.wpsstm-sources').shortenTable(1);
     
-    $('.wpsstm-source-icon-add').live("click", function(event){
+    $('.wpsstm-source-icon-add').on("click", function(event){
         event.preventDefault();
         
         var row = $(this).closest('.wpsstm-source');
@@ -42,7 +42,7 @@ jQuery(document).ready(function($){
 
     });
     
-    $('.wpsstm-source-icon-delete').live("click", function(event){
+    $('.wpsstm-source-icon-delete').on("click", function(event){
         var row = $(this).closest('.wpsstm-source');
         
         if ( row.hasClass('wpsstm-source-new') ){

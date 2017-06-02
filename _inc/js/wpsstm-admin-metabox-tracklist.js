@@ -6,23 +6,23 @@ jQuery(function($){
         
         /* Row actions */
         //edit
-        wrapper.find('.row-actions .edit a').live("click", function(event){
+        wrapper.find('.row-actions .edit a').on("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
             row.addClass('metabox-table-row-edit');
         });
         //save
-        wrapper.find('.row-actions .save a').live("click", function(event){
+        wrapper.find('.row-actions .save a').on("click", function(event){
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //remove
-        wrapper.find('.row-actions .remove a').live("click", function(event){
+        wrapper.find('.row-actions .remove a').on("click", function(event){
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //delete
-        wrapper.find('.row-actions .delete a').live("click", function(event){
+        wrapper.find('.row-actions .delete a').on("click", function(event){
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
