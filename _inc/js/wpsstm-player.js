@@ -43,7 +43,7 @@ $(document).ready(function(){
     });
 
     //love/unlove track (either for page tracks or player track)
-    $('[itemprop="track"] .wpsstm-wp-love-unlove-track-links a').live( "click", function(e) {
+    $('[itemprop="track"] .wpsstm-wp-love-unlove-track-links a').on( "click", function(e) {
         e.preventDefault();
 
         var link = $(this);
@@ -62,7 +62,7 @@ $(document).ready(function(){
     });
 
     //bottom player : click on source item
-    $( ".wpsstm-player-sources-list li .wpsstm-source-title" ).live( "click", function(e) {
+    $( ".wpsstm-player-sources-list li .wpsstm-source-title" ).on( "click", function(e) {
 
         e.preventDefault();
 
@@ -438,8 +438,6 @@ class WpsstmTracklist {
 
         //try to get previous track
         for (var i = 0; i < self.tracks.length; i++) {
-            
-            console.log(i + " VS " + first_track_idx);
 
             if (queue_track_idx == first_track_idx){
                 console.log("WpsstmTracklist:play_previous_track() : is tracklist first track");
@@ -905,9 +903,7 @@ class WpsstmTrack {
             //autoplay:     true,
             //muted:        true
         });
-        
-        console.log(self.sources);
-        
+
         $( self.sources ).each(function(i, source_attr) {
             //media
             var source_el = $('<source />');
@@ -942,11 +938,6 @@ class WpsstmTrack {
         
         var track_el = self.get_track_el();
         $(track_el).addClass('active');
-
-        //handle source
-        if (source_idx === undefined){
-            source_idx = 0;
-        }
         
         self.build_player_trackinfo();
         self.build_player_audio_el(); //build <audio/> el
@@ -971,6 +962,14 @@ class WpsstmTrack {
 
                 wpsstm_player = player;
                 wpsstm_current_media = media;
+                
+                //handle source
+                if (source_idx !== undefined){
+                    self.switch_track_source(source_idx);
+                }else{
+                    //TO FIX TO CHECK this overrides the browser source priority.  Should we keep this ?
+                    self.switch_track_source(0);
+                }
 
                 $(wpsstm_current_media).on('error', function(error) {
                     var current_source = $(wpsstm_current_media).find('audio').attr('src');
@@ -1101,26 +1100,25 @@ class WpsstmTrack {
     switch_track_source(idx){
         var self = this;
 
-        var new_player_source = $(wpsstm_current_media).find('audio source').eq(idx);
-        var new_player_source_url = new_player_source.attr('src');
+        var new_source_obj = self.get_track_source(idx);
+        var new_source_url = new_source_obj.src;
+        var new_source = new_source_obj.get_player_source_el();
+        
         var current_player_source_url = $(wpsstm_current_media).find('audio').attr('src');
 
-        if (current_player_source_url == new_player_source_url) return false;
-        
-        var new_source_obj = self.sources[idx];
-        console.log("WpsstmTrack:switch_track_source():" + new_player_source_url);
+        if (current_player_source_url == new_source_url) return false;
+
+        console.log("WpsstmTrack:switch_track_source() #" + idx + ": " + new_source_url);
 
         //player
-        wpsstm_current_media.pause();
-        wpsstm_current_media.setSrc(new_player_source);
+        wpsstm_current_media.setSrc(new_source);
         wpsstm_current_media.load();
-        wpsstm_current_media.play();
 
         //trackinfo
         var trackinfo_sources = $(bottom_player_el).find('#wpsstm-player-sources-wrapper li');
         $(trackinfo_sources).removeClass('wpsstm-active-source');
 
-        var new_source_el = new_source_obj.get_player_source_el();
+        var new_source_el = new_source_obj.get_player_source_li_el();
         $(new_source_el).addClass('wpsstm-active-source');
     }
     
@@ -1221,10 +1219,14 @@ class WpsstmTrackSource {
 
     }
 
-    get_player_source_el(){
+    get_player_source_li_el(){
         return $(bottom_player_el).find('[data-wpsstm-source-idx="'+this.source_idx+'"]');
     }
     
+    get_player_source_el(){
+        return $(wpsstm_current_media).find('audio source').eq(this.source_idx);
+    }
+
     select_source_list(){
         var self = this;
         var track_obj = wpsstm_page_player.get_tracklist_track_obj(self.tracklist_idx,self.track_idx);
@@ -1233,9 +1235,8 @@ class WpsstmTrackSource {
         if ( track_sources_count <= 1 ) return;
         
         console.log("clicked source #" + this.source_idx + " of track #" + this.track_idx + " in playlist #" + self.tracklist_idx);
-        console.log(self);
-        
-        var player_source_el = self.get_player_source_el();
+
+        var player_source_el = self.get_player_source_li_el();
         var ul_el = player_source_el.closest('ul');
 
         var sources_list = player_source_el.closest('ul');
