@@ -80,14 +80,15 @@ class WP_SoundSytem_Core_Sources{
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
         $sources = (array)$track->get_track_sources(false); //db & remote
 
-        $default = new WP_SoundSytem_Source($track);
+        $default = new WP_SoundSytem_Source();
         array_unshift($sources,$default); //add blank line
 
         $rows = array();
 
         foreach ( $sources as $key=>$source_raw ){
             
-            $source = new WP_SoundSytem_Source($track,$source_raw);
+            $source = new WP_SoundSytem_Source($source_raw);
+            if (!$source->src) continue;
 
             $disabled = false;
             $source_title_el = $source_url_el = null;
@@ -214,7 +215,9 @@ class WP_SoundSytem_Core_Sources{
         
         $sources = array();
         foreach((array)$track->sources as $source_raw){
-            $sources[] = new WP_SoundSytem_Source($track,$source_raw);
+            $source = new WP_SoundSytem_Source($source_raw);
+            if (!$source->src) continue;
+            $sources[] = $source;
         }
 
         foreach($sources as $key=>$source){
@@ -252,6 +255,7 @@ class WP_SoundSytem_Core_Sources{
         
         $new_sources = array();
 
+        //TO FIX correct source urls when possible
         foreach((array)$sources as $key=>$source){
             $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
             if ( !$source['url'] ) continue;
@@ -289,7 +293,7 @@ class WP_SoundSytem_Source {
         'origin'        => null, 
     );
     
-    function __construct($track,$args = null){
+    function __construct($args = null){
 
         //set properties from args input
 
