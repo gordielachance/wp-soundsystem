@@ -159,8 +159,8 @@ class WP_SoundSytem_Tracklist_Table{
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
         
-        if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
-        
+        if ( property_exists($this->tracklist,'feed_url') && ($this->tracklist->feed_url) ) $classes[] = 'wpsstm-tracklist-live';
+
         $next_refresh_sec = null;
 
         if ( property_exists($this->tracklist,'expire_time') ) {
