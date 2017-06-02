@@ -185,10 +185,16 @@ abstract class WP_SoundSytem_Player_Provider{
     public function provider_scripts_styles(){
         /* override if any style or script is required to run this provider, eg. a MediaElement.js renderer */
     }
+    
+    /*
+    Check if the provider can handle the source by returning a cleaned URL
+    */
+    
+    abstract public function format_source_src($url);
 
     /*
-    This is the function that checks if the provider can handle the source.
-    The mime types or pseudo-mime types should match http://www.mediaelementjs.com/.
+    Returns the the mime type or pseudo-mime type for this source
+    https://github.com/mediaelement/mediaelement/blob/master/docs/usage.md
     */
     
     abstract public function get_source_type($url);
@@ -202,10 +208,6 @@ abstract class WP_SoundSytem_Player_Provider{
     
     function format_source_title($title){
         return $title;
-    }
-    
-    function format_source_src($url){
-        return $url;
     }
 
     /*
@@ -224,14 +226,27 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
     var $slug = 'wp';
     var $icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
     
-    function get_source_type($url){
-        
-        //check file is supported
+    //get file URL extension
+    function get_file_url_ext($url){
         $filetype = wp_check_filetype($url);
         if ( !$ext = $filetype['ext'] ) return;
+        return $ext;
+    }
+    
+    function format_source_src($url){
         
+        if ( !$ext = $this->get_file_url_ext($url) ) return;
+        
+        //check file is supported
         $audio_extensions = wp_get_audio_extensions();
         if ( !in_array($ext,$audio_extensions) ) return;
+        
+        return $url;
+    }
+    
+    function get_source_type($url){
+        
+        if ( !$ext = $this->get_file_url_ext($url) ) return;
         
         return sprintf('audio/%s',$ext);//$filetype['type'],
         
@@ -245,14 +260,23 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
     var $slug = 'youtube';
     var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
-    function get_source_type($url){
-
+    function get_youtube_id($url){
         //youtube
-        $pattern = '~(?:youtube.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu.be/)([^"&?/ ]{11})~i';
+        $pattern = '~http(?:s?)://(?:www.)?youtu(?:be.com/watch\?v=|.be/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?~i';
         preg_match($pattern, $url, $url_matches);
-
-        if (!$url_matches) return;
         
+        if ( !isset($url_matches[1]) ) return;
+        
+        return $url_matches[1];
+    }
+    
+    function format_source_src($url){
+        if ( !$yt_id = $this->get_youtube_id($url) ) return;
+        return sprintf('https://youtube.com/watch?v=%s',$yt_id);
+    }
+    
+    function get_source_type($url){
+        if (!$url_matches) return;
         return 'video/youtube';
     }
 
@@ -260,7 +284,6 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
         return wpsstm_get_soundsgood_sources($track,'youtube',$args);
     }
 
-    
 }
 
 class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Provider{
@@ -274,7 +297,85 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
     }
     
+    function get_sc_track_id($url){
+
+        /*
+        check for souncloud API track URL
+        
+        https://api.soundcloud.com/tracks/9017297
+        */
+        
+        $pattern = '~https?://api.soundcloud.com/tracks/([^/]+)~';
+        preg_match($pattern, $url, $url_matches);
+
+        if ( isset($url_matches[1]) ){
+            return $url_matches[1];
+        }
+        
+        /*
+        check for souncloud widget URL
+        
+        https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/282715465&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true
+        */
+        
+        $pattern = '~https?://w.soundcloud.com/player/.*tracks/([^&]+)~';
+        preg_match($pattern, $url, $url_matches);
+
+        if ( isset($url_matches[1]) ){
+            return $url_matches[1];
+        }
+
+        /*
+        check for souncloud track URL
+        
+        https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou
+        */
+
+        $pattern = '~https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~';
+        preg_match($pattern, $url, $url_matches);
+
+        if ( isset($url_matches) ){
+            return $this->request_sc_track_id($url);
+        }
+
+    }
+    
+    /*
+    Get the ID of a Soundcloud track URL (eg. https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou)
+    Requires a Soundcloud Client ID.
+    */
+    
+    function request_sc_track_id($url){
+        if ( !$soundcloud_client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
+
+        $api_url = 'https://api.soundcloud.com/resolve.json';
+        $api_url = add_query_arg(array(
+            'url' =>        urlencode ($url),
+            'client_id' =>  $soundcloud_client_id
+        ),$api_url);
+
+        $response = wp_remote_get( $api_url );
+        $json = wp_remote_retrieve_body( $response );
+        if ( is_wp_error($json) ) return;
+        $data = json_decode($json,true);
+        if ( isset($data['id']) ) return $data['id'];
+    }
+
+    function format_source_src($url){
+        if ( !$track_id = $this->get_sc_track_id($url) ) return;
+        
+        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
+        
+        return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$client_id);
+        
+        /*
+        TO FIX we sould be able to make it work without soundcloud_client_id, using that kind of URLS :
+        https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/282715465&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true
+        */
+    }
+    
     function get_source_type($url){
+
         //soundcloud
         $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
         preg_match($pattern, $url, $url_matches);
@@ -284,21 +385,6 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         return 'video/soundcloud';
     }
 
-    function format_source_src($url){
-        
-        //TO FIX extract url parts to format the URL correctly
-        
-        //eg. https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/282715465&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true
-        
-        $url = 'https://w.soundcloud.com/player/?url=%s';
-        
-        $url = add_query_arg(array(
-            'url'       =>$url,
-            'auto_play' =>false
-        ),$url);
-        
-        return $url;
-    }
     
     function sources_lookup($track,$args=null){
         return wpsstm_get_soundsgood_sources($track,'soundcloud',$args);
@@ -313,16 +399,17 @@ class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provid
     var $slug = 'mixcloud';
     var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
     
-    function get_source_type($url){
+    function format_source_src($url){
         //mixcloud
         $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
         preg_match($pattern, $url, $url_matches);
 
         if (!$url_matches) return;
-        
+    }
+    
+    function get_source_type($url){
         return 'audio/mixcloud';
     }
-
 }
 
 function wpsstm_player() {

@@ -233,6 +233,7 @@ class WP_SoundSytem_Core_Sources{
                 'class' =>                          implode(' ',$li_classes),
                 'data-wpsstm-source-idx' =>         $key,
                 'data-wpsstm-source-type'   =>      $source->type,
+                'data-wpsstm-source-src'   =>       $source->src,
                 'data-wpsstm-source-origin'   =>    $source->origin,
             );
             
@@ -310,11 +311,13 @@ class WP_SoundSytem_Source {
 
         foreach( (array)wpsstm_player()->providers as $provider ){
             
-            if ( !$type = $provider->get_source_type($this->url) ) continue;
+            //TO FIX TO REMOVE
+
+            if ( !$src_url = $provider->format_source_src($this->url) ) continue;
             
             $this->provider =       $provider;
-            $this->type =           $type;
-            $this->src =            $provider->format_source_src($this->url);
+            $this->type =           $provider->get_source_type($src_url);
+            $this->src =            $src_url;
                 
             break;
             
