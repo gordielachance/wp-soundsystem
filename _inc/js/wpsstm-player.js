@@ -1,5 +1,7 @@
 var bottom_block_el;
 var bottom_player_el;
+var bottom_track_el;
+
 var wpsstm_player;
 var wpsstm_current_media;
 var wpsstm_track_source_requests_limit = 5; //number of following tracks we want to populate the sources for when clicking a track
@@ -13,6 +15,8 @@ $(document).ready(function(){
     
     bottom_block_el =           $('#wpsstm-bottom');
     bottom_player_el =          $(bottom_block_el).find('#wpsstm-bottom-player');
+    bottom_track_el =           $(bottom_player_el).find('#wpsstm-player-track');
+    bottom_trackinfo_el =       $(bottom_track_el).find('#wpsstm-player-trackinfo');
     wpsstm_player_shuffle_el =  $('#wpsstm-player-shuffle');
     wpsstm_player_loop_el =     $('#wpsstm-player-loop');
     bt_prev_track =             $('#wpsstm-player-extra-previous-track');
@@ -924,28 +928,28 @@ class WpsstmTrack {
         //track infos
         var track_el = self.get_track_el();
         var trackinfo = $(track_el).clone();
-        trackinfo.attr('data-wpsstm-tracklist-idx',self.tracklist_idx); //set tracklist ID for the player
-        trackinfo.show();
-        trackinfo.find('td.trackitem_play_bt').remove();
-        $('#wpsstm-player-trackinfo').html(trackinfo);
+        $(trackinfo).attr('data-wpsstm-tracklist-idx',self.tracklist_idx); //set tracklist ID for the player
+        $(trackinfo).show();//show in not done yet
+        $(trackinfo).find('td.trackitem_play_bt').remove();
+        $(bottom_trackinfo_el).html(trackinfo);
     }
 
     load_in_player(source_idx){
         
         var self = this;
-        
-        //display bottom block if not done yet
-        bottom_player_el.show();
+
+        $(bottom_track_el).show(); //show in not done yet
         
         var track_el = self.get_track_el();
         $(track_el).addClass('active');
 
-        self.build_player_trackinfo();
-        self.build_player_audio_el(); //build <audio/> el
-        
+        //handle source
         if (source_idx === undefined){
             source_idx = 0;
         }
+        
+        self.build_player_trackinfo();
+        self.build_player_audio_el(); //build <audio/> el
 
         console.log("load_in_player()  tracklist#" + self.tracklist_idx + ", track#" + self.track_idx + " source#" + source_idx);
 

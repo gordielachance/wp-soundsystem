@@ -310,8 +310,6 @@ class WP_SoundSytem_Source {
     function populate_url(){
 
         foreach( (array)wpsstm_player()->providers as $provider ){
-            
-            //TO FIX TO REMOVE
 
             if ( !$src_url = $provider->format_source_src($this->url) ) continue;
             

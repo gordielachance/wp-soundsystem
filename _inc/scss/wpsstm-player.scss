@@ -122,171 +122,175 @@ a.wpsstm-play-track{
     }
     
     #wpsstm-bottom-player{
-        display:none;
         position: relative;
         color:white;
         font-family:sans-serif;
-        #wpsstm-player-actions{
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 10%;
-            text-align: right;
-            margin-right: .5em;
-            > *{
-                padding: 0 .25em;
-                font-size:1.5em;
-                width:calc(10% / 2);
-            }
-            a{
-                @include opacity(0.9);
-                color:white;
-                text-decoration: none;
-                border:none!important;
-                &:hover{
-                    @include opacity(1);
-                }
-            }
-        }
-
-        #wpsstm-player-trackinfo{
+        
+        #wpsstm-player-track{
+            
+            display:none;
             background:#222;
-            line-height:4em;
-            height:4em;
+            line-height:3em;
+            height:3em;
             position:relative;
             font-size: 0.8em;
-            padding: 0;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            font-size: .6em;
-            [itemprop="track"]{
-                display: inline-block!important;
-                width: 90%;
-                td{
-                    display:inline-block;
-                    padding: 0 1em;
-                    margin: 0;
-                    
-                    &[itemprop="image"]{
-                        padding-left: 0;
-                        img {
-                            max-height:3em;
-                        }
-                    }
-                    &[itemprop="name"]:before{
-                        content:"\002014";
-                        padding-right:.5em;
-                        @extend .truncate;
-                    }
-                    &[itemprop="byArtist"]{
-                        @extend .truncate;
-                    }
-                    &[itemprop="inAlbum"]{
-                        display:none;
-                        @extend .truncate;
-                    }
-                    
+            padding:0 1em;
+            
+            #wpsstm-player-actions{
+                position: absolute;
+                right: 1em;
+                top: 0;
+                width: 10%;
+                text-align: right;
+                > *{
+                    padding: 0 .25em;
+                    font-size:1.5em;
+                    width:calc(10% / 2);
                 }
-                
-                &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                    .wpsstm-player-sources-list{
-                        padding-left: 3em;
-                        &:before{
-                            position:absolute;
-                            font-family: FontAwesome;
-                            content: "\f077"; //chevron up
-                            left: 0;
-                            display: block;
-                            width: 3em;
-                            text-align: center;
-                            bottom: 0;
-                        }
-                    }
-                    .trackitem_sources:hover{
-                        ul.wpsstm-player-sources-list{
-                            &:before{
-                                content: "";
-                            }
-                            background:rgba(34, 34, 34, 0.95);
-                            @include opacity(1);
-                            position:absolute;
-                            bottom:-2em;
-                            padding: 1em 2em;
-                            padding-bottom: 0;
-                            li{
-                                display: block;
-                                padding: .5em 0;
-                            }
-                        }
-                    }
-                }
-                
-            }
-
-            .column-trackitem_sources{
-                padding: 0;
-                margin:0;
-                line-height: 2em;
-                width: 20%;
-                position:relative;
-                ul.wpsstm-player-sources-list{
-                    position:relative;
-                    display:block;
-                    font-size:.85em;
-                    padding: 0;
-                    margin:0;
-                    list-style-type: none;
-                    @include opacity(.3);
-                    padding: 0 2em;
-                    
-                    li{
-                        display:none;
-                        @include opacity(.75);
-                        position:relative;
-                        .wpsstm-source-title{
-                            cursor: pointer;
-                            cursor: hand;
-                            display:inline;
-                        }
-                        &:hover{
-                            @include opacity(.9);
-                        }
-
-                        &.wpsstm-active-source{
-                            @include opacity(1);
-                            display:inline-block;
-                        }
-                        &.wpsstm-bad-source{
-                            //text-decoration: line-through;
-                            display:none!important;
-                        }
-
-                        a.wpsstm-source-provider-link{
-                            font-size:2em;
-                            position:absolute;
-                        }
-                        span{
-                            padding-left:3.5em;
-                            display: inline-block;
-                            width: calc(100% - 3.5em);
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
-
-                    }
+                a{
+                    @include opacity(0.9);
+                    color:white;
+                    text-decoration: none;
+                    border:none!important;
                     &:hover{
                         @include opacity(1);
                     }
                 }
-
             }
+            
+            #wpsstm-player-trackinfo{
+                text-transform: uppercase;
+                letter-spacing: .05em;
+                font-size: .6em;
+                position:relative;
+                width: 90%;
+                [itemprop="track"]{
+                    td{
+                        display:inline-block;
+                        padding: 0 1em;
+                        margin: 0;
+
+                        &[itemprop="image"]{
+                            padding-left: 0;
+                            img {
+                                max-height:3em;
+                            }
+                        }
+                        &[itemprop="name"]:before{
+                            content:"\002014";
+                            padding-right:.5em;
+                            @extend .truncate;
+                        }
+                        &[itemprop="byArtist"]{
+                            @extend .truncate;
+                        }
+                        &[itemprop="inAlbum"]{
+                            display:none;
+                            @extend .truncate;
+                        }
+
+                    }
+
+                    &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                        .wpsstm-player-sources-list{
+                            padding-left: 3em;
+                            &:before{
+                                position:absolute;
+                                font-family: FontAwesome;
+                                content: "\f077"; //chevron up
+                                left: 0;
+                                display: block;
+                                width: 3em;
+                                text-align: center;
+                                bottom: 0;
+                            }
+                        }
+                        .trackitem_sources:hover{
+                            ul.wpsstm-player-sources-list{
+                                &:before{
+                                    content: "";
+                                }
+                                background:rgba(34, 34, 34, 0.95);
+                                @include opacity(1);
+                                position:absolute;
+                                bottom:-2em;
+                                padding: 1em 2em;
+                                padding-bottom: 0;
+                                li{
+                                    display: block;
+                                    padding: .5em 0;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                .column-trackitem_sources{
+                    padding: 0;
+                    margin:0;
+                    line-height: 2em;
+                    position:relative;
+                    ul.wpsstm-player-sources-list{
+                        position:relative;
+                        display:block;
+                        font-size:.85em;
+                        padding: 0;
+                        margin:0;
+                        list-style-type: none;
+                        @include opacity(.3);
+                        padding: 0 2em;
+
+                        li{
+                            display:none;
+                            @include opacity(.75);
+                            position:relative;
+                            .wpsstm-source-title{
+                                cursor: pointer;
+                                cursor: hand;
+                                display:inline;
+                            }
+                            &:hover{
+                                @include opacity(.9);
+                            }
+
+                            &.wpsstm-active-source{
+                                @include opacity(1);
+                                display:inline-block;
+                            }
+                            &.wpsstm-bad-source{
+                                //text-decoration: line-through;
+                                display:none!important;
+                            }
+
+                            a.wpsstm-source-provider-link{
+                                font-size:2em;
+                                position:absolute;
+                            }
+                            span{
+                                padding-left:3.5em;
+                                display: inline-block;
+                                width: calc(100% - 3.5em);
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+
+                        }
+                        &:hover{
+                            @include opacity(1);
+                        }
+                    }
+
+                }
+            }
+            
         }
 
         #wpsstm-player-wrapper{
             background:#222;
             position:relative;
-            overflow: auto;
+            overflow: hidden;
             a{
                 color:white;
             }
