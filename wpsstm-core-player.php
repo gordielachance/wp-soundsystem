@@ -176,15 +176,8 @@ abstract class WP_SoundSytem_Player_Provider{
     var $icon;
     
     function __construct(){
-        add_action( 'wp_enqueue_scripts',array($this,'provider_scripts_styles') );
     }
-    
-    /*
-    Scripts/Styles to load
-    */
-    public function provider_scripts_styles(){
-        /* override if any style or script is required to run this provider, eg. a MediaElement.js renderer */
-    }
+
     
     /*
     Check if the provider can handle the source by returning a cleaned URL
@@ -276,7 +269,6 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
     }
     
     function get_source_type($url){
-        if (!$url_matches) return;
         return 'video/youtube';
     }
 
@@ -286,16 +278,35 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
 
 }
 
+/*
+The Soundcloud Provider reacts differently if we've got a soundcloud client ID or not : either it will stream a mp3, or load the soundcloud widget and use medialement's widget renderer.
+*/
+
+
 class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Provider{
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
     var $icon = '<i class="fa fa-soundcloud" aria-hidden="true"></i>';
+    var $client_id;
     
-    function provider_scripts_styles(){
-        //soundcloud renderer
-        wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');
+    function __construct(){
+        
+        $this->client_id = wpsstm()->get_options('soundcloud_client_id');
+        
+        parent::__construct();
+        add_action( 'wp_enqueue_scripts',array($this,'provider_scripts_styles') );
     }
+    
+    /*
+    Scripts/Styles to load
+    */
+    public function provider_scripts_styles(){
+        if (!$this->client_id){ //soundcloud renderer (required for soundcloud widget)
+            wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');    
+        }
+    }
+
     
     function get_sc_track_id($url){
 
@@ -346,13 +357,15 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
     */
     
     function request_sc_track_id($url){
-        if ( !$soundcloud_client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
+        if ( !$this->client_id ) return;
+        
+        $api_args = array(
+            'url' =>        urlencode ($url),
+            'client_id' =>  $this->client_id
+        );
 
         $api_url = 'https://api.soundcloud.com/resolve.json';
-        $api_url = add_query_arg(array(
-            'url' =>        urlencode ($url),
-            'client_id' =>  $soundcloud_client_id
-        ),$api_url);
+        $api_url = add_query_arg($api_args,$api_url);
 
         $response = wp_remote_get( $api_url );
         $json = wp_remote_retrieve_body( $response );
@@ -364,28 +377,29 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
     function format_source_src($url){
         if ( !$track_id = $this->get_sc_track_id($url) ) return;
         
-        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
-        
-        return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$client_id);
-        
-        /*
-        TO FIX we sould be able to make it work without soundcloud_client_id, using that kind of URLS :
-        https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/282715465&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true
-        */
+        if ( $this->client_id ){ //stream url
+            return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$this->client_id);
+        }else{ //widget url
+            $widget_url = 'https://w.soundcloud.com/player/';
+            $track_url = sprintf('http://api.soundcloud.com/tracks/%s',$track_id);
+            $widget_args = array(
+                'url' =>        urlencode ($track_url),
+                'autoplay' =>   false,
+                'client_id' =>  $this->client_id
+            );
+            return add_query_arg($widget_args,$widget_url);
+        }
+
     }
     
     function get_source_type($url){
-
-        //soundcloud
-        $pattern = '~https?://(?:api\.)?soundcloud\.com/.*~i';
-        preg_match($pattern, $url, $url_matches);
-
-        if (!$url_matches) return;
-        
-        return 'video/soundcloud';
+        if ( $this->client_id ){ //for stream url
+            return 'audio/mp3';
+        }else{ //for widget url
+            return 'video/soundcloud';
+        }
     }
 
-    
     function sources_lookup($track,$args=null){
         return wpsstm_get_soundsgood_sources($track,'soundcloud',$args);
     }
