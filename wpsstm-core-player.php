@@ -57,6 +57,9 @@ class WP_SoundSytem_Core_Player{
 
     function player_html(){
 	   global $wp_query;
+        
+        if ( !did_action('init_playable_tracklist') ) return;
+        
         ?>
         <div id="wpsstm-bottom">
             <?php
@@ -113,19 +116,22 @@ class WP_SoundSytem_Core_Player{
 
             ?>
             <div id="wpsstm-bottom-player">
-                <div id="wpsstm-player-actions">
-                    <?php 
-                    //scrobbling
-                    if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                        echo wpsstm_lastfm()->get_scrobbler_icons();
-                    }
-                    //favorites
-                    if ( wpsstm()->get_options('lastfm_favorites') ){
-                        echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
-                    }
-                    ?>
+                <div id="wpsstm-player-track">
+                    <div id="wpsstm-player-actions">
+                        <?php 
+                        //scrobbling
+                        if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                            echo wpsstm_lastfm()->get_scrobbler_icons();
+                        }
+                        //favorites
+                        if ( wpsstm()->get_options('lastfm_favorites') ){
+                            echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
+                        }
+                        ?>
+                    </div>
+                    <div id="wpsstm-player-trackinfo"></div>
                 </div>
-                <div id="wpsstm-player-trackinfo"></div>
+                
                 <div id="wpsstm-player-wrapper">
                     <div id="wpsstm-player-extra-previous-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
@@ -141,6 +147,7 @@ class WP_SoundSytem_Core_Player{
     }
     
     function enqueue_player_scripts_styles(){
+        //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
         
         //CSS
         wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
@@ -303,7 +310,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
     */
     public function provider_scripts_styles(){
         if (!$this->client_id){ //soundcloud renderer (required for soundcloud widget)
-            wp_enqueue_script('wp-mediaelement-renderer-soundcloud','https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.0.6/renderers/soundcloud.min.js', array('wp-mediaelement'), '4.0.6');    
+            wp_enqueue_script('wp-mediaelement-renderer-soundcloud',includes_url('js/mediaelement/renderers/soundcloud.min.js'), array('wp-mediaelement'), '4.0.6');    
         }
     }
 

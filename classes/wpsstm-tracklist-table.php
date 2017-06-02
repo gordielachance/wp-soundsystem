@@ -20,6 +20,11 @@ class WP_SoundSytem_Tracklist_Table{
         $this->no_items_label = __( 'No tracks found.','wpsstm');
 
         $this->can_player = ( !wpsstm_is_backend() && wpsstm()->get_options('player_enabled') == 'on' );
+        
+        if ($this->can_player){
+            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+        }
+        
     }
     
     function prepare_items() {
