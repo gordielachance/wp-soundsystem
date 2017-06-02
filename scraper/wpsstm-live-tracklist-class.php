@@ -122,10 +122,9 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     
     function get_options($keys=null){
         $options = array();
-        if ( $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true) ){
-            $options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
-        }
-        
+        $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
+        $options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
+
         if ($keys){
             return wpsstm_get_array_value($keys, $options);
         }else{
