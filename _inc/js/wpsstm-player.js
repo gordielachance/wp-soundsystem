@@ -1108,7 +1108,8 @@ class WpsstmTrack {
 
         if (current_player_source_url == new_source_url) return false;
 
-        console.log("WpsstmTrack:switch_track_source() #" + idx + ": " + new_source_url);
+        console.log("WpsstmTrack:switch_track_source() #" + idx + ": ");
+        console.log(new_source);
 
         //player
         wpsstm_current_media.setSrc(new_source);
@@ -1224,7 +1225,7 @@ class WpsstmTrackSource {
     }
     
     get_player_source_el(){
-        return $(wpsstm_current_media).find('audio source').eq(this.source_idx);
+        return $(bottom_player_el).find('audio source').eq(this.source_idx).get(0);
     }
 
     select_source_list(){
