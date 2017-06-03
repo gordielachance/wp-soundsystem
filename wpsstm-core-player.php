@@ -61,7 +61,7 @@ class WP_SoundSytem_Core_Player{
         if ( !did_action('init_playable_tracklist') ) return;
         
         ?>
-        <div id="wpsstm-bottom">
+        <div id="wpsstm-bottom-wrapper">
             <?php
         
             $redirect_previous = wpsstm_get_player_redirection('previous');
@@ -115,9 +115,9 @@ class WP_SoundSytem_Core_Player{
             }
 
             ?>
-            <div id="wpsstm-bottom-player">
-                <div id="wpsstm-player-track">
-                    <div id="wpsstm-player-actions">
+            <div id="wpsstm-bottom">
+                <div id="wpsstm-bottom-track-wrapper">
+                    <div id="wpsstm-bottom-track-actions">
                         <?php 
                         //scrobbling
                         if ( wpsstm()->get_options('lastfm_scrobbling') ){
@@ -129,10 +129,10 @@ class WP_SoundSytem_Core_Player{
                         }
                         ?>
                     </div>
-                    <div id="wpsstm-player-trackinfo"></div>
+                    <div id="wpsstm-bottom-track-info"></div>
                 </div>
                 
-                <div id="wpsstm-player-wrapper">
+                <div id="wpsstm-bottom-player-wrapper">
                     <div id="wpsstm-player-extra-previous-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player"></div>

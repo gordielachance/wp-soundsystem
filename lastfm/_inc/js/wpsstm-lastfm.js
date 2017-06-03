@@ -20,9 +20,9 @@ class WpsstmLastFM {
         
         var self = this;
         
-        self.icon_scrobble_el =     $(bottom_player_el).find('#wpsstm-player-toggle-scrobble')
-        self.icon_love_el =         $(bottom_player_el).find('.wpsstm-lastfm-love-unlove-track-links');
-        self.auth_notice_el =       $(bottom_block_el).find('#wpsstm-bottom-notice-lastfm-auth');
+        self.icon_scrobble_el =     $(bottom_el).find('#wpsstm-player-toggle-scrobble')
+        self.icon_love_el =         $(bottom_el).find('.wpsstm-lastfm-love-unlove-track-links');
+        self.auth_notice_el =       $(bottom_wrapper_el).find('#wpsstm-bottom-notice-lastfm-auth');
 
         if (self.is_scrobbler_active){
             $(self.icon_scrobble_el).addClass('active');

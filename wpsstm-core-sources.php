@@ -230,7 +230,7 @@ class WP_SoundSytem_Core_Sources{
             $icon_link = $source->get_provider_icon_link();
             
             $li_classes = array();
-            if ($key==0) $li_classes[]= 'wpsstm-active-source';
+            if ($key==0) $li_classes[]= 'wpsstm-active-source'; //default active source
             
             $attr_arr = array(
                 'class' =>                          implode(' ',$li_classes),
@@ -241,7 +241,7 @@ class WP_SoundSytem_Core_Sources{
             );
             
             $li_classes = null;
-            $lis[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($attr_arr),$icon_link,$source_title);
+            $lis[] = sprintf('<li %s>%s %s <i class="fa fa-exclamation-triangle" aria-hidden="true"></i></li>',wpsstm_get_html_attr($attr_arr),$icon_link,$source_title);
             
         }
         if ( !empty($lis) ){
