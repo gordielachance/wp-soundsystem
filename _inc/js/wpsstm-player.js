@@ -917,7 +917,7 @@ class WpsstmTrack {
         var track_el = self.get_track_el();
         var trackinfo = $(track_el).clone();
         $(bottom_trackinfo_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx); //set tracklist ID for the player
-        $(trackinfo).show();//show in not done yet
+        $(bottom_el).show();//show in not done yet
         $(trackinfo).find('td.trackitem_play_bt').remove();
         $(bottom_trackinfo_el).html(trackinfo);
         
@@ -938,8 +938,6 @@ class WpsstmTrack {
     load_in_player(source_idx){
         
         var self = this;
-
-        $(bottom_track_wraper_el).show(); //show in not done yet
         
         var track_el = self.get_track_el();
         $(track_el).addClass('active');
@@ -956,7 +954,7 @@ class WpsstmTrack {
             // All the config related to HLS
             hls: {
                 debug:          wpsstmL10n.debug,
-                autoStartLoad:  false
+                autoStartLoad:  true
             },
             // Do not forget to put a final slash (/)
             pluginPath: 'https://cdnjs.com/libraries/mediaelement/',
@@ -969,11 +967,14 @@ class WpsstmTrack {
 
                 wpsstm_mediaElementPlayer = player;
                 wpsstm_mediaElement = mediaElement;
+                
+                
 
                 //handle source
-                self.play_track_source(source_idx);
+               
+                //self.set_track_source(source_idx);
 
-                $(wpsstm_mediaElement).on('error', function(error) {
+                wpsstm_mediaElement.addEventListener('error', function(error) {
                     var source_obj = self.get_track_source(self.current_source_idx);
                     console.log('player event - source error for source: '+self.current_source_idx);
                     //self.debug(error);
@@ -982,36 +983,30 @@ class WpsstmTrack {
 
                 });
 
-                $(wpsstm_mediaElement).on('loadeddata', function() {
+                wpsstm_mediaElement.addEventListener('loadeddata', function() {
                     self.debug('player event - loadeddata');
                     self.update_button('loadeddata');
                     $( document ).trigger( "wpsstmPlayerMediaEvent", ['loadeddata',mediaElement, originalNode, player,self] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                     
-                    //update source playing
-                    $( self.sources ).each(function(idx, source_attr) {
-                        if (source_attr.src == wpsstm_mediaElement.src){
-                            self.update_source_playing(idx);
-                        }
-                    });
+                     wpsstm_mediaElement.play();
                     
-                    wpsstm_mediaElementPlayer.play();
-
                 });
 
-                $(wpsstm_mediaElement).on('play', function() {
+                wpsstm_mediaElement.addEventListener('play', function() {
                     if (wpsstm_mediaElement.duration <= 0) return; //quick fix because it was fired twice.
                     self.duration = Math.floor(mediaElement.duration);
                     self.playback_start = Math.round( $.now() /1000); //seconds - used by lastFM
                     self.debug('player event - play');
+                    self.debug(wpsstm_mediaElement.src);
                     self.update_button('play');
                 });
 
-                $(wpsstm_mediaElement).on('pause', function() {
+                wpsstm_mediaElement.addEventListener('pause', function() {
                     self.debug('player - pause');
                     self.update_button('pause');
                 });
 
-                $(wpsstm_mediaElement).on('ended', function() {
+                wpsstm_mediaElement.addEventListener('ended', function() {
                     self.debug('MediaElement.js event - ended');
                     self.update_button('ended');
                     wpsstm_mediaElement = null;
@@ -1110,10 +1105,10 @@ class WpsstmTrack {
         return source_obj;
     }
     
-    update_source_playing(idx){
+    highligh_source(idx){
         var self = this;
         
-        self.debug("update_source_playing(): #" + idx);
+        self.debug("highligh_source(): #" + idx);
         
         var source_obj = self.get_track_source(idx);
         var track_el = self.get_track_el();
@@ -1124,22 +1119,31 @@ class WpsstmTrack {
         $(source_li).addClass('wpsstm-active-source');
     }
     
-    play_track_source(idx){
+    set_track_source(idx){
         var self = this;
         
         if (idx === undefined) idx = 0;
 
-        self.current_source_idx = idx;
         var new_source_obj = self.get_track_source(idx);
         var new_source = { src: new_source_obj.src, 'type': new_source_obj.type };
+        
+        console.log("wpsstm_mediaElement");
+        console.log(wpsstm_mediaElement);
 
-        if ( wpsstm_mediaElement && (wpsstm_mediaElement.src == new_source.src) ) return false;
+        if ( (self.current_source_idx !== undefined)  && (self.current_source_idx == idx) ) return false;
 
-        self.debug("play_track_source() #" + idx);
+        self.debug("set_track_source() #" + idx);
+        new_source_obj.get_source_li_el().addClass('wpsstm-active-source');
 
         //player
         wpsstm_mediaElement.pause();
-        wpsstm_mediaElement.setSrc(new_source.src);
+        self.highligh_source(idx);
+        
+        //wpsstm_mediaElement.setSrc(new_source.src);
+        self.debug('!rafa8626: ');
+        $(wpsstm_mediaElement).attr('src',new_source.src); //THIS SEEMS TO WORK but we should use wpsstm_mediaElement.setSrc() instead
+        
+        self.current_source_idx = idx;
         wpsstm_mediaElement.load();
 
     }
@@ -1155,7 +1159,7 @@ class WpsstmTrack {
         source_obj.can_play_source = false;
         
         var source_el = source_obj.get_source_li_el();
-        source_el.addClass('wpsstm-bad-source');
+        source_el.removeClass('wpsstm-active-source').addClass('wpsstm-bad-source');
         
         //
         var new_source_idx;
@@ -1173,7 +1177,7 @@ class WpsstmTrack {
         
         if (new_source_idx !== undefined){
             
-            self.play_track_source(new_source_idx);
+            self.set_track_source(new_source_idx);
             
         }else{
            
@@ -1277,7 +1281,7 @@ class WpsstmTrackSource {
             lis_el.removeClass('wpsstm-active-source');
             player_source_el.addClass('wpsstm-active-source');
 
-            track_obj.play_track_source(self.source_idx);
+            track_obj.set_track_source(self.source_idx);
         }
 
     }
