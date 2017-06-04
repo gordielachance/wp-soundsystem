@@ -1,11 +1,10 @@
 <?php
 
-
 /**
  * Based on class WP_List_Table
  */
 
-class WP_SoundSytem_TracksList_Table{
+class WP_SoundSytem_Tracklist_Table{
     var $tracklist;
     var $curr_track_idx = null;
     
@@ -21,6 +20,11 @@ class WP_SoundSytem_TracksList_Table{
         $this->no_items_label = __( 'No tracks found.','wpsstm');
 
         $this->can_player = ( !wpsstm_is_backend() && wpsstm()->get_options('player_enabled') == 'on' );
+        
+        if ($this->can_player){
+            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+        }
+        
     }
     
     function prepare_items() {
@@ -44,11 +48,16 @@ class WP_SoundSytem_TracksList_Table{
             $current_page = $this->tracklist->pagination['current_page'];
             $this->items = array_slice((array)$this->items,(($current_page-1)*$per_page),$per_page);
         }
-        
+
         $this->curr_track_idx = $per_page * ( $current_page - 1 );
+
+        //try to populate cached autosources if item has not any
+        foreach($this->items as $item){		
+            if (!$item->sources){
+                $item->sources = $item->get_track_sources_auto(array('cache_only'=>true));
+            }	
+        }
         
-
-
         /**
          * REQUIRED. Now we need to define our column headers. This includes a complete
          * array of columns to be displayed (slugs & titles), a list of columns
@@ -147,13 +156,13 @@ class WP_SoundSytem_TracksList_Table{
         
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
-            'data-tracklist-id' =>          $this->tracklist->post_id,
+            'data-wpsstm-tracklist-id' =>          $this->tracklist->post_id,
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
         
-        if ($this->tracklist->feed_url) $classes[] = 'wpsstm-tracklist-live';
-        
+        if ( property_exists($this->tracklist,'feed_url') && ($this->tracklist->feed_url) ) $classes[] = 'wpsstm-tracklist-live';
+
         $next_refresh_sec = null;
 
         if ( property_exists($this->tracklist,'expire_time') ) {
@@ -477,7 +486,7 @@ class WP_SoundSytem_TracksList_Table{
      */
     public function single_row( $item ) {
         
-            $sources = wpsstm_player()->get_playable_sources($item,true);
+            $sources = $item->sources;
 
             $classes = array();
             if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';

@@ -17,6 +17,30 @@
     [itemprop="inAlbum"]{
         font-size:.8em;
     }
+    .wpsstm-player-sources-list{
+        li{
+            &:not(.wpsstm-bad-source) .wpsstm-source-error{
+                display:none;
+            }
+        }
+    }
+    &.active{
+        .wpsstm-player-sources-list{
+            li{
+                &.wpsstm-active-source{
+                    font-weight: bold;
+                }
+            }
+        }
+        &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+            .wpsstm-player-sources-list{
+                li{
+                    cursor: pointer;
+                    cursor: hand;
+                }
+            }
+        }
+    }
 }
 
 .wpsstm-tracklist-table{
@@ -91,7 +115,7 @@ a.wpsstm-play-track{
     }
 }
 
-#wpsstm-bottom{
+#wpsstm-bottom-wrapper{
     position:fixed;
     width:100%;
     padding:0;
@@ -121,148 +145,180 @@ a.wpsstm-play-track{
         }
     }
     
-    #wpsstm-bottom-player{
+    #wpsstm-bottom{
         display:none;
         position: relative;
         color:white;
         font-family:sans-serif;
-        #wpsstm-player-actions{
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 20%;
-            text-align: right;
-            > *{
-                padding: 0 .25em;
-                font-size:1.5em;
-            }
-            a{
-                @include opacity(0.9);
-                color:white;
-                text-decoration: none;
-                border:none!important;
-                &:hover{
-                    @include opacity(1);
-                }
-            }
-        }
-
-        #wpsstm-player-trackinfo{
+        
+        #wpsstm-bottom-track-wrapper{
             background:#222;
-            line-height:40px; //player height
+            line-height:3em;
+            height:3em;
+            position:relative;
             font-size: 0.8em;
-            padding: 0;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            font-size: .6em;
-            [itemprop="track"]{
-                display: inline-block!important;
-                width: 80%;
-                position:relative;
-                td{
-                    display:inline-block;
-                    padding: 0 1em;
-                    margin: 0;
-                    
-                    &[itemprop="image"]{
-                        padding-left: 0;
-                        img {
-                            max-height:3em;
-                        }
-                    }
-                    &[itemprop="name"]:before{
-                        content:"\002014";
-                        padding-right:.5em;
-                        @extend .truncate;
-                    }
-                    &[itemprop="byArtist"]{
-                        @extend .truncate;
-                    }
-                    &[itemprop="inAlbum"]{
-                        display:none;
-                        @extend .truncate;
-                    }
-                    
+            padding:0 1em;
+            
+            #wpsstm-bottom-track-actions{
+                position: absolute;
+                right: 1em;
+                top: 0;
+                width: 10%;
+                text-align: right;
+                > *{
+                    padding: 0 .25em;
+                    font-size:1.5em;
+                    width:calc(10% / 2);
                 }
-            }
-
-            .column-trackitem_sources{
-                padding: 0;
-                margin:0;
-                line-height: 2em;
-                width: 20%;
-                position:relative;
-                ul.wpsstm-player-sources-list{
-                    width:100%;
-                    display:block;
-                    font-size:.85em;
-                    padding: 0;
-                    margin:0;
-                    list-style-type: none;
-                    @include opacity(.3);
-                    padding: 0 2em;
-                    min-width: 400px;
-                    
-                    li{
-                        width:100%;
-                        display:none;
-                        @include opacity(.8);
-                        position:relative;
-                        .wpsstm-source-title{
-                            cursor: pointer;
-                            cursor: hand;
-                            display:inline;
-                        }
-                        &:hover{
-                           @include opacity(1); 
-                        }
-
-                        &.wpsstm-active-source{
-                            @include opacity(1);
-                            display:inline-block;
-                        }
-                        &.wpsstm-bad-source{
-                            //text-decoration: line-through;
-                            display:none!important;
-                        }
-
-                        a.wpsstm-trackinfo-provider-link{
-                            font-size:2em;
-                            position:absolute;
-                        }
-                        span{
-                            padding-left:3.5em;
-                            display: inline-block;
-                            width: calc(100% - 3.5em);
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
-
-                    }       
+                a{
+                    @include opacity(0.9);
+                    color:white;
+                    text-decoration: none;
+                    border:none!important;
                     &:hover{
                         @include opacity(1);
                     }
-                    &.expanded{
-                        background:rgba(34, 34, 34, 0.95);
-                        @include opacity(1);
-                        position:absolute;
-                        bottom:0;
-                        padding: 1em 2em;
-                        padding-bottom: 0;
-                        li{
-                            display:inline-block;
+                }
+            }
+            
+            #wpsstm-bottom-track-info{
+                text-transform: uppercase;
+                letter-spacing: .05em;
+                font-size: .6em;
+                position:relative;
+                width: 90%;
+                [itemprop="track"]{
+                    width:100%;
+                    position:relative;
+                    display:block!important; //jQuery would set 'table-row'
+                    td{
+                        display:inline-block;
+                        padding: 0 1em;
+                        margin: 0;
+
+                        &[itemprop="image"]{
+                            padding-left: 0;
+                            img {
+                                max-height:3em;
+                            }
+                        }
+                        &[itemprop="name"]:before{
+                            content:"\002014";
+                            padding-right:.5em;
+                            @extend .truncate;
+                        }
+                        &[itemprop="byArtist"]{
+                            @extend .truncate;
+                        }
+                        &[itemprop="inAlbum"]{
+                            display:none;
+                            @extend .truncate;
+                        }
+
+                    }
+                    
+                    .column-trackitem_sources{
+                        padding: 0;
+                        margin:0;
+                        line-height: 2em;
+                        position:relative;
+                        min-width: 30%;
+                        @include opacity(.3);
+                        &:hover{
+                            @include opacity(1);
+                        }
+                        ul.wpsstm-player-sources-list{
+                            position:relative;
+                            display:block;
+                            font-size:.85em;
+                            padding: 0;
+                            margin:0;
+                            margin-left: 1.5em;
+                            list-style-type: none;
+                            width:100%;
+
+                            padding: 0;
+                            background:rgba(34, 34, 34, 0.95);
+                            position:absolute;
+                            bottom:-2em;
+
+                            li{
+                                &:not(.wpsstm-active-source){
+                                    display:none;
+                                }
+
+                                position:relative;
+                                padding: 0 2em;
+                                height: 4em;
+                                line-height: 4em;
+
+                                a.wpsstm-source-provider-link{
+                                    font-size:2em;
+                                    position:absolute;
+                                }
+                                span{
+                                    padding-left:3.5em;
+                                    display: inline-block;
+                                    width: calc(100% - 3.5em);
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+                                .wpsstm-source-error{
+                                    position: absolute;
+                                    right: 2em;
+                                    height: 4em;
+                                    line-height: 4em;
+                                }
+
+
+                            }
+
+                        }
+
+                    }
+
+                    &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                        .wpsstm-player-sources-list{
+                            &:before{
+                                position:absolute;
+                                font-family: FontAwesome;
+                                content: "\f077"; //chevron up
+                                display: block;
+                                width: 3em;
+                                text-align: center;
+                                bottom: 0;
+                                height: 4em;
+                                line-height: 4em;
+                                left: -1em;
+                            }
+                        }
+                        .trackitem_sources:hover{
+                            ul.wpsstm-player-sources-list{
+                                &:before{
+                                    content: "";
+                                }
+                                li{
+                                    display: block;
+                                    &:hover{
+                                        background-color:lighten(#222, 5%);
+                                    }
+                                }
+                            }
                         }
                     }
+
                 }
 
+
             }
+            
         }
 
-        #wpsstm-player-wrapper{
+        #wpsstm-bottom-player-wrapper{
             background:#222;
             position:relative;
-            overflow: auto;
+            overflow: hidden;
             a{
                 color:white;
             }
