@@ -5,7 +5,10 @@ jQuery(function($){
         var wrapper = $('#wpsstm-tracklist');
         
         var tables_el = wrapper.find('table');
-        tables_el.tableToggleColumns();
+        tables_el.tableToggleColumns({
+            ignore_columns : ['#cb','#trackitem_action'],
+            unchecked_columns : ['#trackitem_album','#trackitem_mbid','#trackitem_sources']
+        });
         
         /* Row actions */
         //edit
@@ -116,9 +119,6 @@ jQuery(function($){
         if( (typeof attr.unchecked_columns === typeof undefined) || !attr.unchecked_columns ) {
             attr.unchecked_columns = [];
         }
-        
-        attr.ignore_columns = ['#cb','#trackitem_action'];
-        attr.unchecked_columns = ['#trackitem_album','#trackitem_mbid','#trackitem_sources'];
 
         this.each(function() {
 
@@ -167,7 +167,12 @@ jQuery(function($){
                 
                 $driver_checkbox.click(function(e) {
                     var $table_column = $table.find('tr >*:nth-child('+column_key+')');
-                    $table_column.toggle();
+                    if ( $(this).is(':checked') ){
+                        $table_column.removeClass('toggle-column-hidden');
+                    }else{
+                        $table_column.addClass('toggle-column-hidden');
+                    }
+                    
                 });
             });
             
@@ -177,11 +182,9 @@ jQuery(function($){
                 var $driver_checkbox = $(th).find('input');
                 $driver_checkbox.prop('checked',false);
                 var $table_column = $table.find('tr >*:nth-child('+column_key+')');
-                $table_column.hide();
+                $table_column.addClass('toggle-column-hidden');
             });
-            
-            
-            
+
             $table.addClass('toggle-columns');
             
             var toggle_driver = $('<table></table>');
@@ -208,14 +211,15 @@ function wpsstm_tracklist_row_action(row_action_link){
     var track_action = link.attr('data-wpsstm-subtrack-action');
 
     var track_sources = [];
-    row.find('.wpsstm-sources input.wpsstm-source-url:not(:disabled)').each(function() {
-        var source_url = $(this).val();
-        var source_title = $(this).siblings('.wpsstm-source-title').val();
-        if (!source_url) return true; //continue
+    jQuery(row).find('.wpsstm-source:not(.wpsstm-source-auto)').each(function() {
+        
+        var source = jQuery(this);
+        var source_title =  source.find('input').eq(0).val();
+        var source_url =    source.find('input').eq(1).val();
         var source = {title:source_title,url:source_url};
         track_sources.push(source);
     });
-    
+
     if ( track_sources.length == 0 ) track_sources = null; // we need this or arg will not be received by PHP
 
     var track = {
@@ -235,8 +239,6 @@ function wpsstm_tracklist_row_action(row_action_link){
         'track_order':      row.find('.trackitem_order input').val(),
         
     };
-    
-    console.log(ajax_data);
 
     jQuery.ajax({
 
@@ -314,7 +316,6 @@ function wpsstm_tracklist_order_update(){
             table.addClass('loading');
         },
         success: function(data){
-            console.log(data);
             if (data.success === false) {
                 console.log(data);
             }

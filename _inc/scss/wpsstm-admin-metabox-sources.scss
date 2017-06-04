@@ -36,7 +36,7 @@ div.wpsstm-source{
             }
         }
     }
-    &.wpsstm-source-new{
+    &:first-of-type{
         .wpsstm-source-icon{
             &.wpsstm-source-icon-delete{
                 display:none;
@@ -58,29 +58,22 @@ div.wpsstm-source{
     }
 }
 
+
+.wpsstm-suggest-sources-link{
+    display:block;
+    text-align:center;
+    &.loading{
+        pointer-events: none;
+        @include opacity(.5);
+    }
+}
+
 .postbox#wpsstm-track-sources{
     .inside{
         
         > p{ //desc
             padding: 0 1em;
             font-style: italic;
-        }
-        
-        margin:0;
-        padding:0;
-        font-size: 1.5em;
-        p.wpsstm-source{
-            padding: .5em 2em;
-            input{
-                height:3em;
-            }
-            
-            &.wpsstm-source-new{
-                background-color:#F1F1F1;
-
-            }
-            
-            
         }
     }
 }
@@ -91,21 +84,12 @@ div.wpsstm-source{
 
 #wpsstm-tracklist{ //tracklist metabox
     td.column-trackitem_sources{
-        margin:0;
-        padding:0;
-        .metabox-table-cell-display{
+
+        .metabox-table-cell-display,.metabox-table-cell-edit{
             text-align:center;
         }
-    }
-    p.wpsstm-source{
-        &.wpsstm-source-new{
-            border-bottom:1px solid #DDD;
-            &.wpsstm-source-icon-add{
-                display:inline;
-            }
-            &.wpsstm-source-icon-delete{
-                display:none;
-            }
+        .wpsstm-track-sources-popup{
+            display:none;
         }
     }
 }
