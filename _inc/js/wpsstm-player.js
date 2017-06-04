@@ -967,12 +967,9 @@ class WpsstmTrack {
 
                 wpsstm_mediaElementPlayer = player;
                 wpsstm_mediaElement = mediaElement;
-                
-                
 
                 //handle source
-               
-                //self.set_track_source(source_idx);
+                self.set_track_source(source_idx);
 
                 wpsstm_mediaElement.addEventListener('error', function(error) {
                     var source_obj = self.get_track_source(self.current_source_idx);
@@ -1137,14 +1134,11 @@ class WpsstmTrack {
 
         //player
         wpsstm_mediaElement.pause();
-        self.highligh_source(idx);
-        
-        //wpsstm_mediaElement.setSrc(new_source.src);
-        self.debug('!rafa8626: ');
-        $(wpsstm_mediaElement).attr('src',new_source.src); //THIS SEEMS TO WORK but we should use wpsstm_mediaElement.setSrc() instead
+        wpsstm_mediaElement.setSrc(new_source.src);
+        wpsstm_mediaElement.load();
         
         self.current_source_idx = idx;
-        wpsstm_mediaElement.load();
+        self.highligh_source(idx);
 
     }
     
