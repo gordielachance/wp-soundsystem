@@ -72,8 +72,6 @@ class WP_SoundSytem_Scraper_Wizard{
         if ( isset($_POST[ 'wpsstm_scraper_wizard_nonce' ]) && wp_verify_nonce( $_POST['wpsstm_scraper_wizard_nonce'], 'wpsstm_scraper_wizard')) $is_valid_nonce=true;
 
         if ($is_autosave || $is_revision || !$is_valid_nonce) return;
-        
-        $post_type = get_post_type();
 
         if ( isset($_POST['save-scraper-settings'])){
         
@@ -86,6 +84,10 @@ class WP_SoundSytem_Scraper_Wizard{
             
             //save wizard settings
             $wizard_settings = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
+            
+            if ( isset($wizard_settings['delete_cache']) ){
+                $this->tracklist->delete_cache();
+            }
             
             if ($wizard_settings){
                 
@@ -319,7 +321,7 @@ class WP_SoundSytem_Scraper_Wizard{
 
             $this->add_wizard_field(
                 'datas_cache_min', 
-                __('Enable Cache','wpsstm'), 
+                __('Enable tracks cache','wpsstm'), 
                 array( $this, 'cache_callback' ), 
                 'wpsstm-wizard-step-options',
                 'wizard-section-options'
@@ -332,6 +334,15 @@ class WP_SoundSytem_Scraper_Wizard{
                 'wpsstm-wizard-step-options',
                 'wizard-section-options'
             );
+            
+            $this->add_wizard_field(
+                'delete_cache', 
+                __('Delete current tracks cache','wpsstm'), 
+                array( $this, 'delete_cache_callback' ), 
+                'wpsstm-wizard-step-options',
+                'wizard-section-options'
+            );
+            
         }
         
 
@@ -707,6 +718,13 @@ class WP_SoundSytem_Scraper_Wizard{
         );
 
         
+    }
+    
+    function delete_cache_callback(){
+        printf(
+            '<input type="checkbox" name="%s[delete_cache]" value="on" />',
+            'wpsstm_wizard'
+        );
     }
     
     function musicbrainz_callback(){
