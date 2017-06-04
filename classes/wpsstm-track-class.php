@@ -327,30 +327,9 @@ class WP_SoundSystem_Track{
     Track Sources
     */
     
-    //get an array of raw track sources from the DB
-    function get_track_sources($db_only = true){
-
+    function get_track_sources_auto( $args = null ){
+        
         if (!$this->artist || !$this->title) return;
-
-        $sources = $this->sources;
-
-        if ($db_only){
-            if ($sources_cached = $this->get_track_sources_auto( array('cache_only'=>true) ) ){
-                $sources = array_merge((array)$sources,(array)$sources_cached);
-            }
-        }else{
-            if ($sources_auto = $this->get_track_sources_auto() ){
-                $sources = array_merge((array)$sources,(array)$sources_auto);
-            } 
-        }
-
-        $sources = wpsstm_sources()->sanitize_sources($sources);
-
-        return $sources;
-    }
-    
-    //Those source will be suggested backend; user will need to confirm them.
-    function get_track_sources_auto($args=null){
 
         $sources = array();
 

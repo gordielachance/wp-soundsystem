@@ -78,7 +78,7 @@ class WP_SoundSytem_Core_Sources{
     function get_sources_field_editable( $post_id, $field_name ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = (array)$track->get_track_sources(false); //db & remote
+        $sources = (array)$track->sources;
 
         $default = new WP_SoundSytem_Source();
         array_unshift($sources,$default); //add blank line
