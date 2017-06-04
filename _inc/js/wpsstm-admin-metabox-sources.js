@@ -66,6 +66,7 @@ jQuery(document).ready(function($){
         if ( row.attr('data-wpsstm-source-origin') == 'auto' ){
             row.removeAttr('data-wpsstm-source-origin');
             row.find('input').prop("disabled", false);
+            row.removeClass('wpsstm-source-auto');
             return;
         }
         

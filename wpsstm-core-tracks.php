@@ -485,7 +485,7 @@ class WP_SoundSytem_Core_Tracks{
         );
 
         $track = new WP_SoundSystem_Track($args);
-        $track->sources = $track->get_track_sources_auto(false);
+        $track->sources = $track->get_track_sources_auto();
 
         $track = $result['track'] = $track;
 

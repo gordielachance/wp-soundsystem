@@ -86,7 +86,22 @@ class WP_SoundSytem_Core_Sources{
         array_unshift($sources,$default); //add blank line
         $sources_inputs = $this->get_sources_inputs($sources, $field_name);
 
-        $desc = __('Add sources to this track.  It could be a local audio file or a link to a music service.  Hover the provider icon to view the source title (when available)','wpsstm');
+        $desc = array();
+        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
+        
+        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
+        
+        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        $desc = implode("\n",$desc);
 
         $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
         
@@ -233,13 +248,11 @@ class WP_SoundSytem_Core_Sources{
         foreach($sources as $key=>$source){
             
             $source_icon = $source_type = $source_title = null;
-            
-            //get provider icon
-
+                
             $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$source->title);
             $icon_link = $source->get_provider_icon_link();
             
-            $li_classes = array();
+            $li_classes = array('wpsstm-source');
             
             $attr_arr = array(
                 'class' =>                          implode(' ',$li_classes),
@@ -295,7 +308,7 @@ class WP_SoundSytem_Core_Sources{
         $field_name = $result['field_name'] = ( isset($_POST['field_name']) ) ? $_POST['field_name'] : null;
 
         $track = new WP_SoundSystem_Track($args);
-        $sources = $track->get_track_sources_auto(false);
+        $sources = $track->get_track_sources_auto();
 
         $track = $result['track'] = $track;
 
@@ -346,6 +359,7 @@ class WP_SoundSytem_Source {
         $this->populate_url();
         
         $this->title = trim($this->title);
+        if (!$this->title && $this->provider) $this->title = $this->provider->name;
 
     }
     

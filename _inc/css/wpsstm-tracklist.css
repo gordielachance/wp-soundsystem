@@ -135,7 +135,7 @@
   opacity: 0.8;
 }
 /* line 145, ../scss/wpsstm-tracklist.scss */
-.wpsstm-tracklist.wpsstm-tracklist-table table tbody tr.no-items .wpsstm-bottom-wrapper-refresh-notice {
+.wpsstm-tracklist.wpsstm-tracklist-table table tbody tr.no-items .wpsstm-bottom-refresh-notice {
   display: inline;
 }
 /* line 151, ../scss/wpsstm-tracklist.scss */

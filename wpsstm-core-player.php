@@ -222,9 +222,9 @@ abstract class WP_SoundSytem_Player_Provider{
 
 class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider{
     
-    var $name = 'Wordpress';
-    var $slug = 'wp';
-    var $icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+    var $name = 'Audio';
+    var $slug = 'audio';
+    var $icon = '<i class="fa fa-file-audio-o" aria-hidden="true"></i>';
     
     //get file URL extension
     function get_file_url_ext($url){

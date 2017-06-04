@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 3.6
-Tested up to: 4.7.4
+Tested up to: 4.8
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -130,20 +130,6 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
-= How can I alter the music sources for a track ? =
-Hook a custom function on the filter *wpsstm_get_track_sources_meta* or *wpsstm_get_track_sources_auto*.
-
-* use *wpsstm_get_track_sources_meta* when populating sources from your database
-* use *wpsstm_get_track_sources_auto* when populating sources from a remote URl - like an API (slower and thus requested through ajax).
-
-`<?php
-function my_filter_get_source_db($sources,$track){
-    //...your code here...
-    return $sources;
-}
-add_filter('wpsstm_get_track_sources_meta','my_filter_get_source_db',10,2);
-?>`
-
 = Standalone tracks vs Subtracks vs Live Playlist tracks ? =
 
 Playlist and Albums tracks are saved as Track posts.  
@@ -163,6 +149,20 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.0.1 =
+* Improved sources / autosource code
+* lastfm.js : fixed displayAuthNotices()
+* removed 'autoredirect' option
+* WP_SoundSytem_Scraper_Wizard : option to delete current cache
+* fixed ignore cache in wizard
+* bottom player : better GUI for source selection
+* if the track has 'native' sources and that they cannot play, try to autosource
+* improved WP_SoundSytem_Player_Provider subclasses
+* new action hook 'init_playable_tracklist'
+* fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
+* tracklist.js : tableToggleColumns()
+* track & tracklist : sources popup (thickbox) + ajaxed sources suggestions
 
 = 1.0.0 =
 * player.js : now uses javascript classes

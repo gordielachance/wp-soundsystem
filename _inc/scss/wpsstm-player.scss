@@ -22,11 +22,24 @@
             &:not(.wpsstm-bad-source) .wpsstm-source-error{
                 display:none;
             }
-            &.wpsstm-active-source{
-                font-weight: bold;
+        }
+    }
+    &.active{
+        .wpsstm-player-sources-list{
+            li{
+                &.wpsstm-active-source{
+                    font-weight: bold;
+                }
             }
         }
-
+        &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+            .wpsstm-player-sources-list{
+                li{
+                    cursor: pointer;
+                    cursor: hand;
+                }
+            }
+        }
     }
 }
 
@@ -175,6 +188,9 @@ a.wpsstm-play-track{
                 position:relative;
                 width: 90%;
                 [itemprop="track"]{
+                    width:100%;
+                    position:relative;
+                    display:block!important; //jQuery would set 'table-row'
                     td{
                         display:inline-block;
                         padding: 0 1em;
@@ -206,6 +222,7 @@ a.wpsstm-play-track{
                         margin:0;
                         line-height: 2em;
                         position:relative;
+                        min-width: 30%;
                         @include opacity(.3);
                         &:hover{
                             @include opacity(1);
@@ -218,6 +235,7 @@ a.wpsstm-play-track{
                             margin:0;
                             margin-left: 1.5em;
                             list-style-type: none;
+                            width:100%;
 
                             padding: 0;
                             background:rgba(34, 34, 34, 0.95);
@@ -231,14 +249,8 @@ a.wpsstm-play-track{
 
                                 position:relative;
                                 padding: 0 2em;
-                                cursor: pointer;
-                                cursor: hand;
                                 height: 4em;
                                 line-height: 4em;
-
-                                &:hover{
-                                    background-color:lighten(#222, 10%);
-                                }
 
                                 a.wpsstm-source-provider-link{
                                     font-size:2em;
@@ -288,6 +300,9 @@ a.wpsstm-play-track{
                                 }
                                 li{
                                     display: block;
+                                    &:hover{
+                                        background-color:lighten(#222, 5%);
+                                    }
                                 }
                             }
                         }
