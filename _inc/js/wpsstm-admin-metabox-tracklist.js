@@ -4,25 +4,31 @@ jQuery(function($){
         
         var wrapper = $('#wpsstm-tracklist');
         
+        var tables_el = wrapper.find('table');
+        tables_el.tableToggleColumns({
+            ignore_columns : ['#cb','#trackitem_action'],
+            unchecked_columns : ['#trackitem_album','#trackitem_mbid','#trackitem_sources']
+        });
+        
         /* Row actions */
         //edit
-        wrapper.find('.row-actions .edit a').live("click", function(event){
+        wrapper.on( "click", ".row-actions .edit a", function(event) {
             event.preventDefault();
             var row = $(this).parents('tr');
             row.addClass('metabox-table-row-edit');
         });
         //save
-        wrapper.find('.row-actions .save a').live("click", function(event){
+        wrapper.on( "click", ".row-actions .save a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //remove
-        wrapper.find('.row-actions .remove a').live("click", function(event){
+        wrapper.on( "click", ".row-actions .remove a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //delete
-        wrapper.find('.row-actions .delete a').live("click", function(event){
+        wrapper.on( "click", ".row-actions .delete a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
@@ -61,8 +67,6 @@ jQuery(function($){
                 }
                 
             }
-
-            
 
             /*
             clone blank row, insert, focus
@@ -105,31 +109,126 @@ jQuery(function($){
         });
 
     })
+
+    $.fn.tableToggleColumns = function(attr = {}) {
+
+        if( (typeof attr.ignore_columns === typeof undefined) || !attr.ignore_columns ) {
+            attr.ignore_columns = [];
+        }
+        
+        if( (typeof attr.unchecked_columns === typeof undefined) || !attr.unchecked_columns ) {
+            attr.unchecked_columns = [];
+        }
+
+        this.each(function() {
+
+            var $table = $(this);
+            var $thead = $(this).find('thead');
+            if ($thead.length == 0) return;
+            
+            var $thead_driver = $thead.clone();
+            
+            //map columns keys
+            $thead_driver.find('tr > *').each(function( key, td ) {
+                $(td).attr('data-toggle-column-key',key);
+            });
+            
+            //ignored columns array
+            var $ignore_columns = [];
+            $(attr.ignore_columns).each(function( key, selector ) {
+                var $ignore_column = $thead_driver.find(selector);
+                if ($ignore_column.length > 0) $ignore_columns.push($ignore_column);
+            });
+            
+            //unchecked columns array
+            var $unchecked_columns = [];
+            $(attr.unchecked_columns).each(function( key, selector ) {
+                var $unchecked_column = $thead_driver.find(selector);
+                if ($unchecked_column.length > 0) $unchecked_columns.push($unchecked_column);
+            });
+            
+            //remove ignore columns
+            $($ignore_columns).each(function( key, el ) {
+                el.remove();
+            });
+            
+            //remove columns without title
+            $thead_driver.find('th').each(function( key, th ) {
+                var content = $(th).html();
+                if (!content) $(th).remove();
+            });
+
+            //add checkboxes
+            $thead_driver.find('th').each(function( key, th ) {
+                var column_key = Number( $(th).attr('data-toggle-column-key') ) + 1;
+                var $driver_checkbox = $('<input type="checkbox" />');
+                $driver_checkbox.prop('checked',true);
+                $(th).prepend($driver_checkbox);
+                
+                $driver_checkbox.click(function(e) {
+                    var $table_column = $table.find('tr >*:nth-child('+column_key+')');
+                    if ( $(this).is(':checked') ){
+                        $table_column.removeClass('toggle-column-hidden');
+                    }else{
+                        $table_column.addClass('toggle-column-hidden');
+                    }
+                    
+                });
+            });
+            
+            //unchecked columns
+            $($unchecked_columns).each(function( key, th ) {
+                var column_key = Number( $(th).attr('data-toggle-column-key') ) + 1;
+                var $driver_checkbox = $(th).find('input');
+                $driver_checkbox.prop('checked',false);
+                var $table_column = $table.find('tr >*:nth-child('+column_key+')');
+                $table_column.addClass('toggle-column-hidden');
+            });
+
+            $table.addClass('toggle-columns');
+            
+            var toggle_driver = $('<table></table>');
+            toggle_driver.attr({
+                id: 'toggle-columns-driver'
+            });
+            
+            toggle_driver.html($thead_driver);
+            toggle_driver.insertBefore( $table );
+            
+        });
+
+
+    }; 
+    
 })
 
 function wpsstm_tracklist_row_action(row_action_link){
-    var link = row_action_link;
-    var row = jQuery(link).parents('tr');
-            
-    //get URI args
-    var uri = new URI( jQuery(link).attr('href') );
-    var uri_args = uri.search(true);
-    var track_id = uri_args.subtrack_id;
-    var tracklist_id = uri_args.post;
-    var track_action = uri_args.subtrack_action;
-    
-    var track_source_urls = [];
-    row.find('.wpsstm-source input').each(function() {
-        track_source_urls.push( jQuery(this).val() );
+    var link = jQuery(row_action_link);
+    var row = link.parents('tr');
+
+    var track_id = row.attr('data-wpsstm-track-id');
+    var tracklist_id = row.closest('[data-wpsstm-tracklist-id]').attr('data-wpsstm-tracklist-id');
+    var track_action = link.attr('data-wpsstm-subtrack-action');
+
+    var track_sources = [];
+    jQuery(row).find('.wpsstm-source:not(.wpsstm-source-auto)').each(function() {
+        
+        var source = jQuery(this);
+        var source_title =  source.find('input').eq(0).val();
+        var source_url =    source.find('input').eq(1).val();
+        var source = {title:source_title,url:source_url};
+        track_sources.push(source);
     });
-    
+
+    if ( track_sources.length == 0 ) track_sources = null; // we need this or arg will not be received by PHP
+
     var track = {
         'post_id':          track_id, 
         'artist':           row.find('.trackitem_artist input').val(),
         'title':            row.find('.trackitem_track input').val(),
         'album':            row.find('.trackitem_album input').val(),
         'mbid':             row.find('.trackitem_mbid input').val(),
-        'source_urls':      track_source_urls,
+        'sources':          track_sources,
         'tracklist_id':     tracklist_id,
     };
 
@@ -189,7 +288,6 @@ function wpsstm_tracklist_order_update(){
     var wrapper = jQuery('#wpsstm-subtracks-list');
     var all_rows = wrapper.find( '#the-list tr' );
     var new_order = [];
-    var tracklist_id = 0; //TO FIX
     
     jQuery.each( all_rows, function( key, value ) {
         
@@ -218,7 +316,6 @@ function wpsstm_tracklist_order_update(){
             table.addClass('loading');
         },
         success: function(data){
-            console.log(data);
             if (data.success === false) {
                 console.log(data);
             }

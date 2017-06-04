@@ -23,7 +23,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
-                $this->sources = wpsstm_sources()->get_track_sources_db($track_id);
+                $this->sources = wpsstm_get_post_sources($track_id);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -32,10 +32,11 @@ class WP_SoundSystem_Track{
         $args_default = $this->get_default();
         $args = wp_parse_args($args,$args_default);
 
-        //only for keys that exists in $args_default
-        foreach ((array)$args_default as $param=>$dummy){
-            if ( !$args[$param] ) continue; //empty value
-            $this->$param = $args[$param];
+        //set properties from args input
+        foreach ($args as $key=>$value){
+            if ( !array_key_exists($key,$args_default) ) continue;
+            if ( !isset($args[$key]) ) continue; //value has not been set
+            $this->$key = $args[$key];
         }
 
     }
@@ -166,9 +167,9 @@ class WP_SoundSystem_Track{
             wpsstm_artists()->metakey           => $this->artist,
             wpsstm_tracks()->metakey            => $this->title,
             wpsstm_albums()->metakey            => $this->album,
-            wpsstm_sources()->sources_metakey   => $this->sources,
+            //sources is more specific, will be saved below
         );
-        
+
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){		
             $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;		
         }
@@ -213,6 +214,9 @@ class WP_SoundSystem_Track{
         }
 
         if ( is_wp_error($post_track_id) ) return $post_track_id;
+        
+        //sources is quite specific
+        $this->update_track_sources($this->sources);
         
         $this->post_id = $post_track_id;
 
@@ -318,6 +322,43 @@ class WP_SoundSystem_Track{
         $loved_by = $this->get_track_loved_by($this->post_id);
         return in_array($user_id,(array)$loved_by);
     }
+    
+    /*
+    Track Sources
+    */
+    
+    function get_track_sources_auto( $args = null ){
+        
+        if (!$this->artist || !$this->title) return;
+
+        $sources = array();
+
+        foreach( (array)wpsstm_player()->providers as $provider ){
+            if ( !$provider_sources = $provider->sources_lookup( $this,$args ) ) continue; //cannot play source
+
+            $sources = array_merge($sources,(array)$provider_sources);
+            
+        }
+
+        //allow plugins to filter this
+        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+
+        return $sources;
+
+    }
+
+    function update_track_sources($sources){
+        
+        if (!$this->artist || !$this->title) return;
+
+        $sources = wpsstm_sources()->sanitize_sources($sources);
+
+        if (!$sources){
+            return delete_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey );
+        }else{
+            return update_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey, $sources );
+        }
+    }
 
 }
 
@@ -387,5 +428,5 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         
         return $tracklist->set_subtrack_ids($subtrack_ids);
     }
-    
+
 }

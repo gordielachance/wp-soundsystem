@@ -263,7 +263,7 @@ class WP_SoundSytem_Core_MusicBrainz {
     function metabox_mb_entries_artist($post){
 
         $entries = $this->get_mb_entries_for_post($post->ID);
-        if (!$entries) return;
+        if ( !$entries || is_wp_error($entries) ) return;
 
         ?>
 
@@ -290,7 +290,7 @@ class WP_SoundSytem_Core_MusicBrainz {
     function metabox_mb_entries_track($post){
         
         $entries = $this->get_mb_entries_for_post($post->ID);
-        if ( !$entries ) return;
+        if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
         $entries_table = new WP_SoundSytem_MB_Entries();
@@ -308,7 +308,7 @@ class WP_SoundSytem_Core_MusicBrainz {
     function metabox_mb_entries_release($post){
         
         $entries = $this->get_mb_entries_for_post($post->ID);
-        if (!$entries) return;
+        if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
         $entries_table = new WP_SoundSytem_MB_Entries();
@@ -382,7 +382,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
         if (!$auto_id) return;
 
-        if ( !$mbid = $this->guess_mbid( $post_id ) ) return;
+        if ( ( !$mbid = $this->guess_mbid( $post_id ) ) || is_wp_error($mbid) ) return;
         
         $this->do_update_mbid($post_id,$mbid);
 
@@ -882,6 +882,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if (!$api_query) return;
         
         $data = $this->get_musicbrainz_api_entry($api_type,null,$api_query);
+        if ( is_wp_error($data) ) return $data;
         return wpsstm_get_array_value($result_keys, $data);
         
     }

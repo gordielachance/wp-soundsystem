@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.0.0
+Version: 1.0.1
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '1.0.0';
+    public $version = '1.0.1';
     /**
     * @public string plugin DB version
     */
@@ -89,7 +89,6 @@ class WP_SoundSytem {
             'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
-            'autoredirect'                      => 0, //seconds
             'autosource'                        => 'on',
             'autosource_cache'                  => 1* WEEK_IN_SECONDS
         );
@@ -114,15 +113,12 @@ class WP_SoundSytem {
         require $this->plugin_dir . 'wpsstm-core-lastfm.php';
         //require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
-        require $this->plugin_dir . 'wpsstm-ajax.php';
-
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
         }
         
-        if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
-        }
+        
+        require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';
@@ -179,83 +175,6 @@ class WP_SoundSytem {
             */
 
         }else{
-
-            if ($current_version < 101){
-                
-                //update sources from plugin Post_Bookmarks
-                if ( class_exists('Post_Bookmarks') ){
-
-                    //get tracks
-                    $tracks_args = array(
-                        'post_type'     => wpsstm()->post_type_track,
-                        'post_status'   => 'any',
-                        'posts_per_page'    => -1,
-                        'fields'            => 'ids'
-                    );
-
-                    $query = new WP_Query( $tracks_args );
-                    
-                    $sources_cat = get_term_by( 'slug', 'wpsstm-sources', 'link_category');
-                    $sources_cat_id = $sources_cat->term_id;
-                    
-                    $bookmarks_args = array(
-                        'category' => $sources_cat_id
-                    );
-
-                    foreach ($query->posts as $track_id){
-                        
-                        if ( !$bookmarks = post_bkmarks_get_post_links($track_id, $bookmarks_args) ) continue;
-                        
-                        $track = new WP_SoundSystem_Track( array('post_id'=>$track_id) );
-                        $sources_db = $this->get_track_sources_db($track_id,false); //without filters
-
-                        foreach ((array)$bookmarks as $bookmark){
-                            $sources_db[] = $bookmark->link_url;
-                        }
-
-                        wpsstm_sources()->update_post_sources($track_id,$sources_db);
-                        
-                    }
-                }
-
-            }
-            
-            if ($current_version < 103){
-                
-                //sources : update from a string -> an array 
-                
-                $sources_meta_key = wpsstm_sources()->sources_metakey;
-                
-                $metas_query = $wpdb->get_results( $wpdb->prepare( "
-                    SELECT post_id,meta_value FROM {$wpdb->postmeta} pm
-                    LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-                    WHERE pm.meta_key = '%s'
-                ", $sources_meta_key ) );
-                
-                foreach((array)$metas_query as $post_sources){
-                    $post_id = $post_sources->post_id;
-                    $meta_value = $post_sources->meta_value;
-                    $meta_value = maybe_unserialize( $meta_value );
-                    foreach((array)$meta_value as $key=>$post_source){
-                        $new_source = wpsstm_sources()->source_blank;
-                        $new_source['url'] = $post_source;
-                        $new_source = array_filter($new_source);
-                        $meta_value[$key] = $new_source;
-                    }
-                    wpsstm_sources()->update_post_sources($post_id,$meta_value);
-                }
-            }
-            
-            if ($current_version < 104){
-                
-                //rename post metas
-                $update_posts = $wpdb->prepare( 
-                    "UPDATE `".$wpdb->prefix . "postmeta` SET meta_key = '%s' WHERE meta_key = '%s'",
-                    wpsstm_sources()->sources_metakey,
-                    '_wpsstm_source_urls'
-                );
-                $wpdb->query($update_posts);
-            }
 
         }
         

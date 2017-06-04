@@ -107,9 +107,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             parent::__construct($post_id);
             $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
             
-            if ( $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true) ){
-                $this->options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
-            }
+            $this->options = $this->get_options();
 
         }
 
@@ -121,6 +119,18 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         }
 
     }
+    
+    function get_options($keys=null){
+        $options = array();
+        $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
+        $options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
+
+        if ($keys){
+            return wpsstm_get_array_value($keys, $options);
+        }else{
+            return $options;
+        }
+    }
 
     function load_remote_tracks($remote_request = false){
 
@@ -129,16 +139,18 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //try to get cache first
 
         $this->datas = $this->datas_cache = $this->get_cache();
+        
         if ($this->datas_cache){
-            
             $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
             if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
                 $this->expire_time = $cache_expire_time;
             }
             
             $this->add($this->datas_cache['tracks']);
+            
             //we got cached tracks, but do ignore them in wizard
             if ( ( $cached_total_items = count($this->tracks) ) && $this->is_wizard ){
+                $this->datas = $this->datas_cache = null;
                 $this->add_notice( 'wizard-header-advanced', 'cache_tracks_loaded', sprintf(__('A cache entry with %1$s tracks was found (%2$s); but is ignored within the wizard.','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
             }
         }
@@ -538,7 +550,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $sources = array();
             if ( $source_urls = $this->get_track_source_urls($single_track_node) ){
                 foreach ((array)$source_urls as $source_url){
-                    $sources[] = array('url'=>$source_url);
+                    $sources[] = array('url'=>$source_url,'origin'=>'scraper');
                 }
             }
 
@@ -766,7 +778,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     function get_refresh_link(){
-        $refresh_icon = '<i class="fa fa-refresh" aria-hidden="true"></i>';
+        $refresh_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
         $error_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         $refresh_text = __('Refresh Playlist','wpsstm');
         return sprintf('<a class="wpsstm-refresh-playlist" href="#">%s %s %s</a>',$refresh_icon,$error_icon,$refresh_text);

@@ -22,7 +22,7 @@ class WP_SoundSytem_Preset_IndieShuffle_Scraper extends WP_SoundSytem_Live_Playl
             'track_artist'     => array('attr'=>'data-track-artist'),
             'track_title'      => array('attr'=>'data-track-title'),
             'track_image'      => array('path'=>'img','attr'=>'src'),
-            'track_source_urls' => array('attr'=>'data-source-url'),
+            'track_source_urls' => array('attr'=>'data-source'),
         )
     );
 

@@ -9,7 +9,6 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
     class WP_SoundSytem_TracksList_Admin_Table extends WP_List_Table {
 
-        var $current_track_idx = -1;
         var $links_per_page = -1;
         var $can_manage_rows;
 
@@ -52,14 +51,20 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
         override parent function so we can add attributes, etc.
         */
         public function single_row( $item ) {
-            $this->current_track_idx ++;
             
             $item_classes = array();
             if ( property_exists($item, 'row_classes') ){
                 $item_classes = $item->row_classes;
             }
+            
+            $attr_arr = array(
+                'class' =>                      implode(' ',$item_classes),
+                'data-wpsstm-track-id' =>       ($item->post_id) ? $item->post_id : null,
+                'data-wpsstm-track-idx' =>      $item->subtrack_order,
+                'data-wpsstm-track-order' =>    $item->subtrack_order
+            );
 
-            printf( '<tr %s data-track-key="%s" data-track-order="%s">',wpsstm_get_classes_attr($item_classes),$this->current_track_idx,$item->subtrack_order );
+            printf( '<tr %s>',wpsstm_get_html_attr($attr_arr) );
             $this->single_row_columns( $item );
             echo '</tr>';
         }
@@ -210,8 +215,8 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
         }
         */
 
-        public function get_field_name( $slug ) {
-            return sprintf('wpsstm[tracklist][tracks][%d][%s]',$this->current_track_idx,$slug);
+        public function get_field_name( $item, $slug ) {
+            return sprintf('wpsstm[tracklist][tracks][%d][%s]',$item->subtrack_order,$slug);
         }
 
 
@@ -238,10 +243,10 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 case 'cb':
 
                     $input_cb = sprintf( '<input type="checkbox" name="%s" value="on"/>',
-                        $this->get_field_name('selected')
+                        $this->get_field_name($item,'selected')
                     );
                     $input_track_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                        $this->get_field_name('post_id'),
+                        $this->get_field_name($item,'post_id'),
                         $item->post_id
                     );
 
@@ -258,7 +263,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 break;
 
                 case 'trackitem_order':
-                    printf( '<input type="text" name="%s" value="%s" size="3"/>',$this->get_field_name('track_order'),$item->subtrack_order);
+                    printf( '<input type="text" name="%s" value="%s" size="3"/>',$this->get_field_name($item,'track_order'),$item->subtrack_order);
                 break;
 
                 case 'trackitem_artist':
@@ -268,7 +273,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     //edit
                     $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',
-                                       $this->get_field_name('artist'),
+                                       $this->get_field_name($item,'artist'),
                                        $item->artist
                                       );
 
@@ -289,7 +294,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
                     //edit
                     $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',
-                                       $this->get_field_name('title'),
+                                       $this->get_field_name($item,'title'),
                                        $item->title
                                       );
 
@@ -309,7 +314,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     $display_html = wpsstm_get_post_album_link_by_name($album,$artist,true);
 
                     //edit
-                    $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',$this->get_field_name('album'),$item->album);
+                    $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',$this->get_field_name($item,'album'),$item->album);
 
                     //display
                     $display_classes[] = 'ellipsis';
@@ -325,7 +330,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     $mbid = $item->mbid;
 
                     //value
-                    $field_value_name = $this->get_field_name('mbid');
+                    $field_value_name = $this->get_field_name($item,'mbid');
                     $edit_el = sprintf('<input type="text" name="%s" value="%s" class="cell-edit-value"/>',$field_value_name,$mbid);
 
                     //display
@@ -340,11 +345,17 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 case 'trackitem_sources':
                     
                     $sources_display =  $item->sources;
-
                     $display_el = ( $sources_display ) ?  count($sources_display) : '—';
-                    $field_name = $this->get_field_name('source_urls');
+                    $field_value_name = $this->get_field_name($item,'sources');
                     
-                    $edit_el = wpsstm_sources()->get_sources_field_editable( $item->post_id, $field_name );
+                    $sources_popup_id = sprintf('wpsstm-subtrack-%s-sources-popup',$item->subtrack_order);
+                    $sources_popup_wrapper = sprintf('<div id="%s" class="wpsstm-track-sources-popup">%s</div>',$sources_popup_id,wpsstm_sources()->get_metabox_sources_manager( $item->post_id, $field_value_name ));
+                    
+                    add_thickbox();
+                    
+                    $sources_popup_link = sprintf('<a title="%s" href="#TB_inline?width=600&height=550&inlineId=%s" class="thickbox">%s</a>',__('Sources','wpsstm'),$sources_popup_id,__('Manage sources','wpsstm'));
+
+                    $edit_el = $sources_popup_wrapper . $sources_popup_link;
                     
                     return sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                 break;
@@ -386,26 +397,46 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             $action_url = add_query_arg(array('subtrack_id'=>$item->post_id),get_edit_post_link());
             $action_url = wp_nonce_url($action_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
             
+            $row_actions = $subtrack_actions = array();
+            
             //edit
-            $edit_url = get_edit_post_link($item->post_id);
-            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-edit',$edit_url,__('Edit'));
-
+            $subtrack_actions[] = array(
+                'slug'  => 'edit',
+                'text'  => __('Edit'),
+                'url'   => get_edit_post_link($item->post_id)
+            );
+            
             //save
-            $save_url = add_query_arg(array('subtrack_action'=>'save'),$action_url);
-            $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-save',$save_url,__('Save'));
+            $subtrack_actions[] = array(
+                'slug'  => 'save',
+                'text'  => __('Save'),
+            );
             
             //remove
-            $remove_url = add_query_arg(array('subtrack_action'=>'remove'),$action_url);
-            $actions['remove'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-save',$remove_url,__('Remove'));
+            $subtrack_actions[] = array(
+                'slug'  => 'remove',
+                'text'  => __('Remove'),
+            );
             
             //delete
             if ( $is_attached ){
-                $delete_url = add_query_arg(array('subtrack_action'=>'delete'),$action_url);
-                $delete_url = wp_nonce_url($delete_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
-                $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','wpsstm-subtrack-action-delete',$delete_url,__('Delete'));
+                $subtrack_actions[] = array(
+                    'slug'  => 'remove',
+                    'text'  => __('Delete'),
+                );
+            }
+            
+            foreach($subtrack_actions as $action){
+                $slug = $action['slug'];
+                
+                $url = ( isset($action['url']) ) ? $action['url'] : null;
+                if ( !$url ) $url = add_query_arg(array('subtrack_action'=>$slug),$action_url); //default subtrack action url
+                        
+                $row_actions[$slug] = sprintf('<a data-wpsstm-subtrack-action="%s" href="%s">%s</a>',$slug,$url,$action['text']);
             }
 
-            return $this->row_actions( $actions, true );
+
+            return $this->row_actions( $row_actions, true );
         }
 
     }
