@@ -37,6 +37,9 @@ class WP_SoundSytem_Core_Sources{
 
         add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
+        
+        //ajax : sources manager : suggest
+        add_action('wp_ajax_wpsstm_suggest_editable_sources', array($this,'ajax_suggest_editable_sources'));
 
     }
 
@@ -67,44 +70,54 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
-        $desc = __('Add sources to this track.  It could be a local audio file or a link to a music service.  Hover the provider icon to view the source title (when available)','wpsstm');
-        printf('<p>%s</p>',$desc);
         
-        echo $this->get_sources_field_editable($post->ID,'wpsstm_sources');
+        echo $this->get_metabox_sources_manager($post->ID);
         
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
     }
     
-    function get_sources_field_editable( $post_id, $field_name ){
+    function get_metabox_sources_manager( $post_id, $field_name = 'wpsstm_sources' ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = (array)$track->get_track_sources(false); //db & remote
+        $sources = ($track->sources) ? $track->sources : array();
+        $field_name_attr = null;
 
         $default = new WP_SoundSytem_Source();
         array_unshift($sources,$default); //add blank line
+        $sources_inputs = $this->get_sources_inputs($sources, $field_name);
 
+        $desc = __('Add sources to this track.  It could be a local audio file or a link to a music service.  Hover the provider icon to view the source title (when available)','wpsstm');
+
+        $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
+        
+        $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
+
+        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s"><p>%s</p><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$track->artist,$track->album,$track->title,$desc,$sources_inputs,$suggest_link);
+
+    }
+    
+    function get_sources_inputs($sources,$field_name){
+        
         $rows = array();
 
         foreach ( $sources as $key=>$source_raw ){
             
             $source = new WP_SoundSytem_Source($source_raw);
-            if (!$source->src) continue;
 
-            $disabled = false;
+            $disabled = $readonly = false;
             $source_title_el = $source_url_el = null;
             
 
             $source_classes = array('wpsstm-source');
-            if ($key==0){
-                $source_classes[] = 'wpsstm-source-new';
-            }
-            
+
             //origin
             if ( $source->origin == 'auto' ){
-                $disabled = true;
+                $disabled = $readonly = true;
+                $source_classes[] = 'wpsstm-source-auto';
             }
             
             $disabled_str = disabled( $disabled, true, false );
+            $readonly_str = wpsstm_readonly( $readonly, true, false );
 
             //icon
             $icon_link = $source->get_provider_icon_link();
@@ -123,7 +136,7 @@ class WP_SoundSytem_Core_Sources{
             );
             
             $source_title_el = sprintf('<input type="hidden" class="wpsstm-source-title" %s/>',wpsstm_get_html_attr($source_title_attr_arr));
-            $source_url_el = sprintf('<input type="text" class="wpsstm-source-url" %s %s/>',wpsstm_get_html_attr($source_url_attr_arr),$disabled_str);
+            $source_url_el = sprintf('<input type="text" class="wpsstm-source-url" %s %s %s/>',wpsstm_get_html_attr($source_url_attr_arr),$disabled_str,$readonly_str);
             
             $content_url = sprintf('<span class="wpsstm-source-icon">%s</span>',$icon_link);
             
@@ -141,10 +154,7 @@ class WP_SoundSytem_Core_Sources{
 
             $rows[] = sprintf('<div %s>%s</div>',wpsstm_get_html_attr($attr_arr),$content_url);
         }
-        
-        $rows = implode("\n",$rows);
-        return sprintf('<div class="wpsstm-sources">%s</div>',$rows);
-
+        return implode("\n",$rows);
     }
     
     /**
@@ -230,7 +240,6 @@ class WP_SoundSytem_Core_Sources{
             $icon_link = $source->get_provider_icon_link();
             
             $li_classes = array();
-            if ($key==0) $li_classes[]= 'wpsstm-active-source'; //default active source
             
             $attr_arr = array(
                 'class' =>                          implode(' ',$li_classes),
@@ -241,7 +250,7 @@ class WP_SoundSytem_Core_Sources{
             );
             
             $li_classes = null;
-            $lis[] = sprintf('<li %s>%s %s <i class="fa fa-exclamation-triangle" aria-hidden="true"></i></li>',wpsstm_get_html_attr($attr_arr),$icon_link,$source_title);
+            $lis[] = sprintf('<li %s>%s %s <i class="wpsstm-source-error fa fa-exclamation-triangle" aria-hidden="true"></i></li>',wpsstm_get_html_attr($attr_arr),$icon_link,$source_title);
             
         }
         if ( !empty($lis) ){
@@ -267,6 +276,35 @@ class WP_SoundSytem_Core_Sources{
         $new_sources = wpsstm_array_unique_by_subkey($new_sources,'url');
 
         return $new_sources;
+    }
+    
+    function ajax_suggest_editable_sources($field_name){
+        $result = array(
+            'input'     => $_POST,
+            'message'   => null,
+            'new_html'  => null,
+            'success'   => false
+        );
+
+        $args = $result['args'] = array(
+            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+        );
+        
+        $field_name = $result['field_name'] = ( isset($_POST['field_name']) ) ? $_POST['field_name'] : null;
+
+        $track = new WP_SoundSystem_Track($args);
+        $sources = $track->get_track_sources_auto(false);
+
+        $track = $result['track'] = $track;
+
+        $result['new_html'] = wpsstm_sources()->get_sources_inputs($sources,$field_name);
+        $result['success'] = true;
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+
     }
 
 }
@@ -333,5 +371,4 @@ class WP_SoundSytem_Source {
         $title = ($this->title) ? $this->title : null;
         return sprintf('<a class="wpsstm-source-provider-link" href="%s" target="_blank" title="%s">%s</a>',$this->url,$title,$this->provider->icon);
     }
-
 }

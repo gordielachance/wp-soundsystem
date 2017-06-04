@@ -346,8 +346,16 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     
                     $sources_display =  $item->sources;
                     $display_el = ( $sources_display ) ?  count($sources_display) : '—';
-                    $field_name = $this->get_field_name($item,'sources');
-                    $edit_el = wpsstm_sources()->get_sources_field_editable( $item->post_id, $field_name );
+                    $field_value_name = $this->get_field_name($item,'sources');
+                    
+                    $sources_popup_id = sprintf('wpsstm-subtrack-%s-sources-popup',$item->subtrack_order);
+                    $sources_popup_wrapper = sprintf('<div id="%s" class="wpsstm-track-sources-popup">%s</div>',$sources_popup_id,wpsstm_sources()->get_metabox_sources_manager( $item->post_id, $field_value_name ));
+                    
+                    add_thickbox();
+                    
+                    $sources_popup_link = sprintf('<a title="%s" href="#TB_inline?width=600&height=550&inlineId=%s" class="thickbox">%s</a>',__('Sources','wpsstm'),$sources_popup_id,__('Manage sources','wpsstm'));
+
+                    $edit_el = $sources_popup_wrapper . $sources_popup_link;
                     
                     return sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                 break;

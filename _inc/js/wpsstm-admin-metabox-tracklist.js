@@ -4,25 +4,31 @@ jQuery(function($){
         
         var wrapper = $('#wpsstm-tracklist');
         
+        var tables_el = wrapper.find('table');
+        tables_el.tableToggleColumns({
+            ignore_columns : ['#cb','#trackitem_action'],
+            unchecked_columns : ['#trackitem_album','#trackitem_mbid','#trackitem_sources']
+        });
+        
         /* Row actions */
         //edit
-        wrapper.find('.row-actions .edit a').on("click", function(event){
+        wrapper.on( "click", ".row-actions .edit a", function(event) {
             event.preventDefault();
             var row = $(this).parents('tr');
             row.addClass('metabox-table-row-edit');
         });
         //save
-        wrapper.find('.row-actions .save a').on("click", function(event){
+        wrapper.on( "click", ".row-actions .save a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //remove
-        wrapper.find('.row-actions .remove a').on("click", function(event){
+        wrapper.on( "click", ".row-actions .remove a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
         //delete
-        wrapper.find('.row-actions .delete a').on("click", function(event){
+        wrapper.on( "click", ".row-actions .delete a", function(event) {
             event.preventDefault();
             wpsstm_tracklist_row_action(this);
         });
@@ -61,8 +67,6 @@ jQuery(function($){
                 }
                 
             }
-
-            
 
             /*
             clone blank row, insert, focus
@@ -105,6 +109,97 @@ jQuery(function($){
         });
 
     })
+
+    $.fn.tableToggleColumns = function(attr = {}) {
+
+        if( (typeof attr.ignore_columns === typeof undefined) || !attr.ignore_columns ) {
+            attr.ignore_columns = [];
+        }
+        
+        if( (typeof attr.unchecked_columns === typeof undefined) || !attr.unchecked_columns ) {
+            attr.unchecked_columns = [];
+        }
+
+        this.each(function() {
+
+            var $table = $(this);
+            var $thead = $(this).find('thead');
+            if ($thead.length == 0) return;
+            
+            var $thead_driver = $thead.clone();
+            
+            //map columns keys
+            $thead_driver.find('tr > *').each(function( key, td ) {
+                $(td).attr('data-toggle-column-key',key);
+            });
+            
+            //ignored columns array
+            var $ignore_columns = [];
+            $(attr.ignore_columns).each(function( key, selector ) {
+                var $ignore_column = $thead_driver.find(selector);
+                if ($ignore_column.length > 0) $ignore_columns.push($ignore_column);
+            });
+            
+            //unchecked columns array
+            var $unchecked_columns = [];
+            $(attr.unchecked_columns).each(function( key, selector ) {
+                var $unchecked_column = $thead_driver.find(selector);
+                if ($unchecked_column.length > 0) $unchecked_columns.push($unchecked_column);
+            });
+            
+            //remove ignore columns
+            $($ignore_columns).each(function( key, el ) {
+                el.remove();
+            });
+            
+            //remove columns without title
+            $thead_driver.find('th').each(function( key, th ) {
+                var content = $(th).html();
+                if (!content) $(th).remove();
+            });
+
+            //add checkboxes
+            $thead_driver.find('th').each(function( key, th ) {
+                var column_key = Number( $(th).attr('data-toggle-column-key') ) + 1;
+                var $driver_checkbox = $('<input type="checkbox" />');
+                $driver_checkbox.prop('checked',true);
+                $(th).prepend($driver_checkbox);
+                
+                $driver_checkbox.click(function(e) {
+                    var $table_column = $table.find('tr >*:nth-child('+column_key+')');
+                    if ( $(this).is(':checked') ){
+                        $table_column.removeClass('toggle-column-hidden');
+                    }else{
+                        $table_column.addClass('toggle-column-hidden');
+                    }
+                    
+                });
+            });
+            
+            //unchecked columns
+            $($unchecked_columns).each(function( key, th ) {
+                var column_key = Number( $(th).attr('data-toggle-column-key') ) + 1;
+                var $driver_checkbox = $(th).find('input');
+                $driver_checkbox.prop('checked',false);
+                var $table_column = $table.find('tr >*:nth-child('+column_key+')');
+                $table_column.addClass('toggle-column-hidden');
+            });
+
+            $table.addClass('toggle-columns');
+            
+            var toggle_driver = $('<table></table>');
+            toggle_driver.attr({
+                id: 'toggle-columns-driver'
+            });
+            
+            toggle_driver.html($thead_driver);
+            toggle_driver.insertBefore( $table );
+            
+        });
+
+
+    }; 
+    
 })
 
 function wpsstm_tracklist_row_action(row_action_link){
@@ -116,14 +211,15 @@ function wpsstm_tracklist_row_action(row_action_link){
     var track_action = link.attr('data-wpsstm-subtrack-action');
 
     var track_sources = [];
-    row.find('.wpsstm-sources input.wpsstm-source-url:not(:disabled)').each(function() {
-        var source_url = $(this).val();
-        var source_title = $(this).siblings('.wpsstm-source-title').val();
-        if (!source_url) return true; //continue
+    jQuery(row).find('.wpsstm-source:not(.wpsstm-source-auto)').each(function() {
+        
+        var source = jQuery(this);
+        var source_title =  source.find('input').eq(0).val();
+        var source_url =    source.find('input').eq(1).val();
         var source = {title:source_title,url:source_url};
         track_sources.push(source);
     });
-    
+
     if ( track_sources.length == 0 ) track_sources = null; // we need this or arg will not be received by PHP
 
     var track = {
@@ -143,8 +239,6 @@ function wpsstm_tracklist_row_action(row_action_link){
         'track_order':      row.find('.trackitem_order input').val(),
         
     };
-    
-    console.log(ajax_data);
 
     jQuery.ajax({
 
@@ -222,7 +316,6 @@ function wpsstm_tracklist_order_update(){
             table.addClass('loading');
         },
         success: function(data){
-            console.log(data);
             if (data.success === false) {
                 console.log(data);
             }

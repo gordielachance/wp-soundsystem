@@ -19,7 +19,7 @@
     }
     .wpsstm-player-sources-list{
         li{
-            &:not(.wpsstm-bad-source) .fa-exclamation-triangle{
+            &:not(.wpsstm-bad-source) .wpsstm-source-error{
                 display:none;
             }
             &.wpsstm-active-source{
@@ -133,13 +133,12 @@ a.wpsstm-play-track{
     }
     
     #wpsstm-bottom{
+        display:none;
         position: relative;
         color:white;
         font-family:sans-serif;
         
         #wpsstm-bottom-track-wrapper{
-            
-            display:none;
             background:#222;
             line-height:3em;
             height:3em;
@@ -201,6 +200,71 @@ a.wpsstm-play-track{
                         }
 
                     }
+                    
+                    .column-trackitem_sources{
+                        padding: 0;
+                        margin:0;
+                        line-height: 2em;
+                        position:relative;
+                        @include opacity(.3);
+                        &:hover{
+                            @include opacity(1);
+                        }
+                        ul.wpsstm-player-sources-list{
+                            position:relative;
+                            display:block;
+                            font-size:.85em;
+                            padding: 0;
+                            margin:0;
+                            margin-left: 1.5em;
+                            list-style-type: none;
+
+                            padding: 0;
+                            background:rgba(34, 34, 34, 0.95);
+                            position:absolute;
+                            bottom:-2em;
+
+                            li{
+                                &:not(.wpsstm-active-source){
+                                    display:none;
+                                }
+
+                                position:relative;
+                                padding: 0 2em;
+                                cursor: pointer;
+                                cursor: hand;
+                                height: 4em;
+                                line-height: 4em;
+
+                                &:hover{
+                                    background-color:lighten(#222, 10%);
+                                }
+
+                                a.wpsstm-source-provider-link{
+                                    font-size:2em;
+                                    position:absolute;
+                                }
+                                span{
+                                    padding-left:3.5em;
+                                    display: inline-block;
+                                    width: calc(100% - 3.5em);
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+                                .wpsstm-source-error{
+                                    position: absolute;
+                                    right: 2em;
+                                    height: 4em;
+                                    line-height: 4em;
+                                }
+
+
+                            }
+
+                        }
+
+                    }
 
                     &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
                         .wpsstm-player-sources-list{
@@ -231,61 +295,7 @@ a.wpsstm-play-track{
 
                 }
 
-                .column-trackitem_sources{
-                    padding: 0;
-                    margin:0;
-                    line-height: 2em;
-                    position:relative;
-                    ul.wpsstm-player-sources-list{
-                        position:relative;
-                        display:block;
-                        font-size:.85em;
-                        padding: 0;
-                        margin:0;
-                        margin-left: 1.5em;
-                        list-style-type: none;
-                        @include opacity(.3);
-                        padding: 0;
-                        background:rgba(34, 34, 34, 0.95);
-                        position:absolute;
-                        bottom:-2em;
 
-                        li{
-                            &:not(.wpsstm-active-source){
-                                display:none;
-                            }
-                            
-                            position:relative;
-                            padding: 0 2em;
-                            cursor: pointer;
-                            cursor: hand;
-                            height: 4em;
-                            line-height: 4em;
-                            
-                            &:hover{
-                                background-color:lighten(#222, 10%);
-                            }
-
-                            a.wpsstm-source-provider-link{
-                                font-size:2em;
-                                position:absolute;
-                            }
-                            span{
-                                padding-left:3.5em;
-                                display: inline-block;
-                                width: calc(100% - 3.5em);
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            }
-
-                        }
-                        &:hover{
-                            @include opacity(1);
-                        }
-                    }
-
-                }
             }
             
         }

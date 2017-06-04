@@ -48,14 +48,6 @@ class WP_SoundSytem_Tracklist_Table{
             $current_page = $this->tracklist->pagination['current_page'];
             $this->items = array_slice((array)$this->items,(($current_page-1)*$per_page),$per_page);
         }
-        
-        /*
-        populate track sources
-        */
-        
-        foreach($this->items as $item){
-            $item->sources = $item->get_track_sources(true); //DB only
-        }
 
         $this->curr_track_idx = $per_page * ( $current_page - 1 );
         

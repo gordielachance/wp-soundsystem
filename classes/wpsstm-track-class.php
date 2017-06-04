@@ -23,7 +23,7 @@ class WP_SoundSystem_Track{
                 $this->artist = wpsstm_get_post_artist($track_id);
                 $this->album = wpsstm_get_post_album($track_id);
                 $this->mbid = wpsstm_get_post_mbid($track_id);
-                $this->sources = wpsstm_get_post_sources($track_id); //regular sources only (set by user, from database) - when displaying a tracklist, we'll populate extra sources (if any) within WP_SoundSytem_Tracklist_Table::prepare_items()
+                $this->sources = wpsstm_get_post_sources($track_id);
             }
         }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
@@ -327,30 +327,9 @@ class WP_SoundSystem_Track{
     Track Sources
     */
     
-    //get an array of raw track sources from the DB
-    function get_track_sources($db_only = true){
-
+    function get_track_sources_auto( $args = null ){
+        
         if (!$this->artist || !$this->title) return;
-
-        $sources = $this->sources;
-
-        if ($db_only){
-            if ($sources_cached = $this->get_track_sources_auto( array('cache_only'=>true) ) ){
-                $sources = array_merge((array)$sources,(array)$sources_cached);
-            }
-        }else{
-            if ($sources_auto = $this->get_track_sources_auto() ){
-                $sources = array_merge((array)$sources,(array)$sources_auto);
-            } 
-        }
-
-        $sources = wpsstm_sources()->sanitize_sources($sources);
-
-        return $sources;
-    }
-    
-    //Those source will be suggested backend; user will need to confirm them.
-    function get_track_sources_auto($args=null){
 
         $sources = array();
 

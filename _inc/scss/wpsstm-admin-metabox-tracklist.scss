@@ -38,6 +38,16 @@
             }
 
         }
+        
+        #toggle-columns-driver{
+            margin: auto;
+            padding: 1em 0;
+        }
+        table.toggle-columns{
+            .toggle-column-hidden{
+                display:none;
+            }
+        }
 
         > table.wp-list-table{
             .column-reorder,.column-trackitem_order {
