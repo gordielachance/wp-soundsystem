@@ -86,6 +86,7 @@ class WP_SoundSytem_Settings {
         if( isset( $input['delete_transients'] ) ){
             $transients = wpsstm_get_transients_by_prefix( 'wpsstm' );
 
+            //TO FIX use a mysql command for this ?  Crashes when there is too much transient.
             foreach((array)$transients as $transient_name){
                 delete_transient( $transient_name );
             }
