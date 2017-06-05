@@ -150,6 +150,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 1.0.2 =
+* Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
+* new class WP_SoundSytem_LastFM_User()
+
 = 1.0.1 =
 * Improved sources / autosource code
 * lastfm.js : fixed displayAuthNotices()
