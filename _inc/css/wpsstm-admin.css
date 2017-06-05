@@ -1,9 +1,17 @@
 /* line 3, ../scss/_shared.scss */
+.wpsstm-icon-link {
+  text-decoration: none;
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/* line 8, ../scss/_shared.scss */
 .wpsstm-toggle-tracklist-length {
   display: block;
   text-align: center;
 }
-/* line 7, ../scss/_shared.scss */
+/* line 12, ../scss/_shared.scss */
 .wpsstm-toggle-tracklist-length button {
   cursor: pointer;
   cursor: hand;
@@ -16,7 +24,7 @@
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
-/* line 17, ../scss/_shared.scss */
+/* line 22, ../scss/_shared.scss */
 .wpsstm-toggle-tracklist-length button:hover {
   background: none;
   color: black;

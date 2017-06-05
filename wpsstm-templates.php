@@ -321,7 +321,7 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     }
 
     $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
+    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
+    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
