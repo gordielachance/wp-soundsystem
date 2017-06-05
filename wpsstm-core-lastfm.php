@@ -216,10 +216,10 @@ class WP_SoundSytem_Core_LastFM{
     Get the URL of the app authentification at last.fm.
     */
     
-    public function get_app_auth_url($callback_url = null){
+    public function get_app_auth_url(){
         $url = 'http://www.last.fm/api/auth/';
         
-        if (!$callback_url){ //default callblack
+        if ( !$callback_url = get_permalink() ){
             $callback_url = home_url();
         }
         
