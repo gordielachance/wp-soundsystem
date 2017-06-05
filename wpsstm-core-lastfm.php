@@ -65,7 +65,7 @@ class WP_SoundSytem_LastFM_User{
     Get the user metas stored after a last.fm session has been initialized.
     */
     
-    private function get_lastfm_user_api_metas(){
+    private function get_lastfm_user_api_metas($keys=null){
         if (!$this->user_id) return false;
         
         if ( $this->user_api_metas === null ) {
@@ -80,8 +80,12 @@ class WP_SoundSytem_LastFM_User{
                 $this->user_api_metas = $remote_api_metas;
             }
         }
-
-        return $this->user_api_metas;
+        
+        if ($keys){
+            return wpsstm_get_array_value($keys, $this->user_api_metas);
+        }else{
+            return $this->user_api_metas;
+        }
     }
     
     /*
@@ -156,7 +160,7 @@ class WP_SoundSytem_LastFM_User{
                 'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
             );
 
-            wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_user_api_auth()"); 
+            //wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_user_api_auth()"); 
 
             try{
                 $user_auth = new AuthApi('setsession', $auth_args);
@@ -206,7 +210,12 @@ class WP_SoundSytem_LastFM_User{
 
             $this->is_user_api_logged = $is_user_api_logged;
             
-            wpsstm()->debug_log($is_user_api_logged,"lastfm - is_user_api_logged()");
+            $debug = array(
+                'logged'    =>          $this->is_user_api_logged,
+                'lastfm_username' =>    $this->get_lastfm_user_api_metas('username')
+            );
+            
+            //wpsstm()->debug_log(json_encode($debug),"lastfm - is_user_api_logged()");
             
         }
         
@@ -234,7 +243,10 @@ class WP_SoundSytem_LastFM_User{
             'track' =>  $track->title
         );
         
-        wpsstm()->debug_log(json_encode($api_args),"lastfm - lastfm_love_track()");
+        $debug_args = $api_args;
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        
+        wpsstm()->debug_log(json_encode($debug_args),"lastfm - lastfm_love_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -261,7 +273,10 @@ class WP_SoundSytem_LastFM_User{
             'track' =>  $track->title
         );
         
-        wpsstm()->debug_log(json_encode($api_args),"lastfm - now_playing_lastfm_track()");
+        $debug_args = $api_args;
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        
+        wpsstm()->debug_log(json_encode($debug_args),"lastfm - now_playing_lastfm_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -290,7 +305,10 @@ class WP_SoundSytem_LastFM_User{
             'duration'      => $track->duration
         );
         
-        wpsstm()->debug_log(json_encode($api_args),"lastfm - scrobble_lastfm_track()");
+        $debug_args = $api_args;
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+
+        wpsstm()->debug_log(json_encode($debug_args),"lastfm - scrobble_lastfm_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -338,13 +356,16 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
 
         //ajax : love & unlove
-        add_action( 'wp_ajax_wpsstm_lastfm_love_unlove_track',array($this,'ajax_love_unlove_track') );
+        add_action('wp_ajax_wpsstm_user_love_unlove_lastfm_track',array($this,'ajax_love_unlove_lastfm_track') );
         
         //ajax : updateNowPlaying
-        add_action('wp_ajax_wpsstm_update_now_playing_lastfm_track', array($this,'ajax_update_now_playing_lastfm_track'));
+        add_action('wp_ajax_wpsstm_user_update_now_playing_lastfm_track', array($this,'ajax_user_update_now_playing_lastfm_track'));
         
         //ajax : scrobble
-        add_action('wp_ajax_wpsstm_scrobble_lastfm_track', array($this,'ajax_scrobble_lastfm_track'));
+        add_action('wp_ajax_wpsstm_user_scrobble_lastfm_track', array($this,'ajax_user_scrobble_lastfm_track'));
+        
+        add_action('wp_ajax_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
+        add_action('wp_ajax_nopriv_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
         
     }
     
@@ -377,7 +398,8 @@ class WP_SoundSytem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'is_user_api_logged'             => (int)$this->lastfm_user->is_user_api_logged(),
+            'has_lastfm_bot'            => (bool)wpsstm()->get_options('lastfm_bot_user_id'),
+            'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
             //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
             //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
         );
@@ -524,7 +546,7 @@ class WP_SoundSytem_Core_LastFM{
         return $results;
     }
     
-    function ajax_love_unlove_track(){
+    function ajax_love_unlove_lastfm_track(){
         $result = array(
             'input'     => $_POST,
             'success'   => false,
@@ -552,7 +574,7 @@ class WP_SoundSytem_Core_LastFM{
         wp_send_json( $result ); 
     }
     
-    function ajax_update_now_playing_lastfm_track(){
+    function ajax_user_update_now_playing_lastfm_track(){
         $result = array(
             'input'     => $_POST,
             'message'   => null,
@@ -582,7 +604,7 @@ class WP_SoundSytem_Core_LastFM{
         wp_send_json( $result ); 
     }
     
-    function ajax_scrobble_lastfm_track(){
+    function ajax_user_scrobble_lastfm_track(){
         $result = array(
             'input'     => $_POST,
             'message'   => null,
@@ -602,7 +624,7 @@ class WP_SoundSytem_Core_LastFM{
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
 
         if ( $success ){
-            if ( is_wp_error() ){
+            if ( is_wp_error($success) ){
                 $code = $success->get_error_code();
                 $result['message'] = $success->get_error_message($code); 
             }else{
@@ -612,6 +634,67 @@ class WP_SoundSytem_Core_LastFM{
         
         header('Content-type: application/json');
         wp_send_json( $result ); 
+        
+    }
+    
+    function ajax_bot_scrobble_lastfm_track(){
+        
+        //TO FIX check with a meta that we are not submitting the last track again
+        
+        $result = array(
+            'input'     => $_POST,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        if ( $bot_user_id = (int)wpsstm()->get_options('lastfm_bot_user_id') ){
+            $track_args = array(
+                'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
+                'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
+                'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null,
+                'duration'  => ( isset($_POST['track']['duration']) ) ? $_POST['track']['duration'] : null
+            );
+
+            $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+            
+            //check that the new submission has not been sent just before
+            $last_scrobble_meta_key = 'wpsstm_last_scrobble';
+            $track_arr = $track->array_export();
+            $last_scrobble = get_user_meta($bot_user_id, $last_scrobble_meta_key, true);
+            
+            if ( $last_scrobble == $track_arr ){
+                
+                $result['message'] = 'This track has already been scrobbled by the bot: ' . json_encode($track_arr); 
+                
+            }else{
+                
+                $start_timestamp = ( isset($_POST['playback_start']) ) ? $_POST['playback_start'] : null;
+
+                $bot_user = new WP_SoundSytem_LastFM_User($bot_user_id);
+                $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);
+
+                if ( $success ){
+                    if ( is_wp_error($success) ){
+                        $code = $success->get_error_code();
+                        $result['message'] = $success->get_error_message($code); 
+                    }else{
+                        $result['success'] = true;
+                        
+                        //update last bot scrobble
+                        update_user_meta( $bot_user_id, $last_scrobble_meta_key, $track_arr );
+                        
+                    }
+                }
+                
+            }
+
+        }else{
+            $result['message'] = 'No bot user ID defined'; 
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+        
     }
     
     function get_scrobbler_icons(){

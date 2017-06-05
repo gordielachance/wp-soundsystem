@@ -4,10 +4,11 @@ class WpsstmLastFM {
         self.icon_scrobble_el; //player scrobble icon
         self.icon_love_el;
         self.auth_notice_el;
-        self.is_user_api_logged =         parseInt(wpsstmLastFM.is_user_api_logged);
+        self.has_lastfm_bot =       parseInt(wpsstmLastFM.has_lastfm_bot);
+        self.is_user_api_logged =   parseInt(wpsstmLastFM.is_user_api_logged);
         self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
 
-        self.auth_notice_el =        null;
+        self.auth_notice_el =       null;
         
         if ( ( self.has_user_scrobbler === null ) && (self.is_user_api_logged) ){  //default
             alert(self.is_user_api_logged);
@@ -97,7 +98,7 @@ class WpsstmLastFM {
         }
 
         var ajax_data = {
-            action:           'wpsstm_update_now_playing_lastfm_track',
+            action:           'wpsstm_user_update_now_playing_lastfm_track',
             track:            track
         };
 
@@ -127,7 +128,7 @@ class WpsstmLastFM {
     last.fm API - track.scrobble
     */
 
-    scrobble(track_obj,media){
+    user_scrobble(track_obj,media){
         
         var self = this;
 
@@ -141,7 +142,7 @@ class WpsstmLastFM {
         }
 
         var ajax_data = {
-            action:             'wpsstm_scrobble_lastfm_track',
+            action:             'wpsstm_user_scrobble_lastfm_track',
             track:              track,
             playback_start:     track_obj.playback_start
         };
@@ -167,6 +168,41 @@ class WpsstmLastFM {
             }
         })
     }
+    
+    bot_scrobble(track_obj,media){
+        
+        var self = this;
+
+        if ( media.duration <= 30) return;
+
+        var track = {
+            artist:     track_obj.artist,
+            title:      track_obj.title,
+            album:      track_obj.album,
+            duration:   track_obj.duration
+        }
+
+        var ajax_data = {
+            action:             'wpsstm_bot_scrobble_lastfm_track',
+            track:              track,
+            playback_start:     track_obj.playback_start
+        };
+
+        console.log("lastfm - ajax bot track.scrobble");
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }
+            }
+        })
+    }
 
     /*
     last.fm API - track.love
@@ -183,7 +219,7 @@ class WpsstmLastFM {
         }
 
         var ajax_data = {
-            action:     'wpsstm_lastfm_love_unlove_track',
+            action:     'wpsstm_user_love_unlove_lastfm_track',
             do_love:    do_love,
             track:      track
         };
@@ -234,8 +270,13 @@ class WpsstmLastFM {
             break;
             case 'ended':
                 if (wpsstm_lastfm.has_user_scrobbler){
-                    wpsstm_lastfm.scrobble(track_obj,media);
+                    wpsstm_lastfm.user_scrobble(track_obj,media);
                 }
+                //bot scrobble
+                if (wpsstm_lastfm.has_lastfm_bot){
+                    wpsstm_lastfm.bot_scrobble(track_obj,media);
+                }
+
             break;
         }
     });
