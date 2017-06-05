@@ -377,7 +377,7 @@ class WP_SoundSytem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'is_api_logged'             => (int)$this->lastfm_user->is_user_api_logged(),
+            'is_user_api_logged'             => (int)$this->lastfm_user->is_user_api_logged(),
             //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
             //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
         );

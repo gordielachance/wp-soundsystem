@@ -4,13 +4,13 @@ class WpsstmLastFM {
         self.icon_scrobble_el; //player scrobble icon
         self.icon_love_el;
         self.auth_notice_el;
-        self.is_api_logged =         parseInt(wpsstmLastFM.is_api_logged);
-        self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_api_logged) ); //localStorage stores strings
+        self.is_user_api_logged =         parseInt(wpsstmLastFM.is_user_api_logged);
+        self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
 
         self.auth_notice_el =        null;
         
-        if ( ( self.has_user_scrobbler === null ) && (self.is_api_logged) ){  //default
-            alert(self.is_api_logged);
+        if ( ( self.has_user_scrobbler === null ) && (self.is_user_api_logged) ){  //default
+            alert(self.is_user_api_logged);
             self.has_user_scrobbler = true;
         }
 
@@ -32,7 +32,7 @@ class WpsstmLastFM {
         $(self.icon_scrobble_el).find('a').click(function(e) {
             e.preventDefault();
             
-            if ( !self.is_api_logged ){
+            if ( !self.is_user_api_logged ){
                 self.displayAuthNotices();
                 return;
             }
@@ -48,7 +48,7 @@ class WpsstmLastFM {
         $(self.icon_love_el).find('a').click(function(e) {
             e.preventDefault();
             
-            if ( !self.is_api_logged ){
+            if ( !self.is_user_api_logged ){
                 self.displayAuthNotices();
                 return;
             }
@@ -76,7 +76,7 @@ class WpsstmLastFM {
             $('#wpsstm-bottom-notice-wp-auth').addClass('active');
             return;
         }
-        if ( !self.is_api_logged ){
+        if ( !self.is_user_api_logged ){
             $(self.auth_notice_el).addClass('active');
             return;
         }
