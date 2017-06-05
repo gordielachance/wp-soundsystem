@@ -5,13 +5,13 @@ class WpsstmLastFM {
         self.icon_love_el;
         self.auth_notice_el;
         self.is_api_logged =         parseInt(wpsstmLastFM.is_api_logged);
-        self.is_scrobbler_active =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_api_logged) ); //localStorage stores strings
+        self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_api_logged) ); //localStorage stores strings
 
         self.auth_notice_el =        null;
         
-        if ( ( self.is_scrobbler_active === null ) && (self.is_api_logged) ){  //default
+        if ( ( self.has_user_scrobbler === null ) && (self.is_api_logged) ){  //default
             alert(self.is_api_logged);
-            self.is_scrobbler_active = true;
+            self.has_user_scrobbler = true;
         }
 
     }
@@ -24,7 +24,7 @@ class WpsstmLastFM {
         self.icon_love_el =         $(bottom_el).find('.wpsstm-lastfm-love-unlove-track-links');
         self.auth_notice_el =       $(bottom_wrapper_el).find('#wpsstm-bottom-notice-lastfm-auth');
 
-        if (self.is_scrobbler_active){
+        if (self.has_user_scrobbler){
             $(self.icon_scrobble_el).addClass('active');
         }
 
@@ -37,10 +37,10 @@ class WpsstmLastFM {
                 return;
             }
 
-            self.is_scrobbler_active = !self.is_scrobbler_active;
+            self.has_user_scrobbler = !self.has_user_scrobbler;
             $(self.icon_scrobble_el).toggleClass('active');
 
-            localStorage.setItem("wpsstm-scrobble", self.is_scrobbler_active);
+            localStorage.setItem("wpsstm-scrobble", self.has_user_scrobbler);
 
         });
         
@@ -228,12 +228,12 @@ class WpsstmLastFM {
 
         switch(mediaEvent) {
             case 'loadeddata':
-                if (wpsstm_lastfm.is_scrobbler_active){
+                if (wpsstm_lastfm.has_user_scrobbler){
                     wpsstm_lastfm.updateNowPlaying(track_obj);
                 }
             break;
             case 'ended':
-                if (wpsstm_lastfm.is_scrobbler_active){
+                if (wpsstm_lastfm.has_user_scrobbler){
                     wpsstm_lastfm.scrobble(track_obj,media);
                 }
             break;
