@@ -97,7 +97,7 @@ class WpsstmLastFM {
         }
 
         var ajax_data = {
-            action:           'wpsstm_lastfm_update_now_playing_track',
+            action:           'wpsstm_update_now_playing_lastfm_track',
             track:            track
         };
 
@@ -141,7 +141,7 @@ class WpsstmLastFM {
         }
 
         var ajax_data = {
-            action:             'wpsstm_lastfm_scrobble_track',
+            action:             'wpsstm_scrobble_lastfm_track',
             track:              track,
             playback_start:     track_obj.playback_start
         };
