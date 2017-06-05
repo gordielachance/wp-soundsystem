@@ -382,7 +382,15 @@ class WP_SoundSytem_Source {
     function get_provider_icon_link(){
         if ( !$this->provider ) return;
         
-        $title = ($this->title) ? $this->title : null;
-        return sprintf('<a class="wpsstm-source-provider-link" href="%s" target="_blank" title="%s">%s</a>',$this->url,$title,$this->provider->icon);
+        $classes = array('wpsstm-source-provider-link','wpsstm-icon-link');
+        
+        $attr_arr = array(
+            'class'     => implode(' ',$classes),
+            'href'      => $this->url,
+            'target'    => '_blank',
+            'title'     => $this->title
+        );
+        
+        return sprintf('<a %s>%s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon);
     }
 }
