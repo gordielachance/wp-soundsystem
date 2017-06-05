@@ -143,6 +143,13 @@ class WP_SoundSytem_Settings {
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
             $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
+            
+            //Global user ID
+            if ( isset ($input['lastfm_global_user_id']) && ctype_digit($input['lastfm_global_user_id']) ){
+                if ( get_userdata( $input['lastfm_global_user_id'] ) ){ //check user exists
+                    $new_input['lastfm_global_user_id'] = $input['lastfm_global_user_id'];
+                }
+            }
 
             /*
             Other APIs
@@ -331,6 +338,14 @@ class WP_SoundSytem_Settings {
             'lastfm_settings'
         );
         
+        add_settings_field(
+            'lastfm_global_user_id', 
+            __('Global Last.fm scrobbling','wpsstm'), 
+            array( $this, 'lastfm_global_user_id_callback' ), 
+            'wpsstm-settings-page', 
+            'lastfm_settings'
+        );
+        
         /*
         APIs
         */
@@ -499,6 +514,23 @@ class WP_SoundSytem_Settings {
         );
     }
     
+    function lastfm_global_user_id_callback(){
+        $option = (int)wpsstm()->get_options('lastfm_global_user_id');
+        
+        $help = array();
+        $help[]= __("ID of Wordpress user to use for global Last.fm scrobbling : each time a user scrobbles a song, do scrobble it with this account too.","wpsstm");
+        $help[]= __("0 = Disabled.","wpsstm");
+        $help[]= __("(You need to have authorized this account to Last.fm)","wpsstm");
+        $help = sprintf("<small>%s</small>",implode('  ',$help));
+        
+        printf(
+            '<input type="number" name="%s[lastfm_global_user_id]" size="4" min="0" value="%s" /><br/>%s',
+            wpsstm()->meta_name_options,
+            $option,
+            $help
+        );
+    }
+    
     function section_live_playlists_desc(){
         _e('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
     }
@@ -517,7 +549,10 @@ class WP_SoundSytem_Settings {
     function live_playlists_scraper_page_id_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
 
-        $help = "<small>".__("ID of the page to use for the frontend Tracklist Importer. 0 = Disabled.","wpsstm")."</small>";
+        $help = array();
+        $help[]= __("ID of the page to use for the frontend Tracklist Importer.","wpsstm");
+        $help[]= __("0 = Disabled.","wpsstm");
+        $help = sprintf("<small>%s</small>",implode('  ',$help));
         
         printf(
             '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" /><br/>%s',
@@ -529,9 +564,12 @@ class WP_SoundSytem_Settings {
     
     function live_playlists_cache_callback(){
         $option = (int)wpsstm()->get_options('live_playlists_cache_min');
-
-        $help = '<small>'.__('Number of minutes a playlist is cached before requesting the remote page again. 0 = Disabled.','wpsstm').'</small>';
         
+        $help = array();
+        $help[]= __("Number of minutes a playlist is cached before requesting the remote page again.","wpsstm");
+        $help[]= __("0 = Disabled.","wpsstm");
+        $help = sprintf("<small>%s</small>",implode('  ',$help));
+
         printf(
             '<input type="number" name="%s[live_playlists_cache_min]" size="4" min="0" value="%s" /><br/>%s',
             wpsstm()->meta_name_options,
