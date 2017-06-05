@@ -145,9 +145,9 @@ class WP_SoundSytem_Settings {
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
             
             //Global user ID
-            if ( isset ($input['lastfm_global_user_id']) && ctype_digit($input['lastfm_global_user_id']) ){
-                if ( get_userdata( $input['lastfm_global_user_id'] ) ){ //check user exists
-                    $new_input['lastfm_global_user_id'] = $input['lastfm_global_user_id'];
+            if ( isset ($input['lastfm_bot_user_id']) && ctype_digit($input['lastfm_bot_user_id']) ){
+                if ( get_userdata( $input['lastfm_bot_user_id'] ) ){ //check user exists
+                    $new_input['lastfm_bot_user_id'] = $input['lastfm_bot_user_id'];
                 }
             }
 
@@ -339,9 +339,9 @@ class WP_SoundSytem_Settings {
         );
         
         add_settings_field(
-            'lastfm_global_user_id', 
-            __('Global Last.fm scrobbling','wpsstm'), 
-            array( $this, 'lastfm_global_user_id_callback' ), 
+            'lastfm_bot_user_id', 
+            __('Last.fm bot','wpsstm'), 
+            array( $this, 'lastfm_bot_user_id_callback' ), 
             'wpsstm-settings-page', 
             'lastfm_settings'
         );
@@ -514,17 +514,17 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function lastfm_global_user_id_callback(){
-        $option = (int)wpsstm()->get_options('lastfm_global_user_id');
+    function lastfm_bot_user_id_callback(){
+        $option = (int)wpsstm()->get_options('lastfm_bot_user_id');
         
         $help = array();
-        $help[]= __("ID of Wordpress user to use for global Last.fm scrobbling : each time a user scrobbles a song, do scrobble it with this account too.","wpsstm");
+        $help[]= __("ID of Wordpress user to use for as Last.fm bot: each time a user scrobbles a song, do scrobble it with this account too.","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help[]= __("(You need to have authorized this account to Last.fm)","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
         printf(
-            '<input type="number" name="%s[lastfm_global_user_id]" size="4" min="0" value="%s" /><br/>%s',
+            '<input type="number" name="%s[lastfm_bot_user_id]" size="4" min="0" value="%s" /><br/>%s',
             wpsstm()->meta_name_options,
             $option,
             $help

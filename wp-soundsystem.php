@@ -83,7 +83,7 @@ class WP_SoundSytem {
             'lastfm_client_secret'              => null,
             'lastfm_scrobbling'                 => 'on',
             'lastfm_favorites'                  => 'on',
-            'lastfm_global_user_id'             => null,
+            'lastfm_bot_user_id'                => null,
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,

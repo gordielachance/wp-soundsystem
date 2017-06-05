@@ -106,7 +106,7 @@ class WP_SoundSytem_Core_Player{
             }
 
             //Last.FM track action - API auth notice
-            if ( !wpsstm_lastfm()->is_user_api_logged() ){
+            if ( !wpsstm_lastfm()->lastfm_user->is_user_api_logged() ){
                 $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
                 $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
                 $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
