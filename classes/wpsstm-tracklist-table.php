@@ -261,13 +261,13 @@ class WP_SoundSytem_Tracklist_Table{
                         $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
                         $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
                         $share_text = __('Share', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s<span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
+                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s <span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
 
                         //xspf
                         $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
                         $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
                         $xspf_text = __('XSPF', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s<span> %s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
+                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
 
                         //favorite
                         if ( $this->tracklist->post_id && current_user_can('administrator') ) { //TO FIX remove current_user_can when feature is ready
