@@ -95,14 +95,16 @@ abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlis
 }
 
 class WP_SoundSytem_Preset_Radionomy_Playlists_API extends WP_SoundSytem_Preset_Radionomy{
-    var $redirect_url = 'http://api.radionomy.com/tracklist.cfm?radiouid=%radionomy-id%&apikey=XXX&amount=10&type=xml&cover=true';
+    //api max tracks = 40
+    var $redirect_url = 'http://api.radionomy.com/tracklist.cfm?radiouid=%radionomy-id%&apikey=XXX&amount=20&type=xml&cover=true';
     
     var $options_default =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'tracks track'),
             'track_artist'      => array('path'=>'artists'),
             'track_title'       => array('path'=>'title'),
-            'track_image'       => array('path'=>'cover')
+            'track_image'       => array('path'=>'cover'),
+            //playduration
         )
     );
     
