@@ -99,6 +99,7 @@ This would be very appreciated — Thanks !
 
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.FM API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
+* [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
 
 = Contributors =
 
