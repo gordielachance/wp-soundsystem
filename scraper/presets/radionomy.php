@@ -1,26 +1,22 @@
 <?php
-class WP_SoundSytem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
 
+/*
+http://api.radionomy.com/currentsong.cfm?radiouid=0f973ea3-2059-482d-993d-d43e8c5d6a1a&type=xml&cover=yes&callmeback=yes&defaultcover=yes&streamurl=yes&zoneid=0&countrycode=&size=90&dynamicconf=yes&cachbuster=144626
+
+http://api.radionomy.com/tracklist.cfm?radiouid=0f973ea3-2059-482d-993d-d43e8c5d6a1a&apikey=XXX&amount=10&type=xml&cover=true
+
+*/
+
+abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlist_Preset{
     var $preset_slug =      'radionomy';
     var $preset_url =       'https://www.radionomy.com';
     
     var $pattern =          '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~';
-    var $redirect_url =     'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
-
     var $variables =        array(
         'radionomy-slug' => null,
         'radionomy-id' => null
     );
-
-    var $options_default =  array(
-        'selectors' => array(
-            'tracks'            => array('path'=>'div.titre'),
-            'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),
-            'track_title'       => array('path'=>'table td i'),
-            'track_image'       => array('path'=>'img','attr'=>'src')
-        )
-    );
-
+    
     function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);
 
@@ -95,5 +91,34 @@ class WP_SoundSytem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSytem_Liv
         if ( !$slug = $this->get_variable_value('radionomy-slug') ) return;
         return sprintf(__('Radionomy : %s','wppstm'),$slug);
     }
+    
+}
+
+class WP_SoundSytem_Preset_Radionomy_Playlists_API extends WP_SoundSytem_Preset_Radionomy{
+    var $redirect_url = 'http://api.radionomy.com/tracklist.cfm?radiouid=%radionomy-id%&apikey=XXX&amount=10&type=xml&cover=true';
+    
+    var $options_default =  array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'tracks track'),
+            'track_artist'      => array('path'=>'artists'),
+            'track_title'       => array('path'=>'title'),
+            'track_image'       => array('path'=>'cover')
+        )
+    );
+    
+}
+
+class WP_SoundSytem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSytem_Preset_Radionomy{
+
+    var $redirect_url =     'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
+
+    var $options_default =  array(
+        'selectors' => array(
+            'tracks'            => array('path'=>'div.titre'),
+            'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),
+            'track_title'       => array('path'=>'table td i'),
+            'track_image'       => array('path'=>'img','attr'=>'src')
+        )
+    );
 
 }

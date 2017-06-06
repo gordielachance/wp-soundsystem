@@ -132,7 +132,7 @@ function wpsstm_register_scraper_presets($presets){
     
     $presets[] = new WP_SoundSytem_Preset_LastFM_Scraper();
     $presets[] = new WP_SoundSytem_Preset_Spotify_Playlists_Api();
-    $presets[] = new WP_SoundSytem_Preset_Radionomy_Playlists_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_Radionomy_Playlists_Api();
     $presets[] = new WP_SoundSytem_Preset_SomaFM_Stations();
     $presets[] = new WP_SoundSytem_Preset_BBC_Stations();
     $presets[] = new WP_SoundSytem_Preset_BBC_Playlists();
