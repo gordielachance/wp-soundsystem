@@ -30,31 +30,21 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
     }
     
     /*
-    //TO FIX
     Keep only reddit posts that have a media
     */
     /*
     protected function get_track_nodes($body_node){
 
-        echo"BEFORE:";
         $selector = $this->get_options( array('selectors','tracks','path') );
         $post_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
         //var_dump($post_nodes->length);
-        
-        $media_posts_wrapper = qp( '', null, self::$querypath_options );
-        
 
         foreach($post_nodes as $key=>$node) {
-
-            $title = qp( $node, null, self::$querypath_options )->find('title')->innerHTML();
             $media = qp( $node, null, self::$querypath_options )->find('media')->innerHTML();
-            //if (!$media) continue;
-            
-            $media_posts_wrapper->append($node);
-            
+            if (!$media) unset($post_nodes[$key]);
         }
-
-        return $media_posts_wrapper;
+        //var_dump($post_nodes->length);
+        return $post_nodes;
     }
     */
     
@@ -108,7 +98,13 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
             '(Official Videoclip)',
             '(Clip officiel)',
             '(Lyric Video)',
-            '(Official Music Video)'
+            '(Official Music Video)',
+            '(HD)',
+            '(Music Video)',
+            '(High Quality)',
+            ' HD',
+            ' HQ'
+            
         );
         
         $title = preg_replace('~\[.*\]~', '', $title); //remove comments like [Hip-Hop]
