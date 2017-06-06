@@ -305,6 +305,24 @@ function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
 
+function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
+    if (!$post_id) $post_id = get_the_ID();
+    
+    $post_type = get_post_type($post_id);
+    $is_live_tracklist = ( $post_type == wpsstm()->post_type_live_playlist  );
+    
+    if (!$is_live_tracklist) return;
+    $tracklist = wpsstm_get_post_tracklist($post_id);
+    $freq = $tracklist->get_options('datas_cache_min');
+
+    $freq_secs = $freq * MINUTE_IN_SECONDS;
+    
+    $refresh_time_human = human_time_diff( 0, $freq_secs );
+    $refresh_time_human = sprintf('every %s',$refresh_time_human);
+    $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
+
+    return $refresh_time_el;
+}
 /*
 Get track love/unlove icons.
 */

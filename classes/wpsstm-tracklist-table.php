@@ -230,17 +230,7 @@ class WP_SoundSytem_Tracklist_Table{
                 $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
                 $text_time = sprintf(__('on  %s - %s','wpsstm'),$date,$time);
                 $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
-                
-                //live playlist refresh time
-                if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
-
-                    //expire time
-                    //$refresh_time = get_date_from_gmt( date( 'Y-m-d H:i:s', $expire_timestamp ), get_option( 'time_format' ) );
-                    $refresh_time_human = human_time_diff( $this->tracklist->updated_time, $this->tracklist->expire_time );
-                    $refresh_time_human = sprintf('every %s',$refresh_time_human);
-                    $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
-
-                }
+                $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
                 
             }
         
