@@ -2,6 +2,7 @@ var bottom_wrapper_el;
 var bottom_el;
 var bottom_track_wraper_el;
 
+var wpsstm_currentTrack;
 var wpsstm_mediaElement;
 var wpsstm_mediaElementPlayer;
 var wpsstm_track_source_requests_limit = 5; //number of following tracks we want to populate the sources for when clicking a track
@@ -947,6 +948,7 @@ class WpsstmTrack {
         
         var self = this;
         
+        wpsstm_currentTrack = self;
         var track_el = self.get_track_el();
         $(track_el).addClass('active');
         
@@ -971,13 +973,15 @@ class WpsstmTrack {
             features: ['playpause','loop','progress','current','duration','volume'],
             loop: false,
             success: function(mediaElement, originalNode, player) {
-                self.debug("MediaElementPlayer ready");
 
                 wpsstm_mediaElementPlayer = player;
                 wpsstm_mediaElement = mediaElement;
 
                 //handle source
                 self.set_track_source(source_idx);
+                
+                self.debug("wpsstmMediaReady");
+                $( document ).trigger( "wpsstmMediaReady" ); //custom event
 
                 wpsstm_mediaElement.addEventListener('error', function(error) {
                     var source_obj = self.get_track_source(self.current_source_idx);
@@ -991,10 +995,7 @@ class WpsstmTrack {
                 wpsstm_mediaElement.addEventListener('loadeddata', function() {
                     self.debug('player event - loadeddata');
                     self.update_button('loadeddata');
-                    $( document ).trigger( "wpsstmPlayerMediaEvent", ['loadeddata',mediaElement, originalNode, player,self] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-                    
-                     wpsstm_mediaElement.play();
-                    
+                    wpsstm_mediaElement.play();
                 });
 
                 wpsstm_mediaElement.addEventListener('play', function() {
@@ -1015,9 +1016,7 @@ class WpsstmTrack {
                     self.debug('MediaElement.js event - ended');
                     self.update_button('ended');
                     wpsstm_mediaElement = null;
-
-                    $( document ).trigger( "wpsstmPlayerMediaEvent", ['ended',mediaElement, originalNode, player,self] ); //register custom event - used by lastFM for the track.scrobble call
-
+                    
                     //Play next song if any
                     var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
                     tracklist_obj.play_next_track();

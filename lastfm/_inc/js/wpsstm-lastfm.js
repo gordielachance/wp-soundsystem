@@ -4,9 +4,12 @@ class WpsstmLastFM {
         self.icon_scrobble_el; //player scrobble icon
         self.icon_love_el;
         self.auth_notice_el;
+        self.ping_timer;
+        self.ping;
         self.has_lastfm_bot =       parseInt(wpsstmLastFM.has_lastfm_bot);
         self.is_user_api_logged =   parseInt(wpsstmLastFM.is_user_api_logged);
         self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
+        
 
         self.auth_notice_el =       null;
         
@@ -102,7 +105,7 @@ class WpsstmLastFM {
             track:            track
         };
 
-        console.log("lastfm - ajax track.updateNowPlaying");
+        self.debug("lastfm - ajax track.updateNowPlaying");
 
         return $.ajax({
 
@@ -128,11 +131,9 @@ class WpsstmLastFM {
     last.fm API - track.scrobble
     */
 
-    user_scrobble(track_obj,media){
+    user_scrobble(track_obj){
         
         var self = this;
-
-        if ( media.duration <= 30) return;
 
         var track = {
             artist:     track_obj.artist,
@@ -147,7 +148,7 @@ class WpsstmLastFM {
             playback_start:     track_obj.playback_start
         };
 
-        console.log("lastfm - ajax track.scrobble");
+        self.debug("lastfm - ajax track.scrobble");
 
         return $.ajax({
 
@@ -169,11 +170,9 @@ class WpsstmLastFM {
         })
     }
     
-    bot_scrobble(track_obj,media){
+    bot_scrobble(track_obj){
         
         var self = this;
-
-        if ( media.duration <= 30) return;
 
         var track = {
             artist:     track_obj.artist,
@@ -188,7 +187,7 @@ class WpsstmLastFM {
             playback_start:     track_obj.playback_start
         };
 
-        console.log("lastfm - ajax bot track.scrobble");
+        self.debug("lastfm - ajax bot track.scrobble");
 
         return $.ajax({
 
@@ -224,7 +223,7 @@ class WpsstmLastFM {
             track:      track
         };
 
-        console.log("lastFM - love/unlove track");
+        self.debug("lastFM - love/unlove track");
 
         return $.ajax({
 
@@ -252,6 +251,57 @@ class WpsstmLastFM {
         })
     }
         
+    debug(msg){
+        var prefix = "WpsstmLastFM: ";
+        wpsstm_debug(msg,prefix);
+    }
+    
+    /*
+    after 10s: updateNowPlaying()
+    after 40s: scrobble
+    */
+    
+    lastFmTrackEvents(){
+        var self = this;
+
+        self.debug("lastFmTrackEvents()");
+
+        self.ping_timer = setInterval ( function(){
+            
+            if(wpsstm_mediaElement.paused) return;
+            self.ping++;
+
+            self.debug("track ping: " + self.ping);
+
+            if (self.ping == 1) { //5s
+                if (self.has_user_scrobbler){
+                    self.updateNowPlaying(wpsstm_currentTrack);
+                }
+            }
+
+            //stop timer & scrobble
+            if (self.ping >= 7) { //35s
+                clearInterval(self.ping_timer);
+                
+                if (self.ping == 7){ //35s
+                    if ( wpsstm_mediaElement.duration > 30) { //scrobble
+                        if (wpsstm_lastfm.has_user_scrobbler){
+                            wpsstm_lastfm.user_scrobble(wpsstm_currentTrack);
+                        }
+                        //bot scrobble
+                        if (wpsstm_lastfm.has_lastfm_bot){
+                            wpsstm_lastfm.bot_scrobble(wpsstm_currentTrack);
+                        }
+                    }
+                }
+                
+            }
+
+            
+            
+        }, 5000 ); // one ping = 5s
+    }
+    
 }
 
 (function($){
@@ -259,27 +309,23 @@ class WpsstmLastFM {
     $( document ).on( "wpsstmDomReady", function( event ) {
         wpsstm_lastfm.init();
     });
+    
+    $( document ).on( "wpsstmMediaReady", function( event ) {
 
-    $( document ).on( "wpsstmPlayerMediaEvent", function( event,mediaEvent,media,node,player,track_obj ) {
-
-        switch(mediaEvent) {
-            case 'loadeddata':
-                if (wpsstm_lastfm.has_user_scrobbler){
-                    wpsstm_lastfm.updateNowPlaying(track_obj);
-                }
-            break;
-            case 'ended':
-                if (wpsstm_lastfm.has_user_scrobbler){
-                    wpsstm_lastfm.user_scrobble(track_obj,media);
-                }
-                //bot scrobble
-                if (wpsstm_lastfm.has_lastfm_bot){
-                    wpsstm_lastfm.bot_scrobble(track_obj,media);
-                }
-
-            break;
-        }
+        wpsstm_mediaElement.addEventListener('loadeddata', function() {
+            //reinit for each track
+            wpsstm_lastfm.ping_timer = null;
+            wpsstm_lastfm.ping = 0; 
+        });
+        
+        wpsstm_mediaElement.addEventListener('play', function() {
+            if (wpsstm_lastfm.ping_timer === null){
+                 wpsstm_lastfm.lastFmTrackEvents();
+            }
+        });
+        
     });
+
 
     $(document).on( "wpsstmTrackLove", function( event,track_obj,do_love ) {
         wpsstm_lastfm.love_unlove(track_obj,do_love);
