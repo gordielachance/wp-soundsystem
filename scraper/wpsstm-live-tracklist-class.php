@@ -569,7 +569,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
             $artist =   $this->sanitize_remote_string($artist);
             $title =    $this->sanitize_remote_string($title);
-            $album =    $this->get_track_album($album);
+            $album =    $this->sanitize_remote_string($album);
 
             $args = array(
                 'artist'        => $artist,
