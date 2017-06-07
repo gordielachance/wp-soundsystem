@@ -281,8 +281,7 @@ class WpsstmLastFM {
 
             //stop timer & scrobble
             if (self.ping >= 7) { //35s
-                clearInterval(self.ping_timer);
-                
+                clearInterval(self.ping_timer); //TO FIX not working
                 if (self.ping == 7){ //35s
                     if ( wpsstm_mediaElement.duration > 30) { //scrobble
                         if (wpsstm_lastfm.has_user_scrobbler){
@@ -297,8 +296,6 @@ class WpsstmLastFM {
                 
             }
 
-            
-            
         }, 5000 ); // one ping = 5s
     }
     
