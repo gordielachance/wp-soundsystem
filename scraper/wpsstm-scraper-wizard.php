@@ -12,13 +12,12 @@ class WP_SoundSytem_Scraper_Wizard{
     function __construct($post_id_or_feed_url = null){
 
         $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
-        
-        $this->is_advanced = ( wpsstm_is_backend() && isset($_REQUEST['advanced_wizard']) );
-        
-        $this->tracklist->ignore_cache = $this->is_advanced;
-        $this->tracklist->tracks_strict = false;
 
+        $this->tracklist->ignore_cache = ( wpsstm_is_backend() && isset($_REQUEST['advanced_wizard']) );
+        $this->tracklist->tracks_strict = false;
         $this->tracklist->load_remote_tracks(true);
+        
+        $this->is_advanced = ( $this->tracklist->ignore_cache || ( $this->tracklist->feed_url && !$this->tracklist->tracks ) );
         
         //metabox
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
