@@ -343,7 +343,7 @@ function wpsstm_get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$ar
 
         $saved = set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
 
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources))),'wpsstm_get_soundsgood_sources() request'); 
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'wpsstm_get_soundsgood_sources() request'); 
     }
 
     return $sources;
@@ -394,7 +394,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         
     }elseif ( $is_live_tracklist ){
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(false);
+        $tracklist->load_remote_tracks(false); //will be request through ajax
         
     }else{ //playlist or album
         $tracklist->load_subtracks();

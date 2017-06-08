@@ -246,7 +246,7 @@ class WP_SoundSytem_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
         
-        wpsstm()->debug_log(json_encode($debug_args),"lastfm - lastfm_love_track()");
+        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"lastfm - lastfm_love_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -256,7 +256,7 @@ class WP_SoundSytem_LastFM_User{
                 $results = $track_api->unlove($api_args);
             }
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return wpsstm_lastfm()->handle_api_exception($e);
         }
         
         return $results;
@@ -272,17 +272,17 @@ class WP_SoundSytem_LastFM_User{
             'artist' => $track->artist,
             'track' =>  $track->title
         );
-        
+
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
         
-        wpsstm()->debug_log(json_encode($debug_args),"lastfm - now_playing_lastfm_track()");
+        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"lastfm - now_playing_lastfm_track()'");
         
         try {
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->updateNowPlaying($api_args);
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return wpsstm_lastfm()->handle_api_exception($e);
         }
         
         return $results;
@@ -308,13 +308,13 @@ class WP_SoundSytem_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
 
-        wpsstm()->debug_log(json_encode($debug_args),"lastfm - scrobble_lastfm_track()");
+        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"lastfm - scrobble_lastfm_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->scrobble($api_args);
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return wpsstm_lastfm()->handle_api_exception($e);
         }
         
         return $results;
@@ -547,18 +547,21 @@ class WP_SoundSytem_Core_LastFM{
     }
     
     function ajax_love_unlove_lastfm_track(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'success'   => false,
             'message'   => null
         );
         $track_args = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
         );
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
-        $do_love = $result['do_love'] = filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
+        $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
         $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
         
         if ( $success ){
@@ -575,16 +578,19 @@ class WP_SoundSytem_Core_LastFM{
     }
     
     function ajax_user_update_now_playing_lastfm_track(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'success'   => false
         );
         
         $track_args = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
         );
 
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
@@ -605,21 +611,24 @@ class WP_SoundSytem_Core_LastFM{
     }
     
     function ajax_user_scrobble_lastfm_track(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'success'   => false
         );
         
         $track_args = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null,
-            'duration'  => ( isset($_POST['track']['duration']) ) ? $_POST['track']['duration'] : null
+            'title'     => ( isset($ajax_data['track']['title']) ) ?        $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?       $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?        $ajax_data['track']['album'] : null,
+            'duration'  => ( isset($ajax_data['track']['duration']) ) ?     $ajax_data['track']['duration'] : null
         );
 
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
-        $start_timestamp = ( isset($_POST['playback_start']) ) ? $_POST['playback_start'] : null;
+        $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
 
@@ -639,20 +648,20 @@ class WP_SoundSytem_Core_LastFM{
     
     function ajax_bot_scrobble_lastfm_track(){
         
-        //TO FIX check with a meta that we are not submitting the last track again
-        
+        $ajax_data = wp_unslash($_POST);
+
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'success'   => false
         );
         
         if ( $bot_user_id = (int)wpsstm()->get_options('lastfm_bot_user_id') ){
             $track_args = array(
-                'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-                'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-                'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null,
-                'duration'  => ( isset($_POST['track']['duration']) ) ? $_POST['track']['duration'] : null
+                'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+                'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+                'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null,
+                'duration'  => ( isset($ajax_data['track']['duration']) ) ? $ajax_data['track']['duration'] : null
             );
 
             $track = $result['track'] = new WP_SoundSystem_Track($track_args);
@@ -664,11 +673,11 @@ class WP_SoundSytem_Core_LastFM{
             
             if ( $last_scrobble == $track_arr ){
                 
-                $result['message'] = 'This track has already been scrobbled by the bot: ' . json_encode($track_arr); 
+                $result['message'] = 'This track has already been scrobbled by the bot: ' . json_encode($track_arr,JSON_UNESCAPED_UNICODE); 
                 
             }else{
                 
-                $start_timestamp = ( isset($_POST['playback_start']) ) ? $_POST['playback_start'] : null;
+                $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
 
                 $bot_user = new WP_SoundSytem_LastFM_User($bot_user_id);
                 $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);

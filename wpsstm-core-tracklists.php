@@ -94,13 +94,15 @@ class WP_SoundSytem_Core_Tracklists{
     
     function ajax_love_unlove_tracklist(){
         
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'success'   => false
         );
         
-        $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
-        $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
+        $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ?     $ajax_data['post_id'] : null;
+        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         if ($tracklist_id && ($do_love!==null) ){
             $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
@@ -120,13 +122,16 @@ class WP_SoundSytem_Core_Tracklists{
     }
     
     function ajax_load_tracklist(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'success'   => false,
             'new_html'  => null
         );
         
-        $tracklist_id = $result['post_id'] = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+        $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
@@ -342,7 +347,7 @@ class WP_SoundSytem_Core_Tracklists{
         if (!$bulk_action) return;
 
         //strip slashes for $_POST args if any
-        $form_tracks = stripslashes_deep($form_tracks); 
+        $form_tracks = wp_unslash($form_tracks); 
         
         //keep only the checked links
         $form_tracks = array_filter(
@@ -512,14 +517,17 @@ class WP_SoundSytem_Core_Tracklists{
     }
     
     function ajax_tracklist_reorder(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
             'message'   => null,
             'success'   => false,
-            'input'     => $_POST
+            'input'     => $ajax_data
         );
 
-        $result['post_id']  =           $post_id =          ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
-        $result['subtracks_order']   =  $subtracks_order =  ( isset($_POST['subtracks_order']) ) ? $_POST['subtracks_order'] : null;
+        $result['post_id']  =           $post_id =          ( isset($ajax_data['post_id']) ) ?          $ajax_data['post_id'] : null;
+        $result['subtracks_order']   =  $subtracks_order =  ( isset($ajax_data['subtracks_order']) ) ?  $ajax_data['subtracks_order'] : null;
 
         if ( $subtracks_order && $post_id ){
 
