@@ -1093,7 +1093,7 @@ class WpsstmTrack {
 
         if (self.sources.length){ //we've got sources
             self.can_play = true;
-            self.debug("populate_html_sources(): " +self.sources.length);
+            //self.debug("populate_html_sources(): " +self.sources.length);
         }
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);

@@ -135,6 +135,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         //try to get cache first
 
+        $cache_tracks = $remote_tracks = array();
         $this->datas = $this->datas_cache = $this->get_cache();
         
         if ($this->datas_cache){
@@ -142,8 +143,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
                 $this->expire_time = $cache_expire_time;
             }
+            
+            $cache_tracks = $this->datas_cache['tracks'];
 
-            $this->add($this->datas_cache['tracks']); //populate cache tracks
+            $this->add($cache_tracks); //populate cache tracks
 
             //we got cached track
             if ( $cached_total_items = count($this->tracks)  ){
@@ -152,7 +155,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             }
 
         }
-        
+
         //get remote tracks
         if ( !$this->tracks && $remote_request ){
 
@@ -211,6 +214,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             }
 
         }
+        
+        wpsstm()->debug_log(json_encode(array('remote_request'=>$remote_request,'cache_tracks'=>count($cache_tracks),'has_remote_tracks'=>count($remote_tracks))),'load_remote_tracks()' );
 
         //get options back from page (a preset could have changed them)
         $this->options = $this->options; 
