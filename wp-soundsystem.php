@@ -96,6 +96,15 @@ class WP_SoundSytem {
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
+        
+        //validate options
+        /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
+        https://wordpress.stackexchange.com/a/126206/70449
+        
+        if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['guest_user_id'] = null;
+        if ( $this->options['guest_user_id'] && !get_userdata( $this->options['guest_user_id'] ) ) $this->options['guest_user_id'] = null;
+        if ( $this->options['lastfm_bot_user_id'] && !get_userdata( $this->options['lastfm_bot_user_id'] ) ) $this->options['lastfm_bot_user_id'] = null;
+        */
     }
     
     function includes(){
