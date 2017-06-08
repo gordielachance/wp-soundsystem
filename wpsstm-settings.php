@@ -122,6 +122,12 @@ class WP_SoundSytem_Settings {
                 }
                 
             }
+            //guest user ID
+            if ( isset ($input['guest_user_id']) && ctype_digit($input['guest_user_id']) ){
+                if ( get_userdata( $input['guest_user_id'] ) ){ //check user exists
+                    $new_input['guest_user_id'] = $input['guest_user_id'];
+                }
+            }
 
             //cache duration
             if ( isset ($input['live_playlists_cache_min']) && ctype_digit($input['live_playlists_cache_min']) ){
@@ -144,7 +150,7 @@ class WP_SoundSytem_Settings {
             $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
             
-            //Global user ID
+            //Lastfm bot
             if ( isset ($input['lastfm_bot_user_id']) && ctype_digit($input['lastfm_bot_user_id']) ){
                 if ( get_userdata( $input['lastfm_bot_user_id'] ) ){ //check user exists
                     $new_input['lastfm_bot_user_id'] = $input['lastfm_bot_user_id'];
@@ -251,13 +257,32 @@ class WP_SoundSytem_Settings {
             'live_playlists_settings'
         );
         
+        /*
+        Frontend Wizard
+        */
+        
+        add_settings_section(
+            'frontend_wizard_settings', // ID
+            __('Frontend Wizard','wpsstm'), // Title
+            array( $this, 'section_frontend_wizard_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
 
         add_settings_field(
             'frontend_scraper_page_id', 
             __('Frontend wizard page ID','wpsstm'), 
-            array( $this, 'live_playlists_scraper_page_id_callback' ), 
+            array( $this, 'wizard_page_id_callback' ), 
             'wpsstm-settings-page', 
-            'live_playlists_settings'
+            'frontend_wizard_settings'
+        );
+        
+        add_settings_field(
+            'guest_user_id', 
+            __('Guest ID','wpsstm'), 
+            array( $this, 'guest_user_id_callback' ), 
+            'wpsstm-settings-page', 
+            'frontend_wizard_settings'
         );
 
         add_settings_field(
@@ -340,7 +365,7 @@ class WP_SoundSytem_Settings {
         
         add_settings_field(
             'lastfm_bot_user_id', 
-            __('Last.fm bot','wpsstm'), 
+            __('Last.fm bot ID','wpsstm'), 
             array( $this, 'lastfm_bot_user_id_callback' ), 
             'wpsstm-settings-page', 
             'lastfm_settings'
@@ -546,16 +571,36 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function live_playlists_scraper_page_id_callback(){
+    function section_frontend_wizard_desc(){
+        _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
+    }
+    
+    function wizard_page_id_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
 
         $help = array();
-        $help[]= __("ID of the page to use for the frontend Tracklist Importer.","wpsstm");
+        $help[]= __("ID of the page used to display the frontend Tracklist Wizard.","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
         printf(
             '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" /><br/>%s',
+            wpsstm()->meta_name_options,
+            $option,
+            $help
+        );
+    }
+    
+    function guest_user_id_callback(){
+        $option = (int)wpsstm()->get_options('guest_user_id');
+        
+        $help = array();
+        $help[]= __("If the visitor is not logged, use this Wordpress user to create the loaded playlist.","wpsstm");
+        $help[]= __("0 = Disabled.","wpsstm");
+        $help = sprintf("<small>%s</small>",implode('  ',$help));
+        
+        printf(
+            '<input type="number" name="%s[guest_user_id]" size="4" min="0" value="%s" /><br/>%s',
             wpsstm()->meta_name_options,
             $option,
             $help
