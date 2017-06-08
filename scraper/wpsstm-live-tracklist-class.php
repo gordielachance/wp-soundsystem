@@ -31,9 +31,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public $id;
     public $transient_name_cache; 
     
-    public $is_wizard = false;
-    
     var $expire_time = null;
+    var $ignore_cache = false; //eg. when advanced wizard
 
     //response
     var $request_pagination = array(
@@ -143,10 +142,15 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
                 $this->expire_time = $cache_expire_time;
             }
-            
-            $this->add($this->datas_cache['tracks']);
-            
-            
+
+            $this->add($this->datas_cache['tracks']); //populate cache tracks
+
+            //we got cached track
+            if ( $cached_total_items = count($this->tracks)  ){
+
+                $this->add_notice( 'wizard-header', 'cache_tracks_loaded', sprintf(__('A cache entry with %s tracks was found (%s).','wpsstm'),$cached_total_items,gmdate(DATE_ISO8601,$this->datas_cache['timestamp'])) );
+            }
+
         }
         
         //get remote tracks
@@ -751,6 +755,12 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     public function get_cache(){
+        
+        if ( $this->ignore_cache ){
+            wpsstm()->debug_log("ignore_cache is set","WP_SoundSytem_Remote_Tracklist::get_cache()"); 
+            return;
+        }
+        
         if ( !$this->get_options('datas_cache_min') ){
 
             $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
