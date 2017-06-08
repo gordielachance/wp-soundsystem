@@ -85,9 +85,8 @@ class WP_SoundSytem_Scraper_Wizard{
             //save wizard settings
             $wizard_settings = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
             
-            if ( isset($wizard_settings['delete_cache']) ){
-                $this->tracklist->delete_cache();
-            }
+            //while updating the live tracklist settings, ignore caching
+            $this->tracklist->delete_cache();
             
             if ($wizard_settings){
                 
@@ -118,7 +117,6 @@ class WP_SoundSytem_Scraper_Wizard{
         if ( isset($_POST[ 'wpsstm_wizard' ]['reset']) ){
             delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
             delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
-            $this->tracklist->delete_cache();
         }
 
     }
@@ -334,15 +332,7 @@ class WP_SoundSytem_Scraper_Wizard{
                 'wpsstm-wizard-step-options',
                 'wizard-section-options'
             );
-            
-            $this->add_wizard_field(
-                'delete_cache', 
-                __('Delete current tracks cache','wpsstm'), 
-                array( $this, 'delete_cache_callback' ), 
-                'wpsstm-wizard-step-options',
-                'wizard-section-options'
-            );
-            
+
         }
         
 
@@ -362,11 +352,6 @@ class WP_SoundSytem_Scraper_Wizard{
         //cache
         if ( isset($input['datas_cache_min']) && ctype_digit($input['datas_cache_min']) ){
             $new_input['datas_cache_min'] = $input['datas_cache_min'];
-        }
-        
-        //cache has been disabled, delete existing cache
-        if ( !isset($new_input['datas_cache_min']) && isset($previous_values['datas_cache_min']) && ( $this->tracklist->datas_cache ) ) {
-            $this->tracklist->delete_cache();
         }
 
         //selectors 
@@ -719,14 +704,7 @@ class WP_SoundSytem_Scraper_Wizard{
 
         
     }
-    
-    function delete_cache_callback(){
-        printf(
-            '<input type="checkbox" name="%s[delete_cache]" value="on" />',
-            'wpsstm_wizard'
-        );
-    }
-    
+
     function musicbrainz_callback(){
         
         $option = $this->tracklist->get_options('musicbrainz');
