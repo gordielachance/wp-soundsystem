@@ -113,6 +113,8 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Installation ==
 
+This plugin requires PHP Version 5.4 or later.
+
 1. Upload the plugin to your blog and Activate it.
 
 == Frequently Asked Questions ==
@@ -150,6 +152,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= XXX =
+* wp_unslash() ajax_data 
+* improved wizard cache
 
 = 1.0.2 =
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
