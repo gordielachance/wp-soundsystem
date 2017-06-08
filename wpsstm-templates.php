@@ -359,6 +359,9 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
 
 function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     
+    $user_id = get_current_user_id();
+    if (!$user_id) return;
+    
     //capability check
     $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist );
     $required_cap = $post_type_obj->cap->edit_posts;
