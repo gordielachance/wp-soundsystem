@@ -26,6 +26,9 @@ class WP_SoundSytem_Core_Tracklists{
     private function __construct() { /* Do nothing here */ }
 
     function init(){
+        
+        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
+        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
@@ -62,6 +65,7 @@ class WP_SoundSytem_Core_Tracklists{
         add_action( 'post_submitbox_start', array($this,'publish_metabox_download_link') );
         
         //scraper
+        //TO FIX move under wizard ?
         add_action( 'admin_init', array($this,'scraper_wizard_init') );
         add_action( 'save_post',  array($this, 'scraper_wizard_save'));
         
@@ -383,7 +387,7 @@ class WP_SoundSytem_Core_Tracklists{
         $post_type = get_post_type($post_id);
         if( !in_array($post_type,$this->scraper_post_types ) ) return;
         
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
+        
         $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
 
     }
@@ -391,8 +395,7 @@ class WP_SoundSytem_Core_Tracklists{
     function scraper_wizard_save($post_id){
         $post_type = get_post_type($post_id);
         if( !in_array($post_type,$this->scraper_post_types ) ) return;
-
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
+        
         $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
         $wizard->save_wizard($post_id);
     }
