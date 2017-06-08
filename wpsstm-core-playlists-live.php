@@ -370,6 +370,26 @@ class WP_SoundSytem_Core_Live_Playlists{
     function frontend_wizard_display($content){
         
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
+        
+        //guest ID
+        if ( !$user_id = get_current_user_id() ){
+            $user_id = wpsstm()->get_options('guest_user_id');
+        }
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $required_cap = $post_type_obj->cap->edit_posts;
+        
+        if ( !current_user_can($required_cap) ){
+            
+            $auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+            $auth_text = sprintf(__('Loading a tracklist requires you to be logged.  You can login or subscribe %s.','wpsstm'),$auth_link);
+            $notice = sprintf('<p class="wpsstm-notice wpsstm-bottom-notice">%s</p>',$auth_text);
+            
+            return $notice;
+        }
+        
+        
 
         ob_start();
         $this->frontend_wizard->wizard_display();
