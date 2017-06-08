@@ -31,3 +31,20 @@
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
 }
+
+/* line 31, ../scss/_shared.scss */
+.wpsstm-notice {
+  font-size: 0.8em;
+  padding: .5em;
+  background-color: #fcf8e3;
+  color: #222;
+}
+/* line 36, ../scss/_shared.scss */
+.wpsstm-notice a {
+  color: #222;
+  text-decoration: underline;
+}
+/* line 41, ../scss/_shared.scss */
+.wpsstm-notice.active {
+  display: block;
+}

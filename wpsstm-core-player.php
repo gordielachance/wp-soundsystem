@@ -102,7 +102,7 @@ class WP_SoundSytem_Core_Player{
                 $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                 $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
                 $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice">%s %s </p>',$wp_auth_icon,$wp_auth_text);
+                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-notice wpsstm-bottom-notice">%s %s </p>',$wp_auth_icon,$wp_auth_text);
             }
 
             //Last.FM track action - API auth notice
@@ -111,7 +111,7 @@ class WP_SoundSytem_Core_Player{
                 $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
                 $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
                 $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-                printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
+                printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-notice wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
             }
 
             ?>

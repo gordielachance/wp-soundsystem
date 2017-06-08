@@ -330,7 +330,7 @@ Get track love/unlove icons.
 function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     
     //capability check
-    $post_type_obj = get_post_type_object(wpsstm()->post_type_track );
+    $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
     $required_cap = $post_type_obj->cap->edit_posts;
     if ( !current_user_can($required_cap) ) return;
 
@@ -381,7 +381,7 @@ function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     if (!$user_id) return;
     
     //capability check
-    $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist );
+    $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
     $required_cap = $post_type_obj->cap->edit_posts;
     if ( !current_user_can($required_cap) ) return;
 

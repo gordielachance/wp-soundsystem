@@ -561,7 +561,7 @@ class WpsstmTracklist {
         
         notice_el.attr({
             id:     'wpsstm-bottom-refresh-notice-' + self.tracklist_idx,
-            class:  'wpsstm-bottom-notice wpsstm-bottom-refresh-notice active'
+            class:  'wpsstm-notice wpsstm-bottom-notice wpsstm-bottom-refresh-notice active'
         });
         
         var notice_icon_el = $('<i class="fa fa-refresh fa-fw fa-spin"></i>');
