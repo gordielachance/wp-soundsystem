@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.0.1
+Version: 1.0.2
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '1.0.1';
+    public $version = '1.0.2';
     /**
     * @public string plugin DB version
     */
@@ -83,6 +83,7 @@ class WP_SoundSytem {
             'lastfm_client_secret'              => null,
             'lastfm_scrobbling'                 => 'on',
             'lastfm_favorites'                  => 'on',
+            'lastfm_bot_user_id'                => null,
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
@@ -127,9 +128,7 @@ class WP_SoundSytem {
         if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
             require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
-        
-        
-        
+
         do_action('wpsstm_loaded');
         
         

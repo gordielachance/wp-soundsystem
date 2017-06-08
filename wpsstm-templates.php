@@ -144,7 +144,7 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
 
     if (!$query_args) return;
     
-    //wpsstm()->debug_log( json_encode($query_args), "wpsstm_get_post_id_by()"); 
+    //wpsstm()->debug_log( json_encode($query_args,JSON_UNESCAPED_UNICODE), "wpsstm_get_post_id_by()"); 
 
     $query = new WP_Query( $query_args );
     if (!$query->posts) return;
@@ -305,6 +305,24 @@ function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
 
+function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
+    if (!$post_id) $post_id = get_the_ID();
+    
+    $post_type = get_post_type($post_id);
+    $is_live_tracklist = ( $post_type == wpsstm()->post_type_live_playlist  );
+    
+    if (!$is_live_tracklist) return;
+    $tracklist = wpsstm_get_post_tracklist($post_id);
+    $freq = $tracklist->get_options('datas_cache_min');
+
+    $freq_secs = $freq * MINUTE_IN_SECONDS;
+    
+    $refresh_time_human = human_time_diff( 0, $freq_secs );
+    $refresh_time_human = sprintf('every %s',$refresh_time_human);
+    $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
+
+    return $refresh_time_el;
+}
 /*
 Get track love/unlove icons.
 */
@@ -326,8 +344,8 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     }
 
     $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
+    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
+    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
     return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
 

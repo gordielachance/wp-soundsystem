@@ -99,6 +99,7 @@ This would be very appreciated — Thanks !
 
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.FM API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
+* [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
 
 = Contributors =
 
@@ -149,6 +150,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.0.2 =
+* Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
+* new class WP_SoundSytem_LastFM_User()
 
 = 1.0.1 =
 * Improved sources / autosource code

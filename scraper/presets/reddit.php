@@ -30,31 +30,21 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
     }
     
     /*
-    //TO FIX
     Keep only reddit posts that have a media
     */
     /*
     protected function get_track_nodes($body_node){
 
-        echo"BEFORE:";
         $selector = $this->get_options( array('selectors','tracks','path') );
         $post_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
         //var_dump($post_nodes->length);
-        
-        $media_posts_wrapper = qp( '', null, self::$querypath_options );
-        
 
         foreach($post_nodes as $key=>$node) {
-
-            $title = qp( $node, null, self::$querypath_options )->find('title')->innerHTML();
             $media = qp( $node, null, self::$querypath_options )->find('media')->innerHTML();
-            //if (!$media) continue;
-            
-            $media_posts_wrapper->append($node);
-            
+            if (!$media) unset($post_nodes[$key]);
         }
-
-        return $media_posts_wrapper;
+        //var_dump($post_nodes->length);
+        return $post_nodes;
     }
     */
     
@@ -86,20 +76,9 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
     }
     */
     
-    
-    protected function get_track_artist($track_node){
-        $artist = parent::get_track_artist($track_node);
-        $artist = trim($artist,'"'); //remove quotation marks
-        $artist = trim($artist,"'"); //remove quotation marks
-        $artist = preg_replace('~\[.*\]~', '', $artist); //remove comments like [Hip-Hop]
-        return $artist;
-    }
-    
-    protected function get_track_title($track_node){
-        $title = parent::get_track_title($track_node);
-
-        $title = trim($title,'"'); //remove quotation marks
-        $title = trim($title,"'"); //remove quotation marks
+    protected function filter_string($str){
+        $str = trim($str,'"'); //remove quotation marks
+        $str = trim($str,"'"); //remove quotation marks
         
         $remove_strings = array(
             '(Audio)',
@@ -108,18 +87,35 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
             '(Official Videoclip)',
             '(Clip officiel)',
             '(Lyric Video)',
-            '(Official Music Video)'
+            '(Official Music Video)',
+            '(HD)',
+            '(Music Video)',
+            '(High Quality)',
+            ' HD',
+            ' HQ'
+            
         );
         
-        $title = preg_replace('~\[.*\]~', '', $title); //remove comments like [Hip-Hop]
-        $title = preg_replace('~\(\d{4}\)~', '', $title); //remove dates like (1968)
-        $title = preg_replace('~\d{4} ?$~', '', $title); //remove dates like 2005 at the end of the string
+        $str = preg_replace('~\[.*\]~', '', $str); //remove comments like [Hip-Hop]
+        $str = preg_replace('~\(\d{4}\)~', '', $str); //remove dates like (1968)
+        $str = preg_replace('~\d{4} ?$~', '', $str); //remove dates like 2005 at the end of the string
 
         foreach((array)$remove_strings as $remove_str){
-            $title = str_ireplace($remove_str, "", $title);
+            $str = str_ireplace($remove_str, "", $str);
         }
 
-        return $title;
+        return $str;
+    }
+
+    protected function get_track_artist($track_node){
+        $artist = parent::get_track_artist($track_node);
+        return $this->filter_string($artist);
+    }
+    
+    protected function get_track_title($track_node){
+        $title = parent::get_track_title($track_node);
+        return $this->filter_string($title);
+
     }
 
 }

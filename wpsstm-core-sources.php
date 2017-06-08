@@ -292,20 +292,23 @@ class WP_SoundSytem_Core_Sources{
     }
     
     function ajax_suggest_editable_sources($field_name){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'new_html'  => null,
             'success'   => false
         );
 
         $args = $result['args'] = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'title'     => ( isset($ajax_data['track']['title']) ) ? $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ? $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ? $ajax_data['track']['album'] : null
         );
         
-        $field_name = $result['field_name'] = ( isset($_POST['field_name']) ) ? $_POST['field_name'] : null;
+        $field_name = $result['field_name'] = ( isset($ajax_data['field_name']) ) ? $ajax_data['field_name'] : null;
 
         $track = new WP_SoundSystem_Track($args);
         $sources = $track->get_track_sources_auto();
@@ -382,7 +385,15 @@ class WP_SoundSytem_Source {
     function get_provider_icon_link(){
         if ( !$this->provider ) return;
         
-        $title = ($this->title) ? $this->title : null;
-        return sprintf('<a class="wpsstm-source-provider-link" href="%s" target="_blank" title="%s">%s</a>',$this->url,$title,$this->provider->icon);
+        $classes = array('wpsstm-source-provider-link','wpsstm-icon-link');
+        
+        $attr_arr = array(
+            'class'     => implode(' ',$classes),
+            'href'      => $this->url,
+            'target'    => '_blank',
+            'title'     => $this->title
+        );
+        
+        return sprintf('<a %s>%s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon);
     }
 }

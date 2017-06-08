@@ -1,5 +1,10 @@
 @import "compass/css3";
 
+.wpsstm-icon-link{
+    text-decoration:none;
+    @include box-shadow(none !important); //twenty seventeen fix
+}
+
 .wpsstm-toggle-tracklist-length{
     display:block;
     text-align:center;

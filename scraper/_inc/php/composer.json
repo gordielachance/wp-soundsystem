@@ -1,6 +1,7 @@
 {
     "require": {
-        "querypath/QueryPath": ">=3.0.0"
+        "querypath/QueryPath": ">=3.0.0",
+        "neitanod/forceutf8": "~2.0"
     },
     "config": {
         "vendor-dir": ""

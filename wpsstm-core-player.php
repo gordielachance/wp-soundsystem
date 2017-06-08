@@ -106,7 +106,7 @@ class WP_SoundSytem_Core_Player{
             }
 
             //Last.FM track action - API auth notice
-            if ( !wpsstm_lastfm()->is_user_api_logged() ){
+            if ( !wpsstm_lastfm()->lastfm_user->is_user_api_logged() ){
                 $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
                 $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
                 $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
@@ -169,7 +169,7 @@ class WP_SoundSytem_Core_Player{
 
     function get_track_button(){
         //https://wordpress.stackexchange.com/a/162945/70449
-        $link = '<a class="wpsstm-play-track" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
+        $link = '<a class="wpsstm-play-track wpsstm-icon-link" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
 
         return $link;
 

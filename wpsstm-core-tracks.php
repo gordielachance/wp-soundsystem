@@ -432,27 +432,26 @@ class WP_SoundSytem_Core_Tracks{
     
     function ajax_love_unlove_track(){
 
-        //TO FIX weird encoding that fucks up our code eg. 'Patrick S\u00e9bastien'
-        //header("Content-Type", "application/json; charset=ISO-8859-1");
+        $ajax_data = wp_unslash($_POST);
 
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'success'   => false
         );
 
-        $do_love = $result['do_love'] = ( isset($_POST['do_love']) ) ? filter_var($_POST['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
+        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         $track_args = $result['track_args'] = array(
-            'post_id'   => ( isset($_POST['track']['post_id']) ) ? $_POST['track']['post_id'] : null,
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'post_id'   => ( isset($ajax_data['track']['post_id']) ) ?  $ajax_data['track']['post_id'] : null,
+            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
         );
 
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
         
-        wpsstm()->debug_log( json_encode($track), "ajax_love_unlove_track()"); 
+        wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_love_unlove_track()"); 
         
         if ( ($do_love!==null) ){
 
@@ -471,17 +470,20 @@ class WP_SoundSytem_Core_Tracks{
     }
     
     function ajax_get_track_sources_auto(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
         $result = array(
-            'input'     => $_POST,
+            'input'     => $ajax_data,
             'message'   => null,
             'new_html'  => null,
             'success'   => false
         );
 
         $args = $result['args'] = array(
-            'title'     => ( isset($_POST['track']['title']) ) ? $_POST['track']['title'] : null,
-            'artist'    => ( isset($_POST['track']['artist']) ) ? $_POST['track']['artist'] : null,
-            'album'     => ( isset($_POST['track']['album']) ) ? $_POST['track']['album'] : null
+            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
         );
 
         $track = new WP_SoundSystem_Track($args);
