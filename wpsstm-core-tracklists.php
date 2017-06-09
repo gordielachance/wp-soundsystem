@@ -67,7 +67,7 @@ class WP_SoundSytem_Core_Tracklists{
         //scraper
         //TO FIX move under wizard ?
         add_action( 'admin_init', array($this,'scraper_wizard_init') );
-        add_action( 'save_post',  array($this, 'scraper_wizard_save'));
+        add_action( 'save_post',  array($this, 'wizard_save_metabox'));
         
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table'));
@@ -385,6 +385,7 @@ class WP_SoundSytem_Core_Tracklists{
 
     }
 
+    //TO FIX to improve
     function scraper_wizard_init(){
         $post_id = (isset($_REQUEST['post'])) ? $_REQUEST['post'] : null;
         if (!$post_id) return;
@@ -397,12 +398,21 @@ class WP_SoundSytem_Core_Tracklists{
 
     }
     
-    function scraper_wizard_save($post_id){
+    //TO FIX to improve
+    function wizard_save_metabox($post_id){
         $post_type = get_post_type($post_id);
         if( !in_array($post_type,$this->scraper_post_types ) ) return;
         
+        //check save status
+        $is_autosave = wp_is_post_autosave( $post_id );
+        $is_revision = wp_is_post_revision( $post_id );
+        $is_valid_nonce = false;
+        if ( isset($_POST[ 'wpsstm_scraper_wizard_nonce' ]) && wp_verify_nonce( $_POST['wpsstm_scraper_wizard_nonce'], 'wpsstm_scraper_wizard')) $is_valid_nonce=true;
+
+        if ($is_autosave || $is_revision || !$is_valid_nonce) return;
+        
         $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
-        $wizard->save_wizard($post_id);
+        $wizard->save_wizard();
     }
     
     function content_append_tracklist_table($content){

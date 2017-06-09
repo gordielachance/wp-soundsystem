@@ -360,11 +360,28 @@ class WP_SoundSytem_Core_Live_Playlists{
         global $wp_query;
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
-
-        $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
-
+        
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        $this->frontend_wizard = new WP_SoundSytem_Scraper_Wizard($frontend_wizard_url);
+
+        if ( isset($_REQUEST[ 'wpsstm_wizard' ]['post_id']) ){
+            $wizard_id = $_REQUEST[ 'wpsstm_wizard' ]['post_id'];
+            $this->frontend_wizard = new WP_SoundSytem_Scraper_Wizard($wizard_id);
+        }else{
+            $wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
+            $this->frontend_wizard = new WP_SoundSytem_Scraper_Wizard($wizard_url);
+        }
+
+        $post_id = $this->frontend_wizard->save_wizard();
+
+        if ( is_wp_error($post_id) ){
+            $this->frontend_wizard->tracklist->add_notice( 'wizard-header', 'preset_loaded', __('There has been a problem while loading this playlist:','wpsstm') );
+        }elseif($post_id){
+            if ( 'publish' == get_post_status( $post_id ) ){
+                wp_redirect( get_permalink($post_id) );
+            }
+
+        }
+
     }
 
     function frontend_wizard_display($content){
@@ -376,11 +393,13 @@ class WP_SoundSytem_Core_Live_Playlists{
             $user_id = wpsstm()->get_options('guest_user_id');
         }
         
+        
+        
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
-        
-        if ( !current_user_can($required_cap) ){
+
+        if ( !user_can($user_id,$required_cap) ){
             
             $auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
             $auth_text = sprintf(__('Loading a tracklist requires you to be logged.  You can login or subscribe %s.','wpsstm'),$auth_link);

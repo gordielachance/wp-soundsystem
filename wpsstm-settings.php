@@ -596,6 +596,7 @@ class WP_SoundSytem_Settings {
         
         $help = array();
         $help[]= __("If the visitor is not logged, use this Wordpress user to create the loaded playlist.","wpsstm");
+        $help[]= __("The capability 'edit_post' must be enabled for this user (Contributor role).","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
