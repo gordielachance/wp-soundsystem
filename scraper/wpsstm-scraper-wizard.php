@@ -17,8 +17,8 @@ class WP_SoundSytem_Scraper_Wizard{
         $this->tracklist->tracks_strict = false;
         $this->tracklist->load_remote_tracks(true);
         
-        $this->is_advanced = (wpsstm_is_backend() && ( $this->tracklist->ignore_cache || ( $this->tracklist->feed_url && !$this->tracklist->tracks ) ) );
-        
+        $this->is_advanced = ( wpsstm_is_backend() && ( $this->tracklist->ignore_cache || ( $this->tracklist->feed_url && !$this->tracklist->tracks ) ) );
+
         //metabox
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register') );
         
@@ -63,16 +63,16 @@ class WP_SoundSytem_Scraper_Wizard{
 
     }
     
-    function save_wizard(){
+    function save_frontend_wizard(){
 
-        //create new post
         if ( !$post_id = $this->tracklist->post_id ){
             
             //TO FIX limit for post creations ? (spam/bots, etc.)
 
             //user check - guest user
+            $user_id = $guest_user_id = null;
             if ( !$user_id = get_current_user_id() ){
-                $user_id = wpsstm()->get_options('guest_user_id');
+                $user_id = $guest_user_id = wpsstm()->get_options('guest_user_id');
             }
 
             //capability check
@@ -86,18 +86,15 @@ class WP_SoundSytem_Scraper_Wizard{
                 if( !$this->tracklist->tracks ){
                     return new WP_Error( 'wpsstm_wizard_empty_tracks', __('No remote tracks found, abord creating live playlist','wpsstm') );
                 }
-                
-                $post_status = 'draft'; //TO FIX should be auto-draft, but for now we want to see them backend
-                
-                if ( isset($_REQUEST[ 'save-playlist']) ){
-                    $post_status = 'publish';
-                }
-  
+
                 $post_args = array(
                     'post_title'    => $this->tracklist->title,
                     'post_type'     => wpsstm()->post_type_live_playlist,
-                    'post_status'   => $post_status,
-                    'post_author'   => $user_id
+                    'post_status'   => 'wpsstm-wizard',
+                    'post_author'   => $user_id,
+                    'meta_input'   => array(
+                        wpsstm_live_playlists()->frontend_wizard_meta_key => true
+                    )
                 );
 
                 $new_post_id = wp_insert_post( $post_args );
@@ -107,6 +104,21 @@ class WP_SoundSytem_Scraper_Wizard{
             }
         }
         
+        if ( !$post_id = $this->tracklist->post_id ) return;
+        $wizard_url = ( isset($_REQUEST[ 'wpsstm_feed_url' ]) ) ? $_REQUEST[ 'wpsstm_feed_url' ] : null;
+        $this->save_feed_url($wizard_url);
+        
+        //TO FIX
+        if ( isset($_REQUEST[ 'save-playlist']) ){
+            $post_status = 'publish';
+        }
+
+        return $post_id;
+
+    }
+    
+    function save_backend_wizard(){
+
         if ( !$post_id = $this->tracklist->post_id ) return;
 
         if ( isset($_REQUEST[ 'wpsstm_wizard' ]['reset']) ){

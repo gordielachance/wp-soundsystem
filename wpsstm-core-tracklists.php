@@ -412,7 +412,7 @@ class WP_SoundSytem_Core_Tracklists{
         if ($is_autosave || $is_revision || !$is_valid_nonce) return;
         
         $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
-        $wizard->save_wizard();
+        $wizard->save_backend_wizard();
     }
     
     function content_append_tracklist_table($content){
