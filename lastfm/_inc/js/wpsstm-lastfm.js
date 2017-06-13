@@ -265,8 +265,8 @@ class WpsstmLastFM {
     $( document ).on( "wpsstmMediaReady", function( event ) {
 
         wpsstm_mediaElement.addEventListener('loadeddata', function() {
-            if (self.has_user_scrobbler){
-                self.updateNowPlaying(wpsstm_currentTrack);
+            if (wpsstm_lastfm.has_user_scrobbler){
+                wpsstm_lastfm.updateNowPlaying(wpsstm_currentTrack);
             }
         });
         
