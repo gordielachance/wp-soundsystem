@@ -1430,36 +1430,38 @@ class WpsstmPagePlayer {
     play_next_tracklist(){
         var self = this;
         
+        self.end_current_tracklist();
+        
         var current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(self.current_tracklist_idx);
         var queue_tracklist_idx = current_tracklist_idx;
         var last_tracklist_idx = self.tracklists.length -1;
         var new_tracklist;
 
-        //try to get previous track
+        //try to get next playlist
         for (var i = 0; i < self.tracklists.length; i++) {
 
-            if (queue_tracklist_idx == last_tracklist_idx){
+            if (queue_tracklist_idx == last_tracklist_idx){ //this is the last page tracklist
                 
-                self.debug("play_next_tracklist() : is page last tracklist, go back to first tracklist");
-                self.end_current_tracklist();
+                self.debug("play_next_tracklist() : is page last tracklist");
                 
                 if ( !self.is_loop ){
-                    break;
-                }else{
-                    queue_tracklist_idx = 0;
+                    self.debug("play_next_tracklist() : Loop is disabled; ignore play_next_tracklist()");
+                    return false;
                 }
+                    
+                queue_tracklist_idx = 0;
 
             }else{
                 queue_tracklist_idx = Number(queue_tracklist_idx) + 1;
             }
 
-            if (queue_tracklist_idx == current_tracklist_idx){
-                self.debug("play_next_tracklist() : Playlist loop, abord");
-                return false;
-            }
-
             queue_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(queue_tracklist_idx);
             var check_tracklist = self.get_tracklist_obj(queue_tracklist_idx);
+            
+            if (queue_tracklist_idx == current_tracklist_idx){ //playlists loop
+                self.debug("play_next_tracklist() : No other playlist to play has been found, abord to avoid infinite loop");
+                return false;
+            }
 
             if ( check_tracklist.can_play){
                 new_tracklist = check_tracklist;
