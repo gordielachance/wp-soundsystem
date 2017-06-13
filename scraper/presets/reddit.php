@@ -77,9 +77,12 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
     */
     
     protected function filter_string($str){
-        $str = trim($str,'"'); //remove quotation marks
-        $str = trim($str,"'"); //remove quotation marks
         
+        //remove quotation marks
+        $str = trim($str,'"'); 
+        $str = trim($str,"'");
+        
+        //remove some strings
         $remove_strings = array(
             '(Audio)',
             '(Official)',
@@ -96,12 +99,20 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
             
         );
         
-        $str = preg_replace('~\[.*\]~', '', $str); //remove comments like [Hip-Hop]
-        $str = preg_replace('~\(\d{4}\)~', '', $str); //remove dates like (1968)
-        $str = preg_replace('~\d{4} ?$~', '', $str); //remove dates like 2005 at the end of the string
-
         foreach((array)$remove_strings as $remove_str){
             $str = str_ireplace($remove_str, "", $str);
+        }
+        
+        //remove some (regex) strings
+        $remove_regexes = array(
+            '~\[.*\]~', //eg [Hip-Hop]
+            '~\(\d{4}\)~', //dates - eg. (1968)
+            '~\d{4} ?$~', //dates (end of string) eg. 2005
+            '~[-|–|—] *$~' //dash (end of string)
+        );
+        
+        foreach((array)$remove_regexes as $pattern){
+            $str = preg_replace($pattern, '', $str);
         }
 
         return $str;
