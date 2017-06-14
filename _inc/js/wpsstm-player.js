@@ -313,11 +313,11 @@ class WpsstmTracklist {
         
         var self = this;
         var tracklist_el = self.get_tracklist_el();
-        var deferredObject = $.Deferred();
+        var deferredTracklist = $.Deferred();
         
         if ( self.did_tracklist_request && !force ){
             
-            deferredObject.resolve();
+            deferredTracklist.resolve();
             
         }else{
             
@@ -338,7 +338,7 @@ class WpsstmTracklist {
                     dataType: 'json'
                 });
 
-                var refresh_notice = self.get_refresh_notice();
+                var refresh_notice = self.get_refresh_notice_el();
                 var refresh_notice_table = $(refresh_notice).clone();
                 refresh_notice_table.find('em').remove();
                 //refresh_notice_table = $( refresh_notice_table.html() );
@@ -354,27 +354,27 @@ class WpsstmTracklist {
 
             self.tracklist_request.done(function(data) {
                 if (data.success === false) {
-                    deferredObject.reject();
+                    deferredTracklist.reject();
                 }else{
                     var new_tracklist_el = $(data.new_html);
                     $(tracklist_el).replaceWith(new_tracklist_el);
                     self.populate_tracklist( new_tracklist_el );
-                    deferredObject.resolve();
+                    deferredTracklist.resolve();
                 }
 
             });
 
-             self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
-                self.can_play = false;
-                $(tracklist_el).addClass('error');
-                console.log("get_tracklist_request failed for tracklist #" + self.tracklist_idx);
-                deferredObject.reject();
-             });
-
+            self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
+                deferredTracklist.reject();
+            });  
+            
             self.tracklist_request.always(function() {
 
                 self.did_tracklist_request = true; //so we can avoid running this function several times
-                $('#wpsstm-bottom-refresh-notice-' + self.tracklist_idx).remove();
+                
+                refresh_notice.remove();
+                refresh_notice_table.remove();
+                
                 $(tracklist_el).removeClass('loading');
 
                 //refresh timer
@@ -383,15 +383,19 @@ class WpsstmTracklist {
                 }
 
                 self.tracklist_request = undefined;
-
-
             });
             
         }
+        
+        ////
+        
+        deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
+            self.can_play = false;
+            $(tracklist_el).addClass('error');
+            console.log("get_tracklist_request failed for tracklist #" + self.tracklist_idx);
+        });
 
-        
-        
-        return deferredObject.promise();
+        return deferredTracklist.promise();
 
     }
     
@@ -554,11 +558,11 @@ class WpsstmTracklist {
 
     }
 
-    get_refresh_notice(){
+    get_refresh_notice_el(){
 
         var self = this;
         
-        self.debug("get_refresh_notice");
+        self.debug("get_refresh_notice_el");
         
         var notice_el = $('<p />');
         var tracklist = this.get_tracklist_el();
