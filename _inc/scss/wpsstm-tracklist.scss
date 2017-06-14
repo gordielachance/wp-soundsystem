@@ -44,7 +44,7 @@
         }
     }
     
-    &.wpsstm-tracklist-table {
+    &.wpsstm-tracklist-table{
         position:relative;
         font-family: sans-serif;
         width: 100%;
@@ -70,7 +70,8 @@
         table{
             width: 100%;
             display: table;
-            border: none;
+            border-collapse: collapse;
+            border:none;
             margin:0;
             
             .column-trackitem_image{
@@ -108,7 +109,7 @@
                 font-weight: 400;
             }
 
-            thead {
+            thead{
                 /*
                 display: table-header-group;
                 vertical-align: middle;
@@ -120,21 +121,21 @@
                 */
                 display:none;
             }
-            tfoot {
-                th {
+            tfoot{
+                th{
                     border-top: 1px solid #e1e1e1;
                 }
             }
 
-           tbody tr {
+           tbody tr{
 
                 @include transition-property(background);
                 @include transition-duration(.4s);
 
-                &:nth-child(odd) {
+                &:nth-child(odd){
                     background: rgba(0,0,0,0.0125);
                 }
-                &:hover {
+                &:hover{
                     background: rgba(0,0,0,0.025);
                     td.column-image img{
                         @include opacity(0.8);
@@ -146,12 +147,15 @@
                         display:inline;
                     }
                 }
+                &:not(.no-items):not(:last-child){
+                    border-bottom: 1px solid #eee;
+                }
 
                 td{
                     &.column-image{
                         width: 50px;
                         padding:0;
-                        img {
+                        img{
                             max-width: 100%;
                             @include opacity(0.2);
                             @include transition-property(opacity);
