@@ -645,7 +645,8 @@ class WpsstmTracklist {
                 wpsstm_mediaElement.currentTime = 0;
                 current_track.update_button('ended');
             }
-            
+
+            current_track.sources_request.abort();
             current_track.current_track_idx = undefined;
             current_track.current_source_idx = undefined;
         }
@@ -788,11 +789,11 @@ class WpsstmTrack {
             return;
         }
         
-        var track_el = self.get_track_el();
-        $(track_el).addClass('buffering');
-
-        
         wpsstm_currentTrack = self;
+        var track_el = self.get_track_el();
+        $(track_el).addClass('active buffering');
+        self.set_bottom_trackinfo();
+        
         var deferredObject = self.get_sources_auto();
         
         deferredObject.done(function() {
@@ -804,7 +805,7 @@ class WpsstmTrack {
             }else{
                 tracklist_obj.play_next_track();
             }
-            
+
         })
         
         deferredObject.fail(function() {
@@ -939,11 +940,8 @@ class WpsstmTrack {
         var self = this;
         
         var track_el = self.get_track_el();
-        $(track_el).addClass('active');
-        
-        self.set_bottom_trackinfo();
-        self.set_bottom_audio_el(); //build <audio/> el
 
+        self.set_bottom_audio_el(); //build <audio/> el
         self.debug("load_in_player");
         
         var audio_el = $('#wpsstm-player-audio');
