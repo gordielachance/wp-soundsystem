@@ -554,7 +554,11 @@ class WP_SoundSytem_Tracklist_Table{
         switch($column_name){
             case 'trackitem_order':
                 $this->curr_track_idx++;
-                return $this->curr_track_idx;
+                
+                $loading_icon = '<i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>';
+                $text = sprintf('<span>%s</span>',$this->curr_track_idx);
+                return $loading_icon.$text;
+                
             case 'trackitem_play_bt':
                 return wpsstm_player()->get_track_button($item);
             case 'trackitem_track':
