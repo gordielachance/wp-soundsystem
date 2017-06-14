@@ -154,13 +154,13 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 == Changelog ==
 
 
-= XXX =
+= 1.0.2.5 =
 * wp_unslash() ajax_data 
 * improved wizard cache
 * WP_SoundSytem_Preset_Radionomy_Playlists_API
 * new dependency : forceutf8 + composer update
 * wizard : better cache handling for wizard
-* player.js : fix playlist not refreshing
+* player.js : fix playlist no more refreshing
 * fix refresh link not always displayed
 * fix remove notices when playlist request failed
 * play_or_skip : ignore action if we've skipped the track + small timeout to fix fast tracks skips
