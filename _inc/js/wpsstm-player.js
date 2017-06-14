@@ -1457,11 +1457,6 @@ class WpsstmPagePlayer {
 
             queue_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(queue_tracklist_idx);
             var check_tracklist = self.get_tracklist_obj(queue_tracklist_idx);
-            
-            if (queue_tracklist_idx == current_tracklist_idx){ //playlists loop
-                self.debug("play_next_tracklist() : No other playlist to play has been found, abord to avoid infinite loop");
-                return false;
-            }
 
             if ( check_tracklist.can_play){
                 new_tracklist = check_tracklist;
