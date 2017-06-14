@@ -235,7 +235,7 @@ class WP_SoundSytem_Tracklist_Table{
             }
         
             //refresh link
-            if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
+            if ( method_exists($this->tracklist,'get_refresh_link') ) {
                 $refresh_link_el = $this->tracklist->get_refresh_link();
             }
 
