@@ -38,7 +38,6 @@
     }
 
     &.buffering{
-        pointer-events: none;
         .trackitem_order{
             .wpsstm-player-icon-buffering{
                 display:inline-block;
@@ -50,11 +49,13 @@
     }
     
     &.active{
-        
-        @include opacity(1);
+        &:not(.error){
+            @include opacity(1);
+        }
         
         &.buffering{
             @include opacity(.75);
+            pointer-events: none;
         }
         
         .wpsstm-player-sources-list{
@@ -100,7 +101,7 @@
 
 
 
-            &.playing .wpsstm-play-track, &.buffering .wpsstm-play-track{
+            &.playing .wpsstm-play-track, &.active .wpsstm-play-track{
                 .wpsstm-player-icon{
                     display:none;
                 }
