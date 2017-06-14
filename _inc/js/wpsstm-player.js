@@ -797,14 +797,19 @@ class WpsstmTrack {
         var deferredObject = self.get_sources_auto();
         
         deferredObject.done(function() {
+            
+            //set a small timeout so track does not play if user fast skip tracks
+            setTimeout(function(){
+                
+                if ( self != wpsstm_currentTrack ) return false; //track has been switched since we've requested it
 
-            if ( self != wpsstm_currentTrack ) return false; //track has been switched since we've requested it
-
-            if ( self.sources.length > 0 ){
-                self.load_in_player(source_idx);
-            }else{
-                tracklist_obj.play_next_track();
-            }
+                if ( self.sources.length > 0 ){
+                    self.load_in_player(source_idx);
+                }else{
+                    tracklist_obj.play_next_track();
+                }
+                
+            }, 1000);
 
         })
         
