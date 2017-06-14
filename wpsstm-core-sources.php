@@ -238,12 +238,13 @@ class WP_SoundSytem_Core_Sources{
         $lis = array();
         $sources = array();
         
-        $sources = array();
         foreach((array)$track->sources as $source_raw){
             $source = new WP_SoundSytem_Source($source_raw);
             if (!$source->src) continue;
             $sources[] = $source;
         }
+        
+        $sources = $track->sort_sources_by_similarity($sources);
 
         foreach($sources as $key=>$source){
             
@@ -269,26 +270,6 @@ class WP_SoundSytem_Core_Sources{
         if ( !empty($lis) ){
             return sprintf('<ul class="wpsstm-player-sources-list">%s</ul>',implode("",$lis));
         }
-    }
-    
-    function sanitize_sources($sources){
-        
-        if ( empty($sources) ) return;
-        
-        $new_sources = array();
-
-        //TO FIX correct source urls when possible
-        foreach((array)$sources as $key=>$source){
-            $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
-            if ( !$source['url'] ) continue;
-            if ( !filter_var($source['url'], FILTER_VALIDATE_URL) ) continue;
-            $new_sources[] = array_filter($source);
-        }
-        
-        $new_sources = array_unique($new_sources, SORT_REGULAR);
-        $new_sources = wpsstm_array_unique_by_subkey($new_sources,'url');
-
-        return $new_sources;
     }
     
     function ajax_suggest_editable_sources($field_name){
@@ -340,11 +321,13 @@ class WP_SoundSytem_Source {
     var $src; //URL used in the 'source' tag (which could be not the same)
     var $provider;
     var $type;
+    var $similarity;
 
     static $defaults = array(
         'url'           => null,
         'title'         => null,
         'origin'        => null, 
+        'similarity'    => null,
     );
     
     function __construct($args = null){

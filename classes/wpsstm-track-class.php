@@ -342,16 +342,75 @@ class WP_SoundSystem_Track{
 
         //allow plugins to filter this
         $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+        
+        $sources = $this->sanitize_track_sources($sources);
 
         return $sources;
 
+    }
+    
+    function sort_sources_by_similarity($sources){
+        
+        $artist_sanitized = sanitize_title($this->artist);
+        $title_sanitized = sanitize_title($this->title);
+        
+        //compute similarity
+        foreach((array)$sources as $key=>$source){
+            
+            $source_title_sanitized = sanitize_title($source->title);
+            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); //remove artist from source title so the string to compare is shorter
+            
+            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
+            $sources[$key]->similarity = $similarity_pc;
+        }
+        
+        //reorder by similarity
+        usort($sources, function ($a, $b){
+            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
+        });
+        
+        return $sources;
+    }
+    
+    function sanitize_track_sources($sources){
+        
+        if ( empty($sources) ) return;
+        
+        $artist_sanitized = sanitize_title($this->artist);
+        $title_sanitized = sanitize_title($this->title);
+
+        foreach((array)$sources as $key=>$source){
+            //url is not valid
+            if ( !$source['url'] || ( !filter_var($source['url'], FILTER_VALIDATE_URL) ) ) unset($sources[$key]);
+            
+            //check that the track artist is contained in the source title
+            /*
+            $source_sanitized = sanitize_title($source['title']);
+
+            if (strpos($source_sanitized, $artist_sanitized) === false) {
+                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'title'=>$this->title,'source_title'=>$source['title']) ), "WP_SoundSystem_Track::get_track_sources_auto() - source ignored as artist is not contained in its title");
+                unset($sources[$key]);
+            }
+            */
+            
+        }
+
+        foreach((array)$sources as $key=>$source){
+            $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
+            $source[$key] = array_filter($source);
+        }
+
+        $sources = array_unique($sources, SORT_REGULAR);
+        $sources = wpsstm_array_unique_by_subkey($sources,'url');
+
+        return $sources;
     }
 
     function update_track_sources($sources){
         
         if (!$this->artist || !$this->title) return;
 
-        $sources = wpsstm_sources()->sanitize_sources($sources);
+        $sources = $this->sanitize_track_sources($sources);
 
         if (!$sources){
             return delete_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey );
