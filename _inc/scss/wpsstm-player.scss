@@ -86,6 +86,7 @@
             &[data-wpsstm-sources-count="0"]:not(:hover):not(.active){
                 @include opacity(.1);
             }
+            
             &:not(.active){
                 @include opacity(.25);
 
@@ -99,7 +100,7 @@
 
 
 
-            &.playing .wpsstm-play-track{
+            &.playing .wpsstm-play-track, &.buffering .wpsstm-play-track{
                 .wpsstm-player-icon{
                     display:none;
                 }

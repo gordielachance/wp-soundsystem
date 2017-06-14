@@ -153,6 +153,8 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 1.0.2.6 =
+* improved tracks GUI (buffering, active, etc)
 
 = 1.0.2.5 =
 * wp_unslash() ajax_data 
