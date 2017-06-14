@@ -645,8 +645,11 @@ class WpsstmTracklist {
                 wpsstm_mediaElement.currentTime = 0;
                 current_track.update_button('ended');
             }
-
-            current_track.sources_request.abort();
+            
+            if (current_track.sources_request){
+                current_track.sources_request.abort();
+            }
+            
             current_track.current_track_idx = undefined;
             current_track.current_source_idx = undefined;
         }
