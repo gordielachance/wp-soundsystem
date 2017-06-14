@@ -787,10 +787,14 @@ class WpsstmTrack {
         var track_el = self.get_track_el();
         $(track_el).addClass('buffering');
 
+        
+        wpsstm_currentTrack = self;
         var deferredObject = self.get_sources_auto();
         
         deferredObject.done(function() {
-            
+
+            if ( self != wpsstm_currentTrack ) return false; //track has been switched since we've requested it
+
             if ( self.sources.length > 0 ){
                 self.load_in_player(source_idx);
             }else{
@@ -800,10 +804,16 @@ class WpsstmTrack {
         })
         
         deferredObject.fail(function() {
+            
+            if ( self != wpsstm_currentTrack ) return false; //track has been switched since we've requested it
+
             tracklist_obj.play_next_track();
         })
 
         deferredObject.always(function(data, textStatus, jqXHR) {
+            
+            if ( self != wpsstm_currentTrack ) return false; //track has been switched since we've requested it
+            
             self.get_next_tracks_sources_auto();
         })
 
@@ -827,7 +837,7 @@ class WpsstmTrack {
             deferredObject.resolve();
         } else{
             
-            self.debug("get_sources_auto()");
+            self.debug("get_sources_auto");
             
             var promise = self.get_track_sources_request();
             $(track_el).addClass('buffering');
@@ -844,7 +854,7 @@ class WpsstmTrack {
             })
             
             promise.done(function() {
-                self.debug("get_sources_auto() - success");
+                self.debug("get_sources_auto - success");
                 deferredObject.resolve();
             })
             
@@ -867,14 +877,11 @@ class WpsstmTrack {
         var self = this;
         var tracklist = wpsstm_page_player.tracklists[self.tracklist_idx];
 
-        self.debug("get_next_tracks_sources_auto()");
+        self.debug("get_next_tracks_sources_auto");
 
         var max_items = wpsstm_track_source_requests_limit;
         var rtrack_in = self.track_idx + 1;
         var rtrack_out = self.track_idx + max_items + 1;
-        
-        //TO FIX
-        //get X tracks that have .did_sources_request = false
 
         var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
 
@@ -927,14 +934,13 @@ class WpsstmTrack {
         
         var self = this;
         
-        wpsstm_currentTrack = self;
         var track_el = self.get_track_el();
         $(track_el).addClass('active');
         
         self.set_bottom_trackinfo();
         self.set_bottom_audio_el(); //build <audio/> el
 
-        self.debug("load_in_player()");
+        self.debug("load_in_player");
         
         var audio_el = $('#wpsstm-player-audio');
 
