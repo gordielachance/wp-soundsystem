@@ -349,6 +349,27 @@ class WP_SoundSystem_Track{
 
     }
     
+    /*
+    Remove a source if its title contains the word 'cover'.
+    Except for tracks that have 'cover' in their title.
+    */
+    
+    function remove_cover_sources($sources){
+        
+        //this track is a cover; abord
+        $track_is_cover = stripos($this->title, 'cover');
+        if ( $track_is_cover ) return $sources;
+
+        foreach((array)$sources as $key=>$source){
+            $source_is_cover = stripos($source->title, 'cover');
+            if ( $source_is_cover ){
+                unset($source[$key]);
+            }
+        }
+
+        return $sources;
+    }
+    
     function sort_sources_by_similarity($sources){
         
         $artist_sanitized = sanitize_title($this->artist);
@@ -383,6 +404,8 @@ class WP_SoundSystem_Track{
             //url is not valid
             if ( !$source['url'] || ( !filter_var($source['url'], FILTER_VALIDATE_URL) ) ) unset($sources[$key]);
             
+            
+            
             //check that the track artist is contained in the source title
             /*
             $source_sanitized = sanitize_title($source['title']);
@@ -394,6 +417,8 @@ class WP_SoundSystem_Track{
             */
             
         }
+        
+        $sources = $this->remove_cover_sources($sources);
 
         foreach((array)$sources as $key=>$source){
             $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
