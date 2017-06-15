@@ -527,36 +527,30 @@ class WpsstmTracklist {
         //expire countdown
         if (self.expire_sec === 0) return;
         if (self.expire_sec <= 0) return;
+        
+        var ms = self.expire_sec * 1000;
 
         self.debug("init_refresh_timer()");
         
         if (self.refresh_timer){ //stop current timer if any
-            clearInterval(self.refresh_timer);
+            clearTimeout(self.refresh_timer);
             self.refresh_timer = undefined;
         }
         
         self.debug("could refresh in "+ self.expire_sec +" seconds");
-
-        self.refresh_timer = setInterval ( function(){
-                return self.update_refresh_timer();
-        }, 1000 );
-    }
-    
-    update_refresh_timer(){
-        var self = this;
-        self.expire_sec = self.expire_sec - 1;
         
-        //self.debug("update_refresh_timer() - " + self.expire_sec);
-
-        if (self.expire_sec <= 0){
-            clearInterval(self.refresh_timer);
+        setTimeout(function(){
+            
             self.expire_sec = 0;
             var tracklist_el = self.get_tracklist_el();
             $(tracklist_el).attr('data-wpsstm-expire-sec',0); //for CSS
             self.did_tracklist_request = false;
-        }
-
+            self.debug("refresh timer expired");
+            
+        }, ms );
+        
     }
+
 
     get_refresh_notice_el(){
 
