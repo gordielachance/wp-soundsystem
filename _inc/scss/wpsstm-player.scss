@@ -78,28 +78,18 @@
 
 .wpsstm-tracklist-table{
     tbody{
-        tr{
-            
-            &.wpsstm-invalid-track{
-                background:rgba(255, 0, 0, 0.10);
-            }
-            
-            &[data-wpsstm-sources-count="0"]:not(:hover):not(.active){
-                @include opacity(.1);
-            }
+        tr:not(.no-items){
             
             &:not(.active){
                 @include opacity(.25);
-
-            }
-
-            &:hover .wpsstm-play-track{
-                .wpsstm-player-icon{
-                        @include opacity(1);
+                &[data-wpsstm-sources-count="0"]:not(:hover){
+                    @include opacity(.1);
                 }
+                &.has-played{
+                    @include opacity(.5);
+                }
+
             }
-
-
 
             &.playing .wpsstm-play-track, &.active .wpsstm-play-track{
                 .wpsstm-player-icon{
@@ -118,10 +108,11 @@
                     display:inline-block;
                 }
             }
-
-            &.has-played:not(.active){
-                @include opacity(.5);
+            
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
             }
+            
         }
     }
 }
