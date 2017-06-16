@@ -219,11 +219,36 @@
   vertical-align: middle;
 }
 
-/* line 4, ../scss/_wpsstm-shared.scss */
+/* line 5, ../scss/_wpsstm-shared.scss */
+.truncate {
+  /*
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  */
+}
+
+/* line 13, ../scss/_wpsstm-shared.scss */
 .wpsstm-icon-link, .toggle-children-link {
   text-decoration: none;
   -moz-box-shadow: none !important;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+/* line 19, ../scss/_wpsstm-shared.scss */
+.wpsstm-can-click {
+  cursor: pointer;
+  cursor: hand;
+}
+
+/* line 24, ../scss/_wpsstm-shared.scss */
+.ellipsis {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
