@@ -1,8 +1,7 @@
-// HIDE MAX LIST ITEMS JQUERY PLUGIN
-// Version: 1.36
-// Author: Josh Winn
-// Website: www.joshuawinn.com
-// Usage: Free and Open Source. WTFPL: http://sam.zoy.org/wtfpl/
+/*
+Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/jawinn/Hide-Max-List-Items-Expander-jQuery-Plugin)
+*/
+
 (function($){
     $.fn.extend({ 
         toggleChildren: function(options){
@@ -13,7 +12,7 @@
                 btLess:                 null, //jQuery item or selector
                 childrenShowCount:      false,
                 childrenMax:            3,
-                speed:                  1000,
+                speed:                  500,
                 moreText:               'Read more', //if btMore is not defined
                 lessText:               'Read less', //if btLess is not defined
             };
