@@ -76,46 +76,7 @@
     }
 }
 
-.wpsstm-tracklist-table{
-    tbody{
-        tr:not(.no-items){
-            
-            &:not(.active){
-                @include opacity(.25);
-                &[data-wpsstm-sources-count="0"]:not(:hover){
-                    @include opacity(.1);
-                }
-                &.has-played{
-                    @include opacity(.5);
-                }
 
-            }
-
-            &.playing .wpsstm-play-track, &.active .wpsstm-play-track{
-                .wpsstm-player-icon{
-                    display:none;
-                }
-                .wpsstm-player-icon-pause{
-                    display:inline-block;
-                }
-            }
-
-            &.error .wpsstm-play-track{
-                .wpsstm-player-icon{
-                    display:none;
-                }
-                .wpsstm-player-icon-error{
-                    display:inline-block;
-                }
-            }
-            
-            &.wpsstm-invalid-track{
-                background:rgba(255, 0, 0, 0.10);
-            }
-            
-        }
-    }
-}
 
 a.wpsstm-play-track{
     text-decoration:none;

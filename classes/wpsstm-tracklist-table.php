@@ -150,8 +150,7 @@ class WP_SoundSytem_Tracklist_Table{
 	 */
 	public function display() {
         $classes = array(
-            'wpsstm-tracklist',
-            'wpsstm-tracklist-table'
+            'wpsstm-tracklist'
         );
         
         $attr_arr = array(
@@ -176,30 +175,30 @@ class WP_SoundSytem_Tracklist_Table{
             $attr_arr['data-wpsstm-expire-sec'] = $next_refresh_sec;
         }
 
-        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr)); ?>
-            <?php $this->display_tablenav( 'top' );?>
-            <table>
-                    <thead>
-                    <tr>
-                            <?php $this->print_column_headers(); ?>
-                    </tr>
-                    </thead>
+        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr));
+            $this->display_tablenav( 'top' );
+            ?>
+                <table>
+                        <thead>
+                        <tr>
+                                <?php $this->print_column_headers(); ?>
+                        </tr>
+                        </thead>
 
-                    <tbody>
-                            <?php $this->display_rows_or_placeholder(); ?>
-                    </tbody>
+                        <tbody class="wpsstm-tracklist-entries">
+                                <?php $this->display_rows_or_placeholder(); ?>
+                        </tbody>
 
-                    <tfoot>
-                    <tr>
-                            <?php //$this->print_column_headers( false ); ?>
-                    </tr>
-                    </tfoot>
+                        <tfoot>
+                        <tr>
+                                <?php //$this->print_column_headers( false ); ?>
+                        </tr>
+                        </tfoot>
 
-            </table>
-            <?php //$this->display_tablenav( 'bottom' );?>
+                </table>
+                <?php //$this->display_tablenav( 'bottom' );?>
         </div>
-
-        <?php
+            <?php
 
 	}
     

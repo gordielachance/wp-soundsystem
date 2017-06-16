@@ -1,9 +1,6 @@
 (function($){
 
   $(document).ready(function(){
-      
-      $('.wpsstm-tracklist-table table').shortenTable(3,'tbody tr');
-      $('.wpsstm-tracklist-list').shortenTable(3);
 
     //artist lookup
     var artist_lookup_input = $('input.wpsstm-lookup-artist');
