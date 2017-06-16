@@ -49,7 +49,7 @@
                         $itemsCount = $('<small class="toggle-children-count" />');
                         $btMore.append($itemsCount);   
                     }
-                    $itemsCount.text(totalChildren - op.childrenMax);
+                    $itemsCount.text(' /' + (totalChildren));
                 }
 
                 // Get or create "Read less" button

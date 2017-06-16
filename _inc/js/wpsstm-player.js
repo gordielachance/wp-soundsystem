@@ -268,7 +268,7 @@ class WpsstmTracklist {
 
             var link = $(this);
             var link_wrapper = link.closest('.wpsstm-love-unlove-playlist-links');
-            var tracklist_wrapper = link.closest('.wpsstm-tracklist-table');
+            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
@@ -731,7 +731,7 @@ class WpsstmTrack {
             },
             complete: function() {
                 link_wrappers.removeClass('loading');
-                $( document ).trigger( "wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                $(document).trigger( "wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
             }
         })
     }
@@ -799,7 +799,7 @@ class WpsstmTrack {
         
         self.set_bottom_trackinfo();
         
-        $( document ).trigger( "wpsstmTrackInit",[self] ); //custom event
+        $(document).trigger( "wpsstmTrackInit",[self] ); //custom event
         
         var deferredObject = self.get_sources_auto();
         
@@ -977,7 +977,7 @@ class WpsstmTrack {
                 self.set_track_source(source_idx);
                 
                 self.debug("wpsstmMediaReady");
-                $( document ).trigger( "wpsstmMediaReady",[wpsstm_mediaElement,self] ); //custom event
+                $(document).trigger( "wpsstmMediaReady",[wpsstm_mediaElement,self] ); //custom event
 
                 wpsstm_mediaElement.addEventListener('error', function(error) {
                     var source_obj = self.get_track_source(self.current_source_idx);
@@ -1302,7 +1302,7 @@ class WpsstmPagePlayer {
 
         });
         
-        $( document ).trigger( "wpsstmDomReady"); //custom event
+        $(document).trigger( "wpsstmDomReady"); //custom event
 
         //shuffle
         self.tracklists_shuffle_order = wpsstm_shuffle(self.tracklists_shuffle_order);

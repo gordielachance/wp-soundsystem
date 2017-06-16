@@ -258,11 +258,11 @@ class WpsstmLastFM {
 
 (function($){
     
-    $( document ).on( "wpsstmDomReady", function( event ) {
+    $(document).on( "wpsstmDomReady", function( event ) {
         wpsstm_lastfm.init();
     });
     
-    $( document ).on( "wpsstmMediaReady", function( event, media,track ) {
+    $(document).on( "wpsstmMediaReady", function( event, media,track ) {
 
         media.addEventListener('loadeddata', function() {
             if (wpsstm_lastfm.has_user_scrobbler){

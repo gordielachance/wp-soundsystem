@@ -4,24 +4,29 @@
         toggleTracklist: function(options){
             // OPTIONS
             var defaults = {
-                childrenMax: 3
+                childrenShowCount:  true,
+                childrenMax:        3,
+                childrenSelector:   '.wpsstm-tracklist-entries > *',
+                moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+                lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
             };
             var options =  $.extend(defaults, options);
             
-            if ( $(this).attr("data-tracks-count") > 0 ) {
-                return this.toggleChildren({
-                    childrenMax:        options.childrenMax,
-                    childrenSelector:   'tbody tr',
-                    moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-                    lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
-                });
-            }
+            $(this).each(function() {
+                if ( $(this).attr("data-tracks-count") > 0 ) {
+                    return $(this).toggleChildren(options);
+                }
+            });
 
 
         }
     });
+    
+    $(document).ready(function(){
+        $('.wpsstm-tracklist').toggleTracklist();
+    });
 
-    $( document ).on( "wpsstmTrackInit", function( event, track_obj ) {
+    $(document).on( "wpsstmTrackInit", function( event, track_obj ) {
         
         var track_el = track_obj.track_el;
         if ( track_el.is(":visible") ) return;
@@ -38,13 +43,6 @@
         
     });
     
-    $(document).ready(function(){
-
-        $('.wpsstm-tracklist table').toggleTracklist();
-
-  });  
-
-
 })(jQuery);
 
 /*

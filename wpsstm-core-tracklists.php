@@ -56,7 +56,6 @@ class WP_SoundSytem_Core_Tracklists{
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         add_action( 'save_post', array($this,'metabox_tracklist_save')); 
         
-        add_action( 'wp_enqueue_scripts', array( $this, 'tracklists_script_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'metabox_tracklist_scripts_styles' ) );
 
         add_filter('manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
@@ -254,14 +253,35 @@ class WP_SoundSytem_Core_Tracklists{
 
         $entry_html = array();
 
-        foreach($tracklist->tracks as $entry){
-            $artist = $entry->artist; //wpsstm_get_post_artist_link_by_name($entry->artist);
-            $track = $entry->title; //wpsstm_get_post_track_link_by_name($entry->artist,$entry->title,null);
+        foreach($tracklist->tracks as $item){
+            $artist = $item->artist; //wpsstm_get_post_artist_link_by_name($item->artist);
+            $track = $item->title; //wpsstm_get_post_track_link_by_name($item->artist,$item->title,null);
             $track_title_artist = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$artist,$track);
-            $entry_html[] =  sprintf('<li>%s</li>',$track_title_artist);
+            
+            $item_classes = array();
+            if ( !$item->validate_track() ) $item_classes[] = 'wpsstm-invalid-track';
+        
+            $item_attr_arr = array(
+                'class' =>                      implode(' ',$item_classes),
+                'data-wpsstm-track-id' =>       $item->post_id,
+                'itemtype' =>                   'http://schema.org/MusicRecording',
+                'itemprop' =>                   'track',
+            );
+            
+            
+            $entry_html[] =  sprintf('<li %s>%s</li>',wpsstm_get_html_attr($item_attr_arr),$track_title_artist);
         }
+        
+        $list_classes = array('wpsstm-tracklist');
+        
+        $list_attr_arr = array(
+            'class'           =>            implode(' ',$list_classes),
+            'data-wpsstm-tracklist-id' =>   $tracklist->post_id,
+            'data-tracks-count' =>          $tracklist->pagination['total_items'],
+            'itemtype' =>                   'http://schema.org/MusicPlaylist',
+        );
 
-        $output = sprintf('<ol class="wpsstm-tracklist-list">%s</ol>',implode("\n",$entry_html));
+        $output = sprintf('<div itemscope %s><ol class="wpsstm-tracklist-entries">%s</ol></div>',wpsstm_get_html_attr($list_attr_arr),implode("\n",$entry_html));
         echo $output;
 
         if (!$output){
