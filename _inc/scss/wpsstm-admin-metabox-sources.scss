@@ -1,4 +1,5 @@
 @import "compass/css3";
+@import "wpsstm-shared";
 
 div.wpsstm-source{
     
@@ -29,8 +30,7 @@ div.wpsstm-source{
         .wpsstm-source-icon{
             width:1em;
             display:inline-block;
-            cursor: pointer;
-            cursor: hand;
+            @extend .wpsstm-can-click;
             &.wpsstm-source-icon-add{
                 display:none;
             }

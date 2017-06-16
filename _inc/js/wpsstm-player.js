@@ -65,6 +65,33 @@ $(document).ready(function(){
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj();
         tracklist_obj.play_next_track();
     });
+    
+    //scroll to playlist track when clicking the player's track number
+    $('#wpsstm-bottom').on( "click",'[itemprop="track"] .trackitem_order', function(e) {
+        e.preventDefault();
+        var player_track_el = $(this).parents('[itemprop="track"]');
+        var track_idx = player_track_el.attr('data-wpsstm-track-idx');
+        
+        var tracklist_el = player_track_el.closest('[data-wpsstm-tracklist-idx]');
+        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+        var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
+
+        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+        var track_el = track_obj.track_el;
+        var newTracksCount = track_obj.track_idx + 1;
+
+        //display request rows if needed
+        tracklist_el.toggleTracklist({
+            childrenMax:newTracksCount
+        });
+
+        //https://stackoverflow.com/a/6677069/782013
+        $('html, body').animate({
+            scrollTop: track_el.offset().top - ( $(window).height() / 3) //not at the very top
+        }, 500);
+
+    });
+    
 
     //love/unlove track (either for page tracks or player track)
     $('[itemprop="track"]').on( "click",".wpsstm-wp-love-unlove-track-links a", function(e) {

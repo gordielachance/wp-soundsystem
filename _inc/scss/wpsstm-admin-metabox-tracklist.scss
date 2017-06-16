@@ -1,5 +1,5 @@
 @import "compass/css3";
-@import "compass/typography/text/ellipsis";
+@import "wpsstm-shared";
 
 .postbox#wpsstm-tracklist{
     
@@ -8,11 +8,6 @@
         .loading{
             pointer-events: none;
             @include opacity(0.5);
-        }
-
-        .ellipsis{
-            display:block;
-            @include ellipsis($no-wrap: true);
         }
 
         >.search-box{ //filter links
@@ -78,8 +73,7 @@
                             .metabox-table-row-draghandle {
                                 text-align: center;
                                 &:not(.disabled) {
-                                    cursor: pointer;
-                                    cursor: hand;
+                                    @extend .wpsstm-can-click;
                                 }
                                 &.disabled{
                                     opacity:0.5;

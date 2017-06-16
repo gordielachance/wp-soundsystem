@@ -1,12 +1,5 @@
 @import "compass/css3";
-
-.truncate {
-    /*
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    */
-}
+@import "wpsstm-shared";
 
 [itemprop="track"]{
     [itemprop="byArtist"]{
@@ -68,8 +61,7 @@
         &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
             .wpsstm-player-sources-list{
                 li{
-                    cursor: pointer;
-                    cursor: hand;
+                    @extend .wpsstm-can-click;
                 }
             }
         }
@@ -192,7 +184,11 @@ a.wpsstm-play-track{
 
                     }
                     
-                    .column-trackitem_sources{
+                    .trackitem_order{
+                        @extend .wpsstm-can-click;
+                    }
+                    
+                    .trackitem_sources{
                         padding: 0;
                         margin:0;
                         line-height: 2em;
