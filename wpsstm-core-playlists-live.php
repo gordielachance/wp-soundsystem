@@ -336,16 +336,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         return $query;
         
     }
-    
-    /**
-    Overrides the function from WP_SoundSytem_Core_Playlists
-    **/
-    
-    function metabox_tracklist_scripts_styles(){
-        // CSS
-        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
-    }
-    
+
     /**
     *   Add the 'xspf' query variable so Wordpress
     *   won't mangle it.

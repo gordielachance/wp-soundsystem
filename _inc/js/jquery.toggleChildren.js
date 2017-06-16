@@ -12,7 +12,7 @@
                 btMore:                 null, //jQuery item or selector
                 btLess:                 null, //jQuery item or selector
                 childrenShowCount:      false,
-                max:                    3,
+                childrenMax:            3,
                 speed:                  1000,
                 moreText:               'Read more', //if btMore is not defined
                 lessText:               'Read less', //if btLess is not defined
@@ -32,8 +32,8 @@
                 // Get or create "Read More" button
                 if ( op.btMore && $(op.btMore).length ) {
                     $btMore = $(op.btMore);
-                }else if ( $container.next("toggle-children-more").length > 0 ){ //has already been created
-                    $btMore = $container.next("toggle-children-more");
+                }else if ( $container.nextAll(".toggle-children-more").length > 0 ){ //has already been created
+                    $btMore = $container.nextAll(".toggle-children-more");
                 }else{
                     $btMore = $('<a href="#">'+op.moreText+'</a>');
                     $container.after($btMore);
@@ -43,25 +43,25 @@
                 
                 // Show children count
                 if(op.childrenShowCount){
-                    if ( $btMore.find("toggle-children-count").length > 0 ){ //has already been created
+                    if ( $btMore.find(".toggle-children-count").length > 0 ){ //has already been created
                         $itemsCount = $btMore.find("toggle-children-count");
                     }else{
                         $itemsCount = $('<small class="toggle-children-count" />');
                         $btMore.append($itemsCount);   
                     }
-                    $itemsCount.text(totalChildren - op.max);
+                    $itemsCount.text(totalChildren - op.childrenMax);
                 }
 
                 // Get or create "Read less" button
                 if ( op.btLess && $(op.btLess).length ) {
                     $btLess = $(op.btLess);
-                }else if ( $container.next("toggle-children-less").length > 0 ){ //has already been created
-                    $btLess = $container.next("toggle-children-less");
+                }else if ( $container.nextAll(".toggle-children-less").length > 0 ){ //has already been created
+                    $btLess = $container.nextAll(".toggle-children-less");
                 }else{
                     $btLess = $('<a href="#">'+op.lessText+'</a>');
                     $container.after($btLess);
                 }
-
+                
                 $btLess.addClass('toggle-children-link toggle-children-less');
                 $btLess.hide(); //hide it by default
 
@@ -74,26 +74,26 @@
                     speedPerChild = 0; 
                 }
 
-                // If list has more than the "max" option
-                if ( (totalChildren > 0) && (totalChildren > op.max) ){
+                // If list has more than the "childrenMax" option
+                if ( (totalChildren > 0) && (totalChildren > op.childrenMax) ){
                     
                     // Initial Page Load: Hide each LI element over the max
                     $children.each(function(index){
-                        if ( (index+1) > op.max ) {
+                        if ( (index+1) > op.childrenMax ) {
                             $(this).hide(0);
                         } else {
                             $(this).show(0);
                         }
                     });
+                    
+                    // Get array of children past the maximum option 
+                    var $childrenSliced = $children.slice(op.childrenMax);
 
                     // READ MORE
                     $btMore.off('click').on("click", function(e){
                         
                         $btMore.hide();
                         $btLess.show();
-                        
-                        // Get array of children past the maximum option 
-                        var $childrenSliced = $children.slice(op.max);
 
                         // Sequentially show the list items
                         // For more info on this awesome function: http://goo.gl/dW0nM
@@ -112,9 +112,6 @@
                         
                         $btMore.show();
                         $btLess.hide();
-
-                        // Get array of children past the maximum option 
-                        var $childrenSliced = $children.slice(op.max);
 
                         var i = $childrenSliced.length - 1; 
                         $childrenSliced.each(function () {

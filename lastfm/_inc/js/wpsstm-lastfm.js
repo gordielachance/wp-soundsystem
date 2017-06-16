@@ -262,22 +262,22 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $( document ).on( "wpsstmMediaReady", function( event ) {
+    $( document ).on( "wpsstmMediaReady", function( event, media,track ) {
 
-        wpsstm_mediaElement.addEventListener('loadeddata', function() {
+        media.addEventListener('loadeddata', function() {
             if (wpsstm_lastfm.has_user_scrobbler){
-                wpsstm_lastfm.updateNowPlaying(wpsstm_currentTrack);
+                wpsstm_lastfm.updateNowPlaying(track);
             }
         });
         
-        wpsstm_mediaElement.addEventListener('ended', function() {
+        media.addEventListener('ended', function() {
             if ( wpsstm_mediaElement.duration > 30) { //scrobble
                 if (wpsstm_lastfm.has_user_scrobbler){
-                    wpsstm_lastfm.user_scrobble(wpsstm_currentTrack);
+                    wpsstm_lastfm.user_scrobble(track);
                 }
                 //bot scrobble
                 if (wpsstm_lastfm.has_lastfm_bot){
-                    wpsstm_lastfm.bot_scrobble(wpsstm_currentTrack);
+                    wpsstm_lastfm.bot_scrobble(track);
                 }
             }
         });

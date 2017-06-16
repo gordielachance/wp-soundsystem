@@ -44,17 +44,6 @@
         }
     }
     
-    //more - less
-    .toggle-children-link{
-        display: block;
-        width: 100%;
-        text-decoration: none;
-        border: none;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1.5em;
-    }
-    
     &.wpsstm-tracklist-table{
         position:relative;
         font-family: sans-serif;
@@ -178,4 +167,16 @@
         }
     }
     
+}
+
+//more - less
+.toggle-children-link{
+    @extend .wpsstm-icon-link;
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    border-bottom: none;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5em;
 }

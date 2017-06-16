@@ -189,11 +189,6 @@ class WP_SoundSytem_Core_Tracklists{
         add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK );
     }
 
-    function tracklists_script_styles(){
-        //TO FIX limitations ?
-        wp_enqueue_style( 'wpsstm-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-tracklist.css',null,wpsstm()->version );
-    }
-    
     function metabox_tracklist_scripts_styles(){
         
         //check post type

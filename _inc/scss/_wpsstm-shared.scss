@@ -1,6 +1,8 @@
 @import "compass/css3";
+@import "wpsstm-tracklist";
 
 .wpsstm-icon-link{
     text-decoration:none;
     @include box-shadow(none !important); //twenty seventeen fix
+    border:none!important;
 }
