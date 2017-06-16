@@ -1,12 +1,23 @@
 (function($){
 
     $(document).ready(function(){
+        
+        /*
+        about
+        */
+        $('#post-46 .entry-content').toggleChildren({
+            childrenSelector:'> p'
+        });
 
         /*
         tracklists
         */
 
-        $('.wpsstm-tracklist-table table').shortenTable(3,'tbody tr');
+        $('.wpsstm-tracklist-table table').toggleChildren({
+            childrenSelector:   'tbody tr',
+            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
+        });
 
   });  
 
