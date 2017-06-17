@@ -1,86 +1,29 @@
 @import "compass/css3";
 @import "wpsstm-shared";
 
-[itemprop="track"]{
-    [itemprop="byArtist"]{
-        font-weight: bold;
-    }
-    [itemprop="name"]{
-    }
-    [itemprop="inAlbum"]{
-        font-size:.8em;
-    }
-    
-    @include opacity(.3);
+.wpsstm-tracklist.wpsstm-playable-tracklist{
+    [itemprop="track"]:not(.no-items){
 
-    .trackitem_order{
-        .wpsstm-player-icon-buffering{
-            display:none;
-        }
-        span{
-            display:initial;
-        }
-    }
-    
-    .wpsstm-player-sources-list{
-        li{
-            &:not(.wpsstm-bad-source) .wpsstm-source-error{
-                display:none;
-            }
-        }
-    }
+        @include opacity(1);
 
-    &.buffering{
-        .trackitem_order{
-            .wpsstm-player-icon-buffering{
-                display:inline-block;
+        &:not(.active){
+            @include opacity(.25);
+            &[data-wpsstm-sources-count="0"]:not(:hover){
+                @include opacity(.1);
             }
-            span{
-                display:none;
+            &.has-played{
+                @include opacity(.5);
             }
+
         }
-    }
-    
-    &.active{
-        &:not(.error){
-            @include opacity(1);
+
+        &.wpsstm-invalid-track{
+            background:rgba(255, 0, 0, 0.10);
         }
-        
-        &.buffering{
-            @include opacity(.75);
-            pointer-events: none;
-        }
-        
-        .wpsstm-player-sources-list{
-            li{
-                &.wpsstm-active-source{
-                    font-weight: bold;
-                }
-            }
-        }
-        &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-            .wpsstm-player-sources-list{
-                li{
-                    @extend .wpsstm-can-click;
-                }
-            }
-        }
+
     }
 }
 
-
-
-a.wpsstm-play-track{
-    text-decoration:none;
-    border-bottom:none!important; //twentyfifteen fix
-
-    .wpsstm-player-icon{
-        display:none;
-        &.wpsstm-player-icon-play{
-            display:inline-block;
-        }
-    }
-}
 
 #wpsstm-bottom-wrapper{
     position:fixed;

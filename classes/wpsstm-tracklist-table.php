@@ -153,6 +153,8 @@ class WP_SoundSytem_Tracklist_Table{
             'wpsstm-tracklist'
         );
         
+        if ($this->can_player) $classes[] = 'wpsstm-playable-tracklist';
+        
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
             'data-wpsstm-tracklist-id' =>          $this->tracklist->post_id,
@@ -238,7 +240,7 @@ class WP_SoundSytem_Tracklist_Table{
                 $refresh_link_el = $this->tracklist->get_refresh_link();
             }
 
-            printf('<small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
+            printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
 
             if ( !wpsstm_is_backend() ){
                 ?>
