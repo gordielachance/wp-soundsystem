@@ -2,12 +2,7 @@
 
     $(document).ready(function(){
         
-        /*
-        about
-        */
-        $('#post-46 .entry-content').toggleChildren({
-            childrenSelector:'> p'
-        });
+
 
   });  
 
