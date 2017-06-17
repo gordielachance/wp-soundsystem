@@ -40,12 +40,10 @@ class WP_SoundSytem_Scraper_Wizard{
     }
     
     function wizard_scripts_styles_backend(){
-        wpsstm_tracklists()->tracklists_script_styles();
         wp_enqueue_style('wpsstm-scraper-wizard');
         wp_enqueue_script('wpsstm-scraper-wizard');
     }
     function wizard_scripts_styles_frontend(){
-        wpsstm_tracklists()->tracklists_script_styles();
         wp_enqueue_style('wpsstm-scraper-wizard');
         wp_enqueue_script('wpsstm-scraper-wizard');
     }

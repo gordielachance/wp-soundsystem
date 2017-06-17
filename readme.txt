@@ -113,6 +113,8 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Installation ==
 
+This plugin requires PHP Version 5.4 or later.
+
 1. Upload the plugin to your blog and Activate it.
 
 == Frequently Asked Questions ==
@@ -150,6 +152,20 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.0.2.6 =
+* improved tracks GUI (buffering, active, etc)
+
+= 1.0.2.5 =
+* wp_unslash() ajax_data 
+* improved wizard cache
+* WP_SoundSytem_Preset_Radionomy_Playlists_API
+* new dependency : forceutf8 + composer update
+* wizard : better cache handling for wizard
+* player.js : fix playlist no more refreshing
+* fix refresh link not always displayed
+* fix remove notices when playlist request failed
+* play_or_skip : ignore action if we've skipped the track + small timeout to fix fast tracks skips
 
 = 1.0.2 =
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)

@@ -4,8 +4,6 @@ class WpsstmLastFM {
         self.icon_scrobble_el; //player scrobble icon
         self.icon_love_el;
         self.auth_notice_el;
-        self.ping_timer;
-        self.ping;
         self.has_lastfm_bot =       parseInt(wpsstmLastFM.has_lastfm_bot);
         self.is_user_api_logged =   parseInt(wpsstmLastFM.is_user_api_logged);
         self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
@@ -256,68 +254,31 @@ class WpsstmLastFM {
         wpsstm_debug(msg,prefix);
     }
     
-    /*
-    after 10s: updateNowPlaying()
-    after 40s: scrobble
-    */
-    
-    lastFmTrackEvents(){
-        var self = this;
-
-        self.debug("lastFmTrackEvents()");
-
-        self.ping_timer = setInterval ( function(){
-            
-            if(wpsstm_mediaElement.paused) return;
-            self.ping++;
-
-            self.debug("track ping: " + self.ping);
-
-            if (self.ping == 1) { //5s
-                if (self.has_user_scrobbler){
-                    self.updateNowPlaying(wpsstm_currentTrack);
-                }
-            }
-
-            //stop timer & scrobble
-            if (self.ping >= 7) { //35s
-                clearInterval(self.ping_timer); //TO FIX not working
-                if (self.ping == 7){ //35s
-                    if ( wpsstm_mediaElement.duration > 30) { //scrobble
-                        if (wpsstm_lastfm.has_user_scrobbler){
-                            wpsstm_lastfm.user_scrobble(wpsstm_currentTrack);
-                        }
-                        //bot scrobble
-                        if (wpsstm_lastfm.has_lastfm_bot){
-                            wpsstm_lastfm.bot_scrobble(wpsstm_currentTrack);
-                        }
-                    }
-                }
-                
-            }
-
-        }, 5000 ); // one ping = 5s
-    }
-    
 }
 
 (function($){
     
-    $( document ).on( "wpsstmDomReady", function( event ) {
+    $(document).on( "wpsstmDomReady", function( event ) {
         wpsstm_lastfm.init();
     });
     
-    $( document ).on( "wpsstmMediaReady", function( event ) {
+    $(document).on( "wpsstmMediaReady", function( event, media,track ) {
 
-        wpsstm_mediaElement.addEventListener('loadeddata', function() {
-            //reinit for each track
-            wpsstm_lastfm.ping_timer = null;
-            wpsstm_lastfm.ping = 0; 
+        media.addEventListener('loadeddata', function() {
+            if (wpsstm_lastfm.has_user_scrobbler){
+                wpsstm_lastfm.updateNowPlaying(track);
+            }
         });
         
-        wpsstm_mediaElement.addEventListener('play', function() {
-            if (wpsstm_lastfm.ping_timer === null){
-                 wpsstm_lastfm.lastFmTrackEvents();
+        media.addEventListener('ended', function() {
+            if ( wpsstm_mediaElement.duration > 30) { //scrobble
+                if (wpsstm_lastfm.has_user_scrobbler){
+                    wpsstm_lastfm.user_scrobble(track);
+                }
+                //bot scrobble
+                if (wpsstm_lastfm.has_lastfm_bot){
+                    wpsstm_lastfm.bot_scrobble(track);
+                }
             }
         });
         

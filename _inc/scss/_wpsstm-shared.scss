@@ -1,0 +1,26 @@
+@import "compass/css3";
+@import "compass/typography/text/ellipsis";
+
+.truncate {
+    /*
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    */
+}
+
+.wpsstm-icon-link{
+    text-decoration:none;
+    @include box-shadow(none !important); //twenty seventeen fix
+    border:none!important;
+}
+
+.wpsstm-can-click{
+    cursor: pointer;
+    cursor: hand;
+}
+
+.ellipsis{
+    display:block;
+    @include ellipsis($no-wrap: true);
+}

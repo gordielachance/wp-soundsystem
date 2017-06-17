@@ -28,10 +28,9 @@ jQuery(document).ready(function($){
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                link.addClass('loading');
+                sources_wrapper.addClass('loading');
             },
             success: function(data){
-                console.log(data);
                 if (data.success === false) {
                     console.log(data);
                 }else{
@@ -50,10 +49,16 @@ jQuery(document).ready(function($){
                     });
                     
                     sources_section.html($rows);
+                    sources_section.toggleChildren({
+                        childrenShowCount:  true,
+                        childrenMax:        3,
+                        moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+                        lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
+                    });
                 }
             },
             complete: function() {
-                link.removeClass('loading');
+                sources_wrapper.removeClass('loading');
             }
         });
     });
@@ -111,6 +116,15 @@ jQuery(document).ready(function($){
         
         
     });
+    
+    $(document).ready(function(){
+        
+        $('.wpsstm-sources-section-auto').toggleTracklist();
+
+    });  
+    
+    
+    
 })
 
 

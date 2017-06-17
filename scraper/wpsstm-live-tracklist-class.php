@@ -135,6 +135,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         //try to get cache first
 
+        $cache_tracks = $remote_tracks = array();
         $this->datas = $this->datas_cache = $this->get_cache();
         
         if ($this->datas_cache){
@@ -142,8 +143,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             if ( $cache_expire_time = get_option( $transient_timeout_name ) ){
                 $this->expire_time = $cache_expire_time;
             }
+            
+            $cache_tracks = $this->datas_cache['tracks'];
 
-            $this->add($this->datas_cache['tracks']); //populate cache tracks
+            $this->add($cache_tracks); //populate cache tracks
 
             //we got cached track
             if ( $cached_total_items = count($this->tracks)  ){
@@ -152,7 +155,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             }
 
         }
-        
+
         //get remote tracks
         if ( !$this->tracks && $remote_request ){
 
@@ -189,10 +192,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
                     //format response
                     $title =    $this->get_tracklist_title();
                     $author =   $this->get_tracklist_author();
-                    
-                    $title =    $this->sanitize_remote_string($title);
-                    $author =   $this->sanitize_remote_string($author);
-                    
+
                     $this->datas = $this->datas_remote = array(
                         'title'         => $title,
                         'author'        => $author,
@@ -211,6 +211,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             }
 
         }
+        
+        wpsstm()->debug_log(json_encode(array('remote_request'=>$remote_request,'cache_tracks'=>count($cache_tracks),'has_remote_tracks'=>count($remote_tracks))),'load_remote_tracks()' );
 
         //get options back from page (a preset could have changed them)
         $this->options = $this->options; 
@@ -283,6 +285,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //response body
         $content = wp_remote_retrieve_body( $this->response ); 
         if ( is_wp_error($content) ) return $content;
+        $content = Encoding::fixUTF8($content); //fixes mixed encoding TO FIX is it ok to put it here ?
         
         $body_node = $this->get_body_node($content);
         if ( is_wp_error($body_node) ) return $body_node;
@@ -342,7 +345,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             if ($response_code && $response_code != 200){
                 $response_message = wp_remote_retrieve_response_message( $response );
                 return new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
-            }else{
+            }else{ //ok
                 return $response;
             }
             
@@ -566,10 +569,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $artist =   $this->get_track_artist($single_track_node);
             $title =    $this->get_track_title($single_track_node);
             $album =    $this->get_track_album($single_track_node);
-
-            $artist =   $this->sanitize_remote_string($artist);
-            $title =    $this->sanitize_remote_string($title);
-            $album =    $this->sanitize_remote_string($album);
 
             $args = array(
                 'artist'        => $artist,
@@ -805,12 +804,6 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         $error_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         $refresh_text = __('Refresh Playlist','wpsstm');
         return sprintf('<a class="wpsstm-refresh-playlist" href="#">%s %s %s</a>',$refresh_icon,$error_icon,$refresh_text);
-    }
-    
-    //TO FIX maybe use a filter to run this function ?
-    function sanitize_remote_string($str){
-        $str = Encoding::fixUTF8($str); //fixes mixed encoding
-        return $str;
     }
 
 }

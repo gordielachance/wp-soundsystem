@@ -150,9 +150,10 @@ class WP_SoundSytem_Tracklist_Table{
 	 */
 	public function display() {
         $classes = array(
-            'wpsstm-tracklist',
-            'wpsstm-tracklist-table'
+            'wpsstm-tracklist'
         );
+        
+        if ($this->can_player) $classes[] = 'wpsstm-playable-tracklist';
         
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
@@ -176,30 +177,30 @@ class WP_SoundSytem_Tracklist_Table{
             $attr_arr['data-wpsstm-expire-sec'] = $next_refresh_sec;
         }
 
-        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr)); ?>
-            <?php $this->display_tablenav( 'top' );?>
-            <table>
-                    <thead>
-                    <tr>
-                            <?php $this->print_column_headers(); ?>
-                    </tr>
-                    </thead>
+        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr));
+            $this->display_tablenav( 'top' );
+            ?>
+                <table>
+                        <thead>
+                        <tr>
+                                <?php $this->print_column_headers(); ?>
+                        </tr>
+                        </thead>
 
-                    <tbody>
-                            <?php $this->display_rows_or_placeholder(); ?>
-                    </tbody>
+                        <tbody class="wpsstm-tracklist-entries">
+                                <?php $this->display_rows_or_placeholder(); ?>
+                        </tbody>
 
-                    <tfoot>
-                    <tr>
-                            <?php //$this->print_column_headers( false ); ?>
-                    </tr>
-                    </tfoot>
+                        <tfoot>
+                        <tr>
+                                <?php //$this->print_column_headers( false ); ?>
+                        </tr>
+                        </tfoot>
 
-            </table>
-            <?php //$this->display_tablenav( 'bottom' );?>
+                </table>
+                <?php //$this->display_tablenav( 'bottom' );?>
         </div>
-
-        <?php
+            <?php
 
 	}
     
@@ -235,11 +236,11 @@ class WP_SoundSytem_Tracklist_Table{
             }
         
             //refresh link
-            if ( property_exists($this->tracklist,'expire_time') && ($expire_timestamp = $this->tracklist->expire_time ) ) {
+            if ( method_exists($this->tracklist,'get_refresh_link') ) {
                 $refresh_link_el = $this->tracklist->get_refresh_link();
             }
 
-            printf('<small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
+            printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
 
             if ( !wpsstm_is_backend() ){
                 ?>
@@ -554,7 +555,11 @@ class WP_SoundSytem_Tracklist_Table{
         switch($column_name){
             case 'trackitem_order':
                 $this->curr_track_idx++;
-                return $this->curr_track_idx;
+                
+                $loading_icon = '<i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>';
+                $text = sprintf('<span>%s</span>',$this->curr_track_idx);
+                return $loading_icon.$text;
+                
             case 'trackitem_play_bt':
                 return wpsstm_player()->get_track_button($item);
             case 'trackitem_track':

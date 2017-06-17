@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.0.2
+Version: 1.0.2.8
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSytem {
     /**
     * @public string plugin version
     */
-    public $version = '1.0.2';
+    public $version = '1.0.2.8';
     /**
     * @public string plugin DB version
     */
@@ -149,9 +149,11 @@ class WP_SoundSytem {
 
         add_action( 'admin_init', array($this,'load_textdomain'));
 
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_styles_admin' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ) );
         
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_styles_backend' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles_frontend' ) );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
@@ -198,40 +200,52 @@ class WP_SoundSytem {
     public function get_default_option($keys = null){
         return wpsstm_get_array_value($keys,$this->options_default);
     }
+    
+    function register_scripts_styles_shared(){
+        //CSS
+        wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
+        wp_register_style( 'wpsstm-tracklists', $this->plugin_url . '_inc/css/wpsstm-tracklists.css', null,$this->version );
+        //JS
+        wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
+        wp_register_script( 'wpsstm-tracklists', $this->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery.toggleChildren'),$this->version );
+        
+    }
 
-    function enqueue_scripts_styles_admin( $hook ){
+    function enqueue_scripts_styles_backend( $hook ){
 
             if ( !$this->is_admin_page() ) return;
 
             // css
-            wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-            wp_register_style( 'wpsstm_admin',  $this->plugin_url . '_inc/css/wpsstm-admin.css',array('font-awesome'),$this->version );
+            wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
+            wp_enqueue_style( 'wpsstm-admin' );
+        
             // js
-            wp_register_script( 'wpsstm-shortenTables', $this->plugin_url . '_inc/js/wpsstm-shortenTables.js', array('jquery'),$this->version);
-            wp_register_script( 'wpsstm_admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shortenTables'),$this->version);
+            wp_register_script( 'wpsstm-admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-tracklists'),$this->version);
 
             //localize vars
             $localize_vars=array(
                 'ajaxurl'           => admin_url( 'admin-ajax.php' )
             );
         
-            wp_localize_script('wpsstm_admin','wpsstmL10n', $localize_vars);
-
-            wp_enqueue_script( 'wpsstm_admin' );
-            wp_enqueue_style( 'wpsstm_admin' );
+            wp_localize_script('wpsstm-admin','wpsstmL10n', $localize_vars);
+            wp_enqueue_script( 'wpsstm-admin' );
             
             
         //}
         
     }
     
-    function enqueue_scripts_styles(){
+    function enqueue_scripts_styles_frontend(){
         
         //TO FIX TO CHECK embed only for music post types ?
         
-        wp_register_script( 'wpsstm-shortenTables', $this->plugin_url . '_inc/js/wpsstm-shortenTables.js', array('jquery'),$this->version);
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-shortenTables'),$this->version);
+        //css
+        wp_register_style( 'wpsstm-frontend',  $this->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
+        wp_enqueue_style( 'wpsstm-frontend' );
         
+        //js
+        wp_register_script( 'wpsstm-frontend', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-tracklists'),$this->version);
+
         $datas = array(
             'debug'             => (WP_DEBUG),
             'ajaxurl'           => admin_url( 'admin-ajax.php' ),
@@ -239,13 +253,8 @@ class WP_SoundSytem {
             'clipboardtext'     => __('You can copy and share this link:','wpsstm')
         );
         
-        wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
-        wp_enqueue_script( 'wpsstm' );
-        
-        wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-        wp_register_style( 'wpsstm',  $this->plugin_url . '_inc/css/wpsstm.css',array('font-awesome'),$this->version );
-        
-        wp_enqueue_style( 'wpsstm' );
+        wp_localize_script( 'wpsstm-frontend', 'wpsstmL10n', $datas );
+        wp_enqueue_script( 'wpsstm-frontend' );
         
     }
 
