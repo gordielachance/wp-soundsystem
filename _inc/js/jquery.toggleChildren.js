@@ -27,6 +27,7 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                 var $btMore;
                 var $btLess;
                 var speedPerChild;
+                var $itemsCount;
                 
                 //Wrap into a container
                 var hasInit = ( $container.parent(".toggle-children-container").length > 0 );
@@ -49,12 +50,12 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                 // Show children count
                 if(op.childrenShowCount){
                     if ( $btMore.find(".toggle-children-count").length > 0 ){ //has already been created
-                        $itemsCount = $btMore.find("toggle-children-count");
+                        $itemsCount = $btMore.find(".toggle-children-count");
                     }else{
                         $itemsCount = $('<small class="toggle-children-count" />');
                         $btMore.append($itemsCount);   
                     }
-                    $itemsCount.text(' +' + (totalChildren - op.childrenShowCount));
+                    $itemsCount.text(' +' + (totalChildren - op.childrenMax));
                 }
 
                 // Get or create "Read less" button
