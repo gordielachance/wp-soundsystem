@@ -153,6 +153,12 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 == Changelog ==
 
+= 1.0.2.9 =
+* player.js - refresh playlists : use timeout instead of interval
+* wpsstm-shortenTables > jquery.toggleChildren
+* scroll to playlist track when clicking the player's track number
+* tracklists GUI fixes
+
 = 1.0.2.6 =
 * improved tracks GUI (buffering, active, etc)
 
