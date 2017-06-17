@@ -23,7 +23,7 @@
     });
     
     $(document).ready(function(){
-        $('.wpsstm-tracklist').toggleTracklist();
+        $('.wpsstm-tracklist').toggleTracklist();        
     });
 
     $(document).on( "wpsstmTrackInit", function( event, track_obj ) {

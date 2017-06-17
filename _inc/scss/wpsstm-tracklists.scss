@@ -81,6 +81,55 @@
             }
         }
     }
+    .wpsstm-tracklist-chooser-wrapper{
+        position:relative;
+        font-size:.8em;
+        .wpsstm-tracklist-chooser{
+            
+            .wpsstm-tracklist-chooser-list{
+                display:none;
+                background:white;
+                @include opacity(.95);
+                border: 1px solid #eee;
+                padding:1em;
+                header{
+                    text-align:center;
+                    font-size:1.1em;
+                }
+                ul{
+                    list-style: none;
+                }
+                footer{
+                   text-align:center;
+                    input[type="submit"]{
+                        font-size: 1em;
+                        margin-top: 1em;
+                    }
+                }
+            }
+
+            &:hover,&.loading{
+                display:block;
+                position:absolute;
+                top:-1em;
+                left:-1em;
+                z-index:2;
+                min-width: 15vw;
+                > .fa-list{
+                    display:none;
+                }
+                .wpsstm-tracklist-chooser-list{
+                    display:block;
+                }
+            }
+            
+            &.loading{
+                @include opacity(.75);
+                pointer-events: none;
+            }
+            
+        }
+    }
 }
 
 a.wpsstm-play-track{

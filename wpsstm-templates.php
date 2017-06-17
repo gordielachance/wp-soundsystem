@@ -384,27 +384,28 @@ function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
     $required_cap = $post_type_obj->cap->edit_posts;
     if ( !current_user_can($required_cap) ) return;
-
     $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
     $li_els = array();
     
     if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
         foreach($playlist_ids as $playlist_id){
             $title = get_the_title($playlist_id);
-            $li_els[] = sprintf('<li><input type="checkbox" /><label>%s</label>',$title);
+            $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$title);
         }
     }
     
     if (!$li_els) return;
     
-    $header = sprintf('<header>%s</header>',__('Add to playlist','wpsstm'));
+    $header = sprintf('<header>%s %s</header>',$icon,__('Add to playlist','wpsstm'));
     $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
     
-    $list = sprintf('<ul class="wpsstm-tracklist-chooser-list">%s</ul>',implode("\n",$li_els) );
+    $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
     $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
     $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
     
-    $content = sprintf('<span>%s %s %s</span>',$header,$list,$footer);
+    $popup = sprintf('<div class="wpsstm-tracklist-chooser-list">%s %s %s</div>',$header,$list,$footer);
     
-    return sprintf('<span class="wpsstm-tracklist-chooser-wrapper">%s %s </span>',$icon,$content );
+    $link = sprintf('<span class="wpsstm-icon-link wpsstm-requires-auth wpsstm-tracklist-chooser wpsstm-track-action">%s %s</span>',$icon,$popup);
+    
+    return sprintf('<span class="wpsstm-tracklist-chooser-wrapper">%s</span>',$link );
 }
