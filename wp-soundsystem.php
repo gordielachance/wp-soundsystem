@@ -194,6 +194,7 @@ class WP_SoundSytem {
     function register_scripts_styles_shared(){
         //CSS
         wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
+        wp_register_style( 'wpsstm-tracklists', $this->plugin_url . '_inc/css/wpsstm-tracklists.css', null,$this->version );
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         wp_register_script( 'wpsstm-tracklists', $this->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery.toggleChildren'),$this->version );
@@ -205,9 +206,10 @@ class WP_SoundSytem {
             if ( !$this->is_admin_page() ) return;
 
             // css
-            wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome'),$this->version );
+            wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
+            wp_enqueue_style( 'wpsstm-admin' );
+        
             // js
-
             wp_register_script( 'wpsstm-admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-tracklists'),$this->version);
 
             //localize vars
@@ -217,7 +219,6 @@ class WP_SoundSytem {
         
             wp_localize_script('wpsstm-admin','wpsstmL10n', $localize_vars);
             wp_enqueue_script( 'wpsstm-admin' );
-            wp_enqueue_style( 'wpsstm-admin' );
             
             
         //}
@@ -228,6 +229,11 @@ class WP_SoundSytem {
         
         //TO FIX TO CHECK embed only for music post types ?
         
+        //css
+        wp_register_style( 'wpsstm-frontend',  $this->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
+        wp_enqueue_style( 'wpsstm-frontend' );
+        
+        //js
         wp_register_script( 'wpsstm-frontend', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-tracklists'),$this->version);
 
         $datas = array(
@@ -239,9 +245,6 @@ class WP_SoundSytem {
         
         wp_localize_script( 'wpsstm-frontend', 'wpsstmL10n', $datas );
         wp_enqueue_script( 'wpsstm-frontend' );
-
-        wp_register_style( 'wpsstm-frontend',  $this->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome'),$this->version );
-        wp_enqueue_style( 'wpsstm-frontend' );
         
     }
 
