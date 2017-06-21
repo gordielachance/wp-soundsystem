@@ -60,8 +60,8 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     static $querypath_options = array(
         'omit_xml_declaration'      => true,
         'ignore_parser_warnings'    => true,
-        'convert_from_encoding'     => 'auto',
-        'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
+        'convert_from_encoding'     => 'UTF-8', //our input is always UTF8 - look for fixUTF8() in code
+        //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
     
     public function __construct($post_id_or_feed_url = null) {
@@ -285,8 +285,10 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         //response body
         $content = wp_remote_retrieve_body( $this->response ); 
         if ( is_wp_error($content) ) return $content;
-        $content = Encoding::fixUTF8($content); //fixes mixed encoding TO FIX is it ok to put it here ?
         
+        //fixes mixed encoding
+        $content = Encoding::fixUTF8($content);
+
         $body_node = $this->get_body_node($content);
         if ( is_wp_error($body_node) ) return $body_node;
         $this->body_node = $body_node;
@@ -298,6 +300,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
+
         return $tracks;
     }
 
@@ -754,7 +757,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     }
     
     public function get_cache(){
-        
+
         if ( $this->ignore_cache ){
             wpsstm()->debug_log("ignore_cache is set","WP_SoundSytem_Remote_Tracklist::get_cache()"); 
             return;
