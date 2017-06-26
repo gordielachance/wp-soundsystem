@@ -106,7 +106,12 @@ class WP_SoundSytem_Settings {
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
 
+            /*
+            Sources
+            */
             $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+            $new_input['autosource_filter_cover_sources'] = ( isset($input['autosource_filter_cover_sources']) ) ? 'on' : 'off';
+            $new_input['autosource_filter_requires_artist'] = ( isset($input['autosource_filter_requires_artist']) ) ? 'on' : 'off';
 
             /*
             Live playlists
@@ -223,13 +228,41 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'player_settings'
         );
-
+        
+        
+        /*
+        Sources
+        */
+        
         add_settings_field(
             'autosource', 
             __('Auto-source','wpsstm'), 
             array( $this, 'autosource_callback' ), 
             'wpsstm-settings-page', 
-            'player_settings'
+            'sources'
+        );
+        
+        add_settings_section(
+            'sources', // ID
+            __('Sources','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'autosource_filter_cover_sources', 
+            sprintf(__('Auto-source filter #%d','wpsstm'),1), 
+            array( $this, 'autosource_filter_cover_sources_callback' ), 
+            'wpsstm-settings-page', 
+            'sources'
+        );
+        
+        add_settings_field(
+            'autosource_filter_requires_artist', 
+            sprintf(__('Auto-source filter #%d','wpsstm'),2), 
+            array( $this, 'autosource_filter_requires_artist_callback' ), 
+            'wpsstm-settings-page', 
+            'sources'
         );
 
         /*
@@ -473,6 +506,27 @@ class WP_SoundSytem_Settings {
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
             __("Auto-play the first track displayed.","wpsstm")
+        );
+    }
+    
+    function autosource_filter_cover_sources_callback(){
+        $option = wpsstm()->get_options('autosource_filter_cover_sources');
+
+        printf(
+            '<input type="checkbox" name="%s[autosource_filter_cover_sources]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when the word 'cover' is contained in its title.","wpsstm")
+        );
+    }
+    function autosource_filter_requires_artist_callback(){
+        $option = wpsstm()->get_options('autosource_filter_requires_artist');
+
+        printf(
+            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when the track artist is not contained in its title.","wpsstm")
         );
     }
 

@@ -91,7 +91,9 @@ class WP_SoundSytem {
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
-            'autosource_cache'                  => 1* WEEK_IN_SECONDS
+            'autosource_cache'                  => 1* WEEK_IN_SECONDS,
+            'autosource_filter_cover_sources'   => 'off',
+            'autosource_filter_requires_artist' => 'off'
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
