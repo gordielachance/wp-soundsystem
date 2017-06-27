@@ -92,7 +92,7 @@ class WP_SoundSytem {
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
             'autosource_cache'                  => 1* WEEK_IN_SECONDS,
-            'autosource_filter_cover_sources'   => 'off',
+            'autosource_filter_ban_words'       => array('cover'),
             'autosource_filter_requires_artist' => 'off'
         );
         

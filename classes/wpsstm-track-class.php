@@ -345,8 +345,8 @@ class WP_SoundSystem_Track{
         
         $sources = $this->sanitize_track_sources($sources);
         
-        if ( wpsstm()->get_options('autosource_filter_cover_sources') == 'on' ){
-            $sources = $this->autosource_filter_cover_sources($sources);
+        if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
+            $sources = $this->autosource_filter_ban_words($sources);
         }
         if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
             $sources = $this->autosource_filter_title_requires_artist($sources);
@@ -357,19 +357,23 @@ class WP_SoundSystem_Track{
     }
     
     /*
-    Remove a source if its title contains the word 'cover'.
-    Except for tracks that have 'cover' in their title.
+    Exclude sources that have one word of the banned words list in their titles (eg 'cover').
     */
     
-    function autosource_filter_cover_sources($sources){
+    function autosource_filter_ban_words($sources){
         
-        //this track IS a cover; abord
-        $track_is_cover = stripos($this->title, 'cover');
-        if ( $track_is_cover ) return $sources;
+        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
 
-        foreach((array)$sources as $key=>$source){
-            $source_is_cover = stripos($source['title'], 'cover');
-            if ( $source_is_cover ){
+        foreach((array)$ban_words as $word){
+            
+            //this track HAS the word in its title; (the cover IS a cover), abord
+            $ignore_this_word = stripos($this->title, $word);//case insensitive
+            if ( $ignore_this_word ) continue;
+            
+            //check sources for the word
+            foreach((array)$sources as $key=>$source){
+                $source_has_word = stripos($source['title'], $word);//case insensitive
+                if ( !$source_has_word ) continue;
                 unset($source[$key]);
             }
         }

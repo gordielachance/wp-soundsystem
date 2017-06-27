@@ -154,7 +154,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 == Changelog ==
 
 = XXX =
-* new option autosource_filter_cover_sources (experimental)
+* new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)
 
 = 1.0.2.9 =
