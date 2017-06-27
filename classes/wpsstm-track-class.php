@@ -383,6 +383,7 @@ class WP_SoundSystem_Track{
     
     /*
     Remove sources where that the track artist is not contained in the source title
+    https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
     */
     
     function autosource_filter_title_requires_artist($sources){
