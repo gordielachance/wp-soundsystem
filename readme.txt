@@ -33,7 +33,7 @@ For example, when creating an album post, you can load its tracklist from the Mu
 When viewing a post that contains a tracklist, an audio player will show up to play your tracks !
 
 The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
-The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).  It should be OK when Wordpress 4.8 is released.
+The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).  It should be OK when Wordpress 4.8.1 is released.
 
 Supported sources : regular audio files, Youtube, Soundcloud.
 
@@ -152,6 +152,16 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 8. Music sources metabox
 
 == Changelog ==
+
+= XXX =
+* new option autosource_filter_ban_words (experimental)
+* new option autosource_filter_requires_artist (experimental)
+
+= 1.0.2.9 =
+* player.js - refresh playlists : use timeout instead of interval
+* wpsstm-shortenTables > jquery.toggleChildren
+* scroll to playlist track when clicking the player's track number
+* tracklists GUI fixes
 
 = 1.0.2.6 =
 * improved tracks GUI (buffering, active, etc)

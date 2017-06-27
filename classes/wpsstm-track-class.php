@@ -342,16 +342,126 @@ class WP_SoundSystem_Track{
 
         //allow plugins to filter this
         $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+        
+        $sources = $this->sanitize_track_sources($sources);
+        
+        if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
+            $sources = $this->autosource_filter_ban_words($sources);
+        }
+        if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
+            $sources = $this->autosource_filter_title_requires_artist($sources);
+        }
 
         return $sources;
 
+    }
+    
+    /*
+    Exclude sources that have one word of the banned words list in their titles (eg 'cover').
+    */
+    
+    function autosource_filter_ban_words($sources){
+        
+        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
+
+        foreach((array)$ban_words as $word){
+            
+            //this track HAS the word in its title; (the cover IS a cover), abord
+            $ignore_this_word = stripos($this->title, $word);//case insensitive
+            if ( $ignore_this_word ) continue;
+            
+            //check sources for the word
+            foreach((array)$sources as $key=>$source){
+                $source_has_word = stripos($source['title'], $word);//case insensitive
+                if ( !$source_has_word ) continue;
+                unset($source[$key]);
+            }
+        }
+
+        return $sources;
+    }
+    
+    /*
+    Remove sources where that the track artist is not contained in the source title
+    https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
+    */
+    
+    function autosource_filter_title_requires_artist($sources){
+
+        foreach((array)$sources as $key=>$source){
+            
+            /*TO FIX check if it works when artist has special characters like / or &
+            What if the artist is written a little differently ?
+            We should compare text somehow here and accept a certain percent match.
+            */
+            
+            $remove_sources = array();
+            
+            //sanitize data so it is easier to compare
+            $source_sanitized = sanitize_title($source['title']);
+            $artist_sanitized = sanitize_title($this->artist);
+
+            if (strpos($source_sanitized, $artist_sanitized) === false) {
+                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source['title'],'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::get_track_sources_auto() - source ignored as artist is not contained in its title");
+                unset($sources[$key]);
+            }
+        }
+
+        return $sources;
+
+    }
+    
+    function sort_sources_by_similarity($sources){
+        
+        $artist_sanitized = sanitize_title($this->artist);
+        $title_sanitized = sanitize_title($this->title);
+        
+        //compute similarity
+        foreach((array)$sources as $key=>$source){
+            
+            //sanitize data so it is easier to compare
+            $source_title_sanitized = sanitize_title($source->title);
+            
+            //remove artist from source title so the string to compare is shorter
+            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
+            
+            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
+            $sources[$key]->similarity = $similarity_pc;
+        }
+        
+        //reorder by similarity
+        usort($sources, function ($a, $b){
+            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
+        });
+        
+        return $sources;
+    }
+    
+    function sanitize_track_sources($sources){
+        
+        if ( empty($sources) ) return;
+
+        foreach((array)$sources as $key=>$source){
+            //url is not valid
+            if ( !$source['url'] || ( !filter_var($source['url'], FILTER_VALIDATE_URL) ) ) unset($sources[$key]); 
+        }
+
+        foreach((array)$sources as $key=>$source){
+            $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
+            $source[$key] = array_filter($source);
+        }
+
+        $sources = array_unique($sources, SORT_REGULAR);
+        $sources = wpsstm_array_unique_by_subkey($sources,'url');
+
+        return $sources;
     }
 
     function update_track_sources($sources){
         
         if (!$this->artist || !$this->title) return;
 
-        $sources = wpsstm_sources()->sanitize_sources($sources);
+        $sources = $this->sanitize_track_sources($sources);
 
         if (!$sources){
             return delete_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey );

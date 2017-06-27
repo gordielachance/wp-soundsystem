@@ -106,7 +106,21 @@ class WP_SoundSytem_Settings {
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
 
+            /*
+            Sources
+            */
             $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+            
+            if( isset($input['autosource_filter_ban_words']) ){
+                $ban_words = explode(',',$input['autosource_filter_ban_words']);
+                foreach($ban_words as $key=>$word){
+                    $ban_words[$key] = trim($word);
+                }
+                $new_input['autosource_filter_ban_words'] = $ban_words;
+            }
+
+            
+            $new_input['autosource_filter_requires_artist'] = ( isset($input['autosource_filter_requires_artist']) ) ? 'on' : 'off';
 
             /*
             Live playlists
@@ -229,13 +243,41 @@ class WP_SoundSytem_Settings {
             'wpsstm-settings-page', 
             'player_settings'
         );
-
+        
+        
+        /*
+        Sources
+        */
+        
         add_settings_field(
             'autosource', 
             __('Auto-source','wpsstm'), 
             array( $this, 'autosource_callback' ), 
             'wpsstm-settings-page', 
-            'player_settings'
+            'sources'
+        );
+        
+        add_settings_section(
+            'sources', // ID
+            __('Sources','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'autosource_filter_ban_words', 
+            __('Ban words filter','wpsstm'), 
+            array( $this, 'autosource_filter_ban_words_callback' ), 
+            'wpsstm-settings-page', 
+            'sources'
+        );
+        
+        add_settings_field(
+            'autosource_filter_requires_artist', 
+            __('Artist filter','wpsstm'),
+            array( $this, 'autosource_filter_requires_artist_callback' ), 
+            'wpsstm-settings-page', 
+            'sources'
         );
 
         /*
@@ -498,6 +540,40 @@ class WP_SoundSytem_Settings {
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
             __("Auto-play the first track displayed.","wpsstm")
+        );
+    }
+    
+    function autosource_filter_ban_words_callback(){
+
+        $desc[]= sprintf(
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when one of those words is contained in its title","wpsstm")
+        );
+        
+        $desc[]= sprintf('<small>%s</small>',__('List of comma-separated words'));
+        
+        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
+        $ban_words_str = implode(',',$ban_words);
+        $desc[]= sprintf('<input type="text" name="%s[autosource_filter_ban_words]" value="%s" />',wpsstm()->meta_name_options,$ban_words_str);
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo implode("\n",$desc);
+        
+    }
+    function autosource_filter_requires_artist_callback(){
+        $option = wpsstm()->get_options('autosource_filter_requires_artist');
+
+        printf(
+            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when the track artist is not contained in its title.","wpsstm")
         );
     }
 

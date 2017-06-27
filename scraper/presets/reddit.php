@@ -87,6 +87,7 @@ class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset
             '(Audio)',
             '(Official)',
             '(Official Video)',
+            '(Official Audio)',
             '(Official Videoclip)',
             '(Clip officiel)',
             '(Lyric Video)',
