@@ -425,7 +425,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             //delete
             if ( $is_attached ){
                 $subtrack_actions[] = array(
-                    'slug'  => 'remove',
+                    'slug'  => 'delete',
                     'text'  => __('Delete'),
                 );
             }
