@@ -23,7 +23,14 @@
     });
     
     $(document).ready(function(){
-        $('.wpsstm-tracklist').toggleTracklist();        
+        $('.wpsstm-tracklist').toggleTracklist();    
+        $('#wpsstm-subtracks-list table').toggleChildren({
+                childrenShowCount:  true,
+                childrenMax:        3,
+                childrenSelector:   'tbody > *',
+                moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+                lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
+            });
     });
 
     $(document).on( "wpsstmTrackInit", function( event, track_obj ) {
