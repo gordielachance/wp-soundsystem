@@ -135,12 +135,16 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             
             //TO FIX capabilities
             
-            $actions = array();
+            $actions = array(
+                'remove'    => __('Remove tracks','wpsstm'),
+                'save'      => __('Save tracks','wpsstm'),
+                'mbid'      => __('Guess MBIDs','wpsstm'),
+                'delete'    => __('Delete tracks','wpsstm'),
+            );
 
-            $actions['remove']  = __('Remove tracks','wpsstm');
-            $actions['save']    = __('Save tracks','wpsstm');
-            $actions['delete']  = __('Delete tracks','wpsstm');
-            
+            if ( !$auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" ) ){
+                unset($actions['mbid']);
+            }
 
             return apply_filters('wpsstm_get_tracklist_bulk_actions',$actions);
         }

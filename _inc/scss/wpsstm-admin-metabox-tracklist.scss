@@ -33,18 +33,8 @@
             }
 
         }
-        
-        #toggle-columns-driver{
-            margin: auto;
-            padding: 1em 0;
-        }
-        table.toggle-columns{
-            .toggle-column-hidden{
-                display:none;
-            }
-        }
 
-        > table.wp-list-table{
+        table.wp-list-table{
             .column-reorder,.column-trackitem_order {
                 width: 2em;
                 text-align:center;
@@ -126,4 +116,16 @@
         }
     }
 
+}
+
+.toggle-table-columns{
+    table.toggle-columns-driver{
+        margin: auto;
+        padding: 1em 0;
+    }
+    table.wp-list-table{
+        .toggle-column-hidden{
+            display:none;
+        }
+    }
 }

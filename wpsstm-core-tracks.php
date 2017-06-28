@@ -45,7 +45,7 @@ class WP_SoundSytem_Core_Tracks{
         add_action( 'save_post', array($this,'update_title_track'), 99);
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
-        add_action( 'save_post', array($this,'metabox_track_save'), 5); 
+        add_action( 'save_post', array($this,'metabox_track_title_save'), 5); 
         
         //add_filter('manage_posts_columns', array($this,'column_track_register'), 10, 2 );
         //add_action( 'manage_posts_custom_column', array($this,'column_track_content'), 10, 2 );
@@ -378,7 +378,7 @@ class WP_SoundSytem_Core_Tracks{
     Save track field for this post
     **/
     
-    function metabox_track_save( $post_id ) {
+    function metabox_track_title_save( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );

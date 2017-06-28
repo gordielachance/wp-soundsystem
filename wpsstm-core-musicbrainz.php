@@ -41,7 +41,7 @@ class WP_SoundSytem_Core_MusicBrainz {
     function setup_actions(){
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 5);
-        add_action( 'save_post', array($this,'auto_guess_mbid'), 6);
+        add_action( 'save_post', array($this,'auto_set_mbid'), 6);
         add_action( 'save_post', array($this,'metabox_mbdata_save'), 7 ); //requires MBID to be set so be careful to hooks priorities
         
         add_action( 'wpsstm_updated_mbid', array($this,'update_mb_datas'), 9 );
@@ -370,26 +370,28 @@ class WP_SoundSytem_Core_MusicBrainz {
     When saving an artist / track / album and that no MBID exists, guess it - if option enabled
     */
     
-    function auto_guess_mbid( $post_id ){
+    function auto_set_mbid( $post_id ){
         
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         if ( $is_autosave || $is_autodraft || $is_revision ) return;
+        
+        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
+        //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
+        if ( did_action('wpsstm_save_subtracks') ) return;
 
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
-        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracklists.  Do not guess MBID.
-        if ( did_action('wpsstm_save_subtracks') ) return;
-        
+        //ignore if option disabled
         $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
         if (!$auto_id) return;
 
-        $mbid = wpsstm_get_post_mbid($post_id);        
-        if ($mbid) return;
+        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+        if ($track->mbid) return;
         
         if ( ( !$mbid = $this->guess_mbid( $post_id ) ) || is_wp_error($mbid) ) return;
         
@@ -397,6 +399,8 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         //TO FIX should this filter be here ?
         add_filter( 'redirect_post_location', array($this,'redirect_to_switch_entries_after_new_mbid') );
+        
+        return $mbid;
     }
     
     /**

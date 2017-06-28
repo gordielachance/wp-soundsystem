@@ -167,12 +167,9 @@ class WP_SoundSystem_Track{
             wpsstm_artists()->metakey           => $this->artist,
             wpsstm_tracks()->metakey            => $this->title,
             wpsstm_albums()->metakey            => $this->album,
+            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
             //sources is more specific, will be saved below
         );
-
-        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){		
-            $meta_input[wpsstm_mb()->mb_id_meta_name] = $this->mbid;		
-        }
 
         $meta_input = array_filter($meta_input);
 

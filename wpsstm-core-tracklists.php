@@ -398,6 +398,9 @@ class WP_SoundSytem_Core_Tracklists{
             case 'save':
                 $tracklist->save_subtracks();
             break;
+            case 'mbid':
+                $tracklist->set_subtracks_auto_mbid();
+            break;
             case 'remove':
                 $tracklist->remove_subtracks();
             break;
@@ -507,7 +510,15 @@ class WP_SoundSytem_Core_Tracklists{
                         $result['message'] = $post_id->get_error_message();
                     }else{
                         wpsstm()->debug_log("ajax save:"); 
-                        wpsstm()->debug_log($post_id); 
+                        wpsstm()->debug_log($post_id);
+                        
+                        //try to set MBID if none defined
+                        if (!$track->mbid){
+                            if ( ( $mbid = wpsstm_mb()->guess_mbid( $post_id ) ) && !is_wp_error($mbid) ){
+                                $track->mbid = $mbid;
+                                wpsstm_mb()->do_update_mbid($post_id,$mbid);
+                            }
+                        }
 
                         $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
                         $tracklist->add(array($track));

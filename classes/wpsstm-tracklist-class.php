@@ -105,7 +105,7 @@ class WP_SoundSytem_Tracklist{
         return $ordered_ids;
         
     }
-    
+
     function set_subtrack_ids($ordered_ids){
 
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
@@ -180,10 +180,22 @@ class WP_SoundSytem_Tracklist{
     
     function save_subtracks(){
         
-        do_action('wpsstm_save_subtracks'); //this will allow to detect if we're saving a single track or several tracks using did_action().
-
+        do_action('wpsstm_save_subtracks',$this); //this will allow to detect if we're saving a single track or several tracks using did_action().
+        
         foreach($this->tracks as $key=>$track){
             $saved = $track->save_track();
+        }
+    }
+    
+    function set_subtracks_auto_mbid(){
+        //ignore if option disabled
+        $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
+        if (!$auto_id) return;
+        
+        foreach($this->tracks as $key=>$track){
+            if (!$track->post_id) continue;
+            if ( ( !$mbid = wpsstm_mb()->guess_mbid( $track->post_id ) ) || is_wp_error($mbid) ) continue;
+            wpsstm_mb()->do_update_mbid($track->post_id,$mbid);
         }
     }
     
