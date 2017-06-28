@@ -119,30 +119,27 @@ class WP_SoundSytem_Scraper_Wizard{
 
         if ( !$post_id = $this->tracklist->post_id ) return;
 
+        $wizard_url = ( isset($_REQUEST[ 'wpsstm_feed_url' ]) ) ? $_REQUEST[ 'wpsstm_feed_url' ] : null;
+        $this->save_feed_url($wizard_url);
+        
+        //TO FIX set tracklist property 'import_tracks' ?
+        if ( isset($_REQUEST['import-tracks'])){
+            if ($this->tracklist->tracks){
+                $this->tracklist->save_subtracks();
+            }
+        }
+
+        if ( $this->is_advanced ){
+            $wizard_settings = ( isset($_REQUEST['save-scraper-settings']) ) ? $_REQUEST['save-scraper-settings'] : null;
+            $this->save_wizard_settings($wizard_settings);
+        }
+        /*
         if ( isset($_REQUEST[ 'wpsstm_wizard' ]['reset']) ){
-            
             delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
             delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
-            
-        }else{
-            
-            $wizard_url = ( isset($_REQUEST[ 'wpsstm_feed_url' ]) ) ? $_REQUEST[ 'wpsstm_feed_url' ] : null;
-            $this->save_feed_url($wizard_url);
-
-            if ( $this->is_advanced ){
-                $wizard_settings = ( isset($_REQUEST['save-scraper-settings']) ) ? $_REQUEST['save-scraper-settings'] : null;
-                $this->save_wizard_settings($wizard_settings);
-
-                //TO FIX set tracklist property 'import_tracks' ?
-                if ( isset($_REQUEST['import-tracks'])){
-                    if ($this->tracklist->tracks){
-                        $this->tracklist->save_subtracks();
-                    }
-                }
-            }
-
         }
-        
+        */
+
         return $post_id;
         
     }
@@ -812,7 +809,6 @@ class WP_SoundSytem_Scraper_Wizard{
     }
     
     function wizard_display(){
-        
         $classes = array();
         $classes[]  = ( $this->is_advanced ) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
         $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-frontend';
