@@ -119,6 +119,9 @@
 }
 
 .toggle-table-columns{
+    table{
+        table-layout: initial;
+    }
     table.toggle-columns-driver{
         margin: auto;
         padding: 1em 0;

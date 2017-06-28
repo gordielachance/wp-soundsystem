@@ -17,7 +17,7 @@
 }
 
 /* line 18, ../scss/_wpsstm-shared.scss */
-.wpsstm-can-click, .postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle:not(.disabled) {
+.wpsstm-can-click, .postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle:not(.disabled) {
   cursor: pointer;
   cursor: hand;
 }
@@ -51,65 +51,70 @@
 body.no-js .postbox#wpsstm-tracklist #wpsstm-subtracks-list > .tablenav .add-tracklist-track {
   display: none;
 }
-/* line 37, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list #toggle-columns-driver {
-  margin: auto;
-  padding: 1em 0;
-}
-/* line 42, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.toggle-columns .toggle-column-hidden {
-  display: none;
-}
-/* line 48, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table .column-reorder, .postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table .column-trackitem_order {
+/* line 38, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table .column-reorder, .postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table .column-trackitem_order {
   width: 2em;
   text-align: center;
 }
-/* line 54, ../scss/wpsstm-admin-metabox-tracklist.scss */
-body.no-js .postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table .column-trackitem-action {
+/* line 44, ../scss/wpsstm-admin-metabox-tracklist.scss */
+body.no-js .postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table .column-trackitem-action {
   display: none;
 }
-/* line 66, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr td {
+/* line 56, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr td {
   overflow: hidden;
 }
-/* line 68, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr td input[type='text'] {
+/* line 58, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr td input[type='text'] {
   width: 100%;
 }
-/* line 73, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle {
+/* line 63, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle {
   text-align: center;
 }
-/* line 78, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle.disabled {
+/* line 68, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle.disabled {
   opacity: 0.5;
 }
-/* line 87, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-display {
+/* line 77, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-display {
   display: block;
 }
-/* line 90, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-edit {
+/* line 80, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-edit {
+  display: none;
+}
+/* line 86, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr .row-actions span.save {
+  display: none;
+}
+/* line 93, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-display {
   display: none;
 }
 /* line 96, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr .row-actions span.save {
-  display: none;
-}
-/* line 103, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-display {
-  display: none;
-}
-/* line 106, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-edit {
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-edit {
   display: block;
 }
-/* line 112, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.save {
+/* line 102, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.save {
   display: inline;
 }
-/* line 115, ../scss/wpsstm-admin-metabox-tracklist.scss */
-.postbox#wpsstm-tracklist #wpsstm-subtracks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.edit {
+/* line 105, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.edit {
+  display: none;
+}
+
+/* line 122, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.toggle-table-columns table {
+  table-layout: initial;
+}
+/* line 125, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.toggle-table-columns table.toggle-columns-driver {
+  margin: auto;
+  padding: 1em 0;
+}
+/* line 130, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.toggle-table-columns table.wp-list-table .toggle-column-hidden {
   display: none;
 }

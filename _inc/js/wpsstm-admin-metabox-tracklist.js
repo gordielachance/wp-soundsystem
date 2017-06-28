@@ -168,11 +168,8 @@ function wpsstm_tracklist_row_action(row_action_link){
                 if ( data.new_html ){
                     row.html( data.new_html );
                     
-                    //TO FIX TO CHECK duplicate attributes.  Could we run tableToggleColumns() without setting the args again ?
-                    $(table).tableToggleColumns({
-                        ignore_columns : ['#cb','#trackitem_action'],
-                        unchecked_columns : ['#trackitem_album','#trackitem_mbid','#trackitem_sources']
-                    });
+                    //retoggle table columns
+                    $(table).tableToggleColumns();
                     
                 }
                 if ( (track_action == 'remove') || (track_action == 'delete') ){
