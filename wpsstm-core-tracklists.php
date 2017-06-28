@@ -347,10 +347,11 @@ class WP_SoundSytem_Core_Tracklists{
     function metabox_tracklist_save( $post_id ) {
         
         //check save status
-        $is_autosave = wp_is_post_autosave( $post_id );
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         $is_metabox = isset($_POST['wpsstm_tracklist_meta_box_nonce']);
-        if ( !$is_metabox || $is_autosave || $is_revision ) return;
+        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
         //check post type
         $post_type = get_post_type($post_id);
@@ -427,11 +428,12 @@ class WP_SoundSytem_Core_Tracklists{
         
         //check save status
         $is_autosave = wp_is_post_autosave( $post_id );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         $is_valid_nonce = false;
         if ( isset($_POST[ 'wpsstm_scraper_wizard_nonce' ]) && wp_verify_nonce( $_POST['wpsstm_scraper_wizard_nonce'], 'wpsstm_scraper_wizard')) $is_valid_nonce=true;
 
-        if ($is_autosave || $is_revision || !$is_valid_nonce) return;
+        if ($is_autosave || $is_autodraft || $is_revision || !$is_valid_nonce) return;
         
         $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
         $wizard->save_backend_wizard();

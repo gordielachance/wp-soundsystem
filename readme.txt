@@ -2,7 +2,7 @@
 Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
-Requires at least: 3.6
+Requires at least: 3.9
 Tested up to: 4.8
 Stable tag: trunk
 License: GPLv2 or later

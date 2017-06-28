@@ -64,7 +64,7 @@ class WP_SoundSytem_Scraper_Wizard{
     function save_frontend_wizard(){
 
         if ( !$post_id = $this->tracklist->post_id ){
-            
+
             //TO FIX limit for post creations ? (spam/bots, etc.)
 
             //user check - guest user
