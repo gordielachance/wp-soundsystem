@@ -632,7 +632,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         
     }
 
-    private function get_track_node_content($track_node,$selectors,$single_value=true){
+    protected function get_track_node_content($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();

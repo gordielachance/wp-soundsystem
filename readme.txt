@@ -156,6 +156,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = XXX =
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)
+* new RadioKing preset
 
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
