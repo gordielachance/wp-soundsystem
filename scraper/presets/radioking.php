@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_Spotify_Playlists_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSytem_Preset_RadioKing_Api extends WP_SoundSytem_Live_Playlist_Preset{
 
     var $preset_slug =      'radioking';
     var $preset_url =       'https://www.radioking.com';
@@ -7,146 +7,75 @@ class WP_SoundSytem_Preset_Spotify_Playlists_Api extends WP_SoundSytem_Live_Play
     var $pattern =          '~^https?://(?:.*\.)?radioking.com/radio/([^/]+).*?$~i';
     var $redirect_url =     'https://www.radioking.com/api/radio/%radioking-id%/track/ckoi?limit=20';
     var $variables =        array(
-        'radioking-id' => null
+        'radioking-slug'        => null,
+        'radioking-id'          => null
     );
 
     var $options_default =  array(
         'datas_cache_min'   => 15,
         'selectors' => array(
-            'tracks'           => array('path'=>'root > items'),
-            'track_artist'     => array('path'=>'track > artists > name'),
-            'track_album'      => array('path'=>'track > album > name'),
-            'track_title'      => array('path'=>'track > name'),
+            'tracks'            => array('path'=>'root > data'),
+            'track_artist'      => array('path'=>'artist'),
+            'track_album'       => array('path'=>'album'),
+            'track_title'       => array('path'=>'title'),
+            'track_image'       => array('path'=>'cover'),
         )
     );
     
-    //https://www.radioking.com/api/radio/slug/tsugi-radio
-    
-    var $token = null;
+    var $station_data =     null;
 
     function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);
 
-        $this->preset_name = __('Spotify Playlist','wpsstm');
-
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        
-        if ( !$client_id || !$client_secret ){
-            $this->can_use_preset = false;
-        }
+        $this->preset_name = __('Radioking Stations','wpsstm');
     }
     
-    function get_all_raw_tracks(){
+    function get_station_data(){
+        if ( !$slug = $this->get_variable_value('radioking-slug') ) return;
         
-        $tracks_count = $this->get_spotify_playlist_track_count();
-        
-        //init pagination before request
-        $pagination_args = array(
-            'total_items'       => $tracks_count,
-            'page_items_limit'  => 100
-        );
+        $transient_name = 'wpsstm-radioking-' . $slug . '-data';
 
-        $this->set_request_pagination( $pagination_args );
-        
-        return parent::get_all_raw_tracks();
-    }
-    
-    function get_tracklist_title(){
-        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
-        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
-        
-        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
-        
-        $json = wp_remote_retrieve_body($response);
-        
-        if ( is_wp_error($json) ) return $json;
-        
-        $api = json_decode($json,true);
-        
-        return wpsstm_get_array_value('name', $api);
-    }
-    
-    function get_tracklist_author(){
-        return $this->get_variable_value('spotify-user');
-    }
-    
-    protected function get_spotify_playlist_track_count(){
-
-        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
-        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
-
-        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
-        
-        $json = wp_remote_retrieve_body($response);
-        
-        if ( !is_wp_error($json) ){
+        if ( false === ( $station_data = get_transient($transient_name ) ) ) {
+            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$slug) );
+            $json = wp_remote_retrieve_body($response);
+            if ( is_wp_error($json) ) return $json;
             $api = json_decode($json,true);
-            return wpsstm_get_array_value(array('tracks','total'), $api);
+            if ( $station_data = wpsstm_get_array_value(array('data'), $api) ){
+                set_transient( $transient_name, $station_data, 1 * DAY_IN_SECONDS );
+            }
         }
+        
+        return $station_data;
+        
     }
     
     protected function get_request_url(){
         
-        $url = parent::get_request_url();
+        $this->station_data = $this->get_station_data();
+
+        //set station ID
+        if ( $station_id = wpsstm_get_array_value(array('idradio'), $this->station_data) ){
+            $this->set_variable_value('radioking-id',$station_id);
+        }
         
-        //handle pagination
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['page_items_limit'],
-            'offset'    => ($this->request_pagination['current_page'] - 1) * $this->request_pagination['page_items_limit']
-        );
-        
-        $url = add_query_arg($pagination_args,$url);
-        return $url;
+        return parent::get_request_url();
 
     }
     
-    function get_request_args(){
-        $args = parent::get_request_args();
-
-        if ( $token = $this->get_access_token() ){
-
-            $args['headers']['Authorization'] = 'Bearer ' . $token;
-            $this->set_variable_value('spotify-token',$token);            
-        }
-        
-        $args['headers']['Accept'] = 'application/json';
-
-        return $args;
-    }
-
-    function get_access_token(){
-        
-        if ($this->token === null){
-            
-            $this->token = false;
-            
-            $client_id = wpsstm()->get_options('spotify_client_id');
-            $client_secret = wpsstm()->get_options('spotify_client_secret');
-
-            $args = array(
-                'headers'   => array(
-                    'Authorization' => 'Basic '.base64_encode($client_id.':'.$client_secret)
-                ),
-                'body'      => array(
-                    'grant_type'    => 'client_credentials'
-                )
-            );
-
-
-            $response = wp_remote_post( 'https://accounts.spotify.com/api/token', $args );
-
-            if ( is_wp_error($response) ){
-                wpsstm()->debug_log($response->get_error_message(),'Spotify preset error' ); 
-            }
-            $body = wp_remote_retrieve_body($response);
-            $body = json_decode($body);
-            $this->token = $body->access_token;
-            
-        }
-        
-        return $this->token;
-
+    function get_tracklist_title(){
+        return wpsstm_get_array_value(array('name'), $this->station_data);
     }
     
+    protected function get_track_image($track_node){
+        $selectors = $this->get_options(array('selectors','track_image'));
+        
+        if ( $image_id = $this->get_track_node_content($track_node,$selectors) ){
+           $image = sprintf('https://www.radioking.com/api/track/cover/%s?width=55&height=55',$image_id);
+        }
+        
+        
+        
+        return $image;
+    }
+
 }
