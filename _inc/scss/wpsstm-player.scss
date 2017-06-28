@@ -334,6 +334,39 @@
     }    
 }
 
+.wpsstm-tracklist-chooser-link{
+    span{
+        display:none;
+    }
+    a{
+        border:none!important;
+    }
+    > :nth-child(1){ //loading
+        display:none;
+    }
+    > :nth-child(2){ //love
+        display:inline-block;
+    }
+
+    &.wpsstm-is-loved{
+        > :nth-child(2){ //love
+            display:none;
+        }
+    }
+    &.loading{
+        pointer-events: none;
+        > :nth-child(1){ //loading
+            display:inline-block;
+        }
+        > :nth-child(2){ //love
+            display:none;
+        }
+    }  
+    .wpsstm-tracklist-chooser-list{
+        display:none;
+    }
+}
+
 .wpsstm-lastfm-love-unlove-track-links{
     font-size:1em!important;
     @include opacity(.3);

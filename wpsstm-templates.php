@@ -335,6 +335,7 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     if ( !current_user_can($required_cap) ) return;
 
     $wrapper_classes = array(
+        'wpsstm-track-links',
         'wpsstm-love-unlove-track-links',
         'wpsstm-wp-love-unlove-track-links'
     );
@@ -384,7 +385,10 @@ function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
     $required_cap = $post_type_obj->cap->edit_posts;
     if ( !current_user_can($required_cap) ) return;
+    
     $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
+    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+    
     $li_els = array();
     
     if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
@@ -403,9 +407,17 @@ function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
     $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
     
-    $popup = sprintf('<div class="wpsstm-tracklist-chooser-list">%s %s %s</div>',$header,$list,$footer);
+    $block_id = sprintf('tracklist-chooser-%s',$track->get_unique_id());
+
+    $popup = sprintf('<div id="%s" class="wpsstm-tracklist-chooser-list">%s %s %s</div>',$block_id,$header,$list,$footer);
     
-    $link = sprintf('<span class="wpsstm-icon-link wpsstm-requires-auth wpsstm-tracklist-chooser wpsstm-track-action">%s %s</span>',$icon,$popup);
+    $wrapper_classes = array(
+        'wpsstm-track-links',
+        'wpsstm-tracklist-chooser-link'
+    );
     
-    return sprintf('<span class="wpsstm-tracklist-chooser-wrapper">%s</span>',$link );
+    $tracklists_link = sprintf('<a title="%s" href="#TB_inline?width=600&height=550&inlineId=%s" class="thickbox wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s</a>',__('Add playlist to favorites','wpsstm'),$block_id,$icon);
+
+    printf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link,$popup);
+    
 }

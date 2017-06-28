@@ -56,6 +56,7 @@ class WP_SoundSytem_Core_Tracklists{
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         add_action( 'save_post', array($this,'metabox_tracklist_save')); 
         
+        add_action( 'wp_enqueue_scripts', array( $this, 'frontend_script_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'metabox_tracklist_scripts_styles' ) );
 
         add_filter('manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
@@ -186,6 +187,12 @@ class WP_SoundSytem_Core_Tracklists{
 
     function xspf_register_endpoint(){
         add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK );
+    }
+    
+    function frontend_script_styles(){
+        //TO FIX load only if we have a tracklist displayed
+        wp_enqueue_script( 'thickbox' );
+        wp_enqueue_style( 'thickbox' );
     }
 
     function metabox_tracklist_scripts_styles(){
