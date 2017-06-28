@@ -311,6 +311,9 @@ class WP_SoundSytem_Core_Tracklists{
     
     function metabox_tracklist_content( $post ){
         ?>
+        <p id="metabox-wizard-link" class="wpsstm-notice">
+            <a href="#wpsstm-metabox-scraper-wizard"><?php _e('Import Tracks','wpsstm');?></a>
+        </p>
         <div id="wpsstm-subtracks-list" data-wpsstm-tracklist-id="<?php echo $post->ID;?>">
             
             <?php
