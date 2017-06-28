@@ -13,6 +13,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
         var $can_manage_rows;
 
         function prepare_items() {
+           
             global $post;
 
             $columns = $this->get_columns();
@@ -238,6 +239,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
          */
         function column_default( $item, $column_name ){
             global $post;
+             
 
             $classes = array('metabox-table-cell-toggle');
             $display_classes = array_merge( $classes,array('metabox-table-cell-display') );
@@ -351,15 +353,20 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     $sources_display =  $item->sources;
                     $display_el = ( $sources_display ) ?  count($sources_display) : '—';
                     $field_value_name = $this->get_field_name($item,'sources');
-                    
-                    $sources_popup_id = sprintf('wpsstm-subtrack-%s-sources-popup',$item->subtrack_order);
-                    $sources_popup_wrapper = sprintf('<div id="%s" class="wpsstm-track-sources-popup">%s</div>',$sources_popup_id,wpsstm_sources()->get_metabox_sources_manager( $item->post_id, $field_value_name ));
-                    
-                    add_thickbox();
-                    
-                    $sources_popup_link = sprintf('<a title="%s" href="#TB_inline?width=600&height=550&inlineId=%s" class="thickbox">%s</a>',__('Sources','wpsstm'),$sources_popup_id,__('Manage sources','wpsstm'));
 
-                    $edit_el = $sources_popup_wrapper . $sources_popup_link;
+                    $ajax_url = add_query_arg( 
+                        array( 
+                            'action'        => 'wpsstm_track_sources_manager',
+                            'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album),
+                            'width'         => '600', 
+                            'height'        => '550' 
+                        ), 
+                        admin_url( 'admin-ajax.php' )
+                    );
+                    
+                    $sources_popup_link = sprintf('<a title="%s" href="%s" class="thickbox">%s</a>',__('Sources','wpsstm'),$ajax_url,__('Manage sources','wpsstm'));
+
+                    $edit_el = $sources_popup_link;
                     
                     return sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($display_classes),$display_el ) . sprintf( '<div%s>%s</div>',wpsstm_get_classes_attr($edit_classes),$edit_el );
                 break;

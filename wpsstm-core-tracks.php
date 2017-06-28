@@ -68,6 +68,9 @@ class WP_SoundSytem_Core_Tracks{
         
         //ajax : playlist selector
         add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_track_playlists_selector'));
+        
+        //ajax : sources manager
+        add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_track_sources_manager'));
     }
     
     /*
@@ -523,6 +526,12 @@ class WP_SoundSytem_Core_Tracks{
         $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
 
         echo printf('<div class="wpsstm-tracklist-chooser-list">%s %s</div>',$list,$footer);
+    }
+    
+    function ajax_track_sources_manager(){
+        //TO FIX
+        print_r($_REQUEST);return;
+        echo wpsstm_sources()->get_metabox_sources_manager($post->ID); //TO FIX check is not redundent with metabox_sources_content()
     }
     
 }
