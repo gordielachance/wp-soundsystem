@@ -340,10 +340,11 @@ class WP_SoundSytem_Core_Tracklists{
     function metabox_tracklist_save( $post_id ) {
         
         //check save status
-        $is_autosave = wp_is_post_autosave( $post_id );
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         $is_metabox = isset($_POST['wpsstm_tracklist_meta_box_nonce']);
-        if ( !$is_metabox || $is_autosave || $is_revision ) return;
+        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
         //check post type
         $post_type = get_post_type($post_id);

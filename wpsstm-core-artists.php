@@ -105,10 +105,11 @@ class WP_SoundSytem_Core_Artists{
         if (get_post_type($post_id) != wpsstm()->post_type_artist) return;
 
         //check capabilities
-        $is_autosave = wp_is_post_autosave( $post_id );
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         $has_cap = current_user_can('edit_post', $post_id);
-        if ( $is_autosave || $is_revision || !$has_cap ) return;
+        if ( $is_autosave || $is_autodraft || $is_revision || !$has_cap ) return;
 
         $post_title = wpsstm_get_post_artist($post_id);
         if ( !$post_title ) return;
@@ -231,10 +232,11 @@ class WP_SoundSytem_Core_Artists{
     function metabox_artist_save( $post_id ) {
 
         //check save status
-        $is_autosave = wp_is_post_autosave( $post_id );
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
         $is_metabox = isset($_POST['wpsstm_artist_meta_box_nonce']);
-        if ( !$is_metabox || $is_autosave || $is_revision ) return;
+        if ( !$is_metabox || $is_autodraft || $is_autosave || $is_revision ) return;
         
         //check post type
         $post_type = get_post_type($post_id);
