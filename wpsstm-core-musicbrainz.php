@@ -382,6 +382,9 @@ class WP_SoundSytem_Core_MusicBrainz {
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
+        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracklists.  Do not guess MBID.
+        if ( did_action('wpsstm_save_subtracks') ) return;
+        
         $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
         if (!$auto_id) return;
 

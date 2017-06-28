@@ -179,6 +179,9 @@ class WP_SoundSytem_Tracklist{
     }
     
     function save_subtracks(){
+        
+        do_action('wpsstm_save_subtracks'); //this will allow to detect if we're saving a single track or several tracks using did_action().
+
         foreach($this->tracks as $key=>$track){
             $saved = $track->save_track();
         }
