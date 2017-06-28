@@ -20,7 +20,7 @@ abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlis
     function __construct($post_id_or_feed_url = null){
         parent::__construct($post_id_or_feed_url);
 
-        $this->preset_name = __('Radionomy Station','wpsstm');
+        $this->preset_name = __('Radionomy Stations','wpsstm');
     }
     
     protected function get_request_url(){

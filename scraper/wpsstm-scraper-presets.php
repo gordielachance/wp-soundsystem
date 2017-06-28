@@ -129,6 +129,7 @@ function wpsstm_register_scraper_presets($presets){
     require_once( $presets_path . 'twitter.php' );
     require_once( $presets_path . 'reddit.php' );
     require_once( $presets_path . 'indieshuffle.php' );
+    require_once( $presets_path . 'radioking.php' );
     
     $presets[] = new WP_SoundSytem_Preset_LastFM_Scraper();
     $presets[] = new WP_SoundSytem_Preset_Spotify_Playlists_Api();
@@ -145,6 +146,7 @@ function wpsstm_register_scraper_presets($presets){
     $presets[] = new WP_SoundSytem_Preset_RTBF_Stations();
     $presets[] = new WP_SoundSytem_Preset_Reddit_Api();
     $presets[] = new WP_SoundSytem_Preset_IndieShuffle_Scraper();
+    $presets[] = new WP_SoundSytem_Preset_RadioKing_Api();
     
     return $presets;
 }
