@@ -586,7 +586,7 @@ class WP_SoundSytem_Tracklist_Table{
             break;
             case 'trackitem_actions':
                 $love_unlove = wpsstm_get_track_loveunlove_icons($item);
-                $add_to_playlists = wpsstm_get_track_playlist_chooser($item);
+                $add_to_playlists = wpsstm_get_track_playlists_selector_link($item);
                 return $love_unlove.$add_to_playlists;
             default:
                 if ( !is_admin() ) break;

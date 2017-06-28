@@ -56,7 +56,7 @@ class WpsstmLastFM {
             }
             
             var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-love-unlove-track-links');
+            var link_wrapper = link.closest('.wpsstm-track-action-love-unlove');
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
             
             var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');

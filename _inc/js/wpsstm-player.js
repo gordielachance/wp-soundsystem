@@ -94,11 +94,11 @@ $(document).ready(function(){
     
 
     //love/unlove track (either for page tracks or player track)
-    $('[itemprop="track"]').on( "click",".wpsstm-wp-love-unlove-track-links a", function(e) {
+    $('[itemprop="track"]').on( "click",".wpsstm-track-action-wp-love-unlove a", function(e) {
         e.preventDefault();
 
         var link = $(this);
-        var link_wrapper = link.closest('.wpsstm-love-unlove-track-links');
+        var link_wrapper = link.closest('.wpsstm-track-action-love-unlove');
         var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
         var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
@@ -316,11 +316,11 @@ class WpsstmTracklist {
         });
 
         //toggle love/unlove
-        self.tracklist_el.find('.wpsstm-love-unlove-playlist-links a').click(function(e) {
+        self.tracklist_el.find('.wpsstm-playlist-action-love-unlove a').click(function(e) {
             e.preventDefault();
 
             var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-love-unlove-playlist-links');
+            var link_wrapper = link.closest('.wpsstm-playlist-action-love-unlove');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
@@ -745,7 +745,7 @@ class WpsstmTrack {
         
         var track_instances = self.get_track_instances();
         
-        var link_wrappers = track_instances.find('.wpsstm-love-unlove-track-links');
+        var link_wrappers = track_instances.find('.wpsstm-track-action-love-unlove');
 
         var track = {
             artist:     self.artist,

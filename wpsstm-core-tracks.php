@@ -66,6 +66,8 @@ class WP_SoundSytem_Core_Tracks{
         add_action('wp_ajax_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
         add_action('wp_ajax_nopriv_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
         
+        //ajax : playlist selector
+        add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_track_playlists_selector'));
     }
     
     /*
@@ -497,6 +499,27 @@ class WP_SoundSytem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
 
+    }
+    
+    function ajax_track_playlists_selector(){
+        $li_els = array();
+
+        if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
+            foreach($playlist_ids as $playlist_id){
+                $title = get_the_title($playlist_id);
+                $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$title);
+            }
+        }
+
+        if (!$li_els) return;
+
+        $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
+
+        $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
+        $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
+        $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
+
+        echo printf('<div class="wpsstm-tracklist-chooser-list">%s %s</div>',$list,$footer);
     }
     
 }

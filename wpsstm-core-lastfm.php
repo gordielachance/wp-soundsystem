@@ -721,7 +721,7 @@ class WP_SoundSytem_Core_LastFM{
     function get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
 
         $wrapper_classes = array(
-            'wpsstm-love-unlove-track-links',
+            'wpsstm-track-action-love-unlove',
             'wpsstm-lastfm-love-unlove-track-links'
         );
 

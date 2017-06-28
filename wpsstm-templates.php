@@ -292,7 +292,7 @@ function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
     $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
 
     $wrapper_classes = array(
-        'wpsstm-love-unlove-playlist-links'
+        'wpsstm-playlist-action-love-unlove'
     );
     
     if ( $tracklist->is_tracklist_loved_by() ){
@@ -335,9 +335,9 @@ function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     if ( !current_user_can($required_cap) ) return;
 
     $wrapper_classes = array(
-        'wpsstm-track-links',
-        'wpsstm-love-unlove-track-links',
-        'wpsstm-wp-love-unlove-track-links'
+        'wpsstm-track-action',
+        'wpsstm-track-action-love-unlove',
+        'wpsstm-track-action-wp-love-unlove'
     );
     
     if ( $track && $track->is_track_loved_by() ){
@@ -376,7 +376,7 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
     return $post_ids;
 }
 
-function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
+function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = null){
     
     $user_id = get_current_user_id();
     if (!$user_id) return;
@@ -389,35 +389,23 @@ function wpsstm_get_track_playlist_chooser(WP_SoundSystem_Track $track = null){
     $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
     $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
     
-    $li_els = array();
-    
-    if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
-        foreach($playlist_ids as $playlist_id){
-            $title = get_the_title($playlist_id);
-            $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$title);
-        }
-    }
-    
-    if (!$li_els) return;
-    
-    $header = sprintf('<header>%s %s</header>',$icon,__('Add to playlist','wpsstm'));
-    $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
-    
-    $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
-    $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
-    $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
-    
-    $block_id = sprintf('tracklist-chooser-%s',$track->get_unique_id());
-
-    $popup = sprintf('<div id="%s" class="wpsstm-tracklist-chooser-list">%s %s %s</div>',$block_id,$header,$list,$footer);
-    
     $wrapper_classes = array(
-        'wpsstm-track-links',
-        'wpsstm-tracklist-chooser-link'
+        'wpsstm-track-action',
+        'wpsstm-track-action-playlists-selector'
     );
     
-    $tracklists_link = sprintf('<a title="%s" href="#TB_inline?width=600&height=550&inlineId=%s" class="thickbox wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s</a>',__('Add playlist to favorites','wpsstm'),$block_id,$icon);
+    $ajax_url = add_query_arg( 
+        array( 
+            'action'        => 'wpsstm_track_playlists_selector',
+            'track'         => array('artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album),
+            'width'         => '600', 
+            'height'        => '550' 
+        ), 
+        admin_url( 'admin-ajax.php' )
+    );
+    
+    $tracklists_link = sprintf('<a title="%s" href="%s" class="thickbox wpsstm-icon-link wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s</a>',__('Add track to playlist','wpsstm'),$ajax_url,$icon);
 
-    printf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link,$popup);
+    printf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
     
 }

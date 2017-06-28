@@ -24,7 +24,6 @@
     }
 }
 
-
 #wpsstm-bottom-wrapper{
     position:fixed;
     width:100%;
@@ -295,7 +294,7 @@
     }
 }
 
-.wpsstm-love-unlove-track-links,.wpsstm-love-unlove-playlist-links{
+.wpsstm-track-action-love-unlove,.wpsstm-playlist-action-love-unlove{ //both for playlists & tracks
     span{
         display:none;
     }
@@ -334,7 +333,7 @@
     }    
 }
 
-.wpsstm-tracklist-chooser-link{
+.wpsstm-track-action-playlists-selector{
     span{
         display:none;
     }
@@ -361,9 +360,12 @@
         > :nth-child(2){ //love
             display:none;
         }
-    }  
-    .wpsstm-tracklist-chooser-list{
-        display:none;
+    }
+}
+
+.wpsstm-tracklist-chooser-list{ //popup
+    ul{
+        list-style: none;
     }
 }
 
@@ -373,3 +375,9 @@
     &.wpsstm-is-loved,&.loading{
     }
 }
+
+.trackitem_actions{
+    
+}
+
+

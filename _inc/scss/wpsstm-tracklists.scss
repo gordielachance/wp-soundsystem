@@ -20,6 +20,12 @@
         }
     }
     
+    .trackitem_actions{
+        .wpsstm-track-action{
+            margin: 0 .1em;
+        }
+    }
+    
     .wpsstm-player-sources-list{
         li{
             &:not(.wpsstm-bad-source) .wpsstm-source-error{
@@ -202,10 +208,6 @@ a.wpsstm-play-track{
         border:none;
         margin:0;
 
-        .column-trackitem_image{
-            display:none;
-        }
-
         .column-trackitem_order{
             width:3em;
             text-align:center;
@@ -218,6 +220,7 @@ a.wpsstm-play-track{
 
         .column-trackitem_image{
             width:2em;
+            display:none;
             img{
                 max-width:100%;
             }
