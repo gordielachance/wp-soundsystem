@@ -105,16 +105,21 @@ body.no-js .postbox#wpsstm-tracklist #wpsstm-subtracks-list table.wp-list-table 
   display: none;
 }
 
-/* line 122, ../scss/wpsstm-admin-metabox-tracklist.scss */
+/* line 121, ../scss/wpsstm-admin-metabox-tracklist.scss */
+.toggle-table-columns {
+  position: relative;
+  width: 100%;
+}
+/* line 124, ../scss/wpsstm-admin-metabox-tracklist.scss */
 .toggle-table-columns table {
   table-layout: initial;
 }
-/* line 125, ../scss/wpsstm-admin-metabox-tracklist.scss */
+/* line 127, ../scss/wpsstm-admin-metabox-tracklist.scss */
 .toggle-table-columns table.toggle-columns-driver {
   margin: auto;
   padding: 1em 0;
 }
-/* line 130, ../scss/wpsstm-admin-metabox-tracklist.scss */
+/* line 132, ../scss/wpsstm-admin-metabox-tracklist.scss */
 .toggle-table-columns table.wp-list-table .toggle-column-hidden {
   display: none;
 }

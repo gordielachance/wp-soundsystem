@@ -119,6 +119,8 @@
 }
 
 .toggle-table-columns{
+    position:relative;
+    width:100%;
     table{
         table-layout: initial;
     }
