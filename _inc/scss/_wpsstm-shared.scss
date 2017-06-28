@@ -24,3 +24,18 @@
     display:block;
     @include ellipsis($no-wrap: true);
 }
+
+.wpsstm-notice {
+    font-size: 0.8em;
+    padding: .5em;
+    background-color: #fcf8e3;
+    color: #222;
+    a {
+        color: #222;
+        text-decoration: underline;
+    }
+    &.active {
+        display: block;
+    }
+    
+}
