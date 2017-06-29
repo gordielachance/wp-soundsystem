@@ -386,7 +386,7 @@ function wpsstm_get_post_tracklist($post_id=null){
     $tracklist = new WP_SoundSytem_Tracklist($post_id);
     
     $is_live_tracklist = ($post_type == wpsstm()->post_type_live_playlist);
-    $is_frontend_wizard = ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id);
+    $is_frontend_wizard = ($post_id == wpsstm_wizard()->frontend_wizard_page_id);
 
     if ($post_type == wpsstm()->post_type_track){ //single track
         $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );

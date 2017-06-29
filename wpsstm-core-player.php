@@ -73,7 +73,7 @@ class WP_SoundSytem_Core_Player{
                 $post_id = get_the_ID();
                 $post_type = get_post_type();
                 
-                $is_frontend_wizard = ( $post_id == wpsstm_live_playlists()->frontend_wizard_page_id );
+                $is_frontend_wizard = ( $post_id == wpsstm_wizard()->frontend_wizard_page_id );
                 $is_live_playlist = ( $post_type == wpsstm()->post_type_live_playlist  );
                 
                 if ( $is_frontend_wizard || $is_live_playlist ){
