@@ -63,12 +63,7 @@ class WP_SoundSytem_Core_Tracklists{
         add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
 
         add_action( 'post_submitbox_start', array($this,'publish_metabox_download_link') );
-        
-        //scraper
-        //TO FIX move under wizard ?
-        add_action( 'admin_init', array($this,'scraper_wizard_init') );
-        add_action( 'save_post',  array($this, 'wizard_save_metabox'));
-        
+
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table'));
         
@@ -304,7 +299,7 @@ class WP_SoundSytem_Core_Tracklists{
             array($this,'metabox_tracklist_content'),
             $this->allowed_post_types, 
             'normal', 
-            'high' 
+            'high' //priority 
         );
         
     }
@@ -414,37 +409,6 @@ class WP_SoundSytem_Core_Tracklists{
 
     }
 
-    //TO FIX to improve
-    function scraper_wizard_init(){
-        $post_id = (isset($_REQUEST['post'])) ? $_REQUEST['post'] : null;
-        if (!$post_id) return;
-        
-        $post_type = get_post_type($post_id);
-        if( !in_array($post_type,$this->scraper_post_types ) ) return;
-        
-        
-        $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
-
-    }
-    
-    //TO FIX to improve
-    function wizard_save_metabox($post_id){
-        $post_type = get_post_type($post_id);
-        if( !in_array($post_type,$this->scraper_post_types ) ) return;
-        
-        //check save status
-        $is_autosave = wp_is_post_autosave( $post_id );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        $is_valid_nonce = false;
-        if ( isset($_POST[ 'wpsstm_scraper_wizard_nonce' ]) && wp_verify_nonce( $_POST['wpsstm_scraper_wizard_nonce'], 'wpsstm_scraper_wizard')) $is_valid_nonce=true;
-
-        if ($is_autosave || $is_autodraft || $is_revision || !$is_valid_nonce) return;
-        
-        $wizard = new WP_SoundSytem_Scraper_Wizard($post_id);
-        $wizard->save_backend_wizard();
-    }
-    
     function content_append_tracklist_table($content){
         global $post;
         
