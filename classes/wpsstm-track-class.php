@@ -324,6 +324,41 @@ class WP_SoundSystem_Track{
     Track Sources
     */
     
+    function get_track_sources_wizard( $field_name = 'wpsstm_sources' ){
+        
+        $sources = ($this->sources) ? $this->sources : array();
+        $field_name_attr = null;
+
+        $default = new WP_SoundSytem_Source();
+        array_unshift($sources,$default); //add blank line
+        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources, $field_name);
+
+        $desc = array();
+        $desc[]= sprintf('<h2>%s - %s</h2>',$this->artist,$this->title);
+        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
+        
+        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
+        
+        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        $desc = implode("\n",$desc);
+
+        $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
+        
+        $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
+
+        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s"><p>%s</p><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$this->artist,$this->album,$this->title,$desc,$sources_inputs,$suggest_link);
+
+    }
+    
     function get_track_sources_auto( $args = null ){
         
         if (!$this->artist || !$this->title) return;

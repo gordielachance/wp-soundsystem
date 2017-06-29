@@ -357,7 +357,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                     $ajax_url = add_query_arg( 
                         array( 
                             'action'        => 'wpsstm_track_sources_manager',
-                            'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album),
+                            'track'         => array('post_id'=>$item->post_id,'artist'=>$item->artist,'title'=>$item->title,'album'=>$item->album),
                             'width'         => '600', 
                             'height'        => '550' 
                         ), 

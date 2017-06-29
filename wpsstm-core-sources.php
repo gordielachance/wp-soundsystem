@@ -71,44 +71,10 @@ class WP_SoundSytem_Core_Sources{
     
     function metabox_sources_content( $post ){
         
-        echo $this->get_metabox_sources_manager($post->ID);
+        $track = new WP_SoundSystem_Track( array('post_id'=>$post->ID) );
+        echo $track->get_track_sources_wizard($post->ID);
         
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
-    }
-    
-    function get_metabox_sources_manager( $post_id, $field_name = 'wpsstm_sources' ){
-        
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $sources = ($track->sources) ? $track->sources : array();
-        $field_name_attr = null;
-
-        $default = new WP_SoundSytem_Source();
-        array_unshift($sources,$default); //add blank line
-        $sources_inputs = $this->get_sources_inputs($sources, $field_name);
-
-        $desc = array();
-        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
-        
-        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
-        
-        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        $desc = implode("\n",$desc);
-
-        $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
-        
-        $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
-
-        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s"><p>%s</p><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$track->artist,$track->album,$track->title,$desc,$sources_inputs,$suggest_link);
-
     }
     
     function get_sources_inputs($sources,$field_name){

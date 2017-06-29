@@ -529,9 +529,17 @@ class WP_SoundSytem_Core_Tracks{
     }
     
     function ajax_track_sources_manager(){
-        //TO FIX
-        print_r($_REQUEST);return;
-        echo wpsstm_sources()->get_metabox_sources_manager($post->ID); //TO FIX check is not redundent with metabox_sources_content()
+        $ajax_data = $_REQUEST;
+        
+        $track_args = array(
+            'post_id'   => ( isset($ajax_data['track']['post_id']) ) ?  $ajax_data['track']['post_id'] : null,
+            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
+            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
+            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
+        );
+
+        $track = new WP_SoundSystem_Track($track_args);
+        echo $track->get_track_sources_wizard(); //TO FIX check is not redundent with metabox_sources_content()
     }
     
 }

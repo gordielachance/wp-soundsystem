@@ -398,8 +398,8 @@ function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = 
         array( 
             'action'        => 'wpsstm_track_playlists_selector',
             'track'         => array('artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album),
-            'width'         => '600', 
-            'height'        => '550' 
+            //'width'         => '600', 
+            //'height'        => '550' 
         ), 
         admin_url( 'admin-ajax.php' )
     );

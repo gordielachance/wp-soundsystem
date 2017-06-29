@@ -1,7 +1,6 @@
 jQuery(document).ready(function($){
-    
-    $('.wpsstm-suggest-sources-link').on("click", function(event){
-        event.preventDefault();
+    $(document).on("click", '.wpsstm-suggest-sources-link', function(e){
+        e.preventDefault();
         
         var link = $(this);
         var sources_section = $(this).closest('.wpsstm-sources-section');
