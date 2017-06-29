@@ -46,7 +46,7 @@ class WP_SoundSytem_Core_Wizard{
     function setup_actions(){
         
         //frontend
-        add_action( 'wp', array($this,'frontend_wizard_populate' ) );
+        add_action( 'wp', array($this,'frontend_wizard_populate' ), 9 );
         add_action( 'wp', array($this,'frontend_wizard_action' ) );
 
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
@@ -338,6 +338,8 @@ class WP_SoundSytem_Core_Wizard{
         
         if (!$action) return;
         if ( !$user_id = get_current_user_id() ) return;
+        
+        $this->setup_wizard_tracklist($post->ID);
 
         wpsstm()->debug_log(json_encode(array('action'=>$action,'post_id'=>$post->ID,'user_id'=>$user_id)),"frontend_wizard_action()"); 
         
@@ -367,6 +369,11 @@ class WP_SoundSytem_Core_Wizard{
                     die();
                 }
                 
+            break;
+            case 'import':
+                $this->import_tracks_to_static_playlist();
+                wp_redirect( get_permalink($post->ID) );
+                die();
             break;
         }
     }
@@ -445,15 +452,11 @@ class WP_SoundSytem_Core_Wizard{
         $reset = ( isset($_REQUEST[ 'wpsstm_wizard' ]['reset']) || !$wizard_url );
 
         if ( isset($_REQUEST['import-tracks'])){
-            if ($this->tracklist->tracks){
-                $this->tracklist->save_subtracks();
-                $reset = true;
-            }
+            $this->import_tracks_to_static_playlist();
         }
 
         if($reset){
-            delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
-            delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
+            $this->reset_wizard();
         }else{
             $this->save_feed_url($wizard_url);
             if ( $this->is_advanced ){
@@ -463,8 +466,29 @@ class WP_SoundSytem_Core_Wizard{
         }
 
         return $post_id;
+
+    }
+    
+    function import_tracks_to_static_playlist(){
+
+        if ( !$post_id = $this->tracklist->post_id ) return;
+        $post_type = get_post_type($post_id);
         
+        if ($this->tracklist->tracks){
+            $this->tracklist->save_subtracks();
+            $this->reset_wizard();
+        }
         
+        //convert to static playlist if needed
+        if ( $post_type == wpsstm()->post_type_live_playlist ){
+            set_post_type( $post_id, wpsstm()->post_type_playlist );
+        }
+    }
+    
+    function reset_wizard(){
+        if ( !$post_id = $this->tracklist->post_id ) return;
+        delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
+        delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
     }
     
     function save_frontend_wizard(){

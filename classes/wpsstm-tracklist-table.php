@@ -249,6 +249,8 @@ class WP_SoundSytem_Tracklist_Table{
                         $tracklist_links = array();
                         $temp_status = wpsstm_wizard()->wizard_post_status;
                         $post_status = get_post_status($this->tracklist->post_id);
+                        $post_type = get_post_type($this->tracklist->post_id);
+                        $permalink = get_permalink($this->tracklist->post_id);
                 
                         if ($user_id = get_current_user_id() ){
                             
@@ -273,9 +275,16 @@ class WP_SoundSytem_Tracklist_Table{
                             }
 
                             $status_options_str = implode("\n",$status_options);
-                            $form_action = get_permalink($this->tracklist->post_id);
                             $form_onchange = "if(this.value !='') { this.form.submit(); }";
-                            $tracklist_links[] = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="frontend-wizard-action" value="switch-status"/></form>',$form_action,$form_onchange,$status_options_str);
+                            $tracklist_links[] = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="frontend-wizard-action" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str);
+                            
+                            //static playlist switch
+                            if ( ($post_status != $temp_status) && ($post_type == wpsstm()->post_type_live_playlist ) ){
+                                $switch_type_url = add_query_arg(array('frontend-wizard-action'=>'import'),$permalink);
+                                $switch_type_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
+                                $switch_type_text = __('Make static', 'wpsstm');
+                                $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$switch_type_text,$switch_type_url,$switch_type_icon,$switch_type_text);
+                            }
                             
                         }
 
