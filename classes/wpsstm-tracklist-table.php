@@ -247,18 +247,51 @@ class WP_SoundSytem_Tracklist_Table{
                 <div class="alignright actions wpsstm-tracklist-actions">
                     <?php
                         $tracklist_links = array();
+                        $temp_status = wpsstm_wizard()->wizard_post_status;
+                        $post_status = get_post_status($this->tracklist->post_id);
                 
-                        //share
-                        $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
-                        $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
-                        $share_text = __('Share', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s <span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
+                        if ($user_id = get_current_user_id() ){
+                            
+                            //status switcher
+                            $status_options = array();
+                            
+                            $statii = array(
+                                $temp_status    => __('Temporary','wpsstm'),
+                                'draft'         => __('Draft'),
+                                'publish'       => __('Published'),
+                                'private'       => __('Private'),
+                                'trash'         => __('Trash'),
+                            );
 
-                        //xspf
-                        $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
-                        $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                        $xspf_text = __('XSPF', 'wpsstm');
-                        $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
+                            //show temporary status only when it has that status
+                            
+                            if ($post_status != $temp_status) unset($statii[$temp_status]);
+
+                            foreach($statii as $status=>$str){
+                                $selected = selected($post_status, $status, false);
+                                $status_options[] = sprintf('<option value="%s" %s>%s</option>',$status,$selected,$str);
+                            }
+
+                            $status_options_str = implode("\n",$status_options);
+                            $form_action = get_permalink($this->tracklist->post_id);
+                            $form_onchange = "if(this.value !='') { this.form.submit(); }";
+                            $tracklist_links[] = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="frontend-wizard-action" value="switch-status"/></form>',$form_action,$form_onchange,$status_options_str);
+                            
+                        }
+
+                        if ( in_array($post_status,array('publish',$temp_status)) ){
+                            //share
+                            $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
+                            $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
+                            $share_text = __('Share', 'wpsstm');
+                            $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s <span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
+   
+                            //xspf
+                            $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
+                            $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
+                            $xspf_text = __('XSPF', 'wpsstm');
+                            $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
+                        }
 
                         //favorite
                         if ( $this->tracklist->post_id && current_user_can('administrator') ) { //TO FIX remove current_user_can when feature is ready

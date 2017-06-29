@@ -150,24 +150,6 @@ a.wpsstm-play-track{
     }
 }
 
-.wpsstm-tracklist-wrapper{
-    .tracklist-nav{
-        padding:.5em;
-        .tablenav-pages{
-            line-height:3em;
-        }
-        .wpsstm-tracklist-time{
-            margin-left: .5em;
-        }
-        .wpsstm-tracklist-actions{
-            font-size:0.8em;
-            a{
-                text-decoration: none;
-            }
-        }
-    }
-}
-
 .toggle-children-container{
     .wpsstm-tracklist{
         margin:0;
@@ -311,6 +293,30 @@ a.wpsstm-play-track{
                     content: "– ";
                 }
                 
+            }
+        }
+    }
+    
+    .tracklist-nav{
+        padding:.5em;
+        .tablenav-pages{
+            line-height:3em;
+        }
+        .wpsstm-tracklist-time{
+            margin-left: .5em;
+        }
+        .wpsstm-tracklist-actions{
+            font-size:0.8em;
+            > * {
+                display:inline-block;
+            }
+            a{
+                text-decoration: none;
+            }
+            form{
+                select{
+                    font-size:1em;
+                }
             }
         }
     }

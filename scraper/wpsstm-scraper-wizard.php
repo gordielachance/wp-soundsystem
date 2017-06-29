@@ -166,13 +166,21 @@ class WP_SoundSytem_Core_Wizard{
     function wizard_status_notice($content){
         global $post;
         
-        if ( get_current_user_id() != $post->post_author ) return $content;
-        if ( get_post_status($post->ID) != $this->wizard_post_status ) return $content;
         
-        $save_url = add_query_arg(array('frontend-wizard-action'=>'save'),get_permalink());
+        if ( get_post_status($post->ID) != $this->wizard_post_status ) return $content;
 
-        $save_link = sprintf('<a href="%s">%s</a>',$save_url,__('here','wpsstm'));
-        $save_text = sprintf(__('This is a tempory playlist.  If you want to save it to your account, click %s.','wpsstm'),$save_link);
+        //TO FIX hook action to delete posts after one day as specified below
+        
+        $trash_time_secs = 1440 * MINUTE_IN_SECONDS;
+        $trash_time_human = human_time_diff( 0, $trash_time_secs );
+        
+        if ( get_current_user_id() == $post->post_author ){
+            $save_text = sprintf(__('This is a tempory playlist.  Unless you change its status, it will be deleted in %s.','wpsstm'),$trash_time_human);
+        }else{
+            $auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+            $save_text = sprintf(__('This is a tempory playlist.  It will be deleted in %s.  You can login or subscribe %s if you want to save playlists to your profile.','wpsstm'),$trash_time_human,$auth_link);
+        }
+
         $notice = sprintf('<p class="wpsstm-notice wpsstm-bottom-notice">%s</p>',$save_text);
         
         return $notice . $content;
@@ -329,19 +337,29 @@ class WP_SoundSytem_Core_Wizard{
         $action = ( isset($_REQUEST['frontend-wizard-action']) ) ? $_REQUEST['frontend-wizard-action'] : null;
         
         if (!$action) return;
-        
-        wpsstm()->debug_log(json_encode(array('action'=>$action,'post_id'=>$post->ID,'user_id'=>get_current_user_id())),"frontend_wizard_action()"); 
+        if ( !$user_id = get_current_user_id() ) return;
+
+        wpsstm()->debug_log(json_encode(array('action'=>$action,'post_id'=>$post->ID,'user_id'=>$user_id)),"frontend_wizard_action()"); 
         
         switch($action){
-            case 'save':
+            case 'switch-status':
                 
                 //capability check
-                $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-                $required_cap = $post_type_obj->cap->edit_posts;
+                $post_type_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
+                
+                $can_edit_cap =     $post_type_obj->cap->edit_post;
+                $can_add =          current_user_can($can_edit_cap,$post->ID);
+                if (!$can_add) return;
+                
+                $can_publish_cap =  $post_type_obj->cap->publish_posts;
+                $can_publish =      current_user_can($can_publish_cap);
+                
+                //TO FIX validate status regarding user's caps
+                $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
 
                 $updated_post = array(
                     'ID'            => $post->ID,
-                    'post_status'   => 'pending'
+                    'post_status'   => $new_status
                 );
 
                 if ( wp_update_post( $updated_post ) ){
