@@ -243,47 +243,6 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
 }
 
 /*
-When the player has finished playing tracks, we need to move on to the previous page/post so music keeps streaming.
-//WIP TO FIX TO CHECK not working well
-*/
-
-function wpsstm_get_player_redirection($which){
-    global $wp_query;
-
-    $redirect_url = $redirect_title = null;
-
-    if ( !is_singular() ){
-        switch($which){
-            case 'previous':
-                $redirect_url = get_previous_posts_page_link();
-            break;
-            case 'next':
-                $redirect_url = get_next_posts_page_link();
-            break;
-        }
-    }else{
-        
-        $nav_post = null;
-
-        switch($which){
-            case 'previous':
-                $nav_post = get_previous_post();
-            break;
-            case 'next':
-                $nav_post = get_next_post();
-            break;
-        }
-        
-        $redirect_url = get_permalink($nav_post);
-        $redirect_title = get_the_title($nav_post);
-
-    }
-
-    return array('title'=>$redirect_title,'url'=>$redirect_url);
-    
-}
-
-/*
 Get playlist love/unlove icons.
 */
 
