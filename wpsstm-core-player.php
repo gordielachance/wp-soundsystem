@@ -63,10 +63,7 @@ class WP_SoundSytem_Core_Player{
         ?>
         <div id="wpsstm-bottom-wrapper">
             <?php
-        
-            $redirect_previous = wpsstm_get_player_redirection('previous');
-            $redirect_next = wpsstm_get_player_redirection('next');
-        
+
             //live playlist or frontend wizard
             if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
                 
@@ -133,11 +130,9 @@ class WP_SoundSytem_Core_Player{
                 </div>
                 
                 <div id="wpsstm-bottom-player-wrapper">
-                    <div id="wpsstm-player-extra-previous-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_previous['title'];?>" href="<?php echo $redirect_previous['url'];?>"><i class="fa fa-fast-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player"></div>
                     <div id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-extra-next-page" class="wpsstm-player-extra"><a title="<?php echo $redirect_next['title'];?>" href="<?php echo $redirect_next['url'];?>"><i class="fa fa-fast-forward" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></div>
                     <div id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></div>
                 </div>

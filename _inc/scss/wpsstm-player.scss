@@ -244,7 +244,7 @@
                 line-height:40px;
             }
             .wpsstm-player-extra{
-                width:calc(20% / 6); //number of extra icons
+                width:calc(20% / 4); //number of extra icons
                 text-align:center;
                 &#wpsstm-player-shuffle:not(.active){
                     @include opacity(.3);

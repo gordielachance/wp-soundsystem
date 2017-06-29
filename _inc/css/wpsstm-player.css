@@ -275,7 +275,7 @@
 }
 /* line 246, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper .wpsstm-player-extra {
-  width: calc(20% / 6);
+  width: calc(20% / 4);
   text-align: center;
 }
 /* line 249, ../scss/wpsstm-player.scss */
