@@ -430,6 +430,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             );
             
             //delete
+            //TO FIX delete action should be available only if user can delete post
             if ( $is_attached ){
                 $subtrack_actions[] = array(
                     'slug'  => 'delete',

@@ -154,11 +154,14 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 == Changelog ==
 
 = XXX =
+* remote playlist encoding fix
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)
 * new RadioKing preset
 * tracklists : new row action 'Guess MBIDs' 
 * Improved jQuery.toggleTableColums + moved in its own file
+* Abord auto_guess_mbid() for tracks when saving subtracks (too slow)
+* Improved wizard backend & frontend
 
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
@@ -188,7 +191,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 * Improved sources / autosource code
 * lastfm.js : fixed displayAuthNotices()
 * removed 'autoredirect' option
-* WP_SoundSytem_Scraper_Wizard : option to delete current cache
+* WP_SoundSytem_Core_Wizard : option to delete current cache
 * fixed ignore cache in wizard
 * bottom player : better GUI for source selection
 * if the track has 'native' sources and that they cannot play, try to autosource

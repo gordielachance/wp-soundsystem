@@ -33,6 +33,33 @@
   text-overflow: ellipsis;
 }
 
+/* line 28, ../scss/_wpsstm-shared.scss */
+.wpsstm-notice {
+  font-size: 0.8em;
+  padding: .5em;
+  background-color: #fcf8e3;
+  color: #222;
+  text-align: center;
+}
+/* line 34, ../scss/_wpsstm-shared.scss */
+.wpsstm-notice a {
+  color: #222;
+  text-decoration: underline;
+}
+/* line 39, ../scss/_wpsstm-shared.scss */
+.wpsstm-notice.active {
+  display: block;
+}
+
+/*
+Thickbox popups
+*/
+/* line 51, ../scss/_wpsstm-shared.scss */
+#TB_window #TB_ajaxContent {
+  margin: 0;
+  padding: 2em;
+}
+
 /* line 5, ../scss/wpsstm-tracklists.scss */
 [itemprop="track"] [itemprop="byArtist"] {
   font-weight: bold;
