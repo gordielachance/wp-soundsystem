@@ -462,8 +462,8 @@ class WP_SoundSytem_Core_MusicBrainz {
                 add_settings_error('wpsstm_musicbrainz', 'api_lookup', $data->get_error_message(),'inline');
                 return;
             }else{
-                update_post_meta( $post_id, $this->mb_data_meta_name, $data );
-                wpsstm()->debug_log(json_encode($data),"WP_SoundSytem_Core_MusicBrainz::update_mb_datas()" ); 
+                $success = update_post_meta( $post_id, $this->mb_data_meta_name, $data );
+                wpsstm()->debug_log($success,"WP_SoundSytem_Core_MusicBrainz::update_mb_datas()" ); 
             }
             
         }

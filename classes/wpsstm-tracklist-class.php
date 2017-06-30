@@ -105,6 +105,28 @@ class WP_SoundSytem_Tracklist{
         return $ordered_ids;
         
     }
+    
+    function append_subtrack_ids($new_ids){
+        //force array
+        if ( !is_array($new_ids) ) $new_ids = array($new_ids);
+        
+        if ( empty($new_ids) ) return false;
+        
+        $subtrack_ids = $this->get_subtracks_ids();
+        $subtrack_ids = array_merge($subtrack_ids,$new_ids);
+        return $this->set_subtrack_ids($subtrack_ids);
+    }
+    
+    function remove_subtrack_ids($remove_ids){
+        //force array
+        if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
+        
+        if ( empty($remove_ids) ) return false;
+        
+        $subtrack_ids = $this->get_subtracks_ids();
+        $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
+        return $this->set_subtrack_ids($subtrack_ids);
+    }
 
     function set_subtrack_ids($ordered_ids){
 
@@ -119,9 +141,7 @@ class WP_SoundSytem_Tracklist{
     function add($tracks){
 
         //force array
-        if ( !is_array($tracks) ){
-            $tracks = array($tracks);
-        }
+        if ( !is_array($tracks) ) $tracks = array($tracks);
 
         foreach ($tracks as $track){
 

@@ -588,6 +588,7 @@ class WP_SoundSytem_Core_Tracks{
                 $result['message'] = $track_id->get_error_message($code);
             }else{
                 $result['track_id'] = $track_id;
+                $playlist->append_subtrack_ids($track_id);
             }
             
             //once track has been added to playlists, reload them
