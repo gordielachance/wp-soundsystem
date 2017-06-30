@@ -438,29 +438,26 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
   -webkit-column-count: 2;
   column-count: 2;
 }
-/* line 404, ../scss/wpsstm-tracklists.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add {
+/* line 399, ../scss/wpsstm-tracklists.scss */
+#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li.loading {
+  pointer-events: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+/* line 407, ../scss/wpsstm-tracklists.scss */
+#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-add {
   display: none;
   margin: 1em;
   text-align: center;
 }
-/* line 409, ../scss/wpsstm-tracklists.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add input[type="text"] {
-  width: 80%;
-}
-/* line 413, ../scss/wpsstm-tracklists.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add input[type="submit"] {
-  width: 15%;
-  margin-left: 5%;
-}
-/* line 419, ../scss/wpsstm-tracklists.scss */
+/* line 416, ../scss/wpsstm-tracklists.scss */
 #wpsstm-tracklist-chooser-list.loading {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
 
-/* line 426, ../scss/wpsstm-tracklists.scss */
+/* line 423, ../scss/wpsstm-tracklists.scss */
 .wpsstm-lastfm-love-unlove-track-links {
   font-size: 1em !important;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
