@@ -53,10 +53,14 @@
 /*
 Thickbox popups
 */
-/* line 51, ../scss/_wpsstm-shared.scss */
+/* line 47, ../scss/_wpsstm-shared.scss */
+#TB_window {
+  font-family: sans-serif;
+}
+/* line 52, ../scss/_wpsstm-shared.scss */
 #TB_window #TB_ajaxContent {
   margin: 0;
-  padding: 2em;
+  padding: 1em;
 }
 
 /* line 8, ../scss/wpsstm-admin-metabox-tracklist.scss */
