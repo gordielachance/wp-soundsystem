@@ -73,7 +73,7 @@ class WP_SoundSytem_Core_Tracks{
         add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_popup_track_sources'));
         
         //ajax : add track to new tracklist
-        add_action('wp_ajax_wpsstm_add_track_to_new_tracklist', array($this,'ajax_add_track_to_new_tracklist'));
+        add_action('wp_ajax_wpsstm_create_playlist', array($this,'ajax_create_playlist'));
     }
     
     /*
@@ -522,19 +522,19 @@ class WP_SoundSytem_Core_Tracks{
         /*
         Playlists list
         */
-        $filter_playlists_input = sprintf('<input type="text" placeholder="%s" />',__('Type to filter playlists','wpsstm'));
-        $list_all = wpsstm_get_user_playlists_list();
-        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"><p>%s</p> %s</div>',$filter_playlists_input,$list_all);
-
-        $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
-
-        $submit = sprintf('<input type="submit" value="%s"/>',__('Add','wpsstm'));
-        $new_playlist_form = sprintf('<p id="wpsstm-new-playlist-add">%s%s</p>',$new_playlist_input,$submit);
         
-        $new_playlist_link = sprintf('<a id="wpsstm-new-playlist-add-toggle" href="#">+ %s</a>',__('Add New Playlist','wpsstm'));
-        $new_playlist_wrapper = sprintf('<div id="wpsstm-new-playlist-adder">%s %s</div>',$new_playlist_link,$new_playlist_form);
+        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or create a new one','wpsstm'));
+        
+        $list_all = wpsstm_get_user_playlists_list();
+        
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $labels = get_post_type_labels($post_type_obj);
+        $submit = sprintf('<input type="submit" value="%s"/>',$labels->add_new);
+        $new_playlist_bt = sprintf('<p id="wpsstm-new-playlist-add">%s</p>',$submit);
+        
+        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"%s%s%s</div>',$filter_playlists_input,$list_all,$new_playlist_bt);
 
-        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s %s %s</div>',$tracklist_table,$existing_playlists_wrapper,$new_playlist_wrapper);
+        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s%s</div>',$tracklist_table,$existing_playlists_wrapper);
         die();
     }
     
@@ -546,10 +546,10 @@ class WP_SoundSytem_Core_Tracks{
         echo $track->get_track_sources_wizard(); //TO FIX check is not redundent with metabox_sources_content()
     }
 
-    function ajax_add_track_to_new_tracklist(){
+    function ajax_create_playlist(){
         $ajax_data = wp_unslash($_POST);
         
-        wpsstm()->debug_log($ajax_data,"ajax_add_track_to_new_tracklist()"); 
+        wpsstm()->debug_log($ajax_data,"ajax_create_playlist()"); 
 
         $result = array(
             'input'     => $ajax_data,
@@ -557,12 +557,11 @@ class WP_SoundSytem_Core_Tracks{
             'success'   => false,
             'new_html'  => null
         );
-        
-        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
-        $track = new WP_SoundSystem_Track($ajax_data);
-        
+
         //create tracklist
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
+        
+        
         
         $playlist = new WP_SoundSytem_Tracklist();
         $playlist->title = $tracklist_title;
@@ -578,21 +577,6 @@ class WP_SoundSytem_Core_Tracks{
             
             $result['playlist_id'] = $tracklist_id;
             $result['success'] = true;
-            
-            //create track
-            $track = new WP_SoundSystem_Track($track_args);
-            
-            wpsstm()->debug_log($track,"ajax_add_track_to_new_tracklist()"); 
-            
-            $track_id = $track->save_track();
-            if ( is_wp_error($track_id) ){
-                $code = $track_id->get_error_code();
-                $result['message'] = $track_id->get_error_message($code);
-            }else{
-                $result['track_id'] = $track_id;
-                $playlist->append_subtrack_ids($track_id);
-            }
-            
             //once track has been added to playlists, reload them
             $result['new_html'] = wpsstm_get_user_playlists_list();
 

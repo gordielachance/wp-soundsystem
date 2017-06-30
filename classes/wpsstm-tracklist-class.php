@@ -199,7 +199,9 @@ class WP_SoundSytem_Tracklist{
     }
     
     function validate_playlist(){
-        if(!$this->title) return false;
+        if(!$this->title){
+            return new WP_Error( 'wpsstm_playlist_title_missing', __('Please enter a title for this playlist.','wpsstm') );
+        }
         return true;
     }
 
@@ -213,7 +215,12 @@ class WP_SoundSytem_Tracklist{
             return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new playlist','wpsstm') );
         }
         
-        if ( !$this->validate_playlist() ) return;
+        $validated = $this->validate_playlist();
+        if ( !$validated ){
+            return new WP_Error( 'wpsstm_track_cap_missing', __('Error while validating the playlist.','wpsstm') );
+        }elseif( is_wp_error($validated) ){
+            return $validated;
+        }
 
         $post_playlist_id = null;
         $meta_input = array();

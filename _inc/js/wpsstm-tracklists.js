@@ -78,43 +78,48 @@
     */
     
     //filter playlists
-    $(document).on("keyup", '#wpsstm-filter-playlists input[type="text"]', function(e){
+    $(document).on("keyup", '#wpsstm-playlists-filter', function(e){
         e.preventDefault();
         var playlistFilterWrapper = $(this).closest('#wpsstm-filter-playlists');
+        var playlistAddWrapper = $(playlistFilterWrapper).find('#wpsstm-new-playlist-add');
         var value = $(this).val().toLowerCase();
         var li_items = playlistFilterWrapper.find('ul li');
         
+        var has_results = false;
         $(li_items).each(function() {
             if ($(this).text().toLowerCase().search(value) > -1) {
                 $(this).show();
+                has_results = true;
             }
             else {
                 $(this).hide();
             }
         });
         
+        if (has_results){
+            playlistAddWrapper.hide();
+        }else{
+            playlistAddWrapper.show();
+        }
+
     });
-    
-    //show playlist adder
-    $(document).on("click", '#wpsstm-new-playlist-adder a', function(e){
-        e.preventDefault();
-        var popupContent = $(this).parents('.wpsstm-popup-content');
-        var playlistAddWrapper = $(popupContent).find('#wpsstm-new-playlist-add');
-        $(playlistAddWrapper).toggle();
-        
-        //scroll to it
-        //TO FIX NOT WORKING
-        $(popupContent).scrollTop( $(playlistAddWrapper).offset().top ); 
-    });
-    
+
     //create new playlist
-    $(document).on("click", '#wpsstm-new-playlist-adder input[type="submit"]', function(e){
+    $(document).on("click", '#wpsstm-new-playlist-add input[type="submit"]', function(e){
         e.preventDefault();
-        var popupContent = $(this).parents('.wpsstm-popup-content');
-        var playlistAddWrapper = $(popupContent).find('#wpsstm-new-playlist-add');
-        var newPlaylistTitle = $(playlistAddWrapper).find('input[type="text"]').val();
+        var popupContent =              $(this).closest('.wpsstm-popup-content');
+        var playlistFilterWrapper =     $(popupContent).find('#wpsstm-filter-playlists');
+        var existingPlaylists_el =      $(playlistFilterWrapper).find('ul');
+        var newPlaylistTitle_el =       $(playlistFilterWrapper).find('#wpsstm-playlists-filter');
+        var newPlaylistTitle =          newPlaylistTitle_el.val();
         
-        if (!newPlaylistTitle) return;
+        var playlistAddWrapper = $(playlistFilterWrapper).find('#wpsstm-new-playlist-add');
+        
+
+        
+        if (!newPlaylistTitle){
+            $(newPlaylistTitle_el).focus();
+        }
         
         //get track obj from HTML
         var track_html = $(popupContent).find('[itemprop="track"]').first();
@@ -123,7 +128,7 @@
         console.log(track_obj);
 
         var ajax_data = {
-            action:         'wpsstm_add_track_to_new_tracklist',
+            action:         'wpsstm_create_playlist',
             track:          track_obj.build_request_obj(),
             playlist_title: newPlaylistTitle,
         };
@@ -142,7 +147,10 @@
                 if (data.success === false) {
                     console.log(data);
                 }else if(data.new_html) {
-                    popupContent.find('ul').replaceWith(data.new_html);
+                    
+                    $(existingPlaylists_el).remove();
+                    $(data.new_html).insertBefore(playlistAddWrapper);
+                    $( "#wpsstm-playlists-filter" ).trigger("keyup");
                     $(playlistAddWrapper).toggle();
                 }
             },
@@ -150,8 +158,7 @@
                 $(popupContent).removeClass('loading');
             }
         })
-        
-        
+
     });
     
 })(jQuery);

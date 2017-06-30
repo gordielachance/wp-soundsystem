@@ -400,22 +400,15 @@ a.wpsstm-play-track{
         }
     }
 
-    #wpsstm-new-playlist-adder{
-        #wpsstm-new-playlist-add{
-            display:none;
-            margin: 1em;
-            text-align: center;
+    #wpsstm-new-playlist-add{
+        display:none;
+        margin: 1em;
+        text-align: center;
 
-            input[type="text"]{
-                width: 80%;
-            }
-
-            input[type="submit"]{
-                width: 15%;
-                margin-left: 5%;
-            } 
-        }
+        input[type="submit"]{
+        } 
     }
+
     &.loading{
         pointer-events: none;
         @include opacity(.5);
