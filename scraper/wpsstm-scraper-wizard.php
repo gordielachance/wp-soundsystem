@@ -1154,7 +1154,7 @@ class WP_SoundSytem_Core_Wizard{
     }
     
     function feedback_tracklist_callback(){
-        echo $this->tracklist->get_tracklist_table();
+        echo $this->tracklist->get_tracklist_table(array('can_play'=>false));
     }
 
     function cache_callback(){

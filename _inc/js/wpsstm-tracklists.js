@@ -51,7 +51,30 @@
     });
     
     /*
-    Playlists manager popup
+    Single Track
+    */
+    
+    //click on source link
+    $(document).on( "click",'[itemprop="track"].active .wpsstm-player-sources-list li', function(e) {
+        e.preventDefault();
+
+        var track_el = $(this).closest('[itemprop="track"]');
+        
+        var tracklist_el = track_el.closest('[data-wpsstm-tracklist-idx]');
+        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+        var track_idx = track_el.attr('data-wpsstm-track-idx');
+        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+        
+        var source_el = $(this).closest('li');
+        var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
+        var source_obj = track_obj.get_track_source(source_idx);
+        source_obj.select_player_source();
+        
+
+    });
+    
+    /*
+    Single Track Playlists manager popup
     */
     
     //filter playlists

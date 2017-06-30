@@ -9,22 +9,33 @@ class WP_SoundSytem_Tracklist_Table{
     var $curr_track_idx = null;
     
     var $no_items_label = null;
-    var $can_player = true;
-    var $sources_db_only = true;
+    
+    //options
+    var $can_play;
+    var $sources_db_only;
 
-    function __construct($tracklist){
+    function __construct($tracklist,$args = null){
         global $page;
         
+        $defaults = array(
+            'can_play'          => true,
+            'sources_db_only'   => true,
+        );
+        $args = wp_parse_args((array)$args,$defaults);
+
+        foreach($defaults as $slug=>$default_value){
+            $this->$slug = $args[$slug];
+        }
+
+        //can play
+        if ( wpsstm()->get_options('player_enabled') !== 'on' ){
+            $this->can_play = false;
+        }
+
         $this->tracklist = $tracklist;
         
         $this->no_items_label = __( 'No tracks found.','wpsstm');
 
-        $this->can_player = ( !wpsstm_is_backend() && wpsstm()->get_options('player_enabled') == 'on' );
-        
-        if ($this->can_player){
-            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
-        }
-        
     }
     
     function prepare_items() {
@@ -96,7 +107,9 @@ class WP_SoundSytem_Tracklist_Table{
         if ( !$this->show_property_column('image') ) unset($columns['trackitem_image']);
         if ( !$this->show_property_column('album') ) unset($columns['trackitem_album']);
 
-        if ( !$this->can_player ) unset($columns['trackitem_play_bt']);
+        if ( !$this->can_play ){
+            unset($columns['trackitem_play_bt']);
+        }
         
         if ( !current_user_can('administrator') || wpsstm_is_backend() ) unset($columns['trackitem_actions']); //TO FIX remove this condition when feature ready
 
@@ -149,11 +162,15 @@ class WP_SoundSytem_Tracklist_Table{
 	 * @access public
 	 */
 	public function display() {
+        
         $classes = array(
             'wpsstm-tracklist'
         );
         
-        if ($this->can_player) $classes[] = 'wpsstm-playable-tracklist';
+        if ($this->can_play){
+            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+            $classes[] = 'wpsstm-playable-tracklist';
+        }
         
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),

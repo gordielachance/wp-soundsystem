@@ -517,7 +517,7 @@ class WP_SoundSytem_Core_Tracks{
         $tracks = array($track);
         $tracklist = new WP_SoundSytem_Tracklist( $atts['post_id'] );
         $tracklist->add($tracks);
-        $tracklist_table = $tracklist->get_tracklist_table();
+        $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
 
         /*
         Playlists list
