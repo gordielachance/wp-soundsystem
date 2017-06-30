@@ -67,10 +67,13 @@ class WP_SoundSytem_Core_Tracks{
         add_action('wp_ajax_nopriv_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
         
         //ajax : playlist selector
-        add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_track_playlists_selector'));
+        add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_popup_track_playlists'));
         
         //ajax : sources manager
-        add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_track_sources_manager'));
+        add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_popup_track_sources'));
+        
+        //ajax : add track to new tracklist
+        add_action('wp_ajax_wpsstm_add_track_to_new_tracklist', array($this,'ajax_add_track_to_new_tracklist'));
     }
     
     /*
@@ -450,12 +453,7 @@ class WP_SoundSytem_Core_Tracks{
 
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
-        $track_args = $result['track_args'] = array(
-            'post_id'   => ( isset($ajax_data['track']['post_id']) ) ?  $ajax_data['track']['post_id'] : null,
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
+        $track_args = $result['track_args'] = $ajax_data['track'];
 
         $track = $result['track'] = new WP_SoundSystem_Track($track_args);
         
@@ -507,39 +505,99 @@ class WP_SoundSytem_Core_Tracks{
 
     }
     
-    function ajax_track_playlists_selector(){
-        $li_els = array();
+    function ajax_popup_track_playlists(){
 
-        if ( $playlist_ids = wpsstm_get_playlists_ids_for_author($user_id) ){
-            foreach($playlist_ids as $playlist_id){
-                $title = get_the_title($playlist_id);
-                $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$title);
-            }
-        }
+        /*
+        Track block
+        */
+        
+        $ajax_data = $_REQUEST;
+        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $track = new WP_SoundSystem_Track($track_args);
+        $tracks = array($track);
+        $tracklist = new WP_SoundSytem_Tracklist( $atts['post_id'] );
+        $tracklist->add($tracks);
+        $tracklist_table = $tracklist->get_tracklist_table();
 
-        if (!$li_els) return;
+        /*
+        Playlists list
+        */
+        $list_all = wpsstm_get_user_playlists_list();
 
         $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
 
-        $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
-        $submit = sprintf('<input type="submit" value="%s" />',__('Add','wpsstm'));
-        $footer = sprintf('<footer>%s%s</footer>',$new_playlist_input,$submit);
+        $submit = sprintf('<input type="submit" value="%s"/>',__('Add','wpsstm'));
+        $new_playlist_form = sprintf('<p id="wpsstm-new-playlist-add">%s%s</p>',$new_playlist_input,$submit);
+        
+        $new_playlist_link = sprintf('<a id="wpsstm-new-playlist-add-toggle" href="#">+ %s</a>',__('Add New Playlist','wpsstm'));
+        $new_playlist_wrapper = sprintf('<div id="wpsstm-new-playlist-adder">%s %s</div>',$new_playlist_link,$new_playlist_form);
 
-        echo printf('<div class="wpsstm-tracklist-chooser-list">%s %s</div>',$list,$footer);
+        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s %s %s</div>',$tracklist_table,$list_all,$new_playlist_wrapper);
+        die();
     }
     
-    function ajax_track_sources_manager(){
-        $ajax_data = $_REQUEST;
-        
-        $track_args = array(
-            'post_id'   => ( isset($ajax_data['track']['post_id']) ) ?  $ajax_data['track']['post_id'] : null,
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
-
+    function ajax_popup_track_sources(){
+        $ajax_data = wp_unslash($_REQUEST);
+        $track_args = $ajax_data['track'];
         $track = new WP_SoundSystem_Track($track_args);
+        
         echo $track->get_track_sources_wizard(); //TO FIX check is not redundent with metabox_sources_content()
+    }
+
+    function ajax_add_track_to_new_tracklist(){
+        $ajax_data = wp_unslash($_POST);
+        
+        wpsstm()->debug_log($ajax_data,"ajax_add_track_to_new_tracklist()"); 
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false,
+            'new_html'  => null
+        );
+        
+        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $track = new WP_SoundSystem_Track($ajax_data);
+        
+        //create tracklist
+        $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
+        
+        $playlist = new WP_SoundSytem_Tracklist();
+        $playlist->title = $tracklist_title;
+        
+        $tracklist_id = $playlist->save_playlist();
+        
+        if ( is_wp_error($tracklist_id) ){
+            
+            $code = $tracklist_id->get_error_code();
+            $result['message'] = $tracklist_id->get_error_message($code);
+            
+        }else{
+            
+            $result['playlist_id'] = $tracklist_id;
+            $result['success'] = true;
+            
+            //create track
+            $track = new WP_SoundSystem_Track($track_args);
+            
+            wpsstm()->debug_log($track,"ajax_add_track_to_new_tracklist()"); 
+            
+            $track_id = $track->save_track();
+            if ( is_wp_error($track_id) ){
+                $code = $track_id->get_error_code();
+                $result['message'] = $track_id->get_error_message($code);
+            }else{
+                $result['track_id'] = $track_id;
+            }
+            
+            //once track has been added to playlists, reload them
+            $result['new_html'] = wpsstm_get_user_playlists_list();
+
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+        
     }
     
 }

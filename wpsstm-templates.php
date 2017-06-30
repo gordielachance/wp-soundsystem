@@ -317,6 +317,8 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
     //get user playlists
     $default = array(
         'posts_per_page'    => -1,
+        'orderby'=>'title',
+        'order'=>'ASC'
     );
     
     $args = wp_parse_args((array)$args,$default);
@@ -367,4 +369,29 @@ function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = 
 
     printf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
     
+}
+
+function wpsstm_get_user_playlists_list($args = null,$user_id = false){
+
+    if(!$user_id) $user_id = get_current_user_id();
+    if(!$user_id) return false;
+
+    $list = null;
+    $li_els = array();
+    
+    $defaults = array(
+        'post_status' =>    array('publish','pending','draft'),
+        'posts_per_page'    -1
+    );
+    $args = wp_parse_args($args,$defaults);
+
+    if ( $playlists_ids = wpsstm_get_playlists_ids_for_author($user_id,$args) ){
+        foreach($playlists_ids as $playlist_id){
+            $li_title = ( $title = get_the_title($playlist_id) ) ? $title : __('(no title)');
+            $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$li_title);
+        }
+        $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
+    }
+
+    return $list;
 }

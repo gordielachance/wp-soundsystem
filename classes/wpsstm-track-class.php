@@ -6,10 +6,12 @@ class WP_SoundSystem_Track{
     public $title;
     public $artist;
     public $album;
+    public $duration; //in seconds
+    public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
+    
     public $image;
     public $location;
-    public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
-    public $duration; //in seconds
+
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
 
     function __construct( $args = array() ){
@@ -158,6 +160,14 @@ class WP_SoundSystem_Track{
     }
 
     function save_track(){
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $required_cap = $post_type_obj->cap->edit_posts;
+
+        if ( !current_user_can($required_cap) ){
+            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new track','wpsstm') );
+        }
         
         if ( !$this->validate_track() ) return;
 
@@ -501,7 +511,6 @@ class WP_SoundSystem_Track{
             return update_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey, $sources );
         }
     }
-
 }
 
 /**

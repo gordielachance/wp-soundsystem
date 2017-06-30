@@ -50,6 +50,69 @@
         
     });
     
+    /*
+    Playlists manager popup
+    */
+    
+    //show playlist adder
+    $(document).on("click", '#wpsstm-new-playlist-adder a', function(e){
+        e.preventDefault();
+        var popupContent = $(this).parents('.wpsstm-popup-content');
+        var playlistAddWrapper = $(popupContent).find('#wpsstm-new-playlist-add');
+        $(playlistAddWrapper).toggle();
+        
+        //scroll to it
+        //TO FIX NOT WORKING
+        $(popupContent).scrollTop( $(playlistAddWrapper).offset().top ); 
+    });
+    
+    //create new playlist
+    $(document).on("click", '#wpsstm-new-playlist-adder input[type="submit"]', function(e){
+        e.preventDefault();
+        var popupContent = $(this).parents('.wpsstm-popup-content');
+        var playlistAddWrapper = $(popupContent).find('#wpsstm-new-playlist-add');
+        var newPlaylistTitle = $(playlistAddWrapper).find('input[type="text"]').val();
+        
+        if (!newPlaylistTitle) return;
+        
+        //get track obj from HTML
+        var track_html = $(popupContent).find('[itemprop="track"]').first();
+        var track_obj = new WpsstmTrack(track_html);
+        
+        console.log(track_obj);
+
+        var ajax_data = {
+            action:         'wpsstm_add_track_to_new_tracklist',
+            track:          track_obj.build_request_obj(),
+            playlist_title: newPlaylistTitle,
+        };
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(popupContent).addClass('loading');
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success === false) {
+                    console.log(data);
+                }else if(data.new_html) {
+                    popupContent.find('ul').replaceWith(data.new_html);
+                    $(playlistAddWrapper).toggle();
+                }
+            },
+            complete: function() {
+                $(popupContent).removeClass('loading');
+            }
+        })
+        
+        
+    });
+    
 })(jQuery);
 
 /*

@@ -266,32 +266,6 @@ class WpsstmTracklist {
             }
 
         });
-        
-        /*
-        Track : playlists popup
-        */
-        self.tracklist_el.find('[itemprop="track"] .wpsstm-tracklist-chooser input[type="submit"]').click(function(e) {
-            var popup_el = $(this).closest('.wpsstm-tracklist-chooser');
-            popup_el.addClass('loading');
-            e.preventDefault();
-            
-            var tracklist_ids = [];
-            var checkboxes = popup_el.find('input[type="checkbox"]:checked');
-            
-            $.each(checkboxes, function( index, box ) {
-                tracklist_ids.push($(box).val());
-            });
-            
-            var ajax_data = {
-                action:         'wpsstm_append_track',
-                tracklist_ids:  tracklist_ids,
-                new_tracklist:  popup_el.find('footer input[type="text"]').val(),
-            };
-            
-            console.log(ajax_data);
-            
-            
-        });
 
         /*
         Tracklist actions
@@ -747,17 +721,10 @@ class WpsstmTrack {
         
         var link_wrappers = track_instances.find('.wpsstm-track-action-love-unlove');
 
-        var track = {
-            artist:     self.artist,
-            title:      self.title,
-            album:      self.album,
-            post_id:    self.post_id
-        }
-
         var ajax_data = {
             action:         'wpsstm_love_unlove_track',
             do_love:        do_love,
-            track:          track
+            track:          self.build_request_obj()
         };
 
         return $.ajax({
@@ -1083,6 +1050,21 @@ class WpsstmTrack {
 
     }
     
+    /*
+    Convert the track to an object (for ajax requests, etc)
+    */
+    build_request_obj(){
+        var self = this;
+        var track_obj = {
+            artist:     self.artist,
+            title:      self.title,
+            album:      self.album,
+            post_id:    self.post_id,
+            mbid:       self.mbid
+        }
+        return track_obj;
+    }
+    
     get_track_sources_request() {
 
         var self = this;
@@ -1092,17 +1074,11 @@ class WpsstmTrack {
         
         var deferredObject = $.Deferred();
 
-        var track = {
-            artist: self.artist,
-            title:  self.title,
-            album:  self.album
-        }
-        
         //self.debug("get_track_sources_request()");
 
         var ajax_data = {
             'action':           'wpsstm_player_get_track_sources_auto',
-            'track':            track
+            'track':            self.build_request_obj()
         };
         
         self.sources_request = $.ajax({

@@ -178,6 +178,74 @@ class WP_SoundSytem_Tracklist{
         return array_filter($export);
     }
     
+    function validate_playlist(){
+        if(!$this->title) return false;
+        return true;
+    }
+
+    function save_playlist(){
+
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $required_cap = $post_type_obj->cap->edit_posts;
+
+        if ( !current_user_can($required_cap) ){
+            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new playlist','wpsstm') );
+        }
+        
+        if ( !$this->validate_playlist() ) return;
+
+        $post_playlist_id = null;
+        $meta_input = array();
+        
+        /*
+        $meta_input = array(
+            wpsstm_artists()->metakey           => $this->artist,
+            wpsstm_tracks()->metakey            => $this->title,
+            wpsstm_albums()->metakey            => $this->album,
+            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
+            //sources is more specific, will be saved below
+        );
+        */
+
+        $meta_input = array_filter($meta_input);
+        $post_playlist_args = array('meta_input' => $meta_input);
+
+        if (!$this->post_id){ //not a playlist update
+
+            $post_playlist_new_args = array(
+                'post_type'     => wpsstm()->post_type_playlist,
+                'post_status'   => 'draft',
+                'post_author'   => get_current_user_id(),
+                'post_title'    => $this->title,
+            );
+
+            $post_playlist_new_args = wp_parse_args($post_playlist_new_args,$post_playlist_args);
+
+            $post_playlist_id = wp_insert_post( $post_playlist_new_args );
+            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WP_SoundSystem_Tracklist::save_playlist() - post playlist inserted"); 
+
+        }else{ //is a track update
+            
+            $post_playlist_update_args = array(
+                'ID'            => $this->post_id
+            );
+            
+            $post_playlist_update_args = wp_parse_args($post_playlist_update_args,$post_playlist_args);
+            
+            $post_playlist_id = wp_update_post( $post_playlist_update_args );
+            
+            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WP_SoundSystem_Tracklist::save_playlist() - post track updated"); 
+        }
+
+        if ( is_wp_error($post_playlist_id) ) return $post_playlist_id;
+
+        $this->post_id = $post_playlist_id;
+
+        return $this->post_id;
+        
+    }
+    
     function save_subtracks(){
         
         do_action('wpsstm_save_subtracks',$this); //this will allow to detect if we're saving a single track or several tracks using did_action().

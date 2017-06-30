@@ -45,11 +45,12 @@
 Thickbox popups
 */
 #TB_window{
+    font-family:sans-serif;
     #TB_ajaxWindowTitle{
         
     }
     #TB_ajaxContent{
         margin: 0;
-        padding: 2em;
+        padding: 1em;
     }
 }
