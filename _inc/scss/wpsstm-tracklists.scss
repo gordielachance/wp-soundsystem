@@ -388,9 +388,18 @@ a.wpsstm-play-track{
 }
 
 #wpsstm-tracklist-chooser-list{ //popup
-    ul{
-        list-style: none;
+    #wpsstm-filter-playlists{
+        position:relative;
+        ul{
+            font-size:.8em;
+            list-style: none;
+            @include column-count(2);
+            li{
+                @extend .ellipsis;
+            }
+        }
     }
+
     #wpsstm-new-playlist-adder{
         #wpsstm-new-playlist-add{
             display:none;

@@ -54,6 +54,24 @@
     Playlists manager popup
     */
     
+    //filter playlists
+    $(document).on("keyup", '#wpsstm-filter-playlists input[type="text"]', function(e){
+        e.preventDefault();
+        var playlistFilterWrapper = $(this).closest('#wpsstm-filter-playlists');
+        var value = $(this).val().toLowerCase();
+        var li_items = playlistFilterWrapper.find('ul li');
+        
+        $(li_items).each(function() {
+            if ($(this).text().toLowerCase().search(value) > -1) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
+        
+    });
+    
     //show playlist adder
     $(document).on("click", '#wpsstm-new-playlist-adder a', function(e){
         e.preventDefault();

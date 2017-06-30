@@ -24,7 +24,7 @@
 }
 
 /* line 23, ../scss/_wpsstm-shared.scss */
-.ellipsis {
+.ellipsis, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li {
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -427,32 +427,40 @@ a.wpsstm-play-track .wpsstm-player-icon.wpsstm-player-icon-play {
 }
 
 /* line 391, ../scss/wpsstm-tracklists.scss */
-#wpsstm-tracklist-chooser-list ul {
-  list-style: none;
+#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists {
+  position: relative;
 }
-/* line 395, ../scss/wpsstm-tracklists.scss */
+/* line 393, ../scss/wpsstm-tracklists.scss */
+#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul {
+  font-size: .8em;
+  list-style: none;
+  -moz-column-count: 2;
+  -webkit-column-count: 2;
+  column-count: 2;
+}
+/* line 404, ../scss/wpsstm-tracklists.scss */
 #wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add {
   display: none;
   margin: 1em;
   text-align: center;
 }
-/* line 400, ../scss/wpsstm-tracklists.scss */
+/* line 409, ../scss/wpsstm-tracklists.scss */
 #wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add input[type="text"] {
   width: 80%;
 }
-/* line 404, ../scss/wpsstm-tracklists.scss */
+/* line 413, ../scss/wpsstm-tracklists.scss */
 #wpsstm-tracklist-chooser-list #wpsstm-new-playlist-adder #wpsstm-new-playlist-add input[type="submit"] {
   width: 15%;
   margin-left: 5%;
 }
-/* line 410, ../scss/wpsstm-tracklists.scss */
+/* line 419, ../scss/wpsstm-tracklists.scss */
 #wpsstm-tracklist-chooser-list.loading {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
 
-/* line 417, ../scss/wpsstm-tracklists.scss */
+/* line 426, ../scss/wpsstm-tracklists.scss */
 .wpsstm-lastfm-love-unlove-track-links {
   font-size: 1em !important;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);

@@ -522,7 +522,9 @@ class WP_SoundSytem_Core_Tracks{
         /*
         Playlists list
         */
+        $filter_playlists_input = sprintf('<input type="text" placeholder="%s" />',__('Type to filter playlists','wpsstm'));
         $list_all = wpsstm_get_user_playlists_list();
+        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"><p>%s</p> %s</div>',$filter_playlists_input,$list_all);
 
         $new_playlist_input = sprintf('<input type="text" placeholder="%s" />',__('New playlist','wpsstm'));
 
@@ -532,7 +534,7 @@ class WP_SoundSytem_Core_Tracks{
         $new_playlist_link = sprintf('<a id="wpsstm-new-playlist-add-toggle" href="#">+ %s</a>',__('Add New Playlist','wpsstm'));
         $new_playlist_wrapper = sprintf('<div id="wpsstm-new-playlist-adder">%s %s</div>',$new_playlist_link,$new_playlist_form);
 
-        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s %s %s</div>',$tracklist_table,$list_all,$new_playlist_wrapper);
+        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s %s %s</div>',$tracklist_table,$existing_playlists_wrapper,$new_playlist_wrapper);
         die();
     }
     
