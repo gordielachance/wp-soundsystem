@@ -602,6 +602,25 @@ class WP_SoundSytem_Core_Tracks{
             'new_html'  => null
         );
         
+        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
+
+        //create|get subtrack
+        $track_args['tracklist_id'] = $playlist_id;
+        $subtrack = new WP_SoundSystem_Subtrack($track_args);
+        
+        wpsstm()->debug_log($subtrack,"ajax_add_playlist_track()");
+        
+        $track_id = $subtrack->save_track();
+
+        if ( is_wp_error($track_id) ){
+            $code = $track_id->get_error_code();
+            $result['message'] = $track_id->get_error_message($code);
+        }else{
+            $result['success'] = true;
+            $result['track_id'] = $track_id;
+        }
+        
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
@@ -617,6 +636,19 @@ class WP_SoundSytem_Core_Tracks{
             'success'   => false,
             'new_html'  => null
         );
+        
+        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
+        
+        //create|get subtrack
+        $track_args['tracklist_id'] = $playlist_id;
+        $subtrack = new WP_SoundSystem_Subtrack($track_args);
+        
+        wpsstm()->debug_log($subtrack,"ajax_remove_playlist_track()");
+        
+        if ( $success = $subtrack->remove_subtrack() ){
+            $result['success'] = true;
+        }
         
         header('Content-type: application/json');
         wp_send_json( $result ); 

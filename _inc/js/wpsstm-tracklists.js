@@ -164,8 +164,8 @@
         var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
 
         //get track obj from HTML
-        var track_html = $(popupContent).find('[itemprop="track"]').first();
-        var track_obj = new WpsstmTrack(track_html);
+        var track_el = $(popupContent).find('[itemprop="track"]').first();
+        var track_obj = new WpsstmTrack(track_el);
 
         var ajax_data = {
             action:         (is_checked ? 'wpsstm_add_playlist_track' : 'wpsstm_remove_playlist_track'),
@@ -183,20 +183,19 @@
                 $(li_el).addClass('loading');
             },
             success: function(data){
-                console.log(data);
                 if (data.success === false) {
                     console.log(data);
+                    checkbox.prop("checked", !checkbox.prop("checked")); //restore previous state
                 }else if(data.success) {
-                    checkbox.prop("checked", !checkBoxes.prop("checked"));
+                    //TO FIX replace whole track el ?
+                    $(track_el).attr('data-wpsstm-track-id',data.track_id); //set returned track ID (useful if track didn't exist before)
                 }
             },
             complete: function() {
                 $(li_el).removeClass('loading');
             }
         })
-        
-        
-        
+
     });
     
     

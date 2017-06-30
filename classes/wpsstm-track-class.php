@@ -555,11 +555,12 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         
         //save tracklist
         $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
-        $tracklist->append_subtrack_ids($track_id);
-
-        //return track ID to match parent::save_track;
-        return $track_id; 
         
+        //return track ID to match parent::save_track;
+        if ( $tracklist->append_subtrack_ids($track_id) ){
+            return $track_id; 
+        }
+
     }
 
     function remove_subtrack(){
@@ -568,7 +569,7 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         
         //get current subtrack IDs
         $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
-        return remove_subtrack_ids($this->post_id);
+        return $tracklist->remove_subtrack_ids($this->post_id);
     }
 
 }
