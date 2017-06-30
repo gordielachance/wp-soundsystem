@@ -107,7 +107,8 @@
     //create new playlist
     $(document).on("click", '#wpsstm-new-playlist-add input[type="submit"]', function(e){
         e.preventDefault();
-        var popupContent =              $(this).closest('.wpsstm-popup-content');
+        var bt =                        $(this);
+        var popupContent =              $(bt).closest('.wpsstm-popup-content');
         var playlistFilterWrapper =     $(popupContent).find('#wpsstm-filter-playlists');
         var existingPlaylists_el =      $(playlistFilterWrapper).find('ul');
         var newPlaylistTitle_el =       $(playlistFilterWrapper).find('#wpsstm-playlists-filter');
@@ -120,16 +121,9 @@
         if (!newPlaylistTitle){
             $(newPlaylistTitle_el).focus();
         }
-        
-        //get track obj from HTML
-        var track_html = $(popupContent).find('[itemprop="track"]').first();
-        var track_obj = new WpsstmTrack(track_html);
-        
-        console.log(track_obj);
 
         var ajax_data = {
             action:         'wpsstm_create_playlist',
-            track:          track_obj.build_request_obj(),
             playlist_title: newPlaylistTitle,
         };
 
@@ -143,7 +137,6 @@
                 $(popupContent).addClass('loading');
             },
             success: function(data){
-                console.log(data);
                 if (data.success === false) {
                     console.log(data);
                 }else if(data.new_html) {
@@ -160,6 +153,52 @@
         })
 
     });
+    
+    //attach to playlist
+    $(document).on("click", '#wpsstm-filter-playlists ul li input[type="checkbox"]', function(e){
+        
+        var checkbox =      $(this);
+        var is_checked =    $(checkbox).is(':checked');
+        var playlist_id =   $(this).val();
+        var li_el =         $(checkbox).closest('li');
+        var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
+
+        //get track obj from HTML
+        var track_html = $(popupContent).find('[itemprop="track"]').first();
+        var track_obj = new WpsstmTrack(track_html);
+
+        var ajax_data = {
+            action:         (is_checked ? 'wpsstm_add_playlist_track' : 'wpsstm_remove_playlist_track'),
+            track:          track_obj.build_request_obj(),
+            playlist_id:    playlist_id,
+        };
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(li_el).addClass('loading');
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success === false) {
+                    console.log(data);
+                }else if(data.success) {
+                    checkbox.prop("checked", !checkBoxes.prop("checked"));
+                }
+            },
+            complete: function() {
+                $(li_el).removeClass('loading');
+            }
+        })
+        
+        
+        
+    });
+    
     
 })(jQuery);
 

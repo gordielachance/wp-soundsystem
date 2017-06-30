@@ -396,6 +396,10 @@ a.wpsstm-play-track{
             @include column-count(2);
             li{
                 @extend .ellipsis;
+                &.loading{
+                    pointer-events: none;
+                    @include opacity(.5);
+                }
             }
         }
     }

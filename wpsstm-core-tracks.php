@@ -72,8 +72,14 @@ class WP_SoundSytem_Core_Tracks{
         //ajax : sources manager
         add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_popup_track_sources'));
         
-        //ajax : add track to new tracklist
+        //ajax : add new tracklist
         add_action('wp_ajax_wpsstm_create_playlist', array($this,'ajax_create_playlist'));
+        
+        //ajax : add/remove playlist track
+        add_action('wp_ajax_wpsstm_add_playlist_track', array($this,'ajax_add_playlist_track'));
+        add_action('wp_ajax_wpsstm_remove_playlist_track', array($this,'ajax_remove_playlist_track'));
+        
+        
     }
     
     /*
@@ -560,9 +566,7 @@ class WP_SoundSytem_Core_Tracks{
 
         //create tracklist
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
-        
-        
-        
+
         $playlist = new WP_SoundSytem_Tracklist();
         $playlist->title = $tracklist_title;
         
@@ -577,7 +581,6 @@ class WP_SoundSytem_Core_Tracks{
             
             $result['playlist_id'] = $tracklist_id;
             $result['success'] = true;
-            //once track has been added to playlists, reload them
             $result['new_html'] = wpsstm_get_user_playlists_list();
 
         }
@@ -585,6 +588,38 @@ class WP_SoundSytem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
         
+    }
+    
+    function ajax_add_playlist_track(){
+        $ajax_data = wp_unslash($_POST);
+        
+        wpsstm()->debug_log($ajax_data,"ajax_create_playlist()"); 
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false,
+            'new_html'  => null
+        );
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_remove_playlist_track(){
+        $ajax_data = wp_unslash($_POST);
+        
+        wpsstm()->debug_log($ajax_data,"ajax_create_playlist()"); 
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false,
+            'new_html'  => null
+        );
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
 }
