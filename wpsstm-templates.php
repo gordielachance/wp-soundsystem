@@ -388,7 +388,35 @@ function wpsstm_get_user_playlists_list($args = null,$user_id = false){
     if ( $playlists_ids = wpsstm_get_playlists_ids_for_author($user_id,$args) ){
         foreach($playlists_ids as $playlist_id){
             $li_title = ( $title = get_the_title($playlist_id) ) ? $title : __('(no title)');
-            $li_els[] = sprintf('<li><input type="checkbox" value="%s" /> <label>%s</label></li>',$playlist_id,$li_title);
+            $status = get_post_status($playlist_id);
+            $li_classes = array($status);
+            $attr['id'] = sprintf('wpsstm-playlist-%s',$playlist_id);
+            $attr['classes'] = implode(' ',$li_classes);
+            
+            foreach ($attr as $key=>$value){
+                $attr_str.=sprintf(' %s="%s"',$key,$value);
+            }
+            
+            
+            $status_str = '';
+            switch ( $status ) {
+                case 'publish' :
+                    break;
+                case 'private' :
+                    $status_str = __('Private');
+                    break;
+                case 'future' :
+                    $status_str = __('Scheduled');
+                    break;
+                case 'pending' :
+                    $status_str = __('Pending Review');
+                    break;
+                case 'draft' :
+                    $status_str = __('Draft');
+                    break;
+            }
+            $status_str = ($status_str) ? sprintf(' <strong>— %s</strong>',$status_str) : null;
+            $li_els[] = sprintf('<li %s><input type="checkbox" value="%s" /> <label>%s%s</label></li>',$attr_str,$playlist_id,$li_title,$status_str);
         }
         $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
     }
