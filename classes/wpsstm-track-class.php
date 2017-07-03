@@ -27,8 +27,6 @@ class WP_SoundSystem_Track{
                 $this->mbid = wpsstm_get_post_mbid($track_id);
                 $this->sources = wpsstm_get_post_sources($track_id);
             }
-        }elseif ( $this->artist && $this->title ){ //no track ID, try to auto-guess
-            $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
         }
 
         $args_default = $this->get_default();
@@ -39,6 +37,12 @@ class WP_SoundSystem_Track{
             if ( !array_key_exists($key,$args_default) ) continue;
             if ( !isset($args[$key]) ) continue; //value has not been set
             $this->$key = $args[$key];
+        }
+        
+        //no track ID, try to auto-guess
+        //TO FIX this should be an extra function ?
+        if ( !$this->post_id && $this->artist && $this->title ){
+            $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
         }
 
     }

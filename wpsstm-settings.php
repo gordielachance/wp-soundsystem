@@ -545,6 +545,7 @@ class WP_SoundSytem_Settings {
     
     function autosource_filter_ban_words_callback(){
 
+        $desc = array();
         $desc[]= sprintf(
             '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when one of those words is contained in its title","wpsstm")
         );

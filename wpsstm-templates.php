@@ -11,6 +11,7 @@ function wpsstm_get_classes_attr($classes){
 
 //https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
 function wpsstm_get_html_attr($array){
+    $array = (array)$array;
     $str = join(' ', array_map(function($key) use ($array){
        if(is_bool($array[$key])){
           return $array[$key]?$key:'';
@@ -393,11 +394,8 @@ function wpsstm_get_user_playlists_list($args = null,$user_id = false){
             $attr['id'] = sprintf('wpsstm-playlist-%s',$playlist_id);
             $attr['classes'] = implode(' ',$li_classes);
             
-            foreach ($attr as $key=>$value){
-                $attr_str.=sprintf(' %s="%s"',$key,$value);
-            }
-            
-            
+            $attr_str = wpsstm_get_html_attr($attr);
+
             $status_str = '';
             switch ( $status ) {
                 case 'publish' :
@@ -416,7 +414,12 @@ function wpsstm_get_user_playlists_list($args = null,$user_id = false){
                     break;
             }
             $status_str = ($status_str) ? sprintf(' <strong>— %s</strong>',$status_str) : null;
-            $li_els[] = sprintf('<li %s><input type="checkbox" value="%s" /> <label>%s%s</label></li>',$attr_str,$playlist_id,$li_title,$status_str);
+            
+            //checked
+            $checked = ( isset($args['checked_ids']) && in_array($playlist_id,$args['checked_ids']) );
+            $checked_str = checked($checked,true,false);
+            
+            $li_els[] = sprintf('<li %s><input type="checkbox" value="%s" %s /> <label>%s%s</label></li>',$attr_str,$playlist_id,$checked_str,$li_title,$status_str);
         }
         $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
     }

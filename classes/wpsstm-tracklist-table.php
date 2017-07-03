@@ -594,9 +594,7 @@ class WP_SoundSytem_Tracklist_Table{
                     break;
                 }
 
-                foreach ($attr as $key=>$value){
-                    $attr_str.=sprintf(' %s="%s"',$key,$value);
-                }
+                $attr_str = wpsstm_get_html_attr($attr);
 
                 printf('<td %s>',$attr_str);
 
