@@ -120,8 +120,9 @@ class WP_SoundSytem_Core_Playlists{
 
         switch ( $column ) {
             case 'playlist':
-
-                $tracklist_ids = wpsstm_get_subtrack_parent_ids($post_id);
+                
+                $track = new WP_SoundSystem_Subtrack( array('post_id'=>$post_id) );
+                $tracklist_ids = $track->get_parent_ids();
                 $links = array();
 
                 foreach((array)$tracklist_ids as $tracklist_id){

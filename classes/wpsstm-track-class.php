@@ -571,5 +571,33 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
         return $tracklist->remove_subtrack_ids($this->post_id);
     }
+    
+    /*
+    Get IDs of the parent tracklists (albums / playlists) for a subtrack.
+    */
+    function get_parent_ids($args = null){
+        global $wpdb;
+
+        $meta_query = array();
+        $meta_query[] = array(
+            'key'     => 'wpsstm_subtrack_ids',
+            'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
+            'compare' => 'LIKE'
+        );
+
+        $default_args = array(
+            'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
+            'post_status'       => 'any',
+            'posts_per_page'    => -1,
+            'fields'            => 'ids',
+            'meta_query'        => $meta_query
+        );
+
+        $args = wp_parse_args((array)$args,$default_args);
+
+        $query = new WP_Query( $args );
+        $ids = $query->posts;
+        return $ids;
+    }
 
 }

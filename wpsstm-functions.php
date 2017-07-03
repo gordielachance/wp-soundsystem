@@ -92,36 +92,6 @@ function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
     
 }
 
-/*
-Get IDs of the parent tracklists (albums / playlists) for a subtrack.
-*/
-
-function wpsstm_get_subtrack_parent_ids($post_id, $args = null){
-    global $wpdb;
-
-    $meta_query = array();
-    $meta_query[] = array(
-        'key'     => 'wpsstm_subtrack_ids',
-        'value'   => serialize( $post_id ), //https://wordpress.stackexchange.com/a/224987/70449
-        'compare' => 'LIKE'
-    );
-    
-    $default_args = array(
-        'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
-        'post_status'       => 'any',
-        'posts_per_page'    => -1,
-        'fields'            => 'ids',
-        'meta_query'        => $meta_query
-    );
-    
-    if ($args){
-        $args = wp_parse_args($args,$default_args);
-    }
-
-    $query = new WP_Query( $args );
-    $ids = $query->posts;
-    return $ids;
-}
 /**
 * Make a nested HTML list from a multi-dimensionnal array.
 */
