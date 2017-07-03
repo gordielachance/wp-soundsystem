@@ -4,7 +4,7 @@ class WP_SoundSytem_Preset_Spotify_Playlists_Api extends WP_SoundSytem_Live_Play
     var $preset_slug =      'spotify-playlist';
     var $preset_url =       'https://open.spotify.com';
     
-    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^/]+)/?$~i';
+    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^?/]+)~i';
     var $redirect_url =     'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
     var $variables =        array(
         'spotify-user' => null,
