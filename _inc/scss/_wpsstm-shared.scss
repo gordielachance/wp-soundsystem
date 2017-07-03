@@ -2,11 +2,9 @@
 @import "compass/typography/text/ellipsis";
 
 .truncate {
-    /*
     white-space: nowrap;
-    overflow: hidden;
+    //overflow: hidden; //TO FIX breaks in bottom player
     text-overflow: ellipsis;
-    */
 }
 
 .wpsstm-icon-link{

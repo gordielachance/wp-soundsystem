@@ -111,10 +111,6 @@
                         &[itemprop="name"]:before{
                             content:"\002014";
                             padding-right:.5em;
-                            @extend .truncate;
-                        }
-                        &[itemprop="byArtist"]{
-                            @extend .truncate;
                         }
                         &[itemprop="inAlbum"]{
                             display:none;
