@@ -510,7 +510,7 @@ class WP_SoundSytem_Core_Tracklists{
                 }
             break;
             case 'remove':
-                if ( $success = $track->remove_subtrack() ){
+                if ( $success = $tracklist->remove_subtrack_ids($track->post_id) ){
                     $result['success'] = true;
                     $result['output'] = $success;
                 }

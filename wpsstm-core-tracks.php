@@ -652,14 +652,11 @@ class WP_SoundSytem_Core_Tracks{
         
         $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
+        $tracklist = new WP_SoundSytem_Tracklist($playlist_id);
+
+        wpsstm()->debug_log($track_args,"ajax_remove_playlist_track()"); 
         
-        //create|get subtrack
-        $track_args['tracklist_id'] = $playlist_id;
-        $subtrack = new WP_SoundSystem_Subtrack($track_args);
-        
-        wpsstm()->debug_log($subtrack,"ajax_remove_playlist_track()"); 
-        
-        if ( $success = $subtrack->remove_subtrack() ){
+        if ( $success = $tracklist->remove_subtrack_ids($track_args['post_id']) ){
             $result['success'] = true;
         }
         

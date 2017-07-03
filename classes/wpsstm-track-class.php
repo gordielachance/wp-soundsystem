@@ -566,15 +566,6 @@ class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
         }
 
     }
-
-    function remove_subtrack(){
-        global $wpdb;
-        if (!$this->post_id) return;
-        
-        //get current subtrack IDs
-        $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
-        return $tracklist->remove_subtrack_ids($this->post_id);
-    }
     
     /*
     Get IDs of the parent tracklists (albums / playlists) for a subtrack.

@@ -295,9 +295,14 @@ class WP_SoundSytem_Tracklist{
     }
     
     function remove_subtracks(){
+        $rem_ids = array();
+        
         foreach($this->tracks as $key=>$track){
-            $track->remove_subtrack();
+            if (!$track->post_id) continue;
+            $rem_ids[] = $track->post_id;
         }
+        
+        return $tracklist->remove_subtrack_ids($rem_ids);
     }
     
     function delete_subtracks(){
