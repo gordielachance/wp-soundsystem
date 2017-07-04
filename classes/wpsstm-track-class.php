@@ -44,7 +44,6 @@ class WP_SoundSystem_Track{
         if ( !$this->post_id && $this->artist && $this->title ){
             $this->post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title);
         }
-
     }
     
     function get_default(){
@@ -59,6 +58,34 @@ class WP_SoundSystem_Track{
             'duration'      =>null,
             'sources'       =>null
         );
+    }
+    
+    /*
+    Get IDs of the parent tracklists (albums / playlists) for a subtrack.
+    */
+    function get_parent_ids($args = null){
+        global $wpdb;
+
+        $meta_query = array();
+        $meta_query[] = array(
+            'key'     => 'wpsstm_subtrack_ids',
+            'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
+            'compare' => 'LIKE'
+        );
+
+        $default_args = array(
+            'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
+            'post_status'       => 'any',
+            'posts_per_page'    => -1,
+            'fields'            => 'ids',
+            'meta_query'        => $meta_query
+        );
+
+        $args = wp_parse_args((array)$args,$default_args);
+
+        $query = new WP_Query( $args );
+        $ids = $query->posts;
+        return $ids;
     }
 
     //TO FIX do we need this ?
@@ -191,7 +218,7 @@ class WP_SoundSystem_Track{
 
         if (!$this->post_id){ //not a track update
 
-            //TO FIX should this rather be in WP_SoundSystem_Subtrack ?
+            //TO FIX should this rather be in WP_SoundSystem_Track ?
             if ( $existing_track_id = $this->get_existing_track_id() ){ //we found a track that has the same details
                 
                 $post_track_id = $existing_track_id;
@@ -225,6 +252,15 @@ class WP_SoundSystem_Track{
         }
 
         if ( is_wp_error($post_track_id) ) return $post_track_id;
+        
+        //try to set MBID if none defined
+        //TO FIX is it at the right place ?
+        if (!$track->mbid){
+            if ( ( $mbid = wpsstm_mb()->guess_mbid( $post_id ) ) && !is_wp_error($mbid) ){
+                $track->mbid = $mbid;
+                wpsstm_mb()->do_update_mbid($post_id,$mbid);
+            }
+        }
         
         //sources is quite specific
         $this->update_track_sources($this->sources);
@@ -515,84 +551,4 @@ class WP_SoundSystem_Track{
             return update_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey, $sources );
         }
     }
-}
-
-/**
-For tracks that are attached to a tracklist (albums / playlists / live playlists)
-**/
-
-class WP_SoundSystem_Subtrack extends WP_SoundSystem_Track{
-
-    public $tracklist_id = 0;
-    public $subtrack_order = 0;
-    
-    function __construct( $args = array() ){
-
-        //has parent ID
-        if ( isset($args['tracklist_id']) ){
-            $this->tracklist_id = $args['tracklist_id'];
-        }
-
-        parent::__construct($args);
-
-    }
-    
-    function get_default(){
-        $track_defaults = parent::get_default();
-        
-        $default = array(
-            'tracklist_id'      => null,
-            'subtrack_order'    => null
-        );
-        
-        return wp_parse_args($default,$track_defaults);
-    }
-    
-    function save_track(){
-        
-        if ( !$this->tracklist_id || !get_post($this->tracklist_id) ) return new WP_Error('tracklist_id',__("Tracklist ID not defined or does not exists",'wpsstm'));
-
-        //save track
-        $track_id = parent::save_track();
-        if (!$track_id) return false;
-        if ( is_wp_error($track_id) ) return $track_id;
-        
-        //save tracklist
-        $tracklist = new WP_SoundSytem_Tracklist($this->tracklist_id);
-        
-        //return track ID to match parent::save_track;
-        if ( $tracklist->append_subtrack_ids($track_id) ){
-            return $track_id; 
-        }
-
-    }
-    
-    /*
-    Get IDs of the parent tracklists (albums / playlists) for a subtrack.
-    */
-    function get_parent_ids($args = null){
-        global $wpdb;
-
-        $meta_query = array();
-        $meta_query[] = array(
-            'key'     => 'wpsstm_subtrack_ids',
-            'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
-            'compare' => 'LIKE'
-        );
-
-        $default_args = array(
-            'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'meta_query'        => $meta_query
-        );
-
-        $args = wp_parse_args((array)$args,$default_args);
-
-        $query = new WP_Query( $args );
-        $ids = $query->posts;
-        return $ids;
-    }
-
 }

@@ -162,6 +162,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 * Improved jQuery.toggleTableColums + moved in its own file
 * Abord auto_guess_mbid() for tracks when saving subtracks (too slow)
 * Improved wizard backend & frontend
+* Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
 
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval

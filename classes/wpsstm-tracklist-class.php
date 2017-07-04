@@ -145,16 +145,11 @@ class WP_SoundSytem_Tracklist{
 
         foreach ($tracks as $track){
 
-            if ( !is_a($track, 'WP_SoundSystem_Subtrack') ){
+            if ( !is_a($track, 'WP_SoundSystem_Track') ){
                 if ( is_array($track) ){
-                    $track = new WP_SoundSystem_Subtrack($track);
+                    $track = new WP_SoundSystem_Track($track);
                 }
             }
-            
-            //set tracklist ID
-            $track->tracklist_id = $this->post_id;
-
-
 
             $this->tracks[] = $track;
         }
@@ -277,9 +272,18 @@ class WP_SoundSytem_Tracklist{
         
         do_action('wpsstm_save_subtracks',$this); //this will allow to detect if we're saving a single track or several tracks using did_action().
         
+        $subtrack_ids = array();
+        
         foreach($this->tracks as $key=>$track){
-            $saved = $track->save_track();
+            $track_id = $track->save_track();
+            if ( is_wp_error($track_id) ) continue;
+            $subtrack_ids[] = $track_id;
         }
+        
+        $success = $tracklist->append_subtrack_ids($subtrack_ids);
+        
+        return $success;
+        
     }
     
     function set_subtracks_auto_mbid(){

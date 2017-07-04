@@ -466,33 +466,42 @@ class WP_SoundSytem_Core_Tracklists{
         $track_args = $result['track_args'] =   isset($_REQUEST['track']) ? $_REQUEST['track'] : null;
         $track_order =                          isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
 
-        $track = new WP_SoundSystem_Subtrack($track_args);
+        $track = new WP_SoundSystem_Track($track_args);
+        $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
+        
         $success = false;
 
         switch($track_action){
             case 'save':
-                if ( $post_id = $track->save_track() ){
+                
+                //get track ID or create it
+                if (!$post_id = $track->post_id){
+                    $post_id = $track->save_track();
+                }
 
-                    if ( is_wp_error($post_id) ){
-                        $result['message'] = $post_id->get_error_message();
-                    }else{
-                        wpsstm()->debug_log("ajax save:"); 
-                        wpsstm()->debug_log($post_id);
+                if ( is_wp_error($post_id) ){
+                    
+                    $result['message'] = $post_id->get_error_message();
+                    
+                }elseif($post_id){
+                    
+                    $result['post_id'] = $post_id;
+                    wpsstm()->debug_log($post_id,"ajax_tracklist_row_action() - track#");
+
+                    //TO FIX check is already a children ?
+                    $success = $tracklist->append_subtrack_ids($post_id);
+                    
+                    if ( is_wp_error($success) ){
                         
-                        //try to set MBID if none defined
-                        if (!$track->mbid){
-                            if ( ( $mbid = wpsstm_mb()->guess_mbid( $post_id ) ) && !is_wp_error($mbid) ){
-                                $track->mbid = $mbid;
-                                wpsstm_mb()->do_update_mbid($post_id,$mbid);
-                            }
-                        }
-
-                        $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
-                        $tracklist->add(array($track));
-
+                        $result['message'] = $success->get_error_message();
+                        
+                    }else{
+                        
+                        $result['success'] = true;
+                        
                         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
                         $entries_table = new WP_SoundSytem_TracksList_Admin_Table();
-                        $entries_table->items = $tracklist->tracks;
+                        $entries_table->items = (array)$track;
                         $entries_table->prepare_items();
 
                         ob_start();
@@ -501,12 +510,8 @@ class WP_SoundSytem_Core_Tracklists{
 
                         $entries_table->single_row_columns( $item );
                         $result['new_html'] = ob_get_clean();
-
-                        $result['success'] = true;
-                        $result['post_id'] = $post_id;
-
-                        $result['output'] = $success;
                     }
+
                 }
             break;
             case 'remove':
