@@ -61,8 +61,8 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             $attr_arr = array(
                 'class' =>                      implode(' ',$item_classes),
                 'data-wpsstm-track-id' =>       ($item->post_id) ? $item->post_id : null,
-                'data-wpsstm-track-idx' =>      $item->subtrack_order,
-                'data-wpsstm-track-order' =>    $item->subtrack_order
+                'data-wpsstm-track-idx' =>      $item->order,
+                'data-wpsstm-track-order' =>    $item->order
             );
 
             printf( '<tr %s>',wpsstm_get_html_attr($attr_arr) );
@@ -221,7 +221,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
         */
 
         public function get_field_name( $item, $slug ) {
-            return sprintf('wpsstm[tracklist][tracks][%d][%s]',$item->subtrack_order,$slug);
+            return sprintf('wpsstm[tracklist][tracks][%d][%s]',$item->order,$slug);
         }
 
 
@@ -269,7 +269,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
                 break;
 
                 case 'trackitem_order':
-                    printf( '<input type="text" name="%s" value="%s" size="3"/>',$this->get_field_name($item,'track_order'),$item->subtrack_order);
+                    printf( '<input type="text" name="%s" value="%s" size="3"/>',$this->get_field_name($item,'track_order'),$item->order);
                 break;
 
                 case 'trackitem_artist':

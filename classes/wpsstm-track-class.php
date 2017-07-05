@@ -2,6 +2,7 @@
 
 class WP_SoundSystem_Track{
     public $post_id = 0;
+    public $order = false; //order in the playlist, if set //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
 
     public $title;
     public $artist;

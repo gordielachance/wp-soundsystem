@@ -160,7 +160,7 @@ class WP_SoundSytem_Tracklist{
         foreach((array)$this->tracks as $key=>$track){
             //increment count
             $tracks_count++;
-            $this->tracks[$key]->subtrack_order = $tracks_count;
+            $this->tracks[$key]->order = $tracks_count;
         }
 
         $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
