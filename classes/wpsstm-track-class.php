@@ -255,15 +255,7 @@ class WP_SoundSystem_Track{
         }
 
         if ( is_wp_error($post_id) ) return $post_id;
-        
-        //try to set MBID if none defined
-        if (!$this->mbid){
-            if ( ( $mbid = wpsstm_mb()->guess_mbid( $post_id ) ) && !is_wp_error($mbid) ){
-                $this->mbid = $mbid;
-                if ( wpsstm_mb()->do_update_mbid($post_id,$mbid) );
-            }
-        }
-        
+
         //sources is quite specific
         $this->update_track_sources($this->sources);
         
