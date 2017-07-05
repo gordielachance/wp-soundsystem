@@ -274,11 +274,18 @@ class WP_SoundSystem_Track{
     }
     
     function delete_track($force_delete = false){
-        $deleted = wp_delete_post( $this->post_id, $force_delete );
-        if($deleted === false) return false;
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $required_cap = $post_type_obj->cap->delete_posts;
+
+        if ( !current_user_can($required_cap) ){
+            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new track','wpsstm') );
+        }
         
         wpsstm()->debug_log( array('post_id',$this->post_id,'force_delete'=>$force_delete), "WP_SoundSystem_Track::delete_track()"); 
-        return $deleted;
+        
+        return wp_delete_post( $this->post_id, $force_delete );
     }
 
     

@@ -125,10 +125,22 @@ class WP_SoundSytem_Tracklist{
         
         $subtrack_ids = $this->get_subtracks_ids();
         $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
+        
         return $this->set_subtrack_ids($subtrack_ids);
     }
 
     function set_subtrack_ids($ordered_ids){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('This playlist has no post ID','wpsstm') );
+        }
+        
+        //capability check
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __('You have not the capability required to edit this tracklist.','wpsstm') );
+        }
 
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
         $ordered_ids = array_unique($ordered_ids);
@@ -311,10 +323,11 @@ class WP_SoundSytem_Tracklist{
     
     function delete_subtracks(){
         foreach($this->tracks as $key=>$track){
-            if ( $track->delete_track() ){
+            if ( ($success = $track->delete_track()) && !is_wp_error($success) ){
                 unset($this->tracks[$key]);
             }
         }
+        //TO FIX call remove_subtracks() ?
     }
     
     function get_tracklist_admin_table(){

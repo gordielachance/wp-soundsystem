@@ -510,15 +510,19 @@ class WP_SoundSytem_Core_Tracklists{
                 }
             break;
             case 'remove':
-                if ( $success = $tracklist->remove_subtrack_ids($track->post_id) ){
-                    $result['success'] = true;
-                    $result['output'] = $success;
+                $success = $tracklist->remove_subtrack_ids($track->post_id);
+                if ( is_wp_error($success) ){
+                    $result['message'] = $success->get_error_message();
+                }else{
+                    $result['success'] = $success;
                 }
             break;
             case 'delete':
-                if ( $success = $track->delete_track() ){
-                    $result['success'] = true;
-                    $result['output'] = $success;
+                $success = $track->delete_track();
+                if ( is_wp_error($success) ){
+                    $result['message'] = $success->get_error_message();
+                }else{
+                    $result['success'] = $success;
                 }
             break;
         }
@@ -547,9 +551,14 @@ class WP_SoundSytem_Core_Tracklists{
             $tracklist = new WP_SoundSytem_Tracklist($post_id);
             $tracklist->load_subtracks();
             $result['tracklist'] = $tracklist;
-
-            $result['success'] = $tracklist->set_subtrack_ids($subtracks_order);
-
+            
+            $success = $tracklist->set_subtrack_ids($subtracks_order);
+            
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
         }
 
         header('Content-type: application/json');

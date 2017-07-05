@@ -115,11 +115,13 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
         ?>
                 <div id="wpsstm-tracklist-actions" class="actions">
                     <?php
-                    if ( $this->can_manage_rows ){   
-                        ?>
-                        <a class="alignright add-tracklist-track button"><?php echo esc_html_x('Add Row', 'link', 'wpsstm'); ?></a>
-                        <a href="#wpsstm-metabox-scraper-wizard" class="alignright import-tracklist-tracks button"><?php _e('Import Tracks','wpsstm');?></a>
-                        <?php
+                    if ( $this->can_manage_rows ){  
+                        if ( 'top' == $which ) {
+                            ?>
+                            <a class="alignright add-tracklist-track button"><?php echo esc_html_x('Add Row', 'link', 'wpsstm'); ?></a>
+                            <a href="#wpsstm-metabox-scraper-wizard" class="alignright import-tracklist-tracks button"><?php _e('Import Tracks','wpsstm');?></a>
+                            <?php
+                        }
                     }
                     ?>
                 </div>
@@ -141,18 +143,27 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
          * @return array An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
          **************************************************************************/
         function get_bulk_actions() {
+            global $post;
             
-            //TO FIX capabilities
+            //capability check
+            $post_type = $post->post_type;
+            $tracklist_obj = get_post_type_object($post_type);
+            $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
             
-            $actions = array(
-                'remove'    => __('Remove tracks','wpsstm'),
-                'save'      => __('Save tracks','wpsstm'),
-                'mbid'      => __('Guess MBIDs','wpsstm'),
-                'delete'    => __('Delete tracks','wpsstm'),
-            );
-
-            if ( !$auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" ) ){
-                unset($actions['mbid']);
+            $actions = array();
+            
+            if ( current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
+                $actions['remove'] = __('Remove tracks','wpsstm');
+            }
+            
+            if ( current_user_can($post_type_track_obj->cap->edit_posts) ){ //can edit tracks
+                $actions['save'] = __('Save tracks','wpsstm');
+                
+                if ( $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" ) ){
+                    $actions['mbid'] = __('Guess MBIDs','wpsstm');
+                }
+                
+                $actions['delete'] = __('Delete tracks','wpsstm');
             }
 
             return apply_filters('wpsstm_get_tracklist_bulk_actions',$actions);
@@ -407,13 +418,11 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
             if ( 'trackitem_action' !== $column_name ) {
                 return '';
             }
-            
-            //TO FIX
+
             //capability check
             $post_type = $post->post_type;
             $tracklist_obj = get_post_type_object($post_type);
             $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
-            //$required_cap = $post_type_obj->cap->edit_posts;
 
             $actions = array();
 

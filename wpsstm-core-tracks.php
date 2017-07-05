@@ -675,8 +675,12 @@ class WP_SoundSytem_Core_Tracks{
 
         wpsstm()->debug_log($track_args,"ajax_remove_playlist_track()"); 
         
-        if ( $success = $tracklist->remove_subtrack_ids($track_args['post_id']) ){
-            $result['success'] = true;
+        $success = $tracklist->remove_subtrack_ids($track_args['post_id']);
+
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
         }
         
         header('Content-type: application/json');
