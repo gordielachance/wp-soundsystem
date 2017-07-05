@@ -19,10 +19,11 @@
         }
 
         >.tablenav{ //bulk actions
-            .add-tracklist-track{
-                margin:0;
-                body.no-js &{
-                    display:none;
+            #wpsstm-tracklist-actions{
+                overflow:auto;
+                a{
+                    margin:0;
+                    margin-right: 8px;
                 }
             }
             &.top{

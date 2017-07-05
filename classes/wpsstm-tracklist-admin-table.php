@@ -113,11 +113,12 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
         protected function extra_tablenav($which){
         ?>
-                <div class="alignleft actions">
+                <div id="wpsstm-tracklist-actions" class="actions">
                     <?php
                     if ( $this->can_manage_rows ){   
                         ?>
-                        <a class="add-tracklist-track button"><?php echo esc_html_x('Add Row', 'link', 'wpsstm'); ?></a>
+                        <a class="alignright add-tracklist-track button"><?php echo esc_html_x('Add Row', 'link', 'wpsstm'); ?></a>
+                        <a href="#wpsstm-metabox-scraper-wizard" class="alignright import-tracklist-tracks button"><?php _e('Import Tracks','wpsstm');?></a>
                         <?php
                     }
                     ?>
