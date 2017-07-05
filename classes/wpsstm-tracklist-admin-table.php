@@ -23,6 +23,13 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
 
             $this->items = $this->items;
             
+            //capability check
+            //TO FIX
+            /*
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+            $required_cap = $post_type_obj->cap->edit_posts;
+            */
+            
             //TO FIX CAP
             $this->can_manage_rows = current_user_can( 'edit_posts' );
 
@@ -238,9 +245,7 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
          * Handles the columns output.
          */
         function column_default( $item, $column_name ){
-            global $post;
-             
-
+            
             $classes = array('metabox-table-cell-toggle');
             $display_classes = array_merge( $classes,array('metabox-table-cell-display') );
             $edit_classes = array_merge( $classes,array('metabox-table-cell-edit') );

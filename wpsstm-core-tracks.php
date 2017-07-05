@@ -32,7 +32,10 @@ class WP_SoundSytem_Core_Tracks{
     }
     
     function setup_globals(){
-        if ( $subtracks_hide_db = get_option('wpsstm_subtracks_hide') ){
+        
+        if ( isset($_REQUEST['wpsstm_subtracks_hide']) ){
+            $this->subtracks_hide = ($_REQUEST['wpsstm_subtracks_hide'] == 'on') ? true : false;
+        }elseif ( $subtracks_hide_db = get_option('wpsstm_subtracks_hide') ){
             $this->subtracks_hide = ($subtracks_hide_db == 'on') ? true : false;
         }
     }
@@ -54,7 +57,7 @@ class WP_SoundSytem_Core_Tracks{
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
         //subtracks
-        add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
+        add_action( 'current_screen',  array($this, 'toggle_subtracks_notice') );
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
@@ -86,8 +89,8 @@ class WP_SoundSytem_Core_Tracks{
     Display a notice (and link) to toggle view subtracks
     */
     
-    function toggle_subtracks_notice(){
-        $screen = get_current_screen();
+    function toggle_subtracks_notice($screen){
+
         if ( $screen->post_type != wpsstm()->post_type_track ) return;
         if ( $screen->base != 'edit' ) return;
         
@@ -101,8 +104,6 @@ class WP_SoundSytem_Core_Tracks{
         }
         
         $link = add_query_arg(array('post_type'=>wpsstm()->post_type_track,'wpsstm_subtracks_hide'=>$toggle_value),$link);
-        
-
 
         $notice_link = sprintf( '<a href="%s">%s</a>',$link,__('here','wpsstm') );
         
@@ -122,8 +123,8 @@ class WP_SoundSytem_Core_Tracks{
     Toggle view subtracks : store option then redirect
     */
     
-    function toggle_subtracks_store_option(){
-        $screen = get_current_screen();
+    function toggle_subtracks_store_option($screen){
+        
         if ( $screen->post_type != wpsstm()->post_type_track ) return;
         if ( $screen->base != 'edit' ) return;
         if ( !isset($_REQUEST['wpsstm_subtracks_hide']) ) return;

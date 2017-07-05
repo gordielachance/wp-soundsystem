@@ -474,10 +474,8 @@ class WP_SoundSytem_Core_Tracklists{
         switch($track_action){
             case 'save':
                 
-                //get track ID or create it
-                if (!$post_id = $track->post_id){
-                    $post_id = $track->save_track();
-                }
+                //get track ID (insert / update track)
+                $post_id = $track->save_track();
 
                 if ( is_wp_error($post_id) ){
                     
@@ -501,7 +499,7 @@ class WP_SoundSytem_Core_Tracklists{
                         
                         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
                         $entries_table = new WP_SoundSytem_TracksList_Admin_Table();
-                        $entries_table->items = (array)$track;
+                        $entries_table->items = array($track);
                         $entries_table->prepare_items();
 
                         ob_start();

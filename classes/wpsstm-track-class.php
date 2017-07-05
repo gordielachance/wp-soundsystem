@@ -203,7 +203,7 @@ class WP_SoundSystem_Track{
         
         if ( !$this->validate_track() ) return;
 
-        $post_track_id = null;
+        $post_id = null;
         
         $meta_input = array(
             wpsstm_artists()->metakey           => $this->artist,
@@ -222,7 +222,7 @@ class WP_SoundSystem_Track{
             //TO FIX should this rather be in WP_SoundSystem_Track ?
             if ( $existing_track_id = $this->get_existing_track_id() ){ //we found a track that has the same details
                 
-                $post_track_id = $existing_track_id;
+                $post_id = $existing_track_id;
 
             }else{ //insert new track
                 
@@ -234,8 +234,8 @@ class WP_SoundSystem_Track{
 
                 $post_track_new_args = wp_parse_args($post_track_new_args,$post_track_args);
 
-                $post_track_id = wp_insert_post( $post_track_new_args );
-                wpsstm()->debug_log( array('post_id'=>$post_track_id,'args'=>json_encode($post_track_new_args)), "WP_SoundSystem_Track::save_track() - post track inserted"); 
+                $post_id = wp_insert_post( $post_track_new_args );
+                wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_new_args)), "WP_SoundSystem_Track::save_track() - post track inserted"); 
                 
             }
 
@@ -247,26 +247,25 @@ class WP_SoundSystem_Track{
             
             $post_track_update_args = wp_parse_args($post_track_update_args,$post_track_args);
             
-            $post_track_id = wp_update_post( $post_track_update_args );
+            $post_id = wp_update_post( $post_track_update_args );
             
-            wpsstm()->debug_log( array('post_id'=>$post_track_id,'args'=>json_encode($post_track_update_args)), "WP_SoundSystem_Track::save_track() - post track updated"); 
+            wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_update_args)), "WP_SoundSystem_Track::save_track() - post track updated"); 
         }
 
-        if ( is_wp_error($post_track_id) ) return $post_track_id;
+        if ( is_wp_error($post_id) ) return $post_id;
         
         //try to set MBID if none defined
-        //TO FIX is it at the right place ?
-        if (!$track->mbid){
+        if (!$this->mbid){
             if ( ( $mbid = wpsstm_mb()->guess_mbid( $post_id ) ) && !is_wp_error($mbid) ){
-                $track->mbid = $mbid;
-                wpsstm_mb()->do_update_mbid($post_id,$mbid);
+                $this->mbid = $mbid;
+                if ( wpsstm_mb()->do_update_mbid($post_id,$mbid) );
             }
         }
         
         //sources is quite specific
         $this->update_track_sources($this->sources);
         
-        $this->post_id = $post_track_id;
+        $this->post_id = $post_id;
 
         return $this->post_id;
         

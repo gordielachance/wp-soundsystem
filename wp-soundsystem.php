@@ -266,6 +266,8 @@ class WP_SoundSytem {
     */
     
     function is_admin_page(){
+        
+        if ( !wpsstm_is_backend() ) return;
 
         $screen = get_current_screen();
         $post_type = $screen->post_type;

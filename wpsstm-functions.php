@@ -58,12 +58,12 @@ function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
     global $wpdb;
     $query = $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE `meta_key` = '%s'", 'wpsstm_subtrack_ids' );
     $metas = $wpdb->get_col( $query );
-    
+
     $subtrack_ids = array();
 
-    foreach($metas as $meta){
+    foreach((array)$metas as $meta){
         $ids = maybe_unserialize($meta);
-        $subtrack_ids = array_merge($subtrack_ids,$ids);
+        $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
     }
     
     $subtrack_ids = array_unique($subtrack_ids);
@@ -340,7 +340,10 @@ function wpsstm_array_recursive_diff($aArray1, $aArray2) {
 } 
 
 function wpsstm_is_backend(){
-    return ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) );
+    return ( is_admin() && !wpsstm_is_ajax() );
+}
+function wpsstm_is_ajax(){
+    return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 }
 
 /*

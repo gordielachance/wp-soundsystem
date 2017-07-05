@@ -64,7 +64,7 @@ class WP_SoundSytem_Tracklist{
         //get tracklist metas
         $subtrack_ids = $this->get_subtracks_ids();
 
-        foreach ($subtrack_ids as $subtrack_id){
+        foreach ((array)$subtrack_ids as $subtrack_id){
             $subtrack = array(
                 'post_id'  => $subtrack_id
             );
@@ -280,7 +280,7 @@ class WP_SoundSytem_Tracklist{
             $subtrack_ids[] = $track_id;
         }
         
-        $success = $tracklist->append_subtrack_ids($subtrack_ids);
+        $success = $this->append_subtrack_ids($subtrack_ids);
         
         return $success;
         
