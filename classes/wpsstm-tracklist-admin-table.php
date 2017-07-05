@@ -401,46 +401,60 @@ if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
          * @return string Row action output for links.
          */
         protected function handle_row_actions( $item, $column_name, $primary ) {
+            global $post;
 
             if ( 'trackitem_action' !== $column_name ) {
                 return '';
             }
+            
+            //TO FIX
+            //capability check
+            $post_type = $post->post_type;
+            $tracklist_obj = get_post_type_object($post_type);
+            $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
+            //$required_cap = $post_type_obj->cap->edit_posts;
 
             $actions = array();
-            $is_attached = ($item->post_id);
-            
+
             //action link
             $action_url = add_query_arg(array('subtrack_id'=>$item->post_id),get_edit_post_link());
             $action_url = wp_nonce_url($action_url,'wpsstm_subtrack','wpsstm_subtrack_nonce');
             
             $row_actions = $subtrack_actions = array();
             
-            //edit
-            $subtrack_actions[] = array(
-                'slug'  => 'edit',
-                'text'  => __('Edit'),
-                'url'   => get_edit_post_link($item->post_id)
-            );
-            
-            //save
-            $subtrack_actions[] = array(
-                'slug'  => 'save',
-                'text'  => __('Save'),
-            );
-            
-            //remove
-            $subtrack_actions[] = array(
-                'slug'  => 'remove',
-                'text'  => __('Remove'),
-            );
-            
-            //delete
-            //TO FIX delete action should be available only if user can delete post
-            if ( $is_attached ){
+            if ( current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
+                
+                //remove from tracklist
                 $subtrack_actions[] = array(
-                    'slug'  => 'delete',
-                    'text'  => __('Delete'),
+                    'slug'  => 'remove',
+                    'text'  => __('Remove'),
                 );
+            }
+            
+            
+            if ( current_user_can($post_type_track_obj->cap->edit_posts) ){ //can edit tracks
+                
+                //edit
+                $subtrack_actions[] = array(
+                    'slug'  => 'edit',
+                    'text'  => __('Edit'),
+                    'url'   => get_edit_post_link($item->post_id)
+                );
+                
+                //save
+                $subtrack_actions[] = array(
+                    'slug'  => 'save',
+                    'text'  => __('Save'),
+                );
+                
+                //delete
+                if($item->post_id){
+                    $subtrack_actions[] = array(
+                        'slug'  => 'delete',
+                        'text'  => __('Delete'),
+                    );
+                }
+                
             }
             
             foreach($subtrack_actions as $action){

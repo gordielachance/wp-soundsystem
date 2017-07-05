@@ -17,6 +17,8 @@ class WP_SoundSystem_Track{
 
     function __construct( $args = array() ){
         
+        //wpsstm()->debug_log(json_encode($args), "WP_SoundSystem_Track::__construct()"); 
+        
         //has track ID
         if ( isset($args['post_id'] ) ){
             $track_id = $args['post_id'];

@@ -57,7 +57,7 @@ class WP_SoundSytem_Core_Tracks{
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
         //subtracks
-        add_action( 'current_screen',  array($this, 'toggle_subtracks_notice') );
+        add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
@@ -89,7 +89,9 @@ class WP_SoundSytem_Core_Tracks{
     Display a notice (and link) to toggle view subtracks
     */
     
-    function toggle_subtracks_notice($screen){
+    function toggle_subtracks_notice(){
+        
+        $screen = get_current_screen();
 
         if ( $screen->post_type != wpsstm()->post_type_track ) return;
         if ( $screen->base != 'edit' ) return;
@@ -252,7 +254,7 @@ class WP_SoundSytem_Core_Tracks{
 
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
-        $post_title = sanitize_text_field( sprintf('<span itemprop="byArtist">%s</span> <span itemprop="inAlbum">%s</span>',$artist,$title) );
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$title) );
 
         //use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;
