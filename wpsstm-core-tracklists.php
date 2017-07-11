@@ -505,7 +505,7 @@ class WP_SoundSystem_Core_Tracklists{
                         $item = end($entries_table->items);
                         $item->order = $track_order;
 
-                        $entries_table->single_row_columns( $item );
+                        $entries_table->single_row( $item );
                         $result['new_html'] = ob_get_clean();
                     }
 

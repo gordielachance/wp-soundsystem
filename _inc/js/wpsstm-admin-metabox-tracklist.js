@@ -161,12 +161,11 @@ function wpsstm_tracklist_row_action(row_action_link){
             row.addClass('loading');
         },
         success: function(data){
-            console.log(data);
             if (data.success === false) {
                 console.log(data);
             }else{
                 if ( data.new_html ){
-                    row.html( data.new_html );
+                    row.replaceWith( data.new_html );
                     
                     //retoggle table columns
                     $(table).tableToggleColumns();
