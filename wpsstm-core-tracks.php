@@ -48,11 +48,11 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'save_post', array($this,'update_title_track'), 99);
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
-        add_action( 'save_post', array($this,'metabox_track_title_save'), 5); 
+        add_action( 'save_post', array($this,'metabox_track_title_save'), 5);
         
-        //add_filter('manage_posts_columns', array($this,'column_track_register'), 10, 2 );
-        //add_action( 'manage_posts_custom_column', array($this,'column_track_content'), 10, 2 );
-        
+        add_filter('manage_posts_columns', array($this,'tracks_column_lovedby_register'), 10, 2 );
+        add_action( 'manage_posts_custom_column', array($this,'tracks_column_lovedby_content'), 10, 2 );
+
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
@@ -62,7 +62,7 @@ class WP_SoundSystem_Core_Tracks{
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
         
-        //ajax : toggle love tracklist
+        //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
         //ajax : get tracks source auto
@@ -184,7 +184,7 @@ class WP_SoundSystem_Core_Tracks{
         return $query;
     }
     
-    function column_track_register($defaults) {
+    function tracks_column_lovedby_register($defaults) {
         global $post;
 
         $allowed_post_types = array(
@@ -195,20 +195,26 @@ class WP_SoundSystem_Core_Tracks{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
-            $after['track'] = __('Track','wpsstm');
+            $after['track-lovedby'] = __('Loved by','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
     }
     
-    function column_track_content($column,$post_id){
+    function tracks_column_lovedby_content($column,$post_id){
         global $post;
         
         switch ( $column ) {
-            case 'track':
+            case 'track-lovedby':
                 $output = '—';
-                if ($track = wpsstm_get_post_track($post_id) ){
-                    $output = $track;
+                $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+                $links = array();
+                if ( $user_ids = $track->get_track_loved_by() ){
+                    foreach($user_ids as $user_id){
+                        $user_info = get_userdata($user_id);
+                        $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
+                    }
+                    $output = implode(', ',$links);
                 }
                 echo $output;
             break;
