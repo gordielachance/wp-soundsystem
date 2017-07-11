@@ -45,9 +45,8 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
             global $post;
 
             //append blank row
-            if ( $this->can_manage_rows ){ 
-                $args['tracklist_id'] = $post->ID;
-                $blank_track = new WP_SoundSystem_Track($args);
+            if ( $this->can_manage_rows ){
+                $blank_track = new WP_SoundSystem_Track();
                 $blank_track->row_classes = array('metabox-table-row-new','metabox-table-row-edit');
                 $this->single_row($blank_track);
             }
@@ -291,8 +290,7 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
 
                 case 'trackitem_artist':
 
-                    $artist = $item->artist;
-                    $display_html = wpsstm_get_post_artist_link_by_name($artist,true);
+                    $display_html = $item->artist;
 
                     //edit
                     $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',
@@ -311,9 +309,7 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
 
                 case 'trackitem_track':
 
-                    $artist = $item->artist;
-                    $track = $item->title;
-                    $display_html = wpsstm_get_post_track_link_by_name($artist,$track,null,true);
+                    $display_html = $item->title;
 
                     //edit
                     $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',
@@ -332,9 +328,7 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
 
                 case 'trackitem_album': //based on core function ion wp_link_category_checklist()
 
-                    $artist = $item->artist;
-                    $album = $item->album;
-                    $display_html = wpsstm_get_post_album_link_by_name($album,$artist,true);
+                    $display_html = $item->album;
 
                     //edit
                     $edit_el = sprintf('<input type="text" name="%s" value="%s"  class="cell-edit-value" />',$this->get_field_name($item,'album'),$item->album);

@@ -156,54 +156,6 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
 }
 
 /**
-Get the permalink of the artist post by post ID (eg. for a track or an album).
-If it does not exists, just returns the artist name.
-**/
-function wpsstm_get_post_artist_link_for_post($post_id){
-    $artist = null;
-    if ($artist = wpsstm_get_post_artist($post_id) ){
-        $artist = wpsstm_get_post_artist_link_by_name($artist);
-    }
-    return $artist;
-}
-
-/**
-Get the permalink of an artist post by name.
-If it does not exists, just returns the artist name.
-**/
-function wpsstm_get_post_artist_link_by_name($artist,$is_edit=false){
-    if ( $artistid_wp = wpsstm_get_post_id_by('artist',$artist) ){
-        $link = ($is_edit) ? get_edit_post_link( $artistid_wp ) : get_permalink($artistid_wp);
-        $artist = sprintf('<a href="%s">%s</a>',$link,$artist);
-    }
-    return $artist;
-}
-
-/**
-Get the permalink of an album post post by name.
-If it does not exists, just returns the album name.
-**/
-function wpsstm_get_post_album_link_by_name($album,$artist,$is_edit=false){
-    if ( $artist && ( $albumid_wp = wpsstm_get_post_id_by('album',$artist,$album) ) ){
-        $link = ($is_edit) ? get_edit_post_link( $albumid_wp ) : get_permalink($albumid_wp);
-        $album = sprintf('<a href="%s">%s</a>',$link,$album);
-    }
-    return $album;
-}
-
-/**
-Get the permalink of a track post post by name.
-If it does not exists, just returns the track name.
-**/
-function wpsstm_get_post_track_link_by_name($artist,$track,$album=null,$is_edit=false){
-    if ( $trackid_wp = wpsstm_get_post_id_by('track',$artist,$album,$track) ){
-        $link = ($is_edit) ? get_edit_post_link( $trackid_wp ) : get_permalink($trackid_wp);
-        $track = sprintf('<a href="%s">%s</a>',$link,$track);
-    }
-    return $track;
-}
-
-/**
 Get the MusicBrainz link of an item (artist/track/album).
 **/
 function wpsstm_get_post_mb_link_for_post($post_id){

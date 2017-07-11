@@ -256,8 +256,8 @@ class WP_SoundSystem_Core_Tracklists{
         $entry_html = array();
 
         foreach($tracklist->tracks as $item){
-            $artist = $item->artist; //wpsstm_get_post_artist_link_by_name($item->artist);
-            $track = $item->title; //wpsstm_get_post_track_link_by_name($item->artist,$item->title,null);
+            $artist = $item->artist;
+            $track = $item->title;
             $track_title_artist = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$artist,$track);
             
             $item_classes = array();
@@ -460,13 +460,15 @@ class WP_SoundSystem_Core_Tracklists{
             'success'   => false
         );
 
-        $tracklist_id =     isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
+        $tracklist_id =     isset($_REQUEST['tracklist_id']) ? (int)$_REQUEST['tracklist_id'] : null;
         $track_args =       isset($_REQUEST['track']) ? $_REQUEST['track'] : null;
         $track_action =     isset($_REQUEST['track_action']) ? $_REQUEST['track_action'] : null;
         $track_order =      isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
 
         $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
         $track = new WP_SoundSystem_Track($track_args);
+        
+        wpsstm()->debug_log($tracklist,"ajax_tracklist_row_action() - tracklist#");
 
         $success = false;
 
@@ -495,6 +497,10 @@ class WP_SoundSystem_Core_Tracklists{
                     }else{
                         
                         $result['success'] = true;
+                        
+                        //populate tracklist as the global post as it won't always be (eg. ajax requests)
+                        global $post;
+                        $post = get_post($tracklist_id);
                         
                         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
                         $entries_table = new WP_SoundSystem_TracksList_Admin_Table();

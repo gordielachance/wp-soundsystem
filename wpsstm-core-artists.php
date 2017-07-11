@@ -65,7 +65,7 @@ class WP_SoundSystem_Core_Artists{
         
         switch ( $column ) {
                 case 'artist':
-                    if (!$artist = wpsstm_get_post_artist_link_for_post($post_id) ){
+                    if (!$artist = wpsstm_get_post_artist($post_id) ){
                         $artist = '—';
                     }
                     echo $artist;

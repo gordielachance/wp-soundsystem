@@ -596,15 +596,13 @@ class WP_SoundSystem_Tracklist_Table{
 
                 $attr_str = wpsstm_get_html_attr($attr);
 
-                printf('<td %s>',$attr_str);
-
                 if ( method_exists( $this, 'column_' . $column_name ) ) {
-                    echo call_user_func( array( $this, 'column_' . $column_name ), $item );
+                    $content = call_user_func( array( $this, 'column_' . $column_name ), $item );
                 }else {
-                    echo $this->column_default( $item, $column_name );
+                    $content = $this->column_default( $item, $column_name );
                 }
-
-                echo '</td>';
+                
+                printf('<td %s>%s</td>',$attr_str,$content);
             }
     }
     
@@ -620,18 +618,13 @@ class WP_SoundSystem_Tracklist_Table{
             case 'trackitem_play_bt':
                 return wpsstm_player()->get_track_button($item);
             case 'trackitem_track':
-                $artist = $item->artist;
-                $track = $item->title;
-                return wpsstm_get_post_track_link_by_name($artist,$track,null);
+                return $item->title;
             break;
             case 'trackitem_artist':
-                $artist = wpsstm_get_post_artist_link_by_name($item->artist);
-                return $artist;
+                return $item->artist;
             break;
             case 'trackitem_album':
-                $artist = $item->artist;
-                $album = $item->album;
-                return wpsstm_get_post_album_link_by_name($album,$artist,true);
+                return $item->album;
             break;
             case 'trackitem_image':
                 if ( $item->image ){

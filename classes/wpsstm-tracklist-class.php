@@ -106,14 +106,16 @@ class WP_SoundSystem_Tracklist{
         
     }
     
-    function append_subtrack_ids($new_ids){
+    function append_subtrack_ids($append_ids){
         //force array
-        if ( !is_array($new_ids) ) $new_ids = array($new_ids);
+        if ( !is_array($append_ids) ) $append_ids = array($append_ids);
         
-        if ( empty($new_ids) ) return false;
+        if ( empty($append_ids) ) return false;
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
         
         $subtrack_ids = $this->get_subtracks_ids();
-        $subtrack_ids = array_merge($subtrack_ids,$new_ids);
+        $subtrack_ids = array_merge($subtrack_ids,$append_ids);
         return $this->set_subtrack_ids($subtrack_ids);
     }
     
@@ -122,6 +124,8 @@ class WP_SoundSystem_Tracklist{
         if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
         
         if ( empty($remove_ids) ) return false;
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
         
         $subtrack_ids = $this->get_subtracks_ids();
         $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
@@ -332,6 +336,7 @@ class WP_SoundSystem_Tracklist{
     }
     
     function get_tracklist_admin_table(){
+
         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
         $tracklist_table = new WP_SoundSystem_TracksList_Admin_Table();
         $tracklist_table->items = $this->tracks;
