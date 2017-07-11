@@ -141,7 +141,8 @@ class WP_SoundSystem_Tracklist{
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __('You have not the capability required to edit this tracklist.','wpsstm') );
         }
-
+        
+        $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
         $ordered_ids = array_unique($ordered_ids);
         
