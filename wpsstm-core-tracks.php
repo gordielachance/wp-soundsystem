@@ -537,7 +537,7 @@ class WP_SoundSystem_Core_Tracks{
         Playlists list
         */
         
-        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or create a new one','wpsstm'));
+        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
 
         $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$tracklist_ids));
         
