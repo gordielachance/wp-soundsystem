@@ -624,7 +624,7 @@ class WP_SoundSystem_Core_Tracks{
         
         //tracklist
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        $tracklist = new WP_SoundSystem_Playlist($playlist_id);
+        $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
 
         //create|get track
         $track = new WP_SoundSystem_Track($track_args);
