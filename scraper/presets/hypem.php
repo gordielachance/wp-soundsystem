@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_Hypem_Scraper extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
     
     var $preset_slug =      'hypem';
     var $preset_url =       'http://hypem.com/';

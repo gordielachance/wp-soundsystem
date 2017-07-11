@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Tracklist{
+class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     
@@ -145,7 +145,7 @@ class WP_SoundSytem_Tracklist{
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
         $ordered_ids = array_unique($ordered_ids);
         
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSytem_Tracklist::set_subtrack_ids()"); 
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
         return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
     }
@@ -332,7 +332,7 @@ class WP_SoundSytem_Tracklist{
     
     function get_tracklist_admin_table(){
         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-        $tracklist_table = new WP_SoundSytem_TracksList_Admin_Table();
+        $tracklist_table = new WP_SoundSystem_TracksList_Admin_Table();
         $tracklist_table->items = $this->tracks;
         
         ob_start();
@@ -347,7 +347,7 @@ class WP_SoundSytem_Tracklist{
     function get_tracklist_table($args = null){
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
-        $tracklist_table = new WP_SoundSytem_Tracklist_Table($this,$args);
+        $tracklist_table = new WP_SoundSystem_Tracklist_Table($this,$args);
 
         ob_start();
         $tracklist_table->prepare_items();
@@ -376,7 +376,7 @@ class WP_SoundSytem_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Tracklist notice]: ' . $message ); 
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,

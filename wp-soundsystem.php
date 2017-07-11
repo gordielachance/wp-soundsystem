@@ -9,7 +9,7 @@ Version: 1.0.2.9
 License: GPL2
 */
 
-class WP_SoundSytem {
+class WP_SoundSystem {
     /** Version ***************************************************************/
     /**
     * @public string plugin version
@@ -48,7 +48,7 @@ class WP_SoundSytem {
     public static function instance() {
         
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem;
+                    self::$instance = new WP_SoundSystem;
                     self::$instance->setup_globals();
                     self::$instance->includes();
                     self::$instance->setup_actions();
@@ -321,7 +321,7 @@ class WP_SoundSytem {
 }
 
 function wpsstm() {
-	return WP_SoundSytem::instance();
+	return WP_SoundSystem::instance();
 }
 
 wpsstm();

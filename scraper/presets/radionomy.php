@@ -7,7 +7,7 @@ http://api.radionomy.com/tracklist.cfm?radiouid=0f973ea3-2059-482d-993d-d43e8c5d
 
 */
 
-abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlist_Preset{
+abstract class WP_SoundSystem_Preset_Radionomy extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'radionomy';
     var $preset_url =       'https://www.radionomy.com';
     
@@ -57,14 +57,14 @@ abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlis
 
             //QueryPath
             try{
-                $title = htmlqp( $content, 'head meta[property="og:title"]', WP_SoundSytem_Remote_Tracklist::$querypath_options )->attr('content');
+                $title = htmlqp( $content, 'head meta[property="og:title"]', WP_SoundSystem_Remote_Tracklist::$querypath_options )->attr('content');
                 if ($title) $this->radionomy_title = $title;
             }catch(Exception $e){
             }
 
             //QueryPath
             try{
-                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSytem_Remote_Tracklist::$querypath_options )->attr('content');
+                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSystem_Remote_Tracklist::$querypath_options )->attr('content');
             }catch(Exception $e){
                 return false;
             }
@@ -94,7 +94,7 @@ abstract class WP_SoundSytem_Preset_Radionomy extends WP_SoundSytem_Live_Playlis
     
 }
 
-class WP_SoundSytem_Preset_Radionomy_Playlists_API extends WP_SoundSytem_Preset_Radionomy{
+class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Preset_Radionomy{
     //api max tracks = 40
     var $redirect_url = 'http://api.radionomy.com/tracklist.cfm?radiouid=%radionomy-id%&apikey=XXX&amount=20&type=xml&cover=true';
     
@@ -110,7 +110,7 @@ class WP_SoundSytem_Preset_Radionomy_Playlists_API extends WP_SoundSytem_Preset_
     
 }
 
-class WP_SoundSytem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSytem_Preset_Radionomy{
+class WP_SoundSystem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSystem_Preset_Radionomy{
 
     var $redirect_url =     'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
 

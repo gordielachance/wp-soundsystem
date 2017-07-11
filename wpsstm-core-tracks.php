@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Tracks{
+class WP_SoundSystem_Core_Tracks{
 
     public $metakey = '_wpsstm_track';
     public $qvar_track = 'lookup_track';
@@ -18,7 +18,7 @@ class WP_SoundSytem_Core_Tracks{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Tracks;
+                    self::$instance = new WP_SoundSystem_Core_Tracks;
                     self::$instance->init();
             }
             return self::$instance;
@@ -443,7 +443,7 @@ class WP_SoundSytem_Core_Tracks{
         
         $track = new WP_SoundSystem_Track(  array('post_id'=>$atts['post_id']) );
         $tracks = array($track);
-        $tracklist = new WP_SoundSytem_Tracklist( $atts['post_id'] );
+        $tracklist = new WP_SoundSystem_Tracklist( $atts['post_id'] );
 
         $tracklist->add($tracks);
         return $tracklist->get_tracklist_table();
@@ -529,7 +529,7 @@ class WP_SoundSytem_Core_Tracks{
         Tracklist table
         */
         $tracks = array($track);
-        $tracklist = new WP_SoundSytem_Tracklist();
+        $tracklist = new WP_SoundSystem_Tracklist();
         $tracklist->add($tracks);
         $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
 
@@ -583,7 +583,7 @@ class WP_SoundSytem_Core_Tracks{
         //create tracklist
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
 
-        $playlist = new WP_SoundSytem_Tracklist();
+        $playlist = new WP_SoundSystem_Tracklist();
         $playlist->title = $tracklist_title;
         
         $tracklist_id = $playlist->save_playlist();
@@ -671,7 +671,7 @@ class WP_SoundSytem_Core_Tracks{
         
         $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        $tracklist = new WP_SoundSytem_Tracklist($playlist_id);
+        $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
 
         wpsstm()->debug_log($track_args,"ajax_remove_playlist_track()"); 
         
@@ -690,7 +690,7 @@ class WP_SoundSytem_Core_Tracks{
 }
 
 function wpsstm_tracks() {
-	return WP_SoundSytem_Core_Tracks::instance();
+	return WP_SoundSystem_Core_Tracks::instance();
 }
 
 wpsstm_tracks();

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Core_Live_Playlists{
+class WP_SoundSystem_Core_Live_Playlists{
     
     public $allowed_post_types;
     
@@ -10,7 +10,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Live_Playlists;
+                    self::$instance = new WP_SoundSystem_Core_Live_Playlists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -63,7 +63,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             //feed url
             if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
+                update_post_meta( $settings_post->ID, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
                 unset($settings["feed_url"]);
             }
             
@@ -88,7 +88,7 @@ class WP_SoundSytem_Core_Live_Playlists{
             
             $settings['selectors'] = $new_settings['selectors'];
 
-            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
+            update_post_meta($settings_post->ID,WP_SoundSystem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
             
         }
         
@@ -111,7 +111,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         //rename health meta
         $query_post_meta = $wpdb->prepare( 
             "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",
-            WP_SoundSytem_Live_Playlist_Stats::$meta_key_health,
+            WP_SoundSystem_Live_Playlist_Stats::$meta_key_health,
             'spiff_station_health'
         );
         $wpdb->query($query_post_meta);
@@ -190,7 +190,7 @@ class WP_SoundSytem_Core_Live_Playlists{
         $post_id = null;
         $feed_url = null;
 
-        $tracklist = new WP_SoundSytem_Remote_Tracklist($post_id_or_feed_url);
+        $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id_or_feed_url);
  
         //load page preset
         if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
@@ -264,7 +264,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
                 if ( get_post_status($post_id) != 'publish') break;
 
-                $percentage = WP_SoundSytem_Live_Playlist_Stats::get_health($post_id);
+                $percentage = WP_SoundSystem_Live_Playlist_Stats::get_health($post_id);
                 $output = wpsstm_get_percent_bar($percentage);
             break;
             
@@ -273,7 +273,7 @@ class WP_SoundSytem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSytem_Live_Playlist_Stats::get_monthly_request_count($post_id);
+                $output = WP_SoundSystem_Live_Playlist_Stats::get_monthly_request_count($post_id);
             break;
                 
             //total requests
@@ -281,7 +281,7 @@ class WP_SoundSytem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSytem_Live_Playlist_Stats::get_request_count($post_id);
+                $output = WP_SoundSystem_Live_Playlist_Stats::get_request_count($post_id);
 
                 
             break;  
@@ -299,21 +299,21 @@ class WP_SoundSytem_Core_Live_Playlists{
             switch ($orderby){
 
                 case 'health':
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_health );
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_health );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'trending':
                     //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_monthly_requests );
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_monthly_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'popular':
                     //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_requests );
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
@@ -330,7 +330,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 }
 
 function wpsstm_live_playlists() {
-	return WP_SoundSytem_Core_Live_Playlists::instance();
+	return WP_SoundSystem_Core_Live_Playlists::instance();
 }
 
 wpsstm_live_playlists();

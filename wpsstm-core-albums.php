@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Albums{
+class WP_SoundSystem_Core_Albums{
 
     public $metakey = '_wpsstm_release';
     public $qvar_album = 'lookup_release';
@@ -13,7 +13,7 @@ class WP_SoundSytem_Core_Albums{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Albums;
+                    self::$instance = new WP_SoundSystem_Core_Albums;
                     self::$instance->init();
             }
             return self::$instance;
@@ -271,7 +271,7 @@ class WP_SoundSytem_Core_Albums{
 }
 
 function wpsstm_albums() {
-	return WP_SoundSytem_Core_Albums::instance();
+	return WP_SoundSystem_Core_Albums::instance();
 }
 
 wpsstm_albums();

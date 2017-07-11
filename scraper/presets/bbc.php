@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_BBC_Stations extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Preset{
     
     var $preset_slug =      'bbc-station';
     var $preset_url =       'http://www.bbc.co.uk/radio';
@@ -25,7 +25,7 @@ class WP_SoundSytem_Preset_BBC_Stations extends WP_SoundSytem_Live_Playlist_Pres
 
 }
 
-class WP_SoundSytem_Preset_BBC_Playlists extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'bbc-playlist';
     var $preset_url =       'http://www.bbc.co.uk/music/playlists/'; 
     var $pattern =          '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)/?$~i';

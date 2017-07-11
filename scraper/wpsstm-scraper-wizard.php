@@ -1,6 +1,6 @@
 <?php
-//TO FIX rather extend WP_SoundSytem_Remote_Tracklist ?
-class WP_SoundSytem_Core_Wizard{
+//TO FIX rather extend WP_SoundSystem_Remote_Tracklist ?
+class WP_SoundSystem_Core_Wizard{
 
     var $tracklist;
     
@@ -24,7 +24,7 @@ class WP_SoundSytem_Core_Wizard{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Wizard;
+                    self::$instance = new WP_SoundSystem_Core_Wizard;
                     self::$instance->init();
             }
             return self::$instance;
@@ -39,7 +39,7 @@ class WP_SoundSytem_Core_Wizard{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        $this->tracklist = new WP_SoundSytem_Remote_Tracklist();
+        $this->tracklist = new WP_SoundSystem_Remote_Tracklist();
         $this->wizard_settings_init();
     }
 
@@ -294,7 +294,7 @@ class WP_SoundSytem_Core_Wizard{
         $query = new WP_Query($query_args);
         
         foreach($query->posts as $post){
-            $feed_url = get_post_meta( $post->ID, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url,true );
+            $feed_url = get_post_meta( $post->ID, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url,true );
             $li_items[] = sprintf('<li><a href="%s">%s</a> <small>%s</small></li>',get_permalink($post->ID),get_post_field('post_title',$post->ID),$feed_url);
         }
         if ($li_items){
@@ -487,8 +487,8 @@ class WP_SoundSytem_Core_Wizard{
     
     function reset_wizard(){
         if ( !$post_id = $this->tracklist->post_id ) return;
-        delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
-        delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name );
+        delete_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url );
+        delete_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$live_playlist_options_meta_name );
     }
     
     function save_frontend_wizard(){
@@ -553,9 +553,9 @@ class WP_SoundSytem_Core_Wizard{
         $feed_url = trim($feed_url);
 
         if (!$feed_url){
-            return delete_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url );
+            return delete_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url );
         }else{
-            return update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, $feed_url );
+            return update_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url, $feed_url );
         }
     }
                         
@@ -579,9 +579,9 @@ class WP_SoundSytem_Core_Wizard{
         $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
         if (!$wizard_settings){
-            delete_post_meta($post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name);
+            delete_post_meta($post_id, WP_SoundSystem_Remote_Tracklist::$live_playlist_options_meta_name);
         }else{
-            update_post_meta( $post_id, WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings );
+            update_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$live_playlist_options_meta_name, $wizard_settings );
         }
 
         do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
@@ -999,7 +999,7 @@ class WP_SoundSytem_Core_Wizard{
         //presets
         $presets_list = array();
         $presets_list_str = null;
-        foreach ((array)WP_SoundSytem_Core_Live_Playlists::get_available_presets() as $preset){
+        foreach ((array)WP_SoundSystem_Core_Live_Playlists::get_available_presets() as $preset){
             if ( !$preset->wizard_suggest ) continue;
             $preset_str = $preset->preset_name;
             if ($preset->preset_url){
@@ -1010,7 +1010,7 @@ class WP_SoundSytem_Core_Wizard{
 
         if ( !empty($presets_list) ){
             $presets_list_str = implode(', ',$presets_list);
-            printf('<p><small><strong>%s</strong> : %s</small></p>',__('Available presets','wpsstm'),$presets_list_str);
+            printf('<p id="wpsstm-available-presets"><small><strong>%s</strong> %s</small></p>',__('Available presets:','wpsstm'),$presets_list_str);
         }
         
 
@@ -1545,7 +1545,7 @@ class WP_SoundSytem_Core_Wizard{
 }
 
 function wpsstm_wizard() {
-	return WP_SoundSytem_Core_Wizard::instance();
+	return WP_SoundSystem_Core_Wizard::instance();
 }
 
 wpsstm_wizard();

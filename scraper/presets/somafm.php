@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_SomaFM_Stations extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'somafm';
     var $preset_url =       'http://somafm.com/';
     

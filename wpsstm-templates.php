@@ -233,7 +233,7 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     }else{
         $pagenum = (int) $pagenum;
         if ($pagenum > 1){
-            $url = add_query_arg( array(WP_SoundSytem_Tracklist::$paged_var => $pagenum) );
+            $url = add_query_arg( array(WP_SoundSystem_Tracklist::$paged_var => $pagenum) );
         }
     }
 
@@ -249,7 +249,7 @@ Get playlist love/unlove icons.
 
 function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
     
-    $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
+    $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
 
     $wrapper_classes = array(
         'wpsstm-playlist-action-love-unlove'
@@ -381,8 +381,8 @@ function wpsstm_get_user_playlists_list($args = null,$user_id = false){
     $li_els = array();
     
     $defaults = array(
-        'post_status' =>    array('publish','pending','draft'),
-        'posts_per_page'    -1
+        'post_status' =>    array('publish','private','future','pending','draft'),
+        'posts_per_page' => -1
     );
     $args = wp_parse_args($args,$defaults);
 

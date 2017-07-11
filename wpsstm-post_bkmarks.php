@@ -4,7 +4,7 @@
 Requires the Custom Post Links plugin.
 */
 
-class WP_SoundSytem_Post_Bookmarks {
+class WP_SoundSystem_Post_Bookmarks {
 
     function __construct(){
         add_filter('post_bkmarks_get_table_tabs', array( $this, 'register_links_tab' ) );
@@ -89,4 +89,4 @@ class WP_SoundSytem_Post_Bookmarks {
 }
 
 
-new WP_SoundSytem_Post_Bookmarks();
+new WP_SoundSystem_Post_Bookmarks();

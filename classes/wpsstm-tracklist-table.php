@@ -4,7 +4,7 @@
  * Based on class WP_List_Table
  */
 
-class WP_SoundSytem_Tracklist_Table{
+class WP_SoundSystem_Tracklist_Table{
     var $tracklist;
     var $curr_track_idx = null;
     
@@ -376,7 +376,7 @@ class WP_SoundSytem_Tracklist_Table{
 
         $pagination_args = array(
             'base' => str_replace( $big, '%#%', esc_url( wpsstm_get_tracklist_link( $this->tracklist->post_id, $big ) ) ),
-            'format' => sprintf('?%s=%#%',WP_SoundSytem_Tracklist::$paged_var),
+            'format' => sprintf('?%s=%#%',WP_SoundSystem_Tracklist::$paged_var),
             'current' => max( 1,$this->tracklist->pagination['current_page']  ),
             'total' => $this->tracklist->pagination['total_pages']
         );
@@ -396,7 +396,7 @@ class WP_SoundSytem_Tracklist_Table{
             list( $columns, $hidden, $sortable ) = $this->get_column_info();
 
             $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-            $current_url = remove_query_arg( WP_SoundSytem_Tracklist::$paged_var, $current_url );
+            $current_url = remove_query_arg( WP_SoundSystem_Tracklist::$paged_var, $current_url );
 
             if ( isset( $_GET['orderby'] ) )
                     $current_orderby = $_GET['orderby'];

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_RadioKing_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_Preset{
 
     var $preset_slug =      'radioking';
     var $preset_url =       'https://www.radioking.com';

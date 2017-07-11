@@ -4,10 +4,10 @@
 /**
  * Based on class WP_List_Table
  */
-if(!class_exists('WP_SoundSytem_TracksList_Admin_Table')){
+if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
-    class WP_SoundSytem_TracksList_Admin_Table extends WP_List_Table {
+    class WP_SoundSystem_TracksList_Admin_Table extends WP_List_Table {
 
         var $links_per_page = -1;
         var $can_manage_rows;

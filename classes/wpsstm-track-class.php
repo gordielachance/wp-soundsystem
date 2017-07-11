@@ -380,7 +380,7 @@ class WP_SoundSystem_Track{
         $sources = ($this->sources) ? $this->sources : array();
         $field_name_attr = null;
 
-        $default = new WP_SoundSytem_Source();
+        $default = new WP_SoundSystem_Source();
         array_unshift($sources,$default); //add blank line
         $sources_inputs = wpsstm_sources()->get_sources_inputs($sources, $field_name);
 
@@ -530,7 +530,7 @@ class WP_SoundSystem_Track{
         }
 
         foreach((array)$sources as $key=>$source){
-            $source = wp_parse_args($source,WP_SoundSytem_Source::$defaults);
+            $source = wp_parse_args($source,WP_SoundSystem_Source::$defaults);
             $source[$key] = array_filter($source);
         }
 

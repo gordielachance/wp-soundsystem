@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_BuddyPress{
+class WP_SoundSystem_Core_BuddyPress{
 
     /**
     * @var The one true Instance
@@ -9,7 +9,7 @@ class WP_SoundSytem_Core_BuddyPress{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_BuddyPress;
+                    self::$instance = new WP_SoundSystem_Core_BuddyPress;
                     self::$instance->init();
             }
             return self::$instance;
@@ -438,7 +438,7 @@ class WP_SoundSytem_Core_BuddyPress{
 
 
 function wpsstm_buddypress() {
-	return WP_SoundSytem_Core_BuddyPress::instance();
+	return WP_SoundSystem_Core_BuddyPress::instance();
 }
 
 wpsstm_buddypress();

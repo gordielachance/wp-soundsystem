@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Player{
+class WP_SoundSystem_Core_Player{
     
     /**
     * @var The one true Instance
@@ -11,7 +11,7 @@ class WP_SoundSytem_Core_Player{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Player;
+                    self::$instance = new WP_SoundSystem_Core_Player;
                     self::$instance->init();
             }
             return self::$instance;
@@ -40,10 +40,10 @@ class WP_SoundSytem_Core_Player{
         $providers = array();
         
         $slugs = array(
-            'WP_SoundSytem_Player_Provider_Native',
-            'WP_SoundSytem_Player_Provider_Youtube',
-            'WP_SoundSytem_Player_Provider_Soundcloud',
-            //'WP_SoundSytem_Player_Provider_Mixcloud'
+            'WP_SoundSystem_Player_Provider_Native',
+            'WP_SoundSystem_Player_Provider_Youtube',
+            'WP_SoundSystem_Player_Provider_Soundcloud',
+            //'WP_SoundSystem_Player_Provider_Mixcloud'
         );
         //$slugs = null;
         
@@ -171,7 +171,7 @@ class WP_SoundSytem_Core_Player{
     }
 }
 
-abstract class WP_SoundSytem_Player_Provider{
+abstract class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug;
@@ -215,7 +215,7 @@ abstract class WP_SoundSytem_Player_Provider{
     
 }
 
-class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Audio';
     var $slug = 'audio';
@@ -249,7 +249,7 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
 
 }
 
-class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Youtube';
     var $slug = 'youtube';
@@ -285,7 +285,7 @@ The Soundcloud Provider reacts differently if we've got a soundcloud client ID o
 */
 
 
-class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
@@ -410,7 +410,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
     
 }
 
-class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Mixcloud';
     var $slug = 'mixcloud';
@@ -430,7 +430,7 @@ class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provid
 }
 
 function wpsstm_player() {
-	return WP_SoundSytem_Core_Player::instance();
+	return WP_SoundSystem_Core_Player::instance();
 }
 
 wpsstm_player();

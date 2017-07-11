@@ -176,7 +176,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 1.0.2.5 =
 * wp_unslash() ajax_data 
 * improved wizard cache
-* WP_SoundSytem_Preset_Radionomy_Playlists_API
+* WP_SoundSystem_Preset_Radionomy_Playlists_API
 * new dependency : forceutf8 + composer update
 * wizard : better cache handling for wizard
 * player.js : fix playlist no more refreshing
@@ -186,17 +186,17 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 = 1.0.2 =
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
-* new class WP_SoundSytem_LastFM_User()
+* new class WP_SoundSystem_LastFM_User()
 
 = 1.0.1 =
 * Improved sources / autosource code
 * lastfm.js : fixed displayAuthNotices()
 * removed 'autoredirect' option
-* WP_SoundSytem_Core_Wizard : option to delete current cache
+* WP_SoundSystem_Core_Wizard : option to delete current cache
 * fixed ignore cache in wizard
 * bottom player : better GUI for source selection
 * if the track has 'native' sources and that they cannot play, try to autosource
-* improved WP_SoundSytem_Player_Provider subclasses
+* improved WP_SoundSystem_Player_Provider subclasses
 * new action hook 'init_playable_tracklist'
 * fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
 * tracklist.js : tableToggleColumns()
@@ -216,7 +216,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 * started to implement user functions (favorite tracks / favorite playlists)
 
 = 0.9.9.5 =
-* remove WP_SoundSytem_Playlist_Scraper class, new class WP_SoundSytem_Remote_Tracklist instead (much simplier)
+* remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
 * live tracklists : new expire_time var
@@ -282,7 +282,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.8.5 =
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSytem_Remote_Tracklist::get_track_node_content()
+* sanitize string at the end of WP_SoundSystem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =
@@ -308,8 +308,8 @@ informations overriden
 * improved classes WP_SoundSystem_Subtrack() and WP_SoundSystem_Track()
 * fix title comparaison check when updating artist/album/track
 * fix Spiff plugin upgrade routine
-* renamed Array2XML > WP_SoundSytem_Array2XML
-* new function WP_SoundSytem::is_admin_page()
+* renamed Array2XML > WP_SoundSystem_Array2XML
+* new function WP_SoundSystem::is_admin_page()
 * no CSS background for tracklist table
 
 = 0.9.8 =

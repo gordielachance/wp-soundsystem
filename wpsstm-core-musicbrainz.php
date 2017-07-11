@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_MusicBrainz {
+class WP_SoundSystem_Core_MusicBrainz {
     
     var $mb_api_sleep = 1;
 
@@ -21,7 +21,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_MusicBrainz;
+                    self::$instance = new WP_SoundSystem_Core_MusicBrainz;
                     self::$instance->init();
             }
             return self::$instance;
@@ -272,7 +272,7 @@ class WP_SoundSytem_Core_MusicBrainz {
             <?php
 
             require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-            $entries_table = new WP_SoundSytem_MB_Entries();
+            $entries_table = new WP_SoundSystem_MB_Entries();
 
             if ( is_wp_error($entries) ){
                 add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -293,7 +293,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WP_SoundSytem_MB_Entries();
+        $entries_table = new WP_SoundSystem_MB_Entries();
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -311,7 +311,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WP_SoundSytem_MB_Entries();
+        $entries_table = new WP_SoundSystem_MB_Entries();
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -426,7 +426,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         //get MBID of first entry
         $mbid = wpsstm_get_array_value(array(0,'id'), $entries);
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WP_SoundSytem_Core_MusicBrainz::guess_mbid()" ); 
+        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WP_SoundSystem_Core_MusicBrainz::guess_mbid()" ); 
         
         return $mbid;
         
@@ -446,7 +446,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if (!$mbid){
             if ($mbdatas){
                 delete_post_meta( $post_id, $this->mb_data_meta_name );
-                wpsstm()->debug_log('WP_SoundSytem_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
+                wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
             }
         }else{
             
@@ -458,12 +458,12 @@ class WP_SoundSytem_Core_MusicBrainz {
             $data = $this->get_musicbrainz_api_entry($mb_post_type,$mbid);
 
             if ( is_wp_error($data) ){
-                wpsstm()->debug_log($data->get_error_message(),'WP_SoundSytem_Core_MusicBrainz::update_mb_datas() error'); 
+                wpsstm()->debug_log($data->get_error_message(),'WP_SoundSystem_Core_MusicBrainz::update_mb_datas() error'); 
                 add_settings_error('wpsstm_musicbrainz', 'api_lookup', $data->get_error_message(),'inline');
                 return;
             }else{
                 $success = update_post_meta( $post_id, $this->mb_data_meta_name, $data );
-                wpsstm()->debug_log($success,"WP_SoundSytem_Core_MusicBrainz::update_mb_datas()" ); 
+                wpsstm()->debug_log($success,"WP_SoundSystem_Core_MusicBrainz::update_mb_datas()" ); 
             }
             
         }
@@ -517,7 +517,7 @@ class WP_SoundSytem_Core_MusicBrainz {
                 switch ($mbdatas_action){
                     case 'refresh':
                         if ( delete_post_meta( $post_id, $this->mb_data_meta_name ) ){
-                            wpsstm()->debug_log('WP_SoundSytem_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
+                            wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
                             $this->update_mb_datas( $post_id );
                         }
 
@@ -586,7 +586,7 @@ class WP_SoundSytem_Core_MusicBrainz {
             if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
 
             if ( in_array('tracklist',$post_type_items) ){
-                $tracklist = new WP_SoundSytem_Tracklist($post_id);
+                $tracklist = new WP_SoundSystem_Tracklist($post_id);
                 $tracklist->load_subtracks();
                 if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
             }
@@ -730,7 +730,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         if (!$save_tracks) return;
         
-        $tracklist = new WP_SoundSytem_Tracklist($post_id);
+        $tracklist = new WP_SoundSystem_Tracklist($post_id);
         $tracklist->add($save_tracks);
         $tracklist->save_subtracks();
 
@@ -931,7 +931,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 }
 
 function wpsstm_mb() {
-	return WP_SoundSytem_Core_MusicBrainz::instance();
+	return WP_SoundSystem_Core_MusicBrainz::instance();
 }
 
 wpsstm_mb();

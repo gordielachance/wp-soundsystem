@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_Reddit_Api extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Preset{
     
     /* https://regex101.com/r/isVHq9/13 */
     

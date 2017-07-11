@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Playlists{
+class WP_SoundSystem_Core_Playlists{
 
     /**
     * @var The one true Instance
@@ -9,7 +9,7 @@ class WP_SoundSytem_Core_Playlists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Playlists;
+                    self::$instance = new WP_SoundSystem_Core_Playlists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -153,7 +153,7 @@ class WP_SoundSytem_Core_Playlists{
 }
 
 function wpsstm_playlists() {
-	return WP_SoundSytem_Core_Playlists::instance();
+	return WP_SoundSystem_Core_Playlists::instance();
 }
 
 wpsstm_playlists();

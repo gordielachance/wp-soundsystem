@@ -4,7 +4,7 @@
 Handle posts that have a tracklist, like albums and playlists.
 **/
 
-class WP_SoundSytem_Core_Tracklists{
+class WP_SoundSystem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
     public $allowed_post_types = array();
@@ -17,7 +17,7 @@ class WP_SoundSytem_Core_Tracklists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Tracklists;
+                    self::$instance = new WP_SoundSystem_Core_Tracklists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -100,7 +100,7 @@ class WP_SoundSytem_Core_Tracklists{
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         if ($tracklist_id && ($do_love!==null) ){
-            $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
+            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
             $success = $tracklist->love_tracklist($do_love);
             if ( $success ){
                 if( is_wp_error($success) ){
@@ -376,7 +376,7 @@ class WP_SoundSytem_Core_Tracklists{
         );
 
         //populate a tracklist with the selected tracks
-        $tracklist = new WP_SoundSytem_Tracklist($post_id);
+        $tracklist = new WP_SoundSystem_Tracklist($post_id);
         $tracklist->add($form_tracks);
 
         //if parent post is an album, set album for every track
@@ -464,7 +464,7 @@ class WP_SoundSytem_Core_Tracklists{
         $track_order =                          isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
 
         $track = new WP_SoundSystem_Track($track_args);
-        $tracklist = new WP_SoundSytem_Tracklist($track_args['tracklist_id']);
+        $tracklist = new WP_SoundSystem_Tracklist($track_args['tracklist_id']);
         
         $success = false;
 
@@ -495,7 +495,7 @@ class WP_SoundSytem_Core_Tracklists{
                         $result['success'] = true;
                         
                         require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-                        $entries_table = new WP_SoundSytem_TracksList_Admin_Table();
+                        $entries_table = new WP_SoundSystem_TracksList_Admin_Table();
                         $entries_table->items = array($track);
                         $entries_table->prepare_items();
 
@@ -548,7 +548,7 @@ class WP_SoundSytem_Core_Tracklists{
         if ( $subtracks_order && $post_id ){
 
             //populate a tracklist with the selected tracks
-            $tracklist = new WP_SoundSytem_Tracklist($post_id);
+            $tracklist = new WP_SoundSystem_Tracklist($post_id);
             $tracklist->load_subtracks();
             $result['tracklist'] = $tracklist;
             
@@ -568,7 +568,7 @@ class WP_SoundSytem_Core_Tracklists{
 }
 
 function wpsstm_tracklists() {
-	return WP_SoundSytem_Core_Tracklists::instance();
+	return WP_SoundSystem_Core_Tracklists::instance();
 }
 
 wpsstm_tracklists();

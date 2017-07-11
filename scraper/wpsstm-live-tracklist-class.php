@@ -16,7 +16,7 @@ When the tracklist is displayed, we refresh the tracklist only if the transient 
 
 use \ForceUTF8\Encoding;
 
-class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
+class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     //preset infos
     var $preset_slug = 'default';
@@ -239,7 +239,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
         //stats
         if ( $this->datas_remote !==null ){ //we made a remote request
-            new WP_SoundSytem_Live_Playlist_Stats($this);
+            new WP_SoundSystem_Live_Playlist_Stats($this);
         }
 
     }
@@ -447,7 +447,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
 
                 try{
                     $data = json_decode($content, true);
-                    $dom = WP_SoundSytem_Array2XML::createXML($data,'root','element');
+                    $dom = WP_SoundSystem_Array2XML::createXML($data,'root','element');
                     $xml = $dom->saveXML($dom);
                     
 
@@ -735,7 +735,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     */
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSytem_Remote_Tracklist notice]: ' . $message ); 
+        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Remote_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -759,7 +759,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
     public function get_cache(){
 
         if ( $this->ignore_cache ){
-            wpsstm()->debug_log("ignore_cache is set","WP_SoundSytem_Remote_Tracklist::get_cache()"); 
+            wpsstm()->debug_log("ignore_cache is set","WP_SoundSystem_Remote_Tracklist::get_cache()"); 
             return;
         }
         
@@ -774,7 +774,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
             $cache_debug = $cache;
             $cache_debug['tracks_count'] = ( isset($cache['tracks']) ) ? count($cache['tracks']) : null;
             unset($cache_debug['tracks']);
-            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache_debug)),"WP_SoundSytem_Remote_Tracklist::get_cache()"); 
+            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache_debug)),"WP_SoundSystem_Remote_Tracklist::get_cache()"); 
         }
         
         return $cache;
@@ -794,7 +794,7 @@ class WP_SoundSytem_Remote_Tracklist extends WP_SoundSytem_Tracklist{
         
     $this->expire_time = current_time( 'timestamp', true ) + $duration; //UTC
             
-        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSytem_Remote_Tracklist::set_cache()"); 
+        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSystem_Remote_Tracklist::set_cache()"); 
         
     }
 

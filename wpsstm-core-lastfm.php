@@ -7,7 +7,7 @@ use LastFmApi\Api\AuthApi;
 use LastFmApi\Api\ArtistApi;
 use LastFmApi\Api\TrackApi;
 
-class WP_SoundSytem_LastFM_User{
+class WP_SoundSystem_LastFM_User{
     var $user_id = null;
     var $user_token_transient_name = null;
     var $user_api_metas = null;
@@ -322,7 +322,7 @@ class WP_SoundSytem_LastFM_User{
     
 }
 
-class WP_SoundSytem_Core_LastFM{
+class WP_SoundSystem_Core_LastFM{
     
     var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
     var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
@@ -341,7 +341,7 @@ class WP_SoundSytem_Core_LastFM{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_LastFM;
+                    self::$instance = new WP_SoundSystem_Core_LastFM;
                     self::$instance->init();
             }
             return self::$instance;
@@ -385,7 +385,7 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'wp', array($this,'after_app_auth') );
     }
     function setup_lastfm_user(){
-        $this->lastfm_user = new WP_SoundSytem_LastFM_User();
+        $this->lastfm_user = new WP_SoundSystem_LastFM_User();
     }
     
     function enqueue_lastfm_scripts_styles(){
@@ -679,7 +679,7 @@ class WP_SoundSytem_Core_LastFM{
                 
                 $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
 
-                $bot_user = new WP_SoundSytem_LastFM_User($bot_user_id);
+                $bot_user = new WP_SoundSystem_LastFM_User($bot_user_id);
                 $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);
 
                 if ( $success ){
@@ -740,7 +740,7 @@ class WP_SoundSytem_Core_LastFM{
 
 
 function wpsstm_lastfm() {
-	return WP_SoundSytem_Core_LastFM::instance();
+	return WP_SoundSystem_Core_LastFM::instance();
 }
 
 wpsstm_lastfm();

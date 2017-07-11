@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Settings {
+class WP_SoundSystem_Settings {
     
     static $menu_slug = 'wpsstm';
     
@@ -42,7 +42,7 @@ class WP_SoundSytem_Settings {
     
     function register_admin_submenus(){ //TO FIX - this function should be under each type of item ?
         
-        $menu_slug = WP_SoundSytem_Settings::$menu_slug;
+        $menu_slug = WP_SoundSystem_Settings::$menu_slug;
         
         $allowed_post_types = array(
             wpsstm()->post_type_artist,
@@ -829,4 +829,4 @@ class WP_SoundSytem_Settings {
 	}
 }
 
-new WP_SoundSytem_Settings;
+new WP_SoundSystem_Settings;

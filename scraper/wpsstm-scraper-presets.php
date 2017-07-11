@@ -1,6 +1,6 @@
 <?php
 
-abstract class WP_SoundSytem_Live_Playlist_Preset extends WP_SoundSytem_Remote_Tracklist{
+abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote_Tracklist{
     var $preset_slug =      null;
     var $preset_url =       null;
     var $preset_name =      null;
@@ -131,22 +131,22 @@ function wpsstm_register_scraper_presets($presets){
     require_once( $presets_path . 'indieshuffle.php' );
     require_once( $presets_path . 'radioking.php' );
     
-    $presets[] = new WP_SoundSytem_Preset_LastFM_Scraper();
-    $presets[] = new WP_SoundSytem_Preset_Spotify_Playlists_Api();
-    $presets[] = new WP_SoundSytem_Preset_Radionomy_Playlists_Api();
-    $presets[] = new WP_SoundSytem_Preset_SomaFM_Stations();
-    $presets[] = new WP_SoundSytem_Preset_BBC_Stations();
-    $presets[] = new WP_SoundSytem_Preset_BBC_Playlists();
-    $presets[] = new WP_SoundSytem_Preset_Slacker_Stations();
-    $presets[] = new WP_SoundSytem_Preset_Soundcloud_Api();
-    $presets[] = new WP_SoundSytem_Preset_Soundsgood_Playlists_Api();
-    $presets[] = new WP_SoundSytem_Preset_Deezer_Playlists();
-    $presets[] = new WP_SoundSytem_Preset_Hypem_Scraper();
-    $presets[] = new WP_SoundSytem_Preset_Twitter_Timelines();
-    $presets[] = new WP_SoundSytem_Preset_RTBF_Stations();
-    $presets[] = new WP_SoundSytem_Preset_Reddit_Api();
-    $presets[] = new WP_SoundSytem_Preset_IndieShuffle_Scraper();
-    $presets[] = new WP_SoundSytem_Preset_RadioKing_Api();
+    $presets[] = new WP_SoundSystem_Preset_LastFM_Scraper();
+    $presets[] = new WP_SoundSystem_Preset_Spotify_Playlists_Api();
+    $presets[] = new WP_SoundSystem_Preset_Radionomy_Playlists_Api();
+    $presets[] = new WP_SoundSystem_Preset_SomaFM_Stations();
+    $presets[] = new WP_SoundSystem_Preset_BBC_Stations();
+    $presets[] = new WP_SoundSystem_Preset_BBC_Playlists();
+    $presets[] = new WP_SoundSystem_Preset_Slacker_Stations();
+    $presets[] = new WP_SoundSystem_Preset_Soundcloud_Api();
+    $presets[] = new WP_SoundSystem_Preset_Soundsgood_Playlists_Api();
+    $presets[] = new WP_SoundSystem_Preset_Deezer_Playlists();
+    $presets[] = new WP_SoundSystem_Preset_Hypem_Scraper();
+    $presets[] = new WP_SoundSystem_Preset_Twitter_Timelines();
+    $presets[] = new WP_SoundSystem_Preset_RTBF_Stations();
+    $presets[] = new WP_SoundSystem_Preset_Reddit_Api();
+    $presets[] = new WP_SoundSystem_Preset_IndieShuffle_Scraper();
+    $presets[] = new WP_SoundSystem_Preset_RadioKing_Api();
     
     return $presets;
 }

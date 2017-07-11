@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Artists{
+class WP_SoundSystem_Core_Artists{
 
     public $metakey = '_wpsstm_artist';
     public $qvar_artist = 'lookup_artist';
@@ -13,7 +13,7 @@ class WP_SoundSytem_Core_Artists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Artists;
+                    self::$instance = new WP_SoundSystem_Core_Artists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -276,7 +276,7 @@ class WP_SoundSytem_Core_Artists{
 }
 
 function wpsstm_artists() {
-	return WP_SoundSytem_Core_Artists::instance();
+	return WP_SoundSystem_Core_Artists::instance();
 }
 
 wpsstm_artists();

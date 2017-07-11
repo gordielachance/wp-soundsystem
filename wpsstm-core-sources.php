@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Sources{
+class WP_SoundSystem_Core_Sources{
 
     var $providers = array();
 
@@ -11,7 +11,7 @@ class WP_SoundSytem_Core_Sources{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Sources;
+                    self::$instance = new WP_SoundSystem_Core_Sources;
                     self::$instance->init();
             }
             return self::$instance;
@@ -83,7 +83,7 @@ class WP_SoundSytem_Core_Sources{
 
         foreach ( $sources as $key=>$source_raw ){
             
-            $source = new WP_SoundSytem_Source($source_raw);
+            $source = new WP_SoundSystem_Source($source_raw);
 
             $disabled = $readonly = false;
             $source_title_el = $source_url_el = null;
@@ -206,7 +206,7 @@ class WP_SoundSytem_Core_Sources{
         $sources = array();
         
         foreach((array)$track->sources as $source_raw){
-            $source = new WP_SoundSytem_Source($source_raw);
+            $source = new WP_SoundSystem_Source($source_raw);
             if (!$source->src) continue;
             $sources[] = $source;
         }
@@ -274,12 +274,12 @@ class WP_SoundSytem_Core_Sources{
 }
 
 function wpsstm_sources() {
-	return WP_SoundSytem_Core_Sources::instance();
+	return WP_SoundSystem_Core_Sources::instance();
 }
 
 wpsstm_sources();
 
-class WP_SoundSytem_Source {
+class WP_SoundSystem_Source {
     
     var $url; //input URL
     var $title;

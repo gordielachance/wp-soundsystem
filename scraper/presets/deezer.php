@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSytem_Preset_Deezer_Playlists extends WP_SoundSytem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlist_Preset{
     
     var $preset_slug =      'deezer';
     var $preset_url =       'http://www.deezer.com/';
