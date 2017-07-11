@@ -320,7 +320,7 @@ function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = 
     
     $tracklists_link = sprintf('<a title="%s" href="%s" class="thickbox wpsstm-icon-link wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s</a>',__('Add track to playlist','wpsstm'),$ajax_url,$icon);
 
-    printf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
+    return sprintf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
     
 }
 
