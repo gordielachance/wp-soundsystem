@@ -71,11 +71,11 @@ $(document).ready(function(){
     
 
     //love/unlove track (either for page tracks or player track)
-    $('[itemprop="track"]').on( "click",".wpsstm-track-action-wp-love-unlove a", function(e) {
+    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-wp-love-unlove a', function(e) {
         e.preventDefault();
-
+        
         var link = $(this);
-        var link_wrapper = link.closest('.wpsstm-track-action-love-unlove');
+        var link_wrapper = link.closest('.wpsstm-track-action');
         var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
         var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
