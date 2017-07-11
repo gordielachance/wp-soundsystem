@@ -139,14 +139,14 @@ function wpsstm_tracklist_row_action(row_action_link){
         'title':            row.find('.trackitem_track input').val(),
         'album':            row.find('.trackitem_album input').val(),
         'mbid':             row.find('.trackitem_mbid input').val(),
-        'sources':          track_sources,
-        'tracklist_id':     tracklist_id,
+        'sources':          track_sources
     };
 
     var ajax_data = {
         'action':           'wpsstm_tracklist_row_action',
         'track_action':     track_action,
         'track':            track,
+        'tracklist_id':     tracklist_id,
         'track_order':      row.find('.trackitem_order input').val(),
         
     };

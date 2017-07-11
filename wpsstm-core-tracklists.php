@@ -450,6 +450,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
+    //TO FIX is duplicate of ajax functions from WP_SoundSystem_Core_Tracks ?
     function ajax_tracklist_row_action(){
 
         $result = array(
@@ -459,13 +460,14 @@ class WP_SoundSystem_Core_Tracklists{
             'success'   => false
         );
 
-        $track_action =                         isset($_REQUEST['track_action']) ? $_REQUEST['track_action'] : null;
-        $track_args = $result['track_args'] =   isset($_REQUEST['track']) ? $_REQUEST['track'] : null;
-        $track_order =                          isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
+        $tracklist_id =     isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
+        $track_args =       isset($_REQUEST['track']) ? $_REQUEST['track'] : null;
+        $track_action =     isset($_REQUEST['track_action']) ? $_REQUEST['track_action'] : null;
+        $track_order =      isset($_REQUEST['track_order']) ? $_REQUEST['track_order'] : null;
 
+        $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
         $track = new WP_SoundSystem_Track($track_args);
-        $tracklist = new WP_SoundSystem_Tracklist($track_args['tracklist_id']);
-        
+
         $success = false;
 
         switch($track_action){
