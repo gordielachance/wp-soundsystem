@@ -516,7 +516,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function ajax_popup_track_playlists(){
 
-        $ajax_data = $_REQUEST;
+        $ajax_data = wp_unslash($_REQUEST);
         
         /*
         Track
