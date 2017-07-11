@@ -427,7 +427,7 @@ class WP_SoundSystem_Tracklist{
         }
     }
     
-    function get_tracklist_loved_by($tracklist_id){
+    function get_tracklist_loved_by(){
         if ( !$this->post_id ) return false;
         return get_post_meta($this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key);
     }
@@ -437,7 +437,7 @@ class WP_SoundSystem_Tracklist{
         if (!$user_id) return;
         if ( !$this->post_id ) return false;
         
-        $loved_by = $this->get_tracklist_loved_by($this->post_id);
+        $loved_by = $this->get_tracklist_loved_by();
         return in_array($user_id,(array)$loved_by);
     }
 

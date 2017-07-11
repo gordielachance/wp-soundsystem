@@ -59,8 +59,10 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'wp_enqueue_scripts', array( $this, 'frontend_script_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'metabox_tracklist_scripts_styles' ) );
 
-        add_filter('manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
+        add_filter( 'manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
+        add_filter( 'manage_posts_columns', array($this,'tracklist_column_lovedby_register'), 10, 2 ); 
+        add_action( 'manage_posts_custom_column', array($this,'tracklist_column_lovedby_content'), 10, 2 );
 
         add_action( 'post_submitbox_start', array($this,'publish_metabox_download_link') );
 
@@ -289,6 +291,45 @@ class WP_SoundSystem_Core_Tracklists{
         if (!$output){
             echo '—';
         }
+    }
+    
+    function tracklist_column_lovedby_register($defaults) {
+        global $post;
+
+        $allowed_post_types = array(
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+        
+        $before = array();
+        $after = array();
+        
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
+            $after['tracklist-lovedby'] = __('Loved by','wpsstm');
+        }
+        
+        return array_merge($before,$defaults,$after);
+    }
+    
+    function tracklist_column_lovedby_content($column,$post_id){
+        global $post;
+
+        switch ( $column ) {
+            case 'tracklist-lovedby':
+                $output = '—';
+                $tracklist = new WP_SoundSystem_Tracklist( $post_id );
+                $links = array();
+                if ( $user_ids = $tracklist->get_tracklist_loved_by() ){
+                    foreach($user_ids as $user_id){
+                        $user_info = get_userdata($user_id);
+                        $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
+                    }
+                    $output = implode(', ',$links);
+                }
+                echo $output;
+            break;
+        }
+
     }
 
     function metabox_tracklist_register(){
