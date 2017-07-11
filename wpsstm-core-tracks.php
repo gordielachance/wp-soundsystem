@@ -453,10 +453,8 @@ class WP_SoundSystem_Core_Tracks{
         );
 
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
-        
-        $track_args = $result['track_args'] = $ajax_data['track'];
 
-        $track = new WP_SoundSystem_Track($track_args);
+        $track = new WP_SoundSystem_Track($ajax_data['track']);
 
         if ( ($do_love!==null) ){
             
@@ -464,13 +462,11 @@ class WP_SoundSystem_Core_Tracks{
             $result['track'] = $track;
             wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_love_unlove_track()"); 
 
-            if ( $success ){
-                if( is_wp_error($success) ){
-                    $code = $success->get_error_code();
-                    $result['message'] = $success->get_error_message($code); 
-                }else{
-                    $result['success'] = true; 
-                }
+            if( is_wp_error($success) ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code); 
+            }else{
+                $result['success'] = $success; 
             }
         }
 

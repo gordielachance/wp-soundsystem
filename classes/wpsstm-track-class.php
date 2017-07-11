@@ -55,7 +55,7 @@ class WP_SoundSystem_Track{
             return;
         }
         
-        $this->post_id = $post_id;
+        $this->post_id = (int)$post_id;
         
         //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
         
@@ -308,31 +308,36 @@ class WP_SoundSystem_Track{
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
         
         if ( !$this->post_id ){
-            if ( !$this->populate_track_post_auto() ){
-                return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
+            if ( !$this->populate_track_post_auto() ){ //track does not exists, save it
+                $created = $this->save_track();
+                if ( is_wp_error($created) ) return $created;
             }
         }
             
-        if ( $this->post_id ){
-            if ($do_love){
-                return add_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
-            }else{
-                return delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
-            }
+        if ( !$this->post_id ){
+            return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
         }
+        
+        if ($do_love){
+            return update_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+        }else{
+            return delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+        }
+        
     }
     
-    function get_track_loved_by($tracklist_id){
-        if ( !$this->post_id ) return false;
+    function get_track_loved_by(){
+        //track ID is required
+        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;
+        
         return get_post_meta($this->post_id, wpsstm_tracks()->favorited_track_meta_key);
     }
     
     function is_track_loved_by($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
-        if ( !$this->post_id ) return false;
         
-        $loved_by = $this->get_track_loved_by($this->post_id);
+        $loved_by = $this->get_track_loved_by();
         return in_array($user_id,(array)$loved_by);
     }
     

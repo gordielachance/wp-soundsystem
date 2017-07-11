@@ -75,8 +75,8 @@ $(document).ready(function(){
         e.preventDefault();
         
         var link = $(this);
-        var link_wrapper = link.closest('.wpsstm-track-action');
-        var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
+        var links_wrapper = link.closest('.wpsstm-track-action-love-unlove');
+        var do_love = !links_wrapper.hasClass('wpsstm-is-loved');
 
         var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
         var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
