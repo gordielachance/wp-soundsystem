@@ -38,11 +38,7 @@ class WP_SoundSystem_Core_Artists{
         
         //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
         //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
-        
-        //ajax : artist lookup
-        //add_action('wp_ajax_wpsstm_artist_lookup', array($this,'ajax_artist_lookup') ); 
-        //add_action('wp_ajax_nopriv_wpsstm_artist_lookup', array($this,'ajax_artist_lookup') ); 
-        
+
     }
 
     function column_artist_register($defaults) {
@@ -259,20 +255,7 @@ class WP_SoundSystem_Core_Artists{
         }
 
     }
-    
-    function ajax_artist_lookup(){
 
-        if ( !isset($_REQUEST['q']) ) return;
-        $search = trim($_REQUEST['q']);
-
-        $artists_wp = wpsstm_get_post_id_by('artist',$search);
-        $artists = array();
-        foreach((array)$artists_wp as $post){
-            $artists[] = wpsstm_get_post_artist($post->ID);
-        }
-
-    }
-    
 }
 
 function wpsstm_artists() {
