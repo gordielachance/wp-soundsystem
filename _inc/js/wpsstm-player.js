@@ -940,11 +940,24 @@ class WpsstmTrack {
     set_bottom_trackinfo(){
         var self = this;
         //track infos
-        var trackinfo = self.track_el.clone();
-        $(bottom_trackinfo_el).attr('data-wpsstm-tracklist-idx',self.tracklist_idx); //set tracklist ID for the player
+        
+        var tracklist_el = self.get_tracklist_el();
+        var bottom_tracklist_el = tracklist_el.clone();
+
+        //copy attributes from the original playlist 
+        var attributes = $(tracklist_el).prop("attributes");
+        $.each(attributes, function() {
+            $(bottom_trackinfo_el).attr(this.name, this.value);
+        });
+        
+        var table = $('<table></table');
+
+        var row = self.track_el.clone();
+        $(table).append(row);
+
+        $(bottom_trackinfo_el).html(table);
+        
         $(bottom_el).show();//show in not done yet
-        $(trackinfo).find('td.trackitem_play_bt').remove();
-        $(bottom_trackinfo_el).html(trackinfo);
     }
 
     load_in_player(source_idx){
