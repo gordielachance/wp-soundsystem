@@ -396,12 +396,17 @@ class WP_SoundSystem_Core_LastFM{
         //JS
         wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . 'lastfm/_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
         
+        $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+        $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+        $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+        $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
+        $lastfm_auth_notice = $lastfm_auth_icon . ' ' . $lastfm_auth_text;
+        
         //localize vars
         $localize_vars=array(
             'has_lastfm_bot'            => (bool)wpsstm()->get_options('lastfm_bot_user_id'),
             'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
-            //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
-            //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
+            'lastfm_auth_notice'        => $lastfm_auth_notice
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);

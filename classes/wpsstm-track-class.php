@@ -318,6 +318,16 @@ class WP_SoundSystem_Track{
             return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
         }
         
+        //capability check
+        //TO FIX we should add a meta to the user rather than to the track, and check for another capability here ?
+        /*
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $required_cap = $post_type_obj->cap->edit_posts;
+        if ( !current_user_can($required_cap) ){
+            return new WP_Error( 'wpsstm_track_no_edit_cap', __('You have not the capability required to edit this track.','wpsstm') );
+        }
+        */
+
         if ($do_love){
             return update_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
         }else{

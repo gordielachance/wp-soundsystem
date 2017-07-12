@@ -420,6 +420,16 @@ class WP_SoundSystem_Tracklist{
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
         if ( !$this->post_id ) return new WP_Error('no_tracklist_id',__("This tracklist does not exists in the database",'wpsstm'));
 
+        //capability check
+        //TO FIX we should add a meta to the user rather than to the tracklist, and check for another capability here ?
+        /*
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __('You have not the capability required to edit this tracklist.','wpsstm') );
+        }
+        */
+
         if ($do_love){
             return add_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
         }else{

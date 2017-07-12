@@ -35,7 +35,7 @@ class WpsstmLastFM {
             e.preventDefault();
             
             if ( !self.is_user_api_logged ){
-                self.displayAuthNotices();
+                self.lastfm_auth_notice();
                 return;
             }
 
@@ -51,7 +51,7 @@ class WpsstmLastFM {
             e.preventDefault();
             
             if ( !self.is_user_api_logged ){
-                self.displayAuthNotices();
+                self.lastfm_auth_notice();
                 return;
             }
             
@@ -71,16 +71,10 @@ class WpsstmLastFM {
 
     }
     
-    displayAuthNotices(){
+    lastfm_auth_notice(){
         var self = this;
-        
-        if ( !wpsstm_get_current_user_id() ){
-            $('#wpsstm-bottom-notice-wp-auth').addClass('active');
-            return;
-        }
-        if ( !self.is_user_api_logged ){
-            $(self.auth_notice_el).addClass('active');
-            return;
+        if ( wpsstm_get_current_user_id() && !self.is_user_api_logged ){
+            wpsstm_bottom_notice('lastfm-auth',wpsstmLastFM.lastfm_auth_notice);
         }
     }
         
@@ -240,7 +234,7 @@ class WpsstmLastFM {
                         $(self.icon_love_el).removeClass('wpsstm-is-loved');
                     }
                 }else{
-                   console.log(data); 
+                    console.log(data);
                 }
             },
             complete: function() {

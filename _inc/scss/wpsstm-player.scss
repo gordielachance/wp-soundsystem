@@ -40,14 +40,26 @@
         font-size:0.8em;
         margin: 0;
         padding-bottom:1.5em;
-        display:none;
         a{
             color:#222;
             text-decoration: underline;
         }
-        
-        &.active{
-            display:block;
+        p{
+            padding:0;
+            margin:0;
+        }
+        .wpsstm-close-notice{
+            position:absolute;
+            right:0;
+            top:0;
+            display: block;
+            padding: .5em;
+            @include opacity(.8);
+            @extend .wpsstm-can-click;
+            &:hover{
+                @include opacity(1);
+            }
+            
         }
     }
     

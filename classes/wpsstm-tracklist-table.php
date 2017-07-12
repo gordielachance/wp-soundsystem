@@ -111,7 +111,7 @@ class WP_SoundSystem_Tracklist_Table{
             unset($columns['trackitem_play_bt']);
         }
         
-        if ( !current_user_can('administrator') || wpsstm_is_backend() ) unset($columns['trackitem_actions']); //TO FIX remove this condition when feature ready
+        if ( wpsstm_is_backend() ) unset($columns['trackitem_actions']);
 
         return $columns;
     }
@@ -231,8 +231,9 @@ class WP_SoundSystem_Tracklist_Table{
                 printf('<meta itemprop="name" content="%s" />',$this->tracklist->title);
             }else{
             */
+                $loading_icon = '<i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>';
                 $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
-                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s</strong>',$tracklist_link);
+                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_link);
             //}
             
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
@@ -320,7 +321,7 @@ class WP_SoundSystem_Tracklist_Table{
                         }
 
                         //favorite
-                        if ( $this->tracklist->post_id && current_user_can('administrator') ) { //TO FIX remove current_user_can when feature is ready
+                        if ( $this->tracklist->post_id ) {
                             $tracklist_links[] = wpsstm_get_tracklist_loveunlove_icons($this->tracklist->post_id);
                         }
                         

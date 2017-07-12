@@ -298,9 +298,16 @@
         }
     }
     
+    .wpsstm-tracklist-loading-icon{
+        @include opacity(0);
+    }
+    
     &.loading{
         pointer-events: none;
         @include opacity(.5);
+        .wpsstm-tracklist-loading-icon{
+            @include opacity(1);
+        }
     }
     
     .wpsstm-tracklist-time{

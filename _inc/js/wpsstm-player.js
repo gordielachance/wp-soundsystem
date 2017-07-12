@@ -71,8 +71,10 @@ $(document).ready(function(){
     
 
     //love/unlove track (either for page tracks or player track)
-    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-wp-love-unlove a', function(e) {
+    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-wp-love-unlove a', function(e){
+        
         e.preventDefault();
+        if ( !wpsstm_get_current_user_id() ) return;
         
         var link = $(this);
         var links_wrapper = link.closest('.wpsstm-track-action-love-unlove');
@@ -88,15 +90,22 @@ $(document).ready(function(){
         track_obj.love_unlove(do_love);
 
     });
-
-    //user is not logged for action
-    $('.wpsstm-requires-auth').click(function(e) {
-        if ( !wpsstm_get_current_user_id() ){
-            e.preventDefault();
-            $('#wpsstm-bottom-notice-wp-auth').addClass('active');
-        }
-
+    
+    /*
+    //TO FIX
+    instead of the default thickbox popup (link has the 'thickbox' class), we should call it 'manually' so we can check user is logged before displaying it.
+    //tracklist selector popup.
+    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-playlists-selector a', function(e){
+        
+        e.preventDefault();
+        if ( !wpsstm_get_current_user_id() ) return;
+        
+        var popup_title = $(this).attr('title');
+        var popup_url = $(this).attr('href');
+        tb_show(popup_title, popup_url + '&TB_iframe=true');
+        
     });
+    */
 
     /*
     Player : shuffle
@@ -269,6 +278,8 @@ class WpsstmTracklist {
         //toggle love/unlove
         self.tracklist_el.find('.wpsstm-tracklist-action-love-unlove a').click(function(e) {
             e.preventDefault();
+            
+            if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
             var link_wrapper = link.closest('.wpsstm-tracklist-action-love-unlove');
@@ -283,15 +294,14 @@ class WpsstmTracklist {
                 post_id:        tracklist_id,
                 do_love:        do_love,
             };
-            
+
             self.debug("toggle_love_tracklist:" + do_love);
 
             return $.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
                 beforeSend: function() {
                     link_wrapper.addClass('loading');
                 },
@@ -333,7 +343,7 @@ class WpsstmTracklist {
 
                 var ajax_data = {
                     'action':           'wpsstm_load_tracklist',
-                    'post_id':          this.tracklist_id
+                    'post_id':          self.tracklist_id
                 };
 
                 self.tracklist_request = $.ajax({
@@ -344,16 +354,14 @@ class WpsstmTracklist {
                     dataType: 'json'
                 });
 
-                var refresh_notice = self.get_refresh_notice_el();
-                var refresh_notice_table = $(refresh_notice).clone();
-                refresh_notice_table.find('em').remove();
-                //refresh_notice_table = $( refresh_notice_table.html() );
-
-                $(bottom_wrapper_el).prepend(refresh_notice);
-                //replace 'not found' text by refresh notice
-                self.tracklist_el.find('tr.no-items td').append( refresh_notice_table );
                 self.tracklist_el.addClass('loading');
 
+                //bottom notice
+                var notice_slug = 'refresh-' + self.tracklist_idx;
+                var tracklist_title = self.tracklist_el.find('[itemprop="name"]').first().text();
+                var refresh_notice_bottom = $('<i class="fa fa-circle-o-notch fa-fw fa-spin"></i> '+wpsstmPlayer.refreshing_text+' <em>'+tracklist_title+'</em>');
+                wpsstm_bottom_notice(notice_slug,refresh_notice_bottom,false);
+                
             }else{ 
                 //already requesting
             }
@@ -378,9 +386,10 @@ class WpsstmTracklist {
 
                 self.did_tracklist_request = true; //so we can avoid running this function several times
                 
-                refresh_notice.remove();
-                refresh_notice_table.remove();
-                
+                //remove notice
+                var notice_slug = 'refresh-' + self.tracklist_idx;
+                $('#wpsstm-bottom-notice-' + notice_slug).remove();
+
                 self.tracklist_el.removeClass('loading');
 
                 //refresh timer
@@ -556,33 +565,6 @@ class WpsstmTracklist {
         
     }
 
-
-    get_refresh_notice_el(){
-
-        var self = this;
-        
-        self.debug("get_refresh_notice_el");
-        
-        var notice_el = $('<p />');
-        var tracklist_title = self.tracklist_el.find('[itemprop="name"]').first().text();
-        
-        notice_el.attr({
-            id:     'wpsstm-bottom-refresh-notice-' + self.tracklist_idx,
-            class:  'wpsstm-notice wpsstm-bottom-notice wpsstm-bottom-refresh-notice active'
-        });
-        
-        var notice_icon_el = $('<i class="fa fa-refresh fa-fw fa-spin"></i>');
-        var notice_message_el = $('<span />');
-        var playlist_title = $('<em />');
-        playlist_title.text("  " +tracklist_title);
-        notice_message_el.html(wpsstmPlayer.refreshing_text);
-        notice_message_el.append(playlist_title);
-        
-        notice_el.append(notice_icon_el).append(notice_message_el);
-
-        return notice_el;
-    }
-
     play_tracklist_track(track_idx,source_idx){
 
         var self = this;
@@ -691,6 +673,8 @@ class WpsstmTrack {
     }
     
     love_unlove(do_love){
+        
+        if ( !wpsstm_get_current_user_id() ) return;
 
         var self = this;
         
@@ -706,10 +690,11 @@ class WpsstmTrack {
 
         return $.ajax({
 
-            type: "post",
-            url: wpsstmL10n.ajaxurl,
-            data:ajax_data,
-            dataType: 'json',
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+            
             beforeSend: function() {
                 link_wrappers.addClass('loading');
             },
@@ -717,7 +702,6 @@ class WpsstmTrack {
                 if (data.success === false) {
                     console.log(data);
                 }else{
-                    
                     if (do_love){
                         link_wrappers.addClass('wpsstm-is-loved');
                     }else{
@@ -1073,11 +1057,10 @@ class WpsstmTrack {
         };
         
         self.sources_request = $.ajax({
-
-            type: "post",
-            url: wpsstmL10n.ajaxurl,
-            data:ajax_data,
-            dataType: 'json',
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
         });
 
         self.sources_request.done(function(data) {

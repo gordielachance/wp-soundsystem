@@ -241,10 +241,7 @@ Get track love/unlove icons.
 
 function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
     
-    //capability check
-    $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-    $required_cap = $post_type_obj->cap->edit_posts;
-    if ( !current_user_can($required_cap) ) return;
+    //no capability check here since we want to display the link even if the user is not logged ( = call to action - register)
 
     $wrapper_classes = array(
         'wpsstm-track-action',
@@ -291,14 +288,8 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
 }
 
 function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = null){
-    
-    $user_id = get_current_user_id();
-    if (!$user_id) return;
-    
-    //capability check
-    $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-    $required_cap = $post_type_obj->cap->edit_posts;
-    if ( !current_user_can($required_cap) ) return;
+
+    //no capability check here since we want to display the link even if the user is not logged ( = call to action - register)
     
     $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
     $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
