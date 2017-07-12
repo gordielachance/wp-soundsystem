@@ -204,7 +204,7 @@ function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
     $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
 
     $wrapper_classes = array(
-        'wpsstm-playlist-action-love-unlove'
+        'wpsstm-tracklist-action-love-unlove'
     );
     
     if ( $tracklist->is_tracklist_loved_by() ){
@@ -318,7 +318,9 @@ function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = 
         admin_url( 'admin-ajax.php' )
     );
     
-    $tracklists_link = sprintf('<a title="%s" href="%s" class="thickbox wpsstm-icon-link wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s</a>',__('Add track to playlist','wpsstm'),$ajax_url,$icon);
+    $text = __('Add track to playlist','wpsstm');
+    
+    $tracklists_link = sprintf('<a title="%s" href="%s" class="thickbox wpsstm-icon-link wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s <span>%s</span></a>',$text,$ajax_url,$icon,$text);
 
     return sprintf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
     

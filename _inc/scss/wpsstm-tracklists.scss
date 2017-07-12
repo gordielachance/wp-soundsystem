@@ -173,7 +173,13 @@
             }
         }
         .column-trackitem_actions{
+            font-size:.8em;
             text-align:center;
+            .wpsstm-track-action{
+                span{
+                    display:none;
+                }
+            }
         }
 
         th,td{
@@ -334,13 +340,7 @@
     
 }
 
-.wpsstm-track-action-love-unlove,.wpsstm-playlist-action-love-unlove{ //both for playlists & tracks
-    span{
-        display:none;
-    }
-    a{
-        border:none!important;
-    }
+.wpsstm-track-action-love-unlove,.wpsstm-tracklist-action-love-unlove{ //both for playlists & tracks
     > :nth-child(1){ //loading
         display:none;
     }
@@ -374,12 +374,6 @@
 }
 
 .wpsstm-track-action-playlists-selector{
-    span{
-        display:none;
-    }
-    a{
-        border:none!important;
-    }
     > :nth-child(1){ //loading
         display:none;
     }

@@ -267,11 +267,11 @@ class WpsstmTracklist {
         });
 
         //toggle love/unlove
-        self.tracklist_el.find('.wpsstm-playlist-action-love-unlove a').click(function(e) {
+        self.tracklist_el.find('.wpsstm-tracklist-action-love-unlove a').click(function(e) {
             e.preventDefault();
 
             var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-playlist-action-love-unlove');
+            var link_wrapper = link.closest('.wpsstm-tracklist-action-love-unlove');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
             var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
