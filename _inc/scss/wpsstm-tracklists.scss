@@ -36,7 +36,6 @@
             }
         }
     }
-    
 
     .wpsstm-play-track{
         text-decoration:none;
@@ -50,7 +49,6 @@
         }
     }
 
-
     &.buffering{
         .trackitem_order{
             .wpsstm-player-icon-buffering{
@@ -61,7 +59,7 @@
             }
         }
     }
-    &.playing .wpsstm-play-track, &.active .wpsstm-play-track{
+    &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
         .wpsstm-player-icon{
             display:none;
         }
@@ -134,8 +132,6 @@
     
     position:relative;
     font-family: sans-serif;
-    padding: 1em 0;
-    font-size:.8em;
     
     .hentry &{
         margin-bottom: 2em;
@@ -338,6 +334,11 @@
         }
     }
     
+}
+
+.hentry .wpsstm-tracklist{
+    padding: 1em 0;
+    font-size:.8em;
 }
 
 .wpsstm-track-action-love-unlove,.wpsstm-tracklist-action-love-unlove{ //both for playlists & tracks

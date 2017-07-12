@@ -93,6 +93,13 @@
                 font-size: .6em;
                 position:relative;
                 width: 90%;
+                
+                table{
+                    padding:0;
+                    margin:0;
+                    width:100%;
+                }
+                
                 [itemprop="track"]{
                     width:100%;
                     position:relative;
@@ -103,8 +110,10 @@
                         margin: 0;
 
                         &[itemprop="image"]{
-                            padding-left: 0;
+                            padding: 0;
+                            width:4em;
                             img {
+                                
                                 max-height:3em;
                             }
                         }
@@ -115,6 +124,10 @@
                         &[itemprop="inAlbum"]{
                             display:none;
                             @extend .truncate;
+                        }
+                        
+                        &.trackitem_play_bt{
+                            display:none;
                         }
 
                     }
@@ -136,7 +149,6 @@
                         ul.wpsstm-player-sources-list{
                             position:relative;
                             display:block;
-                            font-size:.85em;
                             padding: 0;
                             margin:0;
                             margin-left: 1.5em;
