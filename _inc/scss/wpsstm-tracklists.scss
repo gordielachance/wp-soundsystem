@@ -36,6 +36,20 @@
             }
         }
     }
+    
+
+    .wpsstm-play-track{
+        text-decoration:none;
+        border-bottom:none!important; //twentyfifteen fix
+
+        .wpsstm-player-icon{
+            display:none;
+            &.wpsstm-player-icon-play{
+                display:inline-block;
+            }
+        }
+    }
+
 
     &.buffering{
         .trackitem_order{
@@ -88,18 +102,6 @@
                     @extend .wpsstm-can-click;
                 }
             }
-        }
-    }
-}
-
-a.wpsstm-play-track{
-    text-decoration:none;
-    border-bottom:none!important; //twentyfifteen fix
-
-    .wpsstm-player-icon{
-        display:none;
-        &.wpsstm-player-icon-play{
-            display:inline-block;
         }
     }
 }

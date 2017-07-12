@@ -761,6 +761,7 @@ class WpsstmTrack {
                 track_instances.addClass('playing');
                 track_instances.addClass('has-played');
                 track_instances.removeClass('error buffering ended');
+                
             break;
             case 'pause':
                 track_instances.removeClass('playing');
@@ -792,7 +793,7 @@ class WpsstmTrack {
         wpsstm_currentTrack = self;
         
         var all_tracks = $('[itemprop="track"]');
-        all_tracks.removeClass('active');
+        all_tracks.removeClass('active playing');
         
         var track_instances = self.get_track_instances();
         track_instances.addClass('active buffering');
