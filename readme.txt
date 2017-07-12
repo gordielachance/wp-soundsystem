@@ -133,12 +133,10 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
-= Standalone tracks vs Subtracks vs Live Playlist tracks ? =
+= Where are stored live playlist tracks ? =
 
-Playlist and Albums tracks are saved as Track posts.  
-The playlist / album will have a post meta *wpsstm_subtrack_ids* that contains an array of ordered track IDs.  It is what we call "subtracks" in the plugin's code.
-
-Unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a [transient](https://codex.wordpress.org/Transients_API), to avoid creating too much posts over and over.  The name of that transient starts with *wpsstm_ltracks_*.
+The Live Playlists tracks are not stored as Track posts but as a [transient](https://codex.wordpress.org/Transients_API), to avoid creating too much posts over and over.  The name of that transient starts with *wpsstm_ltracks_*.
+If a user has an interaction with a track (added to a playlist or to favorites), the track will be created as Track post.
 
 == Screenshots ==
 
@@ -190,7 +188,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 = 1.0.1 =
 * Improved sources / autosource code
-* lastfm.js : fixed displayAuthNotices()
+* lastfm.js : fixed lastfm_auth_notice()
 * removed 'autoredirect' option
 * WP_SoundSystem_Core_Wizard : option to delete current cache
 * fixed ignore cache in wizard
