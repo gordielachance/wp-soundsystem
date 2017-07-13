@@ -551,6 +551,30 @@ class WP_SoundSystem_Track{
             'icon' =>       null,
             'classes' =>    array('track-action'),
         );
+        
+        //track details
+        $info_text = __('Details', 'wpsstm');
+        
+        $ajax_url = add_query_arg( 
+            array( 
+                'action'        => 'wpsstm_track_details',
+                'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album),
+                //'width'         => '600', 
+                //'height'        => '550' 
+            ), 
+            admin_url( 'admin-ajax.php' )
+        );
+
+        $link_attr = array(
+            'title'     => __('Track details', 'wpsstm'),
+            'href'      => $ajax_url,
+            'class'     => implode(' ',array('thickbox'))
+        );
+
+        $track_actions['details'] = array(
+            'icon' =>   '<i class="fa fa-address-card-o" aria-hidden="true"></i>',
+            'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$info_text)
+        );
 
         //add to playlist
         $append_text = __('Add','wpsstm');

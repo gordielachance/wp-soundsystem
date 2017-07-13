@@ -69,6 +69,10 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
         add_action('wp_ajax_nopriv_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
         
+        //ajax : track details
+        add_action('wp_ajax_wpsstm_track_details', array($this,'ajax_popup_track_details'));
+        add_action('wp_ajax_nopriv_wpsstm_track_details', array($this,'ajax_popup_track_details'));
+        
         //ajax : playlist selector
         add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_popup_track_playlists'));
         
@@ -519,6 +523,22 @@ class WP_SoundSystem_Core_Tracks{
         $tracklist->add($tracks);
         $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
         return sprintf('<div id="wpsstm-track-popup-header">%s</div>',$tracklist_table);
+    }
+    
+    function ajax_popup_track_details(){
+        $ajax_data = wp_unslash($_REQUEST);
+        
+        /*
+        Track
+        */
+        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $track = new WP_SoundSystem_Track($track_args);
+        
+        $popup_header = $this->track_popup_header($track);
+        
+        printf('<div id="wpsstm-track-details" class="wpsstm-popup-content">%s</div>',$popup_header);
+        die();
+        
     }
     
     function ajax_popup_track_playlists(){
