@@ -72,7 +72,7 @@ class WP_SoundSystem_Core_Sources{
     function metabox_sources_content( $post ){
         
         $track = new WP_SoundSystem_Track( array('post_id'=>$post->ID) );
-        echo $track->get_track_sources_wizard($post->ID);
+        echo $track->sources_manager();
         
         wp_nonce_field( 'wpsstm_sources_meta_box', 'wpsstm_sources_meta_box_nonce' );
     }

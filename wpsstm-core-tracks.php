@@ -68,17 +68,11 @@ class WP_SoundSystem_Core_Tracks{
         //ajax : get tracks source auto
         add_action('wp_ajax_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
         add_action('wp_ajax_nopriv_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
-        
-        //ajax : track details
-        add_action('wp_ajax_wpsstm_track_details', array($this,'ajax_popup_track_details'));
-        add_action('wp_ajax_nopriv_wpsstm_track_details', array($this,'ajax_popup_track_details'));
-        
-        //ajax : playlist selector
-        add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_popup_track_playlists'));
-        
-        //ajax : sources manager
-        add_action('wp_ajax_wpsstm_track_sources_manager', array($this,'ajax_popup_track_sources'));
-        
+
+        //ajax : track popup
+        add_action('wp_ajax_wpsstm_track_popup', array($this,'ajax_track_popup'));
+        add_action('wp_ajax_nopriv_wpsstm_track_popup', array($this,'ajax_track_popup'));
+
         //ajax : add new tracklist
         add_action('wp_ajax_wpsstm_create_playlist', array($this,'ajax_create_playlist'));
         
@@ -524,26 +518,11 @@ class WP_SoundSystem_Core_Tracks{
         $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
         return sprintf('<div id="wpsstm-track-popup-header">%s</div>',$tracklist_table);
     }
-    
-    function ajax_popup_track_details(){
-        $ajax_data = wp_unslash($_REQUEST);
-        
-        /*
-        Track
-        */
-        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
-        $track = new WP_SoundSystem_Track($track_args);
-        
-        $popup_header = $this->track_popup_header($track);
-        
-        printf('<div id="wpsstm-track-details" class="wpsstm-popup-content">%s</div>',$popup_header);
-        die();
-        
-    }
-    
-    function ajax_popup_track_playlists(){
+
+    function ajax_track_popup(){
 
         $ajax_data = wp_unslash($_REQUEST);
+        $popup_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
         
         /*
         Track
@@ -555,32 +534,22 @@ class WP_SoundSystem_Core_Tracks{
         //wpsstm()->debug_log($track,"ajax_popup_track_playlists() - track");
 
         $popup_header = $this->track_popup_header($track);
-
-        /*
-        Playlists list
-        */
+        echo $popup_header;
         
-        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
-
-        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$tracklist_ids));
+        switch($popup_action){
+            case 'track_details':
+                echo"track details";
+            break;
+            case 'playlists_manger':
+                echo $track->playlists_manager();
+            break;
+            case 'sources_manager':
+                echo $track->sources_manager();
+            break;
+        }
         
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $labels = get_post_type_labels($post_type_obj);
-        $submit = sprintf('<input type="submit" value="%s"/>',$labels->add_new);
-        $new_playlist_bt = sprintf('<p id="wpsstm-new-playlist-add">%s</p>',$submit);
-        
-        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"%s%s%s</div>',$filter_playlists_input,$list_all,$new_playlist_bt);
 
-        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s%s</div>',$popup_header,$existing_playlists_wrapper);
         die();
-    }
-    
-    function ajax_popup_track_sources(){
-        $ajax_data = wp_unslash($_REQUEST);
-        $track_args = $ajax_data['track'];
-        $track = new WP_SoundSystem_Track($track_args);
-        
-        echo $track->get_track_sources_wizard(); //TO FIX check is not redundent with metabox_sources_content()
     }
 
     function ajax_create_playlist(){

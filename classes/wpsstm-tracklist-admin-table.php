@@ -364,17 +364,9 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
                     $sources_display =  $item->sources;
                     $display_el = ( $sources_display ) ?  count($sources_display) : '—';
                     $field_value_name = $this->get_field_name($item,'sources');
-
-                    $ajax_url = add_query_arg( 
-                        array( 
-                            'action'        => 'wpsstm_track_sources_manager',
-                            'track'         => array('post_id'=>$item->post_id,'artist'=>$item->artist,'title'=>$item->title,'album'=>$item->album),
-                            'width'         => '600', 
-                            'height'        => '550' 
-                        ), 
-                        admin_url( 'admin-ajax.php' )
-                    );
                     
+                    $ajax_url = $item->get_track_popup_url('sources_manager');
+
                     $sources_popup_link = sprintf('<a title="%s" href="%s" class="thickbox">%s</a>',__('Sources manager','wpsstm'),$ajax_url,__('Manage sources','wpsstm'));
 
                     $edit_el = $sources_popup_link;

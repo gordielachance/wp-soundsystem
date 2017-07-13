@@ -359,46 +359,6 @@ class WP_SoundSystem_Track{
         return in_array($user_id,(array)$loved_by);
     }
     
-    /*
-    Track Sources
-    */
-    
-    function get_track_sources_wizard( $field_name = 'wpsstm_sources' ){
-        
-        $sources = ($this->sources) ? $this->sources : array();
-        $field_name_attr = null;
-
-        $default = new WP_SoundSystem_Source();
-        array_unshift($sources,$default); //add blank line
-        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources, $field_name);
-        
-        $popup_header = wpsstm_tracks()->track_popup_header($this);
-
-        $desc = array();
-        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
-        
-        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
-        
-        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        $desc = implode("\n",$desc);
-
-        $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
-        
-        $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
-
-        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s">%s<div>%s</div><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$this->artist,$this->album,$this->title,$popup_header,$desc,$sources_inputs,$suggest_link);
-
-    }
-    
     function populate_track_sources_auto( $args = null ){
 
         if (!$this->artist || !$this->title) return;
@@ -543,6 +503,19 @@ class WP_SoundSystem_Track{
         }
     }
     
+    function get_track_popup_url($track_action,$args = null){
+        
+        $default_args = array( 
+            'action'        => 'wpsstm_track_popup',
+            'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album)
+        );
+        
+        $args = wp_parse_args((array)$args,$default_args);
+        $args['track_action'] = $track_action;
+        
+        return add_query_arg($args,admin_url( 'admin-ajax.php' ));
+    }
+    
     function get_track_actions_el(){
         
         $track_actions = array();
@@ -551,23 +524,13 @@ class WP_SoundSystem_Track{
             'icon' =>       null,
             'classes' =>    array('track-action'),
         );
-        
+
         //track details
         $info_text = __('Details', 'wpsstm');
-        
-        $ajax_url = add_query_arg( 
-            array( 
-                'action'        => 'wpsstm_track_details',
-                'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album),
-                //'width'         => '600', 
-                //'height'        => '550' 
-            ), 
-            admin_url( 'admin-ajax.php' )
-        );
 
         $link_attr = array(
             'title'     => __('Track details', 'wpsstm'),
-            'href'      => $ajax_url,
+            'href'      => $this->get_track_popup_url('track_details'),
             'class'     => implode(' ',array('thickbox'))
         );
 
@@ -579,20 +542,10 @@ class WP_SoundSystem_Track{
         //add to playlist
         $append_text = __('Add','wpsstm');
         $action_classes = array('wpsstm-requires-auth','track-action');
-        
-        $ajax_url = add_query_arg( 
-            array( 
-                'action'        => 'wpsstm_track_playlists_selector',
-                'track'         => array('artist'=>$this->artist,'title'=>$this->title,'album'=>$this->album),
-                //'width'         => '600', 
-                //'height'        => '550' 
-            ), 
-            admin_url( 'admin-ajax.php' )
-        );
 
         $link_attr = array(
             'title'     => __('Add to playlist','wpsstm'),
-            'href'      => $ajax_url,
+            'href'      => $this->get_track_popup_url('playlists_manger'),
             'class'     => implode(' ',array('thickbox'))
         );
 
@@ -685,6 +638,24 @@ class WP_SoundSystem_Track{
             );
         }
         
+        //sources manager
+        if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
+            
+            $remove_text = __('Sources', 'wpsstm');
+
+            $link_attr = array(
+                'title'     => __('Track sources manager', 'wpsstm'),
+                'href'      => $this->get_track_popup_url('sources_manager'),
+                'class'     => implode(' ',array('thickbox'))
+            );
+
+            $track_actions['sources'] = array(
+                'icon' =>   '<i class="fa fa-cloud" aria-hidden="true"></i>',
+                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+            );
+            
+        }
+        
         //delete
         if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
             
@@ -720,6 +691,56 @@ class WP_SoundSystem_Track{
 
         return sprintf('<ul id="wpsstm-track-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
         
+    }
+    
+    function playlists_manager(){
+
+        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
+
+        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));
+        
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $labels = get_post_type_labels($post_type_obj);
+        $submit = sprintf('<input type="submit" value="%s"/>',$labels->add_new);
+        $new_playlist_bt = sprintf('<p id="wpsstm-new-playlist-add">%s</p>',$submit);
+        
+        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"%s%s%s</div>',$filter_playlists_input,$list_all,$new_playlist_bt);
+
+        return sprintf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s</div>',$existing_playlists_wrapper);
+    }
+
+    function sources_manager( $field_name = 'wpsstm_sources' ){
+        
+        $sources = ($this->sources) ? $this->sources : array();
+        $field_name_attr = null;
+
+        $default = new WP_SoundSystem_Source();
+        array_unshift($sources,$default); //add blank line
+        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources, $field_name);
+
+        $desc = array();
+        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
+        
+        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
+        
+        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        $desc = implode("\n",$desc);
+
+        $field_name_attr = sprintf('data-wpsstm-autosources-field-name="%s"',$field_name);
+        
+        $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
+
+        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s">%s<div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$this->artist,$this->album,$this->title,$desc,$sources_inputs,$suggest_link);
+
     }
     
 }
