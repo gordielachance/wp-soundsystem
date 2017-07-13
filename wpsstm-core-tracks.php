@@ -673,7 +673,7 @@ class WP_SoundSystem_Core_Tracks{
         $track = new WP_SoundSystem_Track( $track_args );
         
         //track ID is required
-        if ( !$track->post_id && !$track->populate_track_post_auto() ) return;
+        if ( !$track->post_id && !$track->populate_track_post_auto() ) return;//track does not exists in DB
 
         //wpsstm()->debug_log($track,"ajax_remove_playlist_track()"); 
         
