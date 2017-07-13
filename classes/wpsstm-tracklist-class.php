@@ -69,6 +69,7 @@ class WP_SoundSystem_Tracklist{
                 'post_id'  => $subtrack_id
             );
             $track = new WP_SoundSystem_Track($track_args);
+            $subtracks[] = $track;
         }
         
         $this->add($subtracks);
