@@ -424,3 +424,13 @@ Thickbox popups
 #wpsstm-tracklist-all-actions .wpsstm-actions-list#wpsstm-tracklist-admin-actions li#tracklist-admin-action-status-switch.expanded form {
   display: inline-block;
 }
+
+/* line 390, ../scss/wpsstm-tracklists.scss */
+#wpsstm-track-all-actions .wpsstm-actions-list {
+  display: inline;
+  padding: 0;
+}
+/* line 393, ../scss/wpsstm-tracklists.scss */
+#wpsstm-track-all-actions .wpsstm-actions-list li {
+  padding: 0 .1em;
+}

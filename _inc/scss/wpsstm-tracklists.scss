@@ -385,3 +385,19 @@
         }
     }
 }
+
+#wpsstm-track-all-actions{
+    .wpsstm-actions-list{
+        display:inline;
+        padding: 0;
+        li{
+            padding: 0 .1em;
+        }
+        &#wpsstm-track-admin-actions{
+
+            li{
+
+            }
+        }
+    }
+}
