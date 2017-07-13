@@ -531,14 +531,29 @@ class WP_SoundSystem_Core_Tracks{
         $track = new WP_SoundSystem_Track($track_args);
         $tracklist_ids = $track->get_parent_ids();
         
-        //wpsstm()->debug_log($track,"ajax_popup_track_playlists() - track");
+        //wpsstm()->debug_log(json_encode($track,JSON_UNESCAPED_UNICODE),"ajax_track_popup()");
 
         $popup_header = $this->track_popup_header($track);
         echo $popup_header;
         
         switch($popup_action){
             case 'track_details':
-                echo"track details";
+                
+                $text_el = null;
+                $bio = wpsstm_lastfm()->get_artist_bio($track->artist);
+                
+                //artist
+                if ( $bio['summary'] ){
+                    $artist_text = $bio['summary'];
+                }else{
+                    $artist_text = __('No data found for this artist','wpsstm');
+                }
+                
+                
+                $title_el = sprintf('<h2>%s</h2>',$track->artist);
+                printf('<div>%s%s</div>',$title_el,$artist_text);
+                
+                
             break;
             case 'playlists_manger':
                 echo $track->playlists_manager();
