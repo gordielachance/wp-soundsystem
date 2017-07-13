@@ -232,8 +232,8 @@ class WP_SoundSystem_Tracklist_Table{
             }else{
             */
                 $loading_icon = '<i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>';
-                $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
-                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_link);
+                $tracklist_action = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
+                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_action);
             //}
             
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
@@ -252,85 +252,13 @@ class WP_SoundSystem_Tracklist_Table{
                 $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
                 
             }
-        
-            //refresh link
-            if ( method_exists($this->tracklist,'get_refresh_link') ) {
-                $refresh_link_el = $this->tracklist->get_refresh_link();
-            }
 
             printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
 
             if ( !wpsstm_is_backend() ){
-                ?>
-                <div class="alignright actions wpsstm-tracklist-actions">
-                    <?php
-                        $tracklist_links = array();
-                        $temp_status = wpsstm_wizard()->wizard_post_status;
-                        $post_status = get_post_status($this->tracklist->post_id);
-                        $post_type = get_post_type($this->tracklist->post_id);
-                        $permalink = get_permalink($this->tracklist->post_id);
-                
-                        if ($user_id = get_current_user_id() ){
-                            
-                            //status switcher
-                            $status_options = array();
-                            
-                            $statii = array(
-                                $temp_status    => __('Temporary','wpsstm'),
-                                'draft'         => __('Draft'),
-                                'publish'       => __('Published'),
-                                'private'       => __('Private'),
-                                'trash'         => __('Trash'),
-                            );
-
-                            //show temporary status only when it has that status
-                            
-                            if ($post_status != $temp_status) unset($statii[$temp_status]);
-
-                            foreach($statii as $status=>$str){
-                                $selected = selected($post_status, $status, false);
-                                $status_options[] = sprintf('<option value="%s" %s>%s</option>',$status,$selected,$str);
-                            }
-
-                            $status_options_str = implode("\n",$status_options);
-                            $form_onchange = "if(this.value !='') { this.form.submit(); }";
-                            $tracklist_links[] = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="frontend-wizard-action" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str);
-                            
-                            //static playlist switch
-                            if ( ($post_status != $temp_status) && ($post_type == wpsstm()->post_type_live_playlist ) ){
-                                $switch_type_url = add_query_arg(array('frontend-wizard-action'=>'import'),$permalink);
-                                $switch_type_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                                $switch_type_text = __('Make static', 'wpsstm');
-                                $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$switch_type_text,$switch_type_url,$switch_type_icon,$switch_type_text);
-                            }
-                            
-                        }
-
-                        if ( in_array($post_status,array('publish',$temp_status)) ){
-                            //share
-                            $share_url = wpsstm_get_tracklist_link($this->tracklist->post_id);
-                            $share_icon = '<i class="fa fa-share-alt" aria-hidden="true"></i>';
-                            $share_text = __('Share', 'wpsstm');
-                            $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-share">%s <span>%s</span></a>',$share_text,$share_url,$share_icon,$share_text);
-   
-                            //xspf
-                            $xspf_url = wpsstm_get_tracklist_link($this->tracklist->post_id,'xspf');
-                            $xspf_icon = '<i class="fa fa-rss" aria-hidden="true"></i>';
-                            $xspf_text = __('XSPF', 'wpsstm');
-                            $tracklist_links[] = sprintf('<a title="%s" href="%s" target="_blank" class="wpsstm-tracklist-action-xspf">%s <span>%s</span></a>',$xspf_text,$xspf_url,$xspf_icon,$xspf_text);
-                        }
-
-                        //favorite
-                        if ( $this->tracklist->post_id ) {
-                            $tracklist_links[] = wpsstm_get_tracklist_loveunlove_icons($this->tracklist->post_id);
-                        }
-                        
-                        $tracklist_links = apply_filters('wpsstm_tracklist_links',$tracklist_links);
-
-                        echo implode("\n",$tracklist_links);
-                    ?>
-                </div>
-            <?php 
+                $actions = $this->tracklist->get_tracklist_actions_el();
+                $admin_actions = $this->tracklist->get_tracklist_admin_actions_el();
+                printf('<div id="wpsstm-tracklist-all-actions">%s%s</div>',$actions,$admin_actions);
             }
             ?>
         </div>
@@ -636,9 +564,7 @@ class WP_SoundSystem_Tracklist_Table{
                 return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
-                $love_unlove = wpsstm_get_track_loveunlove_icons($item);
-                $add_to_playlists = wpsstm_get_track_playlists_selector_link($item);
-                return $love_unlove.$add_to_playlists;
+                return $item->get_track_actions_el();
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes

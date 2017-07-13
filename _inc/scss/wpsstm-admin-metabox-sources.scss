@@ -59,8 +59,7 @@ div.wpsstm-source{
 }
 
 .wpsstm-manage-sources-wrapper.loading{
-    pointer-events: none;
-    @include opacity(.5);
+    @extend .wpsstm-loading-el;
 }
 
 

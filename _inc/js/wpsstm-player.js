@@ -69,16 +69,13 @@ $(document).ready(function(){
 
     });
     
-
-    //love/unlove track (either for page tracks or player track)
-    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-wp-love-unlove a', function(e){
+    //favorite track
+    $(document).on( "click",'[itemprop="track"] #track-action-favorite a', function(e){
         
         e.preventDefault();
         if ( !wpsstm_get_current_user_id() ) return;
         
         var link = $(this);
-        var links_wrapper = link.closest('.wpsstm-track-action-love-unlove');
-        var do_love = !links_wrapper.hasClass('wpsstm-is-loved');
 
         var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
         var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
@@ -87,7 +84,87 @@ $(document).ready(function(){
         var track_idx = track_el.attr('data-wpsstm-track-idx');
 
         var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
-        track_obj.love_unlove(do_love);
+
+        var ajax_data = {
+            action:         'wpsstm_love_unlove_track',
+            do_love:        true,
+            track:          track_obj.build_request_obj()
+        };
+
+        return $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+            
+            beforeSend: function() {
+                link.addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    var track_instances = track_obj.get_track_instances();
+                    track_instances.find('#track-action-favorite').removeClass('active');
+                    track_instances.find('#track-action-unfavorite').addClass('active');
+                }
+            },
+            complete: function() {
+                link.removeClass('loading');
+                $(document).trigger( "wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+            }
+        })
+
+    });
+    
+    //unfavorite track
+    $(document).on( "click",'[itemprop="track"] #track-action-unfavorite a', function(e){
+        
+        e.preventDefault();
+        if ( !wpsstm_get_current_user_id() ) return;
+        
+        var link = $(this);
+        var action_wrapper = link.closest('.track-action');
+
+        var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
+        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+
+        var track_el = link.closest('[itemprop="track"]');
+        var track_idx = track_el.attr('data-wpsstm-track-idx');
+
+        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+
+        var ajax_data = {
+            action:         'wpsstm_love_unlove_track',
+            do_love:        false,
+            track:          track_obj.build_request_obj()
+        };
+
+        return $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+            
+            beforeSend: function() {
+                action_wrapper.addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    var track_instances = track_obj.get_track_instances();
+                    track_instances.find('#track-action-favorite').addClass('active');
+                    track_instances.find('#track-action-unfavorite').removeClass('active');
+                }
+            },
+            complete: function() {
+                action_wrapper.removeClass('loading');
+                $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+            }
+        })
 
     });
     
@@ -95,7 +172,7 @@ $(document).ready(function(){
     //TO FIX
     instead of the default thickbox popup (link has the 'thickbox' class), we should call it 'manually' so we can check user is logged before displaying it.
     //tracklist selector popup.
-    $(document).on( "click",'[itemprop="track"] .wpsstm-track-action-playlists-selector a', function(e){
+    $(document).on( "click",'[itemprop="track"] .track-action-playlist-append a', function(e){
         
         e.preventDefault();
         if ( !wpsstm_get_current_user_id() ) return;
@@ -258,9 +335,7 @@ class WpsstmTracklist {
         */
         
         //refresh
-        var refresh_link = self.tracklist_el.find("a.wpsstm-refresh-playlist");
-
-        $(refresh_link).click(function(e) {
+        self.tracklist_el.find("#tracklist-action-refresh a").click(function(e) {
             e.preventDefault();
             //unset request status
             self.debug("clicked 'refresh' link");
@@ -269,33 +344,32 @@ class WpsstmTracklist {
         });
         
         //share
-        self.tracklist_el.find('a.wpsstm-tracklist-action-share').click(function(e) {
+        self.tracklist_el.find('#tracklist-action-share a').click(function(e) {
           e.preventDefault();
           var text = $(this).attr('href');
           wpsstm_clipboard_box(text);
         });
 
-        //toggle love/unlove
-        self.tracklist_el.find('.wpsstm-tracklist-action-love-unlove a').click(function(e) {
+        //favorite
+        self.tracklist_el.find('#tracklist-action-favorite a').click(function(e) {
             e.preventDefault();
             
             if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-tracklist-action-love-unlove');
+            var action_li = $(this).closest('li');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
-            var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
 
             if (!tracklist_id) return;
 
             var ajax_data = {
                 action:         'wpsstm_love_unlove_tracklist',
                 post_id:        tracklist_id,
-                do_love:        do_love,
+                do_love:        true,
             };
 
-            self.debug("toggle_love_tracklist:" + do_love);
+            self.debug("favorite tracklist:" + tracklist_id);
 
             return $.ajax({
                 type:       "post",
@@ -303,23 +377,72 @@ class WpsstmTracklist {
                 data:       ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    link_wrapper.addClass('loading');
+                    action_li.addClass('loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
                     }else{
-                        if (do_love){
-                            link_wrapper.addClass('wpsstm-is-loved');
-                        }else{
-                            link_wrapper.removeClass('wpsstm-is-loved');
-                        }
+                        var tracklist_instances = self.get_tracklist_instances()
+                        tracklist_instances.find('#tracklist-action-favorite').removeClass('active');
+                        tracklist_instances.find('#tracklist-action-unfavorite').addClass('active');
                     }
                 },
                 complete: function() {
-                    link_wrapper.removeClass('loading');
+                    action_li.removeClass('loading');
                 }
             })
+        });
+        
+        //unfavorite
+        self.tracklist_el.find('#tracklist-action-unfavorite a').click(function(e) {
+            e.preventDefault();
+            
+            if ( !wpsstm_get_current_user_id() ) return;
+
+            var link = $(this);
+            var action_li = $(this).closest('li');
+            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
+            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
+
+            if (!tracklist_id) return;
+
+            var ajax_data = {
+                action:         'wpsstm_love_unlove_tracklist',
+                post_id:        tracklist_id,
+                do_love:        false,
+            };
+
+            self.debug("unfavorite tracklist:" + tracklist_id);
+
+            return $.ajax({
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+                beforeSend: function() {
+                    action_li.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                    }else{
+                        var tracklist_instances = self.get_tracklist_instances()
+                        tracklist_instances.find('#tracklist-action-unfavorite').removeClass('active');
+                        tracklist_instances.find('#tracklist-action-favorite').addClass('active');
+                    }
+                },
+                complete: function() {
+                    action_li.removeClass('loading');
+                }
+            })
+        });
+        
+        //switch status
+        self.tracklist_el.find("#tracklist-admin-action-status-switch a").click(function(e) {
+            e.preventDefault();
+            $(this).closest('li').toggleClass('expanded');
+            
         });
         
         self.tracklist_el.toggleTracklist();
@@ -383,7 +506,6 @@ class WpsstmTracklist {
             });  
             
             self.tracklist_request.always(function() {
-
                 self.did_tracklist_request = true; //so we can avoid running this function several times
                 
                 //remove notice
@@ -406,7 +528,8 @@ class WpsstmTracklist {
         
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
             self.can_play = false;
-            self.tracklist_el.addClass('error');
+            self.tracklist_el.addClass('refresh-error');
+            self.tracklist_el.find('#tracklist-action-refresh').addClass('error');
             console.log("get_tracklist_request failed for tracklist #" + self.tracklist_idx);
         });
 
@@ -670,51 +793,6 @@ class WpsstmTrack {
     debug(msg){
         var prefix = "WpsstmTrack #" + this.track_idx + " in playlist #"+ this.tracklist_idx +": ";
         wpsstm_debug(msg,prefix);
-    }
-    
-    love_unlove(do_love){
-        
-        if ( !wpsstm_get_current_user_id() ) return;
-
-        var self = this;
-        
-        var track_instances = self.get_track_instances();
-        
-        var link_wrappers = track_instances.find('.wpsstm-track-action-love-unlove');
-
-        var ajax_data = {
-            action:         'wpsstm_love_unlove_track',
-            do_love:        do_love,
-            track:          self.build_request_obj()
-        };
-
-        return $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-            
-            beforeSend: function() {
-                link_wrappers.addClass('loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                }else{
-                    if (do_love){
-                        link_wrappers.addClass('wpsstm-is-loved');
-                    }else{
-                        link_wrappers.removeClass('wpsstm-is-loved');
-                    }
-
-                }
-            },
-            complete: function() {
-                link_wrappers.removeClass('loading');
-                $(document).trigger( "wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-            }
-        })
     }
 
     get_track_instances(ancestor){

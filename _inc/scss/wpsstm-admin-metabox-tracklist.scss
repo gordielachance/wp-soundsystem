@@ -6,8 +6,7 @@
     #wpsstm-subtracks-list{
 
         .loading{
-            pointer-events: none;
-            @include opacity(0.5);
+            @extend .wpsstm-loading-el;
         }
 
         >.search-box{ //filter links
@@ -19,7 +18,7 @@
         }
 
         >.tablenav{ //bulk actions
-            #wpsstm-tracklist-actions{
+            .wpsstm-actions-list{
                 overflow:auto;
                 a{
                     margin:0;

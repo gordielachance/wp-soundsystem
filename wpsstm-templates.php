@@ -195,28 +195,6 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
 
 }
 
-/*
-Get playlist love/unlove icons.
-*/
-
-function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
-    
-    $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
-
-    $wrapper_classes = array(
-        'wpsstm-tracklist-action-love-unlove'
-    );
-    
-    if ( $tracklist->is_tracklist_loved_by() ){
-        $wrapper_classes[] = 'wpsstm-is-loved';
-    }
-    
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-tracklist-action wpsstm-tracklist-love"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add playlist to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-tracklist-action wpsstm-tracklist-unlove"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove playlist from favorites','wpsstm'));
-    return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
-}
-
 function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
     if (!$post_id) $post_id = get_the_ID();
     
@@ -234,29 +212,6 @@ function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
     $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
 
     return $refresh_time_el;
-}
-/*
-Get track love/unlove icons.
-*/
-
-function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
-    
-    //no capability check here since we want to display the link even if the user is not logged ( = call to action - register)
-
-    $wrapper_classes = array(
-        'wpsstm-track-action',
-        'wpsstm-track-action-love-unlove',
-        'wpsstm-track-action-wp-love-unlove'
-    );
-    
-    if ( $track && $track->is_track_loved_by() ){
-        $wrapper_classes[] = 'wpsstm-is-loved';
-    }
-
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
-    return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
 
 function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
@@ -285,36 +240,6 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
     $post_ids = $query->posts;
     
     return $post_ids;
-}
-
-function wpsstm_get_track_playlists_selector_link(WP_SoundSystem_Track $track = null){
-
-    //no capability check here since we want to display the link even if the user is not logged ( = call to action - register)
-    
-    $icon = '<i class="fa fa-list" aria-hidden="true"></i>';
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    
-    $wrapper_classes = array(
-        'wpsstm-track-action',
-        'wpsstm-track-action-playlists-selector'
-    );
-    
-    $ajax_url = add_query_arg( 
-        array( 
-            'action'        => 'wpsstm_track_playlists_selector',
-            'track'         => array('artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album),
-            //'width'         => '600', 
-            //'height'        => '550' 
-        ), 
-        admin_url( 'admin-ajax.php' )
-    );
-    
-    $text = __('Add track to playlist','wpsstm');
-    
-    $tracklists_link = sprintf('<a title="%s" href="%s" class="thickbox wpsstm-icon-link wpsstm-requires-auth wpsstm-track-action wpsstm-tracklist-chooser">%s <span>%s</span></a>',$text,$ajax_url,$icon,$text);
-
-    return sprintf('<span %s>%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$tracklists_link);
-    
 }
 
 function wpsstm_get_user_playlists_list($args = null,$user_id = false){

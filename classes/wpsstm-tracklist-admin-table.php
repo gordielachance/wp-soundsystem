@@ -112,7 +112,7 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
 
         protected function extra_tablenav($which){
         ?>
-                <div id="wpsstm-tracklist-actions" class="actions">
+                <div id="wpsstm-tracklist-actions" class="wpsstm-actions-list">
                     <?php
                     if ( $this->can_manage_rows ){  
                         if ( 'top' == $which ) {

@@ -17,6 +17,10 @@
     cursor: pointer;
     cursor: hand;
 }
+.wpsstm-loading-el{
+    pointer-events: none;
+    @include opacity(.5);
+}
 
 .ellipsis{
     display:block;
@@ -39,6 +43,22 @@
     }
 
 }
+
+ul.wpsstm-actions-list{
+    
+    list-style: none;
+    li {
+        display:inline-block;
+        
+        &.loading{
+            @extend .wpsstm-loading-el;
+        }
+        &.error,&.error a{
+            color:red;
+        }
+    }
+}
+
 /*
 Thickbox popups
 */
