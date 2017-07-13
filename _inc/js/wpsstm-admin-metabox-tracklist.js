@@ -94,18 +94,8 @@ jQuery(function($){
             $('#post-bkmarks-bulk-action-selector-top').val("save");
             
             //reorder
-            wpsstm_tracklist_reorder();
+            //update_rows_order();
 
-        });
-
-        // sort rows
-        $( wrapper ).find( '#the-list' ).sortable({
-            handle: '.metabox-table-row-draghandle',
-
-            update: function(event, ui) {
-                wpsstm_tracklist_reorder();
-                wpsstm_tracklist_order_update();
-            }
         });
 
     })
@@ -173,7 +163,7 @@ function wpsstm_tracklist_row_action(row_action_link){
                 }
                 if ( (track_action == 'remove') || (track_action == 'delete') ){
                     row.remove();
-                    wpsstm_tracklist_reorder();
+                    //update_rows_order();
                 }
 
             }
@@ -188,62 +178,3 @@ function wpsstm_tracklist_row_action(row_action_link){
         }
     })
 }
-
-function wpsstm_tracklist_reorder(){
-    var wrapper = jQuery('#wpsstm-subtracks-list');
-    var all_rows = wrapper.find( '#the-list tr' );
-    jQuery.each( all_rows, function( key, value ) {
-      var order_input = jQuery(this).find('.column-trackitem_order input');
-        order_input.val(key);
-    });
-}
-
-function wpsstm_tracklist_order_update(){
-    var wrapper = jQuery('#wpsstm-subtracks-list');
-    var all_rows = wrapper.find( '#the-list tr' );
-    var new_order = [];
-    
-    jQuery.each( all_rows, function( key, value ) {
-        
-        var subtrack_id = jQuery(this).find('input[type="hidden"]').val();
-        if (subtrack_id != 0) {
-            new_order.push(subtrack_id);
-        }
-    });
-    
-    //ajax update order
-    var table = wrapper.find('table.wp-list-table');
-    
-    var ajax_data = {
-        'action'            : 'wpsstm_tracklist_update_order',
-        'post_id'           : wrapper.attr('data-wpsstm-tracklist-id'),
-        'subtracks_order'   : new_order
-    };
-
-    
-    jQuery.ajax({
-        type: "post",
-        url: wpsstmL10n.ajaxurl,
-        data:ajax_data,
-        dataType: 'json',
-        beforeSend: function() {
-            table.addClass('loading');
-        },
-        success: function(data){
-            if (data.success === false) {
-                console.log(data);
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            console.log(xhr.status);
-            console.log(thrownError);
-        },
-        complete: function() {
-            table.removeClass('loading');
-        }
-    })
-
-}
-
-
-

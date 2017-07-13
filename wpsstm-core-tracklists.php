@@ -84,9 +84,8 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_wpsstm_tracklist_row_action', array($this,'ajax_tracklist_row_action'));
         //add_action('wp_ajax_nopriv_wpsstm_tracklist_row_action', array($this,'ajax_tracklist_row_action'));
         
-        //ajax : tracklist reorder
-        //add_action('wp_ajax_wpsstm_tracklist_update_order', array($this,'ajax_tracklist_reorder'));
-        //add_action('wp_ajax_nopriv_wpsstm_tracklist_update_order', array($this,'ajax_tracklist_reorder'));
+        //ajax : update tracklist track position
+        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_track_position'));
 
     }
     
@@ -209,7 +208,7 @@ class WP_SoundSystem_Core_Tracklists{
         wp_enqueue_style( 'wpsstm-admin-metabox-tracklist',  wpsstm()->plugin_url . '_inc/css/wpsstm-admin-metabox-tracklist.css',null,wpsstm()->version );
         
         // JS
-        wp_enqueue_script( 'wpsstm-admin-metabox-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-admin-metabox-tracklist.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-admin-metabox-tracklist', wpsstm()->plugin_url . '_inc/js/wpsstm-admin-metabox-tracklist.js', array('jquery'),wpsstm()->version);
     }
 
     /**
@@ -582,8 +581,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
-    function ajax_tracklist_reorder(){
-        
+    function ajax_update_track_position(){
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
@@ -592,17 +590,18 @@ class WP_SoundSystem_Core_Tracklists{
             'input'     => $ajax_data
         );
 
-        $result['post_id']  =           $post_id =          ( isset($ajax_data['post_id']) ) ?          $ajax_data['post_id'] : null;
-        $result['subtracks_order']   =  $subtracks_order =  ( isset($ajax_data['subtracks_order']) ) ?  $ajax_data['subtracks_order'] : null;
+        $result['track_id']  =          $track_id =         ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
+        $result['tracklist_id']  =      $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
+        $result['position']  =          $position =         ( isset($ajax_data['position']) ) ? $ajax_data['position'] : -1;
 
-        if ( $subtracks_order && $post_id ){
+        if ( $track_id && $tracklist_id && ($position != -1) ){
 
             //populate a tracklist with the selected tracks
-            $tracklist = new WP_SoundSystem_Tracklist($post_id);
+            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
             $tracklist->load_subtracks();
             $result['tracklist'] = $tracklist;
             
-            $success = $tracklist->set_subtrack_ids($subtracks_order);
+            $success = $tracklist->save_track_position($track_id,$position);
             
             if ( is_wp_error($success) ){
                 $result['message'] = $success->get_error_message();

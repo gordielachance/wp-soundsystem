@@ -534,7 +534,7 @@ class WP_SoundSystem_Tracklist_Table{
                 $this->curr_track_idx++;
                 
                 $loading_icon = '<i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>';
-                $text = sprintf('<span>%s</span>',$this->curr_track_idx);
+                $text = sprintf('<span itemprop="position">%s</span>',$this->curr_track_idx);
                 return $loading_icon.$text;
                 
             case 'trackitem_play_bt':
