@@ -136,7 +136,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //try to get cache first
 
         $cache_tracks = $remote_tracks = array();
-        $this->datas = $this->datas_cache = $this->get_cache();
+        $cached_total_items = 0;
+        $this->datas = $this->datas_cache = $this->get_tracks_cache();
         
         if ($this->datas_cache){
             $transient_timeout_name = '_transient_timeout_' . $this->transient_name_cache;
@@ -202,7 +203,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
                     //set cache if there is none
                     if ( !$this->datas_cache ){
-                        $this->set_cache();
+                        $this->set_tracks_cache();
                     }
 
                 }else{
@@ -212,7 +213,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         }
         
-        wpsstm()->debug_log(json_encode(array('remote_request'=>$remote_request,'cache_tracks'=>count($cache_tracks),'has_remote_tracks'=>count($remote_tracks))),'load_remote_tracks()' );
+        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_request'=>$remote_request,'cache_tracks'=>$cached_total_items,'has_remote_tracks'=>count($remote_tracks))),'load_remote_tracks()' );
 
         //get options back from page (a preset could have changed them)
         $this->options = $this->options; 
@@ -756,10 +757,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->request_pagination = $args;
     }
     
-    public function get_cache(){
+    public function get_tracks_cache(){
 
         if ( $this->ignore_cache ){
-            wpsstm()->debug_log("ignore_cache is set","WP_SoundSystem_Remote_Tracklist::get_cache()"); 
+            wpsstm()->debug_log("ignore_cache is set","WP_SoundSystem_Remote_Tracklist::get_tracks_cache()"); 
             return;
         }
         
@@ -774,27 +775,30 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $cache_debug = $cache;
             $cache_debug['tracks_count'] = ( isset($cache['tracks']) ) ? count($cache['tracks']) : null;
             unset($cache_debug['tracks']);
-            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache_debug)),"WP_SoundSystem_Remote_Tracklist::get_cache()"); 
+            wpsstm()->debug_log(array('transient'=>$this->transient_name_cache,'cache'=>json_encode($cache_debug)),"WP_SoundSystem_Remote_Tracklist::get_tracks_cache()"); 
         }
         
         return $cache;
 
     }
     
-    function set_cache(){
+    function set_tracks_cache(){
 
         if ( !$duration_min = $this->get_options('datas_cache_min') ) return;
 
         $duration = $duration_min * MINUTE_IN_SECONDS;
-        $success = set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
+        
+        //TO FIX !!! Does not work when there is special characters (eg. see radio nova tracklist)
+        
+        $success = (bool)set_transient( $this->transient_name_cache, $this->datas_remote, $duration );
 
         $debug_cache = $this->datas_remote;
         $debug_cache['tracks_count'] = ( isset($debug_cache['tracks']) ) ? count($debug_cache['tracks']) : null;
         unset($debug_cache['tracks']);
         
-    $this->expire_time = current_time( 'timestamp', true ) + $duration; //UTC
+        $this->expire_time = current_time( 'timestamp', true ) + $duration; //UTC
             
-        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSystem_Remote_Tracklist::set_cache()"); 
+        wpsstm()->debug_log(array('success'=>$success,'transient'=>$this->transient_name_cache,'duration_min'=>$duration_min,'cache'=>json_encode($debug_cache)),"WP_SoundSystem_Remote_Tracklist::set_tracks_cache()"); 
         
     }
 

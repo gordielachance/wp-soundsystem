@@ -61,13 +61,6 @@ class WP_SoundSystem_Tracklist_Table{
         }
 
         $this->curr_track_idx = $per_page * ( $current_page - 1 );
-
-        //try to populate cached autosources if item has not any
-        foreach($this->items as $item){		
-            if (!$item->sources){
-                $item->populate_track_sources_auto(array('cache_only'=>true));
-            }	
-        }
         
         /**
          * REQUIRED. Now we need to define our column headers. This includes a complete

@@ -14,6 +14,7 @@ class WP_SoundSystem_Track{
     public $location;
 
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    public $did_post_id_lookup = false;
 
     function __construct( $args = array() ){
         
@@ -32,6 +33,9 @@ class WP_SoundSystem_Track{
         //has track ID
         if ( $this->post_id ){
             $this->populate_track_post($this->post_id);
+        }else{
+            //do not auto populate post ID to speed up page load
+            $this->populate_track_post_auto();
         }
     }
     
@@ -40,12 +44,18 @@ class WP_SoundSystem_Track{
     */
     
     function populate_track_post_auto(){
-        if ( !$this->post_id && $this->artist && $this->title ){
-            if ( $auto_post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title) ){
-                $this->populate_track_post($auto_post_id);
-            }
+        if ( $this->post_id || $this->did_post_id_lookup || (!$this->artist || !$this->title) ) return;
+            
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
+
+        if ( $auto_post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title) ){
+            $this->populate_track_post($auto_post_id);
+            return $this->post_id;
         }
-        return $this->post_id;
+
+        $this->did_post_id_lookup = true;
+
+        
     }
     
     function populate_track_post($post_id){
@@ -55,7 +65,7 @@ class WP_SoundSystem_Track{
             return;
         }
         
-        $this->post_id = (int)$post_id;
+        $this->post_id = $post_id;
         
         //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
         
@@ -87,7 +97,7 @@ class WP_SoundSystem_Track{
         global $wpdb;
         
         //track ID is required
-        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;
+        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;//track does not exists in DB
 
         $meta_query = array();
         $meta_query[] = array(
@@ -307,11 +317,9 @@ class WP_SoundSystem_Track{
         if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
         
-        if ( !$this->post_id ){
-            if ( !$this->populate_track_post_auto() ){ //track does not exists, save it
-                $created = $this->save_track();
-                if ( is_wp_error($created) ) return $created;
-            }
+        if ( !$this->post_id && !$this->populate_track_post_auto() ){//track does not exists in DB
+            $created = $this->save_track();
+            if ( is_wp_error($created) ) return $created;
         }
             
         if ( !$this->post_id ){
@@ -338,7 +346,7 @@ class WP_SoundSystem_Track{
     
     function get_track_loved_by(){
         //track ID is required
-        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;
+        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;//track does not exists in DB
         
         return get_post_meta($this->post_id, wpsstm_tracks()->favorited_track_meta_key);
     }

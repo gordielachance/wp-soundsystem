@@ -65,13 +65,22 @@ class WP_SoundSystem_Tracklist{
         $subtrack_ids = $this->get_subtracks_ids();
 
         foreach ((array)$subtrack_ids as $subtrack_id){
-            $subtrack = array(
+            $track_args = array(
                 'post_id'  => $subtrack_id
             );
-            $subtracks[] = $subtrack;
+            $track = new WP_SoundSystem_Track($track_args);
         }
         
         $this->add($subtracks);
+        
+        //try to populate cached autosources if item has not any
+        //TO FIX only if playable ? Is this at the right place ?
+        foreach($this->tracks as $track){		
+            if (!$track->sources){
+                $track->populate_track_sources_auto(array('cache_only'=>true));
+            }
+        }
+        
     }
     
     /*
