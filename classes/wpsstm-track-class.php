@@ -552,13 +552,8 @@ class WP_SoundSystem_Track{
             'classes' =>    array('track-action'),
         );
 
-        /*
-        $love_unlove = wpsstm_get_track_loveunlove_icons($item);
-        $add_to_playlists = wpsstm_get_track_playlists_selector_link($item);
-        */
-        
         //add to playlist
-        $append_text = __('Add to playlist','wpsstm');
+        $append_text = __('Add','wpsstm');
         $action_classes = array('wpsstm-requires-auth','track-action');
         
         $ajax_url = add_query_arg( 
@@ -572,7 +567,7 @@ class WP_SoundSystem_Track{
         );
 
         $link_attr = array(
-            'title'     => $append_text,
+            'title'     => __('Add to playlist','wpsstm'),
             'href'      => $ajax_url,
             'class'     => implode(' ',array('thickbox'))
         );
@@ -631,6 +626,75 @@ class WP_SoundSystem_Track{
         }
 
         return sprintf('<ul id="wpsstm-track-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
+        
+    }
+    
+    function get_track_admin_actions_el(){
+        
+        $track_actions = array();
+        $action_default = array(
+            'text' =>       null,
+            'icon' =>       null,
+            'classes' =>    array('track-action'),
+        );
+        
+        //capability check
+        $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
+        //$post_type = $post->post_type;
+        //$tracklist_obj = get_post_type_object($post_type);
+        
+        //remove
+        //TO FIX global tracklist ?
+        //if ( $this->post_id && current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
+        if ( $this->post_id ){ //can edit tracklist
+        
+            $remove_text = __('Remove', 'wpsstm');
+
+            $link_attr = array(
+                'title'     => __('Remove from tracklist', 'wpsstm'),
+                'href'      => '#',
+            );
+
+            $track_actions['remove'] = array(
+                'icon' =>       '<i class="fa fa-chain-broken" aria-hidden="true"></i>',
+                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+            );
+        }
+        
+        //delete
+        if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
+            
+            $remove_text = __('Delete', 'wpsstm');
+
+            $link_attr = array(
+                'title'     => __('Delete track', 'wpsstm'),
+                'href'      => '#',
+            );
+
+            $track_actions['delete'] = array(
+                'icon' =>   '<i class="fa fa-trash" aria-hidden="true"></i>',
+                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+            );
+            
+        }
+
+
+        $track_actions = apply_filters('wpsstm_track_admin_actions',$track_actions);
+
+        $track_actions_els = array();
+        foreach($track_actions as $slug => $action){
+            $action = wp_parse_args($action,$action_default);
+            //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+
+            $action_attr = array(
+                'id'        => 'track-admin-action-' . $slug,
+                'class'     => implode("\n",$action['classes'])
+            );
+
+            $track_actions_els[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($action_attr),$action['icon'],$action['text']);
+        }
+
+        return sprintf('<ul id="wpsstm-track-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
         
     }
     

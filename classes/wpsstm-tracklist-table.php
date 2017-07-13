@@ -557,7 +557,9 @@ class WP_SoundSystem_Tracklist_Table{
                 return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
-                return $item->get_track_actions_el();
+                $track_actions = $item->get_track_actions_el();
+                $track_admin_actions = $item->get_track_admin_actions_el();
+                return sprintf('<div id="wpsstm-track-all-actions">%s%s</div>',$track_actions,$track_admin_actions);
             default:
                 if ( !is_admin() ) break;
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
