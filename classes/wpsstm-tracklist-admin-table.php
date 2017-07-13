@@ -375,7 +375,7 @@ if(!class_exists('WP_SoundSystem_TracksList_Admin_Table')){
                         admin_url( 'admin-ajax.php' )
                     );
                     
-                    $sources_popup_link = sprintf('<a title="%s" href="%s" class="thickbox">%s</a>',__('Sources','wpsstm'),$ajax_url,__('Manage sources','wpsstm'));
+                    $sources_popup_link = sprintf('<a title="%s" href="%s" class="thickbox">%s</a>',__('Sources manager','wpsstm'),$ajax_url,__('Manage sources','wpsstm'));
 
                     $edit_el = $sources_popup_link;
                     

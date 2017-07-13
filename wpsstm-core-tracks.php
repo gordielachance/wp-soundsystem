@@ -510,6 +510,17 @@ class WP_SoundSystem_Core_Tracks{
 
     }
     
+    /*
+    Header for track popup
+    */
+    function track_popup_header(WP_SoundSystem_Track $track){
+        $tracks = array($track);
+        $tracklist = new WP_SoundSystem_Tracklist();
+        $tracklist->add($tracks);
+        $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
+        return sprintf('<div id="wpsstm-track-popup-header">%s</div>',$tracklist_table);
+    }
+    
     function ajax_popup_track_playlists(){
 
         $ajax_data = wp_unslash($_REQUEST);
@@ -523,13 +534,7 @@ class WP_SoundSystem_Core_Tracks{
         
         //wpsstm()->debug_log($track,"ajax_popup_track_playlists() - track");
 
-        /*
-        Tracklist table
-        */
-        $tracks = array($track);
-        $tracklist = new WP_SoundSystem_Tracklist();
-        $tracklist->add($tracks);
-        $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
+        $popup_header = $this->track_popup_header($track);
 
         /*
         Playlists list
@@ -546,7 +551,7 @@ class WP_SoundSystem_Core_Tracks{
         
         $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"%s%s%s</div>',$filter_playlists_input,$list_all,$new_playlist_bt);
 
-        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s%s</div>',$tracklist_table,$existing_playlists_wrapper);
+        printf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s%s</div>',$popup_header,$existing_playlists_wrapper);
         die();
     }
     

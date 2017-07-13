@@ -371,9 +371,10 @@ class WP_SoundSystem_Track{
         $default = new WP_SoundSystem_Source();
         array_unshift($sources,$default); //add blank line
         $sources_inputs = wpsstm_sources()->get_sources_inputs($sources, $field_name);
+        
+        $popup_header = wpsstm_tracks()->track_popup_header($this);
 
         $desc = array();
-        $desc[]= sprintf('<h2>%s - %s</h2>',$this->artist,$this->title);
         $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
         
         $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
@@ -394,7 +395,7 @@ class WP_SoundSystem_Track{
         
         $suggest_link = sprintf('<a class="wpsstm-suggest-sources-link" href="#" %s>%s</a>',$field_name_attr,__('Suggest sources','wpsstm'));
 
-        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s"><p>%s</p><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$this->artist,$this->album,$this->title,$desc,$sources_inputs,$suggest_link);
+        return sprintf('<div class="wpsstm-manage-sources-wrapper" data-wpsstm-track-artist="%s" data-wpsstm-track-album="%s" data-wpsstm-track-title="%s">%s<div>%s</div><div class="wpsstm-sources-section-user wpsstm-sources-section">%s</div><div class="wpsstm-sources-section-auto wpsstm-sources-section">%s</div></div>',$this->artist,$this->album,$this->title,$popup_header,$desc,$sources_inputs,$suggest_link);
 
     }
     
