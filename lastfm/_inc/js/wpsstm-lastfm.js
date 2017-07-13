@@ -252,7 +252,7 @@ class WpsstmLastFM {
 
 (function($){
     
-    $(document).on( "wpsstmDomReady", function( event ) {
+    $(document).on( "wpsstmPageDomReady", function( event ) {
         wpsstm_lastfm.init();
     });
     

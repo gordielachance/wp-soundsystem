@@ -25,83 +25,142 @@
     $(document).ready(function(){
         $('.wpsstm-tracklist').toggleTracklist();    
         $('#wpsstm-subtracks-list table').toggleChildren({
-                childrenShowCount:  true,
-                childrenMax:        3,
-                childrenSelector:   'tbody > *',
-                moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-                lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
-            });
-    });
-
-    $(document).on( "wpsstmTrackInit", function( event, track_obj ) {
-        
-        var track_el = track_obj.track_el;
-        if ( track_el.is(":visible") ) return;
-        
-        var tracklist_el = track_obj.get_tracklist_el();
-        var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
-        var newTracksCount = track_obj.track_idx + 1;
-        
-        if ( newTracksCount <= visibleTracksCount ) return;
-        
-        tracklist_el.toggleTracklist({
-            childrenMax:newTracksCount
+            childrenShowCount:  true,
+            childrenMax:        3,
+            childrenSelector:   'tbody > *',
+            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
         });
         
-    });
-    
-    /*
-    Single Track
-    */
-    
-    //click on source link
-    $(document).on( "click",'[itemprop="track"].active .wpsstm-player-sources-list li', function(e) {
-        e.preventDefault();
+        // sort rows
+        $('.wpsstm-tracklist').find( '[itemprop="track"]' ).sortable({
+            handle: '#track-admin-action-move a',
 
-        var track_el = $(this).closest('[itemprop="track"]');
-        
-        var tracklist_el = track_el.closest('[data-wpsstm-tracklist-idx]');
-        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
-        var track_idx = track_el.attr('data-wpsstm-track-idx');
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
-        
-        var source_el = $(this).closest('li');
-        var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
-        var source_obj = track_obj.get_track_source(source_idx);
-        source_obj.select_player_source();
-        
-
-    });
-    
-    /*
-    Single Track Playlists manager popup
-    */
-    
-    //filter playlists
-    $(document).on("keyup", '#wpsstm-playlists-filter', function(e){
-        e.preventDefault();
-        var playlistFilterWrapper = $(this).closest('#wpsstm-filter-playlists');
-        var playlistAddWrapper = $(playlistFilterWrapper).find('#wpsstm-new-playlist-add');
-        var value = $(this).val().toLowerCase();
-        var li_items = playlistFilterWrapper.find('ul li');
-        
-        var has_results = false;
-        $(li_items).each(function() {
-            if ($(this).text().toLowerCase().search(value) > -1) {
-                $(this).show();
-                has_results = true;
-            }
-            else {
-                $(this).hide();
+            update: function(event, ui) {
+                wpsstm_tracklist_reorder();
+                wpsstm_tracklist_order_update();
             }
         });
         
-        if (has_results){
-            playlistAddWrapper.hide();
-        }else{
-            playlistAddWrapper.show();
-        }
+    });
+    
+    $(document).on( "wpsstmTracklistDomReady", function( event, self ) {
+        /*
+        Tracklist actions
+        */
+        
+        //refresh
+        self.tracklist_el.find("#tracklist-action-refresh a").click(function(e) {
+            e.preventDefault();
+            //unset request status
+            self.debug("clicked 'refresh' link");
+            self.get_tracklist_request(true); //initialize but do not set track to play
+            
+        });
+        
+        //share
+        self.tracklist_el.find('#tracklist-action-share a').click(function(e) {
+          e.preventDefault();
+          var text = $(this).attr('href');
+          wpsstm_clipboard_box(text);
+        });
 
+        //favorite
+        self.tracklist_el.find('#tracklist-action-favorite a').click(function(e) {
+            e.preventDefault();
+            
+            if ( !wpsstm_get_current_user_id() ) return;
+
+            var link = $(this);
+            var action_li = $(this).closest('li');
+            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
+            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
+
+            if (!tracklist_id) return;
+
+            var ajax_data = {
+                action:         'wpsstm_love_unlove_tracklist',
+                post_id:        tracklist_id,
+                do_love:        true,
+            };
+
+            self.debug("favorite tracklist:" + tracklist_id);
+
+            return $.ajax({
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+                beforeSend: function() {
+                    action_li.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                    }else{
+                        var tracklist_instances = self.get_tracklist_instances()
+                        tracklist_instances.find('#tracklist-action-favorite').removeClass('active');
+                        tracklist_instances.find('#tracklist-action-unfavorite').addClass('active');
+                    }
+                },
+                complete: function() {
+                    action_li.removeClass('loading');
+                }
+            })
+        });
+        
+        //unfavorite
+        self.tracklist_el.find('#tracklist-action-unfavorite a').click(function(e) {
+            e.preventDefault();
+            
+            if ( !wpsstm_get_current_user_id() ) return;
+
+            var link = $(this);
+            var action_li = $(this).closest('li');
+            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
+            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
+
+            if (!tracklist_id) return;
+
+            var ajax_data = {
+                action:         'wpsstm_love_unlove_tracklist',
+                post_id:        tracklist_id,
+                do_love:        false,
+            };
+
+            self.debug("unfavorite tracklist:" + tracklist_id);
+
+            return $.ajax({
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+                beforeSend: function() {
+                    action_li.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                    }else{
+                        var tracklist_instances = self.get_tracklist_instances()
+                        tracklist_instances.find('#tracklist-action-unfavorite').removeClass('active');
+                        tracklist_instances.find('#tracklist-action-favorite').addClass('active');
+                    }
+                },
+                complete: function() {
+                    action_li.removeClass('loading');
+                }
+            })
+        });
+        
+        //switch status
+        self.tracklist_el.find("#tracklist-admin-action-status-switch a").click(function(e) {
+            e.preventDefault();
+            $(this).closest('li').toggleClass('expanded');
+            
+        });
+        
+        self.tracklist_el.toggleTracklist();
     });
 
     //create new playlist

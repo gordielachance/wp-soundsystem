@@ -210,7 +210,8 @@ class WP_SoundSystem {
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         wp_register_script( 'jquery.toggleTableColumns', $this->plugin_url . '_inc/js/jquery.toggleTableColumns.js', array('jquery'),'1.00');
-        wp_register_script( 'wpsstm-tracklists', $this->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery.toggleChildren','jquery.toggleTableColumns'),$this->version );
+        wp_register_script( 'wpsstm-tracks', $this->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery'),$this->version );
+        wp_register_script( 'wpsstm-tracklists', $this->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery.toggleChildren','jquery.toggleTableColumns','wpsstm-tracks'),$this->version );
         
     }
 
