@@ -469,22 +469,25 @@ class WP_SoundSystem_Tracklist{
             'icon' =>       null,
             'classes' =>    array('tracklist-action'),
         );
+        
+        $post_type = get_post_type($this->post_id);
         $temp_status = wpsstm_wizard()->wizard_post_status;
         $post_status = get_post_status($this->post_id);
 
         //refresh playlist
-        $share_url = wpsstm_get_tracklist_link($this->post_id);
-        $refresh_text = __('Refresh','wpsstm');
+        if ($post_type == wpsstm()->post_type_live_playlist ){
+            $refresh_text = __('Refresh','wpsstm');
 
-        $link_attr = array(
-            'title'     => $refresh_text,
-            'href'      => '#',
-        );
+            $link_attr = array(
+                'title'     => $refresh_text,
+                'href'      => '#',
+            );
 
-        $tracklist_actions['refresh'] = array(
-            'icon' => '<i class="fa fa-rss" aria-hidden="true"></i>',
-            'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$refresh_text)
-        );
+            $tracklist_actions['refresh'] = array(
+                'icon' => '<i class="fa fa-rss" aria-hidden="true"></i>',
+                'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$refresh_text)
+            );
+        }
 
         //share
         if ( in_array($post_status,array('publish',$temp_status)) ){
