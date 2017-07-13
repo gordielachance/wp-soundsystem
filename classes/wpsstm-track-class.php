@@ -390,7 +390,7 @@ class WP_SoundSystem_Track{
 
     }
     
-    function get_track_sources_auto( $args = null ){
+    function populate_track_sources_auto( $args = null ){
 
         if (!$this->artist || !$this->title) return;
 
@@ -404,7 +404,7 @@ class WP_SoundSystem_Track{
         }
 
         //allow plugins to filter this
-        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+        $sources = apply_filters('wpsstm_populate_track_sources_auto',$sources,$this,$args);
         
         $sources = $this->sanitize_track_sources($sources);
         
@@ -414,7 +414,8 @@ class WP_SoundSystem_Track{
         if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
             $sources = $this->autosource_filter_title_requires_artist($sources);
         }
-
+        
+        $this->sources = $sources;
         return $sources;
 
     }
@@ -465,7 +466,7 @@ class WP_SoundSystem_Track{
             $artist_sanitized = sanitize_title($this->artist);
 
             if (strpos($source_sanitized, $artist_sanitized) === false) {
-                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source['title'],'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::get_track_sources_auto() - source ignored as artist is not contained in its title");
+                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source['title'],'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::autosource_filter_title_requires_artist() - source ignored as artist is not contained in its title");
                 unset($sources[$key]);
             }
         }

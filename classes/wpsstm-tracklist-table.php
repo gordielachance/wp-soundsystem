@@ -65,7 +65,7 @@ class WP_SoundSystem_Tracklist_Table{
         //try to populate cached autosources if item has not any
         foreach($this->items as $item){		
             if (!$item->sources){
-                $item->sources = $item->get_track_sources_auto(array('cache_only'=>true));
+                $item->populate_track_sources_auto(array('cache_only'=>true));
             }	
         }
         

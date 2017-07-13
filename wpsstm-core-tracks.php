@@ -66,8 +66,8 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
         //ajax : get tracks source auto
-        add_action('wp_ajax_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
-        add_action('wp_ajax_nopriv_wpsstm_player_get_track_sources_auto', array($this,'ajax_get_track_sources_auto'));
+        add_action('wp_ajax_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
+        add_action('wp_ajax_nopriv_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
         
         //ajax : playlist selector
         add_action('wp_ajax_wpsstm_track_playlists_selector', array($this,'ajax_popup_track_playlists'));
@@ -480,7 +480,7 @@ class WP_SoundSystem_Core_Tracks{
         wp_send_json( $result ); 
     }
     
-    function ajax_get_track_sources_auto(){
+    function ajax_populate_track_sources_auto(){
         
         $ajax_data = wp_unslash($_POST);
         
@@ -498,7 +498,7 @@ class WP_SoundSystem_Core_Tracks{
         );
 
         $track = new WP_SoundSystem_Track($args);
-        $track->sources = $track->get_track_sources_auto();
+        $track->sources = $track->populate_track_sources_auto();
 
         $track = $result['track'] = $track;
 

@@ -259,11 +259,11 @@ class WP_SoundSystem_Core_Sources{
         $field_name = $result['field_name'] = ( isset($ajax_data['field_name']) ) ? $ajax_data['field_name'] : null;
 
         $track = new WP_SoundSystem_Track($args);
-        $sources = $track->get_track_sources_auto();
+        $track->populate_track_sources_auto();
 
         $track = $result['track'] = $track;
 
-        $result['new_html'] = wpsstm_sources()->get_sources_inputs($sources,$field_name);
+        $result['new_html'] = wpsstm_sources()->get_sources_inputs($track->sources,$field_name);
         $result['success'] = true;
 
         header('Content-type: application/json');
@@ -308,15 +308,17 @@ class WP_SoundSystem_Source {
             $this->$key = $value;
         }
 
-        $this->url = trim($this->url);
-        $this->populate_url();
-        
         $this->title = trim($this->title);
         if (!$this->title && $this->provider) $this->title = $this->provider->name;
+        
+        $this->url = trim($this->url);
+        $this->populate_source_url();
 
     }
     
-    function populate_url(){
+    private function populate_source_url(){
+        
+        if (!$this->url) return;
 
         foreach( (array)wpsstm_player()->providers as $provider ){
 

@@ -195,6 +195,58 @@ abstract class WP_SoundSystem_Player_Provider{
         
     }
     
+    function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$args=null){
+
+        $args_default = array(
+            'cache_only'    => false,
+            'limit'         => 3
+        );
+
+        $args = wp_parse_args((array)$args,$args_default);
+
+        $sources = $cache = $saved = null;
+        $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
+        $cache = $sources = get_transient( $transient_name );
+        $do_request = ( !$args['cache_only'] && ( false === $cache ) );
+
+        if ( $do_request ) {
+
+            $sources = array();
+
+            $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
+            $api_args = array(
+                'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
+                'limit'                     => $args['limit'],
+                'platforms'                 => $platform,
+                'q'                         => urlencode($track->artist . ' ' . $track->title),
+                'skipSavingInDatabase'      => true
+            );
+            $api_url = add_query_arg($api_args,$api_url);
+            $response = wp_remote_get($api_url);
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ) return $body;
+            $api_response = json_decode( $body, true );
+
+            $items = wpsstm_get_array_value(array(0,'items'),$api_response);
+
+            foreach( (array)$items as $item ){
+
+                $url = wpsstm_get_array_value('permalink',$item);
+                $title = wpsstm_get_array_value('initTitle',$item);
+
+                $source = array('url'=>$url,'title'=>$title,'origin'=>'auto');
+                $sources[] = $source;
+            }
+
+            $saved = set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
+        }
+
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
+
+        return $sources;
+    }
+    
 }
 
 class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
@@ -257,7 +309,7 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
     }
 
     function sources_lookup($track,$args=null){
-        return wpsstm_get_soundsgood_sources($track,'youtube',$args);
+        return $this->get_soundsgood_sources($track,'youtube',$args);
     }
 
 }
@@ -291,7 +343,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
         }
     }
 
-    function get_sc_track_id($url){
+    private function get_sc_track_id($url){
 
         /*
         check for souncloud API track URL
@@ -327,7 +379,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
 
         $pattern = '~https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~';
         preg_match($pattern, $url, $url_matches);
-
+        
         if ( isset($url_matches) ){
             return $this->request_sc_track_id($url);
         }
@@ -337,29 +389,39 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     /*
     Get the ID of a Soundcloud track URL (eg. https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou)
     Requires a Soundcloud Client ID.
+    Store result in a transient to speed up page load.
     */
     
-    function request_sc_track_id($url){
+    private function request_sc_track_id($url){
+        
         if ( !$this->client_id ) return;
         
-        $api_args = array(
-            'url' =>        urlencode ($url),
-            'client_id' =>  $this->client_id
-        );
+        $transient_name = 'wpsstm_sc_track_id_' . md5($url);
 
-        $api_url = 'https://api.soundcloud.com/resolve.json';
-        $api_url = add_query_arg($api_args,$api_url);
-
-        //TO FIX this slows down the page rendering.  Could we avoid it ?
+        if ( false === ( $sc_id = get_transient($transient_name ) ) ) {
         
-        $response = wp_remote_get( $api_url );
-        $json = wp_remote_retrieve_body( $response );
-        if ( is_wp_error($json) ) return;
-        $data = json_decode($json,true);
-        if ( isset($data['id']) ) return $data['id'];
+            $api_args = array(
+                'url' =>        urlencode ($url),
+                'client_id' =>  $this->client_id
+            );
+
+            $api_url = 'https://api.soundcloud.com/resolve.json';
+            $api_url = add_query_arg($api_args,$api_url);
+
+            $response = wp_remote_get( $api_url );
+            $json = wp_remote_retrieve_body( $response );
+            if ( is_wp_error($json) ) return;
+            $data = json_decode($json,true);
+            if ( isset($data['id']) ) {
+                $sc_id = $data['id'];
+                set_transient( $transient_name, $sc_id, 7 * DAY_IN_SECONDS );
+            }
+        }
+        return $sc_id;
     }
 
     function format_source_src($url){
+
         if ( !$track_id = $this->get_sc_track_id($url) ) return;
 
         if ( $this->client_id ){ //stream url
@@ -386,7 +448,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     }
 
     function sources_lookup($track,$args=null){
-        return wpsstm_get_soundsgood_sources($track,'soundcloud',$args);
+        return $this->get_soundsgood_sources($track,'soundcloud',$args);
     }
     
     
