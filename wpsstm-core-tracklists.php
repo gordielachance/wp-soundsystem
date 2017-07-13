@@ -7,6 +7,7 @@ Handle posts that have a tracklist, like albums and playlists.
 class WP_SoundSystem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
+    public $qvar_admin = 'admin';
     public $allowed_post_types = array();
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     
@@ -49,8 +50,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function setup_actions(){
 
-        add_filter( 'query_vars', array($this,'add_query_var_xspf'));
-        add_action( 'init', array($this,'xspf_register_endpoint' ));
+        add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
+        add_action( 'init', array($this,'register_tracklist_endpoints' ));
         add_filter( 'template_include', array($this,'xspf_template_loader'));
         
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
@@ -173,17 +174,19 @@ class WP_SoundSystem_Core_Tracklists{
     *   Add the 'xspf' query variable so Wordpress
     *   won't mangle it.
     */
-    function add_query_var_xspf($vars){
+    function add_tracklist_query_vars($vars){
+        $vars[] = $this->qvar_admin;
         $vars[] = $this->qvar_xspf;
         return $vars;
     }
-    
+
     /**
      * Add endpoint for the "/xspf" posts links 
      */
 
-    function xspf_register_endpoint(){
-        add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK );
+    function register_tracklist_endpoints(){
+        add_rewrite_endpoint($this->qvar_admin, EP_PERMALINK ); // /admin
+        add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK ); // /xspf
     }
     
     function frontend_script_styles(){
@@ -218,17 +221,15 @@ class WP_SoundSystem_Core_Tracklists{
         global $wp_query;
         global $post;
 
-        if( isset( $wp_query->query_vars[$this->qvar_xspf] ) ){ //don't use $wp_query->get() here
-            $file = 'playlist-xspf.php';
-            if ( file_exists( wpsstm_locate_template( $file ) ) ){
-                $template = wpsstm_locate_template( $file );
-            }
-            
+        if( !isset( $wp_query->query_vars[$this->qvar_xspf] ) ) return $template; //don't use $wp_query->get() here
+        
+        $file = 'tracklist-xspf.php';
+        if ( file_exists( wpsstm_locate_template( $file ) ) ){
+            $template = wpsstm_locate_template( $file );
         }
-
+        
         return $template;
     }
-
     
     function column_tracklist_register($defaults) {
         global $post;
