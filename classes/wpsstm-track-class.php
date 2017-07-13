@@ -620,6 +620,25 @@ class WP_SoundSystem_Track{
         //$post_type = $post->post_type;
         //$tracklist_obj = get_post_type_object($post_type);
         
+        //move
+        //TO FIX global tracklist ?
+        //if ( $this->post_id && current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
+        if ( $this->post_id ){ //can edit tracklist
+        
+            $remove_text_a = __('Move', 'wpsstm');
+            $remove_text_b = __('(drag)', 'wpsstm');
+
+            $link_attr = array(
+                'title'     => __('Move track in tracklist', 'wpsstm'),
+                'href'      => '#',
+            );
+
+            $track_actions['move'] = array(
+                'icon' =>       '<i class="fa fa-arrows-v" aria-hidden="true"></i>',
+                'text' =>       sprintf('<a %s><span>%s</span> <small>%s</small></a>',wpsstm_get_html_attr($link_attr),$remove_text_a,$remove_text_b)
+            );
+        }
+        
         //remove
         //TO FIX global tracklist ?
         //if ( $this->post_id && current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
@@ -634,7 +653,7 @@ class WP_SoundSystem_Track{
 
             $track_actions['remove'] = array(
                 'icon' =>       '<i class="fa fa-chain-broken" aria-hidden="true"></i>',
-                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+                'text' =>       sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$remove_text)
             );
         }
         
@@ -651,7 +670,7 @@ class WP_SoundSystem_Track{
 
             $track_actions['sources'] = array(
                 'icon' =>   '<i class="fa fa-cloud" aria-hidden="true"></i>',
-                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+                'text' =>       sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$remove_text)
             );
             
         }
@@ -668,7 +687,7 @@ class WP_SoundSystem_Track{
 
             $track_actions['delete'] = array(
                 'icon' =>   '<i class="fa fa-trash" aria-hidden="true"></i>',
-                'text' =>       sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$remove_text)
+                'text' =>       sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$remove_text)
             );
             
         }
