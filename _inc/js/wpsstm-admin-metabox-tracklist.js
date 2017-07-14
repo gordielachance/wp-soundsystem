@@ -20,17 +20,17 @@ jQuery(function($){
         //save
         wrapper.on( "click", ".row-actions .save a", function(event) {
             event.preventDefault();
-            wpsstm_tracklist_row_action(this);
+            wpsstm_tracklist_row_actionOLD(this);
         });
         //remove
         wrapper.on( "click", ".row-actions .remove a", function(event) {
             event.preventDefault();
-            wpsstm_tracklist_row_action(this);
+            wpsstm_tracklist_row_actionOLD(this);
         });
         //delete
         wrapper.on( "click", ".row-actions .delete a", function(event) {
             event.preventDefault();
-            wpsstm_tracklist_row_action(this);
+            wpsstm_tracklist_row_actionOLD(this);
         });
 
         wrapper.find('.metabox-table-row-new').hide();
@@ -102,7 +102,7 @@ jQuery(function($){
  
 })
 
-function wpsstm_tracklist_row_action(row_action_link){
+function wpsstm_tracklist_row_actionOLD(row_action_link){
     var link = jQuery(row_action_link);
     var row = link.parents('tr');
     var table = row.parents('table');
@@ -133,7 +133,7 @@ function wpsstm_tracklist_row_action(row_action_link){
     };
 
     var ajax_data = {
-        'action':           'wpsstm_tracklist_row_action',
+        'action':           'wpsstm_tracklist_row_actionOLD',
         'track_action':     track_action,
         'track':            track,
         'tracklist_id':     tracklist_id,

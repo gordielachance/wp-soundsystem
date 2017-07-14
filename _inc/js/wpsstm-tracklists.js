@@ -19,7 +19,7 @@
             handle: '#track-admin-action-move a',
 
             update: function(event, ui) {
-                tracklist_obj.save_tracks_order(ui);
+                tracklist_obj.update_playlist_track_position(ui);
             }
         });
         
@@ -136,6 +136,30 @@
             e.preventDefault();
             $(this).closest('li').toggleClass('expanded');
             
+        });
+        
+        //remove
+        tracklist_obj.tracklist_el.find('#track-admin-action-remove a').click(function(e) {
+            e.preventDefault();
+            
+            //get track
+            var track_el = $(this).closest('[itemprop="track"]');
+            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_obj = tracklist_obj.get_track_obj(track_idx);
+            
+            tracklist_obj.remove_playlist_track(track_obj);
+        });
+        
+        //delete
+        tracklist_obj.tracklist_el.find('#track-admin-action-delete a').click(function(e) {
+            e.preventDefault();
+            
+            //get track
+            var track_el = $(this).closest('[itemprop="track"]');
+            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_obj = tracklist_obj.get_track_obj(track_idx);
+            
+            tracklist_obj.delete_playlist_track(track_obj);
         });
         
         tracklist_obj.tracklist_el.toggleTracklist();
@@ -642,7 +666,7 @@ class WpsstmTracklist {
         });
     }
 
-    save_tracks_order(ui){
+    update_playlist_track_position(ui){
         var self = this;
         var rows_container = self.tracklist_el.find( '[itemprop="track"]' );
         var new_order = [];
@@ -684,6 +708,81 @@ class WpsstmTracklist {
             },
             complete: function() {
                 self.tracklist_el.removeClass('loading');
+            }
+        })
+
+    }
+    
+    remove_playlist_track(track_obj){
+        
+        var self = this;
+        var track_el = track_obj.track_el;
+
+        var ajax_data = {
+            action            : 'wpsstm_playlist_remove_track',
+            tracklist_id      : self.tracklist_id,
+            track_id          : track_obj.post_id
+        };
+
+        jQuery.ajax({
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                track_el.addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    $(track_el).remove();
+                    self.update_rows_order();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                track_el.removeClass('loading');
+            }
+        })
+
+    }
+    
+    delete_playlist_track(track_obj){
+        
+        var self = this;
+        var track_el = track_obj.track_el;
+
+        var ajax_data = {
+            action            : 'wpsstm_playlist_delete_track',
+            track_id          : track_obj.post_id
+        };
+
+        jQuery.ajax({
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                track_el.addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    $(track_el).remove();
+                    self.update_rows_order();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                track_el.removeClass('loading');
             }
         })
 

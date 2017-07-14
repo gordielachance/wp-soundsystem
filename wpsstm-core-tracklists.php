@@ -79,13 +79,11 @@ class WP_SoundSystem_Core_Tracklists{
         //ajax : load tracklist
         add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
-        
-        //ajax : tracklist row actions
-        add_action('wp_ajax_wpsstm_tracklist_row_action', array($this,'ajax_tracklist_row_action'));
-        //add_action('wp_ajax_nopriv_wpsstm_tracklist_row_action', array($this,'ajax_tracklist_row_action'));
-        
-        //ajax : update tracklist track position
-        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_track_position'));
+
+        //ajax : row actions
+        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_tracklist_track_position'));
+        add_action('wp_ajax_wpsstm_playlist_remove_track', array($this,'ajax_remove_tracklist_track'));
+        add_action('wp_ajax_wpsstm_playlist_delete_track', array($this,'ajax_delete_tracklist_track'));
 
     }
     
@@ -492,7 +490,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     //TO FIX is duplicate of ajax functions from WP_SoundSystem_Core_Tracks ?
-    function ajax_tracklist_row_action(){
+    function ajax_tracklist_row_actionOLD(){
 
         $result = array(
             'input'     => $_REQUEST,
@@ -558,22 +556,6 @@ class WP_SoundSystem_Core_Tracklists{
 
                 }
             break;
-            case 'remove':
-                $success = $tracklist->remove_subtrack_ids($track->post_id);
-                if ( is_wp_error($success) ){
-                    $result['message'] = $success->get_error_message();
-                }else{
-                    $result['success'] = $success;
-                }
-            break;
-            case 'delete':
-                $success = $track->delete_track();
-                if ( is_wp_error($success) ){
-                    $result['message'] = $success->get_error_message();
-                }else{
-                    $result['success'] = $success;
-                }
-            break;
         }
 
         header('Content-type: application/json');
@@ -581,8 +563,8 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
-    function ajax_update_track_position(){
-        $ajax_data = wp_unslash($_POST);
+    function ajax_update_tracklist_track_position(){
+        $ajax_data = $_POST;
         
         $result = array(
             'message'   => null,
@@ -602,6 +584,62 @@ class WP_SoundSystem_Core_Tracklists{
             $result['tracklist'] = $tracklist;
             
             $success = $tracklist->save_track_position($track_id,$position);
+            
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_remove_tracklist_track(){
+        $ajax_data = $_POST;
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+
+        $result['track_id']  =          $track_id =         ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
+        $result['tracklist_id']  =      $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
+
+        $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+
+        if ( $track_id && $tracklist_id ){
+
+            $success = $tracklist->remove_subtrack_ids($track_id);
+            
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_delete_tracklist_track(){
+        $ajax_data = $_POST;
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+
+        $track_id = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
+
+        if ( $track_id ){
+
+            $track = $result['track'] = new WP_SoundSystem_Track( array('post_id'=>$track_id) );
+            $success = $track->delete_track();
             
             if ( is_wp_error($success) ){
                 $result['message'] = $success->get_error_message();
