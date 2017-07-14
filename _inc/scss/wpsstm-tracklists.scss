@@ -171,11 +171,6 @@
         .column-trackitem_actions{
             font-size:.8em;
             text-align:center;
-            .wpsstm-track-action{
-                span{
-                    display:none;
-                }
-            }
         }
 
         th,td{
@@ -275,12 +270,8 @@
         .tracklist-nav{
             display:none;
         }
-        tr{
-            td{
-                &.trackitem_order{
-                    display:none;
-                }
-            }
+        .trackitem_order,#track-admin-action-move{
+            display:none;
         }
     }
     
