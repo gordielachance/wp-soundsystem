@@ -151,9 +151,8 @@ class WP_SoundSystem {
 
         add_action( 'admin_init', array($this,'load_textdomain'));
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ) );
-        
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_styles_backend' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles_frontend' ) );
 
@@ -204,14 +203,14 @@ class WP_SoundSystem {
     }
     
     function register_scripts_styles_shared(){
+        
+        //TO FIX conditional / move code ?
+        
         //CSS
-        wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-        wp_register_style( 'wpsstm-tracklists', $this->plugin_url . '_inc/css/wpsstm-tracklists.css', null,$this->version );
+        wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
+
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
-        wp_register_script( 'jquery.toggleTableColumns', $this->plugin_url . '_inc/js/jquery.toggleTableColumns.js', array('jquery'),'1.00');
-        wp_register_script( 'wpsstm-tracks', $this->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery'),$this->version );
-        wp_register_script( 'wpsstm-tracklists', $this->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery.toggleChildren','jquery.toggleTableColumns','wpsstm-tracks'),$this->version );
         
     }
 

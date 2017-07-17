@@ -167,6 +167,7 @@
 
     //create new playlist
     $(document).on("click", '#wpsstm-new-playlist-add input[type="submit"]', function(e){
+        
         e.preventDefault();
         var bt =                        $(this);
         var popupContent =              $(bt).closest('.wpsstm-popup-content');
@@ -215,7 +216,8 @@
 
     });
     
-    //attach to playlist
+    //append or remove track from playlist
+    //TO FIX put somewhere else ?
     $(document).on("click", '#wpsstm-filter-playlists ul li input[type="checkbox"]', function(e){
         
         var checkbox =      $(this);
@@ -223,9 +225,12 @@
         var playlist_id =   $(this).val();
         var li_el =         $(checkbox).closest('li');
         var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
+        
+        var popup_section = checkbox.closest('#track-popup-append');
+        var popup = checkbox.closest('.hentry');
 
         //get track obj from HTML
-        var track_el = $(popupContent).find('[itemprop="track"]').first();
+        var track_el = popup.find('[itemprop="track"]').first();
         var track_obj = new WpsstmTrack(track_el);
 
         var ajax_data = {

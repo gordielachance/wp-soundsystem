@@ -143,9 +143,34 @@ class WP_SoundSystem_Core_Albums{
 
     function register_post_type_album() {
 
-        $labels = array( 
-            'name' => _x( 'Albums', 'wpsstm' ),
-            'singular_name' => _x( 'Album', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Albums', 'Albums General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Album', 'Album Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Albums', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Album', 'wpsstm' ),
+            'archives'              => __( 'Album Archives', 'wpsstm' ),
+            'attributes'            => __( 'Album Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Album:', 'wpsstm' ),
+            'all_items'             => __( 'All Albums', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Album', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Album', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Album', 'wpsstm' ),
+            'update_item'           => __( 'Update Album', 'wpsstm' ),
+            'view_item'             => __( 'View Album', 'wpsstm' ),
+            'view_items'            => __( 'View Albums', 'wpsstm' ),
+            'search_items'          => __( 'Search Album', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            'insert_into_item'      => __( 'Insert into album', 'wpsstm' ),
+            'uploaded_to_this_item' => __( 'Uploaded to this album', 'wpsstm' ),
+            'items_list'            => __( 'Albums list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Albums list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter albums list', 'wpsstm' ),
         );
 
         $args = array( 

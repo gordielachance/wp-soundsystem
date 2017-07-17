@@ -120,11 +120,13 @@ class WP_SoundSystem_Tracklist{
         //force array
         if ( !is_array($append_ids) ) $append_ids = array($append_ids);
         
-        if ( empty($append_ids) ) return false;
+        if ( empty($append_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
         
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
         
-        $subtrack_ids = $this->get_subtracks_ids();
+        $subtrack_ids = (array)$this->get_subtracks_ids();
         $subtrack_ids = array_merge($subtrack_ids,$append_ids);
         return $this->set_subtrack_ids($subtrack_ids);
     }
@@ -133,11 +135,13 @@ class WP_SoundSystem_Tracklist{
         //force array
         if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
         
-        if ( empty($remove_ids) ) return false;
+        if ( empty($remove_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
         
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
         
-        $subtrack_ids = $this->get_subtracks_ids();
+        $subtrack_ids = (array)$this->get_subtracks_ids();
         $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
         
         return $this->set_subtrack_ids($subtrack_ids);
@@ -161,7 +165,13 @@ class WP_SoundSystem_Tracklist{
     function set_subtrack_ids($ordered_ids){
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('This playlist has no post ID','wpsstm') );
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
+        
+        //post type check
+        $can_add_post_tracks = in_array(get_post_type($this->post_id),array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+        if (!$can_add_post_tracks){
+            return new WP_Error( 'wpsstm_cannot_set_subtracks', __('Tracks can only be assigned to playlists and albums','wpsstm') );
         }
         
         //capability check
@@ -359,19 +369,7 @@ class WP_SoundSystem_Tracklist{
         }
         //TO FIX call remove_subtracks() ?
     }
-    
-    function get_tracklist_admin_table(){
 
-        require wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-admin-table.php';
-        $tracklist_table = new WP_SoundSystem_TracksList_Admin_Table();
-        $tracklist_table->items = $this->tracks;
-        
-        ob_start();
-        $tracklist_table->prepare_items();
-        $tracklist_table->display();
-        return ob_get_clean();
-    }
-    
     /**
     Read-only tracklist table
     **/
@@ -606,6 +604,32 @@ class WP_SoundSystem_Tracklist{
         $post_status = get_post_status($this->post_id);
         $post_type = get_post_type($this->post_id);
         $permalink = get_permalink($this->post_id);
+        
+        //add track
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        $track_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_add_post_tracks = in_array($post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+
+        if ( $can_add_post_tracks && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+            
+            $add_track_url = $this->get_tracklist_admin_gui_url('add_track');
+            $add_track_text = $track_obj->labels->add_new_item;
+            $add_track_url = add_query_arg(array('TB_iframe'=>true),$add_track_url);
+            $action_classes = array('wpsstm-requires-auth','tracklist-action');
+            
+            $link_attr = array(
+                'title'     => $add_track_text,
+                'href'      => $add_track_url,
+                'class'     => implode(' ',array('thickbox'))
+            );
+
+            $tracklist_actions['add_track'] = array(
+                'icon'      => '<i class="fa fa-plus" aria-hidden="true"></i>',
+                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$add_track_text),
+                'classes'   =>    $action_classes
+            );
+        }
 
         //status switcher
         if ($user_id = get_current_user_id() ){
@@ -622,7 +646,6 @@ class WP_SoundSystem_Tracklist{
             );
 
             //show temporary status only when it has that status
-
             if ($post_status != $temp_status) unset($statii[$temp_status]);
 
             foreach($statii as $status=>$str){
@@ -683,6 +706,30 @@ class WP_SoundSystem_Tracklist{
 
         return sprintf('<ul id="wpsstm-tracklist-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
         
+    }
+    
+    function get_tracklist_admin_gui_url($tracklist_action = null){
+
+        $url = null;
+        
+        if($this->post_id){
+            $url = get_permalink($this->post_id);
+            $url = add_query_arg(array(wpsstm_tracklists()->qvar_admin=>$tracklist_action),$url);
+        }
+
+        return $url;
+    }
+    
+    function tracklist_admin_new_track_details(){
+        
+        $track = new WP_SoundSystem_Track();
+        
+        $admin_action = 'add_track';
+        $form_content = $track->track_admin_form_content();
+        $admin_action_el = sprintf('<input type="hidden" name="wpsstm-admin-tracklist-action" value="%s">',$admin_action);
+        $form_action = $this->get_tracklist_admin_gui_url($admin_action);
+        $nonce_el = wp_nonce_field( 'wpsstm_admin_tracklist_add_track_'.$this->post_id, 'wpsstm_admin_tracklist_add_track_nonce', true, false );
+        return sprintf('<form action="%s" method="post">%s%s%s</form>',$form_action,$form_content,$nonce_el,$admin_action_el);
     }
 
 }

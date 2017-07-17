@@ -37,9 +37,34 @@ class WP_SoundSystem_Core_Playlists{
 
     function register_post_type_playlist() {
 
-        $labels = array( 
-            'name' => _x( 'Playlists', 'wpsstm' ),
-            'singular_name' => _x( 'Playlist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Playlists', 'Playlists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Playlist', 'Playlist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Playlists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Playlist', 'wpsstm' ),
+            'archives'              => __( 'Playlist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Playlist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Playlist:', 'wpsstm' ),
+            'all_items'             => __( 'All Playlists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Playlist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Playlist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Playlist', 'wpsstm' ),
+            'update_item'           => __( 'Update Playlist', 'wpsstm' ),
+            'view_item'             => __( 'View Playlist', 'wpsstm' ),
+            'view_items'            => __( 'View Playlists', 'wpsstm' ),
+            'search_items'          => __( 'Search Playlist', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            'insert_into_item'      => __( 'Insert into playlist', 'wpsstm' ),
+            'uploaded_to_this_item' => __( 'Uploaded to this playlist', 'wpsstm' ),
+            'items_list'            => __( 'Playlists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Playlists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter playlists list', 'wpsstm' ),
         );
 
         $args = array( 

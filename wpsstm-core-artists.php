@@ -130,9 +130,34 @@ class WP_SoundSystem_Core_Artists{
 
     function register_post_type_artist() {
 
-        $labels = array( 
-            'name' => _x( 'Artists', 'wpsstm' ),
-            'singular_name' => _x( 'Artist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Artists', 'Artists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Artist', 'Artist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Artists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Artist', 'wpsstm' ),
+            'archives'              => __( 'Artist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Artist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Artist:', 'wpsstm' ),
+            'all_items'             => __( 'All Artists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Artist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Artist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Artist', 'wpsstm' ),
+            'update_item'           => __( 'Update Artist', 'wpsstm' ),
+            'view_item'             => __( 'View Artist', 'wpsstm' ),
+            'view_items'            => __( 'View Artists', 'wpsstm' ),
+            'search_items'          => __( 'Search Artist', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            'insert_into_item'      => __( 'Insert into artist', 'wpsstm' ),
+            'uploaded_to_this_item' => __( 'Uploaded to this artist', 'wpsstm' ),
+            'items_list'            => __( 'Artists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Artists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter artists list', 'wpsstm' ),
         );
 
         $args = array( 

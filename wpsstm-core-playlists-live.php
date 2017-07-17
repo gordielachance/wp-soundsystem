@@ -129,9 +129,34 @@ class WP_SoundSystem_Core_Live_Playlists{
 
     function register_post_type_live_playlist() {
 
-        $labels = array( 
-            'name' => _x( 'Live Playlists', 'wpsstm' ),
-            'singular_name' => _x( 'Live Playlist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Live Playlists', 'Live Playlists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Live Playlist', 'Live Playlist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Live Playlists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Live Playlist', 'wpsstm' ),
+            'archives'              => __( 'Live Playlist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Live Playlist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Live Playlist:', 'wpsstm' ),
+            'all_items'             => __( 'All Live Playlists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Live Playlist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Live Playlist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Live Playlist', 'wpsstm' ),
+            'update_item'           => __( 'Update Live Playlist', 'wpsstm' ),
+            'view_item'             => __( 'View Live Playlist', 'wpsstm' ),
+            'view_items'            => __( 'View Live Playlists', 'wpsstm' ),
+            'search_items'          => __( 'Search Live Playlist', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            //'insert_into_item'      => __( 'Insert into live playlist', 'wpsstm' ),
+            //'uploaded_to_this_item' => __( 'Uploaded to this live playlist', 'wpsstm' ),
+            'items_list'            => __( 'Live Playlists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Live Playlists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter live playlists list', 'wpsstm' ),
         );
 
         $args = array( 

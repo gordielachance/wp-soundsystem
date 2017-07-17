@@ -1,109 +1,6 @@
 @import "compass";
 @import "wpsstm-shared";
 
-[itemprop="track"]{
-    [itemprop="byArtist"]{
-        @extend .truncate;
-        font-weight: bold;
-    }
-    [itemprop="name"]:before{
-        @extend .truncate;
-    }
-    [itemprop="inAlbum"]{
-        @extend .truncate;
-        font-size:.8em;
-    }
-
-    .trackitem_order{
-        .wpsstm-player-icon-buffering{
-            display:none;
-        }
-        span{
-            display:initial;
-        }
-    }
-    
-    .trackitem_actions{
-        .wpsstm-track-action{
-            margin: 0 .1em;
-        }
-    }
-    
-    .wpsstm-player-sources-list{
-        li{
-            &:not(.wpsstm-bad-source) .wpsstm-source-error{
-                display:none;
-            }
-        }
-    }
-
-    .wpsstm-play-track{
-        text-decoration:none;
-        border-bottom:none!important; //twentyfifteen fix
-
-        .wpsstm-player-icon{
-            display:none;
-            &.wpsstm-player-icon-play{
-                display:inline-block;
-            }
-        }
-    }
-
-    &.buffering{
-        .trackitem_order{
-            .wpsstm-player-icon-buffering{
-                display:inline-block;
-            }
-            span{
-                display:none;
-            }
-        }
-    }
-    &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-pause{
-            display:inline-block;
-        }
-    }
-
-    &.error .wpsstm-play-track{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-error{
-            display:inline-block;
-        }
-    }
-    
-    &.active{
-        &:not(.error){
-            @include opacity(1);
-        }
-        
-        &.buffering{
-            @extend .wpsstm-loading-el;
-            @include opacity(.75);
-        }
-        
-        .wpsstm-player-sources-list{
-            li{
-                &.wpsstm-active-source{
-                    font-weight: bold;
-                }
-            }
-        }
-        &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-            .wpsstm-player-sources-list{
-                li{
-                    @extend .wpsstm-can-click;
-                }
-            }
-        }
-    }
-}
-
 .toggle-children-container{
     .wpsstm-tracklist{
         margin:0;
@@ -125,8 +22,6 @@
         }
     }
 }
-
-
 
 .wpsstm-tracklist{
     
@@ -268,7 +163,7 @@
     
     &[data-tracks-count="0"],&[data-tracks-count="1"]{
         .tracklist-nav{
-            display:none;
+            //display:none;
         }
         .trackitem_order,#track-admin-action-move{
             display:none;
@@ -372,22 +267,6 @@
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-#wpsstm-track-all-actions{
-    .wpsstm-actions-list{
-        display:inline;
-        padding: 0;
-        li{
-            padding: 0 .1em;
-        }
-        &#wpsstm-track-admin-actions{
-
-            li{
-
             }
         }
     }

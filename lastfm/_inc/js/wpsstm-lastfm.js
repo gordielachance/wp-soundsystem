@@ -86,11 +86,7 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = {
-            artist: track_obj.artist,
-            title:  track_obj.title,
-            album:  track_obj.album
-        }
+        var track = track_obj.build_request_obj();
 
         var ajax_data = {
             action:           'wpsstm_user_update_now_playing_lastfm_track',
@@ -127,12 +123,7 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = {
-            artist:     track_obj.artist,
-            title:      track_obj.title,
-            album:      track_obj.album,
-            duration:   track_obj.duration
-        }
+        var track = track_obj.build_request_obj();
 
         var ajax_data = {
             action:             'wpsstm_user_scrobble_lastfm_track',
