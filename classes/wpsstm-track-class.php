@@ -668,6 +668,7 @@ class WP_SoundSystem_Track{
         }
         
         //(playlist) remove
+        /*
         if ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) ){ //can edit tracklist
         
             $remove_text = __('Remove', 'wpsstm');
@@ -683,7 +684,9 @@ class WP_SoundSystem_Track{
             );
         }
         
+        */
         //sources manager
+        /*
         if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
 
             $sources_text = __('Sources manager','wpsstm');
@@ -702,8 +705,10 @@ class WP_SoundSystem_Track{
             );
             
         }
-
+        
+        */
         //delete
+        /*
         if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
             
             $remove_text = __('Delete track','wpsstm');
@@ -719,6 +724,7 @@ class WP_SoundSystem_Track{
             );
             
         }
+        */
 
         $track_actions = apply_filters('wpsstm_track_admin_actions',$track_actions);
 
