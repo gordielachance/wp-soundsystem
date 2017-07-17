@@ -535,7 +535,7 @@ class WP_SoundSystem_Track{
     }
     
     function get_track_actions_el($tracklist_id = null){
-        
+
         $track_actions = array();
         $action_default = array(
             'text' =>       null,
@@ -638,15 +638,20 @@ class WP_SoundSystem_Track{
             'classes' =>    array('track-action'),
         );
         
-        //capability check
-        $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
-        //$post_type = $post->post_type;
-        //$tracklist_obj = get_post_type_object($post_type);
+        /*
+        capability check
+        */
         
-        //move
-        //TO FIX global tracklist ?
-        //if ( $this->post_id && current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
-        if ( $this->post_id ){ //can edit tracklist
+        //track
+        $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
+        //tracklist
+        if ($tracklist_id){
+            $post_type_playlist = get_post_type($tracklist_id);
+            $tracklist_obj = get_post_type_object($post_type_playlist);
+        }
+
+        //(playlist) move
+        if ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) ){ //can edit tracklist
         
             $remove_text_a = __('Move', 'wpsstm');
             $remove_text_b = __('(drag)', 'wpsstm');
@@ -662,10 +667,8 @@ class WP_SoundSystem_Track{
             );
         }
         
-        //remove
-        //TO FIX global tracklist ?
-        //if ( $this->post_id && current_user_can($tracklist_obj->cap->edit_post,$post->post_id) ){ //can edit tracklist
-        if ( $this->post_id ){ //can edit tracklist
+        //(playlist) remove
+        if ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) ){ //can edit tracklist
         
             $remove_text = __('Remove', 'wpsstm');
 
@@ -699,7 +702,7 @@ class WP_SoundSystem_Track{
             );
             
         }
-        
+
         //delete
         if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
             
@@ -716,7 +719,6 @@ class WP_SoundSystem_Track{
             );
             
         }
-
 
         $track_actions = apply_filters('wpsstm_track_admin_actions',$track_actions);
 
