@@ -161,6 +161,15 @@ If a user has an interaction with a track (added to a playlist or to favorites),
 * Abord auto_guess_mbid() for tracks when saving subtracks (too slow)
 * Improved wizard backend & frontend
 * Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
+* frontend admin popups (and templates) for tracks and tracklists; including rewrite rules
+* fixed sources manager
+* removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
+* removed (now) unecessary jquery.toggleTableColumns.js
+* better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
+* new JS events : wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
+* removed publish_metabox_download_link()
+* cleaner code for enqueuing tracklists / tracks / track sources JS & CSS
+* more code cleanup & fixes
 
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
