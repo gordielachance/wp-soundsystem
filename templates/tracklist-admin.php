@@ -36,7 +36,7 @@ get_header();
                             <?php 
                             if ( $can_add_post_tracks ){
                                 ?>
-                                <li class="<?php if ($tracklist_action == 'add_track') echo 'active';?>"><a href="#tracklist-popup-add-track"><?php echo $add_track_text;?></a>
+                                <li class="<?php if ($tracklist_action == 'add_track') echo 'active';?>"><a href="#tracklist-popup-add-track"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo $add_track_text;?></a>
                                 <?php
                             }
                             ?>

@@ -33,11 +33,11 @@ get_header(); ?>
 
                     <div id="track-popup-tabs" class="entry-content">
                         <ul>
-                            <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#track-popup-info"><?php _e('Details','wpsstm');?></a></li>
-                            <li class="<?php if ($admin_action == 'track_details') echo 'active';?>"><a href="#track-popup-edit"><?php _e('Edit');?></a></li>
-                            <li class="<?php if ($admin_action == 'playlists_manger') echo 'active';?>"><a href="#track-popup-append"><?php _e('Playlists manager','wpsstm');?></a></li>
-                            <li class="<?php if ($admin_action == 'sources_manager') echo 'active';?>"><a href="#track-popup-sources"><?php _e('Sources manager','wpsstm');?></a></li>
-                            <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#track-popup-delete"><?php _e('Delete');?></a></li>
+                            <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#track-popup-info"><i class="fa fa-address-card-o" aria-hidden="true"></i> <?php _e('Details','wpsstm');?></a></li>
+                            <li class="<?php if ($admin_action == 'track_details') echo 'active';?>"><a href="#track-popup-edit"><i class="fa fa-pencil" aria-hidden="true"></i> <?php _e('Edit');?></a></li>
+                            <li class="<?php if ($admin_action == 'playlists_manger') echo 'active';?>"><a href="#track-popup-append"><i class="fa fa-list" aria-hidden="true"></i> <?php _e('Playlists manager','wpsstm');?></a></li>
+                            <li class="<?php if ($admin_action == 'sources_manager') echo 'active';?>"><a href="#track-popup-sources"><i class="fa fa-cloud" aria-hidden="true"></i> <?php _e('Sources manager','wpsstm');?></a></li>
+                            <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#track-popup-delete"><i class="fa fa-trash" aria-hidden="true"></i> <?php _e('Delete');?></a></li>
                         </ul>
                         <!--track infos-->
                         <div id="track-popup-info">
