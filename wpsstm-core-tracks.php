@@ -2,12 +2,12 @@
 
 class WP_SoundSystem_Core_Tracks{
 
-    public $metakey = '_wpsstm_track';
+    public $title_metakey = '_wpsstm_track';
     public $qvar_admin = 'admin';
     public $qvar_new_track = 'new';
-    public $qvar_track = 'lookup_track';
+    public $qvar_track_lookup = 'lookup_track';
     public $qvar_subtracks_hide = 'hide_subtracks';
-    public $mbtype = 'recording'; //musicbrainz type, for lookups
+    public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
     public $favorited_track_meta_key = '_wpsstm_user_favorite';
@@ -384,16 +384,16 @@ class WP_SoundSystem_Core_Tracks{
 
     function pre_get_posts_track( $query ) {
 
-        if ( ($artist = $query->get( wpsstm_artists()->qvar_artist )) && ($track = $query->get( $this->qvar_track )) ){
+        if ( ($artist = $query->get( wpsstm_artists()->qvar_artist_lookup )) && ($track = $query->get( $this->qvar_track_lookup )) ){
 
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->metakey,
+                     'key'     => $this->title_metakey,
                      'value'   => $track,
                      'compare' => '='
                 ),
                 array(
-                     'key'     => wpsstm_artists()->metakey,
+                     'key'     => wpsstm_artists()->artist_metakey,
                      'value'   => $artist,
                      'compare' => '='
                 )
@@ -527,7 +527,7 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function add_query_vars_track( $qvars ) {
-        $qvars[] = $this->qvar_track;
+        $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_admin;
         $qvars[] = $this->qvar_new_track;
         $qvars[] = $this->qvar_subtracks_hide;
@@ -553,7 +553,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function metabox_track_content( $post ){
 
-        $track_title = get_post_meta( $post->ID, $this->metakey, true );
+        $track_title = get_post_meta( $post->ID, $this->title_metakey, true );
         
         ?>
         <input type="text" name="wpsstm_track" class="wpsstm-fullwidth" value="<?php echo $track_title;?>" placeholder="<?php printf("Enter track title here",'wpsstm');?>"/>
@@ -615,9 +615,9 @@ class WP_SoundSystem_Core_Tracks{
         $track = ( isset($_POST[ 'wpsstm_track' ]) ) ? $_POST[ 'wpsstm_track' ] : null;
 
         if (!$track){
-            delete_post_meta( $post_id, $this->metakey );
+            delete_post_meta( $post_id, $this->title_metakey );
         }else{
-            update_post_meta( $post_id, $this->metakey, $track );
+            update_post_meta( $post_id, $this->title_metakey, $track );
         }
 
     }

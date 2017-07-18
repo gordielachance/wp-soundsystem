@@ -43,7 +43,7 @@ function wpsstm_get_post_mbid($post_id = null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, wpsstm_mb()->mb_id_meta_name, true );
+    return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
 function wpsstm_get_post_sources($post_id = null){
@@ -59,7 +59,7 @@ function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, wpsstm_mb()->mb_data_meta_name, true );
+    $data = get_post_meta( $post_id, wpsstm_mb()->mbdata_metakey, true );
     
     if ($keys){
         return wpsstm_get_array_value($keys, $data);
@@ -73,21 +73,21 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_artists()->metakey, true );
+    return get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_tracks()->metakey, true );
+    return get_post_meta( $post_id, wpsstm_tracks()->title_metakey, true );
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_albums()->metakey, true );
+    return get_post_meta( $post_id, wpsstm_albums()->album_metakey, true );
 }
 
 /**
@@ -111,7 +111,7 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
             if (!$artist) return;
             
             $query_args = array(
-                wpsstm_artists()->qvar_artist   => $artist,
+                wpsstm_artists()->qvar_artist_lookup   => $artist,
                 'post_type'                     => wpsstm()->post_type_artist,
             );
             
@@ -121,8 +121,8 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
             if (!$artist || !$album) return;
             
             $query_args = array(
-                wpsstm_artists()->qvar_artist    => $artist,
-                wpsstm_albums()->qvar_album     => $album,
+                wpsstm_artists()->qvar_artist_lookup    => $artist,
+                wpsstm_albums()->qvar_album_lookup     => $album,
                 'post_type'                     => wpsstm()->post_type_album,
             );
         break;
@@ -131,13 +131,13 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
             if (!$artist || !$track) return;
             
             $query_args = array(
-                wpsstm_artists()->qvar_artist   => $artist,
-                wpsstm_tracks()->qvar_track     => $track,
+                wpsstm_artists()->qvar_artist_lookup   => $artist,
+                wpsstm_tracks()->qvar_track_lookup     => $track,
                 'post_type'                     => wpsstm()->post_type_track,
             );
 
             if ($album){
-                $query_args[wpsstm_albums()->qvar_album] = $album;
+                $query_args[wpsstm_albums()->qvar_album_lookup] = $album;
             }
 
         break;
@@ -164,9 +164,24 @@ function wpsstm_get_post_mb_link_for_post($post_id){
     if ($mbid = wpsstm_get_post_mbid($post_id) ){
 
         $post_type = get_post_type($post_id);
-        $class_instance = wpsstm_get_class_instance($post_id);
-        $mbtype = $class_instance->mbtype;
+        $mbtype = null;
         
+        switch($post_type){
+
+            case wpsstm()->post_type_artist:
+                $mbtype = wpsstm_artists()->artist_mbtype;
+            break;
+
+            case wpsstm()->post_type_track:
+                $mbtype = wpsstm_tracks()->track_mbtype;
+            break;
+
+            case wpsstm()->post_type_album:
+                $mbtype = wpsstm_albums()->album_mbtype;
+            break;
+
+        }
+
         if ( $url = wpsstm_mb()->get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
         }

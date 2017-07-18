@@ -224,38 +224,6 @@ function wpsstm_locate_template( $template_name, $template_path = '', $default_p
 	return apply_filters( 'wpsstm_locate_template', $template, $template_name, $template_path, $default_path );
 }
 
-/**
-Returns the class instance for a wp music post id
-Requires a post_id, global $post is not always available here
-**/
-function wpsstm_get_class_instance($post_id){
-    $post_type = get_post_type($post_id);
-
-    switch($post_type){
-
-        case wpsstm()->post_type_artist:
-            return wpsstm_artists();
-        break;
-
-        case wpsstm()->post_type_track:
-            return wpsstm_tracks();
-        break;
-
-        case wpsstm()->post_type_album:
-            return wpsstm_albums();
-        break;
-
-        case wpsstm()->post_type_playlist:
-            return wpsstm_playlists();
-        break;
-
-        case wpsstm()->post_type_live_playlist:
-            return wpsstm_live_playlists();
-        break;
-
-    }
-}
-
 function wpsstm_get_url_domain($url){
     $url_parsed = parse_url($url);
     if ( !isset($url_parsed['host']) ) return;

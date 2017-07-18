@@ -223,7 +223,7 @@ class WP_SoundSystem_Tracklist{
         foreach((array)$this->tracks as $key=>$track){
             //increment count
             $tracks_count++;
-            $this->tracks[$key]->order = $tracks_count;
+            $this->tracks[$key]->position = $tracks_count;
         }
 
         $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
@@ -285,10 +285,10 @@ class WP_SoundSystem_Tracklist{
         
         /*
         $meta_input = array(
-            wpsstm_artists()->metakey           => $this->artist,
-            wpsstm_tracks()->metakey            => $this->title,
-            wpsstm_albums()->metakey            => $this->album,
-            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
+            wpsstm_artists()->artist_metakey    => $this->artist,
+            wpsstm_tracks()->title_metakey      => $this->title,
+            wpsstm_albums()->album_metakey      => $this->album,
+            wpsstm_mb()->mbid_metakey           => $this->mbid,
             //sources is more specific, will be saved below
         );
         */

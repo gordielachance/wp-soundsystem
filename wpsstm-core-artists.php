@@ -2,9 +2,9 @@
 
 class WP_SoundSystem_Core_Artists{
 
-    public $metakey = '_wpsstm_artist';
-    public $qvar_artist = 'lookup_artist';
-    public $mbtype = 'artist'; //musicbrainz type, for lookups
+    public $artist_metakey = '_wpsstm_artist';
+    public $qvar_artist_lookup = 'lookup_artist';
+    public $artist_mbtype = 'artist'; //musicbrainz type, for lookups
     
     /**
     * @var The one true Instance
@@ -76,12 +76,11 @@ class WP_SoundSystem_Core_Artists{
 
     function pre_get_posts_artist( $query ) {
 
-        if ( $search = $query->get( $this->qvar_artist ) ){
+        if ( $search = $query->get( $this->qvar_artist_lookup ) ){
             
-            //$query->set( 'meta_key', $this->metakey );
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->metakey,
+                     'key'     => $this->artist_metakey,
                      'value'   => $search,
                      'compare' => '='
                 )
@@ -212,7 +211,7 @@ class WP_SoundSystem_Core_Artists{
     }
     
     function add_query_var_artist( $qvars ) {
-        $qvars[] = $this->qvar_artist;
+        $qvars[] = $this->qvar_artist_lookup;
         return $qvars;
     }
     
@@ -237,7 +236,7 @@ class WP_SoundSystem_Core_Artists{
 
     function metabox_artist_content( $post ){
 
-        $artist_name = get_post_meta( $post->ID, $this->metakey, true );
+        $artist_name = get_post_meta( $post->ID, $this->artist_metakey, true );
         
         ?>
         <input type="text" name="wpsstm_artist" class="wpsstm-fullwidth wpsstm-lookup-artist" value="<?php echo $artist_name;?>" placeholder="<?php printf("Enter artist here",'wpsstm');?>"/>
@@ -274,9 +273,9 @@ class WP_SoundSystem_Core_Artists{
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
 
         if (!$artist){
-            delete_post_meta( $post_id, $this->metakey );
+            delete_post_meta( $post_id, $this->artist_metakey );
         }else{
-            update_post_meta( $post_id, $this->metakey, $artist );
+            update_post_meta( $post_id, $this->artist_metakey, $artist );
         }
 
     }

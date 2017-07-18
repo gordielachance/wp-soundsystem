@@ -2,7 +2,7 @@
 
 class WP_SoundSystem_Track{
     public $post_id = 0;
-    public $order = false; //order in the playlist, if set //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
+    public $position = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
 
     public $title;
     public $artist;
@@ -171,10 +171,10 @@ class WP_SoundSystem_Track{
         $post_id = null;
         
         $meta_input = array(
-            wpsstm_artists()->metakey           => $this->artist,
-            wpsstm_tracks()->metakey            => $this->title,
-            wpsstm_albums()->metakey            => $this->album,
-            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
+            wpsstm_artists()->artist_metakey    => $this->artist,
+            wpsstm_tracks()->title_metakey      => $this->title,
+            wpsstm_albums()->album_metakey      => $this->album,
+            wpsstm_mb()->mbid_metakey           => $this->mbid,
             //sources is more specific, will be saved below
         );
 
@@ -215,10 +215,10 @@ class WP_SoundSystem_Track{
         $post_id = null;
         
         $meta_input = array(
-            wpsstm_artists()->metakey           => $this->artist,
-            wpsstm_tracks()->metakey            => $this->title,
-            wpsstm_albums()->metakey            => $this->album,
-            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
+            wpsstm_artists()->artist_metakey           => $this->artist,
+            wpsstm_tracks()->title_metakey            => $this->title,
+            wpsstm_albums()->album_metakey            => $this->album,
+            wpsstm_mb()->mbid_metakey        => $this->mbid,
             //sources is more specific, will be saved below
         );
 
@@ -302,7 +302,7 @@ class WP_SoundSystem_Track{
             $mzb_args .= '"'.rawurlencode($this->album).'"';
         }
         */
-        $api_type = wpsstm_tracks()->mbtype;
+        $api_type = wpsstm_tracks()->track_mbtype;
         $api_response = wpsstm_mb()->get_musicbrainz_api_entry($api_type,null,$mzb_args);
 
         if (is_wp_error($api_response)) return;

@@ -5,8 +5,8 @@ class WP_SoundSystem_Core_MusicBrainz {
     var $mb_api_sleep = 1;
 
     var $mb_api_errors_meta_name = '_wpsstm_mb_api_error';
-    var $mb_id_meta_name = '_wpsstm_mbid'; //to store the musicbrainz ID
-    var $mb_data_meta_name = '_wpsstm_mbdata'; //to store the musicbrainz datas
+    var $mbid_metakey = '_wpsstm_mbid'; //to store the musicbrainz ID
+    var $mbdata_metakey = '_wpsstm_mbdata'; //to store the musicbrainz datas
 
     var $mb_data_by_url_transient_prefix = 'wpsstm_mb_by_url_'; //to cache the musicbrainz API results
 
@@ -65,10 +65,10 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         if ( $search = $query->get( $this->qvar_mbid ) ){
             
-            $query->set( 'meta_key', $this->mb_id_meta_name );
+            $query->set( 'meta_key', $this->mbid_metakey );
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->mb_id_meta_name,
+                     'key'     => $this->mbid_metakey,
                      'value'   => $search,
                      'compare' => '='
                 )
@@ -359,9 +359,9 @@ class WP_SoundSystem_Core_MusicBrainz {
         $mbid = trim($mbid);
         
         if (!$mbid){
-            delete_post_meta( $post_id, $this->mb_id_meta_name );
+            delete_post_meta( $post_id, $this->mbid_metakey );
         }else{
-            update_post_meta( $post_id, $this->mb_id_meta_name, $mbid );
+            update_post_meta( $post_id, $this->mbid_metakey, $mbid );
         }
         do_action('wpsstm_updated_mbid',$post_id);
     }
@@ -445,7 +445,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         
         if (!$mbid){
             if ($mbdatas){
-                delete_post_meta( $post_id, $this->mb_data_meta_name );
+                delete_post_meta( $post_id, $this->mbdata_metakey );
                 wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
             }
         }else{
@@ -462,7 +462,7 @@ class WP_SoundSystem_Core_MusicBrainz {
                 add_settings_error('wpsstm_musicbrainz', 'api_lookup', $data->get_error_message(),'inline');
                 return;
             }else{
-                $success = update_post_meta( $post_id, $this->mb_data_meta_name, $data );
+                $success = update_post_meta( $post_id, $this->mbdata_metakey, $data );
                 wpsstm()->debug_log($success,"WP_SoundSystem_Core_MusicBrainz::update_mb_datas()" ); 
             }
             
@@ -516,7 +516,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
                 switch ($mbdatas_action){
                     case 'refresh':
-                        if ( delete_post_meta( $post_id, $this->mb_data_meta_name ) ){
+                        if ( delete_post_meta( $post_id, $this->mbdata_metakey ) ){
                             wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
                             $this->update_mb_datas( $post_id );
                         }
@@ -534,7 +534,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         }else{
             //delete mdbata option 
-            delete_post_meta( $post_id, $this->mb_data_meta_name );
+            delete_post_meta( $post_id, $this->mbdata_metakey );
         }
     }
     
@@ -637,7 +637,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         }
         
         if ($artist){
-            update_post_meta( $post_id, wpsstm_artists()->metakey, $artist );
+            update_post_meta( $post_id, wpsstm_artists()->artist_metakey, $artist );
             wpsstm()->debug_log( $artist, "fill_post_artist_with_mbdatas()"); 
         }
 
@@ -658,7 +658,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         }
         
         if ($album){
-            update_post_meta( $post_id, wpsstm_albums()->metakey, $album );
+            update_post_meta( $post_id, wpsstm_albums()->album_metakey, $album );
             wpsstm()->debug_log( $album, "fill_post_album_with_mbdatas()"); 
         }
             
@@ -676,7 +676,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         }
         
         if ($track){
-            update_post_meta( $post_id, wpsstm_tracks()->metakey, $track );
+            update_post_meta( $post_id, wpsstm_tracks()->title_metakey, $track );
             wpsstm()->debug_log( $track, "fill_post_track_with_mbdatas()"); 
         }
             
@@ -862,7 +862,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         switch($api_type){
                 
-            case wpsstm_artists()->mbtype: //artist
+            case wpsstm_artists()->artist_mbtype: //artist
                 
                 if ( !$artist ) break;
                 
@@ -871,7 +871,7 @@ class WP_SoundSystem_Core_MusicBrainz {
                 
             break;
                 
-            case wpsstm_tracks()->mbtype: //track
+            case wpsstm_tracks()->track_mbtype: //track
                 
                 if ( !$artist || !$track ) break;
                 
@@ -881,7 +881,7 @@ class WP_SoundSystem_Core_MusicBrainz {
                 
             break;
                 
-            case wpsstm_albums()->mbtype: //album
+            case wpsstm_albums()->album_mbtype: //album
                 
                 if ( !$artist || !$album ) break;
                 
@@ -914,13 +914,13 @@ class WP_SoundSystem_Core_MusicBrainz {
         $mbtype = null;
         switch( $post_type ){
             case wpsstm()->post_type_artist:
-                $mbtype = wpsstm_artists()->mbtype;
+                $mbtype = wpsstm_artists()->artist_mbtype;
             break;
             case wpsstm()->post_type_track:
-                $mbtype = wpsstm_tracks()->mbtype;
+                $mbtype = wpsstm_tracks()->track_mbtype;
             break;
             case wpsstm()->post_type_album:
-                $mbtype = wpsstm_albums()->mbtype;
+                $mbtype = wpsstm_albums()->album_mbtype;
             break;
         }
         return $mbtype;
