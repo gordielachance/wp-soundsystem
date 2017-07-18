@@ -602,7 +602,9 @@ class WP_SoundSystem_Tracklist{
             $track_actions_els[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($action_attr),$action['icon'],$action['text']);
         }
 
-        return sprintf('<ul id="wpsstm-tracklist-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
+        if ( !empty($track_actions_els) ){
+            return sprintf('<ul id="wpsstm-tracklist-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
+        }
         
     }
     
@@ -733,9 +735,11 @@ class WP_SoundSystem_Tracklist{
 
             $track_actions_els[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($action_attr),$action['icon'],$action['text']);
         }
-
-        return sprintf('<ul id="wpsstm-tracklist-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
         
+        if ( !empty($track_actions_els) ){
+            return sprintf('<ul id="wpsstm-tracklist-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
+        }
+
     }
     
     function get_tracklist_admin_gui_url($tracklist_action = null){
