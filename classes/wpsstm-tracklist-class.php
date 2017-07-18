@@ -517,8 +517,8 @@ class WP_SoundSystem_Tracklist{
         }
 
         //share
-        if ( in_array($post_status,array('publish',$temp_status)) ){
-
+        //TO FIX no conditions (call to action) but notice if post cannot be shared
+        //if ( in_array($post_status,array('publish',$temp_status)) ){
 
             $share_url = wpsstm_get_tracklist_link($this->post_id);
             $share_text = __('Share', 'wpsstm');
@@ -532,7 +532,7 @@ class WP_SoundSystem_Tracklist{
                 'icon' => '<i class="fa fa-share-alt" aria-hidden="true"></i>',
                 'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$share_text)
             );
-        }
+        //}
 
         //xspf
         if ( in_array($post_status,array('publish',$temp_status)) ){

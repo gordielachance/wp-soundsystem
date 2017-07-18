@@ -20,16 +20,23 @@ get_header(); ?>
                     $tracklist = new WP_SoundSystem_Tracklist();
                     $tracklist->add($tracks);
                     $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
-                
+
                     $admin_action = $wp_query->get(wpsstm_tracks()->qvar_track_admin);
                 
+                    /*
+                    Capability check
+                    */
                     //TO FIX to improve
+                    $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
+                    $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
+                    $can_delete_tracks =    current_user_can($post_type_obj->cap->delete_posts);
+                
                     $can_tab = array(
                         'track_info' =>         ($track->title && $track->artist),
-                        'track_details' =>      true,
-                        'playlists_manager' =>  true,
-                        'sources_manager' =>    true,
-                        'delete' =>             true
+                        'track_details' =>      $can_edit_track,
+                        'playlists_manager' =>  (bool)get_current_user_id(),
+                        'sources_manager' =>    $can_edit_track,
+                        'delete' =>             $can_delete_tracks
                     );
 
                     ?>
