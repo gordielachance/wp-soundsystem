@@ -170,6 +170,17 @@ class WP_SoundSystem_Tracklist{
         $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
         $ordered_ids = array_unique($ordered_ids);
         
+        //set post status to 'publish' if it is not done yet (it could be a temporary post)
+        foreach((array)$ordered_ids as $track_id){
+            $track_post_type = get_post_status($track_id);
+            if ($track_post_type != 'publish'){
+                wp_update_post(array(
+                    'ID' =>             $track_id,
+                    'post_status' =>    'publish'
+                ));
+            }
+        }
+        
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
         return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);

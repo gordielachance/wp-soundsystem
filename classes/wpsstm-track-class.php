@@ -359,6 +359,15 @@ class WP_SoundSystem_Track{
             return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
         }
         
+        //set post status to 'publish' if it is not done yet (it could be a temporary post)
+        $track_post_type = get_post_status($this->post_id);
+        if ($track_post_type != 'publish'){
+            wp_update_post(array(
+                'ID' =>             $this->post_id,
+                'post_status' =>    'publish'
+            ));
+        }
+        
         //capability check
         //TO FIX we should add a meta to the user rather than to the track, and check for another capability here ?
         /*
