@@ -373,10 +373,10 @@ class WP_SoundSystem_Core_MusicBrainz {
     function auto_set_mbid( $post_id ){
         
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
         $is_revision = wp_is_post_revision( $post_id );
-        if ( $is_autosave || $is_autodraft || $is_revision ) return;
-        
+        if ( $is_autosave || $skip_status || $is_revision ) return;
+
         //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
         //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
         if ( did_action('wpsstm_save_subtracks') ) return;
