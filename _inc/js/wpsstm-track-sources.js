@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
         
         var bt = $(this);
         var sources_auto_edit_list = bt.closest('#wpsstm-sources-edit-list-auto');
-        var popup_section = bt.closest('#track-popup-sources');
+        var popup_section = bt.closest('#admin-track-sources');
         var popup = bt.closest('.hentry');
 
         //get track obj from HTML

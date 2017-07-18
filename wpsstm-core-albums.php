@@ -122,9 +122,9 @@ class WP_SoundSystem_Core_Albums{
         $album = wpsstm_get_post_album($post_id);
         if ( !$artist || !$album ) return;
         
-        $post_title = sanitize_text_field( sprintf('<span itemprop="byArtist">%s</span> <span itemprop="inAlbum">%s</span>',$artist,$album) );
+        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$album) );
         
-        //use get_post_field here instead of get_the_title() so title is not filtered
+        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;
 
         //log

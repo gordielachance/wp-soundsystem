@@ -146,6 +146,34 @@ class WP_SoundSystem_Tracklist{
         
         return $this->set_subtrack_ids($subtrack_ids);
     }
+
+    function set_subtrack_ids($ordered_ids){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
+        
+        //post type check
+        $can_add_tracklist_items = in_array(get_post_type($this->post_id),array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+        if (!$can_add_tracklist_items){
+            return new WP_Error( 'wpsstm_cannot_set_subtracks', __('Tracks can only be assigned to playlists and albums','wpsstm') );
+        }
+        
+        //capability check
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
+        $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
+        $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
+        $ordered_ids = array_unique($ordered_ids);
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
+        
+        return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
+    }
     
     function save_track_position($track_id,$position){
         $ordered_ids = get_post_meta($this->post_id,'wpsstm_subtrack_ids',true);
@@ -160,34 +188,6 @@ class WP_SoundSystem_Tracklist{
         
         //save
         return $this->set_subtrack_ids($ordered_ids);
-    }
-
-    function set_subtrack_ids($ordered_ids){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
-        }
-        
-        //post type check
-        $can_add_post_tracks = in_array(get_post_type($this->post_id),array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
-        if (!$can_add_post_tracks){
-            return new WP_Error( 'wpsstm_cannot_set_subtracks', __('Tracks can only be assigned to playlists and albums','wpsstm') );
-        }
-        
-        //capability check
-        $post_type = get_post_type($this->post_id);
-        $tracklist_obj = get_post_type_object($post_type);
-        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __('You have not the capability required to edit this tracklist.','wpsstm') );
-        }
-        
-        $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
-        $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
-        $ordered_ids = array_unique($ordered_ids);
-        
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
-        
-        return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
     }
     
     function add($tracks){
@@ -259,7 +259,7 @@ class WP_SoundSystem_Tracklist{
         $required_cap = $post_type_obj->cap->edit_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new playlist','wpsstm') );
+            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new playlist.",'wpsstm') );
         }
         
         $validated = $this->validate_playlist();
@@ -449,7 +449,7 @@ class WP_SoundSystem_Tracklist{
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __('You have not the capability required to edit this tracklist.','wpsstm') );
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         */
 
@@ -484,7 +484,7 @@ class WP_SoundSystem_Tracklist{
         );
         
         $post_type = get_post_type($this->post_id);
-        $temp_status = wpsstm_wizard()->wizard_post_status;
+        $temp_status = wpsstm()->temp_status;
         $post_status = get_post_status($this->post_id);
 
         //refresh playlist
@@ -600,7 +600,7 @@ class WP_SoundSystem_Tracklist{
             'icon' =>       null,
             'classes' =>    array('tracklist-admin-action'),
         );
-        $temp_status = wpsstm_wizard()->wizard_post_status;
+        $temp_status = wpsstm()->temp_status;
         $post_status = get_post_status($this->post_id);
         $post_type = get_post_type($this->post_id);
         $permalink = get_permalink($this->post_id);
@@ -609,22 +609,23 @@ class WP_SoundSystem_Tracklist{
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_add_post_tracks = in_array($post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+        $can_add_tracklist_items = in_array($post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
 
-        if ( $can_add_post_tracks && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+        if ( $can_add_tracklist_items && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
             
-            $add_track_url = $this->get_tracklist_admin_gui_url('add_track');
+            $append_blank_track_url = $this->get_tracklist_admin_gui_url('add-track');
+            $append_blank_track_url = add_query_arg(array('TB_iframe'=>true),$append_blank_track_url);
+            
             $add_track_text = $track_obj->labels->add_new_item;
-            $add_track_url = add_query_arg(array('TB_iframe'=>true),$add_track_url);
             $action_classes = array('wpsstm-requires-auth','tracklist-action');
             
             $link_attr = array(
                 'title'     => $add_track_text,
-                'href'      => $add_track_url,
+                'href'      => $append_blank_track_url,
                 'class'     => implode(' ',array('thickbox'))
             );
 
-            $tracklist_actions['add_track'] = array(
+            $tracklist_actions['add-track'] = array(
                 'icon'      => '<i class="fa fa-plus" aria-hidden="true"></i>',
                 'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$add_track_text),
                 'classes'   =>    $action_classes
@@ -718,18 +719,6 @@ class WP_SoundSystem_Tracklist{
         }
 
         return $url;
-    }
-    
-    function tracklist_admin_new_track_details(){
-        
-        $track = new WP_SoundSystem_Track();
-        
-        $admin_action = 'add_track';
-        $form_content = $track->track_admin_form_content();
-        $admin_action_el = sprintf('<input type="hidden" name="wpsstm-admin-tracklist-action" value="%s">',$admin_action);
-        $form_action = $this->get_tracklist_admin_gui_url($admin_action);
-        $nonce_el = wp_nonce_field( 'wpsstm_admin_tracklist_add_track_'.$this->post_id, 'wpsstm_admin_tracklist_add_track_nonce', true, false );
-        return sprintf('<form action="%s" method="post">%s%s%s</form>',$form_action,$form_content,$nonce_el,$admin_action_el);
     }
 
 }

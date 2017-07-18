@@ -226,7 +226,7 @@
         var li_el =         $(checkbox).closest('li');
         var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
         
-        var popup_section = checkbox.closest('#track-popup-append');
+        var popup_section = checkbox.closest('#admin-track-playlists');
         var popup = checkbox.closest('.hentry');
 
         //get track obj from HTML

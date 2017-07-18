@@ -97,7 +97,7 @@ class WP_SoundSystem_Core_Tracks{
         // (existing track) admin
         add_rewrite_endpoint($this->qvar_admin, EP_PERMALINK ); 
         
-        //(new track) admin
+        //(new track) admin - wordpress/wpsstm_tracks/new
         $new_track_regex = sprintf('%s/%s$',wpsstm()->post_type_track,$this->qvar_new_track);
         $new_track_redirect_args = array(
             'post_type' =>              wpsstm()->post_type_track,
@@ -132,13 +132,13 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     /*
-    Save new track when url is 'wordpress/wpsstm_track/new/'
+    Add new track when url is 'wordpress/wpsstm_track/new/'
     */
     
     function save_new_track(){
         $is_new_track = get_query_var($this->qvar_new_track);
         if (!$is_new_track) return;
-        
+
         //track action
         $track_action = ( isset($_REQUEST['track_action']) ) ? $_REQUEST['track_action'] : null;
         if (!$track_action) return;
@@ -152,7 +152,7 @@ class WP_SoundSystem_Core_Tracks{
         
         $track = new WP_SoundSystem_Track($track_args);
         if ( !$track->post_id && !$track->populate_track_post_auto() ){//track does not exists in DB
-            $track->save_track();
+            $track->save_temp_track();
         }
         
         //tracklist ID
@@ -228,7 +228,7 @@ class WP_SoundSystem_Core_Tracks{
                 $track->title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
                 $track->album = ( isset($_POST[ 'wpsstm_track_album' ]) ) ? $_POST[ 'wpsstm_track_album' ] : null;
                 $track->mbid = ( isset($_POST[ 'wpsstm_track_mbid' ]) ) ? $_POST[ 'wpsstm_track_mbid' ] : null;
-                
+
                 $track->save_track();
                 
             break;
@@ -421,9 +421,12 @@ class WP_SoundSystem_Core_Tracks{
 
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
+        
+        if (!$title || !$artist) return;
+        
         $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$title) );
 
-        //use get_post_field here instead of get_the_title() so title is not filtered
+        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;
 
         //log

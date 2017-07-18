@@ -51,9 +51,9 @@ class WP_SoundSystem_Track{
 
         if ( $auto_post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title) ){
             $this->populate_track_post($auto_post_id);
-            $this->did_post_id_lookup = true;
-            return $this->post_id;
         }
+        $this->did_post_id_lookup = true;
+        return $this->post_id;
 
     }
     
@@ -166,6 +166,39 @@ class WP_SoundSystem_Track{
         return $valid;
 
     }
+    
+    function save_temp_track(){
+        $post_id = null;
+        
+        $meta_input = array(
+            wpsstm_artists()->metakey           => $this->artist,
+            wpsstm_tracks()->metakey            => $this->title,
+            wpsstm_albums()->metakey            => $this->album,
+            wpsstm_mb()->mb_id_meta_name        => $this->mbid,
+            //sources is more specific, will be saved below
+        );
+
+        $meta_input = array_filter($meta_input);
+
+        $post_track_args = array('meta_input' => $meta_input);
+        
+        $post_track_new_args = array(
+            'post_type'     => wpsstm()->post_type_track,
+            'post_status'   => wpsstm()->temp_status,
+            'post_author'   => get_current_user_id(), //TO FIX guest if user is not logged ?
+        );
+
+        $post_track_new_args = wp_parse_args($post_track_new_args,$post_track_args);
+
+        $post_id = wp_insert_post( $post_track_new_args );
+        wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_new_args)), "WP_SoundSystem_Track::save_temp_track()"); 
+        
+        if ( is_wp_error($post_id) ) return $post_id;
+        
+        $this->post_id = $post_id;
+        return $this->post_id;
+        
+    }
 
     function save_track(){
         
@@ -174,7 +207,7 @@ class WP_SoundSystem_Track{
         $required_cap = $post_type_obj->cap->edit_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new track','wpsstm') );
+            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
         if ( !$this->validate_track() ) return;
@@ -214,7 +247,8 @@ class WP_SoundSystem_Track{
         }else{ //is a track update
             
             $post_track_update_args = array(
-                'ID' => $this->post_id
+                'ID' =>             $this->post_id,
+                'post_status' =>    'publish', //previous status may be the temporary one so be sure we publish it here.
             );
             
             $post_track_update_args = wp_parse_args($post_track_update_args,$post_track_args);
@@ -242,7 +276,7 @@ class WP_SoundSystem_Track{
         $required_cap = $post_type_obj->cap->delete_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __('You have not the capability required to create a new track','wpsstm') );
+            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
         wpsstm()->debug_log( array('post_id',$this->post_id,'force_delete'=>$force_delete), "WP_SoundSystem_Track::delete_track()"); 
@@ -331,7 +365,7 @@ class WP_SoundSystem_Track{
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $post_type_obj->cap->edit_posts;
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_no_edit_cap', __('You have not the capability required to edit this track.','wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit this track.",'wpsstm') );
         }
         */
 
@@ -561,7 +595,7 @@ class WP_SoundSystem_Track{
         
         //append to playlist
         $append_text = __('Playlists manager','wpsstm');
-        $append_url = $this->get_track_admin_gui_url('playlists_manger',$tracklist_id);
+        $append_url = $this->get_track_admin_gui_url('playlists_manager',$tracklist_id);
         $append_url = add_query_arg(array('TB_iframe'=>true),$append_url);
 
         $action_classes = array('wpsstm-requires-auth','track-action');
@@ -644,14 +678,19 @@ class WP_SoundSystem_Track{
         
         //track
         $post_type_track_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_edit_track = ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) );
+        
         //tracklist
+        $post_type_playlist = null;
+        $can_edit_tracklist = false;
         if ($tracklist_id){
             $post_type_playlist = get_post_type($tracklist_id);
             $tracklist_obj = get_post_type_object($post_type_playlist);
+            $can_edit_tracklist = ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
         }
 
         //(playlist) move
-        if ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) ){ //can edit tracklist
+        if ( $can_edit_tracklist && ( $post_type_playlist==wpsstm()->post_type_playlist ) ){
         
             $remove_text_a = __('Move', 'wpsstm');
             $remove_text_b = __('(drag)', 'wpsstm');
@@ -669,7 +708,7 @@ class WP_SoundSystem_Track{
         
         //(playlist) remove
         /*
-        if ( $tracklist_id && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) ){ //can edit tracklist
+        if ( $can_edit_tracklist ){ //can edit tracklist
         
             $remove_text = __('Remove', 'wpsstm');
 
@@ -687,7 +726,7 @@ class WP_SoundSystem_Track{
         */
         //sources manager
         /*
-        if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
+        if ( $can_edit_track ){
 
             $sources_text = __('Sources manager','wpsstm');
             $sources_url = $this->get_track_admin_gui_url('sources_manager',$tracklist_id);
@@ -709,7 +748,7 @@ class WP_SoundSystem_Track{
         */
         //delete
         /*
-        if ( $this->post_id && current_user_can($post_type_track_obj->cap->delete_post,$this->post_id) ){
+        if ( $can_edit_track ){
             
             $remove_text = __('Delete track','wpsstm');
 
@@ -744,17 +783,8 @@ class WP_SoundSystem_Track{
         return sprintf('<ul id="wpsstm-admin-track-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
         
     }
-    
+
     function track_admin_details(){
-        $popup_action = 'track_details';
-        $form_content = $this->track_admin_form_content();
-        $popup_action_el = sprintf('<input type="hidden" name="wpsstm-admin-track-action" value="%s">',$popup_action);
-        $form_action = $this->get_track_admin_gui_url($popup_action);
-        $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_details_'.$this->post_id, 'wpsstm_admin_track_gui_details_nonce', true, false );
-        return sprintf('<form action="%s" method="post">%s%s%s</form>',$form_action,$form_content,$nonce_el,$popup_action_el);
-    }
-    
-    function track_admin_form_content(){
         
         //artist
         $artist_input_attr = array(
@@ -796,8 +826,12 @@ class WP_SoundSystem_Track{
         $submit_block = sprintf('<p class="wpsstm-submit-wrapper">%s</p>',$submit_bt_el);
         
         $form_content = $artist_el.$title_el.$album_el.$mbid_el.$submit_block;
-        
-        return $form_content;
+        //
+        $popup_action = 'track_details';
+        $popup_action_el = sprintf('<input type="hidden" name="wpsstm-admin-track-action" value="%s">',$popup_action);
+        $form_action = $this->get_track_admin_gui_url($popup_action);
+        $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_details_'.$this->post_id, 'wpsstm_admin_track_gui_details_nonce', true, false );
+        return sprintf('<form action="%s" method="post">%s%s%s</form>',$form_action,$form_content,$nonce_el,$popup_action_el);
 
     }
     

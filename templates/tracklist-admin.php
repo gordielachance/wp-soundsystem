@@ -1,6 +1,7 @@
 <?php
 global $post;
-get_header(); 
+get_header();
+
 ?>
 
 	<div id="primary" class="content-area">
@@ -18,7 +19,7 @@ get_header();
                     <?php
                     $tracklist = new WP_SoundSystem_Tracklist(get_the_ID());
                     $tracklist_action = $wp_query->get(wpsstm_tracklists()->qvar_admin);
-                    $can_add_post_tracks = in_array($post->post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+                    $can_add_tracklist_items = in_array($post->post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
                 
                     $track_obj = get_post_type_object(wpsstm()->post_type_track);
                     $add_track_text = $track_obj->labels->add_new_item;
@@ -34,20 +35,15 @@ get_header();
                     <div id="track-popup-tabs" class="entry-content">
                         <ul>
                             <?php 
-                            if ( $can_add_post_tracks ){
+                            if ( $can_add_tracklist_items ){
+                                $append_blank_track_url = $tracklist->get_tracklist_admin_gui_url('add-track');
                                 ?>
-                                <li class="<?php if ($tracklist_action == 'add_track') echo 'active';?>"><a href="#tracklist-popup-add-track"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo $add_track_text;?></a>
+                                <li><a href="<?php echo $append_blank_track_url;?>"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo $add_track_text;?></a>
                                 <?php
                             }
                             ?>
                             
                         </ul>
-                        <!--add edit-->
-                        <div id="tracklist-popup-add-track">
-                            <?php
-                            echo $tracklist->tracklist_admin_new_track_details();
-                            ?>
-                        </div>
                     </div><!-- .entry-content -->
 
                 </article><!-- #post-## -->

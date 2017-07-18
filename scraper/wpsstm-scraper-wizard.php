@@ -12,7 +12,6 @@ class WP_SoundSystem_Core_Wizard{
     public $frontend_wizard_page_id = null;
     public $qvar_wizard_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
     public $qvar_wizard_posts = 'wpsstm_wizard_posts';
-    public $wizard_post_status = 'wpsstm-wizard';
     public $frontend_wizard_url = null;
     public $frontend_wizard = null;
     public $frontend_wizard_meta_key = '_wpsstm_is_frontend_wizard';
@@ -51,9 +50,7 @@ class WP_SoundSystem_Core_Wizard{
 
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
-        add_action( 'init', array($this,'register_wizard_post_status'));
-        add_action( 'posts_where', array($this, 'default_exclude_wizard_post_status'),10,2);
-        
+
         //add_action( 'pre_get_posts', array($this, 'is_single_wizard_post'));
         //add_action( 'pre_get_posts', array($this, 'filter_wizard_posts'));
         //add_action( 'pre_get_posts', array($this, 'include_wizard_drafts'));
@@ -100,18 +97,7 @@ class WP_SoundSystem_Core_Wizard{
 
         return array_merge($wizard_rule, $rules);
     }
-    
-    function register_wizard_post_status(){
-        register_post_status( $this->wizard_post_status, array(
-            'label'                     => _x( 'Wizard', 'wpsstm' ),
-            'public'                    => true,
-            'exclude_from_search'       => false,
-            'show_in_admin_all_list'    => true,
-            'show_in_admin_status_list' => true,
-            'label_count'               => _n_noop( 'Wizard <span class="count">(%s)</span>', 'Wizard <span class="count">(%s)</span>' ),
-        ) );
-    }
-    
+
     function frontend_wizard_display($content){
         
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
@@ -167,7 +153,7 @@ class WP_SoundSystem_Core_Wizard{
         global $post;
         
         
-        if ( get_post_status($post->ID) != $this->wizard_post_status ) return $content;
+        if ( get_post_status($post->ID) != wpsstm()->temp_status ) return $content;
 
         //TO FIX hook action to delete posts after one day as specified below
         
@@ -217,20 +203,6 @@ class WP_SoundSystem_Core_Wizard{
         return $query;
     }
     
-    /*
-    Default exclude wizard posts from queries, except if it is explicitly requested
-    */
-    
-    function default_exclude_wizard_post_status( $where, $query ){
-        global $wpdb;
-        
-        if ( $query->is_single() ) return $where;
-        if ( $query->get('post_status') == $this->wizard_post_status ) return $where;
-
-        $where .= sprintf(" AND {$wpdb->posts}.post_status NOT IN ( '%s' ) ", $this->wizard_post_status );
-        return $where;
-    }
-    
     function filter_wizard_posts( $query ) {
         if ( $query->get('post_type')!=wpsstm()->post_type_live_playlist ) return $query;
         
@@ -266,7 +238,7 @@ class WP_SoundSystem_Core_Wizard{
         //allow drafts for guest user queries
         $post_statii = $query->get( 'post_status' );
         $post_statii = array_filter((array)$post_statii);
-        $post_statii = array_merge($post_statii,array('publish',$this->wizard_post_status));
+        $post_statii = array_merge($post_statii,array('publish',wpsstm()->temp_status));
         $query->set( 'post_status', $post_statii );
         $query->set( $this->qvar_wizard_posts, true );
 
@@ -280,7 +252,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $query_args = array(
             'post_type'     => wpsstm()->post_type_live_playlist,
-            'post_status'   => $this->wizard_post_status,
+            'post_status'   => wpsstm()->temp_status,
             /*
             'meta_query' => array(
                 array(
@@ -508,7 +480,7 @@ class WP_SoundSystem_Core_Wizard{
             $required_cap = $post_type_obj->cap->edit_posts;
 
             if ( !user_can($user_id,$required_cap) ){
-                return new WP_Error( 'wpsstm_wizard_cap_missing', __('You have not the capability required to create a new live playlist','wpsstm') );
+                return new WP_Error( 'wpsstm_wizard_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
             }else{
 
                 if( !$this->tracklist->tracks ){
@@ -518,7 +490,7 @@ class WP_SoundSystem_Core_Wizard{
                 $post_args = array(
                     'post_title'    => $this->tracklist->title,
                     'post_type'     => wpsstm()->post_type_live_playlist,
-                    'post_status'   => 'wpsstm-wizard',
+                    'post_status'   => wpsstm()->temp_status,
                     'post_author'   => $user_id,
                     'meta_input'   => array(
                     $this->frontend_wizard_meta_key => true

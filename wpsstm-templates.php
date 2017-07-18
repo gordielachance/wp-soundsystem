@@ -103,7 +103,7 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
     if ( !in_array($slug,$allowed_slugs) ) return;
     
     $post_id = null;
-    $query_args = null;
+    $query_args_default = array();
     
     switch($slug){
         case 'artist':
@@ -144,8 +144,9 @@ function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
     }
 
     if (!$query_args) return;
-    
-    //wpsstm()->debug_log( json_encode($query_args,JSON_UNESCAPED_UNICODE), "wpsstm_get_post_id_by()"); 
+    $query_args = wp_parse_args($query_args,$query_args_default);
+
+    //wpsstm()->debug_log( json_encode(array('args'=>$query_args,'request'=>$query->request),JSON_UNESCAPED_UNICODE), "wpsstm_get_post_id_by()"); 
 
     $query = new WP_Query( $query_args );
     if (!$query->posts) return;

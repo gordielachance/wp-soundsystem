@@ -36,6 +36,12 @@ class WP_SoundSystem {
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
+    /*
+    Temporary post status. Used for tracklist/tracks created frontend; before user "confirmed" them.
+    */
+    
+    public $temp_status = 'wpsstm-wizard';
+    
     /**
     * @var The one true Instance
     */
@@ -150,6 +156,9 @@ class WP_SoundSystem {
         add_action( 'plugins_loaded', array($this, 'upgrade'));
 
         add_action( 'admin_init', array($this,'load_textdomain'));
+        
+        add_action( 'init', array($this,'register_temp_status'));
+        add_action( 'posts_where', array($this, 'ignore_temp_status_backend_listings'),10,2);
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
@@ -200,6 +209,38 @@ class WP_SoundSystem {
     
     public function get_default_option($keys = null){
         return wpsstm_get_array_value($keys,$this->options_default);
+    }
+    
+    function register_temp_status(){
+        register_post_status( $this->temp_status, array(
+            'label' =>                      _x( 'Wizard', 'wpsstm' ),
+            'public' =>                     true,
+            'exclude_from_search' =>        false,
+            'show_in_admin_all_list' =>     true,
+            'show_in_admin_status_list' =>  true,
+            'label_count' =>                _n_noop( 'Wizard <span class="count">(%s)</span>', 'Wizard <span class="count">(%s)</span>' ),
+        ) );
+    }
+    
+    /*
+    Our temporary post status is 'public'.
+    But we want to hide temporary posts from backend listings : 
+    Default exclude them, except if it is explicitly requested or that we query a single post.
+    */
+    
+    function ignore_temp_status_backend_listings( $where, $query ){
+        global $wpdb;
+        
+        if ( !wpsstm_is_backend() ) return $where;
+        
+        $screen = get_current_screen();
+        if ($screen->base != 'edit') return $where;
+        
+        if ( $query->is_single() ) return $where;
+        if ( $query->get('post_status') == wpsstm()->temp_status ) return $where;
+
+        $where .= sprintf(" AND {$wpdb->posts}.post_status NOT IN ( '%s' ) ", wpsstm()->temp_status );
+        return $where;
     }
     
     function register_scripts_styles_shared(){

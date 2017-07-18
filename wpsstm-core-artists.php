@@ -107,10 +107,10 @@ class WP_SoundSystem_Core_Artists{
         $has_cap = current_user_can('edit_post', $post_id);
         if ( $is_autosave || $is_autodraft || $is_revision || !$has_cap ) return;
 
-        $post_title = wpsstm_get_post_artist($post_id);
-        if ( !$post_title ) return;
+        $artist = $post_title = wpsstm_get_post_artist($post_id);
+        if ( !$artist ) return;
         
-        //use get_post_field here instead of get_the_title() so title is not filtered
+        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;
 
         //log
