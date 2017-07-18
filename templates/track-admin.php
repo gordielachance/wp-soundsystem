@@ -27,6 +27,9 @@ get_header(); ?>
                     Capability check
                     */
                     //TO FIX to improve
+                    $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
+                    $create_playlist_cap =  $post_type_obj->cap->edit_posts;
+
                     $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                     $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
                     $can_delete_tracks =    current_user_can($post_type_obj->cap->delete_posts);
@@ -34,7 +37,7 @@ get_header(); ?>
                     $can_tab = array(
                         'track_info' =>         ($track->title && $track->artist),
                         'track_details' =>      $can_edit_track,
-                        'playlists_manager' =>  (bool)get_current_user_id(),
+                        'playlists_manager' =>  true, //call to action
                         'sources_manager' =>    $can_edit_track,
                         'delete' =>             $can_delete_tracks
                     );

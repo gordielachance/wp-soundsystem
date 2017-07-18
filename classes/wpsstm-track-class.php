@@ -845,13 +845,28 @@ class WP_SoundSystem_Track{
     }
     
     function track_admin_playlists(){
+        
+        if ( !get_current_user_id() ){
+            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            return sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+        }
+        
+        /*
+        if ( !current_user_can($create_playlist_cap) ){
+            $wp_cap_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+            $missing_cap_text = __("You don't have the capability required to create a new playlist.",'wpsstm');
+            return sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_cap_icon,$missing_cap_text); 
+        }
+        */
 
         $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
 
         $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));
         
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $labels = get_post_type_labels($post_type_obj);
+        $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $labels = get_post_type_labels($playlist_type_obj);
         
         $submit = sprintf('<input type="submit" value="%s"/>',$labels->add_new_item);
         $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$this->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true, false );
