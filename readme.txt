@@ -169,6 +169,9 @@ If a user has an interaction with a track (added to a playlist or to favorites),
 * new JS events : wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
 * removed publish_metabox_download_link()
 * cleaner code for enqueuing tracklists / tracks / track sources JS & CSS
+* improved custom temporary status
+* do not auto_set_mbid() if post is trashed
+* locking / unlocking tracklists
 * more code cleanup & fixes
 
 = 1.0.2.9 =
