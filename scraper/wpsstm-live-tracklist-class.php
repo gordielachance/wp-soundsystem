@@ -47,8 +47,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public $track_nodes = array();
     public $tracks = array();
     
-    static $meta_key_scraper_url = '_wpsstm_scraper_url';
-    static $live_playlist_options_meta_name = '_wpsstm_scraper_options';
+    static $wizard_url = '_wpsstm_scraper_url';
+    static $wizard_options = '_wpsstm_scraper_options';
 
     public $datas_cache = null;
     public $datas_remote = null;
@@ -102,7 +102,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         if ($post_id){
             parent::__construct($post_id);
-            $feed_url = get_post_meta( $this->post_id, self::$meta_key_scraper_url, true );
+            $feed_url = get_post_meta( $this->post_id, self::$wizard_url, true );
             
             $this->options = $this->get_options();
 
@@ -119,7 +119,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function get_options($keys=null){
         $options = array();
-        $db_options = get_post_meta($this->post_id,self::$live_playlist_options_meta_name ,true);
+        $db_options = get_post_meta($this->post_id,self::$wizard_options ,true);
         $options = array_replace_recursive((array)$this->options_default,(array)$db_options); //last one has priority
 
         if ($keys){

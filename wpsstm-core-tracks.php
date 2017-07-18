@@ -3,7 +3,7 @@
 class WP_SoundSystem_Core_Tracks{
 
     public $title_metakey = '_wpsstm_track';
-    public $qvar_admin = 'admin';
+    public $qvar_track_admin = 'admin';
     public $qvar_new_track = 'new';
     public $qvar_track_lookup = 'lookup_track';
     public $qvar_subtracks_hide = 'hide_subtracks';
@@ -95,7 +95,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function register_track_endpoints(){
         // (existing track) admin
-        add_rewrite_endpoint($this->qvar_admin, EP_PERMALINK ); 
+        add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK ); 
         
         //(new track) admin - wordpress/wpsstm_tracks/new
         $new_track_regex = sprintf('%s/%s$',wpsstm()->post_type_track,$this->qvar_new_track);
@@ -178,7 +178,7 @@ class WP_SoundSystem_Core_Tracks{
         global $wp_query;
         global $post;
 
-        if( !isset( $wp_query->query_vars[$this->qvar_admin] ) ) return $template; //don't use $wp_query->get() here
+        if( !isset( $wp_query->query_vars[$this->qvar_track_admin] ) ) return $template; //don't use $wp_query->get() here
         if ( get_post_type($post) != wpsstm()->post_type_track ) return $template;
         
         $file = 'track-admin.php';
@@ -528,7 +528,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
-        $qvars[] = $this->qvar_admin;
+        $qvars[] = $this->qvar_track_admin;
         $qvars[] = $this->qvar_new_track;
         $qvars[] = $this->qvar_subtracks_hide;
         return $qvars;

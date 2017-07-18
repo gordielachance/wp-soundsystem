@@ -552,7 +552,7 @@ class WP_SoundSystem_Track{
         if ($this->post_id){ //track already exists
             
             $url = get_permalink($this->post_id);
-            $url = add_query_arg(array(wpsstm_tracklists()->qvar_admin=>$track_action),$url);
+            $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$track_action),$url);
             
         }else{ //new track
 

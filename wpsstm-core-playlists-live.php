@@ -63,7 +63,7 @@ class WP_SoundSystem_Core_Live_Playlists{
             
             //feed url
             if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSystem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
+                update_post_meta( $settings_post->ID, WP_SoundSystem_Remote_Tracklist::$wizard_url, $settings["feed_url"] );
                 unset($settings["feed_url"]);
             }
             
@@ -88,7 +88,7 @@ class WP_SoundSystem_Core_Live_Playlists{
             
             $settings['selectors'] = $new_settings['selectors'];
 
-            update_post_meta($settings_post->ID,WP_SoundSystem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
+            update_post_meta($settings_post->ID,WP_SoundSystem_Remote_Tracklist::$wizard_options,$settings);
             
         }
         

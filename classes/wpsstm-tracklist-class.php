@@ -62,7 +62,7 @@ class WP_SoundSystem_Tracklist{
         $subtracks = array();
  
         //get tracklist metas
-        $subtrack_ids = $this->get_subtracks_ids();
+        $subtrack_ids = $this->get_subtrack_ids();
 
         foreach ((array)$subtrack_ids as $subtrack_id){
             $track_args = array(
@@ -88,13 +88,13 @@ class WP_SoundSystem_Tracklist{
     Return the subtracks IDs for a tracklist.
     */
 
-    function get_subtracks_ids(){
+    function get_subtrack_ids(){
         global $wpdb;
 
         $ordered_ids = get_post_meta($this->post_id,'wpsstm_subtrack_ids',true);
-        $ordered_ids = array_unique((array)$ordered_ids);
-        
         if ( empty($ordered_ids) ) return;
+        
+        $ordered_ids = array_unique($ordered_ids);
 
         //validate those IDs, we must be sure they are tracks.
         $args = array(
@@ -126,7 +126,7 @@ class WP_SoundSystem_Tracklist{
         
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
         
-        $subtrack_ids = (array)$this->get_subtracks_ids();
+        $subtrack_ids = (array)$this->get_subtrack_ids();
         $subtrack_ids = array_merge($subtrack_ids,$append_ids);
         return $this->set_subtrack_ids($subtrack_ids);
     }
@@ -141,7 +141,7 @@ class WP_SoundSystem_Tracklist{
         
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
         
-        $subtrack_ids = (array)$this->get_subtracks_ids();
+        $subtrack_ids = (array)$this->get_subtrack_ids();
         $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
         
         return $this->set_subtrack_ids($subtrack_ids);
@@ -183,7 +183,12 @@ class WP_SoundSystem_Tracklist{
         
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
-        return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
+        if ($ordered_ids){
+            return update_post_meta($this->post_id,'wpsstm_subtrack_ids',$ordered_ids);
+        }else{
+            return delete_post_meta($this->post_id,'wpsstm_subtrack_ids');
+        }
+
     }
     
     function save_track_position($track_id,$position){
@@ -343,9 +348,7 @@ class WP_SoundSystem_Tracklist{
             $subtrack_ids[] = $track_id;
         }
         
-        $success = $this->append_subtrack_ids($subtrack_ids);
-        
-        return $success;
+        return $this->append_subtrack_ids($subtrack_ids);
         
     }
     
@@ -369,7 +372,7 @@ class WP_SoundSystem_Tracklist{
             $rem_ids[] = $track->post_id;
         }
         
-        return $tracklist->remove_subtrack_ids($rem_ids);
+        return $this->remove_subtrack_ids($rem_ids);
     }
     
     function delete_subtracks(){
@@ -620,9 +623,10 @@ class WP_SoundSystem_Tracklist{
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
         $can_add_tracklist_items = in_array($post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
 
-        if ( $can_add_tracklist_items && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+        if ( $can_edit_tracklist && $can_add_tracklist_items ){
             
             $append_blank_track_url = $this->get_tracklist_admin_gui_url('add-track');
             $append_blank_track_url = add_query_arg(array('TB_iframe'=>true),$append_blank_track_url);
@@ -644,30 +648,26 @@ class WP_SoundSystem_Tracklist{
         }
 
         //status switcher
-        if ($user_id = get_current_user_id() ){
+        if ( $can_edit_tracklist ){
 
             $status_options = array();
             $current_status = get_post_status_object( get_post_status( $this->post_id) );
 
-            $statii = array(
-                $temp_status    => __('Temporary','wpsstm'),
-                'draft'         => __('Draft'),
-                'publish'       => __('Published'),
-                'private'       => __('Private'),
-                'trash'         => __('Trash'),
-            );
+            $statii = array('draft','publish','private','trash');
 
             //show temporary status only when it has that status
-            if ($post_status != $temp_status) unset($statii[$temp_status]);
+            if ($post_status == $temp_status) $statii[] = $temp_status;
 
-            foreach($statii as $status=>$str){
-                $selected = selected($post_status, $status, false);
-                $status_options[] = sprintf('<option value="%s" %s>%s</option>',$status,$selected,$str);
+            foreach($statii as $slug){
+                $status_obj = get_post_status_object( $slug );
+                $status_label = $status_obj->label;
+                $selected = selected($post_status, $slug, false);
+                $status_options[] = sprintf('<option value="%s" %s>%s</option>',$slug,$selected,$status_label);
             }
 
             $status_options_str = implode("\n",$status_options);
             $form_onchange = "if(this.value !='') { this.form.submit(); }";
-            $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="frontend-wizard-action" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str);
+            $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="%s" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str,wpsstm_tracklists()->qvar_tracklist_admin);
             $status_switch_text = __('Status');
             $action_classes = array('wpsstm-requires-auth','tracklist-action');
 
@@ -684,19 +684,37 @@ class WP_SoundSystem_Tracklist{
         }
 
         //lock playlist
-        if ( ($user_id = get_current_user_id() ) && ($post_status != $temp_status) && ($post_type == wpsstm()->post_type_live_playlist ) ){
-            $switch_type_url = add_query_arg(array('frontend-wizard-action'=>'import'),$permalink);
-            $switch_type_text = __('Lock', 'wpsstm');
+        if ( $can_edit_tracklist && ($post_type == wpsstm()->post_type_live_playlist ) ){
+            $lock_url = $this->get_tracklist_admin_gui_url('lock-tracklist');
+            $lock_text = __('Lock', 'wpsstm');
             $action_classes = array('wpsstm-requires-auth','tracklist-action');
 
             $link_attr = array(
                 'title'     => __('Convert this live playlist to a static playlist', 'wpsstm'),
-                'href'      => $switch_type_url,
+                'href'      => $lock_url,
             );
 
             $tracklist_actions['lock-playlist'] = array(
                 'icon'      => '<i class="fa fa-lock" aria-hidden="true"></i>',
-                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$switch_type_text),
+                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$lock_text),
+                'classes'   =>    $action_classes
+            );
+        }
+        
+        //unlock playlist
+        if ( $can_edit_tracklist && ($post_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() ){
+            $unlock_url = $this->get_tracklist_admin_gui_url('unlock-tracklist');
+            $unlock_text = __('Unlock', 'wpsstm');
+            $action_classes = array('wpsstm-requires-auth','tracklist-action');
+
+            $link_attr = array(
+                'title'     => __('Restore this playlist back to a live playlist', 'wpsstm'),
+                'href'      => $unlock_url,
+            );
+
+            $tracklist_actions['lock-playlist'] = array(
+                'icon'      => '<i class="fa fa-lock" aria-hidden="true"></i>',
+                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$unlock_text),
                 'classes'   =>    $action_classes
             );
         }
@@ -726,10 +744,15 @@ class WP_SoundSystem_Tracklist{
         
         if($this->post_id){
             $url = get_permalink($this->post_id);
-            $url = add_query_arg(array(wpsstm_tracklists()->qvar_admin=>$tracklist_action),$url);
+            $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$tracklist_action),$url);
         }
 
         return $url;
+    }
+    
+    function has_wizard_backup(){
+        global $post;
+        return (bool)get_post_meta($this->post_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old',true);
     }
 
 }

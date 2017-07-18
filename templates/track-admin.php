@@ -21,7 +21,7 @@ get_header(); ?>
                     $tracklist->add($tracks);
                     $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
                 
-                    $admin_action = $wp_query->get(wpsstm_tracks()->qvar_admin);
+                    $admin_action = $wp_query->get(wpsstm_tracks()->qvar_track_admin);
                 
                     //TO FIX to improve
                     $can_tab = array(

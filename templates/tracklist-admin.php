@@ -18,7 +18,7 @@ get_header();
                     
                     <?php
                     $tracklist = new WP_SoundSystem_Tracklist(get_the_ID());
-                    $tracklist_action = $wp_query->get(wpsstm_tracklists()->qvar_admin);
+                    $tracklist_action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_admin);
                     $can_add_tracklist_items = in_array($post->post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
                 
                     $track_obj = get_post_type_object(wpsstm()->post_type_track);
