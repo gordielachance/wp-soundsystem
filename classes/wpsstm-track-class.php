@@ -1,5 +1,11 @@
 <?php
 
+class WP_SoundSystem_Post_Track extends WP_SoundSystem_Track{
+    function __construct($post_id = null){
+        parent::__construct(array('post_id'=>$post_id));
+    }
+}
+
 class WP_SoundSystem_Track{
     public $post_id = 0;
     public $position = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
@@ -13,8 +19,11 @@ class WP_SoundSystem_Track{
     public $image;
     public $location;
 
+    public $parent_ids = array();
+
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
-    public $did_post_id_lookup = false;
+    private $did_post_id_lookup = false;
+    private $did_parents_query = false;
 
     function __construct( $args = array() ){
         
@@ -95,6 +104,8 @@ class WP_SoundSystem_Track{
     function get_parent_ids($args = null){
         global $wpdb;
         
+        if ($this->did_parents_query) return $this->parent_ids;
+        
         //track ID is required
         if ( !$this->post_id && !$this->populate_track_post_auto() ) return;//track does not exists in DB
 
@@ -118,8 +129,11 @@ class WP_SoundSystem_Track{
         //wpsstm()->debug_log($args,'WP_SoundSystem_Track::get_parent_ids()');
 
         $query = new WP_Query( $args );
-        $ids = $query->posts;
-        return $ids;
+        
+        $this->parent_ids = $query->posts;
+        $this->did_parents_query = true;
+        
+        return $this->parent_ids;
     }
 
     //TO FIX do we need this ?
@@ -588,7 +602,8 @@ class WP_SoundSystem_Track{
             if ( !in_array($slug,$popup_slugs) ) continue;
             
             if ( $action['tab_id'] ){
-                $action['href'] .= sprintf('#%s',$action['tab_id']);
+                $anchor = sprintf('#%s',$action['tab_id']);
+                $action['href'] = ( isset($action['href']) ) ? $action['href'] . $anchor : $anchor;
             }
             
             $action['link_classes'][] = 'thickbox';
@@ -620,18 +635,14 @@ class WP_SoundSystem_Track{
         */
         
        //tracklist
-        $post_type_playlist = null;
-        $can_edit_tracklist = false;
-        if ($tracklist_id){
-            $post_type_playlist =   get_post_type($tracklist_id);
-            $tracklist_obj =        get_post_type_object($post_type_playlist);
-        }
-        $can_edit_tracklist =   ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
-
+        $post_type_playlist =   ($tracklist_id) ? get_post_type($tracklist_id) : null;
+        $tracklist_obj =        ($post_type_playlist) ? get_post_type_object($post_type_playlist) : null;
         $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
+        
+        $can_edit_tracklist =   ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
         $can_track_details =        ($this->title && $this->artist);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
-        $can_delete_tracks =        current_user_can($post_type_obj->cap->delete_posts);
+        $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
         $can_move_track =           ( $can_edit_tracklist && ( $post_type_playlist==wpsstm()->post_type_playlist ) );

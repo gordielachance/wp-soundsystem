@@ -278,12 +278,12 @@ function wpsstm_get_post_tracklist($post_id=null){
     $is_frontend_wizard = ($post_id == wpsstm_wizard()->frontend_wizard_page_id);
 
     if ($post_type == wpsstm()->post_type_track){ //single track
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+        $track = new WP_SoundSystem_Post_Track($post_id);
         $tracklist->add($track);
         
     }elseif ( $is_live_tracklist ){
         $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(false); //will be request through ajax
+        $tracklist->load_remote_tracks(false);//will be request through ajax
         
     }else{ //playlist or album
         $tracklist->load_subtracks();

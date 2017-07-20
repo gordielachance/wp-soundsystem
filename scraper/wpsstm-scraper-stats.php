@@ -186,9 +186,9 @@ class WP_SoundSystem_Live_Playlist_Stats{
         $log = $this->get_health_log($post_id);
 
         //add new log entry
-        $new_log = count( $this->tracklist->tracks );
-        set_transient( $transient_log_name, $new_log, 7 * DAY_IN_SECONDS ); //max 1 week
-        $log[$time] = $new_log;
+        $total_tracks = count( $this->tracklist->tracks );
+        set_transient( $transient_log_name, $total_tracks, 7 * DAY_IN_SECONDS ); //max 1 week
+        $log[$time] = $total_tracks;
         
         //update health
         $log_success_pc = 0;

@@ -69,7 +69,7 @@ class WP_SoundSystem_Core_Sources{
     
     function metabox_sources_content( $post ){
 
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post->ID) );
+        $track = new WP_SoundSystem_Post_Track($post->ID);
         $list = wpsstm_sources()->get_track_sources_list($track,true);
         
         $sources_url = $track->get_track_admin_gui_url('sources');
@@ -167,7 +167,7 @@ class WP_SoundSystem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+                $track = new WP_SoundSystem_Post_Track($post_id);
                 echo count($track->sources);
             break;
         }
@@ -222,13 +222,7 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $args = $result['args'] = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ? $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ? $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ? $ajax_data['track']['album'] : null
-        );
-
-        $track = new WP_SoundSystem_Track($args);
+        $track = new WP_SoundSystem_Post_Track($ajax_data['post_id']);
         $track->populate_track_sources_auto();
 
         $track = $result['track'] = $track;

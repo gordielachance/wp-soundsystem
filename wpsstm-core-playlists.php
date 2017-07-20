@@ -29,9 +29,6 @@ class WP_SoundSystem_Core_Playlists{
     function setup_actions(){
 
         add_action( 'init', array($this,'register_post_type_playlist' ));
-        
-        add_filter('manage_posts_columns', array($this,'tracks_column_playlist_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'tracks_column_playlist_content'), 10, 2 );
 
     }
 
@@ -117,63 +114,6 @@ class WP_SoundSystem_Core_Playlists{
 
         register_post_type( wpsstm()->post_type_playlist, $args );
     }
-
-    function tracks_column_playlist_register($defaults) {
-        global $post;
-        global $wp_query;
-
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-
-            if ( !$wp_query->get(wpsstm_tracks()->qvar_subtracks_hide) ){
-                $after['playlist'] = __('Playlist','wpsstm');
-            }
-            
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function tracks_column_playlist_content($column,$post_id){
-        global $post;
-
-        switch ( $column ) {
-            case 'playlist':
-                
-                $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-                $tracklist_ids = $track->get_parent_ids();
-                $links = array();
-
-                foreach((array)$tracklist_ids as $tracklist_id){
-
-                    $tracklist_post_type = get_post_type($tracklist_id);
-                    if ( $tracklist_post_type != wpsstm()->post_type_playlist ) continue;
-
-                    $playlist_url = get_permalink($tracklist_id);
-                    $playlist_name = ( $title = get_the_title($tracklist_id) ) ? $title : sprintf('#%s',$tracklist_id);
-                    
-                    $links[] = sprintf('<a href="%s">%s</a>',$playlist_url,$playlist_name);
-                }
-                
-                
-                
-                if ($links){
-                    echo implode(',',$links);
-                }else{
-                    echo '—';
-                }
-
-                
-            break;
-        }
-    }
-    
 
 }
 

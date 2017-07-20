@@ -39,9 +39,9 @@ jQuery(document).ready(function($){
         var track = track_obj.build_request_obj();
 
         var ajax_data = {
-            action: 'wpsstm_suggest_editable_sources',
+            action:     'wpsstm_suggest_editable_sources',
             field_name: bt.attr('data-wpsstm-autosources-field-name'), //TO FIX has been removed
-            track:  track
+            post_id:    track_obj.post_id
         };
         
         var existing_rows_count = $(popup_section).find('.wpsstm-source').length;

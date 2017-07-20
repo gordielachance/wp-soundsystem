@@ -14,7 +14,7 @@ class WP_SoundSystem_Tracklist{
     
     //datas
     var $tracks = array();
-    var $total_tracks = 0;
+    var $did_query_tracks = false;
     
     var $updated_time = null;
     
@@ -57,18 +57,16 @@ class WP_SoundSystem_Tracklist{
     }
     
     function load_subtracks(){
+        
+        if ( $this->did_query_tracks ) return;
 
-        $post_type = get_post_type($this->post_id);
         $subtracks = array();
  
         //get tracklist metas
         $subtrack_ids = $this->get_subtrack_ids();
 
         foreach ((array)$subtrack_ids as $subtrack_id){
-            $track_args = array(
-                'post_id'  => $subtrack_id
-            );
-            $track = new WP_SoundSystem_Track($track_args);
+            $track = new WP_SoundSystem_Post_Track($subtrack_id);
             $subtracks[] = $track;
         }
         
@@ -81,6 +79,8 @@ class WP_SoundSystem_Tracklist{
                 $track->populate_track_sources_auto(array('cache_only'=>true));
             }
         }
+        
+        $this->did_query_tracks = true;
         
     }
     
@@ -147,18 +147,12 @@ class WP_SoundSystem_Tracklist{
         return $this->set_subtrack_ids($subtrack_ids);
     }
 
-    function set_subtrack_ids($ordered_ids){
+    function set_subtrack_ids($ordered_ids = null){
         
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
         }
-        
-        //post type check
-        $can_add_tracklist_items = in_array(get_post_type($this->post_id),array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
-        if (!$can_add_tracklist_items){
-            return new WP_Error( 'wpsstm_cannot_set_subtracks', __('Tracks can only be assigned to playlists and albums','wpsstm') );
-        }
-        
+
         //capability check
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
@@ -166,10 +160,12 @@ class WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
-        $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
-        $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
-        $ordered_ids = array_unique($ordered_ids);
-        
+        if ($ordered_ids){
+            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
+            $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
+            $ordered_ids = array_unique($ordered_ids);
+        }
+
         //set post status to 'publish' if it is not done yet (it could be a temporary post)
         foreach((array)$ordered_ids as $track_id){
             $track_post_type = get_post_status($track_id);
@@ -315,7 +311,7 @@ class WP_SoundSystem_Tracklist{
             $post_playlist_id = wp_insert_post( $post_playlist_new_args );
             wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WP_SoundSystem_Tracklist::save_playlist() - post playlist inserted"); 
 
-        }else{ //is a track update
+        }else{ //is a playlist update
             
             $post_playlist_update_args = array(
                 'ID'            => $this->post_id
@@ -497,6 +493,7 @@ class WP_SoundSystem_Tracklist{
         $temp_status = wpsstm()->temp_status;
         
         //playlist
+        $permalink = get_permalink($this->post_id);
         $tracklist_type = get_post_type($this->post_id);
         $tracklist_status = get_post_status($this->post_id);
         $tracklist_obj = get_post_type_object($tracklist_type);
@@ -681,7 +678,7 @@ class WP_SoundSystem_Tracklist{
     }
 
     function get_new_tracklist_track_url(){
-        $track = new WP_SoundSystem_Track();
+        $track = new WP_SoundSystem_Post_Track();
         $url = $track->get_new_track_url();
         $args = array(
             'tracklist_id' => $this->post_id

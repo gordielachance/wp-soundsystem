@@ -390,7 +390,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
         if (!$auto_id) return;
 
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+        $track = new WP_SoundSystem_Post_Track($post_id);
         if ($track->mbid) return;
         
         if ( ( !$mbid = $this->guess_mbid( $post_id ) ) || is_wp_error($mbid) ) return;

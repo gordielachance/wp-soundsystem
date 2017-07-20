@@ -400,7 +400,6 @@ class WP_SoundSystem_Core_Wizard{
         $post_type = get_post_type($tracklist_id);
         
         //convert to static playlist if needed
-        //should run BEFORE save_subtracks() since save_subtracks() will not work on live tracklists
         if ( $post_type == wpsstm()->post_type_live_playlist ){
             if ( !set_post_type( $tracklist_id, wpsstm()->post_type_playlist ) ) {
                 return new WP_Error( 'switched_live_playlist_status', __("Error while converting the live tracklist status",'wpsstm') );
@@ -427,7 +426,6 @@ class WP_SoundSystem_Core_Wizard{
         }
         
         //convert to live playlist if needed
-        //should run AFTER remove_subtracks() since remove_subtracks() will not work on live tracklists
         if ( $post_type == wpsstm()->post_type_playlist ){
             if ( !set_post_type( $tracklist_id, wpsstm()->post_type_live_playlist ) ) {
                 return new WP_Error( 'switched_live_playlist_status', __("Error while reverting the live tracklist status",'wpsstm') );
@@ -546,9 +544,9 @@ class WP_SoundSystem_Core_Wizard{
         //save wizard settings
         $wizard_settings = ( isset($wizard_data[ 'wpsstm_wizard' ]) ) ? $wizard_data[ 'wpsstm_wizard' ] : null;
 
-        //while updating the live tracklist settings, ignore caching
-        $this->tracklist->delete_cache();
+        $this->tracklist->flush_subtracks(); //TO FIX is this correct / at the right place ?
 
+        //while updating the live tracklist settings, ignore caching
         if ( !$wizard_settings ) return;
 
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);

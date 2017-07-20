@@ -139,14 +139,11 @@ class WP_SoundSystem_Core_Tracks{
         $is_new_track = get_query_var($this->qvar_new_track);
         if (!$is_new_track) return;
 
-        //track
-        $track_args = array(
-            'artist' => ( isset($_REQUEST['track_artist']) ) ? $_REQUEST['track_artist'] : null,
-            'title' => ( isset($_REQUEST['track_title']) ) ? $_REQUEST['track_title'] : null,
-            'album' => ( isset($_REQUEST['track_album']) ) ? $_REQUEST['track_album'] : null,
-        );
+        $track = new WP_SoundSystem_Post_Track();
+        $track->artist = ( isset($_REQUEST['track_artist']) ) ? $_REQUEST['track_artist'] : null;
+        $track->title = ( isset($_REQUEST['track_title']) ) ? $_REQUEST['track_title'] : null;
+        $track->album = ( isset($_REQUEST['track_album']) ) ? $_REQUEST['track_album'] : null;
         
-        $track = new WP_SoundSystem_Track($track_args);
         if ( !$track->post_id && !$track->populate_track_post_auto() ){//track does not exists in DB
             $track->save_temp_track();
         }
@@ -212,7 +209,7 @@ class WP_SoundSystem_Core_Tracks{
         $post_type = get_post_type();
         if ( $post_type != wpsstm()->post_type_track ) return;
         
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post->ID) );
+        $track = new WP_SoundSystem_Post_Track($post->ID);
         $popup_action = ( isset($_REQUEST['wpsstm-admin-track-action']) ) ? $_REQUEST['wpsstm-admin-track-action'] : null;
         if (!$popup_action || !$track->post_id) return;
 
@@ -369,7 +366,7 @@ class WP_SoundSystem_Core_Tracks{
         switch ( $column ) {
             case 'track-lovedby':
                 $output = '—';
-                $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
+                $track = new WP_SoundSystem_Post_Track($post_id);
                 $links = array();
                 if ( $user_ids = $track->get_track_loved_by() ){
                     foreach($user_ids as $user_id){
