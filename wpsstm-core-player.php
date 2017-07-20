@@ -102,10 +102,6 @@ class WP_SoundSystem_Core_Player{
                         if ( wpsstm()->get_options('lastfm_scrobbling') ){
                             echo wpsstm_lastfm()->get_scrobbler_icons();
                         }
-                        //favorites
-                        if ( wpsstm()->get_options('lastfm_favorites') ){
-                            echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
-                        }
                         ?>
                     </div>
                     <div id="wpsstm-bottom-track-info"></div>

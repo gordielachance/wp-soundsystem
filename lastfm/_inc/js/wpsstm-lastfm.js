@@ -2,7 +2,6 @@ class WpsstmLastFM {
     constructor(){
         var self = this;
         self.icon_scrobble_el; //player scrobble icon
-        self.icon_love_el;
         self.auth_notice_el;
         self.has_lastfm_bot =       parseInt(wpsstmLastFM.has_lastfm_bot);
         self.is_user_api_logged =   parseInt(wpsstmLastFM.is_user_api_logged);
@@ -23,7 +22,6 @@ class WpsstmLastFM {
         var self = this;
         
         self.icon_scrobble_el =     $(bottom_el).find('#wpsstm-player-toggle-scrobble')
-        self.icon_love_el =         $(bottom_el).find('.wpsstm-lastfm-love-unlove-track-links');
         self.auth_notice_el =       $(bottom_wrapper_el).find('#wpsstm-bottom-notice-lastfm-auth');
 
         if (self.has_user_scrobbler){
@@ -44,29 +42,6 @@ class WpsstmLastFM {
 
             localStorage.setItem("wpsstm-scrobble", self.has_user_scrobbler);
 
-        });
-        
-        //click toggle love track
-        $(self.icon_love_el).find('a').click(function(e) {
-            e.preventDefault();
-            
-            if ( !self.is_user_api_logged ){
-                self.lastfm_auth_notice();
-                return;
-            }
-            
-            var link = $(this);
-            var link_wrapper = link.closest('.wpsstm-track-action-love-unlove');
-            var do_love = !link_wrapper.hasClass('wpsstm-is-loved');
-            
-            var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
-            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
-            
-            var track_el = link.closest('[itemprop="track"]');
-            var track_idx = track_el.attr('data-wpsstm-track-idx');
-            
-            var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
-            self.love_unlove(track_obj,do_love);
         });
 
     }
@@ -218,12 +193,7 @@ class WpsstmLastFM {
                 $(self.icon_scrobble_el).addClass('loading');
             },
             success: function(data){ 
-                if (data.success === true) {
-                    if (do_love){
-                        $(self.icon_love_el).addClass('wpsstm-is-loved');
-                    }else{
-                        $(self.icon_love_el).removeClass('wpsstm-is-loved');
-                    }
+                if (!data.success === true) {
                 }else{
                     console.log(data);
                 }
