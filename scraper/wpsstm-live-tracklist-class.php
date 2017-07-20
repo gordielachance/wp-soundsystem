@@ -50,10 +50,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     static $wizard_url = '_wpsstm_scraper_url';
     static $wizard_options = '_wpsstm_scraper_options';
 
-    public $did_query_remote_tracks = false;
     public $datas = null;
 
     public $notices = array();
+    
+    public $can_remote_request = true;
     
     //request
     static $querypath_options = array(
@@ -128,74 +129,71 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
     }
 
-    function load_remote_tracks($remote_request = false){
-
-        if (!$this->feed_url) return;
-
-        $this->updated_time = get_transient( $this->transient_name_cache );
+    function load_subtracks(){
         
+        if ( $this->did_query_tracks ) return;
+        
+        $current_cache_time = get_transient( $this->transient_name_cache );
+
         //cache has expired
-        if ($this->updated_time === false){
+        //TO FIX TO MOVE? flush should be done with a CRON job ?
+        if ($current_cache_time === false){
             $this->flush_subtracks(); //flush orphan tracks if any
             $this->set_subtrack_ids(); //remove all tracks from playlist
             $this->tracks = array();
+        }else{
+            //TO FIX populate cached title & author
+            $this->updated_time = $current_cache_time;
         }
 
-        //try to get cache first
-
-        $db_tracks_count = $remote_tracks_count = 0;
-       
-        $can_refresh = ($remote_request) ? $this->can_remote_request() : false;
+        $can_refresh = ($this->can_remote_request && !$this->did_query_tracks) ? $this->can_refresh() : false;
 
         if ( !$can_refresh ){
-            wpsstm()->debug_log('load DB subtracks','WP_SoundSystem_Remote_Tracklist::load_remote_tracks()' );
-            parent::load_subtracks();
-            $db_tracks_count = count($this->tracks);
-            
-            //TO FIX populate cached title & author
-            
-        }elseif( $remote_request && !$this->did_query_remote_tracks ){
-
-            if ( $remote_tracks = $this->get_all_raw_tracks() ){
-
-                if ( !is_wp_error($remote_tracks) ) {
-
-                    if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
-                        if ( $this->feed_url != $this->redirect_url ){
-                            $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
-                        }
-                    }
-
-                    $this->add($remote_tracks);
-                    $this->save_subtracks();
-                    $remote_tracks_count = count($this->tracks);
-
-                    //populate page notices
-                    foreach($this->notices as $notice){
-                        $this->notices[] = $notice;
-                    }
-                    
-                    //TO FIX store remote title & author
-                    $title =    $this->get_tracklist_title();
-                    $author =   $this->get_tracklist_author();
-
-                    $this->set_expiration_time();
-
-                }else{
-                    $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
-                }
-            }
-            
-            $this->did_query_remote_tracks = true;
-            $this->did_query_tracks = true;
-
-            new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
-
+            return;
         }
-        
-        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_remote_tracks,'db_tracks_count'=>$db_tracks_count,'remote_tracks_count'=>$remote_tracks_count)),'load_remote_tracks()' );
+
+        if ( $remote_tracks = $this->get_all_raw_tracks() ){
+
+            if ( !is_wp_error($remote_tracks) ) {
+
+                if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                    if ( $this->feed_url != $this->redirect_url ){
+                        $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
+                    }
+                }
+
+                $this->add($remote_tracks);
+                $this->save_subtracks();
+                
+                //sort
+                if ($this->get_options('tracks_order') == 'asc'){
+                    $this->tracks = array_reverse($this->tracks);
+                }
+
+                //populate page notices
+                foreach($this->notices as $notice){
+                    $this->notices[] = $notice;
+                }
+
+                //TO FIX store remote title & author
+                $title =    $this->get_tracklist_title();
+                $author =   $this->get_tracklist_author();
+
+                $this->set_expiration_time();
+
+            }else{
+                $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+            }
+        }
+
+        $this->did_query_tracks = true;
+
+        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
+
+        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_tracks,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::load_subtracks()' );
 
         //get options back from page (a preset could have changed them)
+        //TO FIX TO CHECK maybe move ?
         $this->options = $this->options; 
     
         /*
@@ -560,11 +558,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $tracks_arr[] = array_filter($args);
 
         }
-        
-        //sort
-        if ($this->get_options('tracks_order') == 'asc'){
-            $tracks_arr = array_reverse($tracks_arr);
-        }
 
         return $tracks_arr;
 
@@ -732,13 +725,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->request_pagination = $args;
     }
     
-    public function can_remote_request(){
+    public function can_refresh(){
 
         $cache_duration = $this->get_options('datas_cache_min');
+        $current_cache_time = get_transient( $this->transient_name_cache );
         $text_time = null;
 
         if (!$this->ignore_cache){
-            $can = ( $this->updated_time === false); //cache expired
+            $can = ( $current_cache_time === false); //cache expired
         }else{
             $can = true;
         }
@@ -761,7 +755,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 'last_request' =>   $text_time,
                 'can_request' =>    (bool)$can
             ),
-            "WP_SoundSystem_Remote_Tracklist::can_remote_request()"
+            "WP_SoundSystem_Remote_Tracklist::can_refresh()"
         ); 
 
         return $can;
@@ -786,18 +780,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     /*
     Flush temporary tracks
     */
-    //TO FIX should be done with a cron job ?
+    //TO FIX should be done with a cron job (with all tracks) ?
     function flush_subtracks(){
         $force_delete = false;
         
-        parent::load_subtracks();
-        $subtracks = $this->tracks;
-        if (!$subtracks) return;
+        $subtrack_ids = $this->get_subtrack_ids();
+        if (!$subtrack_ids) return;
         
-        $flush_tracks = array();
+        $flush_track_ids = array();
 
         //get tracks to flush
-        foreach ((array)$subtracks as $track){
+        foreach ((array)$subtrack_ids as $track_id){
+            
+            $track = new WP_SoundSystem_Track($track_id);
 
             //ignore if post is attached to any (other than this one) playlist
             $tracklist_ids = $track->get_parent_ids();
@@ -808,14 +803,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $loved_by = $track->get_track_loved_by();
             if ( !empty($loved_by) ) continue;
             
-            $flush_tracks[] = $track;
+            $flush_track_ids[] = $track_id;
         }
         
-        foreach ((array)$flush_tracks as $track){
-            wp_delete_post( $track->post_id, $force_delete );
+        foreach ((array)$flush_track_ids as $track_id){
+            wp_delete_post( $track_id, $force_delete );
         }
 
-        wpsstm()->debug_log(array('subtracks'=>count($subtracks),'flushed'=>count($flush_tracks)),"WP_SoundSystem_Remote_Tracklist::flush_subtracks()"); 
+        wpsstm()->debug_log(array('subtracks'=>count($subtrack_ids),'flushed'=>count($flush_track_ids)),"WP_SoundSystem_Remote_Tracklist::flush_subtracks()"); 
 
     }
 

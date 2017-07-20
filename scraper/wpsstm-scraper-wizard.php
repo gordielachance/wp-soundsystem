@@ -349,7 +349,7 @@ class WP_SoundSystem_Core_Wizard{
         $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
         $this->tracklist->ignore_cache = ( wpsstm_is_backend() && isset($_REQUEST['advanced_wizard']) );
         $this->tracklist->tracks_strict = false;
-        $this->tracklist->load_remote_tracks(true);
+        $this->tracklist->load_subtracks();
         $this->is_advanced = ( wpsstm_is_backend() && ( $this->tracklist->ignore_cache || ( $this->tracklist->feed_url && !$this->tracklist->tracks ) ) );
     }
     

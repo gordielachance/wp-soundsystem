@@ -281,11 +281,11 @@ function wpsstm_get_post_tracklist($post_id=null){
         $track = new WP_SoundSystem_Track($post_id);
         $tracklist->add($track);
         
-    }elseif ( $is_live_tracklist ){
-        $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(false);//will be request through ajax
-        
-    }else{ //playlist or album
+    }else{ // (live) playlist or album
+        if ( $is_live_tracklist ){
+            $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
+            $tracklist->can_remote_request = false; //we'll get remote tracklist through ajax
+        }
         $tracklist->load_subtracks();
     }
     
