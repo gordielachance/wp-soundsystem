@@ -100,7 +100,7 @@ body.wpsstm_track-template-admin,body.wpsstm_tracklist-template-admin{
                 list-style: none;
                 li{
                     display:inline;
-                    &:not(.active){
+                    &:not(.ui-state-active){
                         @include opacity(.8);
                     }
                 }

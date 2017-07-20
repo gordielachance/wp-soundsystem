@@ -246,11 +246,9 @@ class WP_SoundSystem_Tracklist_Table{
 
             printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
 
-            $actions = $this->tracklist->get_tracklist_actions_el();
-            $admin_actions = $this->tracklist->get_tracklist_admin_actions_el();
-        
-            if ( $actions || $admin_actions ){
-                printf('<div id="wpsstm-tracklist-all-actions">%s%s</div>',$actions,$admin_actions);
+            if ( $actions = $this->tracklist->get_tracklist_row_actions() ){
+                $list = wpsstm_get_actions_list($actions,'tracklist');
+                echo $list;
             }
 
             ?>
@@ -557,10 +555,9 @@ class WP_SoundSystem_Tracklist_Table{
                 return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
-                $actions = $item->get_track_actions_el($this->tracklist->post_id);
-                $admin_actions = $item->get_track_admin_actions_el($this->tracklist->post_id);
-                if ( $actions || $admin_actions ){
-                    return sprintf('<div id="wpsstm-track-all-actions">%s%s</div>',$actions,$admin_actions);
+                if ( $actions = $item->get_track_row_actions($this->tracklist->post_id) ){
+                    $actions_list = wpsstm_get_actions_list($actions,'track');
+                    return $actions_list;
                 }
             default:
                 if ( !is_admin() ) break;

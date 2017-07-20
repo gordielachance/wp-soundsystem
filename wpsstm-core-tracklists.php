@@ -8,7 +8,6 @@ class WP_SoundSystem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
     public $qvar_tracklist_admin = 'admin';
-    public $qvar_new_track = 'new';
     public $allowed_post_types = array();
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     
@@ -56,7 +55,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'init', array($this,'register_tracklist_endpoints' ));
         add_filter( 'template_include', array($this,'xspf_template_filter'));
         
-        add_filter( 'wp', array($this,'append_blank_track'));
+        //add_filter( 'wp', array($this,'append_blank_track'));
         add_action( 'wp', array($this,'tracklist_save_admin_gui'));
         add_filter( 'template_include', array($this,'tracklist_admin_template_filter'));
 
@@ -100,7 +99,6 @@ class WP_SoundSystem_Core_Tracklists{
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_admin;
         $vars[] = $this->qvar_xspf;
-        $vars[] = $this->qvar_new_track;
         return $vars;
     }
 
@@ -129,7 +127,7 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         global $wp_query;
 
-        if( $wp_query->get($this->qvar_tracklist_admin) != 'add-track' ) return;
+        if( $wp_query->get($this->qvar_tracklist_admin) != 'append' ) return;
         if ( !in_array(get_post_type($post),array(wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist) ) ) return;
 
         //capability check
@@ -149,7 +147,7 @@ class WP_SoundSystem_Core_Tracklists{
 
             $tracklist->append_subtrack_ids($track->post_id);
 
-            $track_admin_url = $track->get_track_admin_gui_url('track_details',$tracklist->post_id);
+            $track_admin_url = $track->get_track_admin_gui_url('edit',$tracklist->post_id);
             wp_redirect($track_admin_url);
             die();
         }
@@ -606,7 +604,7 @@ class WP_SoundSystem_Core_Tracklists{
             break;
         }
     }
-    
+
 }
 
 function wpsstm_tracklists() {

@@ -488,258 +488,179 @@ class WP_SoundSystem_Tracklist{
         return in_array($user_id,(array)$loved_by);
     }
     
-    function get_tracklist_actions_el(){
+    function get_tracklist_actions(){
         
-        $tracklist_actions = array();
-        $action_default = array(
-            'text' =>       null,
-            'icon' =>       null,
-            'classes' =>    array('tracklist-action'),
-        );
+        /*
+        Capability check
+        */
         
-        $post_type = get_post_type($this->post_id);
         $temp_status = wpsstm()->temp_status;
-        $post_status = get_post_status($this->post_id);
-
-        //refresh playlist
-        if ($post_type == wpsstm()->post_type_live_playlist ){
-            $refresh_text = __('Refresh','wpsstm');
-
-            $link_attr = array(
-                'title'     => $refresh_text,
-                'href'      => '#',
-            );
-
-            $tracklist_actions['refresh'] = array(
-                'icon' => '<i class="fa fa-rss" aria-hidden="true"></i>',
-                'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$refresh_text)
-            );
-        }
-
-        //share
-        //TO FIX no conditions (call to action) but notice if post cannot be shared
-        //if ( in_array($post_status,array('publish',$temp_status)) ){
-
-            $share_url = wpsstm_get_tracklist_link($this->post_id);
-            $share_text = __('Share', 'wpsstm');
-
-            $link_attr = array(
-                'title'     => __('Share this tracklist', 'wpsstm'),
-                'href'      => $share_url,
-            );
-
-            $tracklist_actions['share'] = array(
-                'icon' => '<i class="fa fa-share-alt" aria-hidden="true"></i>',
-                'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$share_text)
-            );
-        //}
-
-        //xspf
-        if ( in_array($post_status,array('publish',$temp_status)) ){
-            $xspf_url = wpsstm_get_tracklist_link($this->post_id,'xspf');
-            $xspf_text = __('XSPF', 'wpsstm');
-
-            $link_attr = array(
-                'title'     => __('XSPF tracklist', 'wpsstm'),
-                'href'      => $xspf_url,
-                'target'     => '_blank'
-            );
-
-            $tracklist_actions['xspf'] = array(
-                'icon'  => '<i class="fa fa-rss" aria-hidden="true"></i>',
-                'text'  => sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$xspf_text)
-            );
-        }
-
-        //favorite & unfavorite
-        if ( $this->post_id ) {
-
-            //favorite
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
-            if ( !$this->is_tracklist_loved_by() ) $action_classes[] = 'active';
-
-            $link_attr = array(
-                'href'  => '#',
-                'title' => __('Add tracklist to favorites','wpsstm')
-            );
-
-            $link_attr = wpsstm_get_html_attr($link_attr);
-
-            $tracklist_actions['favorite'] = array(
-                'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
-                'text' =>       sprintf('<a %s>%s</a>',$link_attr,__('Favorite','wpsstm')),
-                'classes' =>    $action_classes
-            );
-
-            //unfavorite
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
-            if ( $this->is_tracklist_loved_by() ) $action_classes[] = 'active';
-
-            $link_attr = array(
-                'href'  => '#',
-                'title' => __('Remove tracklist from favorites','wpsstm')
-            );
-
-            $tracklist_actions['unfavorite'] = array(
-                'icon'=>    '<i class="fa fa-heart" aria-hidden="true"></i>',
-                'text' =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),__('Unfavorite','wpsstm')),
-                'classes' =>    $action_classes
-            );
-        }
-
-        $tracklist_actions = apply_filters('wpsstm_tracklist_actions',$tracklist_actions);
-
-        $track_actions_els = array();
-        foreach($tracklist_actions as $slug => $action){
-            $action = wp_parse_args($action,$action_default);
-            //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-
-            $action_attr = array(
-                'id'        => 'tracklist-action-' . $slug,
-                'class'     => implode("\n",$action['classes'])
-            );
-
-            $track_actions_els[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($action_attr),$action['icon'],$action['text']);
-        }
-
-        if ( !empty($track_actions_els) ){
-            return sprintf('<ul id="wpsstm-tracklist-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
-        }
         
-    }
-    
-    function get_tracklist_admin_actions_el(){
+        //playlist
+        $tracklist_type = get_post_type($this->post_id);
+        $tracklist_status = get_post_status($this->post_id);
+        $tracklist_obj = get_post_type_object($tracklist_type);
+        $current_status_obj = get_post_status_object( $tracklist_status );
         
-        $tracklist_actions = array();
-        $action_default = array(
-            'text' =>       null,
-            'icon' =>       null,
-            'classes' =>    array('tracklist-admin-action'),
-        );
-        $temp_status = wpsstm()->temp_status;
-        $post_status = get_post_status($this->post_id);
-        $post_type = get_post_type($this->post_id);
-        $permalink = get_permalink($this->post_id);
-        
-        //add track
-        $post_type = get_post_type($this->post_id);
-        $tracklist_obj = get_post_type_object($post_type);
+        //track
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        $can_add_tracklist_items = in_array($post_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+        $can_add_tracklist_items = in_array($tracklist_type,array(wpsstm()->post_type_album,wpsstm()->post_type_playlist) );
+        
+        $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
+        $can_share = true; //TO FIX no conditions (call to action) but notice if post cannot be shared
+        $can_export = ( in_array($tracklist_status,array('publish',wpsstm()->temp_status)) );
+        $can_favorite = true; //call to action
+        $can_add_tracks = ( $can_edit_tracklist && $can_add_tracklist_items );
+        $can_lock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_live_playlist ) );
+        $can_unlock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() );
 
-        if ( $can_edit_tracklist && $can_add_tracklist_items ){
-            
-            $append_blank_track_url = $this->get_tracklist_admin_gui_url('add-track');
-            $append_blank_track_url = add_query_arg(array('TB_iframe'=>true),$append_blank_track_url);
-            
-            $add_track_text = $track_obj->labels->add_new_item;
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
-            
-            $link_attr = array(
-                'title'     => $add_track_text,
-                'href'      => $append_blank_track_url,
-                'class'     => implode(' ',array('thickbox'))
-            );
+        $actions = array();
 
-            $tracklist_actions['add-track'] = array(
-                'icon'      => '<i class="fa fa-plus" aria-hidden="true"></i>',
-                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$add_track_text),
-                'classes'   =>    $action_classes
+        //refresh
+        if ($can_refresh){
+            $actions['refresh'] = array(
+                'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
+                'title' =>      __('Refresh', 'wpsstm'),
             );
         }
+        
+        //share
+        if ($can_share){
+            $actions['share'] = array(
+                'icon' =>       '<i class="fa fa-share-alt" aria-hidden="true"></i>',
+                'title' =>      __('Share', 'wpsstm'),
+                'href' =>       get_permalink($this->post_id),
+            );
+        }
+        
+        //XSPF
+        if ($can_export){
+            $actions['xspf'] = array(
+                'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
+                'title' =>      'XSPF',
+                'href' =>       wpsstm_get_tracklist_link($this->post_id,'xspf'),
+            );
+        }
+        
+        //favorite
+        if ($can_favorite){
+            $actions['favorite'] = array(
+                'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
+                'title' =>      __('Favorite','wpsstm'),
+                'desc' =>       __('Add track to favorites','wpsstm'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-action-toggle-favorite'),
+            );
+            if ( !$this->is_tracklist_loved_by() ) $actions['favorite']['classes'][] = 'wpsstm-toggle-favorite-active';
+        }
 
-        //status switcher
-        if ( $can_edit_tracklist ){
-
+        //unfavorite
+        if ($can_favorite){
+            $actions['unfavorite'] = array(
+                'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
+                'title' =>      __('Unfavorite','wpsstm'),
+                'desc' =>       __('Remove track from favorites','wpsstm'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-action-toggle-favorite'),
+            );
+            if ( $this->is_tracklist_loved_by() ) $actions['unfavorite']['classes'][] = 'wpsstm-toggle-favorite-active';
+        }
+        
+        //add track
+        if ($can_add_tracklist_items){
+            $actions['append'] = array(
+                'icon'      =>  '<i class="fa fa-plus" aria-hidden="true"></i>',
+                'title'     =>  $track_obj->labels->add_new_item,
+                'href'      =>  $this->get_new_tracklist_track_url(),
+                'classes'   =>  array('wpsstm-requires-auth','tracklist-action'),
+            );
+        }
+        
+        //switch status
+        if ($can_edit_tracklist){
             $status_options = array();
-            $current_status = get_post_status_object( get_post_status( $this->post_id) );
-
             $statii = array('draft','publish','private','trash');
 
             //show temporary status only when it has that status
-            if ($post_status == $temp_status) $statii[] = $temp_status;
+            if ($tracklist_status == wpsstm()->temp_status) $statii[] = wpsstm()->temp_status;
 
             foreach($statii as $slug){
                 $status_obj = get_post_status_object( $slug );
                 $status_label = $status_obj->label;
-                $selected = selected($post_status, $slug, false);
+                $selected = selected($tracklist_status, $slug, false);
                 $status_options[] = sprintf('<option value="%s" %s>%s</option>',$slug,$selected,$status_label);
             }
 
+            //status form
             $status_options_str = implode("\n",$status_options);
             $form_onchange = "if(this.value !='') { this.form.submit(); }";
             $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="%s" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str,wpsstm_tracklists()->qvar_tracklist_admin);
-            $status_switch_text = __('Status');
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
 
-            $link_attr = array(
-                'title'     => __('Switch tracklist status','wpssm'),
-                'href'      => '#',
-            );
-
-            $tracklist_actions['status-switch'] = array(
-                'icon'  => '<i class="fa fa-calendar-check-o" aria-hidden="true"></i>',
-                'text' =>   sprintf('<a %s>%s</a> <em>%s</em>%s',wpsstm_get_html_attr($link_attr),$status_switch_text,$current_status->label,$form),
-                'classes'   =>    $action_classes
-            );
-        }
-
-        //lock playlist
-        if ( $can_edit_tracklist && ($post_type == wpsstm()->post_type_live_playlist ) ){
-            $lock_url = $this->get_tracklist_admin_gui_url('lock-tracklist');
-            $lock_text = __('Lock', 'wpsstm');
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
-
-            $link_attr = array(
-                'title'     => __('Convert this live playlist to a static playlist', 'wpsstm'),
-                'href'      => $lock_url,
-            );
-
-            $tracklist_actions['lock-playlist'] = array(
-                'icon'      => '<i class="fa fa-lock" aria-hidden="true"></i>',
-                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$lock_text),
-                'classes'   =>    $action_classes
+            $actions['status-switch'] = array(
+                'icon' =>       '<i class="fa fa-calendar-check-o" aria-hidden="true"></i>',
+                'title' =>      __('Status'),
+                'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
+                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
             );
         }
         
-        //unlock playlist
-        if ( $can_edit_tracklist && ($post_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() ){
-            $unlock_url = $this->get_tracklist_admin_gui_url('unlock-tracklist');
-            $unlock_text = __('Unlock', 'wpsstm');
-            $action_classes = array('wpsstm-requires-auth','tracklist-action');
+        //lock
+        if ($can_lock_playlist){
+            $actions['lock-playlist'] = array(
+                'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
+                'title' =>      __('Lock', 'wpsstm'),
+                'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
+                'href' =>       $this->get_tracklist_admin_gui_url('lock-tracklist'),
+                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
 
-            $link_attr = array(
-                'title'     => __('Restore this playlist back to a live playlist', 'wpsstm'),
-                'href'      => $unlock_url,
-            );
-
-            $tracklist_actions['lock-playlist'] = array(
-                'icon'      => '<i class="fa fa-lock" aria-hidden="true"></i>',
-                'text'      =>   sprintf('<a %s>%s</a>',wpsstm_get_html_attr($link_attr),$unlock_text),
-                'classes'   =>    $action_classes
             );
         }
 
-        $tracklist_actions = apply_filters('wpsstm_tracklist_admin_actions',$tracklist_actions);
+        //unlock
+        if ($can_unlock_playlist){
+            $actions['unlock-playlist'] = array(
+                'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
+                'title' =>      __('Unlock', 'wpsstm'),
+                'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
+                'href' =>       $this->get_tracklist_admin_gui_url('unlock-tracklist'),
+                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
 
-        $track_actions_els = array();
-        foreach($tracklist_actions as $slug => $action){
-            $action = wp_parse_args($action,$action_default);
-            //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-
-            $action_attr = array(
-                'id'        => 'tracklist-admin-action-' . $slug,
-                'class'     => implode("\n",$action['classes'])
             );
-
-            $track_actions_els[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($action_attr),$action['icon'],$action['text']);
         }
         
-        if ( !empty($track_actions_els) ){
-            return sprintf('<ul id="wpsstm-tracklist-admin-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_els));
+        return apply_filters('wpsstm_tracklist_actions',$actions);
+    }
+    
+    function get_tracklist_row_actions(){
+        $actions = $this->get_tracklist_actions();
+        $popup_slugs = array('append');
+        
+        foreach((array)$actions as $slug=>$action){
+            if ( !in_array($slug,$popup_slugs) ) continue;
+            
+            if ( $action['tab_id'] ){
+                $action['href'] .= sprintf('#%s',$action['tab_id']);
+            }
+            
+            $action['link_classes'][] = 'thickbox';
+            $action['href'] = add_query_arg(array('TB_iframe'=>true),$action['href']);
+            $actions[$slug] = $action;
+        }
+        return $actions;
+    }
+    
+    function get_tracklist_popup_actions(){
+        $actions = $this->get_tracklist_actions();
+        
+        foreach((array)$actions as $slug=>$action){
+            
+            if ( $action['tab_id'] ){
+                $action['href'] = sprintf('#%s',$action['tab_id']);
+            }
+            
+            $actions[$slug] = $action;
         }
 
+        return $actions;
     }
     
     function get_tracklist_admin_gui_url($tracklist_action = null){
@@ -757,6 +678,15 @@ class WP_SoundSystem_Tracklist{
     function has_wizard_backup(){
         global $post;
         return (bool)get_post_meta($this->post_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old',true);
+    }
+
+    function get_new_tracklist_track_url(){
+        $track = new WP_SoundSystem_Track();
+        $url = $track->get_new_track_url();
+        $args = array(
+            'tracklist_id' => $this->post_id
+        );
+        return add_query_arg($args,$url);
     }
 
 }

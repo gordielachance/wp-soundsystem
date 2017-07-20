@@ -72,7 +72,7 @@ class WP_SoundSystem_Core_Sources{
         $track = new WP_SoundSystem_Track( array('post_id'=>$post->ID) );
         $list = wpsstm_sources()->get_track_sources_list($track,true);
         
-        $sources_url = $track->get_track_admin_gui_url('sources_manager');
+        $sources_url = $track->get_track_admin_gui_url('sources');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));

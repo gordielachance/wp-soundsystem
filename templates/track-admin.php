@@ -33,14 +33,6 @@ get_header(); ?>
                     $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                     $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
                     $can_delete_tracks =    current_user_can($post_type_obj->cap->delete_posts);
-                
-                    $can_tab = array(
-                        'track_info' =>         ($track->title && $track->artist),
-                        'track_details' =>      $can_edit_track,
-                        'playlists_manager' =>  true, //call to action
-                        'sources_manager' =>    $can_edit_track,
-                        'delete' =>             $can_delete_tracks
-                    );
 
                     ?>
 
@@ -51,26 +43,16 @@ get_header(); ?>
                     </header><!-- .entry-header -->
 
                     <div id="track-popup-tabs" class="entry-content">
-                        <ul>
-                            <?php if ($can_tab['track_info']){?>
-                                <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#track-infos"><i class="fa fa-address-card-o" aria-hidden="true"></i> <?php _e('Details','wpsstm');?></a></li>
-                            <?php } ?>
-                            <?php if ($can_tab['track_details']){?>
-                                <li class="<?php if ($admin_action == 'track_details') echo 'active';?>"><a href="#admin-track-details"><i class="fa fa-pencil" aria-hidden="true"></i> <?php _e('Edit');?></a></li>
-                            <?php } ?>
-                            <?php if ($can_tab['playlists_manager']){?>
-                                <li class="<?php if ($admin_action == 'playlists_manager') echo 'active';?>"><a href="#admin-track-playlists"><i class="fa fa-list" aria-hidden="true"></i> <?php _e('Playlists manager','wpsstm');?></a></li>
-                            <?php } ?>
-                            <?php if ($can_tab['sources_manager']){?>
-                                <li class="<?php if ($admin_action == 'sources_manager') echo 'active';?>"><a href="#admin-track-sources"><i class="fa fa-cloud" aria-hidden="true"></i> <?php _e('Sources manager','wpsstm');?></a></li>
-                            <?php } ?>
-                            <?php if ($can_tab['delete']){?>
-                                <li class="<?php if ($admin_action == 'track_info') echo 'active';?>"><a href="#admin-track-delete"><i class="fa fa-trash" aria-hidden="true"></i> <?php _e('Delete');?></a></li>
-                            <?php } ?>
-                        </ul>
+                        <?php
+                        if ( $actions = $track->get_track_popup_actions($admin_action) ){
+                            $list = wpsstm_get_actions_list($actions,'track');
+                            echo $list;
+                        }
+                        ?>
+
                         <!--track infos-->
-                        <?php if ($can_tab['track_info']){?>
-                            <div id="track-infos">
+                        <?php if ( isset($actions['details']) ){?>
+                            <div id="tab-content-details">
                                 <?php print_r($track);
 
                                 $text_el = null;
@@ -91,28 +73,28 @@ get_header(); ?>
                             </div>
                         <?php } ?>
                         <!--track edit-->
-                        <?php if ($can_tab['track_details']){?>
-                            <div id="admin-track-details">
+                        <?php if ( isset($actions['edit']) ){?>
+                            <div id="tab-content-edit">
                                 <?php 
                                 echo $track->track_admin_details();
                                 ?>
                             </div>
                         <?php } ?>
                         <!--playlists manager-->
-                        <?php if ($can_tab['playlists_manager']){?>
-                            <div id="admin-track-playlists">
+                        <?php if ( isset($actions['playlists']) ){?>
+                            <div id="tab-content-playlists">
                                 <?php echo $track->track_admin_playlists();?>
                             </div>
                         <?php } ?>
                         <!--sources manager-->
-                        <?php if ($can_tab['sources_manager']){?>
-                            <div id="admin-track-sources">
+                        <?php if ( isset($actions['sources']) ){?>
+                            <div id="tab-content-sources">
                                 <?php echo $track->track_admin_sources();?>
                             </div>
                         <?php } ?>
                         <!--track delete-->
-                        <?php if ($can_tab['delete']){?>
-                            <div id="admin-track-delete">
+                        <?php if ( isset($actions['delete']) ){?>
+                            <div id="tab-content-delete">
                                 delete
                             </div>
                         <?php } ?>

@@ -50,7 +50,7 @@ class WP_SoundSystem_Core_Tracks{
         
         add_action( 'init', array($this,'register_track_endpoints' ));
         
-        add_filter( 'wp', array($this,'save_new_track'));
+        add_filter( 'wp', array($this,'add_new_track'));
         add_filter( 'template_include', array($this,'track_admin_template_filter'));
         add_action( 'wp', array($this,'track_save_admin_gui'));
         
@@ -135,13 +135,9 @@ class WP_SoundSystem_Core_Tracks{
     Add new track when url is 'wordpress/wpsstm_track/new/'
     */
     
-    function save_new_track(){
+    function add_new_track(){
         $is_new_track = get_query_var($this->qvar_new_track);
         if (!$is_new_track) return;
-
-        //track action
-        $track_action = ( isset($_REQUEST['track_action']) ) ? $_REQUEST['track_action'] : null;
-        if (!$track_action) return;
 
         //track
         $track_args = array(
@@ -155,12 +151,17 @@ class WP_SoundSystem_Core_Tracks{
             $track->save_temp_track();
         }
         
-        //tracklist ID
-        $tracklist_id = ( isset($_REQUEST['track_action']) ) ? $_REQUEST['track_action'] : null;
-        
         if (!$track->post_id) return;
         
-        $track_admin_url = $track->get_track_admin_gui_url($track_action,$tracklist_id);
+        //tracklist ID
+        $tracklist_id = ( isset($_REQUEST['tracklist_id']) ) ? $_REQUEST['tracklist_id'] : null;
+        
+        if ($tracklist_id){
+            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+            $tracklist->append_subtrack_ids($track->post_id);
+        }
+
+        $track_admin_url = $track->get_track_admin_gui_url('edit');
         
         wp_redirect( $track_admin_url );
         exit;
@@ -216,7 +217,7 @@ class WP_SoundSystem_Core_Tracks{
         if (!$popup_action || !$track->post_id) return;
 
         switch($popup_action){
-            case 'track_details':
+            case 'edit':
                 
                 //nonce check
                 if ( !isset($_POST['wpsstm_admin_track_gui_details_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_details_nonce'], 'wpsstm_admin_track_gui_details_'.$track->post_id ) ) {
@@ -232,7 +233,7 @@ class WP_SoundSystem_Core_Tracks{
                 $track->save_track();
                 
             break;
-            case 'sources_manager':
+            case 'sources':
                 
                 //nonce check
                 if ( !isset($_POST['wpsstm_admin_track_gui_sources_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_sources_nonce'], 'wpsstm_admin_track_gui_sources_'.$track->post_id ) ) {

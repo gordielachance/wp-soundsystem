@@ -24,23 +24,13 @@
     }
     
     .trackitem_actions{
-        
-        #wpsstm-track-all-actions{
-            .wpsstm-actions-list{
-                display:inline;
-                padding: 0;
-                li{
-                    padding: 0 .1em;
-                }
-                &#wpsstm-admin-track-actions{
-
-                    li{
-
-                    }
-                }
+        .wpsstm-actions-list{
+            display:inline;
+            padding: 0;
+            li{
+                padding: 0 .1em;
             }
         }
-
     }
 
     .wpsstm-play-track{
@@ -107,5 +97,11 @@
                 }
             }
         }
+    }
+}
+
+.wpsstm-actions-list{
+    .wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
+        display:none!important;
     }
 }

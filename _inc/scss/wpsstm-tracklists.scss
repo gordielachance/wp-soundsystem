@@ -105,7 +105,7 @@
             &:hover{
                 background: rgba(0,0,0,0.025);
                 td.column-image img{
-                    @include opacity(0.8);
+                    @include opacity(.8);
                 }
             }
 
@@ -165,7 +165,7 @@
         .tracklist-nav{
             //display:none;
         }
-        .trackitem_order,#track-admin-action-move{
+        .trackitem_order,#wpsstm-track-action-move{
             display:none;
         }
     }
@@ -191,16 +191,6 @@
 .hentry .wpsstm-tracklist{
     padding: 1em 0;
     font-size:.8em;
-}
-
-#tracklist-action-favorite,
-#tracklist-action-unfavorite,
-#track-action-favorite,
-#track-action-unfavorite,
-.wpsstm-track-action-love-unlove,.wpsstm-tracklist-action-love-unlove{ 
-    &:not(.active){
-        display:none;
-    }
 }
 
 #wpsstm-tracklist-chooser-list{ //popup
@@ -237,37 +227,37 @@
 
 }
 
-#wpsstm-tracklist-all-actions{
+#wpsstm-tracklist-actions{
+    display:block;
+    padding: 0 1em;
     margin: 1em;
     text-align: center;
     font-size:0.8em;
-    .wpsstm-actions-list{
+    width:100%;
+    li{
+        padding: 0 .5em;
         display:inline;
-        padding: 0 1em;
-        li{
-            padding: 0 .5em;
-        }
-        &#wpsstm-tracklist-admin-actions{
-            border-left: 1px solid #DDD;
 
-            li{
-                &#tracklist-admin-action-status-switch{
-                    form{
-                        display:none;
-                        select{
-                            font-size:1em;
-                        }
-                    }
-                    &.expanded{
-                        em{
-                            display:none;
-                        }
-                        form{
-                           display:inline-block; 
-                        }
-                    }
+        &#wpsstm-tracklist-action-status-switch{
+            form{
+                display:none;
+                select{
+                    font-size:1em;
+                }
+            }
+            &.expanded{
+                em{
+                    display:none;
+                }
+                form{
+                   display:inline-block; 
                 }
             }
         }
+    }
+}
+.wpsstm-actions-list#wpsstm-tracklist-actions{
+    .tracklist-action-favorite-toggle:not(.tracklist-action-favorite-active){
+        display:none;
     }
 }

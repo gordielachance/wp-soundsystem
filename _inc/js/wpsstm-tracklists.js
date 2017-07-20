@@ -16,7 +16,7 @@
         
         // sort rows
         tracklist_obj.tracklist_el.find( '.wpsstm-tracklist-entries' ).sortable({
-            handle: '#track-admin-action-move a',
+            handle: '#wpsstm-track-action-move a',
 
             update: function(event, ui) {
                 tracklist_obj.update_playlist_track_position(ui);
@@ -28,7 +28,7 @@
         */
         
         //refresh
-        tracklist_obj.tracklist_el.find("#tracklist-action-refresh a").click(function(e) {
+        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a").click(function(e) {
             e.preventDefault();
             //unset request status
             tracklist_obj.debug("clicked 'refresh' link");
@@ -37,20 +37,19 @@
         });
         
         //share
-        tracklist_obj.tracklist_el.find('#tracklist-action-share a').click(function(e) {
+        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-share a').click(function(e) {
           e.preventDefault();
           var text = $(this).attr('href');
           wpsstm_clipboard_box(text);
         });
 
         //favorite
-        tracklist_obj.tracklist_el.find('#tracklist-action-favorite a').click(function(e) {
+        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a').click(function(e) {
             e.preventDefault();
             
             if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
-            var action_li = $(this).closest('li');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
 
@@ -70,31 +69,30 @@
                 data:       ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    action_li.addClass('loading');
+                    link.addClass('loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
                     }else{
                         var tracklist_instances = tracklist_obj.get_tracklist_instances()
-                        tracklist_instances.find('#tracklist-action-favorite').removeClass('active');
-                        tracklist_instances.find('#tracklist-action-unfavorite').addClass('active');
+                        tracklist_instances.find('#wpsstm-tracklist-action-favorite').removeClass('wpsstm-toggle-favorite-active');
+                        tracklist_instances.find('#wpsstm-tracklist-action-unfavorite').addClass('wpsstm-toggle-favorite-active');
                     }
                 },
                 complete: function() {
-                    action_li.removeClass('loading');
+                    link.removeClass('loading');
                 }
             })
         });
         
         //unfavorite
-        tracklist_obj.tracklist_el.find('#tracklist-action-unfavorite a').click(function(e) {
+        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-unfavorite a').click(function(e) {
             e.preventDefault();
             
             if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
-            var action_li = $(this).closest('li');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
 
@@ -114,32 +112,32 @@
                 data:       ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    action_li.addClass('loading');
+                    link.addClass('loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
                     }else{
                         var tracklist_instances = tracklist_obj.get_tracklist_instances()
-                        tracklist_instances.find('#tracklist-action-unfavorite').removeClass('active');
-                        tracklist_instances.find('#tracklist-action-favorite').addClass('active');
+                        tracklist_instances.find('#wpsstm-tracklist-action-unfavorite').removeClass('wpsstm-toggle-favorite-active');
+                        tracklist_instances.find('#wpsstm-tracklist-action-favorite').addClass('wpsstm-toggle-favorite-active');
                     }
                 },
                 complete: function() {
-                    action_li.removeClass('loading');
+                    link.removeClass('loading');
                 }
             })
         });
         
         //switch status
-        tracklist_obj.tracklist_el.find("#tracklist-admin-action-status-switch a").click(function(e) {
+        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-status-switch a").click(function(e) {
             e.preventDefault();
             $(this).closest('li').toggleClass('expanded');
             
         });
         
         //remove
-        tracklist_obj.tracklist_el.find('#track-admin-action-remove a').click(function(e) {
+        tracklist_obj.tracklist_el.find('#wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
             
             //get track
@@ -151,7 +149,7 @@
         });
         
         //delete
-        tracklist_obj.tracklist_el.find('#track-admin-action-delete a').click(function(e) {
+        tracklist_obj.tracklist_el.find('#wpsstm-track-action-delete a').click(function(e) {
             e.preventDefault();
             
             //get track
@@ -226,7 +224,7 @@
         var li_el =         $(checkbox).closest('li');
         var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
         
-        var popup_section = checkbox.closest('#admin-track-playlists');
+        var popup_section = checkbox.closest('#tab-content-playlists');
         var popup = checkbox.closest('.hentry');
 
         //get track obj from HTML
@@ -434,7 +432,7 @@ class WpsstmTracklist {
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
             self.can_play = false;
             self.tracklist_el.addClass('refresh-error');
-            self.tracklist_el.find('#tracklist-action-refresh').addClass('error');
+            self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
             console.log("get_tracklist_request failed for tracklist #" + self.tracklist_idx);
         });
 

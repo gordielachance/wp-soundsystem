@@ -49,6 +49,106 @@
             }
 
         });
+        
+        //favorite track
+        $(track_el).find('#wpsstm-track-action-favorite a').click(function(e) {
+
+            e.preventDefault();
+            if ( !wpsstm_get_current_user_id() ) return;
+
+            var link = $(this);
+
+            var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
+            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+
+            var track_el = link.closest('[itemprop="track"]');
+            var track_idx = track_el.attr('data-wpsstm-track-idx');
+
+            var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+
+            var ajax_data = {
+                action:         'wpsstm_love_unlove_track',
+                do_love:        true,
+                track:          track_obj.build_request_obj()
+            };
+
+            return $.ajax({
+
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+
+                beforeSend: function() {
+                    link.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                    }else{
+                        var track_instances = track_obj.get_track_instances();
+                        track_instances.find('#wpsstm-track-action-favorite').removeClass('wpsstm-toggle-favorite-active');
+                        track_instances.find('#wpsstm-track-action-unfavorite').addClass('wpsstm-toggle-favorite-active');
+                    }
+                },
+                complete: function() {
+                    link.removeClass('loading');
+                    $(document).trigger( "wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                }
+            })
+
+        });
+
+        //unfavorite track
+        $(track_el).find('#wpsstm-track-action-unfavorite a').click(function(e) {
+
+            e.preventDefault();
+            if ( !wpsstm_get_current_user_id() ) return;
+
+            var link = $(this);
+
+            var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
+            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+
+            var track_el = link.closest('[itemprop="track"]');
+            var track_idx = track_el.attr('data-wpsstm-track-idx');
+
+            var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+
+            var ajax_data = {
+                action:         'wpsstm_love_unlove_track',
+                do_love:        false,
+                track:          track_obj.build_request_obj()
+            };
+            
+            console.log(ajax_data);
+
+            return $.ajax({
+
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+
+                beforeSend: function() {
+                    link.addClass('loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                    }else{
+                        var track_instances = track_obj.get_track_instances();
+                        track_instances.find('#wpsstm-track-action-favorite').addClass('wpsstm-toggle-favorite-active');
+                        track_instances.find('#wpsstm-track-action-unfavorite').removeClass('wpsstm-toggle-favorite-active');
+                    }
+                },
+                complete: function() {
+                    link.removeClass('loading');
+                    $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                }
+            })
+
+        });
 
     });
     

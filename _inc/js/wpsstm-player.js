@@ -69,110 +69,11 @@ $(document).ready(function(){
 
     });
     
-    //favorite track
-    $(document).on( "click",'[itemprop="track"] #track-action-favorite a', function(e){
-        
-        e.preventDefault();
-        if ( !wpsstm_get_current_user_id() ) return;
-        
-        var link = $(this);
-
-        var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
-        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
-
-        var track_el = link.closest('[itemprop="track"]');
-        var track_idx = track_el.attr('data-wpsstm-track-idx');
-
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
-
-        var ajax_data = {
-            action:         'wpsstm_love_unlove_track',
-            do_love:        true,
-            track:          track_obj.build_request_obj()
-        };
-
-        return $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-            
-            beforeSend: function() {
-                link.addClass('loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                }else{
-                    var track_instances = track_obj.get_track_instances();
-                    track_instances.find('#track-action-favorite').removeClass('active');
-                    track_instances.find('#track-action-unfavorite').addClass('active');
-                }
-            },
-            complete: function() {
-                link.removeClass('loading');
-                $(document).trigger( "wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-            }
-        })
-
-    });
-    
-    //unfavorite track
-    $(document).on( "click",'[itemprop="track"] #track-action-unfavorite a', function(e){
-        
-        e.preventDefault();
-        if ( !wpsstm_get_current_user_id() ) return;
-        
-        var link = $(this);
-        var action_wrapper = link.closest('.track-action');
-
-        var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
-        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
-
-        var track_el = link.closest('[itemprop="track"]');
-        var track_idx = track_el.attr('data-wpsstm-track-idx');
-
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
-
-        var ajax_data = {
-            action:         'wpsstm_love_unlove_track',
-            do_love:        false,
-            track:          track_obj.build_request_obj()
-        };
-
-        return $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-            
-            beforeSend: function() {
-                action_wrapper.addClass('loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                }else{
-                    var track_instances = track_obj.get_track_instances();
-                    track_instances.find('#track-action-favorite').addClass('active');
-                    track_instances.find('#track-action-unfavorite').removeClass('active');
-                }
-            },
-            complete: function() {
-                action_wrapper.removeClass('loading');
-                $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-            }
-        })
-
-    });
-    
     /*
     //TO FIX
     instead of the default thickbox popup (link has the 'thickbox' class), we should call it 'manually' so we can check user is logged before displaying it.
     //tracklist selector popup.
-    $(document).on( "click",'[itemprop="track"] .track-action-playlist-append a', function(e){
+    $(document).on( "click",'[itemprop="track"] #wpsstm-track-action-playlists a', function(e){
         
         e.preventDefault();
         if ( !wpsstm_get_current_user_id() ) return;
