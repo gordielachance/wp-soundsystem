@@ -233,7 +233,7 @@
 
         var ajax_data = {
             action:         (is_checked ? 'wpsstm_add_playlist_track' : 'wpsstm_remove_playlist_track'),
-            track:          track_obj.build_request_obj(),
+            post_id:        track_obj.post_id,
             playlist_id:    playlist_id,
         };
 

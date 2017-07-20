@@ -15,7 +15,7 @@ get_header(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     
                     <?php
-                    $track = new WP_SoundSystem_Post_Track(get_the_ID);
+                    $track = new WP_SoundSystem_Track(get_the_ID);
                     $tracks = array($track);
                     $tracklist = new WP_SoundSystem_Tracklist();
                     $tracklist->add($tracks);

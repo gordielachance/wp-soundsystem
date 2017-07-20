@@ -139,7 +139,7 @@ class WP_SoundSystem_Core_Tracks{
         $is_new_track = get_query_var($this->qvar_new_track);
         if (!$is_new_track) return;
 
-        $track = new WP_SoundSystem_Post_Track();
+        $track = new WP_SoundSystem_Track();
         $track->artist = ( isset($_REQUEST['track_artist']) ) ? $_REQUEST['track_artist'] : null;
         $track->title = ( isset($_REQUEST['track_title']) ) ? $_REQUEST['track_title'] : null;
         $track->album = ( isset($_REQUEST['track_album']) ) ? $_REQUEST['track_album'] : null;
@@ -209,7 +209,7 @@ class WP_SoundSystem_Core_Tracks{
         $post_type = get_post_type();
         if ( $post_type != wpsstm()->post_type_track ) return;
         
-        $track = new WP_SoundSystem_Post_Track($post->ID);
+        $track = new WP_SoundSystem_Track($post->ID);
         $popup_action = ( isset($_REQUEST['wpsstm-admin-track-action']) ) ? $_REQUEST['wpsstm-admin-track-action'] : null;
         if (!$popup_action || !$track->post_id) return;
 
@@ -366,7 +366,7 @@ class WP_SoundSystem_Core_Tracks{
         switch ( $column ) {
             case 'track-lovedby':
                 $output = '—';
-                $track = new WP_SoundSystem_Post_Track($post_id);
+                $track = new WP_SoundSystem_Track($post_id);
                 $links = array();
                 if ( $user_ids = $track->get_track_loved_by() ){
                     foreach($user_ids as $user_id){
@@ -629,7 +629,7 @@ class WP_SoundSystem_Core_Tracks{
         );
         $atts = shortcode_atts($default,$atts);
 
-        $track = new WP_SoundSystem_Track( $atts );
+        $track = new WP_SoundSystem_Track( $atts['post_id'] );
         $tracklist = new WP_SoundSystem_Tracklist();
         $tracklist->add($track);
         
@@ -649,7 +649,7 @@ class WP_SoundSystem_Core_Tracks{
 
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
 
-        $track = new WP_SoundSystem_Track($ajax_data['track']);
+        $track = new WP_SoundSystem_Track($ajax_data['post_id']);
 
         if ( ($do_love!==null) ){
             
@@ -680,13 +680,9 @@ class WP_SoundSystem_Core_Tracks{
             'success'   => false
         );
 
-        $args = $result['args'] = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
 
-        $track = new WP_SoundSystem_Track($args);
+        $track = new WP_SoundSystem_Track($post_id);
         $track->sources = $track->populate_track_sources_auto();
 
         $track = $result['track'] = $track;
@@ -701,14 +697,7 @@ class WP_SoundSystem_Core_Tracks{
 
     function ajax_create_playlist(){
         $ajax_data = wp_unslash($_POST);
-        
-        /*
-        Track
-        */
-        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
-        $track = new WP_SoundSystem_Track($track_args);
-        $tracklist_ids = $track->get_parent_ids();
-        
+
         wpsstm()->debug_log($ajax_data,"ajax_create_playlist()");
         
 
@@ -736,6 +725,7 @@ class WP_SoundSystem_Core_Tracks{
             
             $result['playlist_id'] = $tracklist_id;
             $result['success'] = true;
+            $tracklist_ids = array(); //TO FIX required ?
             $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$tracklist_ids));
             
             $result['new_html'] = $list_all;
@@ -759,7 +749,7 @@ class WP_SoundSystem_Core_Tracks{
             'new_html'  => null
         );
         
-        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         
         //tracklist
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
@@ -807,10 +797,10 @@ class WP_SoundSystem_Core_Tracks{
             'new_html'  => null
         );
         
-        $track_args = isset($ajax_data['track']) ? $ajax_data['track'] : null;
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
         $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
-        $track = new WP_SoundSystem_Track( $track_args );
+        $track = new WP_SoundSystem_Track( $post_id );
         
         //track ID is required
         if ( !$track->post_id && !$track->populate_track_post_auto() ) return;//track does not exists in DB

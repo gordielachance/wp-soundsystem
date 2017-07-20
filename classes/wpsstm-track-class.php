@@ -1,13 +1,7 @@
 <?php
 
-class WP_SoundSystem_Post_Track extends WP_SoundSystem_Track{
-    function __construct($post_id = null){
-        parent::__construct(array('post_id'=>$post_id));
-    }
-}
-
 class WP_SoundSystem_Track{
-    public $post_id = 0;
+    public $post_id = null;
     public $position = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
 
     public $title;
@@ -25,12 +19,26 @@ class WP_SoundSystem_Track{
     private $did_post_id_lookup = false;
     private $did_parents_query = false;
 
-    function __construct( $args = array() ){
-        
-        //wpsstm()->debug_log(json_encode($args), "WP_SoundSystem_Track::__construct()"); 
-        
+    function __construct( $post_id = null ){
+        //has track ID
+        if ( $post_id && ($post = get_post($post_id) ) ){
+
+            $this->post_id = $post_id;
+
+            //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
+
+            if (!$this->title)      $this->title = wpsstm_get_post_track($post_id);
+            if (!$this->artist)     $this->artist = wpsstm_get_post_artist($post_id);
+            if (!$this->album)      $this->album = wpsstm_get_post_album($post_id);
+            if (!$this->mbid)       $this->mbid = wpsstm_get_post_mbid($post_id);
+            if (!$this->sources)    $this->sources = wpsstm_get_post_sources($post_id);
+        }
+    }
+    
+    function populate_array( $args = null ){
+
         $args_default = $this->get_default();
-        $args = wp_parse_args($args,$args_default);
+        $args = wp_parse_args((array)$args,$args_default);
 
         //set properties from args input
         foreach ($args as $key=>$value){
@@ -38,15 +46,10 @@ class WP_SoundSystem_Track{
             if ( !isset($args[$key]) ) continue; //value has not been set
             $this->$key = $args[$key];
         }
-        
-        //has track ID
-        if ( $this->post_id ){
-            $this->populate_track_post($this->post_id);
-        }else{
-            //populate post ID if track already exists in the DB
-            //TO FIX check if this doesn't slow the page rendering
-            $this->populate_track_post_auto();
-        }
+
+        //populate post ID if track already exists in the DB
+        //TO FIX check if this doesn't slow the page rendering
+        $this->populate_track_post_auto();
     }
     
     /*
@@ -59,30 +62,13 @@ class WP_SoundSystem_Track{
         wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
 
         if ( $auto_post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title) ){
-            $this->populate_track_post($auto_post_id);
+            $this->__construct( $auto_post_id );
         }
         $this->did_post_id_lookup = true;
         return $this->post_id;
 
     }
-    
-    function populate_track_post($post_id){
-        
-        if ( !$post = get_post($post_id) ){
-            $this->post_id = null; //if it was set but the post do not exists
-            return;
-        }
-        
-        $this->post_id = $post_id;
-        
-        //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
-        
-        if (!$this->title)      $this->title = wpsstm_get_post_track($post_id);
-        if (!$this->artist)     $this->artist = wpsstm_get_post_artist($post_id);
-        if (!$this->album)      $this->album = wpsstm_get_post_album($post_id);
-        if (!$this->mbid)       $this->mbid = wpsstm_get_post_mbid($post_id);
-        if (!$this->sources)    $this->sources = wpsstm_get_post_sources($post_id);
-    }
+
     
     function get_default(){
         return array(

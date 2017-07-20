@@ -66,7 +66,7 @@ class WP_SoundSystem_Tracklist{
         $subtrack_ids = $this->get_subtrack_ids();
 
         foreach ((array)$subtrack_ids as $subtrack_id){
-            $track = new WP_SoundSystem_Post_Track($subtrack_id);
+            $track = new WP_SoundSystem_Track($subtrack_id);
             $subtracks[] = $track;
         }
         
@@ -202,6 +202,10 @@ class WP_SoundSystem_Tracklist{
         return $this->set_subtrack_ids($ordered_ids);
     }
     
+    /*
+    $tracks = array of tracks objects or array of track IDs
+    */
+    
     function add($tracks){
 
         //force array
@@ -210,8 +214,15 @@ class WP_SoundSystem_Tracklist{
         foreach ($tracks as $track){
 
             if ( !is_a($track, 'WP_SoundSystem_Track') ){
+                
                 if ( is_array($track) ){
-                    $track = new WP_SoundSystem_Track($track);
+                    $track_args = $track;
+                    $track = new WP_SoundSystem_Track();
+                    $track->populate_array($track_args);
+                }else{ //track ID
+                    $track_id = $track;
+                    //TO FIX check for int ?
+                    $track = new WP_SoundSystem_Track($track_id);
                 }
             }
 
@@ -678,7 +689,7 @@ class WP_SoundSystem_Tracklist{
     }
 
     function get_new_tracklist_track_url(){
-        $track = new WP_SoundSystem_Post_Track();
+        $track = new WP_SoundSystem_Track();
         $url = $track->get_new_track_url();
         $args = array(
             'tracklist_id' => $this->post_id

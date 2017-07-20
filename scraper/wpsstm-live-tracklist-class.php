@@ -146,7 +146,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $db_tracks_count = $remote_tracks_count = 0;
        
         $can_refresh = ($remote_request) ? $this->can_remote_request() : false;
-        
+
         if ( !$can_refresh ){
             wpsstm()->debug_log('load DB subtracks','WP_SoundSystem_Remote_Tracklist::load_remote_tracks()' );
             parent::load_subtracks();
@@ -188,7 +188,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             
             $this->did_query_remote_tracks = true;
             $this->did_query_tracks = true;
-            
+
             new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
 
         }
@@ -735,17 +735,18 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public function can_remote_request(){
 
         $cache_duration = $this->get_options('datas_cache_min');
-        $can = ( !$cache_duration );
         $text_time = null;
+
+        if (!$this->ignore_cache){
+            $can = ( $this->updated_time === false); //cache expired
+        }else{
+            $can = true;
+        }
 
         if ( !$cache_duration ){
             $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
         }
-        
-        if (!$this->ignore_cache){
-            $can = ( $this->updated_time === false);
-        }
-        
+
         if ($this->updated_time){
             $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->updated_time ), get_option( 'date_format' ) );
             $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->updated_time ), get_option( 'time_format' ) );
@@ -762,7 +763,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             ),
             "WP_SoundSystem_Remote_Tracklist::can_remote_request()"
         ); 
-        
+
         return $can;
 
     }

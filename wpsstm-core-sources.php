@@ -69,7 +69,7 @@ class WP_SoundSystem_Core_Sources{
     
     function metabox_sources_content( $post ){
 
-        $track = new WP_SoundSystem_Post_Track($post->ID);
+        $track = new WP_SoundSystem_Track($post->ID);
         $list = wpsstm_sources()->get_track_sources_list($track,true);
         
         $sources_url = $track->get_track_admin_gui_url('sources');
@@ -167,7 +167,7 @@ class WP_SoundSystem_Core_Sources{
         switch ( $column ) {
             case 'sources':
                 $output = '—';
-                $track = new WP_SoundSystem_Post_Track($post_id);
+                $track = new WP_SoundSystem_Track($post_id);
                 echo count($track->sources);
             break;
         }
@@ -222,7 +222,7 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $track = new WP_SoundSystem_Post_Track($ajax_data['post_id']);
+        $track = new WP_SoundSystem_Track($ajax_data['post_id']);
         $track->populate_track_sources_auto();
 
         $track = $result['track'] = $track;

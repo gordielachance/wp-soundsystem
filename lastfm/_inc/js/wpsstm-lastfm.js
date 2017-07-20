@@ -61,11 +61,9 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = track_obj.build_request_obj();
-
         var ajax_data = {
             action:           'wpsstm_user_update_now_playing_lastfm_track',
-            track:            track
+            post_id:          track_obj.post_id
         };
 
         self.debug("lastfm - ajax track.updateNowPlaying");
@@ -98,11 +96,9 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = track_obj.build_request_obj();
-
         var ajax_data = {
             action:             'wpsstm_user_scrobble_lastfm_track',
-            track:              track,
+            post_id:            track_obj.post_id,
             playback_start:     track_obj.playback_start
         };
 
@@ -132,16 +128,9 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = {
-            artist:     track_obj.artist,
-            title:      track_obj.title,
-            album:      track_obj.album,
-            duration:   track_obj.duration
-        }
-
         var ajax_data = {
             action:             'wpsstm_bot_scrobble_lastfm_track',
-            track:              track,
+            post_id:            track_obj.post_id,
             playback_start:     track_obj.playback_start
         };
 
@@ -169,16 +158,10 @@ class WpsstmLastFM {
         
         var self = this;
 
-        var track = {
-            artist: track_obj.artist,
-            title:  track_obj.title,
-            album:  track_obj.album
-        }
-
         var ajax_data = {
             action:     'wpsstm_user_love_unlove_lastfm_track',
             do_love:    do_love,
-            track:      track
+            post_id:    track_obj.post_id
         };
 
         self.debug("lastFM - love/unlove track");

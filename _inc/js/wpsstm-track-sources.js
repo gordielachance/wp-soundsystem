@@ -36,8 +36,6 @@ jQuery(document).ready(function($){
         var track_el = popup.find('[itemprop="track"]').first();
         var track_obj = new WpsstmTrack(track_el);
 
-        var track = track_obj.build_request_obj();
-
         var ajax_data = {
             action:     'wpsstm_suggest_editable_sources',
             field_name: bt.attr('data-wpsstm-autosources-field-name'), //TO FIX has been removed

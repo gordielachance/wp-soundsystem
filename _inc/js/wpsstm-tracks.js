@@ -69,7 +69,7 @@
             var ajax_data = {
                 action:         'wpsstm_love_unlove_track',
                 do_love:        true,
-                track:          track_obj.build_request_obj()
+                post_id:        track_obj.post_id //COUCOU
             };
 
             return $.ajax({
@@ -118,7 +118,7 @@
             var ajax_data = {
                 action:         'wpsstm_love_unlove_track',
                 do_love:        false,
-                track:          track_obj.build_request_obj()
+                post_id:        track_obj.post_id
             };
             
             console.log(ajax_data);
@@ -519,23 +519,7 @@ class WpsstmTrack {
         });
 
     }
-    
-    /*
-    Convert the track to an object (for ajax requests, etc)
-    */
-    build_request_obj(){
-        var self = this;
-        var track_obj = {
-            artist:     self.artist,
-            title:      self.title,
-            album:      self.album,
-            post_id:    self.post_id,
-            mbid:       self.mbid,
-            duration:   self.duration
-        }
-        return track_obj;
-    }
-    
+
     get_track_sources_request() {
 
         var self = this;
@@ -548,8 +532,8 @@ class WpsstmTrack {
         //self.debug("get_track_sources_request()");
 
         var ajax_data = {
-            'action':           'wpsstm_populate_track_sources_auto',
-            'track':            self.build_request_obj()
+            action:           'wpsstm_populate_track_sources_auto',
+            post_id:          self.post_id
         };
         
         self.sources_request = $.ajax({

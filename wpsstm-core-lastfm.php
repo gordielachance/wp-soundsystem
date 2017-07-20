@@ -560,12 +560,8 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false,
             'message'   => null
         );
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
         $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
         
@@ -592,13 +588,8 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false
         );
         
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
-
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         
         $success = $this->lastfm_user->now_playing_lastfm_track($track);
 
@@ -625,14 +616,8 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false
         );
         
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?        $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?       $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?        $ajax_data['track']['album'] : null,
-            'duration'  => ( isset($ajax_data['track']['duration']) ) ?     $ajax_data['track']['duration'] : null
-        );
-
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
@@ -662,14 +647,9 @@ class WP_SoundSystem_Core_LastFM{
         );
         
         if ( $bot_user_id = (int)wpsstm()->get_options('lastfm_bot_user_id') ){
-            $track_args = array(
-                'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-                'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-                'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null,
-                'duration'  => ( isset($ajax_data['track']['duration']) ) ? $ajax_data['track']['duration'] : null
-            );
 
-            $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+            $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+            $track = $result['track'] = new WP_SoundSystem_Track($post_id);
             
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';

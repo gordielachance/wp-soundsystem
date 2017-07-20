@@ -142,7 +142,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         $tracklist = new WP_SoundSystem_Tracklist($post->ID);
 
-        $track = new WP_SoundSystem_Post_Track();
+        $track = new WP_SoundSystem_Track();
         $track->save_temp_track();
 
         if ( $track->post_id ){
@@ -378,7 +378,7 @@ class WP_SoundSystem_Core_Tracklists{
         switch ( $column ) {
             case 'playlist':
                 
-                $track = new WP_SoundSystem_Post_Track($post_id);
+                $track = new WP_SoundSystem_Track($post_id);
                 $tracklist_ids = $track->get_parent_ids();
                 $links = array();
 
@@ -583,7 +583,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ( $track_id ){
 
-            $track = $result['track'] = new WP_SoundSystem_Post_Track($track_id);
+            $track = $result['track'] = new WP_SoundSystem_Track($track_id);
             $success = $track->delete_track();
             
             if ( is_wp_error($success) ){
