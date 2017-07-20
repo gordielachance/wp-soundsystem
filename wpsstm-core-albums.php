@@ -159,7 +159,7 @@ class WP_SoundSystem_Core_Albums{
             'update_item'           => __( 'Update Album', 'wpsstm' ),
             'view_item'             => __( 'View Album', 'wpsstm' ),
             'view_items'            => __( 'View Albums', 'wpsstm' ),
-            'search_items'          => __( 'Search Album', 'wpsstm' ),
+            'search_items'          => __( 'Search Albums', 'wpsstm' ),
             //'not_found'             => __( 'Not found', 'wpsstm' ),
             //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
             //'featured_image'        => __( 'Featured Image', 'wpsstm' ),

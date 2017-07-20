@@ -114,7 +114,7 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li, body.wpsstm_
   display: inline;
 }
 /* line 103, ../scss/_wpsstm-shared.scss */
-body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.active), body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li:not(.active) {
+body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active), body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
 }
