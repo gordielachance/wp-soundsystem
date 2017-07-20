@@ -145,7 +145,7 @@ class WP_SoundSystem_Core_Artists{
             'update_item'           => __( 'Update Artist', 'wpsstm' ),
             'view_item'             => __( 'View Artist', 'wpsstm' ),
             'view_items'            => __( 'View Artists', 'wpsstm' ),
-            'search_items'          => __( 'Search Artist', 'wpsstm' ),
+            'search_items'          => __( 'Search Artists', 'wpsstm' ),
             //'not_found'             => __( 'Not found', 'wpsstm' ),
             //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
             //'featured_image'        => __( 'Featured Image', 'wpsstm' ),

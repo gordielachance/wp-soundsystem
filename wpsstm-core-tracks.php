@@ -462,7 +462,7 @@ class WP_SoundSystem_Core_Tracks{
             'update_item'           => __( 'Update Track', 'wpsstm' ),
             'view_item'             => __( 'View Track', 'wpsstm' ),
             'view_items'            => __( 'View Tracks', 'wpsstm' ),
-            'search_items'          => __( 'Search Track', 'wpsstm' ),
+            'search_items'          => __( 'Search Tracks', 'wpsstm' ),
             //'not_found'             => __( 'Not found', 'wpsstm' ),
             //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
             //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
