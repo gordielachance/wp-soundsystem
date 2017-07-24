@@ -312,6 +312,7 @@ class WP_SoundSystem_Core_Tracklists{
         $output = null;
 
         $tracklist = wpsstm_get_post_tracklist($post_id);
+        $tracklist->load_subtracks();
 
         $entry_html = array();
 

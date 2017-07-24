@@ -10,7 +10,7 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
         'soundsgood-playlist-slug' => null,
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
@@ -19,8 +19,8 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
         )
     );
     
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Soundsgood playlists','wpsstm');
 

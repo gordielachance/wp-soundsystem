@@ -7,7 +7,7 @@ class WP_SoundSystem_Preset_Slacker_Stations extends WP_SoundSystem_Live_Playlis
     var $variables =        array(
         'slacker-station-slug' => null
     );
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
             'track_artist'      => array('path'=>'span.artist'),
@@ -15,8 +15,8 @@ class WP_SoundSystem_Preset_Slacker_Stations extends WP_SoundSystem_Live_Playlis
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Slacker.com station tops','wpsstm');
 

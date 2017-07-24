@@ -353,3 +353,9 @@ function wpsstm_get_actions_list($actions,$prefix){
         return sprintf('<ul id="wpsstm-%s-actions" class="wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_lis));
     }
 }
+
+function wpsstm_get_live_tracklist_url($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = null;
+    return get_post_meta($post_id, wpsstm_live_playlists()->feed_url_meta_name, true );
+}

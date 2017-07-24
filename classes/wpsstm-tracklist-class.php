@@ -4,7 +4,7 @@ class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     
-    var $options_default = null;
+    var $options_default = array();
     var $options = array();
 
     //infos
@@ -395,6 +395,8 @@ class WP_SoundSystem_Tracklist{
     Read-only tracklist table
     **/
     function get_tracklist_table($args = null){
+        
+        $this->load_subtracks();
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
         $tracklist_table = new WP_SoundSystem_Tracklist_Table($this,$args);
@@ -685,7 +687,7 @@ class WP_SoundSystem_Tracklist{
     
     function has_wizard_backup(){
         global $post;
-        return (bool)get_post_meta($this->post_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old',true);
+        return (bool)get_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old',true);
     }
 
     function get_new_tracklist_track_url(){

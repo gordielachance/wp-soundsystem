@@ -11,7 +11,7 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
         'radioking-id'          => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'datas_cache_min'   => 15,
         'selectors' => array(
             'tracks'            => array('path'=>'root > data'),
@@ -24,8 +24,8 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
     
     var $station_data =     null;
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Radioking Stations','wpsstm');
     }

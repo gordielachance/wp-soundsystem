@@ -8,7 +8,7 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
     var $variables = array(
         'rtbf-slug' => null
     );
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
@@ -19,8 +19,8 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
     
     var $wizard_suggest = false;
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('RTBF stations','wpsstm');
 

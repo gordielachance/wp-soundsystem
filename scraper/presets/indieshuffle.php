@@ -15,7 +15,7 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
         'uri' => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'datas_cache_min'   => 1440,
         'selectors' => array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
@@ -26,8 +26,8 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->preset_name = __('Indie Shuffle','wpsstm');
     }
 

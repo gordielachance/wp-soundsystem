@@ -8,7 +8,7 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
     var $variables =        array(
         'twitter-username' => null
     );
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'        => array('path'=>'#main_content .timeline .tweet .tweet-text div')
         )
@@ -16,8 +16,8 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
     
     var $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Twitter','wpsstm');
 

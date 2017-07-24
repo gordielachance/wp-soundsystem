@@ -9,7 +9,7 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         'bbc-slug' => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
             'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
@@ -18,8 +18,8 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->preset_name =    __('BBC stations','wpsstm');
     }
 
@@ -33,7 +33,7 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
         'bbc-playlist-id' => null
     );
     
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
@@ -41,8 +41,8 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->preset_name =    __('BBC playlist','wpsstm');
     } 
 

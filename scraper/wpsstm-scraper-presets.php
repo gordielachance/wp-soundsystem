@@ -5,6 +5,7 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     var $preset_url =       null;
     var $preset_name =      null;
     var $preset_desc =      null;
+    var $preset_options =   array();
     var $pattern =          null; //regex pattern that would match an URL
     var $redirect_url =     null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
     var $variables =        array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
@@ -12,8 +13,9 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     var $can_use_preset =   true; //if this preset requires special conditions (eg. an API key or so), override this in your preset class.
     var $wizard_suggest =   true; //suggest or not this preset in the wizard
 
-    public function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    public function __construct($post_id = null){
+        
+        parent::__construct($post_id);
         
         //populate variables from URL
         if ($this->feed_url && $this->pattern){
@@ -25,8 +27,14 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
                 $this->populate_variable_values($url_matches);
             }
         }
+        
     }
     
+    function get_default_options(){
+        $defaults = parent::get_default_options();
+        return array_replace_recursive((array)$defaults,(array)$this->preset_options); //last one has priority
+    }
+
     /**
     If $url_matches is empty, it means that the feed url does not match the pattern.
     **/

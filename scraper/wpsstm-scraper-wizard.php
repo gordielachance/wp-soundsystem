@@ -10,9 +10,9 @@ class WP_SoundSystem_Core_Wizard{
     var $wizard_fields = array();
     
     public $frontend_wizard_page_id = null;
-    public $qvar_wizard_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
+    public $qvar_feed_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
     public $qvar_wizard_posts = 'wpsstm_wizard_posts';
-    public $frontend_wizard_url = null;
+    public $frontend_feed_url = null;
     public $frontend_wizard = null;
     public $frontend_wizard_meta_key = '_wpsstm_is_frontend_wizard';
     
@@ -38,8 +38,9 @@ class WP_SoundSystem_Core_Wizard{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
+
+        //blank tracklist for now (avoid undefined methods)
         $this->tracklist = new WP_SoundSystem_Remote_Tracklist();
-        $this->wizard_settings_init();
     }
 
     function setup_actions(){
@@ -75,7 +76,7 @@ class WP_SoundSystem_Core_Wizard{
     *   Add the query variables for the Wizard
     */
     function add_wizard_query_vars($vars){
-        $vars[] = $this->qvar_wizard_url;
+        $vars[] = $this->qvar_feed_url;
         $vars[] = $this->qvar_wizard_posts;
         return $vars;
     }
@@ -135,10 +136,10 @@ class WP_SoundSystem_Core_Wizard{
         
         if ( $post_id != $this->frontend_wizard_page_id ) return $link;
         
-        $frontend_wizard_url = $wp_query->get($this->qvar_wizard_url);
+        $frontend_feed_url = $wp_query->get($this->qvar_feed_url);
 
-        if ( $frontend_wizard_url ) {
-            $link = add_query_arg(array($this->qvar_wizard_url=>$frontend_wizard_url),$link);
+        if ( $frontend_feed_url ) {
+            $link = add_query_arg(array($this->qvar_feed_url=>$frontend_feed_url),$link);
         }
         
         return $link;
@@ -265,7 +266,7 @@ class WP_SoundSystem_Core_Wizard{
         $query = new WP_Query($query_args);
         
         foreach($query->posts as $post){
-            $feed_url = get_post_meta( $post->ID, WP_SoundSystem_Remote_Tracklist::$wizard_url,true );
+            $feed_url = wpsstm_get_live_tracklist_url($post->ID);
             $li_items[] = sprintf('<li><a href="%s">%s</a> <small>%s</small></li>',get_permalink($post->ID),get_post_field('post_title',$post->ID),$feed_url);
         }
         if ($li_items){
@@ -309,7 +310,7 @@ class WP_SoundSystem_Core_Wizard{
         if ( !is_page($this->frontend_wizard_page_id) ) return;
         
         $wizard_post_id = ( isset($_REQUEST[ 'wpsstm_wizard' ]['post_id']) ) ? $_REQUEST[ 'wpsstm_wizard' ]['post_id'] : null;
-        $wizard_url = $wp_query->get($this->qvar_wizard_url);
+        $wizard_url = $wp_query->get($this->qvar_feed_url);
         
         if (!$wizard_post_id && !$wizard_url) return;
 
@@ -345,8 +346,8 @@ class WP_SoundSystem_Core_Wizard{
 
     }
     
-    function setup_wizard_tracklist($post_id_or_feed_url = null){
-        $this->tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id_or_feed_url);
+    function setup_wizard_tracklist($post_id = null){
+        $this->tracklist = wpsstm_get_post_tracklist($post_id);
         $this->tracklist->ignore_cache = ( wpsstm_is_backend() && isset($_REQUEST['advanced_wizard']) );
         $this->tracklist->tracks_strict = false;
         $this->tracklist->load_subtracks();
@@ -439,16 +440,16 @@ class WP_SoundSystem_Core_Wizard{
         if ( !$tracklist_id = $this->tracklist->post_id ) return;
         
         if ($backup){
-            $wizard_url = get_post_meta($tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url,true);
-            $wizard_options = get_post_meta($tracklist_id,WP_SoundSystem_Remote_Tracklist::$wizard_options ,true);
+            $feed_url = wpsstm_get_live_tracklist_url($tracklist_id);
+            $options = get_post_meta($tracklist_id,wpsstm_live_playlists()->scraper_meta_name,true);
             
             //backup wizard datas
-            if($wizard_url) update_post_meta($tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old', $wizard_url );
-            if($wizard_options) update_post_meta($tracklist_id,WP_SoundSystem_Remote_Tracklist::$wizard_options.'_old',$wizard_options);
+            if($feed_url) update_post_meta($tracklist_id, wpsstm_live_playlists()->feed_url_meta_name.'_old', $feed_url );
+            if($options) update_post_meta($tracklist_id,wpsstm_live_playlists()->scraper_meta_name.'_old',$options);
         }
         
-        delete_post_meta( $tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url );
-        delete_post_meta( $tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_options );
+        delete_post_meta( $tracklist_id, wpsstm_live_playlists()->feed_url_meta_name );
+        delete_post_meta( $tracklist_id, wpsstm_live_playlists()->scraper_meta_name );
         
         return true;
     }
@@ -456,16 +457,16 @@ class WP_SoundSystem_Core_Wizard{
     function restore_wizard_datas(){
         if ( !$tracklist_id = $this->tracklist->post_id ) return;
         
-        $wizard_url = get_post_meta($tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old',true);
-        $wizard_options = get_post_meta($tracklist_id,WP_SoundSystem_Remote_Tracklist::$wizard_options.'_old',true);
+        $feed_url = get_post_meta($tracklist_id, wpsstm_live_playlists()->feed_url_meta_name.'_old',true);
+        $options = get_post_meta($tracklist_id,wpsstm_live_playlists()->scraper_meta_name.'_old',true);
 
         //restore wizard datas
-        if($wizard_url) update_post_meta($tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url, $wizard_url );
-        if($wizard_options) update_post_meta($tracklist_id,WP_SoundSystem_Remote_Tracklist::$wizard_options,$wizard_options);
+        if($feed_url) update_post_meta($tracklist_id, wpsstm_live_playlists()->feed_url_meta_name, $feed_url );
+        if($options) update_post_meta($tracklist_id,wpsstm_live_playlists()->scraper_meta_name,$options);
         
         //delete backup
-        delete_post_meta( $tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_url.'_old' );
-        delete_post_meta( $tracklist_id, WP_SoundSystem_Remote_Tracklist::$wizard_options.'_old' );
+        delete_post_meta( $tracklist_id, wpsstm_live_playlists()->feed_url_meta_name.'_old' );
+        delete_post_meta( $tracklist_id, wpsstm_live_playlists()->scraper_meta_name.'_old' );
     }
     
     function save_frontend_wizard(){
@@ -530,9 +531,9 @@ class WP_SoundSystem_Core_Wizard{
         $feed_url = trim($feed_url);
 
         if (!$feed_url){
-            return delete_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$wizard_url );
+            return delete_post_meta( $post_id, wpsstm_live_playlists()->feed_url_meta_name );
         }else{
-            return update_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$wizard_url, $feed_url );
+            return update_post_meta( $post_id, wpsstm_live_playlists()->feed_url_meta_name, $feed_url );
         }
     }
                         
@@ -556,9 +557,9 @@ class WP_SoundSystem_Core_Wizard{
         $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
         if (!$wizard_settings){
-            delete_post_meta($post_id, WP_SoundSystem_Remote_Tracklist::$wizard_options);
+            delete_post_meta($post_id, wpsstm_live_playlists()->scraper_meta_name);
         }else{
-            update_post_meta( $post_id, WP_SoundSystem_Remote_Tracklist::$wizard_options, $wizard_settings );
+            update_post_meta( $post_id, wpsstm_live_playlists()->scraper_meta_name, $wizard_settings );
         }
 
         do_action('spiff_save_wizard_settings', $wizard_settings, $post_id);
@@ -976,7 +977,7 @@ class WP_SoundSystem_Core_Wizard{
         //presets
         $presets_list = array();
         $presets_list_str = null;
-        foreach ((array)WP_SoundSystem_Core_Live_Playlists::get_available_presets() as $preset){
+        foreach ((array)wpsstm_live_playlists()->get_available_presets() as $preset){
             if ( !$preset->wizard_suggest ) continue;
             $preset_str = $preset->preset_name;
             if ($preset->preset_url){

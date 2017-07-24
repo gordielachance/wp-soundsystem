@@ -17,8 +17,8 @@ abstract class WP_SoundSystem_Preset_Radionomy extends WP_SoundSystem_Live_Playl
         'radionomy-id' => null
     );
     
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Radionomy Stations','wpsstm');
     }
@@ -98,7 +98,7 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Prese
     //api max tracks = 40
     var $redirect_url = 'http://api.radionomy.com/tracklist.cfm?radiouid=%radionomy-id%&apikey=XXX&amount=20&type=xml&cover=true';
     
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'tracks track'),
             'track_artist'      => array('path'=>'artists'),
@@ -114,7 +114,7 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSystem_P
 
     var $redirect_url =     'http://radionomy.letoptop.fr/ajax/ajax_last_titres.php?radiouid=%radionomy-id%';
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'div.titre'),
             'track_artist'      => array('path'=>'table td','regex'=>'^(.*?)(?:<br ?/?>)'),

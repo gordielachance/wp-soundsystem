@@ -12,7 +12,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         'subredit-slug' => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),
@@ -23,8 +23,8 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
     }

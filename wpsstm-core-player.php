@@ -79,10 +79,10 @@ class WP_SoundSystem_Core_Player{
 
                     if ( $is_frontend_wizard ){
 
-                        if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_wizard_url) ){
+                        if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_feed_url) ){
                             $refresh_permalink = add_query_arg(
                                 array(
-                                    wpsstm_live_playlists()->qvar_wizard_url => $feed_url
+                                    wpsstm_live_playlists()->qvar_feed_url => $feed_url
                                 ),
                                 $refresh_permalink
                             );

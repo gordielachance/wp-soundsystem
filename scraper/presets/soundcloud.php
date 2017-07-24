@@ -11,7 +11,7 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
         'soundcloud-page' => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),
@@ -22,8 +22,8 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
     
     var $page_api = null;
     
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
 
         $this->preset_name = __('Soundcloud user tracks or likes','wpsstm');
         

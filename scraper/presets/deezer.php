@@ -5,7 +5,7 @@ class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlis
     var $preset_url =       'http://www.deezer.com/';
     var $pattern =          '~^https?://(?:www.)?deezer.com/playlist/([^/]+)~i';
     
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
             'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
@@ -14,8 +14,8 @@ class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlis
         )
     );
     
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->preset_name =    __('Deezer Playlists','wpsstm');
     }
 }

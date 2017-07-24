@@ -1,7 +1,10 @@
 <?php
 class WP_SoundSystem_Core_Live_Playlists{
     
-    public $allowed_post_types;
+    public $allowed_post_types; //TO FIX TO CHECK
+    
+    public $feed_url_meta_name = '_wpsstm_scraper_url';
+    public $scraper_meta_name = '_wpsstm_scraper_options';
     
     /**
     * @var The one true Instance
@@ -32,8 +35,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     function setup_actions(){
         
         if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
-        
-        add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
+
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
         //listing
@@ -41,90 +43,6 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
-    }
-    
-    function spiff_upgrade(){
-        global $wpdb;
-
-        if ( !$db_v = get_option("spiff-db") ) return;
-
-        wpsstm()->debug_log("upgrade_from_spiff()"); 
-        
-        //upgrade old spiff settings
-        $args = array(
-            'post_type'         => 'station',
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'meta_key'          => 'spiff_settings'
-        );
-        $settings_posts = get_posts($args);
-        foreach ($settings_posts as $settings_post){
-            $settings = get_post_meta($settings_post->ID,'spiff_settings',true);
-            
-            //feed url
-            if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSystem_Remote_Tracklist::$wizard_url, $settings["feed_url"] );
-                unset($settings["feed_url"]);
-            }
-            
-            $new_settings['selectors'] = array();
-            
-            //selectors
-            if ( isset($settings["selectors"]) ){
-                foreach($settings["selectors"] as $selector_slug => $value){
-                    if (!$value) continue;
-                    $new_settings['selectors'][$selector_slug]['path'] = $value;
-                }
-
-            }
-            //regexes
-            if ( isset($settings["selectors_regex"]) ){
-                foreach($settings["selectors_regex"] as $selector_slug => $value){
-                    if (!$value) continue;
-                    $new_settings['selectors'][$selector_slug]['regex'] = $value;
-                }
-
-            }
-            
-            $settings['selectors'] = $new_settings['selectors'];
-
-            update_post_meta($settings_post->ID,WP_SoundSystem_Remote_Tracklist::$wizard_options,$settings);
-            
-        }
-        
-        //upgrade old post type
-        $query_post_type = $wpdb->prepare( 
-            "UPDATE $wpdb->posts SET post_type = REPLACE(post_type, '%s', '%s')",
-            'station',
-            wpsstm()->post_type_live_playlist
-        );
-        $wpdb->query($query_post_type);
-        
-        //service
-        $query_post_meta_service = $wpdb->prepare(
-                "DELETE FROM $wpdb->postmeta
-                WHERE meta_key = %s",
-                'spiff_service'
-            );
-        $wpdb->query($query_post_meta_service);
-        
-        //rename health meta
-        $query_post_meta = $wpdb->prepare( 
-            "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",
-            WP_SoundSystem_Live_Playlist_Stats::$meta_key_health,
-            'spiff_station_health'
-        );
-        $wpdb->query($query_post_meta);
-            
-        //rename other old post meta
-        $query_post_meta = $wpdb->prepare( 
-            "UPDATE $wpdb->postmeta SET meta_key = REPLACE(meta_key, '%s', '%s')",
-            'spiff',
-            'wpsstm'
-        );
-        $wpdb->query($query_post_meta);
-
-        delete_option( "spiff-db" );
     }
 
     function register_post_type_live_playlist() {
@@ -209,45 +127,8 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
-    
-    public function get_preset_tracklist($post_id_or_feed_url = null){
 
-        $post_id = null;
-        $feed_url = null;
-
-        $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id_or_feed_url);
- 
-        //load page preset
-        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
-            $tracklist = $live_tracklist_preset;
-            $tracklist->__construct($post_id_or_feed_url);
-            $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
-        }
-
-        return $tracklist;
-    }
-    
-    function get_live_tracklist_preset($feed_url){
-        
-        $enabled_presets = array();
-
-        $available_presets = self::get_available_presets();
-
-        //get matching presets
-        foreach((array)$available_presets as $preset){
-
-            if ( $preset->can_load_tracklist_url($feed_url) ){
-                $enabled_presets[] = $preset;
-            }
-
-        }
-        
-        //return last (highest priority) preset
-        return end($enabled_presets);
-
-    }
-    
-    static function get_available_presets(){
+    function get_available_presets(){
         
         require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
         

@@ -268,28 +268,48 @@ Get a post tracklist.
 
 function wpsstm_get_post_tracklist($post_id=null){
     global $post;
-    
     if (!$post_id && $post) $post_id = $post->ID;
+    
+    $tracklist = null;
     $post_type = get_post_type($post_id);
 
-    $tracklist = new WP_SoundSystem_Tracklist($post_id);
-    
-    $is_live_tracklist = ($post_type == wpsstm()->post_type_live_playlist);
-    $is_frontend_wizard = ($post_id == wpsstm_wizard()->frontend_wizard_page_id);
-
     if ($post_type == wpsstm()->post_type_track){ //single track
+        $tracklist = new WP_SoundSystem_Tracklist(); //TO FIX set single track properties ?
         $track = new WP_SoundSystem_Track($post_id);
         $tracklist->add($track);
         
-    }else{ // (live) playlist or album
-        if ( $is_live_tracklist ){
-            $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-            $tracklist->can_remote_request = false; //we'll get remote tracklist through ajax
+    }else{
+        
+        if ($post_type == wpsstm()->post_type_live_playlist){ //is a live playlist
+            
+            $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
+
+            /*
+            Check if one of the available presets (which are extending WP_SoundSystem_Remote_Tracklist) can load the tracklist url
+            If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist; 
+            and repopulate post id since it is not populated in the registered preset.
+            */
+            
+            if ( $feed_url = wpsstm_get_live_tracklist_url($post_id) ){
+
+                foreach((array)wpsstm_live_playlists()->get_available_presets() as $preset){
+
+                    if ( $preset->can_load_tracklist_url($feed_url) ){
+                        $tracklist = $preset;
+                        $tracklist->__construct($post_id);
+                        $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$preset->preset_name.'</em>') );
+                        
+                        break;
+                    }
+                }
+            }
+
         }
-        $tracklist->load_subtracks();
     }
     
-    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
-    return $tracklist;
+    if ($tracklist){
+        //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
+        return $tracklist;
+    }
     
 }

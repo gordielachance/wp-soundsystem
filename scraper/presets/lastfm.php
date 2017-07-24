@@ -9,7 +9,7 @@ class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_
         'lastfm-page' => null
     );
 
-    var $options_default =  array(
+    var $preset_options =  array(
         'selectors' => array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
@@ -19,8 +19,8 @@ class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_
         )
     );
 
-    function __construct($post_id_or_feed_url = null){
-        parent::__construct($post_id_or_feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->preset_name = __('Last.FM website','wpsstm');
     }
 
