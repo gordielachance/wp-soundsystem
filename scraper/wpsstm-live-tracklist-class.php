@@ -35,6 +35,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $expire_time = null;
     var $ignore_cache = false; //eg. when advanced wizard
+    public $can_remote_request = false; // by default, only allow to query cache for tracks; update this property to allow querying remote tracks.
 
     //response
     var $request_pagination = array(
@@ -55,7 +56,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     public $notices = array();
     
-    public $can_remote_request = false; // by default, only allow to query cache for tracks; update this property to allow querying remote tracks.
+    
     
     //request
     static $querypath_options = array(
@@ -87,20 +88,121 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             if ($this->feed_url){
                 $this->location = $this->feed_url;
-                $this->id = md5( $this->feed_url ); //unique ID based on URL
-                $this->time_updated_meta_name = sprintf('wpsstm_ltracks_%s',$this->id); //172 characters or less
+                $this->time_updated_meta_name = sprintf('wpsstm_ltracks_%s',$this->post_id); //172 characters or less
             }
-            
+
             //title
-            if ( $title = get_post_meta($this->post_id,$this->remote_title_meta_name) ){
+            if ( $title = get_post_meta($this->post_id,$this->remote_title_meta_name,true) ){
                 $this->title = $title;
             }
             
             //author
-            if ( $author = get_post_meta($this->post_id,$this->remote_author_meta_name) ){
+            if ( $author = get_post_meta($this->post_id,$this->remote_author_meta_name,true) ){
                 $this->author = $author;
             }
             
+            $this->temporary_status_notice();
+            $this->live_tracklist_notice();
+        }
+
+    }
+    
+
+    /*
+    Return the (live) subtracks IDs for a tracklist.
+    */
+
+    function get_subtrack_ids(){
+        $ordered_ids = get_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname,true);
+        if ( empty($ordered_ids) ) return;
+        
+        //validate those IDs, we must be sure they are tracks.
+        $filtered_ids = $this->filter_subtrack_ids($ordered_ids);
+
+        return $filtered_ids;
+        
+    }
+    
+    /*
+    Append (live) subtracks IDs to a tracklist.
+    */
+    
+    function append_subtrack_ids($append_ids){
+        //force array
+        if ( !is_array($append_ids) ) $append_ids = array($append_ids);
+        
+        if ( empty($append_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Remote_Tracklist::append_subtrack_ids()");
+        
+        $subtrack_ids = (array)$this->get_subtrack_ids();
+        $subtrack_ids = array_merge($subtrack_ids,$append_ids);
+        return $this->set_subtrack_ids($subtrack_ids);
+    }
+    
+    /*
+    Remove (live) subtracks IDs from a tracklist.
+    */
+    
+    function remove_subtrack_ids($remove_ids){
+        //force array
+        if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
+        
+        if ( empty($remove_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Remote_Tracklist::remove_subtrack_ids()");
+        
+        $subtrack_ids = (array)$this->get_subtrack_ids();
+        $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
+        
+        return $this->set_subtrack_ids($subtrack_ids);
+    }
+    
+    /*
+    Assign (live) subtracks IDs to a tracklist.
+    */
+
+    function set_subtrack_ids($ordered_ids = null){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
+
+        //capability check
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
+        if ($ordered_ids){
+            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_static_parent_ids()
+            $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
+            $ordered_ids = array_unique($ordered_ids);
+        }
+
+        //set post status to 'publish' if it is not done yet (it could be a temporary post)
+        //TO FIX TO CHECK
+        foreach((array)$ordered_ids as $track_id){
+            $track_post_type = get_post_status($track_id);
+            if ($track_post_type != 'publish'){
+                wp_update_post(array(
+                    'ID' =>             $track_id,
+                    'post_status' =>    'publish'
+                ));
+            }
+        }
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Remote_Tracklist::set_subtrack_ids()"); 
+        
+        if ($ordered_ids){
+            return update_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname,$ordered_ids);
+        }else{
+            return delete_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname);
         }
 
     }
@@ -135,25 +237,24 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function load_subtracks(){
         
         if ( $this->did_query_tracks ) return;
-        
+
         $current_cache_time = get_transient( $this->time_updated_meta_name );
 
         //cache has expired
         //TO FIX TO MOVE? flush should be done with a CRON job ?
         if ($current_cache_time === false){
-            $this->flush_subtracks(); //flush orphan tracks if any
-            $this->set_subtrack_ids(); //remove all tracks from playlist
-            $this->tracks = array();
+            
+            $this->flush_live_subtracks(); //flush orphan tracks if any
+
         }else{
             //TO FIX populate cached title & author
             $this->updated_time = $current_cache_time;
         }
 
         $can_refresh = ($this->can_remote_request && !$this->did_query_tracks) ? $this->can_refresh() : false;
-        
-        $can_refresh = true; //TO FIX TOUOTU
 
         if ( !$can_refresh ){
+            parent::load_subtracks();
             return;
         }
 
@@ -186,16 +287,21 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 if ( $title = $this->get_tracklist_title() ){
                     //TO FIX force bad encoding (eg. last.fm)
                     $this->title = $title;
+                    update_post_meta($this->post_id,$this->remote_title_meta_name,$this->title);
+                }else{
+                    delete_post_meta($this->post_id,$this->remote_title_meta_name);
                 }
 
-                update_post_meta($this->post_id,$this->remote_title_meta_name,$this->title);
+                
                 
                 //set tracklist author
                 if ( $author = $this->get_tracklist_author() ){
                     //TO FIX force bad encoding (eg. last.fm)
                     $this->author = $author;
+                }else{
+                    delete_post_meta($this->post_id,$this->remote_author_meta_name);
                 }
-                update_post_meta($this->post_id,$this->remote_author_meta_name,$this->author);
+                
 
             }else{
                 $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
@@ -725,12 +831,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $cache_duration = $this->get_options('datas_cache_min');
         $current_cache_time = get_transient( $this->time_updated_meta_name );
         $text_time = null;
-
-        if (!$this->ignore_cache){
-            $can = ( $current_cache_time === false); //cache expired
-        }else{
-            $can = true;
-        }
+        
+        $can = ( $current_cache_time === false); //cache expired
+        if ($this->ignore_cache) $can = true;
 
         if ( !$cache_duration ){
             $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
@@ -775,37 +878,205 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     /*
     Flush temporary tracks
     */
-    //TO FIX should be done with a cron job (with all tracks) ?
-    function flush_subtracks(){
+    function flush_live_subtracks(){
+
         $force_delete = false;
+        $flush_track_ids = array();
         
         $subtrack_ids = $this->get_subtrack_ids();
-        if (!$subtrack_ids) return;
         
-        $flush_track_ids = array();
+        if ( $subtrack_ids) {
 
-        //get tracks to flush
-        foreach ((array)$subtrack_ids as $track_id){
-            
-            $track = new WP_SoundSystem_Track($track_id);
+            //get tracks to flush
+            foreach ((array)$subtrack_ids as $track_id){
 
-            //ignore if post is attached to any (other than this one) playlist
-            $tracklist_ids = $track->get_parent_ids();
-            if(($key = array_search($this->post_id, $tracklist_ids)) !== false) unset($tracklist_ids[$key]);
-            if ( !empty($tracklist_ids) ) continue;
-            
-            //ignore if post is favorited by any user
-            $loved_by = $track->get_track_loved_by();
-            if ( !empty($loved_by) ) continue;
-            
-            $flush_track_ids[] = $track_id;
+                $track = new WP_SoundSystem_Track($track_id);
+
+                //ignore if post is attached to any (other than this one) playlist
+                $tracklist_ids = $track->get_static_parent_ids();
+                if(($key = array_search($this->post_id, $tracklist_ids)) !== false) unset($tracklist_ids[$key]);
+                if ( !empty($tracklist_ids) ) continue;
+
+                //ignore if post is favorited by any user
+                $loved_by = $track->get_track_loved_by();
+                if ( !empty($loved_by) ) continue;
+
+                $flush_track_ids[] = $track_id;
+            }
+
+            foreach ((array)$flush_track_ids as $track_id){
+                wp_delete_post( $track_id, $force_delete );
+            }
         }
-        
-        foreach ((array)$flush_track_ids as $track_id){
-            wp_delete_post( $track_id, $force_delete );
-        }
 
-        wpsstm()->debug_log(array('subtracks'=>count($subtrack_ids),'flushed'=>count($flush_track_ids)),"WP_SoundSystem_Remote_Tracklist::flush_subtracks()"); 
+        wpsstm()->debug_log(array('subtracks'=>count($subtrack_ids),'flushed'=>count($flush_track_ids)),"WP_SoundSystem_Remote_Tracklist::flush_live_subtracks()");
+
+        return true;
 
     }
+    
+    function convert_to_static_playlist(){
+        
+        $this->move_wizard_tracks();
+
+        if ( !set_post_type( $this->post_id, wpsstm()->post_type_playlist ) ) {
+            return new WP_Error( 'switched_live_playlist_status', __("Error while converting the live tracklist status",'wpsstm') );
+        }
+
+        return $this->delete_wizard_datas();
+
+    }
+
+    function save_feed_url($feed_url){
+
+        //save feed url
+        $feed_url = trim($feed_url);
+
+        if (!$feed_url){
+            return delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name );
+        }else{
+            return update_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $feed_url );
+        }
+    }
+    
+    function save_wizard($wizard_data = null){
+        
+        $post_type = get_post_type($this->post_id);
+        
+        $allowed_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
+        
+        if( !in_array($post_type,$allowed_post_types ) ) return;
+        if (!$wizard_data) return;
+
+        $wizard_url = ( isset($wizard_data['feed_url']) ) ? trim($wizard_data['feed_url']) : null;
+        $reset = (bool)isset($wizard_data['reset']);
+        $restore = (bool)isset($wizard_data['restore']);
+
+        if($restore){
+            return $this->restore_wizard_datas();
+        }
+
+        if( $reset || !$wizard_url ){
+            return $this->delete_wizard_datas();
+        }
+
+        $this->save_feed_url($wizard_url);
+        return $this->save_wizard_settings($wizard_data);
+    }
+    
+    function save_wizard_settings($wizard_settings){
+
+        if ( !$wizard_settings ) return;
+        if ( !$this->post_id ) return;
+
+        //while updating the live tracklist settings, ignore caching
+        
+
+        $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
+
+        //keep only NOT default values
+        $default_args = $this->options_default;
+        $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
+
+        if (!$wizard_settings){
+            delete_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name);
+        }else{
+            update_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name, $wizard_settings);
+        }
+
+        do_action('spiff_save_wizard_settings', $wizard_settings, $this->post_id);
+
+    }
+    
+    /*
+     * Sanitize wizard data
+     */
+    
+    function sanitize_wizard_settings($input){
+
+        $previous_values = $this->get_options();
+        $new_input = $previous_values;
+        
+        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
+
+        //cache
+        if ( isset($input['datas_cache_min']) && ctype_digit($input['datas_cache_min']) ){
+            $new_input['datas_cache_min'] = $input['datas_cache_min'];
+        }
+
+        //selectors 
+        if ( isset($input['selectors']) && !empty($input['selectors']) ){
+            
+            foreach ($input['selectors'] as $selector_slug=>$value){
+
+                //path
+                if ( isset($value['path']) ) {
+                    $value['path'] = trim($value['path']);
+                }
+
+                //attr
+                if ( isset($value['attr']) ) {
+                    $value['attr'] = trim($value['attr']);
+                }
+
+                //regex
+                if ( isset($value['regex']) ) {
+                    $value['regex'] = trim($value['regex']);
+                }
+
+                $new_input['selectors'][$selector_slug] = array_filter($value);
+
+
+            }
+        }
+
+        //order
+        $new_input['tracks_order'] = ( isset($input['tracks_order']) ) ? $input['tracks_order'] : null;
+
+        //musicbrainz
+        $new_input['musicbrainz'] = ( isset($input['musicbrainz']) ) ? $input['musicbrainz'] : null;
+        
+        $default_args = $default_args = $this->options_default;
+        $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
+
+        return $new_input;
+    }
+    
+    /*
+    For posts that have the 'wpsstm-wizard' status, notice the author that it is a temporary playlist.
+    //TO FIX switch to tracklist notices
+    */
+    
+    function temporary_status_notice(){
+
+        if ( get_post_status($this->post_id) != wpsstm()->temp_status ) return;
+        
+        $post_author = get_post_field( 'post_author', $this->post_id );        
+        if ( get_current_user_id() != $post_author ) return;
+        
+        //TO FIX use correct option value
+        $trash_time_secs = 1440 * MINUTE_IN_SECONDS;
+        $trash_time_human = human_time_diff( 0, $trash_time_secs );
+        
+        $notice = sprintf(__('This is a tempory playlist.  Unless you change its status, it will be deleted in %s.','wpsstm'),$trash_time_human);
+        $this->add_notice( 'tracklist-header', 'temporary_tracklist', $notice );
+        
+    }
+    
+    function live_tracklist_notice(){
+
+        if (!$this->tracks) return;
+        
+        $post_author = get_post_field( 'post_author', $this->post_id );
+        
+        if ( get_current_user_id() != $post_author ) return;
+        $notice = __("This tracklist is currently <em>live</em>, which means it remains synced with the remote source.  If you want to convert it to a static playlist, click the Lock link.",'wpsstm');
+        $this->add_notice( 'tracklist-header', 'lock_live_tracklist', $notice );
+        
+    }
+    
 }

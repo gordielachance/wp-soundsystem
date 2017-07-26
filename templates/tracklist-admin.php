@@ -1,7 +1,7 @@
 <?php
 global $post;
 get_header();
-$tracklist = new WP_SoundSystem_Tracklist(get_the_ID());
+$tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
 ?>
 
@@ -22,14 +22,33 @@ $tracklist = new WP_SoundSystem_Tracklist(get_the_ID());
                         ?>
                     </header><!-- .entry-header -->
 
-                    <div id="track-popup-tabs" class="entry-content">
+                    <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
                         if ( $actions = $tracklist->get_tracklist_popup_actions() ){
                             $list = wpsstm_get_actions_list($actions,'tracklist');
                             echo $list;
                         }
-
+                
                         ?>
+                        
+                        <!--track infos-->
+                        <?php if ( isset($actions['wizard']) ){
+                            $form_action = $tracklist->get_tracklist_admin_gui_url('wizard');
+                            ?>
+                            <div id="tab-content-wizard">
+                                <form method="post" action="<?php echo $form_action;?>">
+                                <?php 
+                                $file = 'wizard-form.php';
+                                if ( file_exists( wpsstm_locate_template( $file ) ) ){
+                                    $template = wpsstm_locate_template( $file );
+                                    load_template( $template );
+                                }
+                                ?>
+                                </form>
+                                caca
+                            </div>
+                        <?php } ?>
+                        
                     </div><!-- .entry-content -->
 
                 </article><!-- #post-## -->

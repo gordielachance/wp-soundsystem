@@ -313,24 +313,25 @@ function wpsstm_get_user_playlists_list($args = null,$user_id = false){
     return $list;
 }
 
-function wpsstm_get_actions_list($actions,$prefix){
-    $track_actions_lis = array();
-    
-    $action_default = array(
+function wpsstm_get_blank_action(){
+    return array(
         'text' =>           null,
         'desc' =>           null,
         'href' =>           '#',
         'icon' =>           null,
-        'classes' =>        array('wpsstm-action',sprintf('wpsstm-%-action',$prefix)),
+        'classes' =>        array('wpsstm-action'),
         'link_classes' =>   array(),
         'link_before' =>    null,
         'link_after' =>     null,
         'has_cap' =>        true,
         'tab_id' =>         null,
     );
+}
+
+function wpsstm_get_actions_list($actions,$prefix){
+    $track_actions_lis = array();
 
     foreach($actions as $slug => $action){
-        $action = wp_parse_args($action,$action_default);
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
 
         $action_attr = array(
@@ -339,11 +340,11 @@ function wpsstm_get_actions_list($actions,$prefix){
         );
 
         $link_attr = array(
-            'title'     => ($action['desc']) ?$action['desc'] : $action['title'],
+            'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
             'href'      => $action['href'],
             'class'     => implode("\n",$action['link_classes'])
         );
-        $link = sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['title']);
+        $link = sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
 
         $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);

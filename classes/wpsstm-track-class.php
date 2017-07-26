@@ -87,7 +87,7 @@ class WP_SoundSystem_Track{
     /*
     Get IDs of the parent tracklists (albums / playlists) for a subtrack.
     */
-    function get_parent_ids($args = null){
+    function get_static_parent_ids($args = null){
         global $wpdb;
         
         if ($this->did_parents_query) return $this->parent_ids;
@@ -97,7 +97,7 @@ class WP_SoundSystem_Track{
 
         $meta_query = array();
         $meta_query[] = array(
-            'key'     => 'wpsstm_subtrack_ids',
+            'key'     => wpsstm_playlists()->subtracks_static_metaname,
             'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
             'compare' => 'LIKE'
         );
@@ -112,7 +112,7 @@ class WP_SoundSystem_Track{
 
         $args = wp_parse_args((array)$args,$default_args);
         
-        //wpsstm()->debug_log($args,'WP_SoundSystem_Track::get_parent_ids()');
+        //wpsstm()->debug_log($args,'WP_SoundSystem_Track::get_static_parent_ids()');
 
         $query = new WP_Query( $args );
         
@@ -579,9 +579,9 @@ class WP_SoundSystem_Track{
         return $url;
     }
     
-    function get_track_row_actions($tracklist_id = null){
-        
-        $actions = $this->get_track_actions($tracklist_id = null);
+    function get_track_row_actions($tracklist = null){
+
+        $actions = $this->get_track_actions($tracklist);
         $popup_slugs = array('details','edit','playlists','sources','delete');
         
         foreach((array)$actions as $slug=>$action){
@@ -599,12 +599,12 @@ class WP_SoundSystem_Track{
         return $actions;
     }
     
-    function get_track_popup_actions($tracklist_id = null){
-        $actions = $this->get_track_actions($tracklist_id = null);
+    function get_track_popup_actions($tracklist = null){
+        $actions = $this->get_track_actions($tracklist);
         
         foreach((array)$actions as $slug=>$action){
             
-            if ( $action['tab_id'] ){
+            if ( isset($action['tab_id']) ){
                 $action['href'] = sprintf('#%s',$action['tab_id']);
             }
             
@@ -614,25 +614,31 @@ class WP_SoundSystem_Track{
         return $actions;
     }
     
-    function get_track_actions($tracklist_id = null){
+    function get_track_actions($tracklist){
         
+        $tracklist_id = $tracklist->post_id;
+
         /*
         Capability check
         */
         
-       //tracklist
-        $post_type_playlist =   ($tracklist_id) ? get_post_type($tracklist_id) : null;
-        $tracklist_obj =        ($post_type_playlist) ? get_post_type_object($post_type_playlist) : null;
-        $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
+        //TO FIX
+        $is_static_playlist =       ( !property_exists($tracklist,'feed_url') );
+        $static_playlists_types =   array(wpsstm()->post_type_playlist,wpsstm()->post_type_album);
         
-        $can_edit_tracklist =   ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
+       //tracklist
+        $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
+        $tracklist_obj =            $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
+        $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
+
+        $can_edit_tracklist =       ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
         $can_track_details =        ($this->title && $this->artist);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
-        $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
+        $can_delete_tracks =        ( current_user_can($track_type_obj->cap->delete_posts) && $is_static_playlist );
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
-        $can_move_track =           ( $can_edit_tracklist && ( $post_type_playlist==wpsstm()->post_type_playlist ) );
-        $can_remove_track =         ( $can_edit_tracklist && ( $post_type_playlist==wpsstm()->post_type_playlist ) );
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && $is_static_playlist );
+        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && $is_static_playlist );
 
         $track_actions = array();
 
@@ -640,7 +646,7 @@ class WP_SoundSystem_Track{
         if ($can_track_details){
             $track_actions['details'] = array(
                 'icon' =>       '<i class="fa fa-address-card-o" aria-hidden="true"></i>',
-                'title' =>      __('Track infos', 'wpsstm'),
+                'text' =>      __('Track infos', 'wpsstm'),
                 'href' =>       $this->get_track_admin_gui_url('details',$tracklist_id),
                 'tab_id' =>      'tab-content-details',
             );
@@ -650,7 +656,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $track_actions['edit'] = array(
                 'icon' =>       '<i class="fa fa-address-card-o" aria-hidden="true"></i>',
-                'title' =>      __('Track details', 'wpsstm'),
+                'text' =>      __('Track details', 'wpsstm'),
                 'href' =>       $this->get_track_admin_gui_url('edit',$tracklist_id),
                 'tab_id' =>      'tab-content-edit',
             );
@@ -660,7 +666,7 @@ class WP_SoundSystem_Track{
         if ($can_playlists_manager){
             $track_actions['playlists'] = array(
                 'icon' =>       '<i class="fa fa-list" aria-hidden="true"></i>',
-                'title' =>      __('Playlists manager','wpsstm'),
+                'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_admin_gui_url('playlists',$tracklist_id),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
                 'tab_id' =>      'tab-content-playlists',
@@ -671,7 +677,7 @@ class WP_SoundSystem_Track{
         if ($can_favorite_track){
             $track_actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
-                'title' =>      __('Favorite','wpsstm'),
+                'text' =>      __('Favorite','wpsstm'),
                 'desc' =>       __('Add track to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-action-toggle-favorite'),
             );
@@ -682,7 +688,7 @@ class WP_SoundSystem_Track{
         if ($can_favorite_track){
             $track_actions['unfavorite'] = array(
                 'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
-                'title' =>      __('Unfavorite','wpsstm'),
+                'text' =>      __('Unfavorite','wpsstm'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-action-toggle-favorite'),
             );
@@ -693,7 +699,7 @@ class WP_SoundSystem_Track{
         if ($can_move_track){
             $track_actions['move'] = array(
                 'icon' =>       '<i class="fa fa-arrows-v" aria-hidden="true"></i>',
-                'title' =>      __('Move', 'wpsstm'),
+                'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
             );
         }
@@ -702,7 +708,7 @@ class WP_SoundSystem_Track{
         if ($can_remove_track){
             $track_actions['remove'] = array(
                 'icon' =>       '<i class="fa fa-chain-broken" aria-hidden="true"></i>',
-                'title' =>      __('Remove', 'wpsstm'),
+                'text' =>      __('Remove', 'wpsstm'),
                 'desc' =>       __('Remove from tracklist', 'wpsstm'),
             );
         }
@@ -711,7 +717,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $track_actions['sources'] = array(
                 'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
-                'title' =>      __('Sources','wpsstm'),
+                'text' =>      __('Sources','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_admin_gui_url('sources',$tracklist_id),
                 'tab_id' =>      'tab-content-sources',
@@ -719,16 +725,25 @@ class WP_SoundSystem_Track{
         }
 
         //delete track
-        if ($can_edit_track){
+        if ($can_delete_tracks){
             $track_actions['delete'] = array(
                 'icon' =>       '<i class="fa fa-trash" aria-hidden="true"></i>',
-                'title' =>      __('Delete'),
+                'text' =>      __('Delete'),
                 'desc' =>       __('Delete track','wpsstm'),
                 'tab_id' =>      'tab-content-delete',
             );
         }
         
-        return apply_filters('wpsstm_track_actions',$track_actions);
+        $actions = apply_filters('wpsstm_track_actions',$track_actions);
+        
+        $default_action = wpsstm_get_blank_action();
+        $default_action['classes'][] = 'wpsstm-track-action';
+        
+        foreach((array)$actions as $slug=>$action){
+            $actions[$slug] = wp_parse_args($action,$default_action);
+        }
+        return $actions;
+
     }
 
     function track_admin_details(){
@@ -801,7 +816,7 @@ class WP_SoundSystem_Track{
 
         $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
 
-        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));
+        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_static_parent_ids()));
         
         $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $labels = get_post_type_labels($playlist_type_obj);

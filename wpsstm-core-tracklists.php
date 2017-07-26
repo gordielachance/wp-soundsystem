@@ -40,12 +40,6 @@ class WP_SoundSystem_Core_Tracklists{
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist
         );
-        
-        $this->scraper_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
 
     }
     
@@ -120,6 +114,11 @@ class WP_SoundSystem_Core_Tracklists{
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','thickbox','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
     }
     
+    function get_tracklist_action(){
+        global $wp_query;
+        return $wp_query->get($this->qvar_tracklist_admin);
+    }
+    
     /*
     Create a blank track and redirect to track popup.  
     We don't use save_track() here since it will check that the artist/title is not empty.
@@ -127,9 +126,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function append_blank_track(){
         global $post;
-        global $wp_query;
 
-        if( $wp_query->get($this->qvar_tracklist_admin) != 'append' ) return;
+        if( $this->get_tracklist_action() != 'append' ) return;
         if ( !in_array(get_post_type($post),array(wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist) ) ) return;
 
         //capability check
@@ -140,7 +138,7 @@ class WP_SoundSystem_Core_Tracklists{
             return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
-        $tracklist = new WP_SoundSystem_Tracklist($post->ID);
+        $tracklist = wpsstm_get_post_tracklist($post->ID);
 
         $track = new WP_SoundSystem_Track();
         $track->save_temp_track();
@@ -151,7 +149,7 @@ class WP_SoundSystem_Core_Tracklists{
 
             $track_admin_url = $track->get_track_admin_gui_url('edit',$tracklist->post_id);
             wp_redirect($track_admin_url);
-            die();
+            exit();
         }
     }
     
@@ -177,12 +175,10 @@ class WP_SoundSystem_Core_Tracklists{
     */
     function tracklist_admin_template_filter($template){
         global $post;
-        global $wp_query;
         
-        $admin_action = isset( $wp_query->query_vars[$this->qvar_tracklist_admin] ) ? $wp_query->query_vars[$this->qvar_tracklist_admin] : null;
-
-        if( !$admin_action ) return $template; //don't use $wp_query->get() here
-        if ( !in_array(get_post_type($post),array(wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist) ) ) return $template;
+        if( !$admin_action = $this->get_tracklist_action() ) return $template;
+        
+        if ( !in_array(get_post_type($post),array(wpsstm()->post_type_playlist,wpsstm()->post_type_album,wpsstm()->post_type_live_playlist) ) ) return $template;
 
         $file = 'tracklist-admin.php';
         if ( file_exists( wpsstm_locate_template( $file ) ) ){
@@ -223,7 +219,7 @@ class WP_SoundSystem_Core_Tracklists{
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
         if ($tracklist_id && ($do_love!==null) ){
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
             $success = $tracklist->love_tracklist($do_love);
             if ( $success ){
                 if( is_wp_error($success) ){
@@ -381,7 +377,7 @@ class WP_SoundSystem_Core_Tracklists{
             case 'playlist':
                 
                 $track = new WP_SoundSystem_Track($post_id);
-                $tracklist_ids = $track->get_parent_ids();
+                $tracklist_ids = $track->get_static_parent_ids();
                 $links = array();
 
                 foreach((array)$tracklist_ids as $tracklist_id){
@@ -431,7 +427,7 @@ class WP_SoundSystem_Core_Tracklists{
         switch ( $column ) {
             case 'tracklist-lovedby':
                 $output = '—';
-                $tracklist = new WP_SoundSystem_Tracklist( $post_id );
+                $tracklist = wpsstm_get_post_tracklist( $post_id );
                 $links = array();
                 if ( $user_ids = $tracklist->get_tracklist_loved_by() ){
                     foreach($user_ids as $user_id){
@@ -447,12 +443,17 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function metabox_tracklist_register(){
+        
+        $allowed_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist
+        );
 
         add_meta_box( 
             'wpsstm-tracklist', 
             __('Tracklist','wpsstm'),
             array($this,'metabox_tracklist_content'),
-            $this->allowed_post_types, 
+            $allowed_post_types, 
             'normal', 
             'high' //priority 
         );
@@ -460,8 +461,8 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function metabox_tracklist_content( $post ){
-        
         $tracklist = wpsstm_get_post_tracklist($post->ID);
+        
         echo $tracklist->get_tracklist_table();
 
     }
@@ -470,14 +471,14 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         
         //check post type
-        $this->allowed_post_types = array(
+        $allowed_post_types = array(
             wpsstm()->post_type_track,
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist,
             wpsstm()->post_type_live_playlist
         );
         $post_type = get_post_type($post->ID);
-        if ( !in_array($post_type,$this->allowed_post_types) ) return $content;
+        if ( !in_array($post_type,$allowed_post_types) ) return $content;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
 
@@ -526,7 +527,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( $track_id && $tracklist_id && ($position != -1) ){
 
             //populate a tracklist with the selected tracks
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
             $tracklist->load_subtracks();
             $result['tracklist'] = $tracklist;
             
@@ -555,7 +556,7 @@ class WP_SoundSystem_Core_Tracklists{
         $result['track_id']  =          $track_id =         ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
         $result['tracklist_id']  =      $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
 
-        $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
 
         if ( $track_id && $tracklist_id ){
 
@@ -604,12 +605,12 @@ class WP_SoundSystem_Core_Tracklists{
         
         if (!$post) return;
         
-        $tracklist = new WP_SoundSystem_Tracklist($post->ID);
+        $tracklist = wpsstm_get_post_tracklist($post->ID);
 
         $post_type = get_post_type($tracklist->post_id);
         
-        $admin_action = ( isset($_REQUEST[$this->qvar_tracklist_admin]) ) ? $_REQUEST[$this->qvar_tracklist_admin] : null;
-        if (!$admin_action || !$tracklist->post_id) return;
+        if( !$admin_action = $this->get_tracklist_action() ) return;
+        if (!$tracklist->post_id) return;
 
         switch($admin_action){
             case 'switch-status':
@@ -635,30 +636,28 @@ class WP_SoundSystem_Core_Tracklists{
                 if ( wp_update_post( $updated_post ) ){
                     $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
                     wp_redirect($redirect_url);
-                    die();
+                    exit();
                 }
             break;
             case 'lock-tracklist':
                 if ( $post_type == wpsstm()->post_type_live_playlist ){
                     
-                    wpsstm_wizard()->setup_wizard_tracklist($tracklist->post_id);
-                    wpsstm_wizard()->convert_to_static_playlist();
+                    $tracklist->convert_to_static_playlist(true);
                     
                     $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
                     wp_redirect($redirect_url);
-                    die();
+                    exit();
                 }
             break;
             case 'unlock-tracklist':
                 
                 if ( $post_type == wpsstm()->post_type_playlist ){
                     
-                    wpsstm_wizard()->setup_wizard_tracklist($tracklist->post_id);
-                    wpsstm_wizard()->convert_to_live_playlist();
+                    $tracklist->convert_to_live_playlist($post->ID);
                     
                     $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
                     wp_redirect($redirect_url);
-                    die();
+                    exit();
                 }
             break;
         }

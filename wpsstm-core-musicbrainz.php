@@ -586,7 +586,7 @@ class WP_SoundSystem_Core_MusicBrainz {
             if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
 
             if ( in_array('tracklist',$post_type_items) ){
-                $tracklist = new WP_SoundSystem_Tracklist($post_id);
+                $tracklist = wpsstm_get_post_tracklist($post_id);
                 $tracklist->load_subtracks();
                 if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
             }
@@ -730,7 +730,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         if (!$save_tracks) return;
         
-        $tracklist = new WP_SoundSystem_Tracklist($post_id);
+        $tracklist = wpsstm_get_post_tracklist($post_id);
         $tracklist->add($save_tracks);
         $tracklist->save_subtracks();
 

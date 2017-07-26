@@ -5,6 +5,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     
     public $feed_url_meta_name = '_wpsstm_scraper_url';
     public $scraper_meta_name = '_wpsstm_scraper_options';
+    public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';
     
     /**
     * @var The one true Instance
@@ -43,6 +44,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
+        
     }
 
     function register_post_type_live_playlist() {

@@ -1,6 +1,6 @@
 jQuery(document).ready(function($){
     //tabs
-    $("#wpsstm-wizard-tabs").tabs();
+    $("#wizard-wrapper.wizard-wrapper-advanced #wpsstm-wizard-tabs").tabs();
 
     /*
     advanced selectors

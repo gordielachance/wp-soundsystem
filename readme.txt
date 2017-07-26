@@ -133,11 +133,6 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
-= Where are stored live playlist tracks ? =
-
-The Live Playlists tracks are not stored as Track posts but as a [transient](https://codex.wordpress.org/Transients_API), to avoid creating too much posts over and over.  The name of that transient starts with *wpsstm_ltracks_*.
-If a user has an interaction with a track (added to a playlist or to favorites), the track will be created as Track post.
-
 == Screenshots ==
 
 1. Settings page
@@ -172,8 +167,10 @@ If a user has an interaction with a track (added to a playlist or to favorites),
 * improved custom temporary status
 * do not auto_set_mbid() if post is trashed
 * locking / unlocking tracklists
+* WP_SoundSystem_Tracklist is now an abstract class + new WP_SoundSystem_Static_Tracklist
+* improved frontend wizard
+* improved wpsstm_get_post_tracklist()
 * more code cleanup & fixes
-
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
 * wpsstm-shortenTables > jquery.toggleChildren
@@ -337,7 +334,7 @@ informations overriden
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
 * improved how posts are automatically filled with MusicBrainz data
-* improved wpsstm_get_all_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
+* improved wpsstm_get_all_subtrack_ids() and WP_SoundSystem_Subtrack::get_static_parent_ids()
 
 = 0.9.6 =
 * Changed how subtracks are stored : now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.

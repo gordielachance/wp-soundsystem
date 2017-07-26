@@ -154,7 +154,7 @@ class WP_SoundSystem_Core_Tracks{
         $tracklist_id = ( isset($_REQUEST['tracklist_id']) ) ? $_REQUEST['tracklist_id'] : null;
         
         if ($tracklist_id){
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
             $tracklist->append_subtrack_ids($track->post_id);
         }
 
@@ -629,9 +629,7 @@ class WP_SoundSystem_Core_Tracks{
         );
         $atts = shortcode_atts($default,$atts);
 
-        $track = new WP_SoundSystem_Track( $atts['post_id'] );
-        $tracklist = new WP_SoundSystem_Tracklist();
-        $tracklist->add($track);
+        $tracklist = wpsstm_get_post_tracklist($atts['post_id']);
         
         return $tracklist->get_tracklist_table();
 
@@ -711,7 +709,7 @@ class WP_SoundSystem_Core_Tracks{
         //create tracklist
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
 
-        $playlist = new WP_SoundSystem_Tracklist();
+        $playlist = wpsstm_get_post_tracklist();
         $playlist->title = $tracklist_title;
         
         $tracklist_id = $playlist->save_playlist();
@@ -754,7 +752,7 @@ class WP_SoundSystem_Core_Tracks{
         //tracklist
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
 
-        $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
+        $tracklist = new WP_SoundSystem_Static_Tracklist($playlist_id);
         $track = new WP_SoundSystem_Track($track_args);
         
         //get track ID or create it
@@ -799,7 +797,7 @@ class WP_SoundSystem_Core_Tracks{
         
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
+        $tracklist = new WP_SoundSystem_Static_Tracklist($playlist_id);
         $track = new WP_SoundSystem_Track( $post_id );
         
         //track ID is required

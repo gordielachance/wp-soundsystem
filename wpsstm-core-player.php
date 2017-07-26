@@ -62,38 +62,6 @@ class WP_SoundSystem_Core_Player{
         
         ?>
         <div id="wpsstm-bottom-wrapper">
-            <?php
-
-            //live playlist or frontend wizard
-            if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
-                
-                $post_id = get_the_ID();
-                $post_type = get_post_type();
-                
-                $is_frontend_wizard = ( $post_id == wpsstm_wizard()->frontend_wizard_page_id );
-                $is_live_playlist = ( $post_type == wpsstm()->post_type_live_playlist  );
-                
-                if ( $is_frontend_wizard || $is_live_playlist ){
-
-                    $refresh_permalink = get_permalink();
-
-                    if ( $is_frontend_wizard ){
-
-                        if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_feed_url) ){
-                            $refresh_permalink = add_query_arg(
-                                array(
-                                    wpsstm_live_playlists()->qvar_feed_url => $feed_url
-                                ),
-                                $refresh_permalink
-                            );
-                        }
-                    }
-
-                }
-
-            }
-
-            ?>
             <div id="wpsstm-bottom">
                 <div id="wpsstm-bottom-track-wrapper">
                     <div id="wpsstm-bottom-track-actions">

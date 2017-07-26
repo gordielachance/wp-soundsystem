@@ -15,10 +15,7 @@ get_header(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     
                     <?php
-                    $track = new WP_SoundSystem_Track(get_the_ID);
-                    $tracks = array($track);
-                    $tracklist = new WP_SoundSystem_Tracklist();
-                    $tracklist->add($tracks);
+                    $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                     $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
 
                     $admin_action = $wp_query->get(wpsstm_tracks()->qvar_track_admin);
@@ -28,11 +25,12 @@ get_header(); ?>
                     */
                     //TO FIX to improve
                     $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
-                    $create_playlist_cap =  $post_type_obj->cap->edit_posts;
+                    $create_playlist_cap =  $playlist_type_obj->cap->edit_posts;
 
+                    $track =                new WP_SoundSystem_Track(get_the_ID());
                     $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                     $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
-                    $can_delete_tracks =    current_user_can($post_type_obj->cap->delete_posts);
+                    $can_delete_tracks =    current_user_can($playlist_type_obj->cap->delete_posts);
 
                     ?>
 

@@ -212,12 +212,12 @@ class WP_SoundSystem {
     
     function register_temp_status(){
         register_post_status( $this->temp_status, array(
-            'label' =>                      _x( 'Wizard', 'wpsstm' ),
+            'label' =>                      _x( 'Temporary', 'wpsstm' ),
             'public' =>                     !wpsstm_is_backend(),
             'exclude_from_search' =>        false,
             'show_in_admin_all_list' =>     false,
             'show_in_admin_status_list' =>  true,
-            'label_count' =>                _n_noop( 'Wizard <span class="count">(%s)</span>', 'Wizard <span class="count">(%s)</span>' ),
+            'label_count' =>                _n_noop( 'Temporary <span class="count">(%s)</span>', 'Temporary <span class="count">(%s)</span>', 'wpsstm' ),
         ) );
     }
 

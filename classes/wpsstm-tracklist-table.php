@@ -165,7 +165,7 @@ class WP_SoundSystem_Tracklist_Table{
         
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
-            'data-wpsstm-tracklist-id' =>          $this->tracklist->post_id,
+            'data-wpsstm-tracklist-id' =>   $this->tracklist->post_id,
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
@@ -175,6 +175,7 @@ class WP_SoundSystem_Tracklist_Table{
         $next_refresh_sec = null;
 
         if ( property_exists($this->tracklist,'expire_time') ) {
+
             $next_refresh_sec = $this->tracklist->expire_time - current_time( 'timestamp', true ); //UTC
             
             if ($next_refresh_sec <= 0){
@@ -223,8 +224,9 @@ class WP_SoundSystem_Tracklist_Table{
             }else{
             */
                 $loading_icon = '<i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>';
-                $tracklist_action = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
-                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_action);
+                $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
+
+                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_title);
             //}
             
             printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
@@ -245,6 +247,9 @@ class WP_SoundSystem_Tracklist_Table{
             }
 
             printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
+        
+            //notices
+            $this->tracklist->display_notices('tracklist-header');
 
             if ( $actions = $this->tracklist->get_tracklist_row_actions() ){
                 $list = wpsstm_get_actions_list($actions,'tracklist');
@@ -555,7 +560,7 @@ class WP_SoundSystem_Tracklist_Table{
                 return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
-                if ( $actions = $item->get_track_row_actions($this->tracklist->post_id) ){
+                if ( $actions = $item->get_track_row_actions($this->tracklist) ){
                     $actions_list = wpsstm_get_actions_list($actions,'track');
                     return $actions_list;
                 }
