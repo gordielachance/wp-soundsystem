@@ -339,7 +339,7 @@ class WP_SoundSystem_Core_Tracks{
         //hide subtracks ?
         
         if ( $query->get($this->qvar_subtracks_hide) ){
-            if ( $subtrack_ids = wpsstm_get_all_subtrack_ids() ) {
+            if ( $subtrack_ids = wpsstm_get_subtrack_ids() ) {
                 $query->set('post__not_in',$subtrack_ids);
             }
         }

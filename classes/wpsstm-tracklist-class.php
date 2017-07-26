@@ -798,7 +798,7 @@ class WP_SoundSystem_Static_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         if ($ordered_ids){
-            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_static_parent_ids()
+            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
             $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
             $ordered_ids = array_unique($ordered_ids);
         }

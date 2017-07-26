@@ -207,7 +207,7 @@ class WP_SoundSystem_Core_Wizard{
 
             $tracklist = wpsstm_get_post_live_tracklist($post->ID);
 
-            $this->is_advanced = ( wpsstm_is_backend() && ( $tracklist->ignore_cache || ( $tracklist->feed_url && !$tracklist->tracks ) ) );
+            $this->is_advanced = ( wpsstm_is_backend() && ( !$tracklist->cache_only || ( $tracklist->feed_url && !$tracklist->tracks ) ) );
 
             $this->wizard_enqueue_script_styles();
             
@@ -226,8 +226,7 @@ class WP_SoundSystem_Core_Wizard{
 
         if ($tracklist){
             $tracklist->tracks_strict = false;
-            $tracklist->can_remote_request = true;
-            $tracklist->ignore_cache = true;
+            $tracklist->cache_only = false;
 
             if ($tracklist->feed_url){
                 $tracklist->load_subtracks();

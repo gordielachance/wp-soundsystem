@@ -51,24 +51,41 @@ function wpsstm_array_unique_by_subkey($array,$subkey){
 }
 
 /*
-Get the IDs of every tracks appearing in a tracklist (playlists or albums)
+Get the IDs of every subtrack in the database; optionnally filtered.
 */
 
-function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
+function wpsstm_get_subtrack_ids($type=null,$filter=false,$args=null){
     global $wpdb;
-    $query = $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE `meta_key` = '%s'", wpsstm_playlists()->subtracks_static_metaname );
-    $metas = $wpdb->get_col( $query );
-
+    
+    $clauses = array();
     $subtrack_ids = array();
+    
+    //get an array of subtracks lists from tracklists
+    
+    if ( !$type || ($type=='static') ) {
+        $clauses[] = sprintf("`meta_key` = '%s'",wpsstm_playlists()->subtracks_static_metaname);
+    }
+    if ( !$type || ($type=='live') ) {
+        $clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
+    }
+    
+    $clauses_str = implode(' OR ',$clauses);
+    
+    $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $clauses_str;
 
-    foreach((array)$metas as $meta){
+    $tracklists_subtrack_ids = $wpdb->get_col( $query );
+    
+    //unserialize all those substracks lists
+    foreach((array)$tracklists_subtrack_ids as $meta){
         $ids = maybe_unserialize($meta);
         $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
     }
     
     $subtrack_ids = array_unique($subtrack_ids);
+
+    //now that we have got all the subtracks ids, maybe filter them
     
-    if ($db_check){
+    if ($filter){
         $default_args = array(
             'post_type'         => wpsstm()->post_type_track,
             'post_status'       => 'any',
@@ -87,7 +104,7 @@ function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
         }
         
     }
-    
+
     return $subtrack_ids;
     
 }

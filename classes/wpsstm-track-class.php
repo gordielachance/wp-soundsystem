@@ -86,34 +86,49 @@ class WP_SoundSystem_Track{
     }
     
     /*
-    Get IDs of the parent tracklists (albums / playlists) for a subtrack.
+    Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
+    $type = null/'static'/'live'
     */
-    function get_static_parent_ids($args = null){
+    function get_parent_ids($type=null,$args = null){
         global $wpdb;
         
         if ($this->did_parents_query) return $this->parent_ids;
         
         //track ID is required
-        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;//track does not exists in DB
-
-        $meta_query = array();
-        $meta_query[] = array(
-            'key'     => wpsstm_playlists()->subtracks_static_metaname,
-            'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
-            'compare' => 'LIKE'
-        );
+        if ( !$this->post_id ) return;//track does not exists in DB
 
         $default_args = array(
             'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
             'post_status'       => 'any',
             'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'meta_query'        => $meta_query
+            'fields'            => 'ids'
         );
-
-        $args = wp_parse_args((array)$args,$default_args);
         
-        //wpsstm()->debug_log($args,'WP_SoundSystem_Track::get_static_parent_ids()');
+        $args = wp_parse_args((array)$args,$default_args);
+
+        $parents_meta_query = array(
+            'relation' => 'OR',
+        );
+        
+        if ( !$type || ($type=='static') ) {
+            $parents_meta_query[] = array(
+                'key'     => wpsstm_playlists()->subtracks_static_metaname,
+                'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
+                'compare' => 'LIKE'
+            );
+        }
+        
+        if ( !$type || ($type=='live') ) {
+            $parents_meta_query[] = array(
+                'key'     => wpsstm_live_playlists()->subtracks_live_metaname,
+                'value'   => serialize( $this->post_id ), //https://wordpress.stackexchange.com/a/224987/70449
+                'compare' => 'LIKE'
+            );
+        }
+        
+        $args['meta_query'][] = $parents_meta_query;
+
+        //wpsstm()->debug_log($args,'WP_SoundSystem_Track::get_parent_ids()');
 
         $query = new WP_Query( $args );
         
@@ -773,7 +788,7 @@ class WP_SoundSystem_Track{
 
         $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
 
-        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_static_parent_ids()));
+        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));
         
         $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $labels = get_post_type_labels($playlist_type_obj);

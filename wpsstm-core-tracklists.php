@@ -243,7 +243,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
-                $tracklist->can_remote_request = true;
+                $tracklist->cache_only = false;
                 $tracklist->load_subtracks();
                 if ( $tracklist->tracks ){
                     $result['success'] = true;
@@ -322,7 +322,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
             if ( !$wp_query->get(wpsstm_tracks()->qvar_subtracks_hide) ){
-                $after['playlist'] = __('Playlist','wpsstm');
+                $after['playlist'] = __('in playlists','wpsstm');
             }
             
         }
@@ -337,7 +337,7 @@ class WP_SoundSystem_Core_Tracklists{
             case 'playlist':
                 
                 $track = new WP_SoundSystem_Track($post_id);
-                $tracklist_ids = $track->get_static_parent_ids();
+                $tracklist_ids = $track->get_parent_ids();
                 $links = array();
 
                 foreach((array)$tracklist_ids as $tracklist_id){
