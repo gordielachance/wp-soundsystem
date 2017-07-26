@@ -32,6 +32,14 @@ class WP_SoundSystem_Track{
             $this->album = wpsstm_get_post_album($post_id);
             $this->mbid = wpsstm_get_post_mbid($post_id);
             $this->source_ids = wpsstm_get_post_source_ids($post_id);
+            
+            /*
+            FOR TESTS TO FIX REMOVE
+            if($post_id == 23844){
+                $this->populate_auto_sources();
+            }
+            */
+            
         }
         
     }
@@ -426,7 +434,7 @@ class WP_SoundSystem_Track{
         }
 
         //allow plugins to filter this
-        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this);
 
         if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
             $sources = $this->autosource_filter_ban_words($sources);
@@ -441,7 +449,7 @@ class WP_SoundSystem_Track{
             $this->source_ids[] = $post_id;
         }
         
-        return $sources;
+        return $this->source_ids;
 
     }
     
