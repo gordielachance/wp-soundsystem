@@ -63,25 +63,6 @@ class WP_SoundSystem_Tracklist_Table{
         }
 
         $this->curr_track_idx = $per_page * ( $current_page - 1 );
-        
-        /**
-         * REQUIRED. Now we need to define our column headers. This includes a complete
-         * array of columns to be displayed (slugs & titles), a list of columns
-         * to keep hidden, and a list of columns that are sortable. Each of these
-         * can be defined in another method (as we've done here) before being
-         * used to build the value for our _column_headers property.
-         */
-        $columns = $this->get_columns();
-        $hidden = array();
-        $sortable = $this->get_sortable_columns();
-
-        /**
-         * REQUIRED. Finally, we build an array to be used by the class for column 
-         * headers. The $this->_column_headers property takes an array which contains
-         * 3 other arrays. One for all columns, one for hidden columns, and one
-         * for sortable columns.
-         */
-        $this->_column_headers = array($columns, $hidden, $sortable);
 
     }
     
@@ -108,13 +89,6 @@ class WP_SoundSystem_Tracklist_Table{
         }
 
         return $columns;
-    }
-    
-    function get_sortable_columns() {
-        $sortable_columns = array(
-            //'title'     => array('title',false),     //true means it's already sorted
-        );
-        return $sortable_columns;
     }
     
     /**
@@ -293,108 +267,7 @@ class WP_SoundSystem_Tracklist_Table{
         return paginate_links( $pagination_args );
     }
     
-    /**
-     * Print column headers, accounting for hidden and sortable columns.
-     *
-     * @since 3.1.0
-     * @access public
-     *
-     * @param bool $with_id Whether to set the id attribute or not
-     */
-    public function get_header( $with_id = true ) {
-            list( $columns, $hidden, $sortable ) = $this->get_column_info();
-
-            $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-            $current_url = remove_query_arg( WP_SoundSystem_Tracklist::$paged_var, $current_url );
-
-            if ( isset( $_GET['orderby'] ) )
-                    $current_orderby = $_GET['orderby'];
-            else
-                    $current_orderby = '';
-
-            if ( isset( $_GET['order'] ) && 'desc' == $_GET['order'] )
-                    $current_order = 'desc';
-            else
-                    $current_order = 'asc';
-
-            foreach ( $columns as $column_key => $column_display_name ) {
-                    $class = array( 'manage-column', "column-$column_key" );
-
-                    $style = '';
-                    if ( in_array( $column_key, $hidden ) )
-                            $style = 'display:none;';
-
-                    $style = ' style="' . $style . '"';
-
-                    if ( isset( $sortable[$column_key] ) ) {
-                            list( $orderby, $desc_first ) = $sortable[$column_key];
-
-                            if ( $current_orderby == $orderby ) {
-                                    $order = 'asc' == $current_order ? 'desc' : 'asc';
-                                    $class[] = 'sorted';
-                                    $class[] = $current_order;
-                            } else {
-                                    $order = $desc_first ? 'desc' : 'asc';
-                                    $class[] = 'sortable';
-                                    $class[] = $desc_first ? 'asc' : 'desc';
-                            }
-
-                            $column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
-                    }
-
-                    $id = $with_id ? "id='$column_key'" : '';
-
-                    if ( !empty( $class ) )
-                            $class = "class='" . join( ' ', $class ) . "'";
-                
-                    return sprintf("<th scope='col' %s %s %s>%s</th>",$id,$class,$style,$column_display_name);
-            }
-    }
     
-    /**
-     * Get a list of all, hidden and sortable columns, with filter applied
-     *
-     * @since 3.1.0
-     * @access protected
-     *
-     * @return array
-     */
-    protected function get_column_info() {
-            if ( isset( $this->_column_headers ) )
-                    return $this->_column_headers;
-
-            $columns = get_column_headers( $this->screen );
-            $hidden = get_hidden_columns( $this->screen );
-
-            $sortable_columns = $this->get_sortable_columns();
-            /**
-             * Filter the list table sortable columns for a specific screen.
-             *
-             * The dynamic portion of the hook name, `$this->screen->id`, refers
-             * to the ID of the current screen, usually a string.
-             *
-             * @since 3.5.0
-             *
-             * @param array $sortable_columns An array of sortable columns.
-             */
-            $_sortable = apply_filters('spiff_manage_tracklist_sortable_columns', $sortable_columns );
-
-            $sortable = array();
-            foreach ( $_sortable as $id => $data ) {
-                    if ( empty( $data ) )
-                            continue;
-
-                    $data = (array) $data;
-                    if ( !isset( $data[1] ) )
-                            $data[1] = false;
-
-                    $sortable[$id] = $data;
-            }
-
-            $this->_column_headers = array( $columns, $hidden, $sortable );
-
-            return $this->_column_headers;
-    }
     
     /**
      * Generate the tbody element for the list table.
@@ -403,11 +276,18 @@ class WP_SoundSystem_Tracklist_Table{
      * @access public
      */
     public function get_rows_or_placeholder() {
-            if ( $this->has_items() ) {
-                return $this->get_display_rows();
-            } else {
+        
+            if ( !$this->has_items() ) {
                 return sprintf('<li class="no-items"><p class="wpsstm-notice">%s</p></li>',$this->no_items_label);
             }
+                
+        
+            $rows = array();
+            foreach ( $this->items as $item ){
+                $rows[] = $this->get_single_row( $item );
+            }
+            return implode("\n",$rows);
+
     }
     
     /**
@@ -421,22 +301,7 @@ class WP_SoundSystem_Tracklist_Table{
     public function has_items() {
             return !empty( $this->items );
     }
-    
-    /**
-     * Generate the table rows
-     *
-     * @since 3.1.0
-     * @access public
-     */
-    public function get_display_rows() {
-        $rows = array();
-        $rows_str = null;
-        foreach ( $this->items as $item ){
-            $rows[] = $this->get_single_row( $item );
-        }
-        return implode("\n",$rows);
-    }
-    
+
     /**
      * Generates content for a single row of the table
      *
@@ -471,24 +336,27 @@ class WP_SoundSystem_Tracklist_Table{
      * @param object $item The current item
      */
     protected function get_single_row_columns( $item ) {
-        list( $columns, $hidden ) = $this->get_column_info();
-
         $columns_html = array();
+        
+        //we'll wrap the track text separately a div (for CSS)
+        $track_text_html = array();
+        $track_text_slugs = array('trackitem_artist','trackitem_track','trackitem_album');
 
-        foreach ( $columns as $column_name => $column_display_name ) {
-
-            $attr_str = null;
-            $attr = array();
+        
+        //wrap 
+        foreach ( $this->get_columns() as $column_name => $column_display_name ) {
+            
+            $content = $this->get_column_content( $item, $column_name );
 
             $classes = array(
                 'wpsstm-track-column',
                 $column_name,
                 'column-'.$column_name
             );
-
-            $attr['class'] = implode(' ',$classes);
-
-            $attr['style'] = ( in_array( $column_name, $hidden ) ) ? 'display:none;' : null;
+            
+            $attr = array(
+                'class' =>  implode(' ',$classes)
+            );
 
             switch($column_name){
                 case 'trackitem_artist':
@@ -505,22 +373,14 @@ class WP_SoundSystem_Tracklist_Table{
                 break;
             }
 
-            $attr_str = wpsstm_get_html_attr($attr);
+            $columns_html[$column_name] = sprintf('<span %s>%s</span>',wpsstm_get_html_attr($attr),$content);
 
-            if ( method_exists( $this, 'column_' . $column_name ) ) {
-                $content = call_user_func( array( $this, 'column_' . $column_name ), $item );
-            }else {
-                $content = $this->column_default( $item, $column_name );
-            }
-
-            $columns_html[] = sprintf('<span %s>%s</span>',$attr_str,$content);
-
-            
         }
+
         return implode("\n",$columns_html);
     }
-    
-    function column_default($item, $column_name){
+
+    function get_column_content($item, $column_name){
         switch($column_name){
             case 'trackitem_position':
                 $this->curr_track_idx++;
@@ -569,16 +429,8 @@ class WP_SoundSystem_Tracklist_Table{
                     $actions_list = wpsstm_get_actions_list($actions,'track');
                     return $actions_list;
                 }
-            default:
-                if ( !is_admin() ) break;
-                return print_r($item,true); //Show the whole array for troubleshooting purposes
+            break;
         }
-    }
-    
-    public function get_column_count() {
-            list ( $columns, $hidden ) = $this->get_column_info();
-            $hidden = array_intersect( array_keys( $columns ), array_filter( $hidden ) );
-            return count( $columns ) - count( $hidden );
     }
 
 }
