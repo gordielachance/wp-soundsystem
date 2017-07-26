@@ -532,7 +532,7 @@ class WpsstmTrack {
         //self.debug("get_track_sources_request()");
 
         var ajax_data = {
-            action:           'wpsstm_populate_track_sources_auto',
+            action:           'wpsstm_sources_auto_lookup',
             post_id:          self.post_id
         };
         

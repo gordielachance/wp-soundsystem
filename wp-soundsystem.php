@@ -33,6 +33,7 @@ class WP_SoundSystem {
     public $post_type_album = 'wpsstm_release';
     public $post_type_artist = 'wpsstm_artist';
     public $post_type_track = 'wpsstm_track';
+    public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
@@ -300,8 +301,9 @@ class WP_SoundSystem {
             wpsstm()->post_type_artist,
             wpsstm()->post_type_album,
             wpsstm()->post_type_track,
+            wpsstm()->post_type_source,
             wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
+            wpsstm()->post_type_live_playlist,
         );
 
         $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );

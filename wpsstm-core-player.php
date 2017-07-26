@@ -162,56 +162,48 @@ abstract class WP_SoundSystem_Player_Provider{
     function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$args=null){
 
         $args_default = array(
-            'cache_only'    => false,
             'limit'         => 3
         );
 
         $args = wp_parse_args((array)$args,$args_default);
 
-        $sources = $cache = $saved = null;
-        $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
-        $cache = $sources = get_transient( $transient_name );
-        $do_request = ( !$args['cache_only'] && ( false === $cache ) );
+        $sources = array();
 
-        if ( $do_request ) {
+        $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
+        $api_args = array(
+            'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
+            'limit'                     => $args['limit'],
+            'platforms'                 => $platform,
+            'q'                         => urlencode($track->artist . ' ' . $track->title),
+            'skipSavingInDatabase'      => true
+        );
+        $api_url = add_query_arg($api_args,$api_url);
+        $response = wp_remote_get($api_url);
+        $body = wp_remote_retrieve_body($response);
 
-            $sources = array();
+        if ( is_wp_error($body) ) return $body;
+        $api_response = json_decode( $body, true );
 
-            $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
-            $api_args = array(
-                'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
-                'limit'                     => $args['limit'],
-                'platforms'                 => $platform,
-                'q'                         => urlencode($track->artist . ' ' . $track->title),
-                'skipSavingInDatabase'      => true
-            );
-            $api_url = add_query_arg($api_args,$api_url);
-            $response = wp_remote_get($api_url);
-            $body = wp_remote_retrieve_body($response);
+        $items = wpsstm_get_array_value(array(0,'items'),$api_response);
 
-            if ( is_wp_error($body) ) return $body;
-            $api_response = json_decode( $body, true );
+        foreach( (array)$items as $item ){
 
-            $items = wpsstm_get_array_value(array(0,'items'),$api_response);
-
-            foreach( (array)$items as $item ){
-
-                $url = wpsstm_get_array_value('permalink',$item);
-                $title = wpsstm_get_array_value('initTitle',$item);
-
-                $source = array('url'=>$url,'title'=>$title,'origin'=>'auto');
-                $sources[] = $source;
-            }
-
-            $saved = set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
+            $source = new WP_SoundSystem_Source();
+            $source->url = wpsstm_get_array_value('permalink',$item);
+            $source->title = wpsstm_get_array_value('initTitle',$item);
+            $source->track_id = $track->post_id;
+            $sources[] = $source;
+            
         }
 
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
 
         return $sources;
     }
     
 }
+
+
 
 class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
     

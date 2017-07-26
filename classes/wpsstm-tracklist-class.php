@@ -79,15 +79,7 @@ abstract class WP_SoundSystem_Tracklist{
         }
         
         $this->add($subtracks);
-        
-        //try to populate cached autosources if item has not any
-        //TO FIX only if playable ? Is this at the right place ?
-        foreach($this->tracks as $track){		
-            if (!$track->sources){
-                $track->populate_track_sources_auto(array('cache_only'=>true));
-            }
-        }
-        
+
         $this->did_query_tracks = true;
         
     }

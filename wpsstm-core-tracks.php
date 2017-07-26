@@ -11,7 +11,6 @@ class WP_SoundSystem_Core_Tracks{
     
     public $subtracks_hide = true; //default hide subtracks in track listings
     public $favorited_track_meta_key = '_wpsstm_user_favorite';
-    public $sources_metakey = '_wpsstm_sources';
 
     /**
     * @var The one true Instance
@@ -81,8 +80,8 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
         //ajax : get tracks source auto
-        add_action('wp_ajax_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
-        add_action('wp_ajax_nopriv_wpsstm_populate_track_sources_auto', array($this,'ajax_populate_track_sources_auto'));
+        add_action('wp_ajax_wpsstm_sources_auto_lookup', array($this,'ajax_sources_auto_lookup'));
+        add_action('wp_ajax_nopriv_wpsstm_sources_auto_lookup', array($this,'ajax_sources_auto_lookup'));
 
         //ajax : add new tracklist
         add_action('wp_ajax_wpsstm_create_playlist', array($this,'ajax_create_playlist'));
@@ -239,7 +238,11 @@ class WP_SoundSystem_Core_Tracks{
                 }
                 
                 $sources_raw = ( isset($_POST[ 'wpsstm_track_sources' ]) ) ? $_POST[ 'wpsstm_track_sources' ] : array();
-                $track->update_track_sources($sources_raw);
+                
+                var_dump($sources_raw);die();
+                
+                //TO FIX TO CHECK
+                //$track->update_track_sources($sources_raw);
             break;
         }
     }
@@ -667,7 +670,7 @@ class WP_SoundSystem_Core_Tracks{
         wp_send_json( $result ); 
     }
     
-    function ajax_populate_track_sources_auto(){
+    function ajax_sources_auto_lookup(){
         
         $ajax_data = wp_unslash($_POST);
         
@@ -681,7 +684,7 @@ class WP_SoundSystem_Core_Tracks{
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
 
         $track = new WP_SoundSystem_Track($post_id);
-        $track->sources = $track->populate_track_sources_auto();
+        $track->populate_auto_sources();
 
         $track = $result['track'] = $track;
 

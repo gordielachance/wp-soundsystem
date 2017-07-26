@@ -47,6 +47,7 @@ class WP_SoundSystem_Settings {
         $allowed_post_types = array(
             wpsstm()->post_type_artist,
             wpsstm()->post_type_track,
+            wpsstm()->post_type_source,
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist,
             wpsstm()->post_type_live_playlist

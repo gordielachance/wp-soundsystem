@@ -15,7 +15,7 @@ class WP_SoundSystem_Track{
 
     public $parent_ids = array();
 
-    public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    public $source_ids = null; //set 'null' so we can check later (by setting it to false) it has been populated
     private $did_post_id_lookup = false;
     private $did_parents_query = false;
 
@@ -27,12 +27,13 @@ class WP_SoundSystem_Track{
 
             //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
 
-            if (!$this->title)      $this->title = wpsstm_get_post_track($post_id);
-            if (!$this->artist)     $this->artist = wpsstm_get_post_artist($post_id);
-            if (!$this->album)      $this->album = wpsstm_get_post_album($post_id);
-            if (!$this->mbid)       $this->mbid = wpsstm_get_post_mbid($post_id);
-            if (!$this->sources)    $this->sources = wpsstm_get_post_sources($post_id);
+            $this->title = wpsstm_get_post_track($post_id);
+            $this->artist = wpsstm_get_post_artist($post_id);
+            $this->album = wpsstm_get_post_album($post_id);
+            $this->mbid = wpsstm_get_post_mbid($post_id);
+            $this->source_ids = wpsstm_get_post_source_ids($post_id);
         }
+        
     }
     
     function populate_array( $args = null ){
@@ -215,11 +216,10 @@ class WP_SoundSystem_Track{
         $post_id = null;
         
         $meta_input = array(
-            wpsstm_artists()->artist_metakey           => $this->artist,
-            wpsstm_tracks()->title_metakey            => $this->title,
-            wpsstm_albums()->album_metakey            => $this->album,
-            wpsstm_mb()->mbid_metakey        => $this->mbid,
-            //sources is more specific, will be saved below
+            wpsstm_artists()->artist_metakey    => $this->artist,
+            wpsstm_tracks()->title_metakey      => $this->title,
+            wpsstm_albums()->album_metakey      => $this->album,
+            wpsstm_mb()->mbid_metakey           => $this->mbid,
         );
 
         $meta_input = array_filter($meta_input);
@@ -260,9 +260,6 @@ class WP_SoundSystem_Track{
 
         if ( is_wp_error($post_id) ) return $post_id;
 
-        //sources is quite specific
-        $this->update_track_sources($this->sources);
-        
         $this->post_id = $post_id;
 
         return $this->post_id;
@@ -400,25 +397,22 @@ class WP_SoundSystem_Track{
         $loved_by = $this->get_track_loved_by();
         return in_array($user_id,(array)$loved_by);
     }
-    
-    function populate_track_sources_auto( $args = null ){
+
+    function populate_auto_sources(){
 
         if (!$this->artist || !$this->title) return;
 
         $sources = array();
 
         foreach( (array)wpsstm_player()->providers as $provider ){
-            if ( !$provider_sources = $provider->sources_lookup( $this,$args ) ) continue; //cannot play source
+            if ( !$provider_sources = $provider->sources_lookup( $this ) ) continue; //cannot play source
 
             $sources = array_merge($sources,(array)$provider_sources);
-            
         }
 
         //allow plugins to filter this
-        $sources = apply_filters('wpsstm_populate_track_sources_auto',$sources,$this,$args);
-        
-        $sources = $this->sanitize_track_sources($sources);
-        
+        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this,$args);
+
         if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
             $sources = $this->autosource_filter_ban_words($sources);
         }
@@ -426,7 +420,12 @@ class WP_SoundSystem_Track{
             $sources = $this->autosource_filter_title_requires_artist($sources);
         }
         
-        $this->sources = $sources;
+        foreach((array)$sources as $source){
+            $post_id = $source->save_source();
+            if ( is_wp_error($post_id) ) continue;
+            $this->source_ids[] = $post_id;
+        }
+        
         return $sources;
 
     }
@@ -447,7 +446,7 @@ class WP_SoundSystem_Track{
             
             //check sources for the word
             foreach((array)$sources as $key=>$source){
-                $source_has_word = stripos($source['title'], $word);//case insensitive
+                $source_has_word = stripos($source->title, $word);//case insensitive
                 if ( !$source_has_word ) continue;
                 unset($source[$key]);
             }
@@ -473,11 +472,11 @@ class WP_SoundSystem_Track{
             $remove_sources = array();
             
             //sanitize data so it is easier to compare
-            $source_sanitized = sanitize_title($source['title']);
+            $source_sanitized = sanitize_title($source->title);
             $artist_sanitized = sanitize_title($this->artist);
 
             if (strpos($source_sanitized, $artist_sanitized) === false) {
-                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source['title'],'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::autosource_filter_title_requires_artist() - source ignored as artist is not contained in its title");
+                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::autosource_filter_title_requires_artist() - source ignored as artist is not contained in its title");
                 unset($sources[$key]);
             }
         }
@@ -511,40 +510,7 @@ class WP_SoundSystem_Track{
         
         return $sources;
     }
-    
-    function sanitize_track_sources($sources){
-        
-        if ( empty($sources) ) return;
 
-        foreach((array)$sources as $key=>$source){
-            //url is not valid
-            if ( !$source['url'] || ( !filter_var($source['url'], FILTER_VALIDATE_URL) ) ) unset($sources[$key]); 
-        }
-
-        foreach((array)$sources as $key=>$source){
-            $source = wp_parse_args($source,WP_SoundSystem_Source::$defaults);
-            $source[$key] = array_filter($source);
-        }
-
-        $sources = array_unique($sources, SORT_REGULAR);
-        $sources = wpsstm_array_unique_by_subkey($sources,'url');
-
-        return $sources;
-    }
-
-    function update_track_sources($sources){
-        
-        if (!$this->artist || !$this->title) return;
-
-        $sources = $this->sanitize_track_sources($sources);
-
-        if (!$sources){
-            return delete_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey );
-        }else{
-            return update_post_meta( $this->post_id, wpsstm_tracks()->sources_metakey, $sources );
-        }
-    }
-    
     function get_new_track_url(){
         $url = get_post_type_archive_link(wpsstm()->post_type_track);
         
@@ -832,11 +798,9 @@ class WP_SoundSystem_Track{
 
     function track_admin_sources(){
         $popup_action = 'sources';
-        $sources = ($this->sources) ? $this->sources : array();
+        $sources_ids = $this->source_ids;
 
-        $default = new WP_SoundSystem_Source();
-        array_unshift($sources,$default); //add blank line
-        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources);
+        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources_ids);
 
         $desc = array();
         $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');

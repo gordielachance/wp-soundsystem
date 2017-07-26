@@ -46,11 +46,17 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
-function wpsstm_get_post_sources($post_id = null){
+function wpsstm_get_post_source_ids($post_id = null){
+    $sources_args = array(
+        'post_type' =>      wpsstm()->post_type_source,
+        'post_status'=>     'any',
+        'posts_per_page' => -1,
+        'fields'  =>        'ids',
+        'post_parent' =>    $post_id
+    );
 
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, wpsstm_tracks()->sources_metakey, true );
+    $query = new WP_Query( $sources_args );
+    return $query->posts; //ids
 }
 
 function wpsstm_get_post_mbdatas($post_id = null, $keys=null){

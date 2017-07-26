@@ -446,8 +446,6 @@ class WP_SoundSystem_Tracklist_Table{
      * @param object $item The current item
      */
     public function get_single_row( $item ) {
-        
-        $sources = $item->sources;
 
         $classes = array();
         if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';
@@ -455,7 +453,7 @@ class WP_SoundSystem_Tracklist_Table{
         $attr_arr = array(
             'class' =>                      implode(' ',$classes),
             'data-wpsstm-track-id' =>       $item->post_id,
-            'data-wpsstm-sources-count' =>  count($sources),
+            'data-wpsstm-sources-count' =>  count($item->source_ids),
             'itemtype' =>                   'http://schema.org/MusicRecording',
             'itemprop' =>                   'track',
         );
@@ -548,7 +546,7 @@ class WP_SoundSystem_Tracklist_Table{
                 }
             break;
             case 'trackitem_sources':
-                return wpsstm_sources()->get_track_sources_list($item,$this->sources_db_only); //db sources only. we'll fetch new sources using ajax.
+                return wpsstm_sources()->get_track_sources_list($item); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
                 if ( $actions = $item->get_track_row_actions($this->tracklist) ){
