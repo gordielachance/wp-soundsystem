@@ -1,5 +1,7 @@
 <?php
 
+global $post;
+
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
     $filename = $post->post_name;
     $filename = sprintf('%1$s.xspf',$filename);
@@ -14,8 +16,8 @@ require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
 $xspf = new mptre\Xspf();
 
-$tracklist = wpsstm_get_post_tracklist();
-$tracklist->get_subtracks();
+$tracklist = wpsstm_get_post_tracklist($post->ID);
+$tracklist->load_subtracks();
 
 //playlist
 if ( $title = $tracklist->title ){
