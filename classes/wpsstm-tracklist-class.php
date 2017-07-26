@@ -30,7 +30,7 @@ abstract class WP_SoundSystem_Tracklist{
     var $tracks_strict = true; //requires a title AND an artist
     
     static $paged_var = 'tracklist_page';
-    
+
     abstract protected function get_subtrack_ids();
     abstract protected function append_subtrack_ids($append_ids);
     abstract protected function remove_subtrack_ids($remove_ids);
@@ -44,6 +44,11 @@ abstract class WP_SoundSystem_Tracklist{
         );
 
         $this->set_tracklist_pagination($pagination_args);
+        
+        $this->options_default = array(
+            'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'=>  ( wpsstm()->get_options('autosource') == 'on' ),
+        );
 
         if ($post_id){
             

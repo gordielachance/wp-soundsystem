@@ -146,6 +146,8 @@ class WP_SoundSystem_Tracklist_Table{
             'class'           =>            implode(' ',$classes),
             'data-wpsstm-tracklist-id' =>   $this->tracklist->post_id,
             'data-wpsstm-tracklist-type' => $this->tracklist->tracklist_type,
+            'data-wpsstm-autosource' =>     (int)$this->tracklist->get_options('autosource'),
+            'data-wpsstm-autoplay' =>       (int)$this->tracklist->get_options('autoplay'),
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
