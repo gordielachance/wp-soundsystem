@@ -16,7 +16,7 @@
         
         // sort rows
         tracklist_obj.tracklist_el.find( '.wpsstm-tracklist-entries' ).sortable({
-            handle: '#wpsstm-track-action-move a',
+            handle: '.wpsstm-reposition-track',
 
             update: function(event, ui) {
                 tracklist_obj.update_playlist_track_position(ui);
@@ -34,13 +34,6 @@
             tracklist_obj.debug("clicked 'refresh' link");
             tracklist_obj.get_tracklist_request(true); //initialize but do not set track to play
             
-        });
-        
-        //share
-        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-share a').click(function(e) {
-          e.preventDefault();
-          var text = $(this).attr('href');
-          wpsstm_clipboard_box(text);
         });
 
         //favorite
@@ -224,7 +217,7 @@
         var li_el =         $(checkbox).closest('li');
         var popupContent =  $(checkbox).closest('.wpsstm-popup-content');
         
-        var popup_section = checkbox.closest('#tab-content-playlists');
+        var popup_section = checkbox.closest('#wpsstm-track-admin-playlists');
         var popup = checkbox.closest('.hentry');
 
         //get track obj from HTML
@@ -664,7 +657,7 @@ class WpsstmTracklist {
         var self = this;
         var all_rows = self.tracklist_el.find( '[itemprop="track"]' );
         jQuery.each( all_rows, function( key, value ) {
-            var position = jQuery(this).find('.column-trackitem_order [itemprop="position"]');
+            var position = jQuery(this).find('.column-trackitem_position [itemprop="position"]');
             position.text(key + 1);
         });
     }
@@ -791,12 +784,4 @@ class WpsstmTracklist {
 
     }
     
-}
-
-/*
-Displays a box with a text the user can copy.
-http://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-*/
-function wpsstm_clipboard_box(text) {
-    window.prompt(wpsstmL10n.clipboardtext, text);
 }

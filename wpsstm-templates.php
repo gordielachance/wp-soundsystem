@@ -330,7 +330,7 @@ function wpsstm_get_blank_action(){
         'link_before' =>    null,
         'link_after' =>     null,
         'has_cap' =>        true,
-        'tab_id' =>         null,
+        'popup' =>          false,
     );
 }
 
@@ -339,6 +339,13 @@ function wpsstm_get_actions_list($actions,$prefix){
 
     foreach($actions as $slug => $action){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+
+        if ( $action['popup'] ){
+            $action['link_classes'][] = 'thickbox';
+            $action['href'] = add_query_arg(array('TB_iframe'=>true),$action['href']);
+        }
+
+        $actions[$slug] = $action;
 
         $action_attr = array(
             'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
@@ -350,7 +357,7 @@ function wpsstm_get_actions_list($actions,$prefix){
             'href'      => $action['href'],
             'class'     => implode("\n",$action['link_classes'])
         );
-        $link = sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
+        $link = sprintf('<a %s>%s<label>%s</label></a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
 
         $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);

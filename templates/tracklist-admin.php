@@ -14,6 +14,9 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 			// Start the loop.
 			while ( have_posts() ) { 
                 the_post();
+                
+                $admin_action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_admin);
+                
                 ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     <header class="entry-header">
@@ -24,31 +27,42 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
                     <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
-                        if ( $actions = $tracklist->get_tracklist_popup_actions() ){
+                        if ( $actions = $tracklist->get_tracklist_actions('admin') ){
                             $list = wpsstm_get_actions_list($actions,'tracklist');
                             echo $list;
                         }
                 
-                        ?>
-                        
-                        <!--track infos-->
-                        <?php if ( isset($actions['wizard']) ){
-                            $form_action = $tracklist->get_tracklist_admin_gui_url('wizard');
-                            ?>
-                            <div id="tab-content-wizard">
-                                <form method="post" action="<?php echo $form_action;?>">
-                                <?php 
+                        $tab_content = null;
+                
+                        switch($admin_action){
+                            case 'share':
+
+                                $text = __("Here's the link to this playlist:","wpsstm");
+                                $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,get_permalink());
+                                
+                            break;
+                            case 'wizard':
+
+                                ob_start();
                                 $file = 'wizard-form.php';
                                 if ( file_exists( wpsstm_locate_template( $file ) ) ){
                                     $template = wpsstm_locate_template( $file );
                                     load_template( $template );
                                 }
-                                ?>
-                                </form>
-                                caca
-                            </div>
-                        <?php } ?>
-                        
+                                $form_content = ob_get_clean();
+                                
+                                $form_action = $tracklist->get_tracklist_admin_gui_url('wizard');
+                                $tab_content = sprintf('<form method="post" action="%s">%s</form>',$form_action,$form_content);
+
+                            break;
+                        }
+                
+                        if ($tab_content){
+                            printf('<div class="wpsstm-tracklist-admin-%s">%s</div>',$admin_action,$tab_content);
+                        }
+                
+                        ?>
+
                     </div><!-- .entry-content -->
 
                 </article><!-- #post-## -->

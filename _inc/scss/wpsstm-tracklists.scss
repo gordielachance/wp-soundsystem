@@ -63,8 +63,33 @@
                     display:inline;
                 }
             }
+            
+            &:not(.active){
+                > span.wpsstm-track-column{
+                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
+                        display:none;
+                    }
+                }
+            }
 
             > span.wpsstm-track-column{
+                
+               &.column-trackitem_position{
+                    .wpsstm-reposition-track{
+                        @extend .wpsstm-can-click;
+                        i{
+                            display:none;
+                        }
+                        &:hover{
+                            i{
+                                display:inherit;
+                            }
+                            [itemprop="position"]{
+                                display:none;
+                            }
+                        }
+                    }
+                }
 
                 &.column-trackitem_image{
                     width: 50px;
@@ -83,20 +108,20 @@
                     }
                 }
                 &.column-trackitem_actions{
-                    font-size:.8em;
-                    text-align:center;
-                    display:none;
-                }
-            }
-            
-            &.active{
-                > span.wpsstm-track-column{
-                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
-                        display:block;
+                    display:inline;
+                    .wpsstm-actions-list{
+                        display:inline;
+                        li{
+                            a{
+                                @extend .wpsstm-icon-link;
+                                label{
+                                    display:none;
+                                }
+                            }
+                        }
                     }
                 }
             }
-
         }
     }
     
@@ -137,7 +162,7 @@
                         @extend .truncate;
                     }
                     
-                    &.column-trackitem_order{
+                    &.column-trackitem_position{
                         width:3em;
                         text-align:center;
                     }
@@ -168,7 +193,7 @@
         .tracklist-nav{
             //display:none;
         }
-        .column-trackitem_order,#wpsstm-track-action-move{
+        .column-trackitem_position,#wpsstm-track-action-move{
             display:none;
         }
     }

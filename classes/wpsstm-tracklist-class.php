@@ -436,7 +436,7 @@ abstract class WP_SoundSystem_Tracklist{
         return in_array($user_id,(array)$loved_by);
     }
     
-    function get_tracklist_actions(){
+    function get_tracklist_actions($context = null){
         
         $tracklist_type = get_post_type($this->post_id);
         
@@ -483,7 +483,7 @@ abstract class WP_SoundSystem_Tracklist{
             $actions['share'] = array(
                 'icon' =>       '<i class="fa fa-share-alt" aria-hidden="true"></i>',
                 'text' =>      __('Share', 'wpsstm'),
-                'href' =>       get_permalink($this->post_id),
+                'href' =>       $this->get_tracklist_admin_gui_url('share'),
             );
         }
         
@@ -593,7 +593,34 @@ abstract class WP_SoundSystem_Tracklist{
             );
         //}
         
-        $actions = apply_filters('wpsstm_tracklist_actions',$actions);
+        //context
+        switch($context){
+            case 'page':
+
+                /*
+                if ($can_edit_tracklist){
+                    $actions['advanced'] = array(
+                        'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
+                        'text' =>      __('Advanced', 'wpsstm'),
+                        'href' =>       $this->get_tracklist_admin_gui_url('about'),
+                    );
+                }
+                */
+
+                $popup_action_slugs = array('share','append','wizard','advanced');
+                
+                //set popup
+                foreach ($actions as $slug=>$action){
+                    if ( !in_array($slug,$popup_action_slugs) ) continue;
+                    $actions[$slug]['popup'] = true;
+                }
+                
+            break;
+            case 'admin':
+            break;
+        }
+        
+        $actions = apply_filters('wpsstm_tracklist_actions',$actions,$context);
         
         $default_action = wpsstm_get_blank_action();
         $default_action['classes'][] = 'wpsstm-tracklist-action';
@@ -604,40 +631,7 @@ abstract class WP_SoundSystem_Tracklist{
         return $actions;
         
     }
-    
-    function get_tracklist_row_actions(){
-        $actions = $this->get_tracklist_actions();
-        $popup_slugs = array('append');
-        
-        foreach((array)$actions as $slug=>$action){
-            if ( !in_array($slug,$popup_slugs) ) continue;
-            
-            if ( isset($action['tab_id']) ){
-                $action['href'] .= sprintf('#%s',$action['tab_id']);
-            }
-            
-            $action['link_classes'][] = 'thickbox';
-            $action['href'] = add_query_arg(array('TB_iframe'=>true),$action['href']);
-            $actions[$slug] = $action;
-        }
-        return $actions;
-    }
-    
-    function get_tracklist_popup_actions(){
-        $actions = $this->get_tracklist_actions();
-        
-        foreach((array)$actions as $slug=>$action){
-            
-            if ( $action['tab_id'] ){
-                $action['href'] = sprintf('#%s',$action['tab_id']);
-            }
-            
-            $actions[$slug] = $action;
-        }
 
-        return $actions;
-    }
-    
     function get_tracklist_admin_gui_url($tracklist_action = null){
 
         $url = null;

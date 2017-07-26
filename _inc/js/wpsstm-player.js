@@ -44,7 +44,7 @@ $(document).ready(function(){
     });
     
     //scroll to playlist track when clicking the player's track number
-    $('#wpsstm-bottom').on( "click",'[itemprop="track"] .trackitem_order', function(e) {
+    $('#wpsstm-bottom').on( "click",'[itemprop="track"] .trackitem_position', function(e) {
         e.preventDefault();
         var player_track_el = $(this).parents('[itemprop="track"]');
         var track_idx = player_track_el.attr('data-wpsstm-track-idx');

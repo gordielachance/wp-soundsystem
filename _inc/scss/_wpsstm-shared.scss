@@ -61,6 +61,12 @@ ul.wpsstm-actions-list{
     li {
         display:inline-block;
         
+        a{
+            label{
+                padding-left:.25em;
+            }
+        }
+        
         &.loading{
             @extend .wpsstm-loading-el;
         }

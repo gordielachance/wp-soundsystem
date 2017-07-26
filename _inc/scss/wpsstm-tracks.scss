@@ -10,7 +10,7 @@
         font-size:.8em;
     }
 
-    .trackitem_order{
+    .trackitem_position{
         .wpsstm-player-icon-buffering{
             display:none;
         }
@@ -42,7 +42,7 @@
     }
 
     &.buffering{
-        .trackitem_order{
+        .trackitem_position{
             .wpsstm-player-icon-buffering{
                 display:inline-block;
             }

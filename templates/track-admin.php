@@ -42,17 +42,27 @@ get_header(); ?>
 
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
-                        if ( $actions = $track->get_track_popup_actions($tracklist) ){
+                        if ( $actions = $track->get_track_actions($tracklist,'admin') ){
                             $list = wpsstm_get_actions_list($actions,'track');
                             echo $list;
                         }
-                        ?>
-
-                        <!--track infos-->
-                        <?php if ( isset($actions['details']) ){?>
-                            <div id="tab-content-details">
-                                <?php print_r($track);
-
+                
+                        $tab_content = null;
+                
+                        switch ($admin_action){
+                            case 'edit':
+                                $tab_content = $track->track_admin_details();
+                            break;
+                            case 'playlists':
+                                $tab_content = $track->track_admin_playlists();
+                            break;
+                            case 'sources':
+                                $tab_content = $track->track_admin_sources();
+                            break;
+                            case 'delete':
+                                $tab_content = "delete";
+                            break;
+                            default: //about
                                 $text_el = null;
                                 $bio = wpsstm_lastfm()->get_artist_bio($track->artist);
 
@@ -63,39 +73,18 @@ get_header(); ?>
                                     $artist_text = __('No data found for this artist','wpsstm');
                                 }
 
-
                                 $title_el = sprintf('<h2>%s</h2>',$track->artist);
-                                printf('<div>%s%s</div>',$title_el,$artist_text);
+                                $tab_content = sprintf('<div>%s%s</div>',$title_el,$artist_text);
+                            break;
+                        }
+                
+                        if ($tab_content){
+                            printf('<div class="wpsstm-track-admin-%s">%s</div>',$admin_action,$tab_content);
+                        }
+                        
+                
+                        ?>
 
-                                ?>
-                            </div>
-                        <?php } ?>
-                        <!--track edit-->
-                        <?php if ( isset($actions['edit']) ){?>
-                            <div id="tab-content-edit">
-                                <?php 
-                                echo $track->track_admin_details();
-                                ?>
-                            </div>
-                        <?php } ?>
-                        <!--playlists manager-->
-                        <?php if ( isset($actions['playlists']) ){?>
-                            <div id="tab-content-playlists">
-                                <?php echo $track->track_admin_playlists();?>
-                            </div>
-                        <?php } ?>
-                        <!--sources manager-->
-                        <?php if ( isset($actions['sources']) ){?>
-                            <div id="tab-content-sources">
-                                <?php echo $track->track_admin_sources();?>
-                            </div>
-                        <?php } ?>
-                        <!--track delete-->
-                        <?php if ( isset($actions['delete']) ){?>
-                            <div id="tab-content-delete">
-                                delete
-                            </div>
-                        <?php } ?>
                     </div><!-- .entry-content -->
 
                 </article><!-- #post-## -->

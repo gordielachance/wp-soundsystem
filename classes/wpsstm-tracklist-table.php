@@ -89,7 +89,7 @@ class WP_SoundSystem_Tracklist_Table{
         
         $columns = array(
             'trackitem_image'   =>      '',
-            'trackitem_order'   =>      '',
+            'trackitem_position'   =>      '',
             'trackitem_play_bt' =>      '',
             'trackitem_artist' =>       __('Artist','wpsstm'),
             'trackitem_track' =>        __('Title','wpsstm'),
@@ -247,7 +247,7 @@ class WP_SoundSystem_Tracklist_Table{
         $notices_el = $this->tracklist->get_notices('tracklist-header');
 
         $actions_el = null;
-        if ( $actions = $this->tracklist->get_tracklist_row_actions() ){
+        if ( $actions = $this->tracklist->get_tracklist_actions('page') ){
             $actions_el = wpsstm_get_actions_list($actions,'tracklist');
         }
 
@@ -522,12 +522,28 @@ class WP_SoundSystem_Tracklist_Table{
     
     function column_default($item, $column_name){
         switch($column_name){
-            case 'trackitem_order':
+            case 'trackitem_position':
                 $this->curr_track_idx++;
                 
                 $loading_icon = '<i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>';
-                $text = sprintf('<span itemprop="position">%s</span>',$this->curr_track_idx);
-                return $loading_icon.$text;
+                
+                /*
+                Capability check
+                */
+                $tracklist_id =             $this->tracklist->post_id;
+                $is_static_playlist =       $this->tracklist->tracklist_type == 'static-playlist';
+                $post_type_playlist =       get_post_type($tracklist_id);
+                $tracklist_obj =            $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
+                $can_edit_tracklist =       ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
+                $can_move_track =           ( $can_edit_tracklist && $is_static_playlist );
+                
+                $position = sprintf('<span itemprop="position">%s</span>',$this->curr_track_idx);
+                
+                if ($can_move_track){
+                    $position = sprintf('<span class="wpsstm-reposition-track"><i class="fa fa-arrows-v" aria-hidden="true"></i>%s</span>',$position);
+                }
+                
+                return $loading_icon.$position;
                 
             case 'trackitem_play_bt':
                 return wpsstm_player()->get_track_button($item);
@@ -549,7 +565,7 @@ class WP_SoundSystem_Tracklist_Table{
                 return wpsstm_sources()->get_track_sources_list($item); //db sources only. we'll fetch new sources using ajax.
             break;
             case 'trackitem_actions':
-                if ( $actions = $item->get_track_row_actions($this->tracklist) ){
+                if ( $actions = $item->get_track_actions($this->tracklist,'page') ){
                     $actions_list = wpsstm_get_actions_list($actions,'track');
                     return $actions_list;
                 }
