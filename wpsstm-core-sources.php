@@ -435,6 +435,29 @@ class WP_SoundSystem_Source {
 
     }
     
+    function get_source_id_by_url(){
+
+        $args = array(
+            'post_parent'       => $this->track_id,
+            'post_type'         => array(wpsstm()->post_type_source),
+            'post_status'       => 'any',
+            'posts_per_page'    => 1,
+            'fields'            => 'ids',
+            'meta_query'        => array(
+                'source_url' => array(
+                    'key'     => wpsstm_sources()->url_metakey,
+                    'value'   => $this->url
+                )
+            )
+        );
+
+        $query = new WP_Query( $args );
+        
+        $post_id = (isset($query->posts[0])) ? $query->posts[0] : null;
+
+        return $post_id;
+    }
+    
     function save_source(){
         
         $this->sanitize_source();
@@ -442,6 +465,14 @@ class WP_SoundSystem_Source {
         if (!$this->url){
             return new WP_Error( 'no_source_url', __('Unable to save source : missing URL','wpsstm') );
         }
+        
+        //check if this source exists already
+
+        if ( $existing_id = $this->get_source_id_by_url() ){
+            $this->post_id = $existing_id;
+            return $existing_id;
+        }
+
 
         $post_source_args = array(
             'post_title' =>     $this->title,
