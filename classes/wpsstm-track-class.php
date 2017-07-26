@@ -579,7 +579,7 @@ class WP_SoundSystem_Track{
         return $url;
     }
     
-    function get_track_row_actions($tracklist = null){
+    function get_track_row_actions($tracklist){
 
         $actions = $this->get_track_actions($tracklist);
         $popup_slugs = array('details','edit','playlists','sources','delete');
@@ -599,7 +599,7 @@ class WP_SoundSystem_Track{
         return $actions;
     }
     
-    function get_track_popup_actions($tracklist = null){
+    function get_track_popup_actions($tracklist){
         $actions = $this->get_track_actions($tracklist);
         
         foreach((array)$actions as $slug=>$action){
@@ -623,7 +623,7 @@ class WP_SoundSystem_Track{
         */
         
         //TO FIX
-        $is_static_playlist =       ( !property_exists($tracklist,'feed_url') );
+        $is_static_playlist =       $tracklist->tracklist_type == 'static-playlist';
         $static_playlists_types =   array(wpsstm()->post_type_playlist,wpsstm()->post_type_album);
         
        //tracklist

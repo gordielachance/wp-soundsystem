@@ -275,6 +275,7 @@ function wpsstm_get_post_tracklist($post_id=null){
 
     switch ($post_type){
         case wpsstm()->post_type_track:
+            $tracklist = new WP_SoundSystem_Static_Tracklist($post_id);
             $track = new WP_SoundSystem_Track($post_id);
             $tracklist->add($track);
         break;

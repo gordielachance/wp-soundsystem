@@ -31,101 +31,42 @@
     .hentry &{
         margin-bottom: 2em;
     }
-
-    table{
-        font-size:1em;
-        width: 100%;
+    
+    //make it look like a table
+    /*
+    > ul{
+        list-style: none;
         display: table;
         border-collapse: collapse;
-        border:none;
+        > li {
+            display:table-row;
+            > span{
+                display:table-column;
+            }
+        }
+    }
+    */
+    
+
+    
+    ul.wpsstm-tracklist-entries{
+        font-size:1em;
         margin:0;
-
-        .column-trackitem_order{
-            width:3em;
-            text-align:center;
-        }
-
-        .column-trackitem_play_bt{
-            width:2em;
-            text-align:center;
-        }
-
-        .column-trackitem_image{
-            width:2em;
-            display:none;
-            img{
-                max-width:100%;
-            }
-        }
-        .column-trackitem_sources{
-            display:none;
-            ul{
-                list-style-type: none;
-            }
-        }
-        .column-trackitem_actions{
-            font-size:.8em;
-            text-align:center;
-        }
-
-        th,td{
-            border:none;
-        }
-
-        th{
-            font-weight: 400;
-        }
-
-        thead{
-            /*
-            display: table-header-group;
-            vertical-align: middle;
-            border-color: inherit;
-            th{
-                border-bottom: 1px solid #e1e1e1;
-                text-align:center;
-            }
-            */
-            display:none;
-        }
-        tfoot{
-            th{
-                border-top: 1px solid #e1e1e1;
-            }
-        }
-
-        tbody tr{
-
-            @include transition-property(background);
-            @include transition-duration(.4s);
-
-            &:nth-child(odd){
-                background: rgba(0,0,0,0.0125);
-            }
-            &:hover{
-                background: rgba(0,0,0,0.025);
-                td.column-image img{
-                    @include opacity(.8);
-                }
-            }
+        list-style: none;
+        
+        > li[itemprop="track"]{
+            
+            position:relative;
 
             &.no-items{
                 .wpsstm-bottom-refresh-notice{
                     display:inline;
                 }
             }
-            &:not(.no-items):not(:last-child){
-                border-bottom: 1px solid #eee;
-            }
 
-            &[itemprop="track"]:not(.no-items){
-            }
+            > span.wpsstm-track-column{
 
-            td{
-                font-size: 1em;
-                line-height: 2em;
-                padding: .5em;
-                &.column-image{
+                &.column-trackitem_image{
                     width: 50px;
                     padding:0;
                     img{
@@ -135,22 +76,84 @@
                         @include transition-duration(.4s);
                     }
                 }
-            }
-       }
-
-    }
-    
-    > ol, ul{
-        li[itemprop="track"]{
-            [itemprop="name"]{
-                &:before{
-                    content: "– ";
+                &.column-trackitem_sources{
+                    display:none;
+                    ul{
+                        list-style-type: none;
+                    }
                 }
-                
+                &.column-trackitem_actions{
+                    font-size:.8em;
+                    text-align:center;
+                    display:none;
+                }
             }
+            
+            &.active{
+                > span.wpsstm-track-column{
+                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
+                        display:block;
+                    }
+                }
+            }
+
         }
     }
     
+    &.wpsstm-tracklist-table{
+        ul.wpsstm-tracklist-entries{
+            width: 100%;
+            > li[itemprop="track"]{
+                display:block;
+                @include transition-property(background);
+                @include transition-duration(.4s);
+
+                &:nth-child(odd){
+                    background: rgba(0,0,0,0.0125);
+                }
+                &:hover{
+                    background: rgba(0,0,0,0.025);
+                    td.column-image img{
+                        @include opacity(.8);
+                    }
+                }
+                
+                &:not(.no-items):not(:last-child){
+                    border-bottom: 1px solid #eee;
+                }
+                
+                > span.wpsstm-track-column{
+                    display:inline-block;
+                    line-height: 2em;
+                    padding: .5em;
+                    
+                    &[itemprop="byArtist"]{
+                        @extend .truncate;
+                    }
+                    &[itemprop="name"]{
+                        @extend .truncate;
+                    }
+                    &[itemprop="inAlbum"]{
+                        @extend .truncate;
+                    }
+                    
+                    &.column-trackitem_order{
+                        width:3em;
+                        text-align:center;
+                    }
+
+                    &.column-trackitem_play_bt{
+                        width:2em;
+                        text-align:center;
+                    }
+                    &.column-trackitem_sources{
+                        display:none;
+                    }
+                }
+            }
+        }
+    }
+
     .tracklist-nav{
         padding:.5em;
         .tablenav-pages{
@@ -165,7 +168,7 @@
         .tracklist-nav{
             //display:none;
         }
-        .trackitem_order,#wpsstm-track-action-move{
+        .column-trackitem_order,#wpsstm-track-action-move{
             display:none;
         }
     }

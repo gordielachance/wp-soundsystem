@@ -300,52 +300,18 @@ class WP_SoundSystem_Core_Tracklists{
         return $defaults;
     }
     
+    
     function column_tracklist_content($column,$post_id){
         global $post;
         
         if ($column != 'tracklist') return;
         
-        $output = null;
+        $output = '—';
 
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $tracklist->load_subtracks();
-
-        $entry_html = array();
-
-        foreach($tracklist->tracks as $item){
-            $artist = $item->artist;
-            $track = $item->title;
-            $track_title_artist = sprintf(__('<span itemprop="byArtist">%s</span> <span itemprop="name">%s</span>','wpsstm'),$artist,$track);
-            
-            $item_classes = array();
-            if ( !$item->validate_track() ) $item_classes[] = 'wpsstm-invalid-track';
+        $output = $tracklist->get_tracklist_table(array('display_type'=>'list','can_play'=>false));
         
-            $item_attr_arr = array(
-                'class' =>                      implode(' ',$item_classes),
-                'data-wpsstm-track-id' =>       $item->post_id,
-                'itemtype' =>                   'http://schema.org/MusicRecording',
-                'itemprop' =>                   'track',
-            );
-            
-            
-            $entry_html[] =  sprintf('<li %s>%s</li>',wpsstm_get_html_attr($item_attr_arr),$track_title_artist);
-        }
-        
-        $list_classes = array('wpsstm-tracklist');
-        
-        $list_attr_arr = array(
-            'class'           =>            implode(' ',$list_classes),
-            'data-wpsstm-tracklist-id' =>   $tracklist->post_id,
-            'data-tracks-count' =>          $tracklist->pagination['total_items'],
-            'itemtype' =>                   'http://schema.org/MusicPlaylist',
-        );
-
-        $output = sprintf('<div itemscope %s><ol class="wpsstm-tracklist-entries">%s</ol></div>',wpsstm_get_html_attr($list_attr_arr),implode("\n",$entry_html));
         echo $output;
-
-        if (!$output){
-            echo '—';
-        }
     }
     
     function tracks_column_playlist_register($defaults) {
@@ -463,7 +429,7 @@ class WP_SoundSystem_Core_Tracklists{
     function metabox_tracklist_content( $post ){
         $tracklist = wpsstm_get_post_tracklist($post->ID);
         
-        echo $tracklist->get_tracklist_table();
+        echo $tracklist->get_tracklist_table(array('can_play'=>false));
 
     }
 

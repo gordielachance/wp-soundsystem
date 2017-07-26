@@ -106,50 +106,55 @@
                 position:relative;
                 width: 90%;
                 
-                table{
+                .wpsstm-tracklist-entries{
                     padding:0;
                     margin:0;
                     width:100%;
-                }
-                
-                [itemprop="track"]{
-                    width:100%;
-                    position:relative;
-                    display:block!important; //jQuery would set 'table-row'
-                    td{
-                        display:inline-block;
-                        padding: 0 1em;
-                        margin: 0;
+                    
+                    li[itemprop="track"]{
+                        width:100%;
+                        position:relative;
+                        display:block!important; //jQuery would set 'table-row'
+                        .wpsstm-track-column{
 
-                        &[itemprop="image"]{
-                            padding: 0;
-                            width:4em;
-                            img {
-                                
-                                max-height:3em;
+                            &[itemprop="image"]{
+                                padding: 0;
+                                width:4em;
+                                img {
+
+                                    max-height:3em;
+                                }
                             }
+                            &[itemprop="name"]:before{
+                                content:"\002014";
+                                padding-right:.5em;
+                            }
+                            &[itemprop="inAlbum"]{
+                                display:none;
+                                @extend .truncate;
+                            }
+
+                            &.trackitem_play_bt{
+                                display:none;
+                            }
+                            
+                            &.column-trackitem_actions{
+                                display:none;
+                            }
+                            
+                            &.column-trackitem_sources{
+                                display:inline-block;
+                            }
+
                         }
-                        &[itemprop="name"]:before{
-                            content:"\002014";
-                            padding-right:.5em;
-                        }
-                        &[itemprop="inAlbum"]{
-                            display:none;
-                            @extend .truncate;
-                        }
-                        
-                        &.trackitem_play_bt{
-                            display:none;
+
+                        .trackitem_order{
+                            @extend .wpsstm-can-click;
                         }
 
                     }
                     
-                    .trackitem_order{
-                        @extend .wpsstm-can-click;
-                    }
-
                 }
-
 
             }
             

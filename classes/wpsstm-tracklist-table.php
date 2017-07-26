@@ -13,13 +13,15 @@ class WP_SoundSystem_Tracklist_Table{
     //options
     var $can_play;
     var $sources_db_only;
+    var $display_type;
 
     function __construct($tracklist,$args = null){
         global $page;
         
         $defaults = array(
-            'can_play'          => true,
-            'sources_db_only'   => true,
+            'can_play' =>           true,
+            'sources_db_only' =>    true,
+            'display_type' =>       'table',
         );
         $args = wp_parse_args((array)$args,$defaults);
 
@@ -99,6 +101,7 @@ class WP_SoundSystem_Tracklist_Table{
         //remove properties when it is null for every track of the playlist
         if ( !$this->show_property_column('image') ) unset($columns['trackitem_image']);
         if ( !$this->show_property_column('album') ) unset($columns['trackitem_album']);
+        if ($this->display_type != 'table') unset($columns['trackitem_actions']);
 
         if ( !$this->can_play ){
             unset($columns['trackitem_play_bt']);
@@ -163,9 +166,12 @@ class WP_SoundSystem_Tracklist_Table{
             $classes[] = 'wpsstm-playable-tracklist';
         }
         
+        $classes[] = sprintf('wpsstm-tracklist-%s',$this->display_type);
+        
         $attr_arr = array(
             'class'           =>            implode(' ',$classes),
             'data-wpsstm-tracklist-id' =>   $this->tracklist->post_id,
+            'data-wpsstm-tracklist-type' => $this->tracklist->tracklist_type,
             'data-tracks-count' =>          $this->tracklist->pagination['total_items'],
             'itemtype' =>                   'http://schema.org/MusicPlaylist',
         );
@@ -185,84 +191,71 @@ class WP_SoundSystem_Tracklist_Table{
             
             $attr_arr['data-wpsstm-expire-sec'] = $next_refresh_sec;
         }
+        
+        $entries_html = $this->get_rows_or_placeholder();
 
-        printf('<div itemscope %s>',wpsstm_get_html_attr($attr_arr));
-            $this->display_tablenav( 'top' );
-            ?>
-                <table>
-                        <thead>
-                        <tr>
-                                <?php $this->print_column_headers(); ?>
-                        </tr>
-                        </thead>
-
-                        <tbody class="wpsstm-tracklist-entries">
-                                <?php $this->display_rows_or_placeholder(); ?>
-                        </tbody>
-
-                        <tfoot>
-                        <tr>
-                                <?php //$this->print_column_headers( false ); ?>
-                        </tr>
-                        </tfoot>
-
-                </table>
-                <?php //$this->display_tablenav( 'bottom' );?>
-        </div>
-            <?php
+        
+        $list = sprintf('<ul class="wpsstm-tracklist-entries">%s</ul>',$entries_html);
+        
+        
+        if ($this->display_type == 'table'){
+            $nav_top = $this->get_tablenav( 'top' );
+            $nav_bottom = null; //$this->get_tablenav( 'bottom' );
+            $list = $nav_top . $list . $nav_bottom;
+        }
+        
+        
+        $output = sprintf('<div itemscope %s>%s</div>',wpsstm_get_html_attr($attr_arr),$list);
+        echo $output;
 
 	}
     
-    protected function extra_tablenav($which){
+    protected function get_extra_tablenav($which){
         global $post;
-        ?>
-        <div>
-            <?php
-            /*
-            if ( $post && ($post->ID == $this->tracklist->post_id) ) { //don't show title if post = tracklist
-                printf('<meta itemprop="name" content="%s" />',$this->tracklist->title);
-            }else{
-            */
-                $loading_icon = '<i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>';
-                $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
 
-                printf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_title);
-            //}
-            
-            printf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
+        /*
+        if ( $post && ($post->ID == $this->tracklist->post_id) ) { //don't show title if post = tracklist
+            printf('<meta itemprop="name" content="%s" />',$this->tracklist->title);
+        }else{
+        */
+            $loading_icon = '<i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>';
+            $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($this->tracklist->post_id),$this->tracklist->title);
+
+            $title_el = sprintf('<strong class="wpsstm-tracklist-title" itemprop="name">%s%s</strong>',$loading_icon,$tracklist_title);
+        //}
+
+        $numtracks_el = sprintf('<meta itemprop="numTracks" content="%s" />',$this->tracklist->pagination['total_items']);
+
+        $updated_time_el = $refresh_time_el = $refresh_countdown_el = $refresh_link_el = null;
+
+        //static playlist time
+        if ( $this->tracklist->updated_time ){
+
+            $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );
+            $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'time_format' ) );
+
+            $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+            $text_time = sprintf(__('on %s - %s','wpsstm'),$date,$time);
+            $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
+            $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
+
+        }
+
+        $time_el = sprintf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
+
+        //notices
+        $notices_el = $this->tracklist->get_notices('tracklist-header');
+
+        $actions_el = null;
+        if ( $actions = $this->tracklist->get_tracklist_row_actions() ){
+            $actions_el = wpsstm_get_actions_list($actions,'tracklist');
+        }
+
+        return sprintf('<div>%s%s%s%s%s</div>',$title_el,$numtracks_el,$time_el,$notices_el,$actions_el);
         
-            $updated_time_el = $refresh_time_el = $refresh_countdown_el = $refresh_link_el = null;
-
-            //static playlist time
-            if ( $this->tracklist->updated_time ){
-
-                $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );
-                $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'time_format' ) );
-
-                $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
-                $text_time = sprintf(__('on %s - %s','wpsstm'),$date,$time);
-                $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
-                $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
-                
-            }
-
-            printf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
-        
-            //notices
-            $this->tracklist->display_notices('tracklist-header');
-
-            if ( $actions = $this->tracklist->get_tracklist_row_actions() ){
-                $list = wpsstm_get_actions_list($actions,'tracklist');
-                echo $list;
-            }
-
-            ?>
-        </div>
-
-    <?php
     }
         
-    protected function display_tablenav( $which ) {
+    protected function get_tablenav( $which ) {
         
         $post_type = get_post_type($this->tracklist->post_id);
         
@@ -271,18 +264,9 @@ class WP_SoundSystem_Tracklist_Table{
             'tracklist-' . $post_type,
             esc_attr( $which )
         );
+        
+        return sprintf('<div %s>%s%s<br class="clear" /></div>',wpsstm_get_classes_attr($classes),$this->get_extra_tablenav( $which ),$this->get_pagination( $which ));
 
-        ?>
-        <div <?php echo wpsstm_get_classes_attr($classes);?>>
-
-        <?php
-                $this->extra_tablenav( $which );
-                $this->pagination( $which );
-        ?>
-
-                <br class="clear" />
-        </div>
-        <?php
     }
     
     /**
@@ -293,7 +277,7 @@ class WP_SoundSystem_Tracklist_Table{
      *
      * @param string $which
      */
-    protected function pagination( $which ) {
+    protected function get_pagination( $which ) {
         
         if ( !$this->tracklist->pagination['per_page'] ) return;
 
@@ -306,7 +290,7 @@ class WP_SoundSystem_Tracklist_Table{
             'total' => $this->tracklist->pagination['total_pages']
         );
 
-        echo paginate_links( $pagination_args );
+        return paginate_links( $pagination_args );
     }
     
     /**
@@ -317,7 +301,7 @@ class WP_SoundSystem_Tracklist_Table{
      *
      * @param bool $with_id Whether to set the id attribute or not
      */
-    public function print_column_headers( $with_id = true ) {
+    public function get_header( $with_id = true ) {
             list( $columns, $hidden, $sortable ) = $this->get_column_info();
 
             $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
@@ -362,8 +346,8 @@ class WP_SoundSystem_Tracklist_Table{
 
                     if ( !empty( $class ) )
                             $class = "class='" . join( ' ', $class ) . "'";
-
-                    echo "<th scope='col' $id $class $style>$column_display_name</th>";
+                
+                    return sprintf("<th scope='col' %s %s %s>%s</th>",$id,$class,$style,$column_display_name);
             }
     }
     
@@ -418,13 +402,11 @@ class WP_SoundSystem_Tracklist_Table{
      * @since 3.1.0
      * @access public
      */
-    public function display_rows_or_placeholder() {
+    public function get_rows_or_placeholder() {
             if ( $this->has_items() ) {
-                    $this->display_rows();
+                return $this->get_display_rows();
             } else {
-                    echo '<tr class="no-items"><td class="colspanchange" colspan="' . $this->get_column_count() . '">';
-                    $this->no_items();
-                    echo '</td></tr>';
+                return sprintf('<tr class="no-items"><td class="colspanchange" colspan="%s">%s</td></tr>',$this->get_column_count(),$this->no_items());
             }
     }
     
@@ -446,9 +428,13 @@ class WP_SoundSystem_Tracklist_Table{
      * @since 3.1.0
      * @access public
      */
-    public function display_rows() {
-            foreach ( $this->items as $item )
-                    $this->single_row( $item );
+    public function get_display_rows() {
+        $rows = array();
+        $rows_str = null;
+        foreach ( $this->items as $item ){
+            $rows[] = $this->get_single_row( $item );
+        }
+        return implode("\n",$rows);
     }
     
     /**
@@ -459,24 +445,23 @@ class WP_SoundSystem_Tracklist_Table{
      *
      * @param object $item The current item
      */
-    public function single_row( $item ) {
+    public function get_single_row( $item ) {
         
-            $sources = $item->sources;
+        $sources = $item->sources;
 
-            $classes = array();
-            if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';
-        
-            $attr_arr = array(
-                'class' =>                      implode(' ',$classes),
-                'data-wpsstm-track-id' =>       $item->post_id,
-                'data-wpsstm-sources-count' =>  count($sources),
-                'itemtype' =>                   'http://schema.org/MusicRecording',
-                'itemprop' =>                   'track',
-            );
-        
-            printf( '<tr itemscope %s>',wpsstm_get_html_attr($attr_arr) );
-            $this->single_row_columns( $item );
-            echo '</tr>';
+        $classes = array();
+        if ( !$item->validate_track() ) $classes[] = 'wpsstm-invalid-track';
+
+        $attr_arr = array(
+            'class' =>                      implode(' ',$classes),
+            'data-wpsstm-track-id' =>       $item->post_id,
+            'data-wpsstm-sources-count' =>  count($sources),
+            'itemtype' =>                   'http://schema.org/MusicRecording',
+            'itemprop' =>                   'track',
+        );
+
+        return sprintf( '<li itemscope %s>%s</li>',wpsstm_get_html_attr($attr_arr),$this->get_single_row_columns( $item ) );
+
     }
     
     /**
@@ -487,48 +472,54 @@ class WP_SoundSystem_Tracklist_Table{
      *
      * @param object $item The current item
      */
-    protected function single_row_columns( $item ) {
-            list( $columns, $hidden ) = $this->get_column_info();
+    protected function get_single_row_columns( $item ) {
+        list( $columns, $hidden ) = $this->get_column_info();
 
-            foreach ( $columns as $column_name => $column_display_name ) {
-                
-                $attr_str = null;
-                $attr = array();
+        $columns_html = array();
 
-                $classes = array(
-                    $column_name,
-                    'column-'.$column_name
-                );
+        foreach ( $columns as $column_name => $column_display_name ) {
 
-                $attr['class'] = implode(' ',$classes);
+            $attr_str = null;
+            $attr = array();
 
-                $attr['style'] = ( in_array( $column_name, $hidden ) ) ? 'display:none;' : null;
+            $classes = array(
+                'wpsstm-track-column',
+                $column_name,
+                'column-'.$column_name
+            );
 
-                switch($column_name){
-                    case 'trackitem_artist':
-                        $attr['itemprop'] = 'byArtist';
-                    break;
-                    case 'trackitem_track':
-                        $attr['itemprop'] = 'name';
-                    break;
-                    case 'trackitem_album':
-                        $attr['itemprop'] = 'inAlbum';
-                    break;
-                    case 'trackitem_image':
-                        $attr['itemprop'] = 'image';
-                    break;
-                }
+            $attr['class'] = implode(' ',$classes);
 
-                $attr_str = wpsstm_get_html_attr($attr);
+            $attr['style'] = ( in_array( $column_name, $hidden ) ) ? 'display:none;' : null;
 
-                if ( method_exists( $this, 'column_' . $column_name ) ) {
-                    $content = call_user_func( array( $this, 'column_' . $column_name ), $item );
-                }else {
-                    $content = $this->column_default( $item, $column_name );
-                }
-                
-                printf('<td %s>%s</td>',$attr_str,$content);
+            switch($column_name){
+                case 'trackitem_artist':
+                    $attr['itemprop'] = 'byArtist';
+                break;
+                case 'trackitem_track':
+                    $attr['itemprop'] = 'name';
+                break;
+                case 'trackitem_album':
+                    $attr['itemprop'] = 'inAlbum';
+                break;
+                case 'trackitem_image':
+                    $attr['itemprop'] = 'image';
+                break;
             }
+
+            $attr_str = wpsstm_get_html_attr($attr);
+
+            if ( method_exists( $this, 'column_' . $column_name ) ) {
+                $content = call_user_func( array( $this, 'column_' . $column_name ), $item );
+            }else {
+                $content = $this->column_default( $item, $column_name );
+            }
+
+            $columns_html[] = sprintf('<span %s>%s</span>',$attr_str,$content);
+
+            
+        }
+        return implode("\n",$columns_html);
     }
     
     function column_default($item, $column_name){

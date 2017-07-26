@@ -56,6 +56,8 @@ abstract class WP_SoundSystem_Tracklist{
             $this->updated_time = get_post_modified_time( 'U', false, $post_id );
             $this->location = get_permalink($post_id);
             
+            $this->tracklist_type = $this->get_tracklist_type();
+            
         }
 
         $this->options = array_replace_recursive((array)$this->options_default,$this->options); //last one has priority
@@ -88,6 +90,28 @@ abstract class WP_SoundSystem_Tracklist{
         
         $this->did_query_tracks = true;
         
+    }
+    
+    function get_tracklist_type(){
+        if (!$this->post_id) return;
+        $tracklist_post_type = get_post_type($this->post_id);
+
+        switch ($tracklist_post_type){
+            case wpsstm()->post_type_track:
+                $tracklist_type = 'track';
+            break;
+            case wpsstm()->post_type_album:
+                $tracklist_type = 'album';
+            break;
+            case wpsstm()->post_type_playlist:
+                $tracklist_type = 'static-playlist';
+            break;
+            case wpsstm()->post_type_live_playlist:
+                $tracklist_type = 'live-playlist';
+            break;
+        }
+        
+        return $tracklist_type;
     }
     
     function filter_subtrack_ids($ordered_ids,$args = array()){
@@ -359,6 +383,12 @@ abstract class WP_SoundSystem_Tracklist{
     */
     
     function display_notices($slug){
+        echo $this->get_notices($slug);
+    }
+    
+    function get_notices($slug){
+        
+        $notices = array();
 
         foreach ($this->notices as $notice){
             if ( $notice['slug'] != $slug ) continue;
@@ -372,8 +402,10 @@ abstract class WP_SoundSystem_Tracklist{
             
             //$notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
             
-            printf('<p %s><strong>%s</strong></p>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
+            $notices[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
         }
+        
+        return implode("\n",$notices);
     }
     
     function love_tracklist($do_love){
@@ -414,17 +446,19 @@ abstract class WP_SoundSystem_Tracklist{
     
     function get_tracklist_actions(){
         
+        $tracklist_type = get_post_type($this->post_id);
+        
+        //no tracklist actions if this is a "track" tracklist
+        if ($tracklist_type == wpsstm()->post_type_track ) return;
+        
         /*
         Capability check
         */
-        
-        $temp_status = wpsstm()->temp_status;
-        
-        $is_live_tracklist =  property_exists($this,'feed_url');
+
+        $is_live_tracklist =  $this->tracklist_type == 'live-playlist';
         
         //playlist
         $permalink = get_permalink($this->post_id);
-        $tracklist_type = get_post_type($this->post_id);
         $tracklist_status = get_post_status($this->post_id);
         $tracklist_obj = get_post_type_object($tracklist_type);
         $current_status_obj = get_post_status_object( $tracklist_status );

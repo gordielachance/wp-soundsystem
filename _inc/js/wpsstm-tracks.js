@@ -429,12 +429,12 @@ class WpsstmTrack {
             $(bottom_trackinfo_el).attr(this.name, this.value);
         });
         
-        var table = $('<table></table');
+        var list = $('<ul class="wpsstm-tracklist-entries"></ul>');
 
         var row = self.track_el.clone();
-        $(table).append(row);
+        $(list).append(row);
 
-        $(bottom_trackinfo_el).html(table);
+        $(bottom_trackinfo_el).html(list);
         
         $(bottom_el).show();//show in not done yet
     }

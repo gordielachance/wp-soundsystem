@@ -2,15 +2,11 @@
 @import "wpsstm-shared";
 
 [itemprop="track"]{
+    
     [itemprop="byArtist"]{
-        @extend .truncate;
         font-weight: bold;
     }
-    [itemprop="name"]:before{
-        @extend .truncate;
-    }
     [itemprop="inAlbum"]{
-        @extend .truncate;
         font-size:.8em;
     }
 

@@ -42,7 +42,7 @@ get_header(); ?>
 
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
-                        if ( $actions = $track->get_track_popup_actions($admin_action) ){
+                        if ( $actions = $track->get_track_popup_actions($tracklist) ){
                             $list = wpsstm_get_actions_list($actions,'track');
                             echo $list;
                         }
