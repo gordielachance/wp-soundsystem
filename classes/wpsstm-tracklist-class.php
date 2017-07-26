@@ -582,8 +582,7 @@ abstract class WP_SoundSystem_Tracklist{
         }
         
         //wizard
-        //TO FIX CAP
-        //if ($can_wizard){
+        if ($can_edit_tracklist){
             $actions['wizard'] = array(
                 'icon' =>       '<i class="fa fa-magic" aria-hidden="true"></i>',
                 'text' =>      __('Wizard', 'wpsstm'),
@@ -591,7 +590,7 @@ abstract class WP_SoundSystem_Tracklist{
                 'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
 
             );
-        //}
+        }
         
         //context
         switch($context){

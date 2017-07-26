@@ -134,6 +134,8 @@ class WP_SoundSystem_Core_Tracks{
     Add new track when url is 'wordpress/wpsstm_track/new/'
     */
     
+    //TO FIX is this required ?
+    
     function add_new_track(){
         $is_new_track = get_query_var($this->qvar_new_track);
         if (!$is_new_track) return;
@@ -161,8 +163,7 @@ class WP_SoundSystem_Core_Tracks{
         
         wp_redirect( $track_admin_url );
         exit;
-        
-        
+
     }
     
     /**

@@ -79,7 +79,7 @@ get_header(); ?>
                         }
                 
                         if ($tab_content){
-                            printf('<div class="wpsstm-track-admin-%s">%s</div>',$admin_action,$tab_content);
+                            printf('<div id="wpsstm-track-admin-%s" class="wpsstm-track-admin>%s</div>',$admin_action,$tab_content);
                         }
                         
                 

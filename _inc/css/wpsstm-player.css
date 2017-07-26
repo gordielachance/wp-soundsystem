@@ -14,7 +14,7 @@
 }
 
 /* line 16, ../scss/_wpsstm-shared.scss */
-.wpsstm-can-click, #wpsstm-bottom-wrapper .wpsstm-bottom-notice .wpsstm-close-notice, #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper #wpsstm-bottom-track-info .wpsstm-tracklist-entries li[itemprop="track"] .trackitem_order {
+.wpsstm-can-click, #wpsstm-bottom-wrapper .wpsstm-bottom-notice .wpsstm-close-notice, #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper #wpsstm-bottom-track-info .wpsstm-tracklist-entries li[itemprop="track"] .trackitem_position {
   cursor: pointer;
   cursor: hand;
 }
@@ -74,7 +74,11 @@ ul.wpsstm-actions-list {
 ul.wpsstm-actions-list li {
   display: inline-block;
 }
-/* line 67, ../scss/_wpsstm-shared.scss */
+/* line 65, ../scss/_wpsstm-shared.scss */
+ul.wpsstm-actions-list li a label {
+  padding-left: .25em;
+}
+/* line 73, ../scss/_wpsstm-shared.scss */
 ul.wpsstm-actions-list li.error, ul.wpsstm-actions-list li.error a {
   color: red;
 }
@@ -82,48 +86,48 @@ ul.wpsstm-actions-list li.error, ul.wpsstm-actions-list li.error a {
 /*
 Thickbox popups
 */
-/* line 79, ../scss/_wpsstm-shared.scss */
+/* line 85, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #sidebar, body.wpsstm_track-template-admin #colophon, body.wpsstm_tracklist-template-admin #sidebar, body.wpsstm_tracklist-template-admin #colophon {
   display: none;
 }
-/* line 82, ../scss/_wpsstm-shared.scss */
+/* line 88, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #content, body.wpsstm_tracklist-template-admin #content {
   width: 100%;
   margin: 0;
 }
-/* line 86, ../scss/_wpsstm-shared.scss */
+/* line 92, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #main, body.wpsstm_tracklist-template-admin #main {
   margin: 0;
   padding: 0;
 }
-/* line 90, ../scss/_wpsstm-shared.scss */
+/* line 96, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #wpadminbar, body.wpsstm_tracklist-template-admin #wpadminbar {
   display: none;
 }
-/* line 95, ../scss/_wpsstm-shared.scss */
+/* line 101, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry, body.wpsstm_tracklist-template-admin .hentry {
   margin: 0;
   padding: 0;
 }
-/* line 99, ../scss/_wpsstm-shared.scss */
+/* line 105, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul, body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul {
   list-style: none;
 }
-/* line 101, ../scss/_wpsstm-shared.scss */
+/* line 107, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li, body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li {
   display: inline;
 }
-/* line 103, ../scss/_wpsstm-shared.scss */
+/* line 109, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active), body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
 }
 
-/* line 112, ../scss/_wpsstm-shared.scss */
+/* line 118, ../scss/_wpsstm-shared.scss */
 #TB_window {
   font-family: sans-serif;
 }
-/* line 117, ../scss/_wpsstm-shared.scss */
+/* line 123, ../scss/_wpsstm-shared.scss */
 #TB_window #TB_ajaxContent {
   margin: 0;
   padding: 1em;

@@ -406,7 +406,7 @@ class WP_SoundSystem_Tracklist_Table{
             if ( $this->has_items() ) {
                 return $this->get_display_rows();
             } else {
-                return sprintf('<tr class="no-items"><td class="colspanchange" colspan="%s">%s</td></tr>',$this->get_column_count(),$this->no_items());
+                return sprintf('<li class="no-items"><p class="wpsstm-notice">%s</p></li>',$this->no_items_label);
             }
     }
     
@@ -580,18 +580,6 @@ class WP_SoundSystem_Tracklist_Table{
             $hidden = array_intersect( array_keys( $columns ), array_filter( $hidden ) );
             return count( $columns ) - count( $hidden );
     }
-    
-    /**
-     * Message to be displayed when there are no items
-     *
-     * @since 3.1.0
-     * @access public
-     */
-    public function no_items() {
-        echo $this->no_items_label;
-    }
-    
-    
-    
+
 }
 ?>

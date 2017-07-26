@@ -37,7 +37,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                         switch($admin_action){
                             case 'share':
 
-                                $text = __("Here's the link to this playlist:","wpsstm");
+                                $text = __("Use this link to share this playlist:","wpsstm");
                                 $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,get_permalink());
                                 
                             break;
@@ -58,7 +58,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                         }
                 
                         if ($tab_content){
-                            printf('<div class="wpsstm-tracklist-admin-%s">%s</div>',$admin_action,$tab_content);
+                            printf('<div id="wpsstm-tracklist-admin-%s" class="wpsstm-tracklist-admin">%s</div>',$admin_action,$tab_content);
                         }
                 
                         ?>
