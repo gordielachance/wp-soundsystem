@@ -627,7 +627,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         //get all orphans
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $orphan_ids = $tracklist->get_tracklist_orphan_ids();
+        $orphan_ids = $tracklist->get_orphan_track_ids();
 
         foreach ((array)$orphan_ids as $track_id){
             wp_update_post( array(
@@ -650,7 +650,7 @@ class WP_SoundSystem_Core_Tracklists{
         //get all orphans (with any post status)
         $statii = array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash', wpsstm()->temp_status);
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $orphan_ids = $tracklist->get_tracklist_orphan_ids(array('post_status'=>$statii));
+        $orphan_ids = $tracklist->get_orphan_track_ids(array('post_status'=>$statii));
         
         foreach((array)$orphan_ids as $track_id){
             wp_delete_post( $track_id, true );

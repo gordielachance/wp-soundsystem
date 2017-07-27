@@ -31,7 +31,7 @@ abstract class WP_SoundSystem_Tracklist{
     
     static $paged_var = 'tracklist_page';
 
-    abstract protected function get_subtrack_ids();
+    abstract protected function get_subtrack_ids(); //TO FIX TO CHECK get_subtrack_ids should run a query that uses the subtracks query var.  Maybe we could use a single method for this.
     abstract protected function append_subtrack_ids($append_ids);
     abstract protected function remove_subtrack_ids($remove_ids);
     abstract protected function set_subtrack_ids($ordered_ids = null);
@@ -733,6 +733,31 @@ abstract class WP_SoundSystem_Tracklist{
         //delete backup
         delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old' );
         delete_post_meta( $this->post_id, wpsstm_live_playlists()->scraper_meta_name.'_old' );
+    }
+    
+    function get_orphan_track_ids(){
+        $orphan_ids = array();
+        $subtrack_ids = $this->get_subtrack_ids();
+
+        //get tracks to flush
+        foreach ((array)$subtrack_ids as $track_id){
+
+            $track = new WP_SoundSystem_Track($track_id);
+
+            //ignore if post is attached to any (other than this one) playlist
+            $tracklist_ids = $track->get_parent_ids();
+            if(($key = array_search($this->post_id, $tracklist_ids)) !== false) unset($tracklist_ids[$key]);
+            if ( !empty($tracklist_ids) ) continue;
+
+            //ignore if post is favorited by any user
+            $loved_by = $track->get_track_loved_by();
+            if ( !empty($loved_by) ) continue;
+
+            $orphan_ids[] = $track_id;
+        }
+        
+        return $orphan_ids;
+
     }
 
 }

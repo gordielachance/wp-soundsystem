@@ -873,42 +873,23 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
     }
 
-
     /*
     Flush temporary tracks
     */
     function flush_live_subtracks(){
 
         $force_delete = false;
-        $flush_track_ids = array();
+        $flushed = 0;
         
-        $subtrack_ids = $this->get_subtrack_ids();
+        $orphan_ids = $this->get_orphan_track_ids();
         
-        if ( $subtrack_ids) {
-
-            //get tracks to flush
-            foreach ((array)$subtrack_ids as $track_id){
-
-                $track = new WP_SoundSystem_Track($track_id);
-
-                //ignore if post is attached to any (other than this one) playlist
-                $tracklist_ids = $track->get_parent_ids();
-                if(($key = array_search($this->post_id, $tracklist_ids)) !== false) unset($tracklist_ids[$key]);
-                if ( !empty($tracklist_ids) ) continue;
-
-                //ignore if post is favorited by any user
-                $loved_by = $track->get_track_loved_by();
-                if ( !empty($loved_by) ) continue;
-
-                $flush_track_ids[] = $track_id;
-            }
-
-            foreach ((array)$flush_track_ids as $track_id){
-                wp_delete_post( $track_id, $force_delete );
+        foreach ((array)$orphan_ids as $track_id){
+            if ( wp_delete_post( $track_id, $force_delete ) ){
+                $flushed += 1;
             }
         }
 
-        wpsstm()->debug_log(array('subtracks'=>count($subtrack_ids),'flushed'=>count($flush_track_ids)),"WP_SoundSystem_Remote_Tracklist::flush_live_subtracks()");
+        wpsstm()->debug_log(array('subtracks'=>count($orphan_ids),'flushed'=>$flushed),"WP_SoundSystem_Remote_Tracklist::flush_live_subtracks()");
 
         return true;
 
