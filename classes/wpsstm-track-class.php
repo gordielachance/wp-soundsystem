@@ -33,13 +33,14 @@ class WP_SoundSystem_Track{
             $this->mbid = wpsstm_get_post_mbid($post_id);
             $this->source_ids = wpsstm_get_post_source_ids($post_id);
             
+
+            //FOR TESTS TO FIX REMOVE
             /*
-            FOR TESTS TO FIX REMOVE
-            if($post_id == 23844){
+            if($post_id == 23842){
                 $this->populate_auto_sources();
             }
             */
-            
+
         }
         
     }
@@ -76,11 +77,16 @@ class WP_SoundSystem_Track{
             wpsstm_tracks()->qvar_track_lookup =>   $this->title
         );
 
+        if ($this->post_id){
+            $query_args['post__not_in'] = array($this->post_id);
+        }
+
         if ($this->album){
-            $query_args[wpsstm_albums()->qvar_album_lookup] = $this->album
+            $query_args[wpsstm_albums()->qvar_album_lookup] = $this->album;
         }
 
         $query = new WP_Query( $query_args );
+
         return $query->posts;
     }
     

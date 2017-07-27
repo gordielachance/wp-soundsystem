@@ -488,6 +488,11 @@ class WP_SoundSystem_Source {
             )
         );
 
+        if ($this->post_id){
+            $args['post__not_in'] = array($this->post_id);
+        }
+
+
         $query = new WP_Query( $args );
         return $query->posts;
     }
@@ -501,12 +506,10 @@ class WP_SoundSystem_Source {
         }
         
         //check if this source exists already
-
         if ( $duplicate_ids = $this->get_source_duplicates() ){
             $this->post_id = $duplicate_ids[0];
             return $this->post_id;
         }
-
 
         $post_source_args = array(
             'post_title' =>     $this->title,
