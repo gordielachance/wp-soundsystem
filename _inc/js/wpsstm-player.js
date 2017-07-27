@@ -194,7 +194,7 @@ class WpsstmPagePlayer {
         var tracklist_obj = self.get_tracklist_obj(tracklist_idx);
 
         //cannot play this tracklist
-        if (!tracklist_obj.can_play) {
+        if (!tracklist_obj.tracklist_can_play) {
             self.play_next_tracklist();
             return;
         }
@@ -265,7 +265,7 @@ class WpsstmPagePlayer {
             queue_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(queue_tracklist_idx);
             var check_tracklist = self.get_tracklist_obj(queue_tracklist_idx);
 
-            if (check_tracklist.can_play){
+            if (check_tracklist.tracklist_can_play){
                 new_tracklist = check_tracklist;
                 break;
             }
@@ -308,7 +308,7 @@ class WpsstmPagePlayer {
             queue_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(queue_tracklist_idx);
             var check_tracklist = self.get_tracklist_obj(queue_tracklist_idx);
 
-            if ( check_tracklist.can_play){
+            if ( check_tracklist.tracklist_can_play){
                 new_tracklist = check_tracklist;
                 break;
             }

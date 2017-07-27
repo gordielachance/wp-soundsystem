@@ -49,5 +49,5 @@ foreach ( $tracklist->tracks as $track){
 
 echo $xspf->output();
 
-die();
+exit();
 

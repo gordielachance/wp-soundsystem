@@ -100,8 +100,7 @@ class WP_SoundSystem_Track{
         wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
 
         if ( $duplicates = $this->get_track_duplicates() ){
-            $first = $duplicates[0];
-            $this->__construct( $auto_post_id );
+            $this->__construct( $duplicates[0] );
         } 
 
         $this->did_post_id_lookup = true;

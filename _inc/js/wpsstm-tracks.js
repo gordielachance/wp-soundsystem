@@ -187,7 +187,7 @@ class WpsstmTrack {
         self.post_id =              self.track_el.attr('data-wpsstm-track-id');
         self.sources_request =      null;
         self.did_sources_request =  false;
-        self.can_play =             true; //false when no source have been populated or that none are playable
+        self.track_can_play =       true; //false when no source have been populated or that none are playable
         self.sources =              [];
         self.current_source_idx =   undefined;
        
@@ -264,7 +264,7 @@ class WpsstmTrack {
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
         //cannot play this track
-        if (!self.can_play) {
+        if (!self.track_can_play) {
             tracklist_obj.play_next_track();
             return;
         }
@@ -342,7 +342,7 @@ class WpsstmTrack {
             promise.fail(function() {
 
                 track_instances.addClass('error');
-                self.can_play = false;
+                self.track_can_play = false;
 
                 console.log("sources request failed for track #" + self.track_idx);
                 
@@ -574,7 +574,7 @@ class WpsstmTrack {
         });
 
         if (self.sources.length){ //we've got sources
-            self.can_play = true;
+            self.track_can_play = true;
             //self.debug("populate_html_sources(): " +self.sources.length);
             $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event
         }
@@ -642,7 +642,7 @@ class WpsstmTrack {
         
         self.debug("skip_bad_source(): #" + source_idx + ": " +source_obj.src);
 
-        source_obj.can_play_source = false;
+        source_obj.source_can_play = false;
         self.current_source_idx = undefined;
         
         var source_el = source_obj.get_source_li_el();
@@ -657,7 +657,7 @@ class WpsstmTrack {
         var sources_reordered = sources_after.concat(sources_before);
 
         $( sources_reordered ).each(function(i, source_attr) {
-            if (!source_attr.can_play_source) return true; //continue;
+            if (!source_attr.source_can_play) return true; //continue;
             new_source_idx = source_attr.source_idx;
             return false;//break
         });
@@ -682,7 +682,7 @@ class WpsstmTrack {
                 self.debug("skip_bad_source() - No valid sources found - go to next track if possible");
                 var track_instances = self.get_track_instances();
                 track_instances.addClass('error');
-                self.can_play = false;
+                self.track_can_play = false;
 
                 //No more sources - Play next song if any
                 var tracklist = wpsstm_page_player.get_tracklist_obj(this.tracklist_idx);

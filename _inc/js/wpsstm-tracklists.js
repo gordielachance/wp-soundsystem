@@ -294,7 +294,7 @@ class WpsstmTracklist {
         self.tracks =                   [];
         self.tracks_shuffle_order =     [];
         self.did_tracklist_request =    true;
-        self.can_play =                 true;
+        self.tracklist_can_play =       true;
         self.populate_tracklist(tracklist_el);
 
     }
@@ -423,7 +423,7 @@ class WpsstmTracklist {
         ////
         
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
-            self.can_play = false;
+            self.tracklist_can_play = false;
             self.tracklist_el.addClass('refresh-error');
             self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
             console.log("get_tracklist_request failed for tracklist #" + self.tracklist_idx);
@@ -502,7 +502,7 @@ class WpsstmTracklist {
             queue_track_idx = self.get_maybe_shuffle_track_idx(queue_track_idx);
             var check_track = self.get_track_obj(queue_track_idx);
 
-            if (check_track.can_play){
+            if (check_track.track_can_play){
                 new_track = check_track;
                 break;
             }
@@ -518,7 +518,7 @@ class WpsstmTracklist {
     
     play_next_track(){
         var self = this;
-        
+
         var current_track_idx = self.get_maybe_unshuffle_track_idx(self.current_track_idx);
         var queue_track_idx = current_track_idx;
         var last_track_idx = self.tracks.length -1;
@@ -537,7 +537,7 @@ class WpsstmTracklist {
             queue_track_idx = self.get_maybe_shuffle_track_idx(queue_track_idx);
             var check_track = self.get_track_obj(queue_track_idx);
 
-            if ( check_track.can_play){
+            if ( check_track.track_can_play){
                 new_track = check_track;
                 break;
             }

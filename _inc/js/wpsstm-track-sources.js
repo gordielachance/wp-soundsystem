@@ -167,7 +167,7 @@ class WpsstmTrackSource {
         
         self.src =    $(source_html).attr('data-wpsstm-source-src');
         self.type =    $(source_html).attr('data-wpsstm-source-type');
-        self.can_play_source = true;
+        self.source_can_play = true;
         
         //self.debug("new WpsstmTrackSource");
 
