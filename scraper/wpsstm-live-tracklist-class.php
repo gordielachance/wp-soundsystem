@@ -122,7 +122,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
 
     function get_subtrack_ids($args = null){
-        return parent::get_subtrack_ids('live', $args);
+        return parent::get_type_subtrack_ids('live', $args);
     }
     
     /*
@@ -130,44 +130,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
 
     function set_subtrack_ids($ordered_ids = null){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
-        }
-
-        //capability check
-        $post_type = get_post_type($this->post_id);
-        $tracklist_obj = get_post_type_object($post_type);
-        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-        
-        if ($ordered_ids){
-            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
-            $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
-            $ordered_ids = array_unique($ordered_ids);
-        }
-
-        //set post status to 'publish' if it is not done yet (it could be a temporary post)
-        //TO FIX TO CHECK
-        foreach((array)$ordered_ids as $track_id){
-            $track_post_type = get_post_status($track_id);
-            if ($track_post_type != 'publish'){
-                wp_update_post(array(
-                    'ID' =>             $track_id,
-                    'post_status' =>    'publish'
-                ));
-            }
-        }
-        
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Remote_Tracklist::set_subtrack_ids()"); 
-        
-        if ($ordered_ids){
-            return update_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname,$ordered_ids);
-        }else{
-            return delete_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname);
-        }
-
+        return parent::set_type_subtrack_ids('live',$ordered_ids);
     }
     
     protected function get_default_options(){
