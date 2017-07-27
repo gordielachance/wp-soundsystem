@@ -63,7 +63,7 @@ class WP_SoundSystem_Source {
         return $query->posts;
     }
     
-    function save_source(){
+    function save_source($args = null){
         
         $this->sanitize_source();
         
@@ -76,21 +76,35 @@ class WP_SoundSystem_Source {
             $this->post_id = $duplicate_ids[0];
             return $this->post_id;
         }
+        
+        $default_args = array(
+            'post_status' =>    wpsstm()->temp_status,
+            'post_author' =>    get_current_user_id(),
+        );
+        $args = wp_parse_args((array)$args,$default_args);
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $required_cap = $post_type_obj->cap->edit_posts;
 
-        $post_source_args = array(
+        if ( !user_can($args['post_author'],$required_cap) ){
+            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
+        }
+
+        $required_args = array(
             'post_title' =>     $this->title,
             'post_type' =>      wpsstm()->post_type_source,
-            'post_status' =>    wpsstm()->temp_status,
-            'post_author' =>    get_current_user_id(), //TO FIX guest if user is not logged ?
             'post_parent' =>    $this->track_id,
             'meta_input' =>     array(
                 wpsstm_sources()->url_metakey => $this->url,
             ),
         );
+            
+        $args = wp_parse_args($required_args,$args);
 
-        $this->post_id = wp_insert_post( $post_source_args );
+        $this->post_id = wp_insert_post( $args );
 
-        wpsstm()->debug_log(json_encode(array('args'=>$post_source_args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
+        wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
         
         return $this->post_id;
         

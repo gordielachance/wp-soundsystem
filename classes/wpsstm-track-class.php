@@ -495,7 +495,12 @@ class WP_SoundSystem_Track{
         }
         
         foreach((array)$sources as $source){
-            $post_id = $source->save_source();
+            
+            $args = array(
+                'post_author'   => wpsstm()->get_options('community_user_id'),
+            );
+            
+            $post_id = $source->save_source($args);
             if ( is_wp_error($post_id) ) continue;
             if ( in_array($post_id,$this->source_ids) ) continue; //already populated
             $this->source_ids[] = $post_id;

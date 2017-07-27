@@ -69,7 +69,7 @@ class WP_SoundSystem_Core_Playlists{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','editor','author','thumbnail', 'comments' ),
+            'supports' => array( 'author','title','editor','author','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,

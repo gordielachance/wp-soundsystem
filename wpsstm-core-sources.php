@@ -86,7 +86,7 @@ class WP_SoundSystem_Core_Sources{
         $args = array( 
             'labels' => $labels,
             'hierarchical' => true, //TO FIX not working
-            'supports' => array( 'title'),
+            'supports' => array( 'author','title'),
             'taxonomies' => array(),
             'public' => true,
             'show_ui' => true,

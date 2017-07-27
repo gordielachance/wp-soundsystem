@@ -180,8 +180,37 @@ class WP_SoundSystem_Core_Wizard{
     function wizard_page_content($content){
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
         $form_content = $this->get_wizard_form();
-        $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
+        $error = null;
         
+        //capability check
+        if ( !$user_id = get_current_user_id() ){
+            if ( wpsstm()->get_options('visitors_wizard') ){
+                $user_id = wpsstm()->get_options('community_user_id');
+            }
+        }
+
+        if (!$user_id){
+            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            $error = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+        }else{
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+            $required_cap = $post_type_obj->cap->edit_posts;
+            if ( !user_can($user_id,$required_cap) ){
+                $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+                $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+                $wp_auth_text = __("You don't have the capability required to use the frontend wizard.",'wpsstm');
+                $error = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+            }
+        }
+
+        if ( $error ){
+            $form = $error;
+        }else{
+            $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
+        }
+
         $last_entries = wpsstm_wizard()->frontend_wizard_last_entries();
         return $content.$form.$last_entries;
         
@@ -314,9 +343,9 @@ class WP_SoundSystem_Core_Wizard{
         //TO FIX limit for post creations ? (spam/bots, etc.)
         //TO FIX community author
         //user check - guest user
-        $user_id = $guest_user_id = null;
+        $user_id = $community_user_id = null;
         if ( !$user_id = get_current_user_id() ){
-            $user_id = $guest_user_id = wpsstm()->get_options('guest_user_id');
+            $user_id = $community_user_id = wpsstm()->get_options('community_user_id');
         }
 
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);

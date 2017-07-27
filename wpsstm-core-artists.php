@@ -163,7 +163,7 @@ class WP_SoundSystem_Core_Artists{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','thumbnail', 'comments' ),
+            'supports' => array( 'author','title','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,

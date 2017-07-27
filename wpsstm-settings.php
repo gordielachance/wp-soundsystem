@@ -138,9 +138,9 @@ class WP_SoundSystem_Settings {
                 
             }
             //guest user ID
-            if ( isset ($input['guest_user_id']) && ctype_digit($input['guest_user_id']) ){
-                if ( get_userdata( $input['guest_user_id'] ) ){ //check user exists
-                    $new_input['guest_user_id'] = $input['guest_user_id'];
+            if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
+                if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
+                    $new_input['community_user_id'] = $input['community_user_id'];
                 }
             }
 
@@ -218,6 +218,24 @@ class WP_SoundSystem_Settings {
         );
         
         */
+        
+        /*
+        Community user
+        */
+        add_settings_section(
+            'community_user_settings', // ID
+            __('Community user','wpsstm'), // Title
+            array( $this, 'section_community_user_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'community_user_id', 
+            __('Community user ID','wpsstm'), 
+            array( $this, 'community_user_id_callback' ), 
+            'wpsstm-settings-page', 
+            'community_user_settings'
+        );
         
         /*
         Player
@@ -321,9 +339,9 @@ class WP_SoundSystem_Settings {
         );
         
         add_settings_field(
-            'guest_user_id', 
-            __('Guest ID','wpsstm'), 
-            array( $this, 'guest_user_id_callback' ), 
+            'visitors_wizard', 
+            __('Enable for visitors','wpsstm'), 
+            array( $this, 'visitors_wizard_callback' ), 
             'wpsstm-settings-page', 
             'frontend_wizard_settings'
         );
@@ -583,10 +601,11 @@ class WP_SoundSystem_Settings {
         $option = wpsstm()->get_options('autosource');
 
         printf(
-            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s <small>%s</small>',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("If no source is set for the track, try to find an online source automatically.","wpsstm")
+            __("If no source is set for the track, try to find an online source automatically.","wpsstm"),
+            __("This requires the community user ID to be set.","wpsstm")
         );
     }
     
@@ -649,6 +668,22 @@ class WP_SoundSystem_Settings {
         );
     }
     
+    function section_community_user_desc(){
+        $desc = array();
+        $desc[]= __("The plugin requires a community user to enable some of the plugin's features, like the frontend wizard or the auto-source.","wpsstm");
+
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo implode("\n",$desc);
+        
+    }
+    
     function section_frontend_wizard_desc(){
         _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
     }
@@ -669,20 +704,25 @@ class WP_SoundSystem_Settings {
         );
     }
     
-    function guest_user_id_callback(){
-        $option = (int)wpsstm()->get_options('guest_user_id');
-        
-        $help = array();
-        $help[]= __("If the visitor is not logged, use this Wordpress user to create the loaded playlist.","wpsstm");
-        $help[]= __("The capability 'edit_post' must be enabled for this user (Contributor role).","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
-        
+    function visitors_wizard_callback(){
+        $option = wpsstm()->get_options('visitors_wizard');
+
         printf(
-            '<input type="number" name="%s[guest_user_id]" size="4" min="0" value="%s" /><br/>%s',
+            '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s <small>%s</small>',
             wpsstm()->meta_name_options,
-            $option,
-            $help
+            checked( $option, 'on', false ),
+            __("Enable frontend wizard for non-logged users.","wpsstm"),
+            __("This requires the community user ID to be set.","wpsstm")
+        );
+    }
+    
+    function community_user_id_callback(){
+        $option = (int)wpsstm()->get_options('community_user_id');
+
+        printf(
+            '<input type="number" name="%s[community_user_id]" size="4" min="0" value="%s" />',
+            wpsstm()->meta_name_options,
+            $option
         );
     }
     

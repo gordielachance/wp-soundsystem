@@ -84,7 +84,8 @@ class WP_SoundSystem {
             'mb_suggest_bookmarks'              => 'on',
             'live_playlists_enabled'            => 'off',
             'frontend_scraper_page_id'          => null,
-            'guest_user_id'                     => null,
+            'visitors_wizard'                   => 'on',
+            'community_user_id'                 => null,
             'live_playlists_cache_min'          => 15,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'lastfm_client_id'                  => null,
@@ -110,8 +111,8 @@ class WP_SoundSystem {
         /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
         https://wordpress.stackexchange.com/a/126206/70449
         
-        if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['guest_user_id'] = null;
-        if ( $this->options['guest_user_id'] && !get_userdata( $this->options['guest_user_id'] ) ) $this->options['guest_user_id'] = null;
+        if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
+        if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
         if ( $this->options['lastfm_bot_user_id'] && !get_userdata( $this->options['lastfm_bot_user_id'] ) ) $this->options['lastfm_bot_user_id'] = null;
         */
     }
