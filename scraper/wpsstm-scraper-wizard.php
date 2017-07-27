@@ -336,30 +336,34 @@ class WP_SoundSystem_Core_Wizard{
         //feed URL
         $feed_url = isset($_POST[ 'wpsstm_wizard' ]['feed_url']) ? trim($_POST[ 'wpsstm_wizard' ]['feed_url']) : null;
 
-        if ( !$feed_url ) return; //TO FIX SANITIZE + ADD NOTICE ?
-        
-        //capability check
-
-        //TO FIX limit for post creations ? (spam/bots, etc.)
-        //TO FIX community author
-        //user check - guest user
-        $user_id = $community_user_id = null;
-        if ( !$user_id = get_current_user_id() ){
-            $user_id = $community_user_id = wpsstm()->get_options('community_user_id');
+        if (filter_var($feed_url, FILTER_VALIDATE_URL) === false){
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('wizard_error'=>'invalid_url'),$link);
+            wp_redirect($link);
+            exit();
         }
 
+        //capability check
+        if ( !$user_id = get_current_user_id() ){
+            if ( wpsstm()->get_options('visitors_wizard') ){
+                $user_id = wpsstm()->get_options('community_user_id');
+            }
+        }
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
 
         if ( !user_can($user_id,$required_cap) ){
-            return new WP_Error( 'wpsstm_wizard_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('wizard_error'=>'missing_cap'),$link);
+            wp_redirect($link);
+            exit();
         }
 
         //create temporary tracklist
         $post_args = array(
             'post_type'     => wpsstm()->post_type_live_playlist,
             'post_status'   => wpsstm()->temp_status,
-            'post_author'   => $user_id, //TO FIX community user
+            'post_author'   => $user_id,
             'meta_input'   => array(
                 $this->frontend_wizard_meta_key => true, //TO FIX required ? TO CHECK
                 wpsstm_live_playlists()->feed_url_meta_name => $feed_url,
