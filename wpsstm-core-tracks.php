@@ -80,6 +80,10 @@ class WP_SoundSystem_Core_Tracks{
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         */
         
+        //delete sources when post is deleted
+        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
+        add_action( 'deleted_post', array($this,'delete_track_sources') );
+        
         //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
@@ -860,6 +864,35 @@ class WP_SoundSystem_Core_Tracks{
         
         header('Content-type: application/json');
         wp_send_json( $result ); 
+    }
+    
+    function trash_track_sources($post_id){
+        
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
+        
+        //get all sources
+        $source_ids = wpsstm_get_post_source_ids($post_id);
+        
+        foreach((array)$source_ids as $source_id){
+            wp_update_post(array(
+                'ID'    =>  $source_id,
+                'post_status'   =>  'trash'
+            ));
+        }
+
+    }
+    
+    function delete_track_sources($post_id){
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
+        
+        //get all sources (with any post status)
+        $statii = array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash', wpsstm()->temp_status);
+        $source_ids = wpsstm_get_post_source_ids($post_id,array('post_status'=>$statii));
+        
+        foreach((array)$source_ids as $source_id){
+            wp_delete_post( $source_id, true );
+        }
+        
     }
     
 }

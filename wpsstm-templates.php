@@ -46,16 +46,30 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
-function wpsstm_get_post_source_ids($post_id = null){
-    $sources_args = array(
-        'post_type' =>      wpsstm()->post_type_source,
+function wpsstm_get_post_source_ids($post_id = null,$args = null){
+    
+    $default_args = array(
         'post_status'=>     'any',
         'posts_per_page' => -1,
         'fields'  =>        'ids',
         'post_parent' =>    $post_id
     );
+    
+    if (!$args){
+        $args = $default_args;
+    }else{
+        $args = wp_parse_args($args,$default_args);
+    }
+    
+    $required_args = array(
+        'post_type' =>      wpsstm()->post_type_source,
+        'fields'  =>        'ids',
+        'post_parent' =>    $post_id
+    );
+    
+    $args = wp_parse_args($required_args,$args);
 
-    $query = new WP_Query( $sources_args );
+    $query = new WP_Query( $args );
     return $query->posts; //ids
 }
 
