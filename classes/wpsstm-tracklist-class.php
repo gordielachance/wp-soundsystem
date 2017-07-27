@@ -44,11 +44,7 @@ abstract class WP_SoundSystem_Tracklist{
         );
 
         $this->set_tracklist_pagination($pagination_args);
-        
-        $this->options_default = array(
-            'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'=>  ( wpsstm()->get_options('autosource') == 'on' ),
-        );
+
 
         if ($post_id){
             
@@ -68,6 +64,23 @@ abstract class WP_SoundSystem_Tracklist{
 
         $this->options = array_replace_recursive((array)$this->options_default,$this->options); //last one has priority
 
+    }
+    
+    function get_options($keys=null){
+        $options = array();
+
+        if ($keys){
+            return wpsstm_get_array_value($keys, $this->options);
+        }else{
+            return $this->options;
+        }
+    }
+    
+    protected function get_default_options(){
+        return array(
+            'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'=>  ( wpsstm()->get_options('autosource') == 'on' ),
+        );
     }
     
     function load_subtracks(){
@@ -353,10 +366,6 @@ abstract class WP_SoundSystem_Tracklist{
         }
 
         $this->pagination = $args;
-    }
-
-    function get_options($keys = null){
-        return wpsstm_get_array_value($keys,$this->options);
     }
     
     /*

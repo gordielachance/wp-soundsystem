@@ -217,7 +217,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
     
     protected function get_default_options(){
-        return array(
+        $live_options = array(
             'selectors' => array(
                 'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
                 'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="track"]'
@@ -231,16 +231,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'datas_cache_min'           => (int)wpsstm()->get_options('live_playlists_cache_min'), //time tracklist is cached - if set to null, will take plugin value
             'musicbrainz'               => wpsstm()->get_options('mb_auto_id') //should we use musicbrainz to get the tracks data ? - if set to null, will take plugin value
         );
-    }
-    
-    function get_options($keys=null){
-        $options = array();
-
-        if ($keys){
-            return wpsstm_get_array_value($keys, $this->options);
-        }else{
-            return $this->options;
-        }
+        
+        return array_replace_recursive((array)parent::get_default_options(),$live_options); //last one has priority
+        
     }
 
     function load_subtracks(){
@@ -312,9 +305,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_tracks,'remote_tracks_count'=>count($this->tracks),'last_request_time'=>$this->updated_time)),'WP_SoundSystem_Remote_Tracklist::load_subtracks()' );
 
-        //get options back from page (a preset could have changed them)
-        //TO FIX TO CHECK maybe move ?
-        $this->options = $this->options; 
     }
     
     public function get_all_raw_tracks(){
