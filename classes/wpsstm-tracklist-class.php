@@ -32,8 +32,6 @@ abstract class WP_SoundSystem_Tracklist{
     static $paged_var = 'tracklist_page';
 
     abstract protected function get_subtrack_ids(); //TO FIX TO CHECK get_subtrack_ids should run a query that uses the subtracks query var.  Maybe we could use a single method for this.
-    abstract protected function append_subtrack_ids($append_ids);
-    abstract protected function remove_subtrack_ids($remove_ids);
     abstract protected function set_subtrack_ids($ordered_ids = null);
 
     function __construct($post_id = null ){
@@ -101,6 +99,45 @@ abstract class WP_SoundSystem_Tracklist{
 
         $this->did_query_tracks = true;
         
+    }
+    
+    /*
+    Append subtracks IDs to a tracklist.
+    */
+    
+    function append_subtrack_ids($append_ids){
+        //force array
+        if ( !is_array($append_ids) ) $append_ids = array($append_ids);
+        
+        if ( empty($append_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
+        
+        $subtrack_ids = (array)$this->get_subtrack_ids();
+        $subtrack_ids = array_merge($subtrack_ids,$append_ids);
+        return $this->set_subtrack_ids($subtrack_ids);
+    }
+    
+    /*
+    Remove subtracks IDs from a tracklist.
+    */
+    
+    function remove_subtrack_ids($remove_ids){
+        //force array
+        if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
+        
+        if ( empty($remove_ids) ){
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+        }
+        
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
+        
+        $subtrack_ids = (array)$this->get_subtrack_ids();
+        $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
+        
+        return $this->set_subtrack_ids($subtrack_ids);
     }
     
     function get_tracklist_type(){
@@ -778,45 +815,6 @@ class WP_SoundSystem_Static_Tracklist extends WP_SoundSystem_Tracklist{
 
         return $filtered_ids;
         
-    }
-    
-    /*
-    Append (static) subtracks IDs to a tracklist.
-    */
-    
-    function append_subtrack_ids($append_ids){
-        //force array
-        if ( !is_array($append_ids) ) $append_ids = array($append_ids);
-        
-        if ( empty($append_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
-        }
-        
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($append_ids)), "WP_SoundSystem_Static_Tracklist::append_subtrack_ids()");
-        
-        $subtrack_ids = (array)$this->get_subtrack_ids();
-        $subtrack_ids = array_merge($subtrack_ids,$append_ids);
-        return $this->set_subtrack_ids($subtrack_ids);
-    }
-    
-    /*
-    Remove (static) subtracks IDs from a tracklist.
-    */
-    
-    function remove_subtrack_ids($remove_ids){
-        //force array
-        if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
-        
-        if ( empty($remove_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
-        }
-        
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Static_Tracklist::remove_subtrack_ids()");
-        
-        $subtrack_ids = (array)$this->get_subtrack_ids();
-        $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
-        
-        return $this->set_subtrack_ids($subtrack_ids);
     }
     
     /*
