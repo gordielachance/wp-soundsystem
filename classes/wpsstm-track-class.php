@@ -477,6 +477,7 @@ class WP_SoundSystem_Track{
         foreach((array)$sources as $source){
             $post_id = $source->save_source();
             if ( is_wp_error($post_id) ) continue;
+            if ( in_array($post_id,$this->source_ids) ) continue; //already populated
             $this->source_ids[] = $post_id;
         }
         
