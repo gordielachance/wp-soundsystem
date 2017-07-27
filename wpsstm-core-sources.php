@@ -43,6 +43,9 @@ class WP_SoundSystem_Core_Sources{
         add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
         
+        add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
+        add_action( 'manage_posts_custom_column', array($this,'column_source_url_content'), 10, 2 );
+        
         //ajax : sources manager : suggest
         add_action('wp_ajax_wpsstm_suggest_editable_sources', array($this,'ajax_suggest_editable_sources'));
 
@@ -322,6 +325,37 @@ class WP_SoundSystem_Core_Sources{
                 $output = '—';
                 $track = new WP_SoundSystem_Track($post_id);
                 echo count($track->source_ids);
+            break;
+        }
+    }
+    
+    function column_source_url_register($defaults) {
+        global $post;
+
+        $before = array();
+        $after = array();
+        
+        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
+        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
+        
+        if ( $post_type == wpsstm()->post_type_source ){
+            $after['source_url'] = __('URL','wpsstm');
+        }
+        
+        return array_merge($before,$defaults,$after);
+    }
+
+    //TO FIX NOT WORKING
+    function column_source_url_content($column,$post_id){
+        global $post;
+
+        switch ( $column ) {
+            case 'source_url':
+                $output = '—';
+                if( $source_url = get_post_meta( $post_id, $this->url_metakey, true ) ){
+                    $output = $source_url;
+                }
+                echo $output;
             break;
         }
     }
