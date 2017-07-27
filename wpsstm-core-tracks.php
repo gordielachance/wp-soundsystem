@@ -58,7 +58,7 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_frontend' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_backend' ) );
         
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_track') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
         add_action( 'save_post', array($this,'update_title_track'), 99);
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
@@ -384,19 +384,14 @@ class WP_SoundSystem_Core_Tracks{
         }
     }
 
-    function pre_get_posts_track( $query ) {
+    function pre_get_posts_by_track_title( $query ) {
 
-        if ( ($artist = $query->get( wpsstm_artists()->qvar_artist_lookup )) && ($track = $query->get( $this->qvar_track_lookup )) ){
+        if ( $track = $query->get( $this->qvar_track_lookup ) ){
 
             $query->set( 'meta_query', array(
                 array(
                      'key'     => $this->title_metakey,
                      'value'   => $track,
-                     'compare' => '='
-                ),
-                array(
-                     'key'     => wpsstm_artists()->artist_metakey,
-                     'value'   => $artist,
                      'compare' => '='
                 )
             ));

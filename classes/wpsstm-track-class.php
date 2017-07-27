@@ -62,6 +62,29 @@ class WP_SoundSystem_Track{
     }
     
     /*
+    Query tracks (IDs) that have the same artist + title (+album if set)
+    */
+    
+    function get_track_duplicates(){
+        
+        $query_args = array(
+            'post_type' =>      wpsstm()->post_type_track,
+            'post_status' =>    'any',
+            'posts_per_page'=>  -1,
+            'fields' =>         'ids',
+            wpsstm_artists()->qvar_artist_lookup => $this->artist,
+            wpsstm_tracks()->qvar_track_lookup =>   $this->title
+        );
+
+        if ($this->album){
+            $query_args[wpsstm_albums()->qvar_album_lookup] = $this->album
+        }
+
+        $query = new WP_Query( $query_args );
+        return $query->posts;
+    }
+    
+    /*
     Get the post ID for this track, if it already exists in the database; and populate its data
     */
     
@@ -70,9 +93,11 @@ class WP_SoundSystem_Track{
             
         wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
 
-        if ( $auto_post_id = wpsstm_get_post_id_by('track',$this->artist,$this->album,$this->title) ){
+        if ( $duplicates = $this->get_track_duplicates() ){
+            $first = $duplicates[0];
             $this->__construct( $auto_post_id );
-        }
+        } 
+
         $this->did_post_id_lookup = true;
         return $this->post_id;
 

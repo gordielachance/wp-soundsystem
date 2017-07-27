@@ -30,7 +30,7 @@ class WP_SoundSystem_Core_Artists{
 
         add_action( 'init', array($this,'register_post_type_artist' ));
         add_filter( 'query_vars', array($this,'add_query_var_artist') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_artist') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );
         add_action( 'save_post', array($this,'update_title_artist'), 99);
         
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
@@ -74,7 +74,7 @@ class WP_SoundSystem_Core_Artists{
     }
 
 
-    function pre_get_posts_artist( $query ) {
+    function pre_get_posts_by_artist( $query ) {
 
         if ( $search = $query->get( $this->qvar_artist_lookup ) ){
             

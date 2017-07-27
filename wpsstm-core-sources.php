@@ -435,13 +435,16 @@ class WP_SoundSystem_Source {
 
     }
     
-    function get_source_id_by_url(){
+    /*
+    Get the sources (IDs) that have the same URL than the current one
+    */
+    function get_source_duplicates(){
 
         $args = array(
             'post_parent'       => $this->track_id,
             'post_type'         => array(wpsstm()->post_type_source),
             'post_status'       => 'any',
-            'posts_per_page'    => 1,
+            'posts_per_page'    => -1,
             'fields'            => 'ids',
             'meta_query'        => array(
                 'source_url' => array(
@@ -452,10 +455,7 @@ class WP_SoundSystem_Source {
         );
 
         $query = new WP_Query( $args );
-        
-        $post_id = (isset($query->posts[0])) ? $query->posts[0] : null;
-
-        return $post_id;
+        return $query->posts;
     }
     
     function save_source(){
@@ -468,9 +468,9 @@ class WP_SoundSystem_Source {
         
         //check if this source exists already
 
-        if ( $existing_id = $this->get_source_id_by_url() ){
-            $this->post_id = $existing_id;
-            return $existing_id;
+        if ( $duplicate_ids = $this->get_source_duplicates() ){
+            $this->post_id = $duplicate_ids[0];
+            return $this->post_id;
         }
 
 
@@ -487,7 +487,7 @@ class WP_SoundSystem_Source {
 
         $this->post_id = wp_insert_post( $post_source_args );
 
-        wpsstm()->debug_log(array('args'=>$post_source_args,'post_id'=>$this->post_id),"WP_SoundSystem_Source::save_source()");
+        wpsstm()->debug_log(json_encode(array('args'=>$post_source_args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
         
         return $this->post_id;
         

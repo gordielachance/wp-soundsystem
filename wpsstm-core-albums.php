@@ -29,7 +29,7 @@ class WP_SoundSystem_Core_Albums{
     function setup_actions(){
         add_action( 'init', array($this,'register_post_type_album' ));
         add_filter( 'query_vars', array($this,'add_query_var_album') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_album') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
         add_action( 'save_post', array($this,'update_title_album'), 99);
         
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
@@ -81,19 +81,14 @@ class WP_SoundSystem_Core_Albums{
         }
     }
 
-    function pre_get_posts_album( $query ) {
+    function pre_get_posts_by_album( $query ) {
 
-        if ( ($album = $query->get( $this->qvar_album_lookup )) && ($artist = $query->get( wpsstm_artists()->qvar_artist_lookup )) ){
+        if ( $album = $query->get( $this->qvar_album_lookup ) ){
 
             $query->set( 'meta_query', array(
                 array(
                      'key'     => $this->album_metakey,
                      'value'   => $album,
-                     'compare' => '='
-                ),
-                array(
-                     'key'     => wpsstm_artists()->artist_metakey,
-                     'value'   => $artist,
                      'compare' => '='
                 )
             ));
