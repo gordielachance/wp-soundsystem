@@ -120,6 +120,7 @@ class WP_SoundSystem {
         
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
