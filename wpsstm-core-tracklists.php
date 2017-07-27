@@ -321,7 +321,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
-            if ( !$wp_query->get(wpsstm_tracks()->qvar_subtracks_hide) ){
+            if ( !$wp_query->get(wpsstm_tracks()->qvar_exclude_subtracks) ){
                 $after['playlist'] = __('in playlists','wpsstm');
             }
             
@@ -330,6 +330,8 @@ class WP_SoundSystem_Core_Tracklists{
         return array_merge($before,$defaults,$after);
     }
     
+
+    
     function tracks_column_playlist_content($column,$post_id){
         global $post;
 
@@ -337,23 +339,9 @@ class WP_SoundSystem_Core_Tracklists{
             case 'playlist':
                 
                 $track = new WP_SoundSystem_Track($post_id);
-                $tracklist_ids = $track->get_parent_ids();
-                $links = array();
 
-                foreach((array)$tracklist_ids as $tracklist_id){
-
-                    $tracklist_post_type = get_post_type($tracklist_id);
-
-                    $playlist_url = get_permalink($tracklist_id);
-                    $playlist_name = ( $title = get_the_title($tracklist_id) ) ? $title : sprintf('#%s',$tracklist_id);
-                    
-                    $links[] = sprintf('<a href="%s">%s</a>',$playlist_url,$playlist_name);
-                }
-                
-                
-                
-                if ($links){
-                    echo implode(',',$links);
+                if ( $list = $track->get_parents_list() ){
+                    echo $list;
                 }else{
                     echo '—';
                 }

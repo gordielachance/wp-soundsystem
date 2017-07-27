@@ -51,10 +51,10 @@ function wpsstm_array_unique_by_subkey($array,$subkey){
 }
 
 /*
-Get the IDs of every subtrack in the database; optionnally filtered.
+Get the IDs of every subtrack in the database
 */
 
-function wpsstm_get_subtrack_ids($type=null,$filter=false,$args=null){
+function wpsstm_get_subtrack_ids($type=null){
     global $wpdb;
     
     $clauses = array();
@@ -72,6 +72,9 @@ function wpsstm_get_subtrack_ids($type=null,$filter=false,$args=null){
     $clauses_str = implode(' OR ',$clauses);
     
     $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $clauses_str;
+    
+    echo $query;
+    print_r("<br/><br/>");
 
     $tracklists_subtrack_ids = $wpdb->get_col( $query );
     
@@ -81,31 +84,7 @@ function wpsstm_get_subtrack_ids($type=null,$filter=false,$args=null){
         $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
     }
     
-    $subtrack_ids = array_unique($subtrack_ids);
-
-    //now that we have got all the subtracks ids, maybe filter them
-    
-    if ($filter){
-        $default_args = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'post__in'          => $subtrack_ids
-        );
-
-        if ($args){
-            $args = wp_parse_args($args,$default_args);
-        }
-
-        $query = new WP_Query( $args );
-        if ( $db_ids = $query->posts ){
-            $subtrack_ids = array_intersect($subtrack_ids, $db_ids);
-        }
-        
-    }
-
-    return $subtrack_ids;
+    return array_unique($subtrack_ids);
     
 }
 

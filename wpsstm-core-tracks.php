@@ -6,7 +6,8 @@ class WP_SoundSystem_Core_Tracks{
     public $qvar_track_admin = 'admin';
     public $qvar_new_track = 'new';
     public $qvar_track_lookup = 'lookup_track';
-    public $qvar_subtracks_hide = 'hide_subtracks';
+    public $qvar_include_subtracks = 'subtracks_include';
+    public $qvar_exclude_subtracks = 'subtracks_exclude';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
@@ -71,10 +72,13 @@ class WP_SoundSystem_Core_Tracks{
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
         //subtracks
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_subtracks') );
+        
+        /*
         add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
-        add_filter( 'pre_get_posts', array($this,'exclude_subtracks') );
+        */
         
         //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
@@ -275,9 +279,9 @@ class WP_SoundSystem_Core_Tracks{
         $notice = null;
         
         if ($this->subtracks_hide){
-            $notice = sprintf(__('Click %s if you want to include tracks belonging to albums and playlists in this listing.','wpsstm'),$notice_link);
+            $notice = sprintf(__('Click %s if you want to include subtracks (tracks belonging to albums or (live) playlists) in this listing.','wpsstm'),$notice_link);
         }else{
-            $notice = sprintf(__('Click %s if you want to exclude tracks belonging to albums and playlists of this listing.','wpsstm'),$notice_link);
+            $notice = sprintf(__('Click %s if you want to exclude subtracks (tracks belonging to albums or (live) playlists) from this listing.','wpsstm'),$notice_link);
         }
 
         printf('<div class="notice notice-warning"><p>%s</p></div>',$notice);
@@ -302,8 +306,75 @@ class WP_SoundSystem_Core_Tracks{
 
     }
     
-    function default_exclude_subtracks( $query ) {
+    /*
+    Include or exclude subtracks from tracks queries.
+    Subtrack type can be 'static', 'live' or true (both).
+    
+    include & true : returns all substracks
+    include & live|static : returns live|static substracks
+    
+    exclude & true : return all tracks that are not subtracks
+    exclude & live|static : return all tracks that are not live|static substracks
+.   */
+    
+    function pre_get_posts_subtracks( $query ) {
+
+        //only for tracks
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
         
+        $type = null;
+        $include = null;
+
+        $include_type = $query->get($this->qvar_include_subtracks);
+        $exclude_type = $query->get($this->qvar_exclude_subtracks);
+
+        if($include_type){
+            $type = $include_type;
+            $include = true;
+        }elseif($exclude_type){
+            $type = $exclude_type;
+            $include = false;
+        }
+
+        //cannot process
+        if ( ($type===null) || ($include===null) ) return $query;
+        
+        //fetch subtracks
+        $subtrack_ids = null;
+
+        if ($type === true){
+            $subtrack_ids = wpsstm_get_subtrack_ids();
+        }else{
+            $subtrack_ids = wpsstm_get_subtrack_ids($type); 
+        }
+
+        if ($include){
+            
+            //if we want to include subtracks and that there is none, force return nothing
+            //https://core.trac.wordpress.org/ticket/28099
+            //https://wordpress.stackexchange.com/a/140727/70449
+            if (!$subtrack_ids){ 
+                $subtrack_ids[] = array(0);
+            }
+            
+            $query->set('post__in',(array)$subtrack_ids);
+        }else{
+            
+            //if we want to exclude subtracks and that there is none, abord
+            if (!$subtrack_ids){ 
+                return $query;
+            }
+            
+            $query->set('post__not_in',(array)$subtrack_ids);
+        }
+
+        return $query;
+    }
+    
+    //TO FIX caution with this, will exclude tracks backend to.
+    //We should find a way to run it only for backend listings.
+    function default_exclude_subtracks( $query ) {
+
         //only for main query
         if ( !$query->is_main_query() ) return $query;
         
@@ -311,37 +382,11 @@ class WP_SoundSystem_Core_Tracks{
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
         
         //already defined
-        if ( $query->get($this->qvar_subtracks_hide) ) return $query;
+        if ( $query->get($this->qvar_exclude_subtracks) ) return $query;
         
         //option enabled ?
         if ($this->subtracks_hide){
-            $query->set($this->qvar_subtracks_hide,true);
-        }
-
-        return $query;
-    }
-    
-    
-    /**
-    If query var 'hide_subtracks' is set,
-    Filter tracks queries so tracks belonging to tracklists (albums/playlists/live playlists)) are not listed.
-    TO FIX should update the post count too. see wp_count_posts
-    **/
-    
-    function exclude_subtracks( $query ) {
-        
-        //only for main query
-        if ( !$query->is_main_query() ) return $query;
-        
-        //only for tracks
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        
-        //hide subtracks ?
-        
-        if ( $query->get($this->qvar_subtracks_hide) ){
-            if ( $subtrack_ids = wpsstm_get_subtrack_ids() ) {
-                $query->set('post__not_in',$subtrack_ids);
-            }
+            $query->set($this->qvar_exclude_subtracks,true);
         }
 
         return $query;
@@ -527,7 +572,8 @@ class WP_SoundSystem_Core_Tracks{
         $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_track_admin;
         $qvars[] = $this->qvar_new_track;
-        $qvars[] = $this->qvar_subtracks_hide;
+        $qvars[] = $this->qvar_include_subtracks;
+        $qvars[] = $this->qvar_exclude_subtracks;
         return $qvars;
     }
     

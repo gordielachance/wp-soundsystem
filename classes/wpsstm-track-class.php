@@ -176,6 +176,26 @@ class WP_SoundSystem_Track{
         
         return $this->parent_ids;
     }
+    
+    function get_parents_list($type = null){
+
+        $tracklist_ids = $this->get_parent_ids($type);
+        $links = array();
+
+        foreach((array)$tracklist_ids as $tracklist_id){
+
+            $tracklist_post_type = get_post_type($tracklist_id);
+
+            $playlist_url = get_permalink($tracklist_id);
+            $playlist_name = ( $title = get_the_title($tracklist_id) ) ? $title : sprintf('#%s',$tracklist_id);
+
+            $links[] = sprintf('<li><a href="%s">%s</a></li>',$playlist_url,$playlist_name);
+        }
+        
+        if ($links){
+            return sprintf('<ul class="wpsstm-track-parents">%s</ul>',implode("\n",$links));
+        }
+    }
 
     //TO FIX do we need this ?
     function array_export(){
