@@ -155,17 +155,15 @@ abstract class WP_SoundSystem_Player_Provider{
     Search sources from this provider
     */
     
-    function sources_lookup($track,$args=null){
+    function sources_lookup($track){
         
     }
     
-    function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$args=null){
+    function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform){
 
-        $args_default = array(
+        $args = array(
             'limit'         => 3
         );
-
-        $args = wp_parse_args((array)$args,$args_default);
 
         $sources = array();
 
@@ -264,8 +262,8 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
         return 'video/youtube';
     }
 
-    function sources_lookup($track,$args=null){
-        return $this->get_soundsgood_sources($track,'youtube',$args);
+    function sources_lookup($track){
+        return $this->get_soundsgood_sources($track,'youtube');
     }
 
 }
@@ -403,8 +401,8 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
         }
     }
 
-    function sources_lookup($track,$args=null){
-        return $this->get_soundsgood_sources($track,'soundcloud',$args);
+    function sources_lookup($track){
+        return $this->get_soundsgood_sources($track,'soundcloud');
     }
     
     

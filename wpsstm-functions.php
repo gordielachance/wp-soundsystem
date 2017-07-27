@@ -72,9 +72,6 @@ function wpsstm_get_subtrack_ids($type=null){
     $clauses_str = implode(' OR ',$clauses);
     
     $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $clauses_str;
-    
-    echo $query;
-    print_r("<br/><br/>");
 
     $tracklists_subtrack_ids = $wpdb->get_col( $query );
     
