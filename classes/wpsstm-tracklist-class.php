@@ -31,7 +31,6 @@ abstract class WP_SoundSystem_Tracklist{
     
     static $paged_var = 'tracklist_page';
 
-    abstract protected function get_subtrack_ids(); //TO FIX TO CHECK get_subtrack_ids should run a query that uses the subtracks query var.  Maybe we could use a single method for this.
     abstract protected function set_subtrack_ids($ordered_ids = null);
 
     function __construct($post_id = null ){
@@ -102,6 +101,32 @@ abstract class WP_SoundSystem_Tracklist{
     }
     
     /*
+    Return the subtracks IDs for a tracklist.
+    */
+
+    function get_subtrack_ids($type, $args = null){
+        
+        $default = array(
+            'post_status' =>    'any',
+            'posts_per_page'=>  -1,
+        );
+
+        $args = wp_parse_args((array)$args,$default);
+
+        $forced = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'fields' =>                 'ids',
+            $qvar_include_subtracks =>  $type,
+        );
+
+        $args = wp_parse_args($forced,$args);
+
+        $query = new WP_Query( $args );
+        return $query->posts;
+        
+    }
+    
+    /*
     Append subtracks IDs to a tracklist.
     */
     
@@ -161,33 +186,7 @@ abstract class WP_SoundSystem_Tracklist{
         
         return $tracklist_type;
     }
-    
-    function filter_subtrack_ids($ordered_ids,$args = array()){
-        global $wpdb;
 
-        $ordered_ids = array_unique($ordered_ids);
-
-        //validate those IDs, we must be sure they are tracks.
-        $args = array(
-            'post_type'         => array(wpsstm()->post_type_track),
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'post__in'          => $ordered_ids
-        );
-
-        $query = new WP_Query( $args );
-        $post_ids = $query->posts;
-        
-        foreach($ordered_ids as $key=>$ordered_id){
-            if (!in_array($ordered_id,$post_ids)) unset($ordered_ids[$key]);
-        }
-
-        return $ordered_ids;
-    }
-    
-    
-    
     /*
     $tracks = array of tracks objects or array of track IDs
     */
@@ -805,16 +804,8 @@ class WP_SoundSystem_Static_Tracklist extends WP_SoundSystem_Tracklist{
     Return the (static) subtracks IDs for a tracklist.
     */
 
-    function get_subtrack_ids(){
-
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
-        if ( empty($ordered_ids) ) return;
-        
-        //validate those IDs, we must be sure they are tracks.
-        $filtered_ids = $this->filter_subtrack_ids($ordered_ids);
-
-        return $filtered_ids;
-        
+    function get_subtrack_ids($args = null){
+        return parent::get_subtrack_ids('static', $args);
     }
     
     /*

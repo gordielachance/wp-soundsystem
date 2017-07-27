@@ -121,15 +121,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     Return the (live) subtracks IDs for a tracklist.
     */
 
-    function get_subtrack_ids(){
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_live_playlists()->subtracks_live_metaname,true);
-        if ( empty($ordered_ids) ) return;
-        
-        //validate those IDs, we must be sure they are tracks.
-        $filtered_ids = $this->filter_subtrack_ids($ordered_ids);
-
-        return $filtered_ids;
-        
+    function get_subtrack_ids($args = null){
+        return parent::get_subtrack_ids('live', $args);
     }
     
     /*
