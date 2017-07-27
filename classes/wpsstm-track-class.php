@@ -39,9 +39,11 @@ class WP_SoundSystem_Track{
             if($post_id == 23842){
                 $this->populate_auto_sources();
             }
+            $this->populate_auto_sources();
             */
 
         }
+
         
     }
     
@@ -492,7 +494,7 @@ class WP_SoundSystem_Track{
         if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
             $sources = $this->autosource_filter_title_requires_artist($sources);
         }
-        
+
         foreach((array)$sources as $source){
             
             $args = array(
@@ -500,7 +502,12 @@ class WP_SoundSystem_Track{
             );
             
             $post_id = $source->save_source($args);
-            if ( is_wp_error($post_id) ) continue;
+            if ( is_wp_error($post_id) ){
+                $code = $post_id->get_error_code();
+                $error_msg = $post_id->get_error_message($code);
+                wpsstm()->debug_log( $error_msg, "WP_SoundSystem_Track::populate_auto_sources() - unable to save source");
+                continue;
+            }
             if ( in_array($post_id,$this->source_ids) ) continue; //already populated
             $this->source_ids[] = $post_id;
         }

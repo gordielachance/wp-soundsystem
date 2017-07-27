@@ -34,7 +34,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public $remote_author_meta_name = 'wpsstm_remote_author_name';
     
     var $expire_time = null;
-    var $cache_only = true; //by default, for speedness, disabable remote request tracks.  We have to enable it manually.
+    var $cache_only = true;//by default, for speedness, disabble remote request tracks.  We have to enable it manually.
 
     //response
     var $request_pagination = array(
