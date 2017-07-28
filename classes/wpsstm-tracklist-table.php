@@ -280,7 +280,7 @@ class WP_SoundSystem_Tracklist_Table{
     public function get_rows_or_placeholder() {
         
             if ( !$this->has_items() ) {
-                return sprintf('<li class="no-items"><p class="wpsstm-notice">%s</p></li>',$this->no_items_label);
+                return sprintf('<li class="no-items">%s</li>',$this->no_items_label);
             }
                 
         

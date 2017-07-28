@@ -78,7 +78,6 @@ class WP_SoundSystem_Source {
         }
         
         $default_args = array(
-            'post_status' =>    wpsstm()->temp_status,
             'post_author' =>    get_current_user_id(),
         );
         $args = wp_parse_args((array)$args,$default_args);
