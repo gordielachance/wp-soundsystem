@@ -69,8 +69,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
         
         //TO FIX TO CHECK delete track orphans when tracklist is deleted
-        //add_action( 'wp_trash_post', array($this,'trash_tracklist_orphans') );
-        //add_action( 'deleted_post', array($this,'delete_tracklist_orphans') );
+        add_action( 'wp_trash_post', array($this,'trash_tracklist_orphans') );
         
         //ajax : toggle love tracklist
         add_action('wp_ajax_wpsstm_love_unlove_tracklist', array($this,'ajax_love_unlove_tracklist'));
@@ -636,26 +635,6 @@ class WP_SoundSystem_Core_Tracklists{
             ));
         }
 
-    }
-    
-    function delete_tracklist_orphans($post_id){
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        
-        if ( !in_array(get_post_type($post_id),$allowed_post_types) ) return;
-        
-        //get all orphans (with any post status)
-        $statii = array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash', wpsstm()->temp_status);
-        $tracklist = wpsstm_get_post_tracklist($post_id);
-        $orphan_ids = $tracklist->get_orphan_track_ids(array('post_status'=>$statii));
-        
-        foreach((array)$orphan_ids as $track_id){
-            wp_delete_post( $track_id, true );
-        }
-        
     }
 
 }
