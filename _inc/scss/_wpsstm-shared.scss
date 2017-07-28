@@ -81,6 +81,9 @@ Thickbox popups
 */
 
 body.wpsstm_track-template-admin,body.wpsstm_tracklist-template-admin{
+    header{
+        margin: 2em 0;
+    }
     //hide default styles - this may have to be adapted to your theme
     #sidebar,#colophon{
         display:none;

@@ -64,9 +64,6 @@
                         switch ($track_admin_action){
                             case 'new-subtrack':
                             case 'edit':
-                                print_r($track);
-                                echo"<br/>";
-                                print_r($track->get_track_admin_gui_url($track_admin_action));
                                 ?>
                                 <div id="wpsstm-track-admin-edit" class="wpsstm-track-admin">
                                     <form action="<?php echo esc_url($track->get_track_admin_gui_url($track_admin_action));?>" method="POST">
