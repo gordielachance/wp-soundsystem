@@ -73,6 +73,7 @@ class WP_SoundSystem_Core_Tracks{
         
         //subtracks
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_subtracks') );
+        add_filter( 'posts_orderby', array($this,'sort_subtracks_by_position'), 10, 2 );
         
         /*
         add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
@@ -308,71 +309,6 @@ class WP_SoundSystem_Core_Tracks{
         
         $this->subtracks_hide = ($value == 'on') ? true : false;
 
-    }
-    
-    /*
-    Include or exclude subtracks from tracks queries.
-    Subtrack type can be 'static', 'live' or true (both).
-    
-    include & true : returns all substracks
-    include & live|static : returns live|static substracks
-    
-    exclude & true : return all tracks that are not subtracks
-    exclude & live|static : return all tracks that are not live|static substracks
-.   */
-    
-    function pre_get_posts_subtracks( $query ) {
-
-        //only for tracks
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        
-        $type = null;
-        $include = null;
-
-        $include_type = $query->get($this->qvar_include_subtracks);
-        $exclude_type = $query->get($this->qvar_exclude_subtracks);
-
-        if($include_type){
-            $type = $include_type;
-            $include = true;
-        }elseif($exclude_type){
-            $type = $exclude_type;
-            $include = false;
-        }
-
-        //cannot process
-        if ( ($type===null) || ($include===null) ) return $query;
-        
-        //fetch subtracks
-        $subtrack_ids = null;
-
-        if ($type === true){
-            $subtrack_ids = wpsstm_get_subtrack_ids();
-        }else{
-            $subtrack_ids = wpsstm_get_subtrack_ids($type); 
-        }
-
-        if ($include){
-            
-            //if we want to include subtracks and that there is none, force return nothing
-            //https://core.trac.wordpress.org/ticket/28099
-            //https://wordpress.stackexchange.com/a/140727/70449
-            if (!$subtrack_ids){ 
-                $subtrack_ids[] = array(0);
-            }
-            
-            $query->set('post__in',(array)$subtrack_ids);
-        }else{
-            
-            //if we want to exclude subtracks and that there is none, abord
-            if (!$subtrack_ids){ 
-                return $query;
-            }
-            
-            $query->set('post__not_in',(array)$subtrack_ids);
-        }
-
-        return $query;
     }
     
     //TO FIX caution with this, will exclude tracks backend to.
@@ -893,6 +829,86 @@ class WP_SoundSystem_Core_Tracks{
             wp_delete_post( $source_id, true );
         }
         
+    }
+    
+    /*
+    Include or exclude subtracks from tracks queries.
+    Subtrack type can be 'static', 'live' or true (both).
+    
+    include & true : returns all substracks
+    include & live|static : returns live|static substracks
+    
+    exclude & true : return all tracks that are not subtracks
+    exclude & live|static : return all tracks that are not live|static substracks
+.   */
+    
+    function pre_get_posts_subtracks( $query ) {
+
+        //only for tracks
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        
+        $type = true;
+        $include = null;
+
+        $include_type = $query->get($this->qvar_include_subtracks);
+        $exclude_type = $query->get($this->qvar_exclude_subtracks);
+
+        if($include_type){
+            $type = $include_type;
+            $include = true;
+        }elseif($exclude_type){
+            $type = $exclude_type;
+            $include = false;
+        }else{ //cannot process
+            return;
+        }
+
+        $tracklist_id = $query->get('tracklist_id');
+
+        $subtrack_ids = wpsstm_get_subtrack_ids($type,$tracklist_id); 
+
+        if ($include){
+            
+            //if we want to include subtracks and that there is none, force return nothing
+            //https://core.trac.wordpress.org/ticket/28099
+            //https://wordpress.stackexchange.com/a/140727/70449
+            if (!$subtrack_ids){ 
+                $subtrack_ids[] = array(0);
+            }
+            
+            $query->set('post__in',(array)$subtrack_ids);
+        }else{
+            
+            //if we want to exclude subtracks and that there is none, abord
+            if (!$subtrack_ids){ 
+                return $query;
+            }
+            
+            $query->set('post__not_in',(array)$subtrack_ids);
+        }
+
+        return $query;
+    }
+    
+    /*
+    By default, Wordpress will sort the subtracks by date.
+    If we have a subtracks query with a tracklist ID set; and that no orderby is defined, rather sort by tracklist position.
+    */
+    
+    function sort_subtracks_by_position($orderby_sql, $query){
+        $tracklist_id = $query->get('tracklist_id');
+        $orderby = $query->get('orderby');
+        $include_type = $query->get($this->qvar_include_subtracks);
+        
+        if ( !$include_type || !$tracklist_id || $orderby ) return $orderby_sql;
+
+        $subtrack_ids = wpsstm_get_subtrack_ids($include_type,$tracklist_id);
+        if (!$subtrack_ids) return $orderby_sql;
+        
+        $ordered_ids = implode(' ,',$subtrack_ids);
+        
+        return sprintf('FIELD(ID, %s)',$ordered_ids);
+
     }
     
 }

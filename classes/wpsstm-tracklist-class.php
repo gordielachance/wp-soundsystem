@@ -104,7 +104,9 @@ abstract class WP_SoundSystem_Tracklist{
     Return the subtracks IDs for a tracklist; by type ('static' or 'live')
     */
 
-    function get_type_subtrack_ids($type, $args = null){
+    function get_type_subtrack_ids($type = 'any', $args = null){
+        
+        //get available subtracks
         
         $default = array(
             'post_status' =>    'any',
@@ -114,8 +116,9 @@ abstract class WP_SoundSystem_Tracklist{
         $args = wp_parse_args((array)$args,$default);
 
         $forced = array(
-            'post_type' => wpsstm()->post_type_track,
-            'fields' =>     'ids',
+            'post_type' =>      wpsstm()->post_type_track,
+            'fields' =>         'ids',
+            'tracklist_id' =>   $this->post_id,
             wpsstm_tracks()->qvar_include_subtracks =>  $type,
         );
 
@@ -160,14 +163,14 @@ abstract class WP_SoundSystem_Tracklist{
                 ));
             }
         }
-        
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
-        
+
         //static or live ?
         $metaname = wpsstm_playlists()->subtracks_static_metaname;
         if ($type == 'live'){
             $metaname = wpsstm_live_playlists()->subtracks_live_metaname;
         }
+        
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'meta'=>$metaname,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
         if ($ordered_ids){
             return update_post_meta($this->post_id,$metaname,$ordered_ids);

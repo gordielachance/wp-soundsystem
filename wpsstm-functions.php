@@ -51,27 +51,31 @@ function wpsstm_array_unique_by_subkey($array,$subkey){
 }
 
 /*
-Get the IDs of every subtrack in the database
+Get the IDs of subtracks; by type (static|live) and optional tracklist id.
+Used for subtrack queries; which will "filter" those subtracks (by post status, etc.); while this array will allow us to sort tracks.
 */
 
-function wpsstm_get_subtrack_ids($type=null){
+function wpsstm_get_subtrack_ids($type='any',$tracklist_id=null){
     global $wpdb;
     
-    $clauses = array();
+    $type_clauses = array();
     $subtrack_ids = array();
+    $type_clauses_str = $parent_clause_str = null;
     
-    //get an array of subtracks lists from tracklists
-    
-    if ( !$type || ($type=='static') ) {
-        $clauses[] = sprintf("`meta_key` = '%s'",wpsstm_playlists()->subtracks_static_metaname);
-    }
-    if ( !$type || ($type=='live') ) {
-        $clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
+    if ($tracklist_id){
+        $parent_clause_str = sprintf(" AND `post_id` = '%d'",$tracklist_id);
     }
     
-    $clauses_str = implode(' OR ',$clauses);
+    if ( ($type=='any') || ($type=='static') ) {
+        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_playlists()->subtracks_static_metaname);
+    }
+    if ( ($type=='any') || ($type=='live') ) {
+        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
+    }
     
-    $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $clauses_str;
+    $type_clauses_str = implode(' OR ',$type_clauses);
+    
+    $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $type_clauses_str . $parent_clause_str;
 
     $tracklists_subtrack_ids = $wpdb->get_col( $query );
     
