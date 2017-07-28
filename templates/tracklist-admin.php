@@ -41,20 +41,6 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                                 $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,get_permalink());
                                 
                             break;
-                            case 'wizard':
-
-                                ob_start();
-                                $file = 'wizard-form.php';
-                                if ( file_exists( wpsstm_locate_template( $file ) ) ){
-                                    $template = wpsstm_locate_template( $file );
-                                    load_template( $template );
-                                }
-                                $form_content = ob_get_clean();
-                                
-                                $form_action = $tracklist->get_tracklist_admin_gui_url('wizard');
-                                $tab_content = sprintf('<form method="post" action="%s">%s</form>',$form_action,$form_content);
-
-                            break;
                         }
                 
                         if ($tab_content){

@@ -685,18 +685,7 @@ abstract class WP_SoundSystem_Tracklist{
 
             );
         }
-        
-        //wizard
-        if ($can_edit_tracklist){
-            $actions['wizard'] = array(
-                'icon' =>       '<i class="fa fa-magic" aria-hidden="true"></i>',
-                'text' =>      __('Wizard', 'wpsstm'),
-                'href' =>       $this->get_tracklist_admin_gui_url('wizard'),
-                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
 
-            );
-        }
-        
         //context
         switch($context){
             case 'page':
@@ -711,7 +700,7 @@ abstract class WP_SoundSystem_Tracklist{
                 }
                 */
 
-                $popup_action_slugs = array('share','append','wizard','advanced');
+                $popup_action_slugs = array('share','append','advanced');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){
