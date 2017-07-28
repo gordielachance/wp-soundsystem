@@ -116,6 +116,8 @@
                         position:relative;
                         display:block!important; //jQuery would set 'table-row'
                         .wpsstm-track-column{
+                            
+                            line-height:2em;
 
                             &[itemprop="image"]{
                                 padding: 0;
@@ -139,7 +141,8 @@
                             }
                             
                             &.column-trackitem_actions{
-                                display:none;
+                                float:none;
+                                font-size:1.5em;
                             }
                             
                             &.column-trackitem_sources{
