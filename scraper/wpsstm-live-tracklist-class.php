@@ -194,7 +194,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 
                 $tracklist_post = array(
                     'ID'    => $this->post_id,
-                    'post_title'   => $this->title,
                     'meta_input'    => array(
                         $this->remote_title_meta_name => $remote_title,
                         $this->remote_author_meta_name => $remote_author,
