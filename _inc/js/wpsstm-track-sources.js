@@ -92,8 +92,8 @@ jQuery(document).ready(function($){
         
         var row = $(this).closest('.wpsstm-source');
         //auto source
-        if ( row.attr('data-wpsstm-source-origin') == 'auto' ){
-            row.removeAttr('data-wpsstm-source-origin');
+        if ( row.attr('data-wpsstm-auto-source') == '1' ){
+            row.attr('data-wpsstm-auto-source', '0');
             row.find('input').prop("disabled", false);
             row.removeClass('wpsstm-source-auto');
             return;
@@ -119,7 +119,7 @@ jQuery(document).ready(function($){
             var new_row = row_blank.clone();
             new_row.insertAfter( row_blank );
             var row_blank_input = row_blank.find('input.wpsstm-editable-source-url');
-            row_blank.removeAttr('data-wpsstm-source-origin');
+            row_blank.attr('data-wpsstm-auto-source', '0');
             row_blank_input.prop("disabled", false);
             row_blank_input.val(''); //clear form
             row_blank_input.focus();

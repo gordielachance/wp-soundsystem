@@ -169,7 +169,7 @@
                 }
             }
         }
-        &[data-wpsstm-source-origin="auto"]{
+        &[data-wpsstm-auto-source="1"]{
             .wpsstm-source-icon{
                 &.wpsstm-source-icon-delete{
                     display:none;

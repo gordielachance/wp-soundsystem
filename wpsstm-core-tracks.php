@@ -203,11 +203,27 @@ class WP_SoundSystem_Core_Tracks{
                 }
                 
                 $sources_raw = ( isset($_POST[ 'wpsstm_track_sources' ]) ) ? $_POST[ 'wpsstm_track_sources' ] : array();
-                
-                var_dump($sources_raw);die();
-                
+
                 //TO FIX TO CHECK
-                //$track->update_track_sources($sources_raw);
+                foreach((array)$sources_raw as $source_raw){
+                    $source = new WP_SoundSystem_Source();
+                    $source->populate_array( $source_raw );
+
+                    if ($source->post_id){ //confirm source by updating its author
+                        
+                        wp_update_post(array(
+                            'ID' =>             $source->post_id,
+                            'post_author' =>    get_current_user_id()
+                        ));
+                        
+                    }else{ //add source
+                        
+                        $source->save_source();
+                        
+                    }
+                    
+                }
+                
             break;
         }
     }

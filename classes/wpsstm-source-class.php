@@ -4,17 +4,19 @@ class WP_SoundSystem_Source {
     var $track_id;
     var $url; //input URL
     var $title;
-    var $origin = null; //origin of the source (auto, scraper,user...)
+    var $is_auto; //is this an auto source ?
     
     var $src; //URL used in the 'source' tag (which could be not the same)
     var $provider;
     var $type;
     var $similarity;
 
-    static $defaults = array(
+    private $defaults = array(
+        'post_id'       => null,
+        'track_id'      => null,
         'url'           => null,
         'title'         => null,
-        'origin'        => null, 
+        'is_auto'       => null, 
         'similarity'    => null,
     );
     
@@ -27,12 +29,34 @@ class WP_SoundSystem_Source {
 
             $this->url = get_post_meta($post_id,wpsstm_sources()->url_metakey,true);
             $this->populate_source_url();
+            
+            $post_author_id = get_post_field( 'post_author', $post_id );
+            $community_user_id = wpsstm()->get_options('community_user_id');
+            $this->is_auto = ( $post_author_id == $community_user_id );
 
         }
 
         //TO FIX do this as a filter
         //if (!$this->title && $this->provider) $this->title = $this->provider->name;
 
+    }
+    
+    function populate_array( $args = null ){
+
+        $args_default = $this->defaults;
+        $args = wp_parse_args((array)$args,$args_default);
+
+        //set properties from args input
+        foreach ($args as $key=>$value){
+            if ( !array_key_exists($key,$args_default) ) continue;
+            if ( !isset($args[$key]) ) continue; //value has not been set
+            $this->$key = $args[$key];
+        }
+
+        //populate post ID if source already exists in the DB
+        if ( $duplicates = $this->get_source_duplicates() ){
+            $this->__construct( $duplicates[0] );
+        } 
     }
     
     /*
