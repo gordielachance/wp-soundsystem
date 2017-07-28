@@ -138,16 +138,22 @@ class WP_SoundSystem_Core_Tracks{
         global $wp_query;
         global $post;
 
-        if( !isset( $wp_query->query_vars[$this->qvar_track_admin] ) ) return $template; //don't use $wp_query->get() here
-        if ( get_post_type($post) != wpsstm()->post_type_track ) return $template;
-        
+        $post_type = get_post_type($post);
+        $track_admin_action =  get_query_var( $this->qvar_track_admin );
+        $tracklist_admin_action =  get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
+        $tracklist_post_types = array(wpsstm()->post_type_album,wpsstm()->post_type_playlist);
+
+        $is_track_edit = ( $track_admin_action && ($post_type == wpsstm()->post_type_track) );
+        $is_tracklist_new_track = ( ($tracklist_admin_action == 'new-subtrack') && in_array($post_type,$tracklist_post_types) );
+
+        if ( !$is_track_edit && !$is_tracklist_new_track ) return $template;
+
         $file = 'track-admin.php';
         if ( file_exists( wpsstm_locate_template( $file ) ) ){
             $template = wpsstm_locate_template( $file );
 
             //TO FIX should be registered in register_tracks_scripts_styles_shared() then enqueued here, but it is not working
             wp_enqueue_script( 'wpsstm-track-admin', wpsstm()->plugin_url . '_inc/js/wpsstm-track-admin.js', array('jquery','jquery-ui-tabs'),wpsstm()->version, true );
-            
             add_filter( 'body_class', array($this,'track_popup_body_classes'));
         }
         
@@ -155,12 +161,7 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function track_popup_body_classes($classes){
-        //remove default
-        if(($key = array_search('wpsstm_track-template-default', $classes)) !== false) {
-            unset($classes[$key]);
-            $classes[] = 'wpsstm_track-template-admin';
-        }
-
+        $classes[] = 'wpsstm_track-template-admin';
         return $classes;
     }
     
@@ -172,14 +173,15 @@ class WP_SoundSystem_Core_Tracks{
         if ( $post_type != wpsstm()->post_type_track ) return;
         
         $track = new WP_SoundSystem_Track($post->ID);
-        $popup_action = ( isset($_REQUEST['wpsstm-admin-track-action']) ) ? $_REQUEST['wpsstm-admin-track-action'] : null;
-        if (!$popup_action || !$track->post_id) return;
+        $popup_action = ( isset($_POST['wpsstm-admin-track-action']) ) ? $_POST['wpsstm-admin-track-action'] : null;
+        if ( !$popup_action ) return;
 
         switch($popup_action){
+
             case 'edit':
                 
                 //nonce check
-                if ( !isset($_POST['wpsstm_admin_track_gui_details_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_details_nonce'], 'wpsstm_admin_track_gui_details_'.$track->post_id ) ) {
+                if ( !isset($_POST['wpsstm_admin_track_gui_edit_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_edit_nonce'], 'wpsstm_admin_track_gui_edit_'.$track->post_id ) ) {
                     wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
                     break;
                 }

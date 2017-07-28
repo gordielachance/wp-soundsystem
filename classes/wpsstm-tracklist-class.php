@@ -430,36 +430,6 @@ abstract class WP_SoundSystem_Tracklist{
         }
         //TO FIX call remove_subtracks() ?
     }
-    
-    /*
-    Append a blank subtrack to the playlist.
-    */
-    
-    function add_blank_subtrack(){
-
-        //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = $post_type_obj->cap->edit_posts;
-
-        if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
-        }
-        
-        $args = array(
-            'post_type'     => wpsstm()->post_type_track,
-            'post_status'   => 'publish', //TO FIX should be draft ?
-            'post_author'   => get_current_user_id()
-        );
-        
-        $post_id = wp_insert_post( $args );
-        
-        if ( is_wp_error($post_id) ) return $post_id;
-        
-        $this->append_subtrack_ids($post_id);
-        
-        return $post_id;
-        
-    }
 
     /**
     Read-only tracklist table
@@ -654,10 +624,14 @@ abstract class WP_SoundSystem_Tracklist{
         
         //add track
         if ($can_add_tracklist_items){
-            $actions['append'] = array(
+            
+            $new_subtrack_url = $this->get_tracklist_admin_gui_url('new-subtrack');
+            $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
+            
+            $actions['new-subtrack'] = array(
                 'icon'      =>  '<i class="fa fa-plus" aria-hidden="true"></i>',
                 'text'     =>   $track_obj->labels->add_new_item,
-                'href'      =>  $this->get_tracklist_admin_gui_url('append'),
+                'href'      =>  $new_subtrack_url,
                 'classes'   =>  array('wpsstm-requires-auth','tracklist-action'),
             );
         }
@@ -726,7 +700,7 @@ abstract class WP_SoundSystem_Tracklist{
                 }
                 */
 
-                $popup_action_slugs = array('share','append','advanced');
+                $popup_action_slugs = array('share','new-subtrack','advanced');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){

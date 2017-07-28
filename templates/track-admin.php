@@ -1,6 +1,4 @@
-<?php
-
-get_header(); ?>
+<?php get_header(); ?>
 
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
@@ -15,11 +13,11 @@ get_header(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                     
                     <?php
+                    $post_type = get_post_type();
                     $tracklist = wpsstm_get_post_tracklist(get_the_ID());
-                    $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
 
-                    $admin_action = $wp_query->get(wpsstm_tracks()->qvar_track_admin);
-                
+                    $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_admin );
+
                     /*
                     Capability check
                     */
@@ -27,7 +25,12 @@ get_header(); ?>
                     $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
                     $create_playlist_cap =  $playlist_type_obj->cap->edit_posts;
 
-                    $track =                new WP_SoundSystem_Track(get_the_ID());
+                    if ( $post_type == wpsstm()->post_type_track ){
+                        $track = new WP_SoundSystem_Track(get_the_ID());
+                    }else{
+                        $track = new WP_SoundSystem_Track();
+                    }
+                    
                     $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                     $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
                     $can_delete_tracks =    current_user_can($playlist_type_obj->cap->delete_posts);
@@ -35,8 +38,17 @@ get_header(); ?>
                     ?>
 
                     <header class="entry-header">
-                        <?php
+                        <h1><?php the_title();?></h1>
+                        <?php if ($track_admin_action == 'new-subtrack'){ //TO FIX NOT WORKING
+                            printf('<h2>%s</h2>',$track_type_obj->labels->add_new_item);
+                        }
+                        
+                        /*
+                        if ( $post_type == wpsstm()->post_type_track ) {
+                            $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
                             printf('<div id="wpsstm-track-popup-header">%s</div>',$tracklist_table);
+                        }
+                        */
                         ?>
                     </header><!-- .entry-header -->
 
@@ -49,11 +61,15 @@ get_header(); ?>
                 
                         $tab_content = null;
                 
-                        switch ($admin_action){
+                        switch ($track_admin_action){
+                            case 'new-subtrack':
                             case 'edit':
+                                print_r($track);
+                                echo"<br/>";
+                                print_r($track->get_track_admin_gui_url($track_admin_action));
                                 ?>
                                 <div id="wpsstm-track-admin-edit" class="wpsstm-track-admin">
-                                    <form action="<?php echo esc_url($track->get_track_admin_gui_url('edit'));?>" method="POST">
+                                    <form action="<?php echo esc_url($track->get_track_admin_gui_url($track_admin_action));?>" method="POST">
 
                                         <div id="track-admin-artist">
                                             <h3><?php _e('Artist','wpsstm');?></h3>
@@ -76,9 +92,22 @@ get_header(); ?>
                                         </div>
 
                                         <p class="wpsstm-submit-wrapper">
+                                            <?php 
+                                            if ($track_admin_action=='new-subtrack'){
+                                                $tracklist_id = isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
+                                                ?>
+                                                <input type="hidden" name="tracklist_id" value="<?php echo $tracklist_id;?>" />
+                                                <input type="hidden" name="wpsstm-admin-tracklist-action" value="new-subtrack" />
+                                                <?php wp_nonce_field( 'wpsstm_admin_new_tracklist_subtrack_'.$tracklist_id, 'wpsstm_admin_new_tracklist_subtrack_nonce', true );?>
+                                                <?php
+                                            }else{
+                                                ?>
+                                                <input type="hidden" name="wpsstm-admin-track-action" value="edit" />
+                                                <?php wp_nonce_field( 'wpsstm_admin_track_gui_edit_'.$track->post_id, 'wpsstm_admin_track_gui_edit_nonce', true );?>
+                                                <?php
+                                            }
+                                            ?>
                                             <input id="wpsstm-update-track-bt" type="submit" value="<?php _e('Save');?>" />
-                                            <input type="hidden" name="wpsstm-admin-track-action" value="edit" />
-                                            <?php wp_nonce_field( 'wpsstm_admin_track_gui_details_'.$track->post_id, 'wpsstm_admin_track_gui_details_nonce', true );?>
                                         </p>
 
                                     </form>
