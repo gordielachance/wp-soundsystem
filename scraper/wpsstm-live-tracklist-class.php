@@ -156,7 +156,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function load_subtracks(){
         
         if ( $this->did_query_tracks ) return;
-        
+
         if ( $this->is_expired && $this->get_subtrack_ids() ){
             $this->flush_live_subtracks();
         }
@@ -179,7 +179,15 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
                 $this->add($remote_tracks);
-                $this->save_subtracks();
+                
+                //save track
+                
+                $post_args = array(
+                    'post_author'   => wpsstm()->get_options('community_user_id'),
+                    'post_status'   => 'publish',
+                );
+                
+                $this->save_subtracks($post_args);
                 
                 //sort
                 if ($this->get_options('tracks_order') == 'asc'){
@@ -200,8 +208,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                     delete_post_meta($this->post_id,$this->remote_title_meta_name);
                 }
 
-                
-                
                 //set tracklist author
                 if ( $author = $this->get_tracklist_author() ){
                     //TO FIX force bad encoding (eg. last.fm)

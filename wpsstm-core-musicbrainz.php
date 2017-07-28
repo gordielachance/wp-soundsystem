@@ -379,7 +379,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
         //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
-        if ( did_action('wpsstm_save_subtracks') ) return;
+        if ( did_action('wpsstm_save_multiple_tracks') ) return;
 
         //check post type
         $post_type = get_post_type($post_id);

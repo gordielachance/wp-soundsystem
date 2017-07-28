@@ -381,15 +381,15 @@ abstract class WP_SoundSystem_Tracklist{
         return $this->post_id;
         
     }
-    
-    function save_subtracks(){
+
+    function save_subtracks($args = null){
         
-        do_action('wpsstm_save_subtracks',$this); //this will allow to detect if we're saving a single track or several tracks using did_action().
+        do_action('wpsstm_save_multiple_tracks'); //eg. musicbrainz auto-guess ID will be ignored
         
         $subtrack_ids = array();
         
         foreach($this->tracks as $key=>$track){
-            $track_id = $track->save_track();
+            $track_id = $track->save_track($args);
             
             if ( is_wp_error($track_id) ) continue;
             $subtrack_ids[] = $track_id;

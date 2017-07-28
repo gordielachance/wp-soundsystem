@@ -671,6 +671,7 @@ class WP_SoundSystem_Settings {
     function section_community_user_desc(){
         $desc = array();
         $desc[]= __("The plugin requires a community user to enable some of the plugin's features, like the frontend wizard or the auto-source.","wpsstm");
+        $desc[]= __("You need to extend its capabilities to the author role.","wpsstm"); //TO FIX rework
 
         //wrap
         $desc = array_map(

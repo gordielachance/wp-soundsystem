@@ -276,19 +276,28 @@ class WP_SoundSystem_Track{
         
     }
 
-    function save_track(){
+    function save_track($args = null){
+        
+        if ( !$this->validate_track() ) return;
+        $post_id = null;
+        
+        
+        $args_default = array(
+            'post_status'   => 'publish',
+            'post_author'   => get_current_user_id(),
+        );
+        
+        $args = (!$args) ? $args_default : wp_parse_args($args,$args_default);
+        
+        $user_id = $args['post_author'];
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $post_type_obj->cap->edit_posts;
 
-        if ( !current_user_can($required_cap) ){
+        if ( !user_can($user_id,$required_cap) ){
             return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
-        
-        if ( !$this->validate_track() ) return;
-
-        $post_id = null;
         
         $meta_input = array(
             wpsstm_artists()->artist_metakey    => $this->artist,
@@ -296,42 +305,32 @@ class WP_SoundSystem_Track{
             wpsstm_albums()->album_metakey      => $this->album,
             wpsstm_mb()->mbid_metakey           => $this->mbid,
         );
-
-        $meta_input = array_filter($meta_input);
-
-        $post_track_args = array('meta_input' => $meta_input);
         
+        $meta_input = array_filter($meta_input);
+        
+        $required_args = array(
+            'post_type'     => wpsstm()->post_type_track,
+            'meta_input'    => $meta_input,
+        );
+        
+        $args = wp_parse_args($required_args,$args);
+
         //check if this track already exists
         if (!$this->post_id){
             $this->populate_track_post_auto();
         }
-
-        if (!$this->post_id){ //not a track update
-
-            $post_track_new_args = array(
-                'post_type'     => wpsstm()->post_type_track,
-                'post_status'   => 'publish',
-                'post_author'   => get_current_user_id()
-            );
-
-            $post_track_new_args = wp_parse_args($post_track_new_args,$post_track_args);
-
-            $post_id = wp_insert_post( $post_track_new_args );
-            wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_new_args)), "WP_SoundSystem_Track::save_track() - post track inserted"); 
-
+        
+        if (!$this->post_id){
+            
+            $post_id = wp_insert_post( $args );
+            
         }else{ //is a track update
             
-            $post_track_update_args = array(
-                'ID' =>             $this->post_id,
-                'post_status' =>    'publish', //previous status may be the temporary one so be sure we publish it here.
-            );
-            
-            $post_track_update_args = wp_parse_args($post_track_update_args,$post_track_args);
-            
-            $post_id = wp_update_post( $post_track_update_args );
-            
-            wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_update_args)), "WP_SoundSystem_Track::save_track() - post track updated"); 
+            $args['ID'] = $this->post_id;
+            $post_id = wp_update_post( $args );
         }
+        
+        wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($args)), "WP_SoundSystem_Track::save_track()" ); 
 
         if ( is_wp_error($post_id) ) return $post_id;
 
