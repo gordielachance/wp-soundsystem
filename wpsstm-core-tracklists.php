@@ -43,7 +43,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'init', array($this,'register_tracklist_endpoints' ));
         add_filter( 'template_include', array($this,'xspf_template_filter'));
         
-        //add_filter( 'wp', array($this,'append_blank_track'));
+        add_filter( 'wp', array($this,'handle_append_subtrack'));
         add_action( 'wp', array($this,'tracklist_save_admin_gui'));
         add_filter( 'template_include', array($this,'tracklist_admin_template_filter'));
 
@@ -121,35 +121,29 @@ class WP_SoundSystem_Core_Tracklists{
     We don't use save_track() here since it will check that the artist/title is not empty.
     */
     
-    function append_blank_track(){
+    function handle_append_subtrack(){
         global $post;
 
         if( $this->get_tracklist_action() != 'append' ) return;
-        if ( !in_array(get_post_type($post),array(wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist) ) ) return;
+        if ( !in_array(get_post_type($post),array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist) ) ) return;
 
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $post_type_obj->cap->edit_posts;
 
-        if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
-        }
-        
         $tracklist = wpsstm_get_post_tracklist($post->ID);
-
-        $track = new WP_SoundSystem_Track();
+        $new_track_id = $tracklist->add_blank_subtrack();
         
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $track_args = array('post_author'=>$community_user_id);
-        $track->save_track($track_args);
-
-        if ( $track->post_id ){
-
-            $tracklist->append_subtrack_ids($track->post_id);
-
-            $track_admin_url = $track->get_track_admin_gui_url('edit',$tracklist->post_id);
+        if ( is_wp_error($new_track_id) ){
+            //TO FIX do something ?
+        }elseif($new_track_id){
+            
+            $new_track = new WP_SoundSystem_Track($new_track_id);
+            $track_admin_url = $new_track->get_track_admin_gui_url('edit',$tracklist->post_id);
             wp_redirect($track_admin_url);
+            
             exit();
+            
         }
     }
     

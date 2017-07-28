@@ -430,6 +430,33 @@ abstract class WP_SoundSystem_Tracklist{
         }
         //TO FIX call remove_subtracks() ?
     }
+    
+    function add_blank_subtrack(){
+        //Used instead of save_track() since save_track() will ignore saving a blank track.
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $required_cap = $post_type_obj->cap->edit_posts;
+
+        if ( !current_user_can($required_cap) ){
+            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
+        }
+        
+        $args = array(
+            'post_type'     => wpsstm()->post_type_track,
+            'post_status'   => 'publish', //TO FIX should be draft ?
+            'post_author'   => get_current_user_id()
+        );
+        
+        $post_id = wp_insert_post( $args );
+        
+        if ( is_wp_error($post_id) ) return $post_id;
+        
+        $this->append_subtrack_ids($post_id);
+        
+        return $post_id;
+        
+    }
 
     /**
     Read-only tracklist table
@@ -626,8 +653,8 @@ abstract class WP_SoundSystem_Tracklist{
         if ($can_add_tracklist_items){
             $actions['append'] = array(
                 'icon'      =>  '<i class="fa fa-plus" aria-hidden="true"></i>',
-                'text'     =>  $track_obj->labels->add_new_item,
-                'href'      =>  $this->get_new_tracklist_track_url(),
+                'text'     =>   $track_obj->labels->add_new_item,
+                'href'      =>  $this->get_tracklist_admin_gui_url('append'),
                 'classes'   =>  array('wpsstm-requires-auth','tracklist-action'),
             );
         }
@@ -738,15 +765,6 @@ abstract class WP_SoundSystem_Tracklist{
         return (bool)get_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old',true);
     }
 
-    function get_new_tracklist_track_url(){
-        $track = new WP_SoundSystem_Track();
-        $url = $track->get_new_track_url();
-        $args = array(
-            'tracklist_id' => $this->post_id
-        );
-        return add_query_arg($args,$url);
-    }
-    
     function move_wizard_tracks(){
         if (!$this->post_id) return;
         

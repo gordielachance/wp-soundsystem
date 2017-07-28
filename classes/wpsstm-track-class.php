@@ -245,7 +245,10 @@ class WP_SoundSystem_Track{
 
     function save_track($args = null){
         
-        if ( !$this->validate_track() ) return;
+        if ( !$this->validate_track() ){
+            return new WP_Error( 'wpsstm_cannot_validate_track', __("Error while validating the track.",'wpsstm') );
+        }
+        
         $post_id = null;
         
         
@@ -564,37 +567,11 @@ class WP_SoundSystem_Track{
         return $sources;
     }
 
-    function get_new_track_url(){
-        $url = get_post_type_archive_link(wpsstm()->post_type_track);
-        
-        $args = array(
-            wpsstm_tracks()->qvar_new_track =>  true
-        );
-        
-        $track_args = array(
-            'track_artist' =>     urlencode($this->artist),
-            'track_title' =>      urlencode($this->title),
-            'track_album' =>      urlencode($this->album)
-        );
-        
-        $args = array_merge($args,$track_args);
-        $args = array_filter($args);
-        
-        return add_query_arg($args,$url);
-    }
-
     function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
-        
-        $url = null;
-        
-        if ($this->post_id){ //track already exists
-            
-            $url = get_permalink($this->post_id);
-            $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$track_action),$url);
-            
-        }else{ //new track
-            $url = $this->get_new_track_url();
-        }
+
+        $url = get_permalink($this->post_id);
+        $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$track_action),$url);
+
         return $url;
     }
     

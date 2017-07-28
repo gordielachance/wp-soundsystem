@@ -4,7 +4,6 @@ class WP_SoundSystem_Core_Tracks{
 
     public $title_metakey = '_wpsstm_track';
     public $qvar_track_admin = 'admin';
-    public $qvar_new_track = 'new';
     public $qvar_track_lookup = 'lookup_track';
     public $qvar_include_subtracks = 'subtracks_include';
     public $qvar_exclude_subtracks = 'subtracks_exclude';
@@ -50,7 +49,6 @@ class WP_SoundSystem_Core_Tracks{
         
         add_action( 'init', array($this,'register_track_endpoints' ));
         
-        add_filter( 'wp', array($this,'add_new_track'));
         add_filter( 'template_include', array($this,'track_admin_template_filter'));
         add_action( 'wp', array($this,'track_save_admin_gui'));
         
@@ -104,15 +102,6 @@ class WP_SoundSystem_Core_Tracks{
     function register_track_endpoints(){
         // (existing track) admin
         add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK ); 
-        
-        //(new track) admin - wordpress/wpsstm_tracks/new
-        $new_track_regex = sprintf('%s/%s$',wpsstm()->post_type_track,$this->qvar_new_track);
-        $new_track_redirect_args = array(
-            'post_type' =>              wpsstm()->post_type_track,
-            $this->qvar_new_track =>    true
-        );
-        $new_track_redirect = add_query_arg($new_track_redirect_args,'index.php');
-        add_rewrite_rule( $new_track_regex, $new_track_redirect, 'top' );
     }
     
     function register_tracks_scripts_styles_shared(){
@@ -136,44 +125,6 @@ class WP_SoundSystem_Core_Tracks{
         
         wp_enqueue_script( 'wpsstm-tracks' );
         wp_enqueue_style( 'wpsstm-tracks' );
-
-    }
-    
-    /*
-    Add new track when url is 'wordpress/wpsstm_track/new/'
-    */
-    
-    //TO FIX is this required ?
-    
-    function add_new_track(){
-        $is_new_track = get_query_var($this->qvar_new_track);
-        if (!$is_new_track) return;
-
-        $track = new WP_SoundSystem_Track();
-        $track->artist = ( isset($_REQUEST['track_artist']) ) ? $_REQUEST['track_artist'] : null;
-        $track->title = ( isset($_REQUEST['track_title']) ) ? $_REQUEST['track_title'] : null;
-        $track->album = ( isset($_REQUEST['track_album']) ) ? $_REQUEST['track_album'] : null;
-        
-        if ( !$track->post_id && !$track->populate_track_post_auto() ){//track does not exists in DB
-            $community_user_id = wpsstm()->get_options('community_user_id');
-            $track_args = array('post_author'=>$community_user_id);
-            $track->save_track($track_args);
-        }
-        
-        if (!$track->post_id) return;
-        
-        //tracklist ID
-        $tracklist_id = ( isset($_REQUEST['tracklist_id']) ) ? $_REQUEST['tracklist_id'] : null;
-        
-        if ($tracklist_id){
-            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $tracklist->append_subtrack_ids($track->post_id);
-        }
-
-        $track_admin_url = $track->get_track_admin_gui_url('edit');
-        
-        wp_redirect( $track_admin_url );
-        exit;
 
     }
     
@@ -513,7 +464,6 @@ class WP_SoundSystem_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_track_admin;
-        $qvars[] = $this->qvar_new_track;
         $qvars[] = $this->qvar_include_subtracks;
         $qvars[] = $this->qvar_exclude_subtracks;
         return $qvars;
