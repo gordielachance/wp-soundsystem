@@ -116,24 +116,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
     }
-    
 
-    /*
-    Return the (live) subtracks IDs for a tracklist.
-    */
-
-    function get_subtrack_ids($args = null){
-        return parent::get_type_subtrack_ids('live', $args);
-    }
-    
-    /*
-    Assign (live) subtracks IDs to a tracklist.
-    */
-
-    function set_subtrack_ids($ordered_ids = null){
-        return parent::set_type_subtrack_ids('live',$ordered_ids);
-    }
-    
     protected function get_default_options(){
         $live_options = array(
             'selectors' => array(

@@ -267,18 +267,18 @@ function wpsstm_get_post_tracklist($post_id=null){
     global $post;
     if (!$post_id && $post) $post_id = $post->ID;
     
-    $tracklist = new WP_SoundSystem_Static_Tracklist(); //default
+    $tracklist = new WP_SoundSystem_Tracklist(); //default
     $post_type = get_post_type($post_id);
 
     switch ($post_type){
         case wpsstm()->post_type_track:
-            $tracklist = new WP_SoundSystem_Static_Tracklist($post_id);
+            $tracklist = new WP_SoundSystem_Tracklist($post_id);
             $track = new WP_SoundSystem_Track($post_id);
             $tracklist->add($track);
         break;
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:
-            $tracklist = new WP_SoundSystem_Static_Tracklist($post_id);
+            $tracklist = new WP_SoundSystem_Tracklist($post_id);
             
         break;
         case wpsstm()->post_type_live_playlist:

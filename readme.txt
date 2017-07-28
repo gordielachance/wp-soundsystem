@@ -167,7 +167,6 @@ echo $tracklist->get_tracklist_table();
 * improved custom temporary status
 * do not auto_set_mbid() if post is trashed
 * locking / unlocking tracklists
-* WP_SoundSystem_Tracklist is now an abstract class + new WP_SoundSystem_Static_Tracklist
 * improved frontend wizard
 * improved wpsstm_get_post_tracklist()
 * more code cleanup & fixes
