@@ -438,6 +438,22 @@ class WP_SoundSystem_Track{
         $loved_by = $this->get_track_loved_by();
         return in_array($user_id,(array)$loved_by);
     }
+    
+    
+    function get_loved_by_list(){
+        $list = null;
+        if ( !$user_ids = $this->get_track_loved_by() ) return;
+        
+        foreach($user_ids as $user_id){
+            $user_info = get_userdata($user_id);
+            $link = sprintf('<li><a href="%s" target="_blank">%s</a></li>',get_author_posts_url($user_id),$user_info->user_login);
+            $links[] = $link;
+        }
+
+        $list = sprintf('<ul class="wpsstm-track-loved-by-list">%s</ul>',implode("\n",$links));
+
+        return $list;
+    }
 
     function populate_auto_sources(){
 

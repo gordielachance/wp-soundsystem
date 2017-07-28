@@ -298,11 +298,13 @@ class WP_SoundSystem_Core_Tracks{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
-            $after['track-lovedby'] = __('Loved by','wpsstm');
+            $after['track-lovedby'] = __('Loved by:','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
     }
+    
+
     
     function tracks_column_lovedby_content($column,$post_id){
         global $post;
@@ -311,13 +313,8 @@ class WP_SoundSystem_Core_Tracks{
             case 'track-lovedby':
                 $output = '—';
                 $track = new WP_SoundSystem_Track($post_id);
-                $links = array();
-                if ( $user_ids = $track->get_track_loved_by() ){
-                    foreach($user_ids as $user_id){
-                        $user_info = get_userdata($user_id);
-                        $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
-                    }
-                    $output = implode(', ',$links);
+                if ( $list = $track->get_loved_by_list() ){
+                    $output = $list;
                 }
                 echo $output;
             break;

@@ -55,6 +55,17 @@
 
 }
 
+.comma-list{
+    list-style: none;
+    display:inline;
+    li{
+        display:inline;
+        &:not(:last-child):after {
+          content: ", ";
+        }
+    }
+}
+
 ul.wpsstm-actions-list{
     
     list-style: none;
@@ -74,6 +85,10 @@ ul.wpsstm-actions-list{
             color:red;
         }
     }
+}
+
+ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
+    @extend .comma-list;
 }
 
 /*

@@ -285,7 +285,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
             if ( !$wp_query->get(wpsstm_tracks()->qvar_exclude_subtracks) ){
-                $after['playlist'] = __('in playlists','wpsstm');
+                $after['playlist'] = __('In playlists:','wpsstm');
             }
             
         }
@@ -326,7 +326,7 @@ class WP_SoundSystem_Core_Tracklists{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
-            $after['tracklist-lovedby'] = __('Loved by','wpsstm');
+            $after['tracklist-lovedby'] = __('Loved by:','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
