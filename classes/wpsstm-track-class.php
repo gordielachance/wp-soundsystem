@@ -499,6 +499,7 @@ class WP_SoundSystem_Track{
             
             $args = array(
                 'post_author'   => wpsstm()->get_options('community_user_id'),
+                'post_status'   => 'publish',
             );
             
             $post_id = $source->save_source($args);

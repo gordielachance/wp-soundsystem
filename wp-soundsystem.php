@@ -354,16 +354,20 @@ class WP_SoundSystem {
         $screen = get_current_screen();
         $post_type = $screen->post_type;
 
-        $link = add_query_arg( array('post_type'=>$post_type),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'author'=>$user_id),admin_url('edit.php') );
         
         $attr = array(
             'href' =>   $link,
-            'class' =>  'current',
         );
-        $count = count_user_posts( $user_id , $post_type );
         
-        print_r($user_id);
+        $author_id = isset($_REQUEST['author']) ? $_REQUEST['author'] : null;
         
+        if ($author_id==$user_id){
+            $attr['class'] = 'current';
+        }
+        
+        $count = count_user_posts( $user_id , $post_type  );
+
         $views['community'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Community','wpsstm'),$count);
         
         return $views;
