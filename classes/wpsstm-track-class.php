@@ -579,11 +579,7 @@ class WP_SoundSystem_Track{
         /*
         Capability check
         */
-        
-        //TO FIX
-        $is_static_playlist =       $tracklist->tracklist_type == 'static-playlist';
-        $static_playlists_types =   array(wpsstm()->post_type_playlist,wpsstm()->post_type_album);
-        
+
        //tracklist
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_obj =            $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
@@ -595,8 +591,8 @@ class WP_SoundSystem_Track{
         $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && $is_static_playlist );
-        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && $is_static_playlist );
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
+        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
 
         $actions = array();
 

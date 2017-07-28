@@ -393,11 +393,10 @@ class WP_SoundSystem_Tracklist_Table{
                 Capability check
                 */
                 $tracklist_id =             $this->tracklist->post_id;
-                $is_static_playlist =       $this->tracklist->tracklist_type == 'static-playlist';
                 $post_type_playlist =       get_post_type($tracklist_id);
                 $tracklist_obj =            $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
                 $can_edit_tracklist =       ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
-                $can_move_track =           ( $can_edit_tracklist && $is_static_playlist );
+                $can_move_track =           ( $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
                 
                 $position = sprintf('<span itemprop="position">%s</span>',$this->curr_track_idx);
                 

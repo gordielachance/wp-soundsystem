@@ -53,11 +53,12 @@ abstract class WP_SoundSystem_Tracklist{
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
             
             $this->updated_time = get_post_modified_time( 'U', false, $post_id );
-            $this->location = get_permalink($post_id);
-            
-            $this->tracklist_type = $this->get_tracklist_type();
+            $this->location = get_permalink($post_id); 
             
         }
+        
+        //tracklist type
+        $this->tracklist_type = $this->get_tracklist_type();
 
         $this->options = array_replace_recursive((array)$this->options_default,$this->options); //last one has priority
 
@@ -219,25 +220,16 @@ abstract class WP_SoundSystem_Tracklist{
         return $this->set_subtrack_ids($subtrack_ids);
     }
     
-    function get_tracklist_type(){
-        if (!$this->post_id) return;
-        $tracklist_post_type = get_post_type($this->post_id);
-
-        switch ($tracklist_post_type){
-            case wpsstm()->post_type_track:
-                $tracklist_type = 'track';
-            break;
-            case wpsstm()->post_type_album:
-                $tracklist_type = 'album';
-            break;
-            case wpsstm()->post_type_playlist:
-                $tracklist_type = 'static-playlist';
-            break;
-            case wpsstm()->post_type_live_playlist:
-                $tracklist_type = 'live-playlist';
-            break;
-        }
+    private function get_tracklist_type(){
         
+        $tracklist_type = 'static'; //default
+        
+        $post_type = get_post_type($this->post_id);
+        
+        if ($post_type == wpsstm()->post_type_live_playlist){
+            $tracklist_type = 'live';
+        }
+
         return $tracklist_type;
     }
 
@@ -552,8 +544,6 @@ abstract class WP_SoundSystem_Tracklist{
         Capability check
         */
 
-        $is_live_tracklist =  $this->tracklist_type == 'live-playlist';
-        
         //playlist
         $permalink = get_permalink($this->post_id);
         $tracklist_status = get_post_status($this->post_id);
@@ -563,7 +553,7 @@ abstract class WP_SoundSystem_Tracklist{
         //track
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        $can_add_tracklist_items = !$is_live_tracklist;
+        $can_add_tracklist_items = ($this->tracklist_type == 'static');
         
         $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
         $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
