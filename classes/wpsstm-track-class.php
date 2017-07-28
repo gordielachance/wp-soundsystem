@@ -32,15 +32,6 @@ class WP_SoundSystem_Track{
             $this->album = wpsstm_get_post_album($post_id);
             $this->mbid = wpsstm_get_post_mbid($post_id);
             $this->source_ids = wpsstm_get_track_source_ids($post_id);
-            
-
-            //FOR TESTS TO FIX REMOVE
-            /*
-            if($post_id == 23842){
-                $this->populate_auto_sources();
-            }
-            $this->populate_auto_sources();
-            */
 
         }
 
@@ -459,25 +450,26 @@ class WP_SoundSystem_Track{
 
         if (!$this->artist || !$this->title) return;
 
-        $sources = array();
+        $auto_sources = array();
+        $new_source_ids = array();
 
         foreach( (array)wpsstm_player()->providers as $provider ){
             if ( !$provider_sources = $provider->sources_lookup( $this ) ) continue; //cannot play source
 
-            $sources = array_merge($sources,(array)$provider_sources);
+            $auto_sources = array_merge($auto_sources,(array)$provider_sources);
         }
 
         //allow plugins to filter this
-        $sources = apply_filters('wpsstm_get_track_sources_auto',$sources,$this);
+        $auto_sources = apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
 
         if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
-            $sources = $this->autosource_filter_ban_words($sources);
+            $auto_sources = $this->autosource_filter_ban_words($auto_sources);
         }
         if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
-            $sources = $this->autosource_filter_title_requires_artist($sources);
+            $auto_sources = $this->autosource_filter_title_requires_artist($auto_sources);
         }
 
-        foreach((array)$sources as $source){
+        foreach((array)$auto_sources as $source){
             
             $args = array(
                 'post_author'   => wpsstm()->get_options('community_user_id'),
@@ -485,17 +477,20 @@ class WP_SoundSystem_Track{
             );
             
             $post_id = $source->save_source($args);
+            
             if ( is_wp_error($post_id) ){
                 $code = $post_id->get_error_code();
                 $error_msg = $post_id->get_error_message($code);
                 wpsstm()->debug_log( $error_msg, "WP_SoundSystem_Track::populate_auto_sources() - unable to save source");
                 continue;
             }
+            
             if ( in_array($post_id,$this->source_ids) ) continue; //already populated
             $this->source_ids[] = $post_id;
+            $new_source_ids[] = $post_id;
         }
         
-        return $this->source_ids;
+        return $new_source_ids;
 
     }
     

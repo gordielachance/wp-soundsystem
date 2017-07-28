@@ -1,5 +1,5 @@
 jQuery(document).ready(function($){
-    
+
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
         var track_el = track_obj.track_el;
         
@@ -8,8 +8,6 @@ jQuery(document).ready(function($){
         //click on source link
         sources_links.click(function(e) {
             e.preventDefault();
-            
-            alert("toto");
             
             var source_el = $(this).closest('li');
             var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
@@ -26,10 +24,13 @@ jQuery(document).ready(function($){
     //suggest sources
     $(document).on("click", 'input#wpsstm-suggest-sources-bt', function(e){
         e.preventDefault();
-        
+
         var bt = $(this);
-        var sources_auto_edit_list = bt.closest('#wpsstm-sources-edit-list-auto');
-        var popup_section = bt.closest('#wpsstm-track-admin-sources');
+        var hentry = bt.closest('article');
+        var track_id = $(hentry).attr('data-track-id');
+        var form = $(hentry).closest('form');
+        var sources_wrapper = $(form).find('.wpsstm-sources-edit-list-user');
+        
         var popup = bt.closest('.hentry');
 
         //get track obj from HTML
@@ -37,12 +38,11 @@ jQuery(document).ready(function($){
         var track_obj = new WpsstmTrack(track_el);
 
         var ajax_data = {
-            action:     'wpsstm_suggest_editable_sources',
-            field_name: bt.attr('data-wpsstm-autosources-field-name'), //TO FIX has been removed
-            post_id:    track_obj.post_id
+            action:     'wpsstm_autosources_form',
+            post_id:    track_id
         };
-        
-        var existing_rows_count = $(popup_section).find('.wpsstm-source').length;
+
+        var existing_rows_count = $(form).find('.wpsstm-source').length;
 
         return $.ajax({
 
@@ -51,37 +51,30 @@ jQuery(document).ready(function($){
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                popup_section.addClass('loading');
+                $(form).addClass('loading');
             },
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
                 }else{
-                    var $rows = $(data.new_html);
                     
-                    //increment input names
-                    $.each($rows, function( row_i, row ) {
-                        var inputs = $(row).find('input');
-                        $.each(inputs, function( i, input ) {
-                            var input_name = $(input).attr('name');
-                            var new_input_index = existing_rows_count + row_i;
-                            var new_input_name = input_name.replace(/\[[\d+]\]/, "[" + new_input_index + "]");
-                            $(input).attr('name',new_input_name);
-                            
+                    bt.remove();
+                    
+                    if (data.new_html){
+                        var $rows = $(data.new_html);
+                        $(sources_wrapper).append($rows);
+                        $(sources_wrapper).toggleChildren({
+                            childrenShowCount:  true,
+                            childrenMax:        4,
+                            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+                            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
                         });
-                    });
-                    
-                    sources_auto_edit_list.html($rows);
-                    sources_auto_edit_list.toggleChildren({
-                        childrenShowCount:  true,
-                        childrenMax:        3,
-                        moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-                        lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
-                    });
+                    }
+
                 }
             },
             complete: function() {
-                popup_section.removeClass('loading');
+                $(form).removeClass('loading');
             }
         });
     });

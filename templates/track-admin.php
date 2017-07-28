@@ -8,37 +8,36 @@
 			<?php
 			// Start the loop.
 			while ( have_posts() ) { 
+                
                 the_post();
+                
+                $post_type = get_post_type();
+                $tracklist = wpsstm_get_post_tracklist(get_the_ID());
+
+                $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_admin );
+
+                /*
+                Capability check
+                */
+                //TO FIX to improve
+                $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
+                $create_playlist_cap =  $playlist_type_obj->cap->edit_posts;
+
+                if ( $post_type == wpsstm()->post_type_track ){
+                    $track = new WP_SoundSystem_Track(get_the_ID());
+                }else{
+                    $track = new WP_SoundSystem_Track();
+                }
+
+                $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
+                $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
+                $can_delete_tracks =    current_user_can($playlist_type_obj->cap->delete_posts);
+                
                 ?>
-                <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                    
-                    <?php
-                    $post_type = get_post_type();
-                    $tracklist = wpsstm_get_post_tracklist(get_the_ID());
-
-                    $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_admin );
-
-                    /*
-                    Capability check
-                    */
-                    //TO FIX to improve
-                    $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
-                    $create_playlist_cap =  $playlist_type_obj->cap->edit_posts;
-
-                    if ( $post_type == wpsstm()->post_type_track ){
-                        $track = new WP_SoundSystem_Track(get_the_ID());
-                    }else{
-                        $track = new WP_SoundSystem_Track();
-                    }
-                    
-                    $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
-                    $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
-                    $can_delete_tracks =    current_user_can($playlist_type_obj->cap->delete_posts);
-
-                    ?>
+                <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> data-track-id="<?php echo $track->post_id;?>">
 
                     <header class="entry-header">
-                        <h1><?php the_title();?></h1>
+                        <h1 class="entry-title"><?php the_title();?></h1>
                         <?php if ($track_admin_action == 'new-subtrack'){ //TO FIX NOT WORKING
                             printf('<h2>%s</h2>',$track_type_obj->labels->add_new_item);
                         }
@@ -164,20 +163,17 @@
                                         <?php _e('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');?>
                                     </p>
                                     <p>
-                                        <?php _e('Hover the provider icon to view the source title (when available).','wpsstm');?>
-                                    </p>
-                                    <p>
                                         <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
                                     </p>
                                     <form action="<?php echo esc_url($track->get_track_admin_gui_url('sources'));?>" method="post">
                                         <div class="wpsstm-sources-edit-list-user wpsstm-sources-edit-list">
-                                            <?php echo wpsstm_sources()->get_sources_inputs($track->source_ids);?>
+                                            <?php 
+                                            echo wpsstm_sources()->get_track_sources_form($track->source_ids,true);
+                                            ?>
                                         </div>
-                                        <div class="wpsstm-sources-edit-list-auto wpsstm-sources-edit-list">
-                                            <p class="wpsstm-submit-wrapper">
-                                                <input id="wpsstm-suggest-sources-bt" type="submit" value="<?php _e('Suggest sources','wpsstm');?>" />
-                                            </p>
-                                        </div>
+                                        <p class="wpsstm-submit-wrapper">
+                                            <input id="wpsstm-suggest-sources-bt" type="submit" value="<?php _e('Suggest sources','wpsstm');?>" />
+                                        </p>
                                         <p class="wpsstm-submit-wrapper">
                                             <input id="wpsstm-update-sources-bt" type="submit" value="<?php _e('Save');?>" />
                                             <input type="hidden" name="wpsstm-admin-track-action" value="sources">

@@ -85,10 +85,6 @@ class WP_SoundSystem_Core_Tracks{
         
         //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
-        
-        //ajax : get tracks source auto
-        add_action('wp_ajax_wpsstm_sources_auto_lookup', array($this,'ajax_sources_auto_lookup'));
-        add_action('wp_ajax_nopriv_wpsstm_sources_auto_lookup', array($this,'ajax_sources_auto_lookup'));
 
         //ajax : add new tracklist
         add_action('wp_ajax_wpsstm_create_playlist', array($this,'ajax_create_playlist'));
@@ -195,7 +191,7 @@ class WP_SoundSystem_Core_Tracks{
                 
             break;
             case 'sources':
-                
+
                 //nonce check
                 if ( !isset($_POST['wpsstm_admin_track_gui_sources_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_sources_nonce'], 'wpsstm_admin_track_gui_sources_'.$track->post_id ) ) {
                     wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
@@ -204,10 +200,17 @@ class WP_SoundSystem_Core_Tracks{
                 
                 $sources_raw = ( isset($_POST[ 'wpsstm_track_sources' ]) ) ? $_POST[ 'wpsstm_track_sources' ] : array();
 
-                //TO FIX TO CHECK
                 foreach((array)$sources_raw as $source_raw){
-                    $source = new WP_SoundSystem_Source();
-                    $source->populate_array( $source_raw );
+                    
+                    if ( isset($source_raw['post_id']) ){
+                        $source = new WP_SoundSystem_Source($source_raw['post_id']);
+                    }else{
+                        $source = new WP_SoundSystem_Source();
+                        
+                        $source_raw['track_id'] = $track->post_id;
+                        $source->populate_array( $source_raw );
+                        if (!$source->url) continue;
+                    }
 
                     if ($source->post_id){ //confirm source by updating its author
                         
@@ -617,32 +620,6 @@ class WP_SoundSystem_Core_Tracks{
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
-    }
-    
-    function ajax_sources_auto_lookup(){
-        
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'new_html'  => null,
-            'success'   => false
-        );
-
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-
-        $track = new WP_SoundSystem_Track($post_id);
-        $track->populate_auto_sources();
-
-        $track = $result['track'] = $track;
-
-        $result['new_html'] = wpsstm_sources()->get_track_sources_list($track);
-        $result['success'] = true;
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-
     }
 
     function ajax_create_playlist(){

@@ -48,8 +48,10 @@ class WP_SoundSystem_Core_Sources{
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        //ajax : sources manager : suggest
-        add_action('wp_ajax_wpsstm_suggest_editable_sources', array($this,'ajax_suggest_editable_sources'));
+        //ajax : get track auto-sources
+        add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
+        add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
+        add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));
 
     }
     
@@ -235,18 +237,21 @@ class WP_SoundSystem_Core_Sources{
         
     }
     
-    function get_sources_inputs($source_ids = null){
+    function get_track_sources_form($source_ids = null,$blank_row = false){
         global $post;
         
-        if (!$source_ids) $source_ids = array();
-
+        $source_ids = (array)$source_ids;
         $field_name = 'wpsstm_track_sources';
-
-        array_unshift($source_ids,null); //add blank line
-        
         $rows = array();
 
+        //add blank row
+        if ($blank_row){
+            array_unshift($source_ids,null); 
+        }
+
         foreach ( $source_ids as $key=>$source_id ){
+            
+            $key++;
 
             $source = new WP_SoundSystem_Source($source_id);
 
@@ -261,58 +266,36 @@ class WP_SoundSystem_Core_Sources{
                 $source_classes[] = 'wpsstm-source-auto';
             }
             
-            $disabled_str = disabled( $disabled, true, false );
-            $readonly_str = wpsstm_readonly( $readonly, true, false );
+            ob_start();
+            
+            ?>
+            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_auto;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
+                <span class="wpsstm-source-action">
+                    <i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>
+                    <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>
+                </span>
+                <span class="wpsstm-source-icon">
+                    <?php echo $source->get_provider_link();?> <small><?php echo $source->url;?></small>
+                </span>
+                <span class="wpsstm-source-fields">
+                    <?php 
+                    if ($source->post_id){
+                        ?>
+                        <input type="hidden" name="<?php printf('%s[%s][post_id]',$field_name,$key);?>" value="<?php echo $source->post_id;?>" <?php disabled( $disabled, true );?> />
+                        <?php
+                    }else{ //blank row
+                        ?>
+                        <input type="text" name="<?php printf('%s[%s][url]',$field_name,$key);?>" placeholder="<?php _e('Source URL','wpsstm');?>" />
+                        <?php
+                    }
+                    ?>
+                </span>
 
-            //icon
-            $icon_link = $source->get_provider_link();
+            </div>
+            <?php
             
-            //post id
-            $source_post_id_attr_arr = array(
-                'name'          => sprintf('%s[%s][post_id]',$field_name,$key),
-                'value'         => $source->post_id,
-            );
-            
-            //track id
-            $source_track_id_attr_arr = array(
-                'name'          => sprintf('%s[%s][track_id]',$field_name,$key),
-                'value'         => $post->ID,
-            );
-            
-            //title
-            $source_title_attr_arr = array(
-                'name'          => sprintf('%s[%s][title]',$field_name,$key),
-                'value'         => $source->title
-            );
-            
-            //url
-            $source_url_attr_arr = array(
-                'name'          => sprintf('%s[%s][url]',$field_name,$key),
-                'value'         => $source->url,
-                'placeholder'   => __("Source URL",'wpsstm'),
-            );
-            
-            $source_title_el = sprintf('<input type="hidden" class="wpsstm-source-title" %s %s/>',wpsstm_get_html_attr($source_title_attr_arr),$disabled_str);
-            $source_url_el = sprintf('<input type="text" class="wpsstm-editable-source-url" %s %s %s/>',wpsstm_get_html_attr($source_url_attr_arr),$disabled_str,$readonly_str);
-            $source_post_id_el = sprintf('<input type="hidden"  %s %s />',wpsstm_get_html_attr($source_post_id_attr_arr),$disabled_str);
-            $source_track_id_el = sprintf('<input type="hidden"  %s %s />',wpsstm_get_html_attr($source_track_id_attr_arr),$disabled_str);
-            
-            $content_url = sprintf('<span class="wpsstm-source-icon">%s</span>',$icon_link);
-            
-            $content_url .= sprintf('<span class="wpsstm-source-fields">%s%s%s%s</span>',$source_post_id_el,$source_track_id_el,$source_title_el,$source_url_el);
-
-            $icon_plus = '<i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>';
-            $icon_minus = '<i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>';
-            
-            $content_url .= sprintf('<span class="wpsstm-source-action">%s%s</span>',$icon_plus,$icon_minus);
-
-            $attr_arr = array(
-                'class'                     => implode(' ',$source_classes),
-                'data-wpsstm-auto-source'   => (int)$source->is_auto,
-                'data-wpsstm-source-id'     => $source->post_id,
-            );
-
-            $rows[] = sprintf('<div %s>%s</div>',wpsstm_get_html_attr($attr_arr),$content_url);
+            $row = ob_get_clean();
+            $rows[] = $row;
         }
         return implode("\n",$rows);
     }
@@ -416,7 +399,33 @@ class WP_SoundSystem_Core_Sources{
         }
     }
     
-    function ajax_suggest_editable_sources(){
+    function ajax_autosources_list(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'new_html'  => null,
+            'success'   => false
+        );
+
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+
+        $track = new WP_SoundSystem_Track($post_id);
+        $track->populate_auto_sources();
+
+        $track = $result['track'] = $track;
+
+        $result['new_html'] = wpsstm_sources()->get_track_sources_list($track);
+        $result['success'] = true;
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+
+    }
+    
+    function ajax_autosources_form(){
         
         $ajax_data = wp_unslash($_POST);
         
@@ -428,19 +437,19 @@ class WP_SoundSystem_Core_Sources{
         );
 
         $track = new WP_SoundSystem_Track($ajax_data['post_id']);
-        $track->populate_auto_sources();
-
         $track = $result['track'] = $track;
-
-        $result['new_html'] = wpsstm_sources()->get_sources_inputs($track->source_ids);
+        
+        $new_source_ids = $track->populate_auto_sources();
         $result['success'] = true;
+        
+        if ( $new_source_ids ){
+            $result['new_html'] = wpsstm_sources()->get_track_sources_form($new_source_ids);
+        }
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
 
     }
-    
-
 
 }
 
