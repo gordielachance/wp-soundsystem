@@ -46,6 +46,8 @@ class WP_SoundSystem_Core_Sources{
         add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'column_source_url_content'), 10, 2 );
         
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
+        
         //ajax : sources manager : suggest
         add_action('wp_ajax_wpsstm_suggest_editable_sources', array($this,'ajax_suggest_editable_sources'));
 

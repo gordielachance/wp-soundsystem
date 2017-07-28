@@ -67,6 +67,7 @@ class WP_SoundSystem_Core_Tracks{
         
         add_filter('manage_posts_columns', array($this,'tracks_column_lovedby_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'tracks_column_lovedby_content'), 10, 2 );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
 
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
