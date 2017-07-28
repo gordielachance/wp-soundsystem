@@ -70,6 +70,8 @@ class WP_SoundSystem_Track{
     
     function get_track_duplicates(){
         
+        if (!$this->artist || !$this->title) return;
+        
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'post_status' =>    'any',
@@ -390,12 +392,7 @@ class WP_SoundSystem_Track{
         
         if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
-        
-        if ( !$this->post_id && !$this->populate_track_post_auto() ){//track does not exists in DB
-            $created = $this->save_track();
-            if ( is_wp_error($created) ) return $created;
-        }
-            
+ 
         if ( !$this->post_id ){
             return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
         }
@@ -429,7 +426,7 @@ class WP_SoundSystem_Track{
     
     function get_track_loved_by(){
         //track ID is required
-        if ( !$this->post_id && !$this->populate_track_post_auto() ) return;//track does not exists in DB
+        if ( !$this->post_id  ) return;//track does not exists in DB
         
         return get_post_meta($this->post_id, wpsstm_tracks()->favorited_track_meta_key);
     }
@@ -730,131 +727,6 @@ class WP_SoundSystem_Track{
             $actions[$slug] = wp_parse_args($action,$default_action);
         }
         return $actions;
-
-    }
-
-    function track_admin_details(){
-        
-        //artist
-        $artist_input_attr = array(
-            'name'  => 'wpsstm_track_artist',
-            'value' => ($this->artist) ? $this->artist : null,
-            'class' => 'wpsstm-fullwidth'
-        );
-        $artist_input = sprintf('<input %s />',wpsstm_get_html_attr($artist_input_attr));
-        $artist_el = sprintf('<div id="track-admin-artist"><h3>%s</h3>%s</div>',__('Artist','wpsstm'),$artist_input);
-        
-        //title
-        $title_input_attr = array(
-            'name'  => 'wpsstm_track_title',
-            'value' => ($this->title) ? $this->title : null,
-            'class' => 'wpsstm-fullwidth'
-        );
-        $title_input = sprintf('<input %s />',wpsstm_get_html_attr($title_input_attr));
-        $title_el = sprintf('<div id="track-admin-title"><h3>%s</h3>%s</div>',__('Title'),$title_input);
-        
-        //album
-        $album_input_attr = array(
-            'name'  => 'wpsstm_track_album',
-            'value' => ($this->album) ? $this->album : null,
-            'class' => 'wpsstm-fullwidth'
-        );
-        $album_input = sprintf('<input %s />',wpsstm_get_html_attr($album_input_attr));
-        $album_el = sprintf('<div id="track-admin-album"><h3>%s</h3>%s</div>',__('Album','wpsstm'),$album_input);
-        
-        //mbid
-        $mbid_input_attr = array(
-            'name'  => 'wpsstm_track_mbid',
-            'value' => ($this->mbid) ? $this->mbid : null,
-            'class' => 'wpsstm-fullwidth'
-        );
-        $mbid_input = sprintf('<input %s />',wpsstm_get_html_attr($mbid_input_attr));
-        $mbid_el = sprintf('<div id="track-admin-mbid"><h3>%s</h3>%s</div>',__('Musicbrainz ID','wpsstm'),$mbid_input);
-        
-        $submit_bt_el = sprintf('<input id="wpsstm-update-track-bt" type="submit" value="%s" />',__('Save'));
-        $submit_block = sprintf('<p class="wpsstm-submit-wrapper">%s</p>',$submit_bt_el);
-        
-        $form_content = $artist_el.$title_el.$album_el.$mbid_el.$submit_block;
-        //
-        $popup_action = 'edit';
-        $popup_action_el = sprintf('<input type="hidden" name="wpsstm-admin-track-action" value="%s">',$popup_action);
-        $form_action = $this->get_track_admin_gui_url($popup_action);
-        $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_details_'.$this->post_id, 'wpsstm_admin_track_gui_details_nonce', true, false );
-        return sprintf('<form action="%s" method="post">%s%s%s</form>',$form_action,$form_content,$nonce_el,$popup_action_el);
-
-    }
-    
-    function track_admin_playlists(){
-        
-        if ( !get_current_user_id() ){
-            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            return sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
-        }
-        
-        /*
-        if ( !current_user_can($create_playlist_cap) ){
-            $wp_cap_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            $missing_cap_text = __("You don't have the capability required to create a new playlist.",'wpsstm');
-            return sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_cap_icon,$missing_cap_text); 
-        }
-        */
-
-        $filter_playlists_input = sprintf('<p><input id="wpsstm-playlists-filter" type="text" placeholder="%s" /></p>',__('Type to filter playlists or to create a new one','wpsstm'));
-
-        $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));
-        
-        $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $labels = get_post_type_labels($playlist_type_obj);
-        
-        $submit = sprintf('<input type="submit" value="%s"/>',$labels->add_new_item);
-        $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$this->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true, false );
-        $new_playlist_bt = sprintf('<p id="wpsstm-new-playlist-add">%s%s</p>',$submit,$nonce_el);
-        
-        $existing_playlists_wrapper = sprintf('<div id="wpsstm-filter-playlists"%s%s%s</div>',$filter_playlists_input,$list_all,$new_playlist_bt);
-
-        return sprintf('<div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">%s</div>',$existing_playlists_wrapper);
-    }
-
-    function track_admin_sources(){
-        $popup_action = 'sources';
-        $sources_ids = $this->source_ids;
-
-        $sources_inputs = wpsstm_sources()->get_sources_inputs($sources_ids);
-
-        $desc = array();
-        $desc[]= __('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');
-        
-        $desc[]= __('Hover the provider icon to view the source title (when available).','wpsstm');
-        
-        $desc[]= __("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        $desc = implode("\n",$desc);
-
-        $suggest_bt = sprintf('<p class="wpsstm-submit-wrapper"><input id="wpsstm-suggest-sources-bt" type="submit" value="%s" /></p>',__('Suggest sources','wpsstm'));
-        $sources_auto = sprintf('<div id="wpsstm-sources-edit-list-auto" class="wpsstm-sources-edit-list">%s</div>',$suggest_bt);
-        
-        $sources_user = sprintf('<div class="wpsstm-sources-edit-list-user wpsstm-sources-edit-list">%s</div>',$sources_inputs);
-
-        $popup_action_el = sprintf('<input type="hidden" name="wpsstm-admin-track-action" value="%s">',$popup_action);
-        $popup_track_id_el = sprintf('<input type="hidden" name="wpsstm-admin-track-id" value="%s">',$this->post_id);
-        
-        $submit_bt_el = sprintf('<input id="wpsstm-update-sources-bt" type="submit" value="%s" />',__('Save'));
-        $nonce_el = wp_nonce_field( 'wpsstm_admin_track_gui_sources_'.$this->post_id, 'wpsstm_admin_track_gui_sources_nonce', true, false );
-        $submit_block = sprintf('<p class="wpsstm-submit-wrapper">%s%s%s</p>',$popup_action_el.$popup_track_id_el,$submit_bt_el,$nonce_el);
-
-        $form_action = $this->get_track_admin_gui_url($popup_action);
-
-        return $desc.sprintf('<form action="%s" method="post">%s</form>',$form_action,$sources_user.$sources_auto.$submit_block);
 
     }
     

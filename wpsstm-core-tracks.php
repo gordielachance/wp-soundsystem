@@ -691,33 +691,20 @@ class WP_SoundSystem_Core_Tracks{
 
         $tracklist = new WP_SoundSystem_Static_Tracklist($playlist_id);
         $track = new WP_SoundSystem_Track($track_args);
-        
-        //get track ID or create it
-        if (!$track_id = $track->post_id){
-            $track_id = $track->save_track();
-        }
-        
+
         wpsstm()->debug_log($track,"ajax_add_playlist_track()");
 
-        if ( is_wp_error($track_id) ){
             
-            $code = $track_id->get_error_code();
-            $result['message'] = $track_id->get_error_message($code);
-            
+        $result['track_id'] = $track->post_id;
+        $success = $tracklist->append_subtrack_ids($track->post_id);
+
+        if ( is_wp_error($success) ){
+            $code = $success->get_error_code();
+            $result['message'] = $success->get_error_message($code);
         }else{
-            
-            $result['track_id'] = $track_id;
-            $success = $tracklist->append_subtrack_ids($track_id);
-            
-            if ( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code);
-            }else{
-                $result['success'] = $success;
-            }
-            
+            $result['success'] = $success;
         }
-        
+            
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
@@ -734,21 +721,23 @@ class WP_SoundSystem_Core_Tracks{
         
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        $tracklist = new WP_SoundSystem_Static_Tracklist($playlist_id);
-        $track = new WP_SoundSystem_Track( $post_id );
         
-        //track ID is required
-        if ( !$track->post_id && !$track->populate_track_post_auto() ) return;//track does not exists in DB
+        if ($post_id){
+            
+            $tracklist = new WP_SoundSystem_Static_Tracklist($playlist_id);
+            $track = new WP_SoundSystem_Track( $post_id );
 
-        //wpsstm()->debug_log($track,"ajax_remove_playlist_track()"); 
-        
-        $success = $tracklist->remove_subtrack_ids($track->post_id);
+            //wpsstm()->debug_log($track,"ajax_remove_playlist_track()"); 
 
-        if ( is_wp_error($success) ){
-            $result['message'] = $success->get_error_message();
-        }else{
-            $result['success'] = $success;
+            $success = $tracklist->remove_subtrack_ids($track->post_id);
+
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
         }
+
         
         header('Content-type: application/json');
         wp_send_json( $result ); 

@@ -117,8 +117,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     /*
-    Create a blank track and redirect to track popup.  
-    We don't use save_track() here since it will check that the artist/title is not empty.
+    Create a blank track and redirect to track edit page.  
     */
     
     function handle_append_subtrack(){

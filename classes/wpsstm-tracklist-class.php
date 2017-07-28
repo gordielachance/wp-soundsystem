@@ -431,9 +431,12 @@ abstract class WP_SoundSystem_Tracklist{
         //TO FIX call remove_subtracks() ?
     }
     
+    /*
+    Append a blank subtrack to the playlist.
+    */
+    
     function add_blank_subtrack(){
-        //Used instead of save_track() since save_track() will ignore saving a blank track.
-        
+
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $post_type_obj->cap->edit_posts;
