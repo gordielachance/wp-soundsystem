@@ -67,18 +67,32 @@
 }
 
 /* line 58, ../scss/_wpsstm-shared.scss */
+.comma-list, ul.wpsstm-track-loved-by-list, ul.wpsstm-track-parents {
+  list-style: none;
+  display: inline;
+}
+/* line 61, ../scss/_wpsstm-shared.scss */
+.comma-list li, ul.wpsstm-track-loved-by-list li, ul.wpsstm-track-parents li {
+  display: inline;
+}
+/* line 63, ../scss/_wpsstm-shared.scss */
+.comma-list li:not(:last-child):after, ul.wpsstm-track-loved-by-list li:not(:last-child):after, ul.wpsstm-track-parents li:not(:last-child):after {
+  content: ", ";
+}
+
+/* line 69, ../scss/_wpsstm-shared.scss */
 ul.wpsstm-actions-list {
   list-style: none;
 }
-/* line 61, ../scss/_wpsstm-shared.scss */
+/* line 72, ../scss/_wpsstm-shared.scss */
 ul.wpsstm-actions-list li {
   display: inline-block;
 }
-/* line 65, ../scss/_wpsstm-shared.scss */
+/* line 76, ../scss/_wpsstm-shared.scss */
 ul.wpsstm-actions-list li a label {
   padding-left: .25em;
 }
-/* line 73, ../scss/_wpsstm-shared.scss */
+/* line 84, ../scss/_wpsstm-shared.scss */
 ul.wpsstm-actions-list li.error, ul.wpsstm-actions-list li.error a {
   color: red;
 }
@@ -86,52 +100,52 @@ ul.wpsstm-actions-list li.error, ul.wpsstm-actions-list li.error a {
 /*
 Thickbox popups
 */
-/* line 84, ../scss/_wpsstm-shared.scss */
+/* line 99, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin header, body.wpsstm_tracklist-template-admin header {
   margin: 2em 0;
 }
-/* line 88, ../scss/_wpsstm-shared.scss */
+/* line 103, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #sidebar, body.wpsstm_track-template-admin #colophon, body.wpsstm_tracklist-template-admin #sidebar, body.wpsstm_tracklist-template-admin #colophon {
   display: none;
 }
-/* line 91, ../scss/_wpsstm-shared.scss */
+/* line 106, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #content, body.wpsstm_tracklist-template-admin #content {
   width: 100%;
   margin: 0;
 }
-/* line 95, ../scss/_wpsstm-shared.scss */
+/* line 110, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #main, body.wpsstm_tracklist-template-admin #main {
   margin: 0;
   padding: 0;
 }
-/* line 99, ../scss/_wpsstm-shared.scss */
+/* line 114, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin #wpadminbar, body.wpsstm_tracklist-template-admin #wpadminbar {
   display: none;
 }
-/* line 104, ../scss/_wpsstm-shared.scss */
+/* line 119, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry, body.wpsstm_tracklist-template-admin .hentry {
   margin: 0;
   padding: 0;
 }
-/* line 108, ../scss/_wpsstm-shared.scss */
+/* line 123, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul, body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul {
   list-style: none;
 }
-/* line 110, ../scss/_wpsstm-shared.scss */
+/* line 125, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li, body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li {
   display: inline;
 }
-/* line 112, ../scss/_wpsstm-shared.scss */
+/* line 127, ../scss/_wpsstm-shared.scss */
 body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active), body.wpsstm_tracklist-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state-active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
 }
 
-/* line 121, ../scss/_wpsstm-shared.scss */
+/* line 136, ../scss/_wpsstm-shared.scss */
 #TB_window {
   font-family: sans-serif;
 }
-/* line 126, ../scss/_wpsstm-shared.scss */
+/* line 141, ../scss/_wpsstm-shared.scss */
 #TB_window #TB_ajaxContent {
   margin: 0;
   padding: 1em;
@@ -289,11 +303,11 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state
   display: initial;
 }
 /* line 174, ../scss/wpsstm-track-sources.scss */
-.wpsstm-sources-edit-list .wpsstm-source[data-wpsstm-source-origin="auto"] .wpsstm-source-icon.wpsstm-source-icon-delete {
+.wpsstm-sources-edit-list .wpsstm-source[data-wpsstm-auto-source="1"] .wpsstm-source-icon.wpsstm-source-icon-delete {
   display: none;
 }
 /* line 177, ../scss/wpsstm-track-sources.scss */
-.wpsstm-sources-edit-list .wpsstm-source[data-wpsstm-source-origin="auto"] .wpsstm-source-icon.wpsstm-source-icon-add {
+.wpsstm-sources-edit-list .wpsstm-source[data-wpsstm-auto-source="1"] .wpsstm-source-icon.wpsstm-source-icon-add {
   display: initial;
 }
 
