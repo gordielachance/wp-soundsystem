@@ -155,7 +155,9 @@ class WP_SoundSystem_Core_Tracks{
         $track->album = ( isset($_REQUEST['track_album']) ) ? $_REQUEST['track_album'] : null;
         
         if ( !$track->post_id && !$track->populate_track_post_auto() ){//track does not exists in DB
-            $track->save_temp_track();
+            $community_user_id = wpsstm()->get_options('community_user_id');
+            $track_args = array('post_author'=>$community_user_id);
+            $track->save_track($track_args);
         }
         
         if (!$track->post_id) return;
@@ -807,7 +809,7 @@ class WP_SoundSystem_Core_Tracks{
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
         
         //get all sources
-        $source_ids = wpsstm_get_post_source_ids($post_id);
+        $source_ids = wpsstm_get_track_source_ids($post_id);
         
         foreach((array)$source_ids as $source_id){
             wp_update_post(array(

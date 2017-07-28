@@ -36,13 +36,7 @@ class WP_SoundSystem {
     public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
-    
-    /*
-    Temporary post status. Used for tracklist/tracks created frontend; before user "confirmed" them.
-    */
-    
-    public $temp_status = 'wpsstm-wizard';
-    
+
     /**
     * @var The one true Instance
     */
@@ -159,8 +153,6 @@ class WP_SoundSystem {
         add_action( 'plugins_loaded', array($this, 'upgrade'));
 
         add_action( 'admin_init', array($this,'load_textdomain'));
-        
-        add_action( 'init', array($this,'register_temp_status'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
@@ -211,17 +203,6 @@ class WP_SoundSystem {
     
     public function get_default_option($keys = null){
         return wpsstm_get_array_value($keys,$this->options_default);
-    }
-    
-    function register_temp_status(){
-        register_post_status( $this->temp_status, array(
-            'label' =>                      _x( 'Temporary', 'wpsstm' ),
-            'public' =>                     !wpsstm_is_backend(),
-            'exclude_from_search' =>        false,
-            'show_in_admin_all_list' =>     false,
-            'show_in_admin_status_list' =>  true,
-            'label_count' =>                _n_noop( 'Temporary <span class="count">(%s)</span>', 'Temporary <span class="count">(%s)</span>', 'wpsstm' ),
-        ) );
     }
 
     function register_scripts_styles_shared(){

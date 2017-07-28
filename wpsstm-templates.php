@@ -46,7 +46,7 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
-function wpsstm_get_post_source_ids($post_id = null,$args = null){
+function wpsstm_get_track_source_ids($post_id = null,$args = null){
     
     $default_args = array(
         'post_status'=>     'any',

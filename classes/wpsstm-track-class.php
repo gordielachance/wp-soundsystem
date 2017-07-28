@@ -31,7 +31,7 @@ class WP_SoundSystem_Track{
             $this->artist = wpsstm_get_post_artist($post_id);
             $this->album = wpsstm_get_post_album($post_id);
             $this->mbid = wpsstm_get_post_mbid($post_id);
-            $this->source_ids = wpsstm_get_post_source_ids($post_id);
+            $this->source_ids = wpsstm_get_track_source_ids($post_id);
             
 
             //FOR TESTS TO FIX REMOVE
@@ -241,39 +241,6 @@ class WP_SoundSystem_Track{
 
         return $valid;
 
-    }
-    
-    function save_temp_track(){
-        $post_id = null;
-        
-        $meta_input = array(
-            wpsstm_artists()->artist_metakey    => $this->artist,
-            wpsstm_tracks()->title_metakey      => $this->title,
-            wpsstm_albums()->album_metakey      => $this->album,
-            wpsstm_mb()->mbid_metakey           => $this->mbid,
-            //sources is more specific, will be saved below
-        );
-
-        $meta_input = array_filter($meta_input);
-
-        $post_track_args = array('meta_input' => $meta_input);
-        
-        $post_track_new_args = array(
-            'post_type'     => wpsstm()->post_type_track,
-            'post_status'   => wpsstm()->temp_status,
-            'post_author'   => get_current_user_id(), //TO FIX guest if user is not logged ?
-        );
-
-        $post_track_new_args = wp_parse_args($post_track_new_args,$post_track_args);
-
-        $post_id = wp_insert_post( $post_track_new_args );
-        wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($post_track_new_args)), "WP_SoundSystem_Track::save_temp_track()"); 
-        
-        if ( is_wp_error($post_id) ) return $post_id;
-        
-        $this->post_id = $post_id;
-        return $this->post_id;
-        
     }
 
     function save_track($args = null){

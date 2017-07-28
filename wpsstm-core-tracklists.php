@@ -138,7 +138,10 @@ class WP_SoundSystem_Core_Tracklists{
         $tracklist = wpsstm_get_post_tracklist($post->ID);
 
         $track = new WP_SoundSystem_Track();
-        $track->save_temp_track();
+        
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $track_args = array('post_author'=>$community_user_id);
+        $track->save_track($track_args);
 
         if ( $track->post_id ){
 

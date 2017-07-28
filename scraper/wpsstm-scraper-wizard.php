@@ -93,15 +93,12 @@ class WP_SoundSystem_Core_Wizard{
         
         $query_args = array(
             'post_type'     => wpsstm()->post_type_live_playlist,
-            'post_status'   => wpsstm()->temp_status,
-            /*
             'meta_query' => array(
                 array(
                     'key'       => $this->frontend_wizard_meta_key,
                     'compare'   => 'EXISTS'
                 )
             )
-            */
         );
 
         $query = new WP_Query($query_args);

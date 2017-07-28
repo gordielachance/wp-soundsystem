@@ -566,8 +566,7 @@ abstract class WP_SoundSystem_Tracklist{
         $can_add_tracklist_items = !$is_live_tracklist;
         
         $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
-        $can_share = true; //TO FIX no conditions (call to action) but notice if post cannot be shared
-        $can_export = ( in_array($tracklist_status,array('publish',wpsstm()->temp_status)) );
+        $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
         $can_favorite = true; //call to action
         $can_add_tracks = ( $can_edit_tracklist && $can_add_tracklist_items );
         $can_lock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_live_playlist ) );
@@ -593,7 +592,7 @@ abstract class WP_SoundSystem_Tracklist{
         }
         
         //XSPF
-        if ($can_export){
+        if ($can_share){
             $actions['xspf'] = array(
                 'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
                 'text' =>      'XSPF',
@@ -637,9 +636,6 @@ abstract class WP_SoundSystem_Tracklist{
         if ($can_edit_tracklist){
             $status_options = array();
             $statii = array('draft','publish','private','trash');
-
-            //display temporary status only when the post HAS this status
-            if ($tracklist_status == wpsstm()->temp_status) $statii[] = wpsstm()->temp_status;
 
             foreach($statii as $slug){
                 $status_obj = get_post_status_object( $slug );
