@@ -6,6 +6,8 @@ class WP_SoundSystem_Core_Live_Playlists{
     public $feed_url_meta_name = '_wpsstm_scraper_url';
     public $scraper_meta_name = '_wpsstm_scraper_options';
     public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';
+    public $remote_title_meta_name = 'wpsstm_remote_title';
+    public $remote_author_meta_name = 'wpsstm_remote_author_name';
     
     /**
     * @var The one true Instance
@@ -44,6 +46,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
+        
+        add_filter( 'the_title', array($this, 'filter_remote_tracklist_title'),10,2 );
+        //add_filter( 'get_the_author_display_name', array($this, 'filter_remote_tracklist_author') ); //TO FIX commented because not sure this should be enabled
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
     }
@@ -234,6 +239,39 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         return $query;
         
+    }
+    
+    function get_cached_remote_title($post_id = null){
+        global $post;
+        if (!$post_id) $post_id = $post->ID;
+        return get_post_meta($post_id,$this->remote_title_meta_name,true);
+    }
+    
+    function filter_remote_tracklist_title($title, $post_id = null){
+        if ( get_post_type($post_id)!=wpsstm()->post_type_live_playlist ) return $title;
+        
+        if ( $remote_title = $this->get_cached_remote_title() ){
+            $title = $remote_title;
+        }
+        
+        return $title;
+    }
+    
+    function get_cached_remote_author($post_id = null){
+        global $post;
+        if (!$post_id) $post_id = $post->ID;
+        return get_post_meta($post_id,$this->remote_author_meta_name,true);
+    }
+    
+    function filter_remote_tracklist_author($author, $post_id = null){
+
+        if ( get_post_type($post_id)!=wpsstm()->post_type_live_playlist ) return $author;
+        
+        if ( $remote_author = $this->get_cached_remote_author() ){
+            $author = $remote_author;
+        }
+        
+        return $author;
     }
     
 }

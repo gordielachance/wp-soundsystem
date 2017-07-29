@@ -29,8 +29,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $feed_url = null;
     public $time_updated_meta_name = null;
-    public $remote_title_meta_name = 'wpsstm_remote_title';
-    public $remote_author_meta_name = 'wpsstm_remote_author_name';
     
     public $is_expired = null;
     var $expire_time = null;
@@ -85,16 +83,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             if ($this->feed_url){
                 $this->location = $this->feed_url;
                 $this->time_updated_meta_name = sprintf('wpsstm_ltracks_%s',$this->post_id); //172 characters or less
-            }
-
-            //title
-            if ( $title = get_post_meta($this->post_id,$this->remote_title_meta_name,true) ){
-                $this->title = $title;
-            }
-            
-            //author
-            if ( $author = get_post_meta($this->post_id,$this->remote_author_meta_name,true) ){
-                $this->author = $author;
             }
             
             //time
@@ -178,8 +166,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $tracklist_post = array(
                     'ID'    => $this->post_id,
                     'meta_input'    => array(
-                        $this->remote_title_meta_name => $remote_title,
-                        $this->remote_author_meta_name => $remote_author,
+                        wpsstm_live_playlists()->remote_title_meta_name => $remote_title,
+                        wpsstm_live_playlists()->remote_author_meta_name => $remote_author,
                     )
                 );
                 wp_update_post( $tracklist_post );
