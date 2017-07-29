@@ -318,6 +318,6 @@ function wpsstm_get_actions_list($actions,$prefix){
 
 function wpsstm_get_live_tracklist_url($post_id = null){
     global $post;
-    if (!$post_id) $post_id = null;
+    if (!$post_id) $post_id = $post->ID;
     return get_post_meta($post_id, wpsstm_live_playlists()->feed_url_meta_name, true );
 }

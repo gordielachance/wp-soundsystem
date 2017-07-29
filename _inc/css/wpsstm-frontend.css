@@ -150,3 +150,17 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state
   margin: 0;
   padding: 1em;
 }
+
+/* line 4, ../scss/wpsstm-frontend.scss */
+#wpsstm-wizard-last-entries ul {
+  text-align: center;
+  list-style: none;
+}
+/* line 7, ../scss/wpsstm-frontend.scss */
+#wpsstm-wizard-last-entries ul li {
+  padding: .5em;
+}
+/* line 9, ../scss/wpsstm-frontend.scss */
+#wpsstm-wizard-last-entries ul li small {
+  clear: both;
+}

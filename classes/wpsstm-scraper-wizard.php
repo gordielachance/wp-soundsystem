@@ -86,29 +86,17 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     
-    function frontend_wizard_last_entries(){
+    function get_last_wizard_tracklists(){
         
-        $li_items = array();
+        ob_start();
         
-        $query_args = array(
-            'post_type'     => wpsstm()->post_type_live_playlist,
-            'meta_query' => array(
-                array(
-                    'key'       => $this->frontend_wizard_meta_key,
-                    'compare'   => 'EXISTS'
-                )
-            )
-        );
-
-        $query = new WP_Query($query_args);
-        
-        foreach($query->posts as $post){
-            $feed_url = wpsstm_get_live_tracklist_url($post->ID);
-            $li_items[] = sprintf('<li><a href="%s">%s</a> <small>%s</small></li>',get_permalink($post->ID),get_post_field('post_title',$post->ID),$feed_url);
+        $file = 'wizard-last-entries.php';
+        if ( file_exists( wpsstm_locate_template( $file ) ) ){
+            $template = wpsstm_locate_template( $file );
+            load_template($template);
         }
-        if ($li_items){
-            return sprintf('<div id="wpsstm-wizard-last-entries"><h2>%s</h2><ul>%s</ul></div>',__('Last requests','wpsstm'),implode("\n",$li_items));
-        }
+        
+        return ob_get_clean();
     }
 
     function wizard_register_scripts_style_shared(){
@@ -208,7 +196,7 @@ class WP_SoundSystem_Core_Wizard{
             $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
         }
 
-        $last_entries = wpsstm_wizard()->frontend_wizard_last_entries();
+        $last_entries = wpsstm_wizard()->get_last_wizard_tracklists();
         return $content.$form.$last_entries;
         
     }
