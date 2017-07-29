@@ -225,7 +225,7 @@ echo $tracklist->get_tracklist_table();
 * remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
-* live tracklists : new expire_time var
+* live tracklists : new expiration_time var
 * new Reddit preset (to be improved)
 * improved validate_track() 
 * last.FM scrobbling

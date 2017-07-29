@@ -361,7 +361,7 @@ class WpsstmTracklist {
                 self.debug("get_tracklist_request");
 
                 var ajax_data = {
-                    'action':           'wpsstm_load_tracklist',
+                    'action':           'wpsstm_refresh_tracklist',
                     'post_id':          self.tracklist_id
                 };
 
@@ -386,6 +386,7 @@ class WpsstmTracklist {
             }
 
             self.tracklist_request.done(function(data) {
+                console.log(data);
                 if (data.success === false) {
                     deferredTracklist.reject();
                 }else{

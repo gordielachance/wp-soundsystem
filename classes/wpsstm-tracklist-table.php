@@ -156,9 +156,9 @@ class WP_SoundSystem_Tracklist_Table{
 
         $next_refresh_sec = null;
 
-        if ( property_exists($this->tracklist,'expire_time') ) {
+        if ( property_exists($this->tracklist,'expiration_time') ) {
 
-            $next_refresh_sec = $this->tracklist->expire_time - current_time( 'timestamp', true ); //UTC
+            $next_refresh_sec = $this->tracklist->expiration_time - current_time( 'timestamp', true ); //UTC
             
             if ($next_refresh_sec <= 0){
                 $next_refresh_sec = 0;
@@ -204,18 +204,14 @@ class WP_SoundSystem_Tracklist_Table{
 
         $updated_time_el = $refresh_time_el = $refresh_countdown_el = $refresh_link_el = null;
 
-        //static playlist time
-        if ( $this->tracklist->updated_time ){
+        //time subtracks were updated
 
-            $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'date_format' ) );
-            $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $this->tracklist->updated_time ), get_option( 'time_format' ) );
 
-            $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
-            $text_time = sprintf(__('on %s - %s','wpsstm'),$date,$time);
-            $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
-            $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
 
-        }
+        $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
+        $text_time = wpsstm_tracklists()->get_human_tracklist_time($this->tracklist->updated_time);
+        $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
+        $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
 
         $time_el = sprintf(' <small class="wpsstm-tracklist-time">%s %s %s</small>',$updated_time_el,$refresh_time_el,$refresh_link_el);
 

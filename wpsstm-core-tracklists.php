@@ -9,6 +9,8 @@ class WP_SoundSystem_Core_Tracklists{
     public $qvar_xspf = 'xspf';
     public $qvar_tracklist_admin = 'admin';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
+    public $time_updated_substracks_meta_name = 'wpsstm_remote_query_time';
+    public $tracklist_post_types = array();
     
     /**
     * @var The one true Instance
@@ -35,6 +37,11 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function setup_globals(){
+        $this->tracklist_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist
+        );
     }
     
     function setup_actions(){
@@ -47,6 +54,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'wp', array($this,'tracklist_save_admin_gui'));
         add_action( 'wp', array($this,'tracklist_append_new_track'));
         add_filter( 'template_include', array($this,'tracklist_admin_template_filter'));
+        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         
@@ -76,8 +84,8 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_wpsstm_love_unlove_tracklist', array($this,'ajax_love_unlove_tracklist'));
         
         //ajax : load tracklist
-        add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
-        add_action('wp_ajax_nopriv_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
+        add_action('wp_ajax_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
+        add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
 
         //ajax : row actions
         add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_tracklist_track_position'));
@@ -192,7 +200,7 @@ class WP_SoundSystem_Core_Tracklists{
         wp_send_json( $result ); 
     }
     
-    function ajax_load_tracklist(){
+    function ajax_refresh_tracklist(){
         
         $ajax_data = wp_unslash($_POST);
         
@@ -206,7 +214,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
-                $tracklist->cache_only = false;
+                $tracklist->can_remote_request = true;
                 $tracklist->load_subtracks();
                 if ( $tracklist->tracks ){
                     $result['success'] = true;
@@ -243,14 +251,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function column_tracklist_register($defaults) {
         global $post;
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
 
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$this->tracklist_post_types) ){
             $defaults['tracklist'] = __('Tracklist','wpsstm');
         }
         
@@ -317,15 +319,10 @@ class WP_SoundSystem_Core_Tracklists{
     function tracklist_column_lovedby_register($defaults) {
         global $post;
 
-        $allowed_post_types = array(
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        
         $before = array();
         $after = array();
         
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$this->tracklist_post_types) ){
             $after['tracklist-lovedby'] = __('Loved by:','wpsstm');
         }
         
@@ -354,17 +351,12 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function metabox_tracklist_register(){
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist
-        );
 
         add_meta_box( 
             'wpsstm-tracklist', 
             __('Tracklist','wpsstm'),
             array($this,'metabox_tracklist_content'),
-            $allowed_post_types, 
+            $this->tracklist_post_types, 
             'normal', 
             'high' //priority 
         );
@@ -408,14 +400,8 @@ class WP_SoundSystem_Core_Tracklists{
         $atts = shortcode_atts($default,$atts);
         
         //check post type
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
         $post_type = get_post_type($atts['post_id']);
-
-        if ( !in_array($post_type,$allowed_post_types) ) return;
+        if ( !in_array($post_type,$this->tracklist_post_types) ) return;
         
         $tracklist = wpsstm_get_post_tracklist($atts['post_id']);
         return $tracklist->get_tracklist_table();
@@ -611,14 +597,8 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function trash_tracklist_orphans($post_id){
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        
-        if ( !in_array(get_post_type($post_id),$allowed_post_types) ) return;
+
+        if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
 
         //get all orphans
         $tracklist = wpsstm_get_post_tracklist($post_id);
@@ -631,6 +611,18 @@ class WP_SoundSystem_Core_Tracklists{
             ));
         }
 
+    }
+    
+    function get_subtracks_update_time($post = null){
+        return get_post_meta($post,$this->time_updated_substracks_meta_name,true);
+    }
+    
+    function get_human_tracklist_time($time){
+        if (!$time) return;
+        
+        $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $time ), get_option( 'date_format' ) );
+        $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $time ), get_option( 'time_format' ) );
+        return sprintf(__('on %s - %s','wpsstm'),$date,$time);
     }
 
 }

@@ -50,11 +50,16 @@ class WP_SoundSystem_Tracklist{
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
             
-            $this->updated_time = get_post_modified_time( 'U', false, $post_id );
-            $this->location = get_permalink($post_id); 
+            //tracklist time
+            $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+            if ( $meta = wpsstm_tracklists()->get_subtracks_update_time($this->post_id) ){
+                //TOFIX TOUTOU $this->updated_time = $meta;
+            }
             
+            $this->location = get_permalink($post_id);
+
         }
-        
+
         //tracklist type
         $this->tracklist_type = $this->get_tracklist_type();
 
@@ -134,6 +139,8 @@ class WP_SoundSystem_Tracklist{
 
     function set_subtrack_ids($ordered_ids = null){
         
+        $success = false;
+        
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
         }
@@ -173,10 +180,17 @@ class WP_SoundSystem_Tracklist{
         wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
         if ($ordered_ids){
-            return update_post_meta($this->post_id,$metaname,$ordered_ids);
+            $success = update_post_meta($this->post_id,$metaname,$ordered_ids);
         }else{
-            return delete_post_meta($this->post_id,$metaname);
+            $success = delete_post_meta($this->post_id,$metaname);
         }
+        
+        if ( is_wp_error($success) ) return $success;
+        
+        //update substracks time
+        $now = current_time( 'timestamp', true );
+        $this->updated_time = $now;
+        return update_post_meta($this->post_id,wpsstm_tracklists()->time_updated_substracks_meta_name,$this->updated_time);
 
     }
     
