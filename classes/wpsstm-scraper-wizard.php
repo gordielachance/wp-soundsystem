@@ -128,17 +128,11 @@ class WP_SoundSystem_Core_Wizard{
 
     function metabox_scraper_wizard_register(){
 
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-
         add_meta_box( 
             'wpsstm-metabox-scraper-wizard', 
             __('Tracklist Importer','wpsstm'),
             array($this,'metabox_wizard_display'),
-            $allowed_post_types, 
+            wpsstm_tracklists()->tracklist_post_types, 
             'normal', //context
             'high' //priority
         );
@@ -212,12 +206,7 @@ class WP_SoundSystem_Core_Wizard{
 
             if ($screen->base != 'post') return;
 
-            $allowed_post_types = array(
-                wpsstm()->post_type_album,
-                wpsstm()->post_type_playlist,
-                wpsstm()->post_type_live_playlist
-            );
-            if( !in_array($screen->post_type,$allowed_post_types ) ) return;
+            if( !in_array($screen->post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
 
             $tracklist = wpsstm_get_post_live_tracklist($post->ID);
 
@@ -274,14 +263,8 @@ class WP_SoundSystem_Core_Wizard{
     function backend_wizard_save($post_id){
         
         $post_type = get_post_type($post_id);
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
             
-        if ( !in_array($post_type,$allowed_post_types) ) return;
+        if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return;
 
         //check save status
         $is_autosave = wp_is_post_autosave( $post_id );

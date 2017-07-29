@@ -131,7 +131,7 @@ class WP_SoundSystem_Track{
         if ( !$this->post_id ) return;//track does not exists in DB
 
         $default_args = array(
-            'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
+            'post_type'         => wpsstm_tracklists()->tracklist_post_types,
             'post_status'       => 'any',
             'posts_per_page'    => -1,
             'fields'            => 'ids'

@@ -775,14 +775,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function save_wizard($wizard_data = null){
         
         $post_type = get_post_type($this->post_id);
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        
-        if( !in_array($post_type,$allowed_post_types ) ) return;
+
+        if( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
 
         $wizard_url = ( isset($wizard_data['feed_url']) ) ? trim($wizard_data['feed_url']) : null;

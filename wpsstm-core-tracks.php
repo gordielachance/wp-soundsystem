@@ -137,10 +137,9 @@ class WP_SoundSystem_Core_Tracks{
         $post_type = get_post_type($post);
         $track_admin_action =  get_query_var( $this->qvar_track_admin );
         $tracklist_admin_action =  get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
-        $tracklist_post_types = array(wpsstm()->post_type_album,wpsstm()->post_type_playlist);
 
         $is_track_edit = ( $track_admin_action && ($post_type == wpsstm()->post_type_track) );
-        $is_tracklist_new_track = ( ($tracklist_admin_action == 'new-subtrack') && in_array($post_type,$tracklist_post_types) );
+        $is_tracklist_new_track = ( ($tracklist_admin_action == 'new-subtrack') && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) );
 
         if ( !$is_track_edit && !$is_tracklist_new_track ) return $template;
 
