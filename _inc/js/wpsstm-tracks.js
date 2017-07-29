@@ -431,7 +431,7 @@ class WpsstmTrack {
         
         var list = $('<ul class="wpsstm-tracklist-entries"></ul>');
 
-        var row = self.track_el.clone();
+        var row = self.track_el.clone(true,true);
         $(list).append(row);
 
         $(bottom_trackinfo_el).html(list);

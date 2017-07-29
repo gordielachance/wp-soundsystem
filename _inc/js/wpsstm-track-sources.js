@@ -3,11 +3,13 @@ jQuery(document).ready(function($){
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
         var track_el = track_obj.track_el;
         
-        var sources_links = $(track_el).filter('.active').find('.wpsstm-track-sources-list a');
+        var sources_links = $(track_el).find('.wpsstm-track-sources-list a');
 
         //click on source link
         sources_links.click(function(e) {
             e.preventDefault();
+            
+            if ( !$(track_el).hasClass('active') ) return;
             
             var source_el = $(this).closest('li');
             var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
