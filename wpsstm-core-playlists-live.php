@@ -23,7 +23,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
+        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
         
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
@@ -133,7 +133,7 @@ class WP_SoundSystem_Core_Live_Playlists{
 
     function get_available_presets(){
         
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-presets.php');
         
         $available_presets = array();
         $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );

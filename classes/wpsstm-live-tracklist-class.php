@@ -28,11 +28,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     var $redirect_url = null; //if needed, a redirect URL.  Can use variables extracted from the pattern using the %variable% format.
     
     public $feed_url = null;
-    public $id = null;
     public $time_updated_meta_name = null;
     public $remote_title_meta_name = 'wpsstm_remote_title';
     public $remote_author_meta_name = 'wpsstm_remote_author_name';
     
+    public $is_expired = null;
     var $expire_time = null;
     var $cache_only = true;//by default, for speedness, disabble remote request tracks.  We have to enable it manually.
     var $can_refresh = null;
@@ -54,9 +54,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     public $notices = array();
     
-    public $is_expired = null;
-    
-    
     //request
     static $querypath_options = array(
         'omit_xml_declaration'      => true,
@@ -67,8 +64,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public function __construct($post_id = null) {
 
-        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/autoload.php');
-        require_once(wpsstm()->plugin_dir . 'scraper/_inc/php/class-array2xml.php');
+        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php');
+        require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
 
         $this->preset_name = __('HTML Scraper','wpsstm');
         
@@ -101,11 +98,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             }
             
             //time
-            $this->updated_time = get_transient( $this->time_updated_meta_name );
-            $this->is_expired = ($this->updated_time === false);
-
-            //set expiration time
-            if ($this->updated_time){
+            $cache_updated = get_transient( $this->time_updated_meta_name );
+            $this->is_expired = ($cache_updated === false);
+            
+            if (!$this->is_expired){
+                
+                $this->updated_time = $cache_updated;
+                
+                //set expiration time
                 $duration_m = $this->get_options('datas_cache_min');
                 $duration_s = $duration_m * MINUTE_IN_SECONDS;
                 $this->expire_time = $this->updated_time + $duration_s; //UTC
@@ -774,6 +774,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function update_last_query_time(){
         
+        //cache disabled
         if ( !$duration_min = $this->get_options('datas_cache_min') ) return;
         
         $now = current_time( 'timestamp', true );

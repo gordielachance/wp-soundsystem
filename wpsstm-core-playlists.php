@@ -20,7 +20,7 @@ class WP_SoundSystem_Core_Playlists{
     
     function init(){
         
-        require wpsstm()->plugin_dir . 'scraper/wpsstm-live-tracklist-class.php';
+        require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
         
         //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );

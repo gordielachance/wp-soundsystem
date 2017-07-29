@@ -552,7 +552,7 @@ class WP_SoundSystem_Tracklist{
         //track
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        $can_add_tracklist_items = ($this->tracklist_type == 'static');
+        $can_add_tracklist_items = ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
         
         $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
         $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
@@ -626,7 +626,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //switch status
-        if ($can_edit_tracklist){
+        if ( $can_edit_tracklist && !wpsstm_is_backend() ){
             $status_options = array();
             $statii = array('draft','publish','private','trash');
 
@@ -699,6 +699,7 @@ class WP_SoundSystem_Tracklist{
                 
             break;
             case 'admin':
+                unset($actions['refresh']);
             break;
         }
         

@@ -129,7 +129,7 @@ class WP_SoundSystem_Settings {
             
             $new_input['live_playlists_enabled'] = ( isset($input['live_playlists_enabled']) ) ? 'on' : 'off';
             
-            //scraper page ID
+            //scraper wizard page ID
             if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
                 if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
                     $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];

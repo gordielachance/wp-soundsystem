@@ -209,7 +209,7 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state
   display: inline;
 }
 /* line 69, ../scss/wpsstm-tracklists.scss */
-.wpsstm-tracklist ul.wpsstm-tracklist-entries > li[itemprop="track"]:not(.active) > span.wpsstm-track-column.column-trackitem_actions {
+.wpsstm-tracklist ul.wpsstm-tracklist-entries > li[itemprop="track"]:not(.active):not(:hover) > span.wpsstm-track-column.column-trackitem_actions {
   display: none;
 }
 /* line 80, ../scss/wpsstm-tracklists.scss */

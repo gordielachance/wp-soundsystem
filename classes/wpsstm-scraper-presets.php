@@ -125,7 +125,7 @@ Register scraper presets.
 */
 function wpsstm_register_scraper_presets($presets){
     
-    $presets_path = wpsstm()->plugin_dir . 'scraper/presets/';
+    $presets_path = wpsstm()->plugin_dir . 'classes/scraper-presets/';
     
     require_once( $presets_path . 'bbc.php' );
     require_once( $presets_path . 'deezer.php' );

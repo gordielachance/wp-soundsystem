@@ -42,19 +42,18 @@ class WP_SoundSystem_Core_Wizard{
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
 
-        
         //frontend
-        add_action( 'wp', array($this,'create_frontend_remote_tracklist' ) );
-        add_action( 'wp', array($this,'populate_wizard_tracklist' ) );
-        add_action( 'wp',  array($this, 'wizard_save_frontend'));
+        add_action( 'wp', array($this,'wizard_populate_tracklist' ) );
+        add_action( 'wp', array($this,'frontend_wizard_create_tracklist' ) );
+        add_action( 'wp',  array($this, 'frontend_wizard_add_tracklist'));
         
         add_filter( 'the_content', array($this,'wizard_page_content'));
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
 
         //backend
-        add_action( 'admin_head', array($this,'populate_wizard_tracklist' ) );
-        add_action( 'save_post',  array($this, 'wizard_save_backend'));
+        add_action( 'admin_head', array($this,'wizard_populate_tracklist' ) );
+        add_action( 'save_post',  array($this, 'backend_wizard_save'));
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register'), 11 );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_scripts_styles_backend' ) );
@@ -114,10 +113,10 @@ class WP_SoundSystem_Core_Wizard{
 
     function wizard_register_scripts_style_shared(){
         // CSS
-        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . 'scraper/_inc/css/wpsstm-scraper-wizard.css',array('wpsstm-tracklists'),wpsstm()->version );
+        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . '_inc/css/wpsstm-scraper-wizard.css',array('wpsstm-tracklists'),wpsstm()->version );
         
         // JS
-        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . 'scraper/_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
+        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
     }
     
     function wizard_scripts_styles_frontend(){
@@ -214,7 +213,7 @@ class WP_SoundSystem_Core_Wizard{
         
     }
 
-    function populate_wizard_tracklist(){
+    function wizard_populate_tracklist(){
         global $post;
 
         $tracklist = null;
@@ -262,7 +261,7 @@ class WP_SoundSystem_Core_Wizard{
 
     }
     
-    function wizard_save_frontend(){
+    function frontend_wizard_add_tracklist(){
         global $post;
         if (!$post) return;
         
@@ -284,7 +283,7 @@ class WP_SoundSystem_Core_Wizard{
 
     }
 
-    function wizard_save_backend($post_id){
+    function backend_wizard_save($post_id){
         
         $post_type = get_post_type($post_id);
         
@@ -307,7 +306,7 @@ class WP_SoundSystem_Core_Wizard{
 
         $tracklist = wpsstm_get_post_live_tracklist($post_id);
         
-        wpsstm()->debug_log($tracklist->post_id, "WP_SoundSystem_Core_Wizard::wizard_save_backend()");
+        wpsstm()->debug_log($tracklist->post_id, "WP_SoundSystem_Core_Wizard::backend_wizard_save()");
         
         $wizard_data = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
         
@@ -321,7 +320,7 @@ class WP_SoundSystem_Core_Wizard{
 
     }
 
-    function create_frontend_remote_tracklist(){
+    function frontend_wizard_create_tracklist(){
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
         
