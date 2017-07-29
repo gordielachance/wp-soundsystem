@@ -143,6 +143,9 @@
                             &.column-trackitem_actions{
                                 float:none;
                                 font-size:1.5em;
+                                #wpsstm-track-action-remove{
+                                    display:none;
+                                }
                             }
                             
                             &.column-trackitem_sources{

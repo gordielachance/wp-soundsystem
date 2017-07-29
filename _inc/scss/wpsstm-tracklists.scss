@@ -64,7 +64,7 @@
                 }
             }
             
-            &:not(.active){
+            &:not(.active):not(:hover){
                 > span.wpsstm-track-column{
                     &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
                         display:none;
