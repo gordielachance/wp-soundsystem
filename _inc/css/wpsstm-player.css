@@ -311,7 +311,7 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state
 }
 /* line 143, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper #wpsstm-bottom-track-info .wpsstm-tracklist-entries li[itemprop="track"] .wpsstm-track-column.column-trackitem_actions {
-  float: none;
+  position: inherit;
   font-size: 1.5em;
 }
 /* line 146, ../scss/wpsstm-player.scss */

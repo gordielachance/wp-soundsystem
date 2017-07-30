@@ -108,7 +108,6 @@
                     }
                 }
                 &.column-trackitem_actions{
-                    display:inline;
                     .wpsstm-actions-list{
                         display:inline;
                         li{
@@ -126,8 +125,9 @@
     }
     
     &.wpsstm-tracklist-table{
+        width: 100%;
         ul.wpsstm-tracklist-entries{
-            width: 100%;
+
             > li[itemprop="track"]{
                 display:block;
                 @include transition-property(background);
@@ -174,8 +174,10 @@
                     &.column-trackitem_sources{
                         display:none;
                     }
+                    
                     &.column-trackitem_actions{
-                        float:right;
+                        position:absolute;
+                        right:0;
                     }
                 }
             }

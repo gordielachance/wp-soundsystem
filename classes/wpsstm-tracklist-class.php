@@ -53,7 +53,7 @@ class WP_SoundSystem_Tracklist{
             //tracklist time
             $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
             if ( $meta = wpsstm_tracklists()->get_subtracks_update_time($this->post_id) ){
-                //TOFIX TOUTOU $this->updated_time = $meta;
+                $this->updated_time = $meta;
             }
             
             $this->location = get_permalink($post_id);

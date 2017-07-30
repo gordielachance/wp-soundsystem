@@ -141,7 +141,7 @@
                             }
                             
                             &.column-trackitem_actions{
-                                float:none;
+                                position:inherit;
                                 font-size:1.5em;
                                 #wpsstm-track-action-remove{
                                     display:none;

@@ -888,17 +888,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $this->is_expired = ( $now >= $this->expiration_time );
         
-            wpsstm()->debug_log(
-                array(
-                    'is_expired' =>             $this->is_expired,
-                    'cache_duration_min' =>     $cache_duration_min,
-                    'can_remote_request' =>     (bool)$this->can_remote_request,
-                    'updated' =>                wpsstm_tracklists()->get_human_tracklist_time($this->updated_time),
-                    'expires' =>                wpsstm_tracklists()->get_human_tracklist_time($this->expiration_time),
-                    'now' =>                    wpsstm_tracklists()->get_human_tracklist_time($now),
-                ),
-                "WP_SoundSystem_Remote_Tracklist::__construct()"
-            );
+        /*
+        wpsstm()->debug_log(
+            array(
+                'is_expired' =>             $this->is_expired,
+                'cache_duration_min' =>     $cache_duration_min,
+                'can_remote_request' =>     (bool)$this->can_remote_request,
+                'updated' =>                wpsstm_tracklists()->get_human_tracklist_time($this->updated_time),
+                'expires' =>                wpsstm_tracklists()->get_human_tracklist_time($this->expiration_time),
+                'now' =>                    wpsstm_tracklists()->get_human_tracklist_time($now),
+            ),
+            "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
+        );
+        */
         
     }
     
