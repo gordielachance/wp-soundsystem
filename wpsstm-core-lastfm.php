@@ -173,7 +173,7 @@ class WP_SoundSystem_LastFM_User{
 
     }
     
-/*
+    /*
     Checks if user can authentificate to last.fm 
     If not, clean database and return false.
     //TO FIX run only if player is displayed
@@ -364,8 +364,8 @@ class WP_SoundSystem_Core_LastFM{
         //ajax : scrobble
         add_action('wp_ajax_wpsstm_user_scrobble_lastfm_track', array($this,'ajax_user_scrobble_lastfm_track'));
         
-        add_action('wp_ajax_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
-        add_action('wp_ajax_nopriv_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
+        add_action('wp_ajax_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
+        add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
         
     }
     
@@ -404,7 +404,7 @@ class WP_SoundSystem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'has_lastfm_bot'            => (bool)wpsstm()->get_options('lastfm_bot_user_id'),
+            'lastfm_scrobble_along'     => ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ),
             'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
             'lastfm_auth_notice'        => $lastfm_auth_notice
         );
@@ -636,7 +636,7 @@ class WP_SoundSystem_Core_LastFM{
         
     }
     
-    function ajax_bot_scrobble_lastfm_track(){
+    function ajax_lastfm_scrobble_along_track(){
         
         $ajax_data = wp_unslash($_POST);
 
@@ -646,7 +646,7 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false
         );
         
-        if ( $bot_user_id = (int)wpsstm()->get_options('lastfm_bot_user_id') ){
+        if ( $community_user_id = wpsstm()->get_options('community_user_id') ){
 
             $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
             $track = $result['track'] = new WP_SoundSystem_Track($post_id);
@@ -654,7 +654,7 @@ class WP_SoundSystem_Core_LastFM{
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';
             $track_arr = $track->array_export();
-            $last_scrobble = get_user_meta($bot_user_id, $last_scrobble_meta_key, true);
+            $last_scrobble = get_user_meta($community_user_id, $last_scrobble_meta_key, true);
             
             if ( $last_scrobble == $track_arr ){
                 
@@ -664,7 +664,7 @@ class WP_SoundSystem_Core_LastFM{
                 
                 $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
 
-                $bot_user = new WP_SoundSystem_LastFM_User($bot_user_id);
+                $bot_user = new WP_SoundSystem_LastFM_User($community_user_id);
                 $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);
 
                 if ( $success ){
@@ -675,7 +675,7 @@ class WP_SoundSystem_Core_LastFM{
                         $result['success'] = true;
                         
                         //update last bot scrobble
-                        update_user_meta( $bot_user_id, $last_scrobble_meta_key, $track_arr );
+                        update_user_meta( $community_user_id, $last_scrobble_meta_key, $track_arr );
                         
                     }
                 }
@@ -683,7 +683,7 @@ class WP_SoundSystem_Core_LastFM{
             }
 
         }else{
-            $result['message'] = 'No bot user ID defined'; 
+            $result['message'] = 'No community user ID defined'; 
         }
         
         header('Content-type: application/json');

@@ -86,7 +86,7 @@ class WP_SoundSystem {
             'lastfm_client_secret'              => null,
             'lastfm_scrobbling'                 => 'on',
             'lastfm_favorites'                  => 'on',
-            'lastfm_bot_user_id'                => null,
+            'lastfm_community_scrobble'         => 'off',
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
@@ -107,7 +107,7 @@ class WP_SoundSystem {
         
         if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
         if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
-        if ( $this->options['lastfm_bot_user_id'] && !get_userdata( $this->options['lastfm_bot_user_id'] ) ) $this->options['lastfm_bot_user_id'] = null;
+        if ( ( $this->options['lastfm_community_scrobble'] == 'on' ) && !get_userdata( $this->options['lastfm_community_scrobble'] ) ) $this->options['lastfm_community_scrobble'] = 'off';
         */
     }
     

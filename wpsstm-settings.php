@@ -101,6 +101,20 @@ class WP_SoundSystem_Settings {
         }else{ //sanitize values
             
             /*
+            Community user
+            */
+            
+            //user id
+            if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
+                if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
+                    $new_input['community_user_id'] = $input['community_user_id'];
+                }
+            }
+            
+            //scrobble along
+            $new_input['lastfm_community_scrobble'] = ( isset($input['lastfm_community_scrobble']) ) ? 'on' : 'off';
+            
+            /*
             Player
             */
             
@@ -137,12 +151,6 @@ class WP_SoundSystem_Settings {
                 }
                 
             }
-            //guest user ID
-            if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
-                if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
-                    $new_input['community_user_id'] = $input['community_user_id'];
-                }
-            }
 
             //cache duration
             if ( isset ($input['live_playlists_cache_min']) && ctype_digit($input['live_playlists_cache_min']) ){
@@ -164,13 +172,6 @@ class WP_SoundSystem_Settings {
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
             $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
-            
-            //Lastfm bot
-            if ( isset ($input['lastfm_bot_user_id']) && ctype_digit($input['lastfm_bot_user_id']) ){
-                if ( get_userdata( $input['lastfm_bot_user_id'] ) ){ //check user exists
-                    $new_input['lastfm_bot_user_id'] = $input['lastfm_bot_user_id'];
-                }
-            }
 
             /*
             Other APIs
@@ -425,9 +426,9 @@ class WP_SoundSystem_Settings {
         );
         
         add_settings_field(
-            'lastfm_bot_user_id', 
-            __('Last.fm bot ID','wpsstm'), 
-            array( $this, 'lastfm_bot_user_id_callback' ), 
+            'lastfm_community_scrobble', 
+            __('Scrobble along','wpsstm'), 
+            array( $this, 'lastfm_community_scrobble_callback' ), 
             'wpsstm-settings-page', 
             'lastfm_settings'
         );
@@ -636,20 +637,19 @@ class WP_SoundSystem_Settings {
         );
     }
     
-    function lastfm_bot_user_id_callback(){
-        $option = (int)wpsstm()->get_options('lastfm_bot_user_id');
+    function lastfm_community_scrobble_callback(){
+        $option = wpsstm()->get_options('lastfm_community_scrobble');
         
         $help = array();
-        $help[]= __("ID of Wordpress user to use for as Last.fm bot: each time a user scrobbles a song, do scrobble it with this account too.","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help[]= __("(You need to have authorized this account to Last.fm)","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble along with the community user.","wpsstm");
+        $help[]= sprintf( "<small>%s</small>",__("0 = Disabled.","wpsstm") );
+        $help[]= sprintf( "<small>%s</small>",__("(You need to have authorized the community user to Last.fm)","wpsstm") );
         
         printf(
-            '<input type="number" name="%s[lastfm_bot_user_id]" size="4" min="0" value="%s" /><br/>%s',
+            '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            $option,
-            $help
+            checked( $option, 'on', false ),
+            implode('  ',$help)
         );
     }
     

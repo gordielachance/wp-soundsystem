@@ -3,9 +3,9 @@ class WpsstmLastFM {
         var self = this;
         self.icon_scrobble_el; //player scrobble icon
         self.auth_notice_el;
-        self.has_lastfm_bot =       parseInt(wpsstmLastFM.has_lastfm_bot);
-        self.is_user_api_logged =   parseInt(wpsstmLastFM.is_user_api_logged);
-        self.has_user_scrobbler =   ( ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
+        self.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
+        self.is_user_api_logged =       parseInt(wpsstmLastFM.is_user_api_logged);
+        self.has_user_scrobbler =   (    ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
         
 
         self.auth_notice_el =       null;
@@ -124,12 +124,12 @@ class WpsstmLastFM {
         })
     }
     
-    bot_scrobble(track_obj){
+    scrobble_along(track_obj){
         
         var self = this;
 
         var ajax_data = {
-            action:             'wpsstm_bot_scrobble_lastfm_track',
+            action:             'wpsstm_lastfm_scrobble_along_track',
             post_id:            track_obj.post_id,
             playback_start:     track_obj.playback_start
         };
@@ -214,8 +214,8 @@ class WpsstmLastFM {
                     wpsstm_lastfm.user_scrobble(track);
                 }
                 //bot scrobble
-                if (wpsstm_lastfm.has_lastfm_bot){
-                    wpsstm_lastfm.bot_scrobble(track);
+                if (wpsstm_lastfm.lastfm_scrobble_along){
+                    wpsstm_lastfm.scrobble_along(track);
                 }
             }
         });
