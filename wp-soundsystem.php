@@ -217,6 +217,23 @@ class WP_SoundSystem {
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         
+        //js
+        wp_register_script( 'wpsstm-shared', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-tracklists'),$this->version);
+        
+        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+        $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+        $wp_auth_notice = $wp_auth_icon.' '.$wp_auth_text;
+
+        $datas = array(
+            'debug'             => (WP_DEBUG),
+            'ajaxurl'           => admin_url( 'admin-ajax.php' ),
+            'logged_user_id'    => get_current_user_id(),
+            'wp_auth_notice'    => $wp_auth_notice
+        );
+
+        wp_localize_script( 'wpsstm-shared', 'wpsstmL10n', $datas );
+        
     }
 
     function enqueue_scripts_styles_backend( $hook ){
@@ -228,14 +245,8 @@ class WP_SoundSystem {
             wp_enqueue_style( 'wpsstm-admin' );
         
             // js
-            wp_register_script( 'wpsstm-admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-tracklists'),$this->version);
+            wp_register_script( 'wpsstm-admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shared','wpsstm-tracklists'),$this->version);
 
-            //localize vars
-            $localize_vars=array(
-                'ajaxurl'           => admin_url( 'admin-ajax.php' )
-            );
-        
-            wp_localize_script('wpsstm-admin','wpsstmL10n', $localize_vars);
             wp_enqueue_script( 'wpsstm-admin' );
             
             
@@ -251,24 +262,7 @@ class WP_SoundSystem {
         wp_register_style( 'wpsstm-frontend',  $this->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
         wp_enqueue_style( 'wpsstm-frontend' );
         
-        //js
-        wp_register_script( 'wpsstm-frontend', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-tracklists'),$this->version);
-        
-        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-        $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-        $wp_auth_notice = $wp_auth_icon.' '.$wp_auth_text;
-
-        $datas = array(
-            'debug'             => (WP_DEBUG),
-            'ajaxurl'           => admin_url( 'admin-ajax.php' ),
-            'logged_user_id'    => get_current_user_id(),
-            'clipboardtext'     => __('You can copy and share this link:','wpsstm'),
-            'wp_auth_notice'    => $wp_auth_notice
-        );
-
-        wp_localize_script( 'wpsstm-frontend', 'wpsstmL10n', $datas );
-        wp_enqueue_script( 'wpsstm-frontend' );
+        wp_enqueue_script( 'wpsstm-shared' );
         
     }
 

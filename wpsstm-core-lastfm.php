@@ -352,7 +352,9 @@ class WP_SoundSystem_Core_LastFM{
     function init(){
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
+        
+        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
+        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
 
         //ajax : love & unlove
         add_action('wp_ajax_wpsstm_user_love_unlove_lastfm_track',array($this,'ajax_love_unlove_lastfm_track') );
@@ -399,7 +401,7 @@ class WP_SoundSystem_Core_LastFM{
         $this->lastfm_user = new WP_SoundSystem_LastFM_User();
     }
     
-    function enqueue_lastfm_scripts_styles(){
+    function enqueue_lastfm_scripts_styles_shared(){
 
         //CSS
         //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . '_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );

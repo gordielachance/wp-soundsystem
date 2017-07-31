@@ -69,7 +69,7 @@
             var ajax_data = {
                 action:         'wpsstm_love_unlove_track',
                 do_love:        true,
-                post_id:        track_obj.post_id //COUCOU
+                post_id:        track_obj.post_id
             };
 
             return $.ajax({
@@ -319,6 +319,7 @@ class WpsstmTrack {
     get_sources_auto(){
 
         var self = this;
+        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
         var track_instances = self.get_track_instances();
         
@@ -326,8 +327,7 @@ class WpsstmTrack {
 
         if ( self.sources.length > 0 ){ //we already have sources
             deferredObject.resolve();
-            
-        } else if ( !wpsstmPlayer.autosource ) {
+        } else if ( !tracklist_obj.autosource ) {
             deferredObject.resolve();
             
         } else if ( self.did_sources_request ) {

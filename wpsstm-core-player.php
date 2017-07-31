@@ -30,7 +30,12 @@ class WP_SoundSystem_Core_Player{
     }
     
     function setup_actions(){
-        add_action( 'wp_enqueue_scripts', array($this,'enqueue_player_scripts_styles'));
+        
+        
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+        
+        
         add_action( 'wp_footer', array($this,'player_html'));
 
     }
@@ -87,7 +92,7 @@ class WP_SoundSystem_Core_Player{
         <?php
     }
     
-    function enqueue_player_scripts_styles(){
+    function enqueue_player_scripts_styles_shared(){
         //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
         
         //CSS
@@ -98,8 +103,6 @@ class WP_SoundSystem_Core_Player{
         
         //localize vars
         $localize_vars=array(
-            'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
             'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
             'refreshing_text'       => __('Refreshing','wpsstm')
         );

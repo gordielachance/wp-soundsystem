@@ -24,8 +24,18 @@ $(document).ready(function(){
     bt_next_track =             $('#wpsstm-player-extra-next-track');
 
     //init tracklists
-    var all_tracklists = $( ".wpsstm-tracklist.wpsstm-playable-tracklist" );
+    var all_tracklists = $( ".wpsstm-tracklist" );
+
     wpsstm_page_player.populate_tracklists(all_tracklists);
+    
+    //autoplay if any
+    $(wpsstm_page_player.tracklists).each(function( i, tracklist_obj ) {
+        if (tracklist_obj.autoplay){
+            wpsstm_page_player.play_or_skip_tracklist(i);
+            return false; //break
+        }
+        
+    });
 
     /*
     Player : previous / next
@@ -179,11 +189,7 @@ class WpsstmPagePlayer {
 
         //shuffle
         self.tracklists_shuffle_order = wpsstm_shuffle(self.tracklists_shuffle_order);
-
-        //autoplay first tracklist
-        if ( wpsstmPlayer.autoplay ){
-            self.play_or_skip_tracklist(0);
-        }
+        
     }
     
     play_or_skip_tracklist(tracklist_idx){

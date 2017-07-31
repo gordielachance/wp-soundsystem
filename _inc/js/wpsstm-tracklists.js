@@ -290,6 +290,8 @@ class WpsstmTracklist {
         self.tracklist_request =        undefined;
         self.refresh_timer =            undefined;
         self.expire_sec =               undefined;
+        self.autoplay =                 undefined;
+        self.autosource =               undefined;
         self.tracklist_idx =            tracklist_index;
         self.tracks =                   [];
         self.tracks_shuffle_order =     [];
@@ -313,6 +315,9 @@ class WpsstmTracklist {
         self.tracklist_el.attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
 
         self.tracklist_id = Number( self.tracklist_el.attr('data-wpsstm-tracklist-id') );
+        self.autoplay = ( Number( self.tracklist_el.attr('data-wpsstm-autoplay') ) === 1);
+        self.autosource = ( Number( self.tracklist_el.attr('data-wpsstm-autosource') ) === 1);
+        
         var expire_sec_attr =  self.tracklist_el.attr('data-wpsstm-expire-sec');
 
         if (typeof expire_sec_attr !== typeof undefined && expire_sec_attr !== false) { // For some browsers, `attr` is undefined; for others, `attr` is false.  Check for both.
