@@ -596,10 +596,11 @@ class WP_SoundSystem_Tracklist{
         
         //XSPF
         if ($can_share){
-            $actions['xspf'] = array(
-                'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
-                'text' =>      'XSPF',
-                'href' =>       wpsstm_get_tracklist_link($this->post_id,'xspf'),
+            $actions['export'] = array(
+                'icon' =>       '<i class="fa fa-download" aria-hidden="true"></i>',
+                'text' =>       __('Export', 'wpsstm'),
+                'desc' =>       __('Export to XSPF', 'wpsstm'),
+                'href' =>       wpsstm_get_tracklist_link($this->post_id,'export'),
             );
         }
         

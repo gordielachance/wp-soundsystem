@@ -53,19 +53,19 @@
                         <?php 
                         if ( $loved_list = $track->get_loved_by_list() ){
                             ?>
-                            <p class="wpsstm-track-loved-by">
+                            <div class="wpsstm-track-loved-by">
                                 <strong><?php _e('Loved by:','wpsstm');?></strong>
                                 <?php echo $loved_list; ?>
-                            </p>
+                            </div>
                             <?php
                         }
                 
                         if ( $playlists_list = $track->get_parents_list() ){
                             ?>
-                            <p class="wpsstm-track-playlists">
+                            <div class="wpsstm-track-playlists">
                                 <strong><?php _e('In playlists:','wpsstm');?></strong>
                                 <?php echo $playlists_list; ?>
-                            </p>
+                            </div>
                             <?php
                         }
                         ?>

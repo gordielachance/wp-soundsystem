@@ -386,7 +386,6 @@ class WpsstmTracklist {
             }
 
             self.tracklist_request.done(function(data) {
-                console.log(data);
                 if (data.success === false) {
                     deferredTracklist.reject();
                 }else{

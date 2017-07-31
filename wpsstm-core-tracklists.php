@@ -159,7 +159,7 @@ class WP_SoundSystem_Core_Tracklists{
             return $template;
         }  
 
-        if ( !in_array(get_post_type($post),$this->wpsstm_tracklists()->tracklist_post_types ) ) return $template;
+        if ( !in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types ) ) return $template;
 
         $file = 'tracklist-admin.php';
         if ( file_exists( wpsstm_locate_template( $file ) ) ){

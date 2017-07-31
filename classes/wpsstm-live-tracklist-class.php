@@ -59,8 +59,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     );
     
     public function __construct($post_id = null) {
-
-        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php');
+        
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
 
         $this->preset_name = __('HTML Scraper','wpsstm');

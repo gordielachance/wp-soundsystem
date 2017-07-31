@@ -670,8 +670,7 @@ class WP_SoundSystem_Settings {
     
     function section_community_user_desc(){
         $desc = array();
-        $desc[]= __("The plugin requires a community user to enable some of the plugin's features, like the frontend wizard or the auto-source.","wpsstm");
-        $desc[]= __("You need to extend its capabilities to the author role.","wpsstm"); //TO FIX rework
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features.","wpsstm");
 
         //wrap
         $desc = array_map(
@@ -682,6 +681,52 @@ class WP_SoundSystem_Settings {
         );
         
         echo implode("\n",$desc);
+        
+        //capability check
+        $check_icon = '<i class="fa fa-check" aria-hidden="true"></i>';
+        $warning_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        
+        //live playlists
+        /*
+        $live_playlist_cap = $live_playlist_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$live_playlist_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$live_playlist_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Live Playlists','wpsstm').'</strong>',$cap_str);
+        */
+
+        //frontend wizard
+        
+        $frontend_wizard_cap = $live_playlist_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$frontend_wizard_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$frontend_wizard_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Frontend Wizard','wpsstm').'</strong>',$cap_str);
+
+
+        //autosource
+        
+        $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$autosource_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$autosource_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Auto-source','wpsstm').'</strong>',$cap_str);
+        
+        //scrobble along
+        
+        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+        $can_scrobble_along = $community_user->is_user_api_logged();
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_scrobble_along, true, false ));
+        
+        $cap_str = sprintf(__('%s %s'),$icon,__('Authentification to Last.fm','wpsstm'));
+        printf('<p>%s: %s</p>','<strong>'.__('Last.fm scrobble along','wpsstm').'</strong>',$cap_str);
+
         
     }
     

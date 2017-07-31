@@ -134,7 +134,8 @@ class WpsstmLastFM {
             playback_start:     track_obj.playback_start
         };
 
-        self.debug("lastfm - ajax bot track.scrobble");
+        self.debug("lastfm - ajax scrobble along");
+        self.debug(ajax_data);
 
         return $.ajax({
 
@@ -143,9 +144,13 @@ class WpsstmLastFM {
             data:ajax_data,
             dataType: 'json',
             success: function(data){
+                console.log(data);//TO FIX TOUTOU
                 if (data.success === false) {
                     console.log(data);
                 }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                console.log("status: " + textStatus + ", error: " + errorThrown); 
             }
         })
     }

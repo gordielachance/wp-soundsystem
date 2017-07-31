@@ -351,6 +351,7 @@ class WP_SoundSystem_Core_LastFM{
     
     function init(){
         require_once(wpsstm()->plugin_dir . 'lastfm/_inc/php/autoload.php');
+        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
@@ -366,6 +367,8 @@ class WP_SoundSystem_Core_LastFM{
         
         add_action('wp_ajax_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
+        
+        //add_action( 'wp',array($this,'test_community_scrobble') );
         
     }
     
@@ -384,6 +387,16 @@ class WP_SoundSystem_Core_LastFM{
         add_action( 'init', array($this,'setup_lastfm_user') );
         add_action( 'wp', array($this,'after_app_auth') );
     }
+    
+    function test_community_scrobble(){
+        if ( !$community_user_id = wpsstm()->get_options('community_user_id') ) return;
+        
+        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+        $track = new WP_SoundSystem_Track('28916');
+        $success = $community_user->scrobble_lastfm_track($track,'1501481576');
+        print_r($success);die();
+    }
+    
     function setup_lastfm_user(){
         $this->lastfm_user = new WP_SoundSystem_LastFM_User();
     }
@@ -391,10 +404,10 @@ class WP_SoundSystem_Core_LastFM{
     function enqueue_lastfm_scripts_styles(){
 
         //CSS
-        //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . 'lastfm/_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
+        //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . '_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . 'lastfm/_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
         
         $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
         $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
@@ -639,18 +652,22 @@ class WP_SoundSystem_Core_LastFM{
     function ajax_lastfm_scrobble_along_track(){
         
         $ajax_data = wp_unslash($_POST);
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $scrobble_along = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
 
         $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
+            'input' =>              $ajax_data,
+            'message' =>            null,
+            'success' =>            false,
+            'community_user_id' =>  $community_user_id,
+            'scrobble_along' =>     $scrobble_along,
         );
         
-        if ( $community_user_id = wpsstm()->get_options('community_user_id') ){
-
+        if ( $community_user_id && $scrobble_along ){
+            
             $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
             $track = $result['track'] = new WP_SoundSystem_Track($post_id);
-            
+
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';
             $track_arr = $track->array_export();
@@ -663,9 +680,8 @@ class WP_SoundSystem_Core_LastFM{
             }else{
                 
                 $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
-
-                $bot_user = new WP_SoundSystem_LastFM_User($community_user_id);
-                $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);
+                $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+                $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
 
                 if ( $success ){
                     if ( is_wp_error($success) ){
@@ -682,8 +698,6 @@ class WP_SoundSystem_Core_LastFM{
                 
             }
 
-        }else{
-            $result['message'] = 'No community user ID defined'; 
         }
         
         header('Content-type: application/json');

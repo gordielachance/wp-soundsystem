@@ -149,7 +149,7 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     
     $url = get_permalink($post_id);
     
-    if ($pagenum == 'xspf'){
+    if ($pagenum == 'export'){
         $url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
         $url = add_query_arg(array('dl'=>(int)($download)),$url);
     }else{
