@@ -45,7 +45,7 @@ class WP_SoundSystem_Tracklist{
             
             $this->post_id = $post_id;
 
-            $this->title = get_the_title($post_id);
+            $this->title = get_post_field('post_title',$post_id); //use get_post_field here instead of get_the_title() so title is not filtered
             
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
@@ -460,7 +460,7 @@ class WP_SoundSystem_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Tracklist notice]: ' . $message ); 
+        //wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -547,6 +547,15 @@ class WP_SoundSystem_Tracklist{
         /*
         Capability check
         */
+        
+        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
+        $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
+        
+        $can_edit_live_cap = $live_post_obj->cap->edit_posts;
+        $can_edit_live =    current_user_can($can_edit_live_cap);
+        
+        $can_edit_static_cap = $static_post_obj->cap->edit_posts;
+        $can_edit_static =    current_user_can($can_edit_static_cap);
 
         //playlist
         $permalink = get_permalink($this->post_id);
@@ -563,8 +572,7 @@ class WP_SoundSystem_Tracklist{
         $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
         $can_favorite = true; //call to action
         $can_add_tracks = ( $can_edit_tracklist && $can_add_tracklist_items );
-        $can_lock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_live_playlist ) );
-        $can_unlock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() );
+        $can_unlock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() && $can_edit_live );
 
         $actions = array();
 
@@ -580,7 +588,7 @@ class WP_SoundSystem_Tracklist{
         if ($can_share){
             $actions['share'] = array(
                 'icon' =>       '<i class="fa fa-share-alt" aria-hidden="true"></i>',
-                'text' =>      __('Share', 'wpsstm'),
+                'text' =>       __('Share', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('share'),
             );
         }
@@ -658,7 +666,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //lock
-        if ($can_lock_playlist){
+        if ( $this->user_can_lock_tracklist() ){
             $actions['lock-playlist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Lock', 'wpsstm'),
@@ -670,7 +678,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         //unlock
-        if ($can_unlock_playlist){
+        if ( $this->user_can_unlock_tracklist() ){
             $actions['unlock-playlist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Unlock', 'wpsstm'),
@@ -880,6 +888,36 @@ class WP_SoundSystem_Tracklist{
 
         return true;
 
+    }
+    
+    function user_can_lock_tracklist(){
+
+        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ) return;
+        
+        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
+        $live_post_obj =  get_post_type_object(wpsstm()->post_type_live_playlist);
+
+        $can_edit_static_cap = $static_post_obj->cap->edit_posts;
+        $can_edit_static =    current_user_can($can_edit_static_cap);
+
+        $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
+        return ( $can_edit_tracklist && $can_edit_static );
+        
+    }
+    
+    function user_can_unlock_tracklist(){
+
+        if ( get_post_type($this->post_id) != wpsstm()->post_type_playlist ) return;
+        
+        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
+        $live_post_obj =  get_post_type_object(wpsstm()->post_type_live_playlist);
+
+        $can_edit_live_cap = $live_post_obj->cap->edit_posts;
+        $can_edit_live =    current_user_can($can_edit_live_cap);
+
+        $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
+        
+        return ( $can_edit_tracklist && $this->has_wizard_backup() && $can_edit_live );
     }
     
 

@@ -41,6 +41,8 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
+        add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
+        
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_stations'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
@@ -236,6 +238,19 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         return $query;
         
+    }
+    
+    function filter_live_playlist_title($title, $post_id = null){
+        
+        if ( get_post_type($post_id) != wpsstm()->post_type_live_playlist ) return $title;
+
+        $tracklist = wpsstm_get_post_tracklist($post_id);
+
+        if ( $remote_title = $tracklist->get_cached_remote_title() ){
+            $title = $remote_title;
+        }
+        
+        return $title;
     }
 
 }

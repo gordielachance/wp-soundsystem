@@ -95,9 +95,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $this->author = $meta_author;
             }
             */
-            
-            $this->temporary_status_notice();
-            $this->live_tracklist_notice();
 
         }
         
@@ -133,87 +130,93 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         if ( !$this->is_expired || !$this->can_remote_request){
+            
             parent::load_subtracks();
-            return;
-        }
-        
-        //cache disabled notice
-        $cache_duration = $this->get_options('datas_cache_min');
-        $has_cache = (bool)$cache_duration;
-        
-        if ( !$has_cache ){
-            $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
-        }
+            
+        }else{
 
-        //get remote stuff
-        if ( $remote_tracks = $this->get_all_raw_tracks() ){
+            //cache disabled notice
+            $cache_duration = $this->get_options('datas_cache_min');
+            $has_cache = (bool)$cache_duration;
 
-            if ( !is_wp_error($remote_tracks) ) {
-
-                if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
-                    if ( $this->feed_url != $this->redirect_url ){
-                        $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
-                    }
-                }
-
-                $this->add($remote_tracks);
-                
-                //set tracklist title
-                $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
-                $this->title = ($remote_title) ? $remote_title : __('Tracklist Wizard','wpsstm');
-
-                //set tracklist author
-                $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
-                $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
-                
-                //update tracklist
-
-                $now = current_time( 'timestamp', true );
-                
-                $tracklist_post = array(
-                    'ID'    => $this->post_id,
-                    'meta_input'    => array(
-                        wpsstm_live_playlists()->remote_title_meta_name => $remote_title,
-                        wpsstm_live_playlists()->remote_author_meta_name => $remote_author,
-                    )
-                );
-                wp_update_post( $tracklist_post );
-
-                //save subtracks
-                
-                $subtracks_args = array(
-                    'post_author'   => wpsstm()->get_options('community_user_id'),
-                );
-
-                $this->save_subtracks($subtracks_args);
-                
-                //expiration time (kepp below save_subtracks() )
-                $now = current_time( 'timestamp', true );
-                $cache_duration_min = $this->get_options('datas_cache_min');
-                $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-                $this->expiration_time = $this->updated_time + $cache_duration_s;
-                
-                //sort
-                if ($this->get_options('tracks_order') == 'asc'){
-                    $this->tracks = array_reverse($this->tracks);
-                }
-
-                //populate page notices
-                foreach($this->notices as $notice){
-                    $this->notices[] = $notice;
-                }
-                
-
-            }else{
-                $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+            if ( !$has_cache ){
+                $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
             }
+
+            //get remote stuff
+            if ( $remote_tracks = $this->get_all_raw_tracks() ){
+
+                if ( !is_wp_error($remote_tracks) ) {
+
+                    if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+                        if ( $this->feed_url != $this->redirect_url ){
+                            $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
+                        }
+                    }
+
+                    $this->add($remote_tracks);
+
+                    //set tracklist title
+                    $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
+                    $this->title = ($remote_title) ? $remote_title : __('Tracklist Wizard','wpsstm');
+
+                    //set tracklist author
+                    $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
+                    $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
+
+                    //update tracklist
+
+                    $now = current_time( 'timestamp', true );
+
+                    $tracklist_post = array(
+                        'ID'    => $this->post_id,
+                        'meta_input'    => array(
+                            wpsstm_live_playlists()->remote_title_meta_name => $remote_title,
+                            wpsstm_live_playlists()->remote_author_meta_name => $remote_author,
+                        )
+                    );
+                    wp_update_post( $tracklist_post );
+
+                    //save subtracks
+
+                    $subtracks_args = array(
+                        'post_author'   => wpsstm()->get_options('community_user_id'),
+                    );
+
+                    $this->save_subtracks($subtracks_args);
+
+                    //expiration time (kepp below save_subtracks() )
+                    $now = current_time( 'timestamp', true );
+                    $cache_duration_min = $this->get_options('datas_cache_min');
+                    $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
+                    $this->expiration_time = $this->updated_time + $cache_duration_s;
+
+                    //sort
+                    if ($this->get_options('tracks_order') == 'asc'){
+                        $this->tracks = array_reverse($this->tracks);
+                    }
+
+                    //populate page notices
+                    foreach($this->notices as $notice){
+                        $this->notices[] = $notice;
+                    }
+
+
+                }else{
+                    $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+                }
+            }
+
+            $this->did_query_tracks = true;
+            
+            new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
+
+            wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_tracks,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::load_subtracks()' );
+            
         }
-
-        $this->did_query_tracks = true;
-
-        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
-
-        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_tracks,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::load_subtracks()' );
+        
+        //TO FIX registering notices should be done in another way.  
+        $this->wizard_community_author_notice();
 
     }
     
@@ -710,14 +713,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
     function add_notice($slug,$code,$message,$error = false){
         
-        wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Remote_Tracklist notice]: ' . $message ); 
-        
-        $this->notices[] = array(
+        $notice = array(
             'slug'      => $slug,
             'code'      => $code,
             'message'   => $message,
             'error'     => $error
         );
+
+        wpsstm()->debug_log(json_encode($notice),'WP_SoundSystem_Remote_Tracklist::add_notice()' );
+        
+        $this->notices[] = $notice;
+
     }
     
     public function set_request_pagination( $args ) {
@@ -897,36 +903,37 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     /*
     For posts that have the 'wpsstm-wizard' status, notice the author that it is a temporary playlist.
-    //TO FIX switch to tracklist notices
     */
     
-    function temporary_status_notice(){
+    function wizard_community_author_notice(){
 
         $community_user_id = wpsstm()->get_options('community_user_id');
         $post_author = get_post_field( 'post_author', $this->post_id );
         
         if( $post_author != $community_user_id ) return;
         
-        //TO FIX use correct option value
-        $trash_time_secs = 1440 * MINUTE_IN_SECONDS;
-        $trash_time_human = human_time_diff( 0, $trash_time_secs );
-        
-        $notice = sprintf(__('This is a tempory playlist.  Unless you change its status, it will be deleted in %s.','wpsstm'),$trash_time_human);
-        $this->add_notice( 'tracklist-header', 'temporary_tracklist', $notice );
-        
-    }
-    
-    function live_tracklist_notice(){
+        if ( get_current_user_id() ){
+            
+            //capability check
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+            $required_cap = $post_type_obj->cap->edit_posts;
+            if ( !current_user_can($required_cap) ) return;
 
-        if (!$this->tracks) return;
-        
-        $post_author = get_post_field( 'post_author', $this->post_id );
-        
-        if ( get_current_user_id() != $post_author ) return;
-        
-        $notice = __("This tracklist is currently <em>live</em>, which means it remains synced with the remote source.  If you want to convert it to a static playlist, click the Lock link.",'wpsstm');
-        $this->add_notice( 'tracklist-header', 'lock_live_tracklist', $notice );
-        
+            $store_url = $this->get_tracklist_admin_gui_url('store');
+            $store_link = sprintf( '<a href="%s">%s</a>',$store_url,__('here','wpsstm') );
+
+            $notice = sprintf(__('This is a tempory playlist.  Click %s if you want to save it to your profile.','wpsstm'),$store_link);
+            $this->add_notice( 'tracklist-header', 'temporary_tracklist', $notice );
+            
+        }else{
+            
+            $redirect = get_permalink($this->post_id);
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($redirect),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This is a temporary playlist.  Login or subscribe %s to save it to your profile.','wpsstm'),$wp_auth_link);
+            $this->add_notice( 'tracklist-header', 'temporary_tracklist', $wp_auth_text );
+            
+        }
+
     }
     
 }

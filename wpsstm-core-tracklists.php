@@ -540,29 +540,44 @@ class WP_SoundSystem_Core_Tracklists{
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
 
-        $post_type = get_post_type($tracklist->post_id);
-        
         if( !$admin_action = $this->get_tracklist_action() ) return;
         if (!$tracklist->post_id) return;
+        
+        //capability check
+        
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $post_author = get_post_field( 'post_author', $tracklist->post_id );
+        
+        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
+        $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
+
+        $post_type =        get_post_type($tracklist->post_id);
+        $post_type_obj =    get_post_type_object($post_type);
+
+        $can_edit_cap =     $post_type_obj->cap->edit_post;
+        $can_edit_post =    current_user_can($can_edit_cap,$tracklist->post_id);
+        
+        $can_edit_live_cap = $live_post_obj->cap->edit_posts;
+        $can_edit_live =    current_user_can($can_edit_live_cap);
+        
+        $can_edit_static_cap = $static_post_obj->cap->edit_posts;
+        $can_edit_static =    current_user_can($can_edit_static_cap);
+
+        $can_publish_cap =  $post_type_obj->cap->publish_posts;
+        $can_publish =      current_user_can($can_publish_cap);
+        
+        $can_store = ( ( $post_author == $community_user_id ) && $can_edit_live );
+
+        //TO FIX validate status regarding user's caps
+        $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
 
         switch($admin_action){
             case 'switch-status':
-
-                //capability check
-                $post_type_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
                 
-                $can_edit_cap =     $post_type_obj->cap->edit_post;
-                $can_add =          current_user_can($can_edit_cap,$post->ID);
-                if (!$can_add) return;
-                
-                $can_publish_cap =  $post_type_obj->cap->publish_posts;
-                $can_publish =      current_user_can($can_publish_cap);
-                
-                //TO FIX validate status regarding user's caps
-                $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
+                if (!$can_edit_post) break;
 
                 $updated_post = array(
-                    'ID'            => $post->ID,
+                    'ID'            => $tracklist->post_id,
                     'post_status'   => $new_status
                 );
 
@@ -573,25 +588,43 @@ class WP_SoundSystem_Core_Tracklists{
                 }
             break;
             case 'lock-tracklist':
-                if ( $post_type == wpsstm()->post_type_live_playlist ){
-                    
-                    $tracklist->convert_to_static_playlist(true);
-                    
-                    $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
-                    wp_redirect($redirect_url);
-                    exit();
-                }
+                
+                if ( !$tracklist->user_can_lock_tracklist() ) break;
+   
+                $tracklist->convert_to_static_playlist(true);
+
+                $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+                wp_redirect($redirect_url);
+                exit();
+                
             break;
             case 'unlock-tracklist':
                 
-                if ( $post_type == wpsstm()->post_type_playlist ){
-                    
-                    $tracklist->convert_to_live_playlist($post->ID);
-                    
-                    $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
-                    wp_redirect($redirect_url);
-                    exit();
-                }
+                if ( !$tracklist->user_can_unlock_tracklist() ) break;
+
+                $tracklist->convert_to_live_playlist($tracklist->post_id);
+
+                $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+                wp_redirect($redirect_url);
+                exit();
+
+            break;
+                
+            case 'store':
+                
+                if ( !$can_store ) break;
+
+                $args = array(
+                    'ID' =>             $tracklist->post_id,
+                    'post_author' =>    get_current_user_id(),
+                );
+                
+                $success = wp_update_post( $args );
+
+                $redirect_url = get_permalink($tracklist->post_id);
+                wp_redirect($redirect_url);
+                exit();
+                
             break;
         }
     }

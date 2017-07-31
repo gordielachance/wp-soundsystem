@@ -157,36 +157,23 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_page_content($content){
-        if ( !is_page($this->frontend_wizard_page_id) ) return $content;
-        $form_content = $this->get_wizard_form();
-        $error = null;
         
-        //capability check
-        if ( !$user_id = get_current_user_id() ){
-            if ( wpsstm()->get_options('visitors_wizard') ){
-                $user_id = wpsstm()->get_options('community_user_id');
-            }
-        }
+        if ( !is_page($this->frontend_wizard_page_id) ) return $content;
+        
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $required_cap = $post_type_obj->cap->edit_posts;
+        if ( !user_can($community_user_id,$required_cap) ) return $content;
 
-        if (!$user_id){
+        $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
+
+        if ( !get_current_user_id() && !$visitors_wizard ){
             $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            $error = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+            $form = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
         }else{
-            $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-            $required_cap = $post_type_obj->cap->edit_posts;
-            if ( !user_can($user_id,$required_cap) ){
-                $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-                $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-                $wp_auth_text = __("You don't have the capability required to use the frontend wizard.",'wpsstm');
-                $error = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
-            }
-        }
-
-        if ( $error ){
-            $form = $error;
-        }else{
+            $form_content = $this->get_wizard_form();
             $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
         }
 
@@ -327,11 +314,10 @@ class WP_SoundSystem_Core_Wizard{
         
         $post_args = array(
             'post_type'     => wpsstm()->post_type_live_playlist,
-            'post_title'    => sprintf('(%s)',__('Frontend Wizard','wpsstm')),
             'post_status'   => 'publish',
             'post_author'   => $community_user_id,
             'meta_input'   => array(
-                $this->frontend_wizard_meta_key => true, //TO FIX required ? TO CHECK
+                $this->frontend_wizard_meta_key => true, //define that the post has been created with the frontend wizard
                 wpsstm_live_playlists()->feed_url_meta_name => $feed_url,
             )
         );
