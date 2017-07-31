@@ -44,7 +44,7 @@
     });
 
     //create new playlist
-    $(document).on( "click",'#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-add input[type="checkbox"]', function(e){
+    $(document).on( "click",'#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-add input[type="submit"]', function(e){
 
         e.preventDefault();
         var bt =                        $(this);
@@ -61,7 +61,7 @@
         }
         
         var ajax_data = {
-            action:         'wpsstm_create_playlist',
+            action:         'wpsstm_append_to_new_playlist',
             playlist_title: newPlaylistTitle_el.val(),
             track_id:       track_id,
         };
@@ -79,11 +79,8 @@
                 if (data.success === false) {
                     console.log(data);
                 }else if(data.new_html) {
-
-                    $(existingPlaylists_el).remove();
-                    $(data.new_html).insertBefore(playlistAddWrapper);
+                    existingPlaylists_el.replaceWith( data.new_html );
                     $( "#wpsstm-playlists-filter" ).trigger("keyup");
-                    $(playlistAddWrapper).toggle();
                 }
             },
             complete: function() {
