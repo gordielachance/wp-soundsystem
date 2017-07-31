@@ -914,17 +914,16 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         if ( get_current_user_id() ){
             
-            //capability check
-            $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-            $required_cap = $post_type_obj->cap->edit_posts;
-            if ( !current_user_can($required_cap) ) return;
+            if ( $can_store = $this->user_can_store_tracklist() ) {
 
-            $store_url = $this->get_tracklist_admin_gui_url('store');
-            $store_link = sprintf( '<a href="%s">%s</a>',$store_url,__('here','wpsstm') );
+                $store_url = $this->get_tracklist_admin_gui_url('store');
+                $store_link = sprintf( '<a href="%s">%s</a>',$store_url,__('here','wpsstm') );
 
-            $notice = sprintf(__('This is a tempory playlist.  Click %s if you want to save it to your profile.','wpsstm'),$store_link);
-            $this->add_notice( 'tracklist-header', 'temporary_tracklist', $notice );
-            
+                $notice = sprintf(__('This is a tempory playlist.  Click %s if you want to save it to your profile.','wpsstm'),$store_link);
+                $this->add_notice( 'tracklist-header', 'temporary_tracklist', $notice );
+                
+            }
+
         }else{
             
             $redirect = get_permalink($this->post_id);

@@ -544,10 +544,7 @@ class WP_SoundSystem_Core_Tracklists{
         if (!$tracklist->post_id) return;
         
         //capability check
-        
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $post_author = get_post_field( 'post_author', $tracklist->post_id );
-        
+
         $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
         $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
 
@@ -556,17 +553,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         $can_edit_cap =     $post_type_obj->cap->edit_post;
         $can_edit_post =    current_user_can($can_edit_cap,$tracklist->post_id);
-        
-        $can_edit_live_cap = $live_post_obj->cap->edit_posts;
-        $can_edit_live =    current_user_can($can_edit_live_cap);
-        
-        $can_edit_static_cap = $static_post_obj->cap->edit_posts;
-        $can_edit_static =    current_user_can($can_edit_static_cap);
 
-        $can_publish_cap =  $post_type_obj->cap->publish_posts;
-        $can_publish =      current_user_can($can_publish_cap);
-        
-        $can_store = ( ( $post_author == $community_user_id ) && $can_edit_live );
 
         //TO FIX validate status regarding user's caps
         $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
@@ -612,14 +599,17 @@ class WP_SoundSystem_Core_Tracklists{
                 
             case 'store':
                 
-                if ( !$can_store ) break;
+                $can_store = $tracklist->user_can_store_tracklist();
 
-                $args = array(
-                    'ID' =>             $tracklist->post_id,
-                    'post_author' =>    get_current_user_id(),
-                );
-                
-                $success = wp_update_post( $args );
+                if ($can_store){
+                    $args = array(
+                        'ID' =>             $tracklist->post_id,
+                        'post_author' =>    get_current_user_id(),
+                    );
+
+                    $success = wp_update_post( $args );
+                }
+
 
                 $redirect_url = get_permalink($tracklist->post_id);
                 wp_redirect($redirect_url);

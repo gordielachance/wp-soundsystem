@@ -547,32 +547,22 @@ class WP_SoundSystem_Tracklist{
         /*
         Capability check
         */
-        
-        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
-        $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
-        
-        $can_edit_live_cap = $live_post_obj->cap->edit_posts;
-        $can_edit_live =    current_user_can($can_edit_live_cap);
-        
-        $can_edit_static_cap = $static_post_obj->cap->edit_posts;
-        $can_edit_static =    current_user_can($can_edit_static_cap);
 
         //playlist
         $permalink = get_permalink($this->post_id);
-        $tracklist_status = get_post_status($this->post_id);
+        
         $tracklist_obj = get_post_type_object($tracklist_type);
+        
+        $tracklist_status = get_post_status($this->post_id);
         $current_status_obj = get_post_status_object( $tracklist_status );
 
         //track
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        $can_add_tracklist_items = ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
         
         $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
         $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
         $can_favorite = true; //call to action
-        $can_add_tracks = ( $can_edit_tracklist && $can_add_tracklist_items );
-        $can_unlock_playlist = ( $can_edit_tracklist && ($tracklist_type == wpsstm()->post_type_playlist ) && $this->has_wizard_backup() && $can_edit_live );
 
         $actions = array();
 
@@ -626,7 +616,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //add track
-        if ($can_add_tracklist_items){
+        if ( $this->user_can_add_tracks() ){
             
             $new_subtrack_url = $this->get_tracklist_admin_gui_url('new-subtrack');
             $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
@@ -918,6 +908,27 @@ class WP_SoundSystem_Tracklist{
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
         
         return ( $can_edit_tracklist && $this->has_wizard_backup() && $can_edit_live );
+    }
+    
+    function user_can_store_tracklist(){
+
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $post_author = get_post_field( 'post_author', $this->post_id );
+        if( $post_author != $community_user_id ) return false;
+
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        return current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
+        
+    }
+    
+    function user_can_add_tracks(){
+        
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
+        
+        return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
     
 
