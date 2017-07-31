@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.0.2.9.1
+Version: 1.0.2.9.2
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.0.2.9.1';
+    public $version = '1.0.2.9.2';
     /**
     * @public string plugin DB version
     */
@@ -129,7 +129,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-lastfm.php';
-        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
+        //require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';

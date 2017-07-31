@@ -114,7 +114,6 @@ class WP_SoundSystem_Track{
             'location'      =>null,
             'mbid'          =>null,
             'duration'      =>null,
-            'source_ids'    =>null,
             'sources'       =>null,
         );
     }

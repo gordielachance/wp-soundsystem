@@ -28,16 +28,10 @@ jQuery(document).ready(function($){
         e.preventDefault();
 
         var bt = $(this);
-        var hentry = bt.closest('article');
-        var track_id = $(hentry).attr('data-track-id');
-        var form = $(hentry).closest('form');
+        var track = bt.closest('[data-wpsstm-track-id]');
+        var track_id = track.attr('data-wpsstm-track-id');
+        var form = bt.closest('form');
         var sources_wrapper = $(form).find('.wpsstm-sources-edit-list-user');
-        
-        var popup = bt.closest('.hentry');
-
-        //get track obj from HTML
-        var track_el = popup.find('[itemprop="track"]').first();
-        var track_obj = new WpsstmTrack(track_el);
 
         var ajax_data = {
             action:     'wpsstm_autosources_form',

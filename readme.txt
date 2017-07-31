@@ -145,29 +145,23 @@ echo $tracklist->get_tracklist_table();
 == Changelog ==
 
 = XXX =
-* remote playlist encoding fix
-* new option autosource_filter_ban_words (experimental)
-* new option autosource_filter_requires_artist (experimental)
+* tracks from live playlists are now saved as regular posts (with the community user as author) and flushed at each tracklist refresh
+* track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
-* tracklists : new row action 'Guess MBIDs' 
-* Improved jQuery.toggleTableColums + moved in its own file
-* Abord auto_guess_mbid() for tracks when saving subtracks (too slow)
-* Improved wizard backend & frontend
-* Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
-* frontend admin popups (and templates) for tracks and tracklists; including rewrite rules
-* fixed sources manager
-* removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
-* removed (now) unecessary jquery.toggleTableColumns.js
 * better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
 * new JS events : wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
-* removed publish_metabox_download_link()
-* cleaner code for enqueuing tracklists / tracks / track sources JS & CSS
-* improved custom temporary status
-* do not auto_set_mbid() if post is trashed
-* locking / unlocking tracklists
-* improved frontend wizard
-* improved wpsstm_get_post_tracklist()
+* Improved wizard backend & frontend
+* Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
+* removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
+
+* Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
+* improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
+* new option autosource_filter_ban_words (experimental)
+* new option autosource_filter_requires_artist (experimental)
+
+
 * more code cleanup & fixes
+
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
 * wpsstm-shortenTables > jquery.toggleChildren
