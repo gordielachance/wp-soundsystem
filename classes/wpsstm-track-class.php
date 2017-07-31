@@ -316,7 +316,7 @@ class WP_SoundSystem_Track{
         
     }
     
-    function delete_track($force_delete = false){
+    function trash_track(){
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
@@ -326,9 +326,12 @@ class WP_SoundSystem_Track{
             return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
-        wpsstm()->debug_log( array('post_id',$this->post_id,'force_delete'=>$force_delete), "WP_SoundSystem_Track::delete_track()"); 
+        $success = wp_trash_post($this->post_id);
         
-        return wp_delete_post( $this->post_id, $force_delete );
+        wpsstm()->debug_log( array('post_id',$this->post_id,'success'=>$success), "WP_SoundSystem_Track::trash_track()"); 
+        
+        return $success;
+        
     }
 
     
@@ -713,11 +716,11 @@ class WP_SoundSystem_Track{
 
         //delete track
         if ($can_delete_tracks){
-            $actions['delete'] = array(
+            $actions['trash'] = array(
                 'icon' =>       '<i class="fa fa-trash" aria-hidden="true"></i>',
-                'text' =>      __('Delete'),
-                'desc' =>       __('Delete track','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('delete',$tracklist_id),
+                'text' =>      __('Trash'),
+                'desc' =>       __('trash track','wpsstm'),
+                'href' =>       $this->get_track_admin_gui_url('trash',$tracklist_id),
             );
         }
         
@@ -725,7 +728,7 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['delete']);
+                unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
                 
                 if ($can_edit_tracklist){
                     $actions['advanced'] = array(
@@ -735,7 +738,7 @@ class WP_SoundSystem_Track{
                     );
                 }
                 
-                $popup_action_slugs = array('about','details','edit','playlists','sources','delete','advanced');
+                $popup_action_slugs = array('about','details','edit','playlists','sources','trash','advanced');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){

@@ -80,8 +80,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
-        
-        //TO FIX TO CHECK delete track orphans when tracklist is deleted
+
         add_action( 'wp_trash_post', array($this,'trash_tracklist_orphans') );
         
         //ajax : toggle love tracklist
@@ -94,7 +93,7 @@ class WP_SoundSystem_Core_Tracklists{
         //ajax : row actions
         add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_tracklist_track_position'));
         add_action('wp_ajax_wpsstm_playlist_remove_track', array($this,'ajax_remove_tracklist_track'));
-        add_action('wp_ajax_wpsstm_playlist_delete_track', array($this,'ajax_delete_tracklist_track'));
+        add_action('wp_ajax_wpsstm_playlist_trash_track', array($this,'ajax_trash_tracklist_track'));
 
     }
     
@@ -290,7 +289,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
-            if ( !$wp_query->get(wpsstm_tracks()->qvar_exclude_subtracks) ){
+            if ( !$wp_query->get('subtracks_exclude') ){
                 $after['playlist'] = __('In playlists:','wpsstm');
             }
             
@@ -360,7 +359,7 @@ class WP_SoundSystem_Core_Tracklists{
             'wpsstm-tracklist', 
             __('Tracklist','wpsstm'),
             array($this,'metabox_tracklist_content'),
-            $this->tracklist_post_types, 
+            $this->static_tracklist_post_types, 
             'normal', 
             'high' //priority 
         );
@@ -471,7 +470,7 @@ class WP_SoundSystem_Core_Tracklists{
         wp_send_json( $result ); 
     }
     
-    function ajax_delete_tracklist_track(){
+    function ajax_trash_tracklist_track(){
         $ajax_data = $_POST;
         
         $result = array(
@@ -485,7 +484,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( $track_id ){
 
             $track = $result['track'] = new WP_SoundSystem_Track($track_id);
-            $success = $track->delete_track();
+            $success = $track->trash_track();
             
             if ( is_wp_error($success) ){
                 $result['message'] = $success->get_error_message();
@@ -600,17 +599,9 @@ class WP_SoundSystem_Core_Tracklists{
     function trash_tracklist_orphans($post_id){
 
         if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
-
-        //get all orphans
+        
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $orphan_ids = $tracklist->get_orphan_track_ids();
-
-        foreach ((array)$orphan_ids as $track_id){
-            wp_update_post( array(
-                'ID'=>              $track_id,
-                'post_status' =>    'trash'
-            ));
-        }
+        $tracklist->flush_subtracks();
 
     }
     

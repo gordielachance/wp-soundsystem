@@ -30,8 +30,6 @@
                 }
 
                 $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
-                $can_edit_track =       current_user_can($track_type_obj->cap->edit_post,$track->post_id);
-                $can_delete_tracks =    current_user_can($playlist_type_obj->cap->delete_posts);
                 
                 ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> data-track-id="<?php echo $track->post_id;?>">
@@ -189,10 +187,10 @@
                                 <?php
                                 
                             break;
-                            case 'delete':
+                            case 'trash':
                                 ?>
-                                <div id="wpsstm-track-admin-delete" class="wpsstm-track-admin">
-                                    delete
+                                <div id="wpsstm-track-admin-trash" class="wpsstm-track-admin">
+                                    trash
                                 </div>
                                 <?php
                             break;

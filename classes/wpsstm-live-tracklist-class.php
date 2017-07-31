@@ -125,11 +125,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     function load_subtracks(){
-        
+
         if ( $this->did_query_tracks ) return;
 
         if ( $this->is_expired && $this->get_subtrack_ids() ){
-            $this->flush_live_subtracks();
+            $this->flush_subtracks();
         }
 
         if ( !$this->is_expired || !$this->can_remote_request){
@@ -729,28 +729,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         $this->request_pagination = $args;
-    }
-
-    /*
-    Flush temporary tracks
-    */
-    function flush_live_subtracks(){
-
-        $force_delete = false;
-        $flushed = 0;
-        
-        $orphan_ids = $this->get_orphan_track_ids();
-        
-        foreach ((array)$orphan_ids as $track_id){
-            if ( wp_delete_post( $track_id, $force_delete ) ){
-                $flushed += 1;
-            }
-        }
-
-        wpsstm()->debug_log(array('subtracks'=>count($orphan_ids),'flushed'=>$flushed),"WP_SoundSystem_Remote_Tracklist::flush_live_subtracks()");
-
-        return true;
-
     }
     
     function convert_to_static_playlist(){

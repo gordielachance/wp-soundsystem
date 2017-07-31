@@ -753,7 +753,7 @@ class WpsstmTracklist {
         var track_el = track_obj.track_el;
 
         var ajax_data = {
-            action            : 'wpsstm_playlist_delete_track',
+            action            : 'wpsstm_playlist_trash_track',
             track_id          : track_obj.post_id
         };
 

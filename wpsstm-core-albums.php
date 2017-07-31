@@ -52,7 +52,7 @@ class WP_SoundSystem_Core_Albums{
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
-            if ( !$wp_query->get(wpsstm_tracks()->qvar_exclude_subtracks) ){
+            if ( !$wp_query->get('subtracks_exclude') ){
                 $after['album'] = __('Album','wpsstm');
             }
             

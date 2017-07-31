@@ -5,8 +5,6 @@ class WP_SoundSystem_Core_Tracks{
     public $title_metakey = '_wpsstm_track';
     public $qvar_track_admin = 'admin';
     public $qvar_track_lookup = 'lookup_track';
-    public $qvar_include_subtracks = 'subtracks_include';
-    public $qvar_exclude_subtracks = 'subtracks_exclude';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
@@ -295,11 +293,11 @@ class WP_SoundSystem_Core_Tracks{
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
         
         //already defined
-        if ( $query->get($this->qvar_exclude_subtracks) ) return $query;
+        if ( $query->get('subtracks_exclude') ) return $query;
         
         //option enabled ?
         if ($this->subtracks_hide){
-            $query->set($this->qvar_exclude_subtracks,true);
+            $query->set('subtracks_exclude',true);
         }
 
         return $query;
@@ -481,8 +479,6 @@ class WP_SoundSystem_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_track_admin;
-        $qvars[] = $this->qvar_include_subtracks;
-        $qvars[] = $this->qvar_exclude_subtracks;
         return $qvars;
     }
     
@@ -742,10 +738,7 @@ class WP_SoundSystem_Core_Tracks{
         $source_ids = wpsstm_get_track_source_ids($post_id);
         
         foreach((array)$source_ids as $source_id){
-            wp_update_post(array(
-                'ID'    =>  $source_id,
-                'post_status'   =>  'trash'
-            ));
+            $success = wp_trash_post($source_id);
         }
 
     }
@@ -769,8 +762,8 @@ class WP_SoundSystem_Core_Tracks{
         $type = true;
         $include = null;
 
-        $include_type = $query->get($this->qvar_include_subtracks);
-        $exclude_type = $query->get($this->qvar_exclude_subtracks);
+        $include_type = $query->get('subtracks_include');
+        $exclude_type = $query->get('subtracks_exclude');
 
         if($include_type){
             $type = $include_type;
@@ -783,8 +776,35 @@ class WP_SoundSystem_Core_Tracks{
         }
 
         $tracklist_id = $query->get('tracklist_id');
+        $subtrack_ids = wpsstm_get_subtrack_ids($type,$tracklist_id);
+        
+        /*
+        filter subtracks to get only the orphans.
+        if $tracklist_id is defined; that tracklist will NOT be considered as a subtrack parent.
+        This is useful to get the flushable subtracks for a live tracklist.
+        */
+        
+        $orphans = $query->get('subtracks_orphan');
 
-        $subtrack_ids = wpsstm_get_subtrack_ids($type,$tracklist_id); 
+        if ($orphans){
+
+            $ignore_parent_id = ($tracklist_id) ? $tracklist_id : null;
+            
+            foreach ((array)$subtrack_ids as $key=>$track_id){
+
+                $track = new WP_SoundSystem_Track($track_id);
+                $parent_ids = (array)$track->get_parent_ids();
+                $loved_by = $track->get_track_loved_by();
+
+                //ignore parent ID
+                if( $ignore_parent_id && ($ignore_parent_key = array_search($ignore_parent_id, $parent_ids)) !== false) unset($parent_ids[$ignore_parent_key]);
+
+                //is not an orphan
+                if ( !empty($parent_ids) || !empty($loved_by) ) unset($subtrack_ids[$key]);
+
+            }
+
+        }
 
         if ($include){
             
@@ -817,7 +837,7 @@ class WP_SoundSystem_Core_Tracks{
     function sort_subtracks_by_position($orderby_sql, $query){
         $tracklist_id = $query->get('tracklist_id');
         $orderby = $query->get('orderby');
-        $include_type = $query->get($this->qvar_include_subtracks);
+        $include_type = $query->get('subtracks_include');
         
         if ( !$include_type || !$tracklist_id || $orderby ) return $orderby_sql;
 

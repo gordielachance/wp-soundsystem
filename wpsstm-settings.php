@@ -82,17 +82,6 @@ class WP_SoundSystem_Settings {
     
     function settings_sanitize( $input ){
         $new_input = array();
-        
-        //delete transients
-        if( isset( $input['delete_transients'] ) ){
-            $transients = wpsstm_get_transients_by_prefix( 'wpsstm' );
-
-            //TO FIX use a mysql command for this ?  Crashes when there is too much transient.
-            foreach((array)$transients as $transient_name){
-                delete_transient( $transient_name );
-            }
-            
-        }
 
         if( isset( $input['reset_options'] ) ){
             
@@ -470,15 +459,7 @@ class WP_SoundSystem_Settings {
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        add_settings_field(
-            'delete_transients', 
-            __('Delete Transients','wpsstm'), 
-            array( $this, 'delete_transients_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_system'//section
-        );
-        
+
         //
         add_settings_field(
             'reset_options', 
@@ -877,18 +858,6 @@ class WP_SoundSystem_Settings {
         );
     }
 
-    function delete_transients_callback(){
-        
-        $transients = wpsstm_get_transients_by_prefix( 'wpsstm' );
-        $transient_count = count($transients);
-        $text_count = sprintf( _n( '%s transient currently stored', '%s transients currently stored', $transient_count, 'wpsstm' ), $transient_count );
-        
-        printf(
-            '<input type="checkbox" name="%1$s[delete_transients]" value="on"/> %2$s',
-            wpsstm()->meta_name_options,
-            __('Clear the temporary data','wpsstm').' <small>('.$text_count.')</small>'
-        );
-    }
     
 	function  settings_page() {
         ?>
