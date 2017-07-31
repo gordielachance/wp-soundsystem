@@ -322,8 +322,12 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         //create tracklist
+        
+        //TO FIX check for duplicate using author + scraper url ?
+        
         $post_args = array(
             'post_type'     => wpsstm()->post_type_live_playlist,
+            'post_title'    => sprintf('(%s)',__('Frontend Wizard','wpsstm')),
             'post_status'   => 'publish',
             'post_author'   => $community_user_id,
             'meta_input'   => array(
