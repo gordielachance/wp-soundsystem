@@ -32,7 +32,7 @@
                 $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                 
                 ?>
-                <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> data-track-id="<?php echo $track->post_id;?>">
+                <article id="post-<?php the_ID(); ?>" <?php post_class('wpsstm-track-admin'); ?> data-wpsstm-track-id="<?php echo $track->post_id;?>">
 
                     <header class="entry-header">
                         <h1 class="entry-title"><?php the_title();?></h1>
@@ -137,7 +137,7 @@
                                 
                                 ?>
                                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                                    <div id="wpsstm-tracklist-chooser-list" class="wpsstm-popup-content">
+                                    <div id="wpsstm-tracklist-chooser-list" data-wpsstm-track-id="<?php echo $tracklist->post_id;?>">
                                         <div id="wpsstm-filter-playlists">
                                             <p>
                                                 <input id="wpsstm-playlists-filter" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" />

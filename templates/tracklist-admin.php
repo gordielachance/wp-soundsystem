@@ -18,7 +18,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                 $admin_action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_admin);
                 
                 ?>
-                <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+                <article id="post-<?php the_ID(); ?>" <?php post_class('wpsstm-tracklist-admin'); ?>>
                     <header class="entry-header">
                         <?php
                             printf('<h1>%s</h1>',$tracklist->title);
