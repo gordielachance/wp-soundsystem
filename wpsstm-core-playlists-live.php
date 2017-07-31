@@ -240,7 +240,10 @@ class WP_SoundSystem_Core_Live_Playlists{
         
     }
     
+    //TO FIX or only wizard posts ?
     function filter_live_playlist_title($title, $post_id = null){
+        
+        if ($title) return $title;
         
         if ( get_post_type($post_id) != wpsstm()->post_type_live_playlist ) return $title;
 

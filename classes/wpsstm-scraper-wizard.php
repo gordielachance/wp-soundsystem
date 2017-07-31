@@ -157,22 +157,21 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_page_content($content){
-        
+
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
-        
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-        $required_cap = $post_type_obj->cap->edit_posts;
-        if ( !user_can($community_user_id,$required_cap) ) return $content;
+        if ( !wpsstm()->can_frontend_tracklist() ) return $content;
 
         $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
 
         if ( !get_current_user_id() && !$visitors_wizard ){
+            
             $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
             $form = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+            
         }else{
+            
             $form_content = $this->get_wizard_form();
             $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
         }
@@ -282,24 +281,21 @@ class WP_SoundSystem_Core_Wizard{
     function frontend_wizard_create_tracklist(){
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
+        if ( !wpsstm()->can_frontend_tracklist() ) return;
         
         $wizard_data = isset($_POST[ 'wpsstm_wizard' ]) ? $_POST[ 'wpsstm_wizard' ] : array();
         
         if ( !isset($wizard_data['load-url']) ) return;
 
         //capability check
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-        $required_cap = $post_type_obj->cap->edit_posts;
 
-        if ( !user_can($community_user_id,$required_cap) ){
+        if ( !wpsstm()->can_frontend_tracklist() ){
             $link = get_permalink($this->frontend_wizard_page_id);
             $link = add_query_arg(array('wizard_error'=>'missing_cap'),$link);
             wp_redirect($link);
             exit();
         }
 
-        
         $feed_url = isset($_POST[ 'wpsstm_wizard' ]['feed_url']) ? trim($_POST[ 'wpsstm_wizard' ]['feed_url']) : null;
 
         if (filter_var($feed_url, FILTER_VALIDATE_URL) === false){
@@ -310,6 +306,7 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         //create tracklist
+        $community_user_id = wpsstm()->get_options('community_user_id');
         
         //TO FIX check for duplicate using author + scraper url ?
         
