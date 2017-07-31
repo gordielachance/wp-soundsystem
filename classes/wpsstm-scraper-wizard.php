@@ -212,8 +212,9 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         if ($tracklist){
-            $tracklist->tracks_strict = false;
+            
             $tracklist->can_remote_request = true;
+            $tracklist->tracks_strict = false;
 
             if ($tracklist->feed_url){
                 $tracklist->load_subtracks();
@@ -712,7 +713,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_tracklist_callback(){
-        echo wpsstm_wizard()->tracklist->get_tracklist_table();
+        echo wpsstm_wizard()->tracklist->get_tracklist_table(array('can_play'=>false));
     }
 
     function feedback_data_type_callback(){

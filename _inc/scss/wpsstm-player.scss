@@ -1,29 +1,6 @@
 @import "compass/css3";
 @import "wpsstm-shared";
 
-.wpsstm-tracklist.wpsstm-playable-tracklist{
-    [itemprop="track"]:not(.no-items){
-
-        @include opacity(1);
-
-        &:not(.active){
-            @include opacity(.25);
-            &[data-wpsstm-sources-count="0"]:not(:hover){
-                @include opacity(.1);
-            }
-            &.has-played{
-                @include opacity(.5);
-            }
-
-        }
-
-        &.wpsstm-invalid-track{
-            background:rgba(255, 0, 0, 0.10);
-        }
-
-    }
-}
-
 #wpsstm-bottom-wrapper{
     position:fixed;
     width:100%;

@@ -11,7 +11,6 @@ class WpsstmLastFM {
         self.auth_notice_el =       null;
         
         if ( ( self.has_user_scrobbler === null ) && (self.is_user_api_logged) ){  //default
-            alert(self.is_user_api_logged);
             self.has_user_scrobbler = true;
         }
 

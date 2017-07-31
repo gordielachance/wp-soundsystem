@@ -61,8 +61,6 @@ Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soun
 
 = Live Playlists =
 
-(disabled by default, you can enable them by accessing the plugin's settings page)
-
 Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Importer (see above).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
 
