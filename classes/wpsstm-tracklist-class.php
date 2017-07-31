@@ -63,7 +63,7 @@ class WP_SoundSystem_Tracklist{
         //tracklist type
         $this->tracklist_type = $this->get_tracklist_type();
 
-        $this->options = array_replace_recursive((array)$this->options_default,$this->options); //last one has priority
+        $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
 
     }
     
@@ -80,7 +80,7 @@ class WP_SoundSystem_Tracklist{
     protected function get_default_options(){
         return array(
             'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'=>  ( wpsstm()->get_options('autosource') == 'on' ),
+            'autosource' => ( wpsstm()->get_options('autosource') == 'on' ),
         );
     }
     
