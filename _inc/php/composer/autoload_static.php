@@ -11,16 +11,32 @@ class ComposerStaticInit9c5a9ed12772223d3e336664965dfd77
     );
 
     public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'Tests\\' => 6,
+        ),
         'M' => 
         array (
             'Masterminds\\' => 12,
         ),
+        'L' => 
+        array (
+            'LastFmApi\\' => 10,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/matto1990/lastfm-api/tests',
+        ),
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
+        ),
+        'LastFmApi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/matto1990/lastfm-api/src/lastfmapi',
         ),
     );
 

@@ -155,8 +155,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                         $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
                     }
                 }
-                
-                //
+
                 $this->add($remote_tracks);
                 
                 //set tracklist title
@@ -185,7 +184,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $subtracks_args = array(
                     'post_author'   => wpsstm()->get_options('community_user_id'),
                 );
-                
+
                 $this->save_subtracks($subtracks_args);
                 
                 //expiration time (kepp below save_subtracks() )
@@ -534,14 +533,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $tracks_arr = array();
         
         foreach($track_nodes as $key=>$single_track_node) {
-            
-            $sources = array();
-            if ( $source_urls = $this->get_track_source_urls($single_track_node) ){
-                foreach ((array)$source_urls as $source_url){
-                    $sources[] = array('url'=>$source_url,'origin'=>'scraper');
-                }
-            }
-            
+
             //format response
             $artist =   $this->get_track_artist($single_track_node);
             $title =    $this->get_track_title($single_track_node);
@@ -552,7 +544,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 'title'         => $title,
                 'album'         => $album,
                 'image'         => $this->get_track_image($single_track_node),
-                'sources'       => $sources
+                'sources'       => $this->get_track_sources($single_track_node),
             );
 
             $tracks_arr[] = array_filter($args);
@@ -585,6 +577,20 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
         
         return $image;
+    }
+    
+    protected function get_track_sources($track_node){
+        $sources = array();
+        $source_urls = $this->get_track_source_urls($track_node);
+        
+        foreach((array)$source_urls as $source_url){
+            $source = new WP_SoundSystem_Source();
+            $source_args = array('url'=>$source_url);
+            $source->populate_array($source_args);
+            $sources[] = $source;
+        }
+        
+        return $sources;
     }
     
     protected function get_track_source_urls($track_node){

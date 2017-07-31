@@ -28,16 +28,15 @@ class WP_SoundSystem_Source {
             $this->track_id = wp_get_post_parent_id( $post_id );
 
             $this->url = get_post_meta($post_id,wpsstm_sources()->url_metakey,true);
-            $this->populate_source_url();
-            
+
             $post_author_id = get_post_field( 'post_author', $post_id );
             $community_user_id = wpsstm()->get_options('community_user_id');
             $this->is_auto = ( $post_author_id == $community_user_id );
 
         }
-
-        //TO FIX do this as a filter
-        //if (!$this->title && $this->provider) $this->title = $this->provider->name;
+        
+        $this->populate_source_url();
+        if (!$this->title && $this->provider) $this->title = $this->provider->name;
 
     }
     
@@ -45,6 +44,7 @@ class WP_SoundSystem_Source {
 
         $args_default = $this->defaults;
         $args = wp_parse_args((array)$args,$args_default);
+        $post_id = null;
 
         //set properties from args input
         foreach ($args as $key=>$value){
@@ -55,10 +55,13 @@ class WP_SoundSystem_Source {
 
         //populate post ID if source already exists in the DB
         if ( $duplicates = $this->get_source_duplicates() ){
-            $this->__construct( $duplicates[0] );
-        } 
+            $post_id = $duplicates[0];
+        }
+        
+        $this->__construct( $post_id );
+        
     }
-    
+
     /*
     Get the sources (IDs) that have the same URL than the current one
     */
@@ -95,6 +98,10 @@ class WP_SoundSystem_Source {
             return new WP_Error( 'no_source_url', __('Unable to save source : missing URL','wpsstm') );
         }
         
+        if (!$this->track_id){
+            return new WP_Error( 'no_source_url', __('Unable to save source : missing track ID','wpsstm') );
+        }
+        
         //check if this source exists already
         if ( $duplicate_ids = $this->get_source_duplicates() ){
             $this->post_id = $duplicate_ids[0];
@@ -103,6 +110,7 @@ class WP_SoundSystem_Source {
         
         $default_args = array(
             'post_author' =>    get_current_user_id(),
+            'post_status' =>    'publish',
         );
         $args = wp_parse_args((array)$args,$default_args);
         
@@ -175,11 +183,7 @@ class WP_SoundSystem_Source {
             'title'     => $this->title
         );
         
-        if ($this->title){
-            $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$this->title);
-        }else{
-            $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$this->provider->name);
-        }
+        $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$this->title);
 
         return sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon,$source_title);
     }

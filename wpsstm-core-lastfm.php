@@ -350,8 +350,6 @@ class WP_SoundSystem_Core_LastFM{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        require_once(wpsstm()->plugin_dir . 'lastfm/_inc/php/autoload.php');
-        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));

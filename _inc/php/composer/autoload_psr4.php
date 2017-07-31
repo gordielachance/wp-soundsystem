@@ -6,5 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = $vendorDir;
 
 return array(
+    'Tests\\' => array($vendorDir . '/matto1990/lastfm-api/tests'),
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
+    'LastFmApi\\' => array($vendorDir . '/matto1990/lastfm-api/src/lastfmapi'),
 );

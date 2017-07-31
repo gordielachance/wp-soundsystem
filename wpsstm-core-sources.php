@@ -44,7 +44,7 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
         
         add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column', array($this,'column_source_url_content'), 10, 2 );
+        add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 ); //'pages' because post is hierarchical
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
@@ -90,7 +90,7 @@ class WP_SoundSystem_Core_Sources{
         $args = array( 
             'labels' => $labels,
             'hierarchical' => true, //TO FIX not working
-            'supports' => array( 'author','title'),
+            'supports' => array( 'author','title','page-attributes'),
             'taxonomies' => array(),
             'public' => true,
             'show_ui' => true,
@@ -237,7 +237,7 @@ class WP_SoundSystem_Core_Sources{
         
     }
     
-    function get_track_sources_form($source_ids = null,$blank_row = false){
+    function get_sources_form($source_ids = null,$blank_row = false){
         global $post;
         
         $source_ids = (array)$source_ids;
@@ -324,7 +324,7 @@ class WP_SoundSystem_Core_Sources{
             case 'sources':
                 $output = '—';
                 $track = new WP_SoundSystem_Track($post_id);
-                echo count($track->source_ids);
+                echo count($track->sources);
             break;
         }
     }
@@ -339,7 +339,7 @@ class WP_SoundSystem_Core_Sources{
         if ( $post_type != wpsstm()->post_type_source ) return $defaults;
         
         if ( $post_type == wpsstm()->post_type_source ){
-            $after['source_url'] = __('URL','wpsstm');
+            $after['sources_list'] = __('URL','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
@@ -348,12 +348,17 @@ class WP_SoundSystem_Core_Sources{
     //TO FIX NOT WORKING
     function column_source_url_content($column,$post_id){
         global $post;
-
         switch ( $column ) {
-            case 'source_url':
+            case 'sources_list':
                 $output = '—';
-                if( $source_url = get_post_meta( $post_id, $this->url_metakey, true ) ){
-                    $output = $source_url;
+                $source = new WP_SoundSystem_Source($post_id);
+                if( $source->post_id ){
+                    $playable_source = $source->get_provider_link();
+                    if ($playable_source){
+                        $output = $playable_source;
+                    }else{
+                        $output = $source->url;
+                    }
                 }
                 echo $output;
             break;
@@ -363,17 +368,10 @@ class WP_SoundSystem_Core_Sources{
     function get_track_sources_list(WP_SoundSystem_Track $track){
 
         $lis = array();
-        $sources = array();
 
-        foreach((array)$track->source_ids as $source_id){
-            $source = new WP_SoundSystem_Source($source_id);
-            if (!$source->src) continue;
-            $sources[] = $source;
-        }
+        $track->sort_sources_by_similarity();
 
-        $sources = $track->sort_sources_by_similarity($sources);
-
-        foreach($sources as $key=>$source){
+        foreach((array)$track->sources as $key=>$source){
 
             $source_icon = $source_type = $source_title = null;            
             $link = $source->get_provider_link();
@@ -413,7 +411,7 @@ class WP_SoundSystem_Core_Sources{
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
 
         $track = new WP_SoundSystem_Track($post_id);
-        $track->populate_auto_sources();
+        $track->save_auto_sources();
 
         $track = $result['track'] = $track;
 
@@ -439,11 +437,11 @@ class WP_SoundSystem_Core_Sources{
         $track = new WP_SoundSystem_Track($ajax_data['post_id']);
         $track = $result['track'] = $track;
         
-        $new_source_ids = $track->populate_auto_sources();
+        $new_source_ids = $track->save_auto_sources();
         $result['success'] = true;
         
         if ( $new_source_ids ){
-            $result['new_html'] = wpsstm_sources()->get_track_sources_form($new_source_ids);
+            $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
         }
 
         header('Content-type: application/json');

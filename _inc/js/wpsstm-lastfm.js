@@ -144,7 +144,6 @@ class WpsstmLastFM {
             data:ajax_data,
             dataType: 'json',
             success: function(data){
-                console.log(data);//TO FIX TOUTOU
                 if (data.success === false) {
                     console.log(data);
                 }

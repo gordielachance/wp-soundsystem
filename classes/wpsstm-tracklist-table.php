@@ -316,7 +316,7 @@ class WP_SoundSystem_Tracklist_Table{
         $attr_arr = array(
             'class' =>                      implode(' ',$classes),
             'data-wpsstm-track-id' =>       $item->post_id,
-            'data-wpsstm-sources-count' =>  count($item->source_ids),
+            'data-wpsstm-sources-count' =>  count($item->sources),
             'itemtype' =>                   'http://schema.org/MusicRecording',
             'itemprop' =>                   'track',
         );

@@ -167,8 +167,12 @@
                                     </p>
                                     <form action="<?php echo esc_url($track->get_track_admin_gui_url('sources'));?>" method="post">
                                         <div class="wpsstm-sources-edit-list-user wpsstm-sources-edit-list">
-                                            <?php 
-                                            echo wpsstm_sources()->get_track_sources_form($track->source_ids,true);
+                                            <?php
+                                            $track_source_ids = array();
+                                            foreach((array)$track->sources as $source){
+                                                $track_source_ids[] = $source->post_id;
+                                            }
+                                            echo wpsstm_sources()->get_sources_form($track_source_ids,true);
                                             ?>
                                         </div>
                                         <p class="wpsstm-submit-wrapper">
