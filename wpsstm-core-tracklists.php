@@ -160,12 +160,10 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ( !in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types ) ) return $template;
 
-        $file = 'tracklist-admin.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
+        if ( $template = wpsstm_locate_template( 'tracklist-admin.php' ) ) {
             add_filter( 'body_class', array($this,'tracklist_popup_body_classes'));
         }
-        
+
         return $template;
     }
     
@@ -244,12 +242,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if( !isset( $wp_query->query_vars[$this->qvar_xspf] ) ) return $template; //don't use $wp_query->get() here
         
-        $file = 'tracklist-xspf.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
-        }
-        
-        return $template;
+        return wpsstm_locate_template( 'tracklist-xspf.php' );
     }
     
     function column_tracklist_register($defaults) {

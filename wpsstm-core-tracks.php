@@ -141,9 +141,7 @@ class WP_SoundSystem_Core_Tracks{
 
         if ( !$is_track_edit && !$is_tracklist_new_track ) return $template;
 
-        $file = 'track-admin.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
+        if ( $template = wpsstm_locate_template( 'track-admin.php' ) ){
 
             //TO FIX should be registered in register_tracks_scripts_styles_shared() then enqueued here, but it is not working
             wp_enqueue_script( 'wpsstm-track-admin', wpsstm()->plugin_url . '_inc/js/wpsstm-track-admin.js', array('jquery','jquery-ui-tabs'),wpsstm()->version, true );

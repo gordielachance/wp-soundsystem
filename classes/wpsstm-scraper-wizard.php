@@ -90,11 +90,7 @@ class WP_SoundSystem_Core_Wizard{
         
         ob_start();
         
-        $file = 'wizard-last-entries.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
-            load_template($template);
-        }
+        $template = wpsstm_locate_template( 'wizard-last-entries.php', true, false );
         
         return ob_get_clean();
     }
@@ -139,21 +135,25 @@ class WP_SoundSystem_Core_Wizard{
 
     }
     
-    function get_wizard_form(){
-        
+    function get_wizard_form($wrapper=true){
+
         ob_start();
         
-        $file = 'wizard-form.php';
-        if ( file_exists( wpsstm_locate_template( $file ) ) ){
-            $template = wpsstm_locate_template( $file );
-            load_template($template);
-        }
+        $template = wpsstm_locate_template( 'wizard-form.php', true, false );
         
-        return ob_get_clean();
+        $form = ob_get_clean();
+
+        if ($wrapper){
+            if( $frontend_id = $this->frontend_wizard_page_id ){
+                $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink($this->tracklist->post_id),$form);
+            }
+        }
+
+        return $form;
     }
     
     function metabox_wizard_display(){
-        echo $this->get_wizard_form();
+        echo $this->get_wizard_form(false);
     }
     
     function wizard_page_content($content){
@@ -162,8 +162,9 @@ class WP_SoundSystem_Core_Wizard{
         if ( !wpsstm()->can_frontend_tracklist() ) return $content;
 
         $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
+        $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
 
-        if ( !get_current_user_id() && !$visitors_wizard ){
+        if ( $can_wizard ){
             
             $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
@@ -171,13 +172,13 @@ class WP_SoundSystem_Core_Wizard{
             $form = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
             
         }else{
-            
-            $form_content = $this->get_wizard_form();
-            $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink(),$form_content);
+            $form = $this->get_wizard_form();
         }
 
         $last_entries = wpsstm_wizard()->get_last_wizard_tracklists();
-        return $content.$form.$last_entries;
+        $content .= $form . $last_entries;
+
+        return $content;
         
     }
 

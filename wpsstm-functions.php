@@ -184,41 +184,21 @@ function wpsstm_readonly( $readonly, $current = true, $echo = true ) {
 }
 
 
-/**
- * Locate template.
- *
- * Locate the called template.
- * Search Order:
- * 1. /themes/CURRENT_THEME/wpsstm/$template_name
- * 2. /themes/CURRENT_THEME/$template_name
- * 3. /plugins/wpsstm/_inc/templates/$template_name.
- *
- * @since 1.0.0
- *
- * @param 	string 	$template_name			Template to load.
- * @param 	string 	$string $template_path	Path to templates.
- * @param 	string	$default_path			Default path to template files.
- * @return 	string 							Path to the template file.
- */
-function wpsstm_locate_template( $template_name, $template_path = '', $default_path = '' ) {
-	// Set variable to search in wpsstm folder of theme.
-	if ( ! $template_path ) :
-		$template_path = 'wpsstm/';
-	endif;
-	// Set default plugin templates path.
-	if ( ! $default_path ) :
-		$default_path = wpsstm()->plugin_dir . 'templates/'; // Path to the template folder
-	endif;
-	// Search template file in theme folder.
-	$template = locate_template( array(
-		$template_path . $template_name,
-		$template_name
-	) );
-	// Get plugins template file.
-	if ( ! $template ) :
-		$template = $default_path . $template_name;
-	endif;
-	return apply_filters( 'wpsstm_locate_template', $template, $template_name, $template_path, $default_path );
+/*
+Locate a template & fallback in plugin's folder
+*/
+function wpsstm_locate_template( $template_name, $load = false, $require_once = true ) {
+    
+    if ( !$located = locate_template( 'wpsstm/' . $template_name ) ) {
+        // Template not found in theme's folder, use plugin's template as a fallback
+        $located = wpsstm()->plugin_dir . 'templates/' . $template_name;
+    }
+    
+    if ( $load && '' != $located ){
+        load_template( $located, $require_once );
+    }
+    
+    return $located;
 }
 
 function wpsstm_get_url_domain($url){

@@ -935,4 +935,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
     
+    /*
+    Check if that tracklist has been created with the wizard
+    */
+    function is_wizard_tracklist(){
+        return get_post_meta($this->post_id,$this->frontend_wizard_meta_key,true);
+    }
+    
 }
