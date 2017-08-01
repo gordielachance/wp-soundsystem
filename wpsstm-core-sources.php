@@ -448,6 +448,15 @@ class WP_SoundSystem_Core_Sources{
         wp_send_json( $result ); 
 
     }
+    
+    function can_autosource(){
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        if (!$community_user_id) return;
+
+        $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+        return user_can($community_user_id,$autosource_cap);
+    }
 
 }
 

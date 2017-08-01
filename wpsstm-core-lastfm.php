@@ -84,7 +84,7 @@ class WP_SoundSystem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ),
+            'lastfm_scrobble_along'     => ( $this->can_community_scrobble() && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
             'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
             'lastfm_auth_notice'        => $lastfm_auth_notice
         );
@@ -388,6 +388,13 @@ class WP_SoundSystem_Core_LastFM{
         $enabled_link = sprintf('<a id="wpsstm-enable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-enable-scrobbling">%s</a>',__('Enable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
         $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-disable-scrobbling">%s</a>',__('Disable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
         return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
+    }
+    
+    function can_community_scrobble(){
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        if (!$community_user_id) return;
+        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+        return $community_user->is_user_api_logged();
     }
 
 }

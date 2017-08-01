@@ -666,10 +666,7 @@ class WP_SoundSystem_Settings {
         //capability check
         $check_icon = '<i class="fa fa-check" aria-hidden="true"></i>';
         $warning_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-        $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        
+
         //live playlists
         /*
         $live_playlist_cap = $live_playlist_post_type_obj->cap->edit_posts;
@@ -681,36 +678,33 @@ class WP_SoundSystem_Settings {
         */
 
         //frontend wizard
-        
+        $can_frontend_wizard = wpsstm_wizard()->can_frontend_wizard();
+        $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $frontend_wizard_cap = $live_playlist_post_type_obj->cap->edit_posts;
-        $is_checked = user_can($community_user_id,$frontend_wizard_cap);
-        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_frontend_wizard, true, false ));
 
         $cap_str = sprintf(__('%s %s'),$icon,$frontend_wizard_cap);
         printf('<p>%s: %s</p>','<strong>'.__('Frontend Wizard','wpsstm').'</strong>',$cap_str);
 
 
         //autosource
-        
+        $can_autosource = wpsstm_sources()->can_autosource();
+        $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
         $autosource_cap = $sources_post_type_obj->cap->edit_posts;
-        $is_checked = user_can($community_user_id,$autosource_cap);
-        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_autosource, true, false ));
 
         $cap_str = sprintf(__('%s %s'),$icon,$autosource_cap);
         printf('<p>%s: %s</p>','<strong>'.__('Auto-source','wpsstm').'</strong>',$cap_str);
         
         //scrobble along
-        
-        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
-        $can_scrobble_along = $community_user->is_user_api_logged();
-        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_scrobble_along, true, false ));
+        $can_community_scrobble = wpsstm_lastfm()->can_community_scrobble();
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_community_scrobble, true, false ));
         
         $cap_str = sprintf(__('%s %s'),$icon,__('Authentification to Last.fm','wpsstm'));
         printf('<p>%s: %s</p>','<strong>'.__('Last.fm scrobble along','wpsstm').'</strong>',$cap_str);
 
-        
     }
-    
+
     function section_frontend_wizard_desc(){
         _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
     }

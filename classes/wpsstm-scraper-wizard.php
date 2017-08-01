@@ -159,7 +159,7 @@ class WP_SoundSystem_Core_Wizard{
     function wizard_page_content($content){
 
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
-        if ( !wpsstm()->can_frontend_tracklist() ) return $content;
+        if ( !$this->can_frontend_wizard() ) return $content;
 
         $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
         $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
@@ -282,20 +282,13 @@ class WP_SoundSystem_Core_Wizard{
     function frontend_wizard_create_tracklist(){
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
-        if ( !wpsstm()->can_frontend_tracklist() ) return;
+        if ( !$this->can_frontend_wizard() ) return;
         
         $wizard_data = isset($_POST[ 'wpsstm_wizard' ]) ? $_POST[ 'wpsstm_wizard' ] : array();
         
         if ( !isset($wizard_data['load-url']) ) return;
 
         //capability check
-
-        if ( !wpsstm()->can_frontend_tracklist() ){
-            $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('wizard_error'=>'missing_cap'),$link);
-            wp_redirect($link);
-            exit();
-        }
 
         $feed_url = isset($_POST[ 'wpsstm_wizard' ]['feed_url']) ? trim($_POST[ 'wpsstm_wizard' ]['feed_url']) : null;
 
@@ -1108,6 +1101,13 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         return $button;
+    }
+    
+    function can_frontend_wizard(){
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $required_cap = $post_type_obj->cap->edit_posts;
+        return user_can($community_user_id,$required_cap);
     }
 
 }
