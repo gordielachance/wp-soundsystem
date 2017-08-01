@@ -18,6 +18,8 @@ use \ForceUTF8\Encoding;
 
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
+    var $tracklist_type = 'live';
+    
     //preset infos
     var $preset_slug = 'default';
     var $preset_name = null;
@@ -64,23 +66,26 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $this->preset_name = __('HTML Scraper','wpsstm');
         
-        $this->options_default = $this->get_default_options();
+        $this->options = $this->options_default = $this->get_default_options();
 
         parent::__construct($post_id);
         
         if ($this->post_id){
-
-            $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
             
+            if ( !$this->is_wizard_disabled() ){
+                
+                $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
+
+                if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
+                    $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
+                }
+                
+            }
+
             if ($this->feed_url){
                 $this->location = $this->feed_url;
             }
 
-            if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
-                
-                $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
-            }
-            
             //expiration time
             $this->populate_expiration_time();
             
@@ -745,7 +750,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             return new WP_Error( 'switched_live_playlist_status', __("Error while converting the live tracklist status",'wpsstm') );
         }
 
-        return $this->delete_wizard_datas();
+        return $this->disable_wizard();
 
     }
 
@@ -769,19 +774,22 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if (!$wizard_data) return;
 
         $wizard_url = ( isset($wizard_data['feed_url']) ) ? trim($wizard_data['feed_url']) : null;
-        $reset = (bool)isset($wizard_data['reset']);
-        $restore = (bool)isset($wizard_data['restore']);
+        $disable = (bool)isset($wizard_data['disable']);
 
-        if($restore){
-            return $this->restore_wizard_datas();
+        $has_form_displayed = !$this->is_wizard_disabled(); //keep above changing disable status
+
+        if($disable){
+            $this->disable_wizard();
+        }else{
+            $this->enable_wizard();
         }
 
-        if( $reset || !$wizard_url ){
-            return $this->delete_wizard_datas();
+        //is disabled
+        if ( $has_form_displayed ){
+            $this->save_feed_url($wizard_url);
+            return $this->save_wizard_settings($wizard_data);
         }
 
-        $this->save_feed_url($wizard_url);
-        return $this->save_wizard_settings($wizard_data);
     }
     
     function save_wizard_settings($wizard_settings){

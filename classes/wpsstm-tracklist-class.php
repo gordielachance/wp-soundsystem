@@ -3,7 +3,7 @@
 class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
-    var $tracklist_type = null;
+    var $tracklist_type = 'static';
     
     var $options_default = array();
     var $options = array();
@@ -60,9 +60,6 @@ class WP_SoundSystem_Tracklist{
 
         }
 
-        //tracklist type
-        $this->tracklist_type = $this->get_tracklist_type();
-
         $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
 
     }
@@ -89,7 +86,7 @@ class WP_SoundSystem_Tracklist{
         if ( $this->did_query_tracks ) return;
 
         $subtracks = array();
- 
+
         //get tracklist metas
         $subtrack_ids = $this->get_subtrack_ids();
 
@@ -431,7 +428,7 @@ class WP_SoundSystem_Tracklist{
     Read-only tracklist table
     **/
     function get_tracklist_table($args = null){
-        
+
         $this->load_subtracks();
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
@@ -657,7 +654,7 @@ class WP_SoundSystem_Tracklist{
         
         //lock
         if ( $this->user_can_lock_tracklist() ){
-            $actions['lock-playlist'] = array(
+            $actions['lock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Lock', 'wpsstm'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
@@ -669,7 +666,7 @@ class WP_SoundSystem_Tracklist{
 
         //unlock
         if ( $this->user_can_unlock_tracklist() ){
-            $actions['unlock-playlist'] = array(
+            $actions['unlock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Unlock', 'wpsstm'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
@@ -730,11 +727,6 @@ class WP_SoundSystem_Tracklist{
 
         return $url;
     }
-    
-    function has_wizard_backup(){
-        global $post;
-        return (bool)get_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old',true);
-    }
 
     function move_wizard_tracks(){
         if (!$this->post_id) return;
@@ -751,7 +743,7 @@ class WP_SoundSystem_Tracklist{
         $this->tracklist_type = 'static';
         
         //clear wizard datas
-        $this->delete_wizard_datas();
+        $this->disable_wizard();
 
     }
     
@@ -769,38 +761,17 @@ class WP_SoundSystem_Tracklist{
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WP_SoundSystem_Tracklist::append_wizard_tracks()");
     }
     
-    function delete_wizard_datas($backup = true){
-        
-        if ( !$this->post_id ) return;
-        
-        if ($backup){
-            $feed_url = wpsstm_get_live_tracklist_url($this->post_id);
-            $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name,true);
-            
-            //backup wizard datas
-            if($feed_url) update_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old', $feed_url );
-            if($options) update_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name.'_old',$options);
-        }
-        
-        delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name );
-        delete_post_meta( $this->post_id, wpsstm_live_playlists()->scraper_meta_name );
-        
-        return true;
+    function is_wizard_disabled(){
+        return (bool)get_post_meta($this->post_id, '_wpsstm_wizard_disabled', true );
     }
     
-    function restore_wizard_datas(){
-        if ( !$this->post_id ) return;
-        
-        $feed_url = get_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old',true);
-        $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name.'_old',true);
-
-        //restore wizard datas
-        if($feed_url) update_post_meta($this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $feed_url );
-        if($options) update_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name,$options);
-
-        //delete backup
-        delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name.'_old' );
-        delete_post_meta( $this->post_id, wpsstm_live_playlists()->scraper_meta_name.'_old' );
+    function disable_wizard(){
+        return update_post_meta($this->post_id, '_wpsstm_wizard_disabled', true );
+    }
+    
+    function enable_wizard(){
+        delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_substracks_meta_name); //force subtracks refresh
+        return delete_post_meta($this->post_id, '_wpsstm_wizard_disabled' );
     }
 
     
@@ -835,10 +806,8 @@ class WP_SoundSystem_Tracklist{
         }
         
         $converted = set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
-
-        if ( !is_wp_error($converted) ){
-            $this->restore_wizard_datas(); //if we had wizard datas
-        }
+        
+        $this->enable_wizard();
 
         return $converted;
 
@@ -891,7 +860,7 @@ class WP_SoundSystem_Tracklist{
         $can_edit_static =    current_user_can($can_edit_static_cap);
 
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
-        return ( $can_edit_tracklist && $can_edit_static );
+        return ( $can_edit_tracklist && !$this->is_wizard_disabled() && $can_edit_static );
         
     }
     
@@ -906,8 +875,8 @@ class WP_SoundSystem_Tracklist{
         $can_edit_live =    current_user_can($can_edit_live_cap);
 
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
-        
-        return ( $can_edit_tracklist && $this->has_wizard_backup() && $can_edit_live );
+
+        return ( $can_edit_tracklist && $this->is_wizard_disabled() && $can_edit_live );
     }
     
     function user_can_store_tracklist(){
