@@ -120,8 +120,6 @@
                 do_love:        false,
                 post_id:        track_obj.post_id
             };
-            
-            console.log(ajax_data);
 
             return $.ajax({
 
@@ -190,6 +188,7 @@ class WpsstmTrack {
         self.track_can_play =       true; //false when no source have been populated or that none are playable
         self.sources =              [];
         self.current_source_idx =   undefined;
+        self.playback_start =       null; //seconds - used by lastFM
        
         //self.debug("new track");
         
@@ -268,6 +267,8 @@ class WpsstmTrack {
             tracklist_obj.play_next_track();
             return;
         }
+
+        self.playback_start = 0; //reset playback start
         
         wpsstm_currentTrack = self;
         
@@ -488,11 +489,12 @@ class WpsstmTrack {
                 });
 
                 wpsstm_mediaElement.addEventListener('play', function() {
-                    if (wpsstm_mediaElement.duration <= 0) return; //quick fix because it was fired twice.
-                    self.duration = Math.floor(mediaElement.duration);
-                    self.playback_start = Math.round( $.now() /1000); //seconds - used by lastFM
+                    
+                    if (!self.playback_start){
+                        self.playback_start = Math.round( $.now() /1000);
+                    }
+
                     self.debug('player event - play');
-                    self.debug(wpsstm_mediaElement.src);
                     self.updateTrackClasses('play');
                 });
 

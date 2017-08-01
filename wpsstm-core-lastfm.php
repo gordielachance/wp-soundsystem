@@ -46,8 +46,6 @@ class WP_SoundSystem_Core_LastFM{
         add_action('wp_ajax_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         
-        //add_action( 'wp',array($this,'test_scrobble_along') );
-        
     }
     
     function setup_globals(){
@@ -64,15 +62,6 @@ class WP_SoundSystem_Core_LastFM{
     function setup_actions(){
         add_action( 'init', array($this,'setup_lastfm_user') );
         add_action( 'wp', array($this,'after_app_auth') );
-    }
-    
-    function test_scrobble_along(){
-        $_POST = array(
-            'post_id' =>    32838,
-            'do_love' =>    'false'
-        );
-        $success = wpsstm_lastfm()->ajax_lastm_toggle_love_track();
-        print_r($success);die();
     }
 
     function setup_lastfm_user(){
@@ -312,9 +301,9 @@ class WP_SoundSystem_Core_LastFM{
         );
         
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
 
         if ( $success ){
@@ -349,6 +338,8 @@ class WP_SoundSystem_Core_LastFM{
         if ( $community_user_id && $enabled ){
             
             $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+            $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+            
             $track = $result['track'] = new WP_SoundSystem_Track($post_id);
 
             //check that the new submission has not been sent just before
@@ -361,8 +352,7 @@ class WP_SoundSystem_Core_LastFM{
                 $result['message'] = 'This track has already been scrobbled by the bot: ' . json_encode($track_arr,JSON_UNESCAPED_UNICODE); 
                 
             }else{
-                
-                $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+
                 $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
                 $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
 
