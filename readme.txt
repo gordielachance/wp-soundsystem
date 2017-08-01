@@ -1,6 +1,6 @@
 === WP SoundSystem ===
-Contributors:grosbouff
-Donate link:http://bit.ly/gbreant
+Contributors: grosbouff
+Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 3.9
 Tested up to: 4.8
@@ -11,41 +11,31 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 
 == Description ==
 
-Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  The perfect fit for your music blog !
+Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
 
 = Several new post types =
-Tracks, artists, albums, playlists and live playlists uses each a custom post type, so you can easily manage them.
+
+Playlists, Live Playlists, Albums, Artists, Tracks and Track Sources each uses a custom post type, so you can easily manage/extend them.
 
 = Playlists =
 
-Managing the playlist tracks is a piece of cake using the Tracklist metabox :
+Managing the playlist tracks is a piece of cake using the *Tracklist metabox* :
 Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
 
-Import a tracklist from a file or a music service like Spotify using the Tracklist Importer (see below).
-Export playlists in [XSPF](https://en.wikipedia.org/wiki/XML_Shareable_Playlist_Format) (XML Shareable Playlist Format).
-
-= MusicBrainz =
-When managing a track, artist or album, the plugin can search for its MusicBrainz ID.
-It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) (an open data music database).
-For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
+Import a tracklist from a file or a music service like Spotify using the *Tracklist Importer* (see below).
 
 = Audio player =
+
 When viewing a post that contains a tracklist, an audio player will show up to play your tracks !
 
-The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
+**Attention:** The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
 The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).  It should be OK when Wordpress 4.8.1 is released.
 
-Supported sources : regular audio files, Youtube, Soundcloud.
+**Supported sources** : Youtube, Soundcloud, regular audio files.
 
-= Auto-source =
-If you didn't set sources for your tracks (see below) and that the "auto-source" setting is checked; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
+= Track Sources =
 
-= Last.FM =
-The audio player can scrobble tracks to your Last.fm account; or add tracks to your Last.fm favorites.
-
-= Music Sources Metabox =
-Set one or several music sources for your tracks when editing them; as on screenshot #8.
-It could be a local audio file or a link to a music service.
+If you didn't set sources for your tracks (see below) and that the **auto-source** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
@@ -53,24 +43,34 @@ Those links will be used by the audio player (see above) to play the track if th
 
 Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
 
-For popular services like Spotify or Radionomy, no need to go any further.
+Popular services like Spotify or Radionomy are automated through presets; and you will not need to do anything to retrieve their tracklists.
+
 But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
+
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle
+**Native presets**: Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing.
+
+You may also propose a **Frontend Tracklist Importer** to your visitors : just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
+
+Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 
 = Live Playlists =
 
-Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Importer (see above).
-The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
+Live Playlists lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
+For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically !
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 
-You may also propose a Frontend Tracklist Importer to your visitors. 
-They will be able to use it to get a remote tracklist; which could be useful for backups or to load a tracklist in a software like [Tomahawk](https://www.tomahawk-player.org/).
-Just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
+= MusicBrainz =
 
-Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
+When managing a track, artist or album, the plugin can search for its **MusicBrainz ID**.
+It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) — an open data music database.
+For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
+
+= Last.FM =
+
+The audio player can **scrobble** tracks to your Last.fm account; or add tracks to your Last.fm favorites.
 
 = Shortcodes =
 
@@ -85,10 +85,8 @@ To embed the tracklist from the post #160.
 Works for albums, playlists and live playlists.
 Optional arguments : *post_id*,*max_rows*.
 
-= Post Bookmarks plugin =
-If the [Post Bookmarks plugin](https://wordpress.org/plugins/post-bookmarks/) is enabled, links from MusicBrainz will be suggested in the Post Bookmarks metabox.
-
 = Donate! =
+
 It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
 If you like it, please consider [making a donation](http://bit.ly/gbreant).
 This would be very appreciated — Thanks !
@@ -114,6 +112,7 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 This plugin requires PHP Version 5.4 or later.
 
 1. Upload the plugin to your blog and Activate it.
+2.  Go to the settings page and setup the plugin.
 
 == Frequently Asked Questions ==
 
@@ -131,6 +130,11 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
+= How does live playlists handle tracks ? =
+
+Each time the tracklist refreshes, old tracks are flushed and replaced by the new ones.
+A track that belongs to another playlist or that has been favorited by a user will only be removed from the live playlist without being trashed.
+
 == Screenshots ==
 
 1. Settings page
@@ -145,6 +149,7 @@ echo $tracklist->get_tracklist_table();
 == Changelog ==
 
 = 1.5.0 =
+
 * tracks from live playlists are now saved as regular posts (with the community user as author) and flushed at each tracklist refresh
 * track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
@@ -160,15 +165,18 @@ echo $tracklist->get_tracklist_table();
 * more code cleanup & fixes
 
 = 1.0.2.9 =
+
 * player.js - refresh playlists : use timeout instead of interval
 * wpsstm-shortenTables > jquery.toggleChildren
 * scroll to playlist track when clicking the player's track number
 * tracklists GUI fixes
 
 = 1.0.2.6 =
+
 * improved tracks GUI (buffering, active, etc)
 
 = 1.0.2.5 =
+
 * wp_unslash() ajax_data 
 * improved wizard cache
 * WP_SoundSystem_Preset_Radionomy_Playlists_API
@@ -180,10 +188,12 @@ echo $tracklist->get_tracklist_table();
 * play_or_skip : ignore action if we've skipped the track + small timeout to fix fast tracks skips
 
 = 1.0.2 =
+
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
 * new class WP_SoundSystem_LastFM_User()
 
 = 1.0.1 =
+
 * Improved sources / autosource code
 * lastfm.js : fixed lastfm_auth_notice()
 * removed 'autoredirect' option
@@ -198,6 +208,7 @@ echo $tracklist->get_tracklist_table();
 * track & tracklist : sources popup (thickbox) + ajaxed sources suggestions
 
 = 1.0.0 =
+
 * player.js : now uses javascript classes
 * player.js : promises & deferred objects
 * "random" button
@@ -205,12 +216,14 @@ echo $tracklist->get_tracklist_table();
 * new preset for indieshuffle.com
 
 = 0.9.9.6 =
+
 * Ajax for live playlists refresh
 * Improved player / tracklists
 * remove editor/author support for albums, artists & tracks
 * started to implement user functions (favorite tracks / favorite playlists)
 
 = 0.9.9.5 =
+
 * remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
@@ -224,6 +237,7 @@ echo $tracklist->get_tracklist_table();
 * removed tracklist duration column
 
 = 0.9.9.4 =
+
 * WP_SoundSystem_Track:: get_unique_id() : use sanitize_title
 * Tracklists Table : share link
 * Tracklists Table : fixed time scraped
@@ -238,59 +252,71 @@ echo $tracklist->get_tracklist_table();
 * Player : track button : new 'has-played' class
 
 = 0.9.9.3 =
+
 * player buttons : previous/next track & previous/next page
 * splitter presets into multiple files
 * improved wpsstm-live-tracklist-class.php
 
 = 0.9.9.2 =
+
 * new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
 * player : new settings : "enabled", "auto-play", "auto-redirect" and "auto-source".
 
 = 0.9.9.1 =
+
 * sources : now an array (url,title,description) instead of just an url.
 
 = 0.9.9.0 =
+
 * new Deezer preset
 * Youtube sources (if any) for Last.FM preset
 * improved player
 * improved sources
 
 = 0.9.8.9 =
+
 * scraper now able to get an array of sources urls for each track.
 * get_track_node_content() : new argument '$single_value' (default to TRUE)
 
 = 0.9.8.8 =
+
 * improved wizard GUI
 * scraper : now we can query an element's attribute (disabled if not HTML content)
 * scraper : improved options
 * scraper : now uses a dynamic selector for the tracklist title
 
 = 0.9.8.7 =
+
 * varioux fixes
 * improved shortenTables
 * mute unecessary columns in the backend listings
 * improved frontend tracklists
 
 = 0.9.8.6 =
+
 * new "sources" metabox - don't use Post Bookmarks for this anymore.
 
 = 0.9.8.5 =
+
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
 * sanitize string at the end of WP_SoundSystem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =
+
 * XSPF output : added title, author, timestamp, location and annotation nodes
 * xspf urls : moved download argument at the end
 * added rewrite rule for frontend wizard
 
 = 0.9.8.3 =
+
 * doc
 * live playlists : when not displaying a single page, add a notice to load the tracklist
 * scraper : cache only if several post are displayed (like an archive page)
 
 = 0.9.8.2 =
+
 * try to use parser without converting encoding
 * fixed Spotify preset (now uses API)
 * new API settings for Spotify
@@ -298,6 +324,7 @@ informations overriden
 * frontend CSS fixes
 
 = 0.9.8.1 =
+
 * sort stations by health / trending / popular
 * fixed ajaxed row actions for tracklist rows
 * improved classes WP_SoundSystem_Subtrack() and WP_SoundSystem_Track()
@@ -308,6 +335,7 @@ informations overriden
 * no CSS background for tracklist table
 
 = 0.9.8 =
+
 * show player column only if at least one track has sources
 * tracks : auto guess ID if not defined
 * improved presets + fixed Soundsgood preset
@@ -318,6 +346,7 @@ informations overriden
 * changed live tracks transient name
 
 = 0.9.7 =
+
 * Better track & album auto title
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
@@ -325,8 +354,9 @@ informations overriden
 * improved wpsstm_get_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
 
 = 0.9.6 =
+
 * Changed how subtracks are stored : now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.
-* 'Hide subtracks' filter now works - still some work to do on this
+* Hide subtracks' filter now works - still some work to do on this
 
 = 0.9.5 =
 
@@ -337,33 +367,36 @@ informations overriden
 * populate track sources only once
 * Add title support for albums, artists & tracks (wasn't showing the 'View Post' or permalink on the post page)
 * tracklists : add 'data-tracks-count' attribute
-
 * WIP : audio player
 * Show a play button in tracklist tables
 * Embed a tracklist for single tracks too
-
 * WIP : frontend scraper
 
 = 0.9.4 =
+
 * improved presets - much cleaner code here.
 * improved scraper notices; don't uses add_settings_error anymore.
 
 = 0.9.3 =
+
 * new 'Twitter' and 'XSPF' presets
 * improved presets
 * validate_tracks() in function content_append_tracklist_table() and file playlist-xspf.php
 * Improved the saving routine for metaboxes
 
 = 0.9.2 =
+
 * New 'BBC Station', 'BBC Playlist', and 'Slacker.com station tops' scraper presets
 * New 'wpsstm-track' and 'wpsstm-tracklist' shortcodes
 
 = 0.9.1 =
+
 * New Radionomy preset
 * Improved scraper presets system
 * Improved Post Bookmarks
 
 = 0.9 =
+
 * First release
 
 == Upgrade Notice ==

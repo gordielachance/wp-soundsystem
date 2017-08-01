@@ -510,7 +510,7 @@ class WP_SoundSystem_Core_Wizard{
 
             $this->add_wizard_field(
                 'datas_cache_min', 
-                __('Enable tracks cache','wpsstm'), 
+                __('Cache duration','wpsstm'), 
                 array( $this, 'cache_callback' ), 
                 'wpsstm-wizard-step-options',
                 'wizard-section-options'
