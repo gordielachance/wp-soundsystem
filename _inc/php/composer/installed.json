@@ -148,17 +148,17 @@
     },
     {
         "name": "matto1990/lastfm-api",
-        "version": "v1.5.1",
-        "version_normalized": "1.5.1.0",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
         "source": {
             "type": "git",
-            "url": "https://github.com/mattoakesnet/PHP-Last.fm-API.git",
-            "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884"
+            "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
+            "reference": "5340be5a58222300160ef23221ddbcfd648c6983"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/mattoakesnet/PHP-Last.fm-API/zipball/a5a5240fd8c4260b72fd83d832a3e9e991284884",
-            "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884",
+            "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/5340be5a58222300160ef23221ddbcfd648c6983",
+            "reference": "5340be5a58222300160ef23221ddbcfd648c6983",
             "shasum": ""
         },
         "require": {
@@ -169,9 +169,9 @@
             "phpunit/phpunit": "~4.8",
             "vlucas/phpdotenv": "*"
         },
-        "time": "2017-04-25T15:49:13+00:00",
+        "time": "2017-05-18T08:26:23+00:00",
         "type": "library",
-        "installation-source": "dist",
+        "installation-source": "source",
         "autoload": {
             "psr-4": {
                 "LastFmApi\\": "src/lastfmapi/",

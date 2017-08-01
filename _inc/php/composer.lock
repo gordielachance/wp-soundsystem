@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f4b3779ac6c364f0c923155a74103600",
+    "content-hash": "2435f2a881aea4e8f20777cfea9fd3a2",
     "packages": [
         {
             "name": "masterminds/html5",
@@ -73,16 +73,16 @@
         },
         {
             "name": "matto1990/lastfm-api",
-            "version": "v1.5.1",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mattoakesnet/PHP-Last.fm-API.git",
-                "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884"
+                "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
+                "reference": "5340be5a58222300160ef23221ddbcfd648c6983"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mattoakesnet/PHP-Last.fm-API/zipball/a5a5240fd8c4260b72fd83d832a3e9e991284884",
-                "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884",
+                "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/5340be5a58222300160ef23221ddbcfd648c6983",
+                "reference": "5340be5a58222300160ef23221ddbcfd648c6983",
                 "shasum": ""
             },
             "require": {
@@ -121,7 +121,7 @@
                 "last.fm",
                 "webservice client"
             ],
-            "time": "2017-04-25T15:49:13+00:00"
+            "time": "2017-05-18 08:26:23"
         },
         {
             "name": "neitanod/forceutf8",
@@ -203,7 +203,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "matto1990/lastfm-api": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
