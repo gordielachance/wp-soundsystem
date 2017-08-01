@@ -51,77 +51,44 @@ function wpsstm_array_unique_by_subkey($array,$subkey){
 }
 
 /*
-Get the IDs of every tracks appearing in a tracklist (playlist or album)
+Get the IDs of subtracks; by type (static|live) and optional tracklist id.
+Used for subtrack queries; which will "filter" those subtracks (by post status, etc.); while this array will allow us to sort tracks.
 */
 
-function wpsstm_get_all_subtrack_ids($db_check=true,$args=null){
+function wpsstm_get_subtrack_ids($type='any',$tracklist_id=null){
     global $wpdb;
-    $query = $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE `meta_key` = '%s'", 'wpsstm_subtrack_ids' );
-    $metas = $wpdb->get_col( $query );
     
+    $type_clauses = array();
     $subtrack_ids = array();
+    $type_clauses_str = $parent_clause_str = null;
+    
+    if ($tracklist_id){
+        $parent_clause_str = sprintf(" AND `post_id` = '%d'",$tracklist_id);
+    }
+    
+    if ( ($type=='any') || ($type=='static') ) {
+        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_playlists()->subtracks_static_metaname);
+    }
+    if ( ($type=='any') || ($type=='live') ) {
+        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
+    }
+    
+    $type_clauses_str = implode(' OR ',$type_clauses);
+    
+    $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $type_clauses_str . $parent_clause_str;
 
-    foreach($metas as $meta){
+    $tracklists_subtrack_ids = $wpdb->get_col( $query );
+    
+    //unserialize all those substracks lists
+    foreach((array)$tracklists_subtrack_ids as $meta){
         $ids = maybe_unserialize($meta);
-        $subtrack_ids = array_merge($subtrack_ids,$ids);
+        $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
     }
     
-    $subtrack_ids = array_unique($subtrack_ids);
-    
-    if ($db_check){
-        $default_args = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'post__in'          => $subtrack_ids
-        );
-
-        if ($args){
-            $args = wp_parse_args($args,$default_args);
-        }
-
-        $query = new WP_Query( $args );
-        if ( $db_ids = $query->posts ){
-            $subtrack_ids = array_intersect($subtrack_ids, $db_ids);
-        }
-        
-    }
-    
-    return $subtrack_ids;
+    return array_unique($subtrack_ids);
     
 }
 
-/*
-Get IDs of the parent tracklists (albums / playlists) for a subtrack.
-*/
-
-function wpsstm_get_subtrack_parent_ids($post_id, $args = null){
-    global $wpdb;
-
-    $meta_query = array();
-    $meta_query[] = array(
-        'key'     => 'wpsstm_subtrack_ids',
-        'value'   => serialize( $post_id ), //https://wordpress.stackexchange.com/a/224987/70449
-        'compare' => 'LIKE'
-    );
-    
-    $default_args = array(
-        'post_type'         => array(wpsstm()->post_type_album,wpsstm()->post_type_playlist,wpsstm()->post_type_live_playlist),
-        'post_status'       => 'any',
-        'posts_per_page'    => -1,
-        'fields'            => 'ids',
-        'meta_query'        => $meta_query
-    );
-    
-    if ($args){
-        $args = wp_parse_args($args,$default_args);
-    }
-
-    $query = new WP_Query( $args );
-    $ids = $query->posts;
-    return $ids;
-}
 /**
 * Make a nested HTML list from a multi-dimensionnal array.
 */
@@ -217,73 +184,21 @@ function wpsstm_readonly( $readonly, $current = true, $echo = true ) {
 }
 
 
-/**
- * Locate template.
- *
- * Locate the called template.
- * Search Order:
- * 1. /themes/CURRENT_THEME/wpsstm/$template_name
- * 2. /themes/CURRENT_THEME/$template_name
- * 3. /plugins/wpsstm/_inc/templates/$template_name.
- *
- * @since 1.0.0
- *
- * @param 	string 	$template_name			Template to load.
- * @param 	string 	$string $template_path	Path to templates.
- * @param 	string	$default_path			Default path to template files.
- * @return 	string 							Path to the template file.
- */
-function wpsstm_locate_template( $template_name, $template_path = '', $default_path = '' ) {
-	// Set variable to search in wpsstm folder of theme.
-	if ( ! $template_path ) :
-		$template_path = 'wpsstm/';
-	endif;
-	// Set default plugin templates path.
-	if ( ! $default_path ) :
-		$default_path = wpsstm()->plugin_dir . 'templates/'; // Path to the template folder
-	endif;
-	// Search template file in theme folder.
-	$template = locate_template( array(
-		$template_path . $template_name,
-		$template_name
-	) );
-	// Get plugins template file.
-	if ( ! $template ) :
-		$template = $default_path . $template_name;
-	endif;
-	return apply_filters( 'wpsstm_locate_template', $template, $template_name, $template_path, $default_path );
-}
-
-/**
-Returns the class instance for a wp music post id
-Requires a post_id, global $post is not always available here
-**/
-function wpsstm_get_class_instance($post_id){
-    $post_type = get_post_type($post_id);
-
-    switch($post_type){
-
-        case wpsstm()->post_type_artist:
-            return wpsstm_artists();
-        break;
-
-        case wpsstm()->post_type_track:
-            return wpsstm_tracks();
-        break;
-
-        case wpsstm()->post_type_album:
-            return wpsstm_albums();
-        break;
-
-        case wpsstm()->post_type_playlist:
-            return wpsstm_playlists();
-        break;
-
-        case wpsstm()->post_type_live_playlist:
-            return wpsstm_live_playlists();
-        break;
-
+/*
+Locate a template & fallback in plugin's folder
+*/
+function wpsstm_locate_template( $template_name, $load = false, $require_once = true ) {
+    
+    if ( !$located = locate_template( 'wpsstm/' . $template_name ) ) {
+        // Template not found in theme's folder, use plugin's template as a fallback
+        $located = wpsstm()->plugin_dir . 'templates/' . $template_name;
     }
+    
+    if ( $load && '' != $located ){
+        load_template( $located, $require_once );
+    }
+    
+    return $located;
 }
 
 function wpsstm_get_url_domain($url){
@@ -295,58 +210,6 @@ function wpsstm_get_url_domain($url){
     $domain = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
     
     return $domain;
-}
-
-function wpsstm_get_soundsgood_sources(WP_SoundSystem_Track $track,$platform,$args=null){
-
-    $args_default = array(
-        'cache_only'    => false,
-        'limit'         => 3
-    );
-
-    $args = wp_parse_args((array)$args,$args_default);
-
-    $sources = $cache = $saved = null;
-    $transient_name = 'wpsstm_provider_source_' . $track->get_unique_id($platform); //TO FIX could be too long ?
-    $cache = $sources = get_transient( $transient_name );
-    $do_request = ( !$args['cache_only'] && ( false === $cache ) );
-
-    if ( $do_request ) {
-
-        $sources = array();
-
-        $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
-        $api_args = array(
-            'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
-            'limit'                     => $args['limit'],
-            'platforms'                 => $platform,
-            'q'                         => urlencode($track->artist . ' ' . $track->title),
-            'skipSavingInDatabase'      => true
-        );
-        $api_url = add_query_arg($api_args,$api_url);
-        $response = wp_remote_get($api_url);
-        $body = wp_remote_retrieve_body($response);
-
-        if ( is_wp_error($body) ) return $body;
-        $api_response = json_decode( $body, true );
-
-        $items = wpsstm_get_array_value(array(0,'items'),$api_response);
-
-        foreach( (array)$items as $item ){
-            
-            $url = wpsstm_get_array_value('permalink',$item);
-            $title = wpsstm_get_array_value('initTitle',$item);
-            
-            $source = array('url'=>$url,'title'=>$title,'origin'=>'auto');
-            $sources[] = $source;
-        }
-
-        $saved = set_transient($transient_name,$sources, wpsstm()->get_options('autosource_cache') );
-
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'saved'=>$saved,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'wpsstm_get_soundsgood_sources() request'); 
-    }
-
-    return $sources;
 }
 
 function wpsstm_array_recursive_diff($aArray1, $aArray2) {
@@ -370,37 +233,66 @@ function wpsstm_array_recursive_diff($aArray1, $aArray2) {
 } 
 
 function wpsstm_is_backend(){
-    return ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) );
+    return ( is_admin() && !wpsstm_is_ajax() );
+}
+function wpsstm_is_ajax(){
+    return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 }
 
 /*
 Get a post tracklist.
+Use this instead of 'new WP_SoundSystem_Tracklist' or 'new WP_SoundSystem_Remote_Tracklist' since it will load the right class (preset, live tracklist, etc.)
 */
-
 function wpsstm_get_post_tracklist($post_id=null){
     global $post;
-    
     if (!$post_id && $post) $post_id = $post->ID;
+    
+    $tracklist = new WP_SoundSystem_Tracklist(); //default
     $post_type = get_post_type($post_id);
 
-    $tracklist = new WP_SoundSytem_Tracklist($post_id);
-    
-    $is_live_tracklist = ($post_type == wpsstm()->post_type_live_playlist);
-    $is_frontend_wizard = ($post_id == wpsstm_live_playlists()->frontend_wizard_page_id);
-
-    if ($post_type == wpsstm()->post_type_track){ //single track
-        $track = new WP_SoundSystem_Track( array('post_id'=>$post_id) );
-        $tracklist->add($track);
-        
-    }elseif ( $is_live_tracklist ){
-        $tracklist = wpsstm_live_playlists()->get_preset_tracklist($post_id);
-        $tracklist->load_remote_tracks(false); //will be request through ajax
-        
-    }else{ //playlist or album
-        $tracklist->load_subtracks();
+    switch ($post_type){
+        case wpsstm()->post_type_track:
+            $tracklist = new WP_SoundSystem_Tracklist($post_id);
+            $track = new WP_SoundSystem_Track($post_id);
+            $tracklist->add($track);
+        break;
+        case wpsstm()->post_type_playlist:
+        case wpsstm()->post_type_album:
+            $tracklist = new WP_SoundSystem_Tracklist($post_id);
+            
+        break;
+        case wpsstm()->post_type_live_playlist:
+            $tracklist = wpsstm_get_post_live_tracklist($post_id);
+        break;
     }
-    
+
     //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
     return $tracklist;
     
+}
+
+function wpsstm_get_post_live_tracklist($post_id=null){
+
+    /*
+    Check if one of the available presets (which are extending WP_SoundSystem_Remote_Tracklist) can load the tracklist url
+    If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist; 
+    and repopulate post id since it is not populated in the registered preset.
+    */
+    
+    $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
+
+    if ( $feed_url = wpsstm_get_live_tracklist_url($post_id) ){
+
+        foreach((array)wpsstm_live_playlists()->get_available_presets() as $preset){
+
+            if ( $preset->can_load_tracklist_url($feed_url) ){
+                $tracklist = $preset;
+                $tracklist->__construct($post_id);
+                wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_post_live_tracklist()");
+                break;
+            }
+        }
+    }
+    
+    return $tracklist;
 }

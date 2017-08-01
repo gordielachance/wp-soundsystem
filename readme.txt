@@ -61,8 +61,6 @@ Native presets : Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soun
 
 = Live Playlists =
 
-(disabled by default, you can enable them by acessing the plugin's settings page)
-
 Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page) using the Tracklist Importer (see above).
 The tracklist will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.
 
@@ -133,13 +131,6 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_table();
 ?>`
 
-= Standalone tracks vs Subtracks vs Live Playlist tracks ? =
-
-Playlist and Albums tracks are saved as Track posts.  
-The playlist / album will have a post meta *wpsstm_subtrack_ids* that contains an array of ordered track IDs.  It is what we call "subtracks" in the plugin's code.
-
-Unlike playlists and albums, the Live Playlists tracks are not stored as Track posts but as a [transient](https://codex.wordpress.org/Transients_API), to avoid creating too much posts over and over.  The name of that transient starts with *wpsstm_ltracks_*.
-
 == Screenshots ==
 
 1. Settings page
@@ -154,9 +145,22 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 == Changelog ==
 
 = XXX =
+* tracks from live playlists are now saved as regular posts (with the community user as author) and flushed at each tracklist refresh
+* track sources are now saved as regular posts (with the community user as author if they are auto-populated)
+* new RadioKing preset
+* better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
+* new JS events : wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
+* Improved wizard backend & frontend
+* Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
+* removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
+
+* Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
+* improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)
-* new RadioKing preset
+
+
+* more code cleanup & fixes
 
 = 1.0.2.9 =
 * player.js - refresh playlists : use timeout instead of interval
@@ -170,7 +174,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 1.0.2.5 =
 * wp_unslash() ajax_data 
 * improved wizard cache
-* WP_SoundSytem_Preset_Radionomy_Playlists_API
+* WP_SoundSystem_Preset_Radionomy_Playlists_API
 * new dependency : forceutf8 + composer update
 * wizard : better cache handling for wizard
 * player.js : fix playlist no more refreshing
@@ -180,17 +184,17 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 
 = 1.0.2 =
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
-* new class WP_SoundSytem_LastFM_User()
+* new class WP_SoundSystem_LastFM_User()
 
 = 1.0.1 =
 * Improved sources / autosource code
-* lastfm.js : fixed displayAuthNotices()
+* lastfm.js : fixed lastfm_auth_notice()
 * removed 'autoredirect' option
-* WP_SoundSytem_Scraper_Wizard : option to delete current cache
+* WP_SoundSystem_Core_Wizard : option to delete current cache
 * fixed ignore cache in wizard
 * bottom player : better GUI for source selection
 * if the track has 'native' sources and that they cannot play, try to autosource
-* improved WP_SoundSytem_Player_Provider subclasses
+* improved WP_SoundSystem_Player_Provider subclasses
 * new action hook 'init_playable_tracklist'
 * fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
 * tracklist.js : tableToggleColumns()
@@ -210,10 +214,10 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 * started to implement user functions (favorite tracks / favorite playlists)
 
 = 0.9.9.5 =
-* remove WP_SoundSytem_Playlist_Scraper class, new class WP_SoundSytem_Remote_Tracklist instead (much simplier)
+* remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
-* live tracklists : new expire_time var
+* live tracklists : new expiration_time var
 * new Reddit preset (to be improved)
 * improved validate_track() 
 * last.FM scrobbling
@@ -276,7 +280,7 @@ Unlike playlists and albums, the Live Playlists tracks are not stored as Track p
 = 0.9.8.5 =
 * scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSytem_Remote_Tracklist::get_track_node_content()
+* sanitize string at the end of WP_SoundSystem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =
@@ -302,8 +306,8 @@ informations overriden
 * improved classes WP_SoundSystem_Subtrack() and WP_SoundSystem_Track()
 * fix title comparaison check when updating artist/album/track
 * fix Spiff plugin upgrade routine
-* renamed Array2XML > WP_SoundSytem_Array2XML
-* new function WP_SoundSytem::is_admin_page()
+* renamed Array2XML > WP_SoundSystem_Array2XML
+* new function WP_SoundSystem::is_admin_page()
 * no CSS background for tracklist table
 
 = 0.9.8 =
@@ -321,7 +325,7 @@ informations overriden
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
 * improved how posts are automatically filled with MusicBrainz data
-* improved wpsstm_get_all_subtrack_ids() and wpsstm_get_subtrack_parent_ids()
+* improved wpsstm_get_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
 
 = 0.9.6 =
 * Changed how subtracks are stored : now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.

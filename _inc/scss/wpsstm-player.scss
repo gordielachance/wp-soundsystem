@@ -1,30 +1,6 @@
 @import "compass/css3";
 @import "wpsstm-shared";
 
-.wpsstm-tracklist.wpsstm-playable-tracklist{
-    [itemprop="track"]:not(.no-items){
-
-        @include opacity(1);
-
-        &:not(.active){
-            @include opacity(.25);
-            &[data-wpsstm-sources-count="0"]:not(:hover){
-                @include opacity(.1);
-            }
-            &.has-played{
-                @include opacity(.5);
-            }
-
-        }
-
-        &.wpsstm-invalid-track{
-            background:rgba(255, 0, 0, 0.10);
-        }
-
-    }
-}
-
-
 #wpsstm-bottom-wrapper{
     position:fixed;
     width:100%;
@@ -40,18 +16,27 @@
     .wpsstm-bottom-notice{
         font-size:0.8em;
         margin: 0;
-        padding: .5em 1em;
         padding-bottom:1.5em;
-        background-color:#fcf8e3;
-        color:#222;
-        display:none;
         a{
             color:#222;
             text-decoration: underline;
         }
-        
-        &.active{
-            display:block;
+        p{
+            padding:0;
+            margin:0;
+        }
+        .wpsstm-close-notice{
+            position:absolute;
+            right:0;
+            top:0;
+            display: block;
+            padding: .5em;
+            @include opacity(.8);
+            @extend .wpsstm-can-click;
+            &:hover{
+                @include opacity(1);
+            }
+            
         }
     }
     
@@ -97,133 +82,62 @@
                 font-size: .6em;
                 position:relative;
                 width: 90%;
-                [itemprop="track"]{
+                
+                .wpsstm-tracklist-entries{
+                    padding:0;
+                    margin:0;
                     width:100%;
-                    position:relative;
-                    display:block!important; //jQuery would set 'table-row'
-                    td{
-                        display:inline-block;
-                        padding: 0 1em;
-                        margin: 0;
-
-                        &[itemprop="image"]{
-                            padding-left: 0;
-                            img {
-                                max-height:3em;
-                            }
-                        }
-                        &[itemprop="name"]:before{
-                            content:"\002014";
-                            padding-right:.5em;
-                            @extend .truncate;
-                        }
-                        &[itemprop="byArtist"]{
-                            @extend .truncate;
-                        }
-                        &[itemprop="inAlbum"]{
-                            display:none;
-                            @extend .truncate;
-                        }
-
-                    }
                     
-                    .trackitem_order{
-                        @extend .wpsstm-can-click;
-                    }
-                    
-                    .trackitem_sources{
-                        padding: 0;
-                        margin:0;
-                        line-height: 2em;
+                    li[itemprop="track"]{
+                        width:100%;
                         position:relative;
-                        min-width: 30%;
-                        @include opacity(.3);
-                        &:hover{
-                            @include opacity(1);
-                        }
-                        ul.wpsstm-player-sources-list{
-                            position:relative;
-                            display:block;
-                            font-size:.85em;
-                            padding: 0;
-                            margin:0;
-                            margin-left: 1.5em;
-                            list-style-type: none;
-                            width:100%;
+                        display:block!important; //jQuery would set 'table-row'
+                        .wpsstm-track-column{
+                            
+                            line-height:2em;
 
-                            padding: 0;
-                            background:rgba(34, 34, 34, 0.95);
-                            position:absolute;
-                            bottom:-2em;
+                            &[itemprop="image"]{
+                                padding: 0;
+                                width:4em;
+                                img {
 
-                            li{
-                                &:not(.wpsstm-active-source){
+                                    max-height:3em;
+                                }
+                            }
+                            &[itemprop="name"]:before{
+                                content:"\002014";
+                                padding-right:.5em;
+                            }
+                            &[itemprop="inAlbum"]{
+                                display:none;
+                                @extend .truncate;
+                            }
+
+                            &.trackitem_play_bt{
+                                display:none;
+                            }
+                            
+                            &.column-trackitem_actions{
+                                position:inherit;
+                                font-size:1.5em;
+                                #wpsstm-track-action-remove{
                                     display:none;
                                 }
-
-                                position:relative;
-                                padding: 0 2em;
-                                height: 4em;
-                                line-height: 4em;
-
-                                a.wpsstm-source-provider-link{
-                                    font-size:2em;
-                                    position:absolute;
-                                }
-                                span{
-                                    padding-left:3.5em;
-                                    display: inline-block;
-                                    width: calc(100% - 3.5em);
-                                    white-space: nowrap;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                }
-                                .wpsstm-source-error{
-                                    position: absolute;
-                                    right: 2em;
-                                    height: 4em;
-                                    line-height: 4em;
-                                }
-
-
+                            }
+                            
+                            &.column-trackitem_sources{
+                                display:inline-block;
                             }
 
+                        }
+
+                        .trackitem_position{
+                            @extend .wpsstm-can-click;
                         }
 
                     }
-
-                    &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                        .wpsstm-player-sources-list{
-                            &:before{
-                                position:absolute;
-                                font-family: FontAwesome;
-                                content: "\f077"; //chevron up
-                                display: block;
-                                width: 3em;
-                                text-align: center;
-                                bottom: 0;
-                                height: 4em;
-                                line-height: 4em;
-                                left: -1em;
-                            }
-                        }
-                        .trackitem_sources:hover{
-                            ul.wpsstm-player-sources-list{
-                                &:before{
-                                    content: "";
-                                }
-                                li{
-                                    display: block;
-                                    &:hover{
-                                        background-color:lighten(#222, 5%);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
+                    
                 }
-
 
             }
             
@@ -295,51 +209,5 @@
         > :nth-child(3){ //enable
             display:none;
         }
-    }
-}
-
-.wpsstm-love-unlove-track-links,.wpsstm-love-unlove-playlist-links{
-    span{
-        display:none;
-    }
-    a{
-        border:none!important;
-    }
-    > :nth-child(1){ //loading
-        display:none;
-    }
-    > :nth-child(2){ //love
-        display:inline-block;
-    }
-    > :nth-child(3){ //unlove
-        display:none;
-    }
-
-    &.wpsstm-is-loved{
-        > :nth-child(2){ //love
-            display:none;
-        }
-        > :nth-child(3){ //unlove
-            display:inline-block;
-        }
-    }
-    &.loading{
-        pointer-events: none;
-        > :nth-child(1){ //loading
-            display:inline-block;
-        }
-        > :nth-child(2){ //love
-            display:none;
-        }
-        > :nth-child(3){ //unlove
-            display:none;
-        }
-    }    
-}
-
-.wpsstm-lastfm-love-unlove-track-links{
-    font-size:1em!important;
-    @include opacity(.3);
-    &.wpsstm-is-loved,&.loading{
     }
 }

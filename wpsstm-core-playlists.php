@@ -1,15 +1,16 @@
 <?php
 
-class WP_SoundSytem_Core_Playlists{
+class WP_SoundSystem_Core_Playlists{
 
     /**
     * @var The one true Instance
     */
     private static $instance;
+    public $subtracks_static_metaname = 'wpsstm_subtrack_ids';
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Playlists;
+                    self::$instance = new WP_SoundSystem_Core_Playlists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -19,7 +20,7 @@ class WP_SoundSytem_Core_Playlists{
     
     function init(){
         
-        require wpsstm()->plugin_dir . 'scraper/wpsstm-live-tracklist-class.php';
+        require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
         
         //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
@@ -29,24 +30,46 @@ class WP_SoundSytem_Core_Playlists{
     function setup_actions(){
 
         add_action( 'init', array($this,'register_post_type_playlist' ));
-        
-        add_filter('manage_posts_columns', array($this,'tracks_column_playlist_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'tracks_column_playlist_content'), 10, 2 );
 
     }
 
     function register_post_type_playlist() {
 
-        $labels = array( 
-            'name' => _x( 'Playlists', 'wpsstm' ),
-            'singular_name' => _x( 'Playlist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Playlists', 'Playlists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Playlist', 'Playlist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Playlists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Playlist', 'wpsstm' ),
+            'archives'              => __( 'Playlist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Playlist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Playlist:', 'wpsstm' ),
+            'all_items'             => __( 'All Playlists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Playlist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Playlist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Playlist', 'wpsstm' ),
+            'update_item'           => __( 'Update Playlist', 'wpsstm' ),
+            'view_item'             => __( 'View Playlist', 'wpsstm' ),
+            'view_items'            => __( 'View Playlists', 'wpsstm' ),
+            'search_items'          => __( 'Search Playlist', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            'insert_into_item'      => __( 'Insert into playlist', 'wpsstm' ),
+            'uploaded_to_this_item' => __( 'Uploaded to this playlist', 'wpsstm' ),
+            'items_list'            => __( 'Playlists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Playlists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter playlists list', 'wpsstm' ),
         );
 
         $args = array( 
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','editor','author','thumbnail', 'comments' ),
+            'supports' => array( 'author','title','editor','author','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,
@@ -92,67 +115,10 @@ class WP_SoundSytem_Core_Playlists{
 
         register_post_type( wpsstm()->post_type_playlist, $args );
     }
-
-    function tracks_column_playlist_register($defaults) {
-        global $post;
-        global $wp_query;
-
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-
-            if ( !$wp_query->get(wpsstm_tracks()->qvar_subtracks_hide) ){
-                $after['playlist'] = __('Playlist','wpsstm');
-            }
-            
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function tracks_column_playlist_content($column,$post_id){
-        global $post;
-
-        switch ( $column ) {
-            case 'playlist':
-
-                $tracklist_ids = wpsstm_get_subtrack_parent_ids($post_id);
-                $links = array();
-
-                foreach((array)$tracklist_ids as $tracklist_id){
-
-                    $tracklist_post_type = get_post_type($tracklist_id);
-                    if ( $tracklist_post_type != wpsstm()->post_type_playlist ) continue;
-
-                    $playlist_url = get_permalink($tracklist_id);
-                    $playlist_name = ( $title = get_the_title($tracklist_id) ) ? $title : sprintf('#%s',$tracklist_id);
-                    
-                    $links[] = sprintf('<a href="%s">%s</a>',$playlist_url,$playlist_name);
-                }
-                
-                
-                
-                if ($links){
-                    echo implode(',',$links);
-                }else{
-                    echo '—';
-                }
-
-                
-            break;
-        }
-    }
-    
-
 }
 
 function wpsstm_playlists() {
-	return WP_SoundSytem_Core_Playlists::instance();
+	return WP_SoundSystem_Core_Playlists::instance();
 }
 
 wpsstm_playlists();

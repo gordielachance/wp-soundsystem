@@ -1,0 +1,203 @@
+[
+    {
+        "name": "querypath/querypath",
+        "version": "3.04",
+        "version_normalized": "3.04.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/technosophos/querypath.git",
+            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/technosophos/querypath/zipball/20e8a1ea75840ad61fe2664f7d8658daa05d4348",
+            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348",
+            "shasum": ""
+        },
+        "require": {
+            "masterminds/html5": "2.*",
+            "php": ">=5.3.0"
+        },
+        "time": "2015-10-10T20:46:32+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "QueryPath": "src/"
+            },
+            "files": [
+                "src/qp_functions.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "description": "HTML/XML querying (CSS 4 or XPath) and processing (like jQuery)",
+        "homepage": "https://github.com/technosophos/querypath",
+        "keywords": [
+            "css",
+            "html",
+            "jquery",
+            "xml",
+            "xslt"
+        ]
+    },
+    {
+        "name": "neitanod/forceutf8",
+        "version": "v2.0.1",
+        "version_normalized": "2.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/neitanod/forceutf8.git",
+            "reference": "47c883ab2739e7938a8bb0bfd1c29d48c88858de"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/47c883ab2739e7938a8bb0bfd1c29d48c88858de",
+            "reference": "47c883ab2739e7938a8bb0bfd1c29d48c88858de",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "time": "2017-05-22T18:50:57+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "ForceUTF8\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "authors": [
+            {
+                "name": "Sebastián Grignoli",
+                "email": "grignoli@gmail.com"
+            }
+        ],
+        "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
+        "homepage": "https://github.com/neitanod/forceutf8"
+    },
+    {
+        "name": "masterminds/html5",
+        "version": "2.2.2",
+        "version_normalized": "2.2.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Masterminds/html5-php.git",
+            "reference": "7866e93dcf0245de22378414e0c2c7350abc45af"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/7866e93dcf0245de22378414e0c2c7350abc45af",
+            "reference": "7866e93dcf0245de22378414e0c2c7350abc45af",
+            "shasum": ""
+        },
+        "require": {
+            "ext-libxml": "*",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "4.*",
+            "sami/sami": "~2.0",
+            "satooshi/php-coveralls": "1.0.*"
+        },
+        "time": "2016-09-22T11:01:11+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.2-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Masterminds\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Matt Butcher",
+                "email": "technosophos@gmail.com"
+            },
+            {
+                "name": "Asmir Mustafic",
+                "email": "goetas@gmail.com"
+            },
+            {
+                "name": "Matt Farina",
+                "email": "matt@mattfarina.com"
+            }
+        ],
+        "description": "An HTML5 parser and serializer.",
+        "homepage": "http://masterminds.github.io/html5-php",
+        "keywords": [
+            "HTML5",
+            "dom",
+            "html",
+            "parser",
+            "querypath",
+            "serializer",
+            "xml"
+        ]
+    },
+    {
+        "name": "matto1990/lastfm-api",
+        "version": "v1.5.1",
+        "version_normalized": "1.5.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/mattoakesnet/PHP-Last.fm-API.git",
+            "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/mattoakesnet/PHP-Last.fm-API/zipball/a5a5240fd8c4260b72fd83d832a3e9e991284884",
+            "reference": "a5a5240fd8c4260b72fd83d832a3e9e991284884",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.3"
+        },
+        "require-dev": {
+            "php": ">=5.3.3",
+            "phpunit/phpunit": "~4.8",
+            "vlucas/phpdotenv": "*"
+        },
+        "time": "2017-04-25T15:49:13+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "LastFmApi\\": "src/lastfmapi/",
+                "Tests\\": "tests"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Marcos",
+                "email": "devilcius@gmail.com"
+            },
+            {
+                "name": "Matt",
+                "email": "matt@oakes.ws"
+            }
+        ],
+        "description": "Last.fm webservice client",
+        "homepage": "https://github.com/matto1990/PHP-Last.fm-API",
+        "keywords": [
+            "api",
+            "last.fm",
+            "webservice client"
+        ]
+    }
+]

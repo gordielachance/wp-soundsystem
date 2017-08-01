@@ -1,0 +1,10 @@
+{
+    "require": {
+        "querypath/QueryPath": ">=3.0.0",
+        "neitanod/forceutf8": "~2.0",
+        "matto1990/lastfm-api": "^1.5"
+    },
+    "config": {
+        "vendor-dir": ""
+    }
+}

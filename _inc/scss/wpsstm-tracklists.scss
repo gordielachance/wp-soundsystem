@@ -1,118 +1,6 @@
 @import "compass";
 @import "wpsstm-shared";
 
-[itemprop="track"]{
-    [itemprop="byArtist"]{
-        font-weight: bold;
-    }
-    [itemprop="name"]{
-    }
-    [itemprop="inAlbum"]{
-        font-size:.8em;
-    }
-
-    .trackitem_order{
-        .wpsstm-player-icon-buffering{
-            display:none;
-        }
-        span{
-            display:initial;
-        }
-    }
-    
-    .wpsstm-player-sources-list{
-        li{
-            &:not(.wpsstm-bad-source) .wpsstm-source-error{
-                display:none;
-            }
-        }
-    }
-
-    &.buffering{
-        .trackitem_order{
-            .wpsstm-player-icon-buffering{
-                display:inline-block;
-            }
-            span{
-                display:none;
-            }
-        }
-    }
-    &.playing .wpsstm-play-track, &.active .wpsstm-play-track{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-pause{
-            display:inline-block;
-        }
-    }
-
-    &.error .wpsstm-play-track{
-        .wpsstm-player-icon{
-            display:none;
-        }
-        .wpsstm-player-icon-error{
-            display:inline-block;
-        }
-    }
-    
-    &.active{
-        &:not(.error){
-            @include opacity(1);
-        }
-        
-        &.buffering{
-            @include opacity(.75);
-            pointer-events: none;
-        }
-        
-        .wpsstm-player-sources-list{
-            li{
-                &.wpsstm-active-source{
-                    font-weight: bold;
-                }
-            }
-        }
-        &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-            .wpsstm-player-sources-list{
-                li{
-                    @extend .wpsstm-can-click;
-                }
-            }
-        }
-    }
-}
-
-a.wpsstm-play-track{
-    text-decoration:none;
-    border-bottom:none!important; //twentyfifteen fix
-
-    .wpsstm-player-icon{
-        display:none;
-        &.wpsstm-player-icon-play{
-            display:inline-block;
-        }
-    }
-}
-
-.wpsstm-tracklist-wrapper{
-    .tracklist-nav{
-        padding:.5em;
-        .tablenav-pages{
-            line-height:3em;
-        }
-        .wpsstm-tracklist-time{
-            margin-left: .5em;
-        }
-        .wpsstm-tracklist-actions{
-            font-size:0.8em;
-            a{
-                text-decoration: none;
-            }
-        }
-    }
-}
-
 .toggle-children-container{
     .wpsstm-tracklist{
         margin:0;
@@ -135,109 +23,75 @@ a.wpsstm-play-track{
     }
 }
 
-
-
 .wpsstm-tracklist{
     
     position:relative;
     font-family: sans-serif;
-    padding: 1em 0;
-    font-size:.8em;
-    margin-bottom: 2em;
     
-    table{
-        font-size:1em;
-        width: 100%;
+    .hentry &{
+        margin-bottom: 2em;
+    }
+    
+    //make it look like a table
+    /*
+    > ul{
+        list-style: none;
         display: table;
         border-collapse: collapse;
-        border:none;
+        > li {
+            display:table-row;
+            > span{
+                display:table-column;
+            }
+        }
+    }
+    */
+    
+
+    
+    ul.wpsstm-tracklist-entries{
+        font-size:1em;
         margin:0;
-
-        .column-trackitem_image{
-            display:none;
-        }
-
-        .column-trackitem_order{
-            width:3em;
-            text-align:center;
-        }
-
-        .column-trackitem_play_bt{
-            width:2em;
-            text-align:center;
-        }
-
-        .column-trackitem_image{
-            width:2em;
-            img{
-                max-width:100%;
-            }
-        }
-        .column-trackitem_sources{
-            display:none;
-            ul{
-                list-style-type: none;
-            }
-        }
-
-        th,td{
-            border:none;
-        }
-
-        th{
-            font-weight: 400;
-        }
-
-        thead{
-            /*
-            display: table-header-group;
-            vertical-align: middle;
-            border-color: inherit;
-            th{
-                border-bottom: 1px solid #e1e1e1;
-                text-align:center;
-            }
-            */
-            display:none;
-        }
-        tfoot{
-            th{
-                border-top: 1px solid #e1e1e1;
-            }
-        }
-
-        tbody tr{
-
-            @include transition-property(background);
-            @include transition-duration(.4s);
-
-            &:nth-child(odd){
-                background: rgba(0,0,0,0.0125);
-            }
-            &:hover{
-                background: rgba(0,0,0,0.025);
-                td.column-image img{
-                    @include opacity(0.8);
-                }
-            }
+        list-style: none;
+        
+        > li[itemprop="track"]{
+            
+            position:relative;
 
             &.no-items{
                 .wpsstm-bottom-refresh-notice{
                     display:inline;
                 }
             }
-            &:not(.no-items):not(:last-child){
-                border-bottom: 1px solid #eee;
+            
+            &:not(.active):not(:hover){
+                > span.wpsstm-track-column{
+                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
+                        display:none;
+                    }
+                }
             }
 
-            &[itemprop="track"]:not(.no-items){
-            }
+            > span.wpsstm-track-column{
+                
+               &.column-trackitem_position{
+                    .wpsstm-reposition-track{
+                        @extend .wpsstm-can-click;
+                        i{
+                            display:none;
+                        }
+                        &:hover{
+                            i{
+                                display:inherit;
+                            }
+                            [itemprop="position"]{
+                                display:none;
+                            }
+                        }
+                    }
+                }
 
-            td{
-                font-size: 1em;
-                line-height: 2em;
-                padding: .5em;
-                &.column-image{
+                &.column-trackitem_image{
                     width: 50px;
                     padding:0;
                     img{
@@ -247,66 +101,285 @@ a.wpsstm-play-track{
                         @include transition-duration(.4s);
                     }
                 }
+                &.column-trackitem_sources{
+                    display:none;
+                    ul{
+                        list-style-type: none;
+                    }
+                }
+                &.column-trackitem_actions{
+                    .wpsstm-actions-list{
+                        display:inline;
+                        li{
+                            a{
+                                @extend .wpsstm-icon-link;
+                                label{
+                                    display:none;
+                                }
+                            }
+                        }
+                    }
+                }
             }
-       }
-
+        }
     }
     
-    > ol, ul{
-        li[itemprop="track"]{
-            [itemprop="name"]{
-                &:before{
-                    content: "– ";
+    &.wpsstm-tracklist-table{
+        width: 100%;
+        ul.wpsstm-tracklist-entries{
+
+            > li[itemprop="track"]{
+                display:block;
+                @include transition-property(background);
+                @include transition-duration(.4s);
+
+                &:nth-child(odd){
+                    background: rgba(0,0,0,0.0125);
+                }
+                &:hover{
+                    background: rgba(0,0,0,0.025);
+                    td.column-image img{
+                        @include opacity(.8);
+                    }
                 }
                 
+                &:not(.no-items):not(:last-child){
+                    border-bottom: 1px solid #eee;
+                }
+                
+                > span.wpsstm-track-column{
+                    display:inline-block;
+                    line-height: 2em;
+                    padding: .5em;
+                    
+                    &[itemprop="byArtist"]{
+                        @extend .truncate;
+                    }
+                    &[itemprop="name"]{
+                        @extend .truncate;
+                    }
+                    &[itemprop="inAlbum"]{
+                        @extend .truncate;
+                    }
+                    
+                    &.column-trackitem_position{
+                        width:3em;
+                        text-align:center;
+                    }
+
+                    &.column-trackitem_play_bt{
+                        width:2em;
+                        text-align:center;
+                    }
+                    &.column-trackitem_sources{
+                        display:none;
+                    }
+                    
+                    &.column-trackitem_actions{
+                        position:absolute;
+                        right:0;
+                    }
+                }
             }
         }
     }
+
+    .tracklist-nav{
+        padding:.5em;
+        .tablenav-pages{
+            line-height:3em;
+        }
+        .wpsstm-tracklist-time{
+            margin-left: .5em;
+        }
+    }
     
-    
-    &[data-tracks-count="1"]{
+    &[data-tracks-count="0"],&[data-tracks-count="1"]{
         .tracklist-nav{
+            //display:none;
+        }
+        .column-trackitem_position,#wpsstm-track-action-move{
             display:none;
         }
-        
+    }
+    
+    .wpsstm-tracklist-loading-icon{
+        @include opacity(0);
     }
     
     &.loading{
-        pointer-events: none;
-        @include opacity(.5);
-    }
-    
-    .wpsstm-tracklist-time{
-
-        .wpsstm-refresh-playlist{
-            i.fa-exclamation-triangle{ //error
-                display:none;
-            }
+        @extend .wpsstm-loading-el;
+        .wpsstm-tracklist-loading-icon{
+            @include opacity(1);
         }
     }
 
-    &:not([data-wpsstm-expire-sec="0"]), &.loading{
-        .wpsstm-tracklist-time .wpsstm-refresh-playlist{
-            display:none;
-        }
-    }
-    
     &[data-wpsstm-expire-sec="0"]{
         .wpsstm-tracklist-refresh-time{
             display:none;
         }
     }
-    
-    &.error{
-        .wpsstm-tracklist-time{
-            .wpsstm-refresh-playlist{
-                i.fa-exclamation-triangle{ //error
+}
+
+.wpsstm-tracklist.wpsstm-playable-tracklist{
+    [itemprop="track"]{
+
+        @include opacity(1);
+
+        &:not(.active){
+            @include opacity(.25);
+            &[data-wpsstm-sources-count="0"]:not(:hover){
+                @include opacity(.1);
+            }
+            &.has-played{
+                @include opacity(.5);
+            }
+
+        }
+
+        &.wpsstm-invalid-track{
+            background:rgba(255, 0, 0, 0.10);
+        }
+        
+        .wpsstm-play-track{
+            text-decoration:none;
+            border-bottom:none!important; //twentyfifteen fix
+
+            .wpsstm-player-icon{
+                display:none;
+                &.wpsstm-player-icon-play{
                     display:inline-block;
                 }
             }
         }
+
+        &.buffering{
+            .trackitem_position{
+                .wpsstm-player-icon-buffering{
+                    display:inline-block;
+                }
+                span{
+                    display:none;
+                }
+            }
+        }
+        &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
+            .wpsstm-player-icon{
+                display:none;
+            }
+            .wpsstm-player-icon-pause{
+                display:inline-block;
+            }
+        }
+
+        &.error .wpsstm-play-track{
+            .wpsstm-player-icon{
+                display:none;
+            }
+            .wpsstm-player-icon-error{
+                display:inline-block;
+            }
+        }
+
+        &.active{
+            &:not(.error){
+                @include opacity(1);
+            }
+
+            &.buffering{
+                @extend .wpsstm-loading-el;
+                @include opacity(.75);
+            }
+
+            .wpsstm-track-sources-list{
+                li{
+                    &.wpsstm-active-source{
+                        font-weight: bold;
+                    }
+                }
+            }
+            &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                .wpsstm-track-sources-list{
+                    li{
+                        @extend .wpsstm-can-click;
+                    }
+                }
+            }
+        }
+
     }
-    
 }
 
+.hentry .wpsstm-tracklist{
+    padding: 1em 0;
+    font-size:.8em;
+}
 
+#wpsstm-tracklist-chooser-list{ //popup
+    #wpsstm-filter-playlists{
+        position:relative;
+        ul{
+            font-size:.8em;
+            list-style: none;
+            //@include column-count(2);
+            li{
+                @extend .ellipsis;
+                padding: 1em;
+                border-bottom: 1px solid rgba(51, 51, 51, 0.1);
+                &.loading{
+                    @extend .wpsstm-loading-el;
+                }
+                
+            }
+        }
+    }
+
+    #wpsstm-new-playlist-add{
+        display:none;
+        margin: 1em;
+        text-align: center;
+
+        input[type="submit"]{
+        } 
+    }
+
+    &.loading{
+        @extend .wpsstm-loading-el;
+    }
+
+}
+
+#wpsstm-tracklist-actions{
+    display:block;
+    padding: 0 1em;
+    margin: 1em;
+    text-align: center;
+    font-size:0.8em;
+    width:100%;
+    li{
+        padding: 0 .5em;
+        display:inline;
+
+        &#wpsstm-tracklist-action-status-switch{
+            form{
+                display:none;
+                select{
+                    font-size:1em;
+                }
+            }
+            &.expanded{
+                em{
+                    display:none;
+                }
+                form{
+                   display:inline-block; 
+                }
+            }
+        }
+    }
+}
+.wpsstm-actions-list#wpsstm-tracklist-actions{
+    .tracklist-action-favorite-toggle:not(.tracklist-action-favorite-active){
+        display:none;
+    }
+}

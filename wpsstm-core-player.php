@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Core_Player{
+class WP_SoundSystem_Core_Player{
     
     /**
     * @var The one true Instance
@@ -11,7 +11,7 @@ class WP_SoundSytem_Core_Player{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Player;
+                    self::$instance = new WP_SoundSystem_Core_Player;
                     self::$instance->init();
             }
             return self::$instance;
@@ -30,7 +30,12 @@ class WP_SoundSytem_Core_Player{
     }
     
     function setup_actions(){
-        add_action( 'wp_enqueue_scripts', array($this,'enqueue_player_scripts_styles'));
+        
+        
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+        
+        
         add_action( 'wp_footer', array($this,'player_html'));
 
     }
@@ -40,10 +45,10 @@ class WP_SoundSytem_Core_Player{
         $providers = array();
         
         $slugs = array(
-            'WP_SoundSytem_Player_Provider_Native',
-            'WP_SoundSytem_Player_Provider_Youtube',
-            'WP_SoundSytem_Player_Provider_Soundcloud',
-            //'WP_SoundSytem_Player_Provider_Mixcloud'
+            'WP_SoundSystem_Player_Provider_Native',
+            'WP_SoundSystem_Player_Provider_Youtube',
+            'WP_SoundSystem_Player_Provider_Soundcloud',
+            //'WP_SoundSystem_Player_Provider_Mixcloud'
         );
         //$slugs = null;
         
@@ -62,56 +67,6 @@ class WP_SoundSytem_Core_Player{
         
         ?>
         <div id="wpsstm-bottom-wrapper">
-            <?php
-
-            //live playlist or frontend wizard
-            if ( wpsstm()->get_options('live_playlists_enabled') == 'on' ){
-                
-                $post_id = get_the_ID();
-                $post_type = get_post_type();
-                
-                $is_frontend_wizard = ( $post_id == wpsstm_live_playlists()->frontend_wizard_page_id );
-                $is_live_playlist = ( $post_type == wpsstm()->post_type_live_playlist  );
-                
-                if ( $is_frontend_wizard || $is_live_playlist ){
-
-                    $refresh_permalink = get_permalink();
-
-                    if ( $is_frontend_wizard ){
-
-                        if ( $feed_url = $wp_query->get(wpsstm_live_playlists()->qvar_frontend_wizard_url) ){
-                            $refresh_permalink = add_query_arg(
-                                array(
-                                    wpsstm_live_playlists()->qvar_frontend_wizard_url => $feed_url
-                                ),
-                                $refresh_permalink
-                            );
-                        }
-                    }
-
-                }
-                
-                
-            }
-        
-            //track action - WP auth notice
-            if ( !get_current_user_id() ){
-                $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-                $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-                $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-                printf('<p id="wpsstm-bottom-notice-wp-auth" class="wpsstm-bottom-notice">%s %s </p>',$wp_auth_icon,$wp_auth_text);
-            }
-
-            //Last.FM track action - API auth notice
-            if ( !wpsstm_lastfm()->lastfm_user->is_user_api_logged() ){
-                $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-                $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
-                $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-                printf('<p id="wpsstm-bottom-notice-lastfm-auth" class="wpsstm-bottom-notice">%s %s </p>',$lastfm_auth_icon,$lastfm_auth_text);
-            }
-
-            ?>
             <div id="wpsstm-bottom">
                 <div id="wpsstm-bottom-track-wrapper">
                     <div id="wpsstm-bottom-track-actions">
@@ -119,10 +74,6 @@ class WP_SoundSytem_Core_Player{
                         //scrobbling
                         if ( wpsstm()->get_options('lastfm_scrobbling') ){
                             echo wpsstm_lastfm()->get_scrobbler_icons();
-                        }
-                        //favorites
-                        if ( wpsstm()->get_options('lastfm_favorites') ){
-                            echo $love_unlove = wpsstm_lastfm()->get_track_loveunlove_icons();
                         }
                         ?>
                     </div>
@@ -141,7 +92,7 @@ class WP_SoundSytem_Core_Player{
         <?php
     }
     
-    function enqueue_player_scripts_styles(){
+    function enqueue_player_scripts_styles_shared(){
         //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
         
         //CSS
@@ -152,8 +103,6 @@ class WP_SoundSytem_Core_Player{
         
         //localize vars
         $localize_vars=array(
-            'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
             'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
             'refreshing_text'       => __('Refreshing','wpsstm')
         );
@@ -171,7 +120,7 @@ class WP_SoundSytem_Core_Player{
     }
 }
 
-abstract class WP_SoundSytem_Player_Provider{
+abstract class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug;
@@ -209,13 +158,55 @@ abstract class WP_SoundSytem_Player_Provider{
     Search sources from this provider
     */
     
-    function sources_lookup($track,$args=null){
+    function sources_lookup($track){
         
+    }
+    
+    function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform){
+
+        $args = array(
+            'limit'         => 3
+        );
+
+        $sources = array();
+
+        $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
+        $api_args = array(
+            'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
+            'limit'                     => $args['limit'],
+            'platforms'                 => $platform,
+            'q'                         => urlencode($track->artist . ' ' . $track->title),
+            'skipSavingInDatabase'      => true
+        );
+        $api_url = add_query_arg($api_args,$api_url);
+        $response = wp_remote_get($api_url);
+        $body = wp_remote_retrieve_body($response);
+
+        if ( is_wp_error($body) ) return $body;
+        $api_response = json_decode( $body, true );
+
+        $items = wpsstm_get_array_value(array(0,'items'),$api_response);
+
+        foreach( (array)$items as $item ){
+
+            $source = new WP_SoundSystem_Source();
+            $source->url = wpsstm_get_array_value('permalink',$item);
+            $source->title = wpsstm_get_array_value('initTitle',$item);
+            $source->track_id = $track->post_id;
+            $sources[] = $source;
+            
+        }
+
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
+
+        return $sources;
     }
     
 }
 
-class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider{
+
+
+class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Audio';
     var $slug = 'audio';
@@ -249,7 +240,7 @@ class WP_SoundSytem_Player_Provider_Native extends WP_SoundSytem_Player_Provider
 
 }
 
-class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Youtube';
     var $slug = 'youtube';
@@ -274,8 +265,8 @@ class WP_SoundSytem_Player_Provider_Youtube extends WP_SoundSytem_Player_Provide
         return 'video/youtube';
     }
 
-    function sources_lookup($track,$args=null){
-        return wpsstm_get_soundsgood_sources($track,'youtube',$args);
+    function sources_lookup($track){
+        return $this->get_soundsgood_sources($track,'youtube');
     }
 
 }
@@ -285,7 +276,7 @@ The Soundcloud Provider reacts differently if we've got a soundcloud client ID o
 */
 
 
-class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
@@ -309,7 +300,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         }
     }
 
-    function get_sc_track_id($url){
+    private function get_sc_track_id($url){
 
         /*
         check for souncloud API track URL
@@ -345,7 +336,7 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
 
         $pattern = '~https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~';
         preg_match($pattern, $url, $url_matches);
-
+        
         if ( isset($url_matches) ){
             return $this->request_sc_track_id($url);
         }
@@ -355,29 +346,39 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
     /*
     Get the ID of a Soundcloud track URL (eg. https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou)
     Requires a Soundcloud Client ID.
+    Store result in a transient to speed up page load.
     */
     
-    function request_sc_track_id($url){
+    private function request_sc_track_id($url){
+        
         if ( !$this->client_id ) return;
         
-        $api_args = array(
-            'url' =>        urlencode ($url),
-            'client_id' =>  $this->client_id
-        );
+        $transient_name = 'wpsstm_sc_track_id_' . md5($url);
 
-        $api_url = 'https://api.soundcloud.com/resolve.json';
-        $api_url = add_query_arg($api_args,$api_url);
-
-        //TO FIX this slows down the page rendering.  Could we avoid it ?
+        if ( false === ( $sc_id = get_transient($transient_name ) ) ) {
         
-        $response = wp_remote_get( $api_url );
-        $json = wp_remote_retrieve_body( $response );
-        if ( is_wp_error($json) ) return;
-        $data = json_decode($json,true);
-        if ( isset($data['id']) ) return $data['id'];
+            $api_args = array(
+                'url' =>        urlencode ($url),
+                'client_id' =>  $this->client_id
+            );
+
+            $api_url = 'https://api.soundcloud.com/resolve.json';
+            $api_url = add_query_arg($api_args,$api_url);
+
+            $response = wp_remote_get( $api_url );
+            $json = wp_remote_retrieve_body( $response );
+            if ( is_wp_error($json) ) return;
+            $data = json_decode($json,true);
+            if ( isset($data['id']) ) {
+                $sc_id = $data['id'];
+                set_transient( $transient_name, $sc_id, 7 * DAY_IN_SECONDS );
+            }
+        }
+        return $sc_id;
     }
 
     function format_source_src($url){
+
         if ( !$track_id = $this->get_sc_track_id($url) ) return;
 
         if ( $this->client_id ){ //stream url
@@ -403,14 +404,14 @@ class WP_SoundSytem_Player_Provider_Soundcloud extends WP_SoundSytem_Player_Prov
         }
     }
 
-    function sources_lookup($track,$args=null){
-        return wpsstm_get_soundsgood_sources($track,'soundcloud',$args);
+    function sources_lookup($track){
+        return $this->get_soundsgood_sources($track,'soundcloud');
     }
     
     
 }
 
-class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provider{
+class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Mixcloud';
     var $slug = 'mixcloud';
@@ -430,7 +431,7 @@ class WP_SoundSytem_Player_Provider_Mixcloud extends WP_SoundSytem_Player_Provid
 }
 
 function wpsstm_player() {
-	return WP_SoundSytem_Core_Player::instance();
+	return WP_SoundSystem_Core_Player::instance();
 }
 
 wpsstm_player();

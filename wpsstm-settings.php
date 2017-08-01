@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSytem_Settings {
+class WP_SoundSystem_Settings {
     
     static $menu_slug = 'wpsstm';
     
@@ -42,11 +42,12 @@ class WP_SoundSytem_Settings {
     
     function register_admin_submenus(){ //TO FIX - this function should be under each type of item ?
         
-        $menu_slug = WP_SoundSytem_Settings::$menu_slug;
+        $menu_slug = WP_SoundSystem_Settings::$menu_slug;
         
         $allowed_post_types = array(
             wpsstm()->post_type_artist,
             wpsstm()->post_type_track,
+            wpsstm()->post_type_source,
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist,
             wpsstm()->post_type_live_playlist
@@ -81,23 +82,26 @@ class WP_SoundSytem_Settings {
     
     function settings_sanitize( $input ){
         $new_input = array();
-        
-        //delete transients
-        if( isset( $input['delete_transients'] ) ){
-            $transients = wpsstm_get_transients_by_prefix( 'wpsstm' );
-
-            //TO FIX use a mysql command for this ?  Crashes when there is too much transient.
-            foreach((array)$transients as $transient_name){
-                delete_transient( $transient_name );
-            }
-            
-        }
 
         if( isset( $input['reset_options'] ) ){
             
             $new_input = wpsstm()->options_default;
             
         }else{ //sanitize values
+            
+            /*
+            Community user
+            */
+            
+            //user id
+            if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
+                if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
+                    $new_input['community_user_id'] = $input['community_user_id'];
+                }
+            }
+            
+            //scrobble along
+            $new_input['lastfm_community_scrobble'] = ( isset($input['lastfm_community_scrobble']) ) ? 'on' : 'off';
             
             /*
             Player
@@ -128,7 +132,7 @@ class WP_SoundSytem_Settings {
             
             $new_input['live_playlists_enabled'] = ( isset($input['live_playlists_enabled']) ) ? 'on' : 'off';
             
-            //scraper page ID
+            //scraper wizard page ID
             if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
                 if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
                     $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
@@ -157,13 +161,6 @@ class WP_SoundSytem_Settings {
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
             $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
-            
-            //Global user ID
-            if ( isset ($input['lastfm_bot_user_id']) && ctype_digit($input['lastfm_bot_user_id']) ){
-                if ( get_userdata( $input['lastfm_bot_user_id'] ) ){ //check user exists
-                    $new_input['lastfm_bot_user_id'] = $input['lastfm_bot_user_id'];
-                }
-            }
 
             /*
             Other APIs
@@ -211,6 +208,24 @@ class WP_SoundSytem_Settings {
         );
         
         */
+        
+        /*
+        Community user
+        */
+        add_settings_section(
+            'community_user_settings', // ID
+            __('Community user','wpsstm'), // Title
+            array( $this, 'section_community_user_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'community_user_id', 
+            __('Community user ID','wpsstm'), 
+            array( $this, 'community_user_id_callback' ), 
+            'wpsstm-settings-page', 
+            'community_user_settings'
+        );
         
         /*
         Player
@@ -293,13 +308,32 @@ class WP_SoundSytem_Settings {
             'live_playlists_settings'
         );
         
+        /*
+        Frontend Wizard
+        */
+        
+        add_settings_section(
+            'frontend_wizard_settings', // ID
+            __('Frontend Wizard','wpsstm'), // Title
+            array( $this, 'section_frontend_wizard_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
 
         add_settings_field(
             'frontend_scraper_page_id', 
             __('Frontend wizard page ID','wpsstm'), 
-            array( $this, 'live_playlists_scraper_page_id_callback' ), 
+            array( $this, 'wizard_page_id_callback' ), 
             'wpsstm-settings-page', 
-            'live_playlists_settings'
+            'frontend_wizard_settings'
+        );
+        
+        add_settings_field(
+            'visitors_wizard', 
+            __('Enable for visitors','wpsstm'), 
+            array( $this, 'visitors_wizard_callback' ), 
+            'wpsstm-settings-page', 
+            'frontend_wizard_settings'
         );
 
         add_settings_field(
@@ -381,9 +415,9 @@ class WP_SoundSytem_Settings {
         );
         
         add_settings_field(
-            'lastfm_bot_user_id', 
-            __('Last.fm bot','wpsstm'), 
-            array( $this, 'lastfm_bot_user_id_callback' ), 
+            'lastfm_community_scrobble', 
+            __('Scrobble along','wpsstm'), 
+            array( $this, 'lastfm_community_scrobble_callback' ), 
             'wpsstm-settings-page', 
             'lastfm_settings'
         );
@@ -425,15 +459,7 @@ class WP_SoundSytem_Settings {
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        add_settings_field(
-            'delete_transients', 
-            __('Delete Transients','wpsstm'), 
-            array( $this, 'delete_transients_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_system'//section
-        );
-        
+
         //
         add_settings_field(
             'reset_options', 
@@ -520,6 +546,7 @@ class WP_SoundSytem_Settings {
     
     function autosource_filter_ban_words_callback(){
 
+        $desc = array();
         $desc[]= sprintf(
             '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when one of those words is contained in its title","wpsstm")
         );
@@ -556,10 +583,11 @@ class WP_SoundSytem_Settings {
         $option = wpsstm()->get_options('autosource');
 
         printf(
-            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s <small>%s</small>',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("If no source is set for the track, try to find an online source automatically.","wpsstm")
+            __("If no source is set for the track, try to find an online source automatically.","wpsstm"),
+            __("This requires the community user ID to be set.","wpsstm")
         );
     }
     
@@ -590,20 +618,19 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function lastfm_bot_user_id_callback(){
-        $option = (int)wpsstm()->get_options('lastfm_bot_user_id');
+    function lastfm_community_scrobble_callback(){
+        $option = wpsstm()->get_options('lastfm_community_scrobble');
         
         $help = array();
-        $help[]= __("ID of Wordpress user to use for as Last.fm bot: each time a user scrobbles a song, do scrobble it with this account too.","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help[]= __("(You need to have authorized this account to Last.fm)","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble along with the community user.","wpsstm");
+        $help[]= sprintf( "<small>%s</small>",__("0 = Disabled.","wpsstm") );
+        $help[]= sprintf( "<small>%s</small>",__("(You need to have authorized the community user to Last.fm)","wpsstm") );
         
         printf(
-            '<input type="number" name="%s[lastfm_bot_user_id]" size="4" min="0" value="%s" /><br/>%s',
+            '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            $option,
-            $help
+            checked( $option, 'on', false ),
+            implode('  ',$help)
         );
     }
     
@@ -622,11 +649,77 @@ class WP_SoundSytem_Settings {
         );
     }
     
-    function live_playlists_scraper_page_id_callback(){
+    function section_community_user_desc(){
+        $desc = array();
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features.","wpsstm");
+
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo implode("\n",$desc);
+        
+        //capability check
+        $check_icon = '<i class="fa fa-check" aria-hidden="true"></i>';
+        $warning_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        
+        //live playlists
+        /*
+        $live_playlist_cap = $live_playlist_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$live_playlist_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$live_playlist_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Live Playlists','wpsstm').'</strong>',$cap_str);
+        */
+
+        //frontend wizard
+        
+        $frontend_wizard_cap = $live_playlist_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$frontend_wizard_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$frontend_wizard_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Frontend Wizard','wpsstm').'</strong>',$cap_str);
+
+
+        //autosource
+        
+        $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+        $is_checked = user_can($community_user_id,$autosource_cap);
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$autosource_cap);
+        printf('<p>%s: %s</p>','<strong>'.__('Auto-source','wpsstm').'</strong>',$cap_str);
+        
+        //scrobble along
+        
+        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+        $can_scrobble_along = $community_user->is_user_api_logged();
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_scrobble_along, true, false ));
+        
+        $cap_str = sprintf(__('%s %s'),$icon,__('Authentification to Last.fm','wpsstm'));
+        printf('<p>%s: %s</p>','<strong>'.__('Last.fm scrobble along','wpsstm').'</strong>',$cap_str);
+
+        
+    }
+    
+    function section_frontend_wizard_desc(){
+        _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
+    }
+    
+    function wizard_page_id_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
 
         $help = array();
-        $help[]= __("ID of the page to use for the frontend Tracklist Importer.","wpsstm");
+        $help[]= __("ID of the page used to display the frontend Tracklist Wizard.","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
@@ -635,6 +728,28 @@ class WP_SoundSytem_Settings {
             wpsstm()->meta_name_options,
             $option,
             $help
+        );
+    }
+    
+    function visitors_wizard_callback(){
+        $option = wpsstm()->get_options('visitors_wizard');
+
+        printf(
+            '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s <small>%s</small>',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Enable frontend wizard for non-logged users.","wpsstm"),
+            __("This requires the community user ID to be set.","wpsstm")
+        );
+    }
+    
+    function community_user_id_callback(){
+        $option = (int)wpsstm()->get_options('community_user_id');
+
+        printf(
+            '<input type="number" name="%s[community_user_id]" size="4" min="0" value="%s" />',
+            wpsstm()->meta_name_options,
+            $option
         );
     }
     
@@ -743,18 +858,6 @@ class WP_SoundSytem_Settings {
         );
     }
 
-    function delete_transients_callback(){
-        
-        $transients = wpsstm_get_transients_by_prefix( 'wpsstm' );
-        $transient_count = count($transients);
-        $text_count = sprintf( _n( '%s transient currently stored', '%s transients currently stored', $transient_count, 'wpsstm' ), $transient_count );
-        
-        printf(
-            '<input type="checkbox" name="%1$s[delete_transients]" value="on"/> %2$s',
-            wpsstm()->meta_name_options,
-            __('Clear the temporary data','wpsstm').' <small>('.$text_count.')</small>'
-        );
-    }
     
 	function  settings_page() {
         ?>
@@ -782,4 +885,4 @@ class WP_SoundSytem_Settings {
 	}
 }
 
-new WP_SoundSytem_Settings;
+new WP_SoundSystem_Settings;

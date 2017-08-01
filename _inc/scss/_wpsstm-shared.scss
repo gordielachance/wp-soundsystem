@@ -2,11 +2,9 @@
 @import "compass/typography/text/ellipsis";
 
 .truncate {
-    /*
     white-space: nowrap;
-    overflow: hidden;
+    //overflow: hidden; //TO FIX breaks in bottom player
     text-overflow: ellipsis;
-    */
 }
 
 .wpsstm-icon-link{
@@ -19,8 +17,129 @@
     cursor: pointer;
     cursor: hand;
 }
+.wpsstm-loading-el{
+    pointer-events: none;
+    @include opacity(.5);
+}
+
+.wpsstm-fullwidth{
+    padding: 3px 8px;
+    font-size: 1.7em;
+    line-height: 100%;
+    height: 1.7em;
+    width: 100%;
+    outline: 0;
+    margin: 0 0 3px;
+    background-color: #fff;
+}
 
 .ellipsis{
     display:block;
     @include ellipsis($no-wrap: true);
+}
+
+.wpsstm-notice {
+    font-size: 0.8em;
+    padding: .5em;
+    background-color: #fcf8e3;
+    color: #222;
+    text-align:center;
+    a {
+        color: #222;
+        text-decoration: underline;
+    }
+    
+    &.active {
+        display: block;
+    }
+
+}
+
+.comma-list{
+    list-style: none;
+    display:inline;
+    li{
+        display:inline;
+        &:not(:last-child):after {
+          content: ", ";
+        }
+    }
+}
+
+ul.wpsstm-actions-list{
+    
+    list-style: none;
+    li {
+        display:inline-block;
+        
+        a{
+            label{
+                padding-left:.25em;
+            }
+        }
+        
+        &.loading{
+            @extend .wpsstm-loading-el;
+        }
+        &.error,&.error a{
+            color:red;
+        }
+    }
+}
+
+ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
+    @extend .comma-list;
+}
+
+/*
+Thickbox popups
+*/
+
+body.wpsstm_track-template-admin,body.wpsstm_tracklist-template-admin{
+    header{
+        margin: 2em 0;
+    }
+    //hide default styles - this may have to be adapted to your theme
+    #sidebar,#colophon{
+        display:none;
+    }
+    #content{
+        width:100%;
+        margin:0;
+    }
+    #main{
+        margin:0;
+        padding:0;
+    }
+    #wpadminbar{
+        display:none;
+    }
+    // !hide default styles
+    
+    .hentry{
+        margin:0;
+        padding:0;
+        #track-popup-tabs{
+            > ul{
+                list-style: none;
+                li{
+                    display:inline;
+                    &:not(.ui-state-active){
+                        @include opacity(.8);
+                    }
+                }
+            }
+        }
+    }
+}
+
+#TB_window{
+    font-family:sans-serif;
+    #TB_ajaxWindowTitle{
+        
+    }
+    #TB_ajaxContent{
+        margin: 0;
+        padding: 1em;
+    }
 }

@@ -1,11 +1,13 @@
 <?php
-class WP_SoundSytem_Core_Live_Playlists{
+class WP_SoundSystem_Core_Live_Playlists{
     
-    public $allowed_post_types;
-    public $qvar_frontend_wizard_url = 'wpsstm_feed_url'; // ! should match the wizard form input name
-    public $frontend_wizard_page_id = null;
-    public $frontend_wizard_url = null;
-    public $frontend_wizard = null;
+    public $allowed_post_types; //TO FIX TO CHECK
+    
+    public $feed_url_meta_name = '_wpsstm_scraper_url';
+    public $scraper_meta_name = '_wpsstm_scraper_options';
+    public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';
+    public $remote_title_meta_name = 'wpsstm_remote_title';
+    public $remote_author_meta_name = 'wpsstm_remote_author_name';
     
     /**
     * @var The one true Instance
@@ -14,7 +16,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Live_Playlists;
+                    self::$instance = new WP_SoundSystem_Core_Live_Playlists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -23,134 +25,70 @@ class WP_SoundSytem_Core_Live_Playlists{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-stats.php');
+        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
         
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
     
     function setup_globals(){
-        $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
+        
     }
 
     function setup_actions(){
         
         if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
-        
-        add_action( 'plugins_loaded', array($this, 'spiff_upgrade'));
+
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        
+        add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
         
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_stations'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
-        
-        //frontend wizard
-        add_filter( 'query_vars', array($this,'add_query_var_feed_url'));
-        add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
-        add_action( 'wp', array($this,'frontend_wizard_populate' ) );
-        add_filter( 'the_content', array($this,'frontend_wizard_display'));
-        add_filter( 'wpsstm_get_tracklist_link', array($this,'frontend_wizard_get_tracklist_link'), 10, 2);
 
-    }
-    
-    function spiff_upgrade(){
-        global $wpdb;
-
-        if ( !$db_v = get_option("spiff-db") ) return;
-
-        wpsstm()->debug_log("upgrade_from_spiff()"); 
-        
-        //upgrade old spiff settings
-        $args = array(
-            'post_type'         => 'station',
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'meta_key'          => 'spiff_settings'
-        );
-        $settings_posts = get_posts($args);
-        foreach ($settings_posts as $settings_post){
-            $settings = get_post_meta($settings_post->ID,'spiff_settings',true);
-            
-            //feed url
-            if ( isset($settings["feed_url"]) ){
-                update_post_meta( $settings_post->ID, WP_SoundSytem_Remote_Tracklist::$meta_key_scraper_url, $settings["feed_url"] );
-                unset($settings["feed_url"]);
-            }
-            
-            $new_settings['selectors'] = array();
-            
-            //selectors
-            if ( isset($settings["selectors"]) ){
-                foreach($settings["selectors"] as $selector_slug => $value){
-                    if (!$value) continue;
-                    $new_settings['selectors'][$selector_slug]['path'] = $value;
-                }
-
-            }
-            //regexes
-            if ( isset($settings["selectors_regex"]) ){
-                foreach($settings["selectors_regex"] as $selector_slug => $value){
-                    if (!$value) continue;
-                    $new_settings['selectors'][$selector_slug]['regex'] = $value;
-                }
-
-            }
-            
-            $settings['selectors'] = $new_settings['selectors'];
-
-            update_post_meta($settings_post->ID,WP_SoundSytem_Remote_Tracklist::$live_playlist_options_meta_name,$settings);
-            
-        }
-        
-        //upgrade old post type
-        $query_post_type = $wpdb->prepare( 
-            "UPDATE $wpdb->posts SET post_type = REPLACE(post_type, '%s', '%s')",
-            'station',
-            wpsstm()->post_type_live_playlist
-        );
-        $wpdb->query($query_post_type);
-        
-        //service
-        $query_post_meta_service = $wpdb->prepare(
-                "DELETE FROM $wpdb->postmeta
-                WHERE meta_key = %s",
-                'spiff_service'
-            );
-        $wpdb->query($query_post_meta_service);
-        
-        //rename health meta
-        $query_post_meta = $wpdb->prepare( 
-            "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",
-            WP_SoundSytem_Live_Playlist_Stats::$meta_key_health,
-            'spiff_station_health'
-        );
-        $wpdb->query($query_post_meta);
-            
-        //rename other old post meta
-        $query_post_meta = $wpdb->prepare( 
-            "UPDATE $wpdb->postmeta SET meta_key = REPLACE(meta_key, '%s', '%s')",
-            'spiff',
-            'wpsstm'
-        );
-        $wpdb->query($query_post_meta);
-
-        delete_option( "spiff-db" );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
     }
 
     function register_post_type_live_playlist() {
 
-        $labels = array( 
-            'name' => _x( 'Live Playlists', 'wpsstm' ),
-            'singular_name' => _x( 'Live Playlist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Live Playlists', 'Live Playlists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Live Playlist', 'Live Playlist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Live Playlists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Live Playlist', 'wpsstm' ),
+            'archives'              => __( 'Live Playlist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Live Playlist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Live Playlist:', 'wpsstm' ),
+            'all_items'             => __( 'All Live Playlists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Live Playlist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Live Playlist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Live Playlist', 'wpsstm' ),
+            'update_item'           => __( 'Update Live Playlist', 'wpsstm' ),
+            'view_item'             => __( 'View Live Playlist', 'wpsstm' ),
+            'view_items'            => __( 'View Live Playlists', 'wpsstm' ),
+            'search_items'          => __( 'Search Live Playlist', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            //'insert_into_item'      => __( 'Insert into live playlist', 'wpsstm' ),
+            //'uploaded_to_this_item' => __( 'Uploaded to this live playlist', 'wpsstm' ),
+            'items_list'            => __( 'Live Playlists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Live Playlists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter live playlists list', 'wpsstm' ),
         );
 
         $args = array( 
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','editor','author','thumbnail', 'comments' ),
+            'supports' => array( 'author','title','editor','author','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,
@@ -196,47 +134,10 @@ class WP_SoundSytem_Core_Live_Playlists{
 
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
-    
-    public function get_preset_tracklist($post_id_or_feed_url = null){
 
-        $post_id = null;
-        $feed_url = null;
-
-        $tracklist = new WP_SoundSytem_Remote_Tracklist($post_id_or_feed_url);
- 
-        //load page preset
-        if ( $live_tracklist_preset = $this->get_live_tracklist_preset($tracklist->feed_url) ){
-            $tracklist = $live_tracklist_preset;
-            $tracklist->__construct($post_id_or_feed_url);
-            $tracklist->add_notice( 'wizard-header', 'preset_loaded', sprintf(__('The preset %s has been loaded','wpsstm'),'<em>'.$live_tracklist_preset->preset_name.'</em>') );
-        }
-
-        return $tracklist;
-    }
-    
-    function get_live_tracklist_preset($feed_url){
+    function get_available_presets(){
         
-        $enabled_presets = array();
-
-        $available_presets = self::get_available_presets();
-
-        //get matching presets
-        foreach((array)$available_presets as $preset){
-
-            if ( $preset->can_load_tracklist_url($feed_url) ){
-                $enabled_presets[] = $preset;
-            }
-
-        }
-        
-        //return last (highest priority) preset
-        return end($enabled_presets);
-
-    }
-    
-    static function get_available_presets(){
-        
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-presets.php');
+        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-presets.php');
         
         $available_presets = array();
         $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
@@ -276,7 +177,7 @@ class WP_SoundSytem_Core_Live_Playlists{
 
                 if ( get_post_status($post_id) != 'publish') break;
 
-                $percentage = WP_SoundSytem_Live_Playlist_Stats::get_health($post_id);
+                $percentage = WP_SoundSystem_Live_Playlist_Stats::get_health($post_id);
                 $output = wpsstm_get_percent_bar($percentage);
             break;
             
@@ -285,7 +186,7 @@ class WP_SoundSytem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSytem_Live_Playlist_Stats::get_monthly_request_count($post_id);
+                $output = WP_SoundSystem_Live_Playlist_Stats::get_monthly_request_count($post_id);
             break;
                 
             //total requests
@@ -293,7 +194,7 @@ class WP_SoundSytem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSytem_Live_Playlist_Stats::get_request_count($post_id);
+                $output = WP_SoundSystem_Live_Playlist_Stats::get_request_count($post_id);
 
                 
             break;  
@@ -311,19 +212,21 @@ class WP_SoundSytem_Core_Live_Playlists{
             switch ($orderby){
 
                 case 'health':
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_health );
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_health );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'trending':
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_monthly_requests );
+                    //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_monthly_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'popular':
-                    $query->set('meta_key', WP_SoundSytem_Live_Playlist_Stats::$meta_key_requests );
+                    //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
+                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
@@ -336,83 +239,27 @@ class WP_SoundSytem_Core_Live_Playlists{
         return $query;
         
     }
-
-    /**
-    *   Add the 'xspf' query variable so Wordpress
-    *   won't mangle it.
-    */
-    function add_query_var_feed_url($vars){
-        $vars[] = $this->qvar_frontend_wizard_url;
-        return $vars;
-    }
-
     
-    function frontend_wizard_populate(){
-        global $wp_query;
-
-        if ( !is_page($this->frontend_wizard_page_id) ) return;
-
-        $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
-
-        require_once(wpsstm()->plugin_dir . 'scraper/wpsstm-scraper-wizard.php');
-        $this->frontend_wizard = new WP_SoundSytem_Scraper_Wizard($frontend_wizard_url);
-    }
-
-    function frontend_wizard_display($content){
+    //TO FIX or only wizard posts ?
+    function filter_live_playlist_title($title, $post_id = null){
         
-        if ( !is_page($this->frontend_wizard_page_id) ) return $content;
+        if ($title) return $title;
+        
+        if ( get_post_type($post_id) != wpsstm()->post_type_live_playlist ) return $title;
 
-        ob_start();
-        $this->frontend_wizard->wizard_display();
-        $output = ob_get_clean();
-        
-        return $content . sprintf('<form method="post" action="%s">%s</form>',get_permalink(),$output);
-        
-    }
-    
-    function frontend_wizard_get_tracklist_link($link,$post_id){
-        global $wp_query;
-        
-        if ( $post_id != $this->frontend_wizard_page_id ) return $link;
-        
-        $frontend_wizard_url = $wp_query->get($this->qvar_frontend_wizard_url);
+        $tracklist = wpsstm_get_post_tracklist($post_id);
 
-        if ( $frontend_wizard_url ) {
-            $link = add_query_arg(array($this->qvar_frontend_wizard_url=>$frontend_wizard_url),$link);
+        if ( $remote_title = $tracklist->get_cached_remote_title() ){
+            $title = $remote_title;
         }
         
-        return $link;
+        return $title;
     }
-    
-    function get_frontend_wizard_tracklist($tracklist,$post_id){
-        if ( ( $post_id == $this->frontend_wizard_page_id ) && ( $this->frontend_wizard ) ) {
-            $tracklist = $this->frontend_wizard->tracklist;
-        }
-        return $tracklist;
-    }
-    
-    /*
-    Handle the XSPF endpoint for the frontend wizard page
-    */
-    
-    function frontend_wizard_rewrite($rules){
-        global $wp_rewrite;
-        if ( !$this->frontend_wizard_page_id ) return $rules;
-        
-        $page_slug = get_post_field( 'post_name', $this->frontend_wizard_page_id );
 
-        $wizard_rule = array(
-            $page_slug . '/xspf/?' => sprintf('index.php?pagename=%s&%s=true',$page_slug,wpsstm_tracklists()->qvar_xspf)
-        );
-
-        return array_merge($wizard_rule, $rules);
-    }
 }
 
 function wpsstm_live_playlists() {
-	return WP_SoundSytem_Core_Live_Playlists::instance();
+	return WP_SoundSystem_Core_Live_Playlists::instance();
 }
-
-
 
 wpsstm_live_playlists();

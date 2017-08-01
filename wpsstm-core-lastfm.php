@@ -7,7 +7,7 @@ use LastFmApi\Api\AuthApi;
 use LastFmApi\Api\ArtistApi;
 use LastFmApi\Api\TrackApi;
 
-class WP_SoundSytem_LastFM_User{
+class WP_SoundSystem_LastFM_User{
     var $user_id = null;
     var $user_token_transient_name = null;
     var $user_api_metas = null;
@@ -173,7 +173,7 @@ class WP_SoundSytem_LastFM_User{
 
     }
     
-/*
+    /*
     Checks if user can authentificate to last.fm 
     If not, clean database and return false.
     //TO FIX run only if player is displayed
@@ -322,7 +322,7 @@ class WP_SoundSytem_LastFM_User{
     
 }
 
-class WP_SoundSytem_Core_LastFM{
+class WP_SoundSystem_Core_LastFM{
     
     var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
     var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
@@ -341,7 +341,7 @@ class WP_SoundSytem_Core_LastFM{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_LastFM;
+                    self::$instance = new WP_SoundSystem_Core_LastFM;
                     self::$instance->init();
             }
             return self::$instance;
@@ -350,10 +350,11 @@ class WP_SoundSytem_Core_LastFM{
     private function __construct() { /* Do nothing here */ }
     
     function init(){
-        require_once(wpsstm()->plugin_dir . 'lastfm/_inc/php/autoload.php');
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
+        
+        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
+        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
 
         //ajax : love & unlove
         add_action('wp_ajax_wpsstm_user_love_unlove_lastfm_track',array($this,'ajax_love_unlove_lastfm_track') );
@@ -364,8 +365,10 @@ class WP_SoundSytem_Core_LastFM{
         //ajax : scrobble
         add_action('wp_ajax_wpsstm_user_scrobble_lastfm_track', array($this,'ajax_user_scrobble_lastfm_track'));
         
-        add_action('wp_ajax_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
-        add_action('wp_ajax_nopriv_wpsstm_bot_scrobble_lastfm_track', array($this,'ajax_bot_scrobble_lastfm_track'));
+        add_action('wp_ajax_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
+        add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_along_track', array($this,'ajax_lastfm_scrobble_along_track'));
+        
+        //add_action( 'wp',array($this,'test_community_scrobble') );
         
     }
     
@@ -384,24 +387,39 @@ class WP_SoundSytem_Core_LastFM{
         add_action( 'init', array($this,'setup_lastfm_user') );
         add_action( 'wp', array($this,'after_app_auth') );
     }
-    function setup_lastfm_user(){
-        $this->lastfm_user = new WP_SoundSytem_LastFM_User();
+    
+    function test_community_scrobble(){
+        if ( !$community_user_id = wpsstm()->get_options('community_user_id') ) return;
+        
+        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+        $track = new WP_SoundSystem_Track('28916');
+        $success = $community_user->scrobble_lastfm_track($track,'1501481576');
+        print_r($success);die();
     }
     
-    function enqueue_lastfm_scripts_styles(){
+    function setup_lastfm_user(){
+        $this->lastfm_user = new WP_SoundSystem_LastFM_User();
+    }
+    
+    function enqueue_lastfm_scripts_styles_shared(){
 
         //CSS
-        //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . 'lastfm/_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
+        //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . '_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . 'lastfm/_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
+        
+        $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
+        $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+        $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+        $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
+        $lastfm_auth_notice = $lastfm_auth_icon . ' ' . $lastfm_auth_text;
         
         //localize vars
         $localize_vars=array(
-            'has_lastfm_bot'            => (bool)wpsstm()->get_options('lastfm_bot_user_id'),
+            'lastfm_scrobble_along'     => ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ),
             'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
-            //'lastfm_client_id'        => wpsstm()->get_options('lastfm_client_id'),
-            //'lastfm_client_secret'    => wpsstm()->get_options('lastfm_client_secret'),
+            'lastfm_auth_notice'        => $lastfm_auth_notice
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -555,12 +573,8 @@ class WP_SoundSytem_Core_LastFM{
             'success'   => false,
             'message'   => null
         );
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
         $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
         
@@ -587,13 +601,8 @@ class WP_SoundSytem_Core_LastFM{
             'success'   => false
         );
         
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null
-        );
-
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         
         $success = $this->lastfm_user->now_playing_lastfm_track($track);
 
@@ -620,14 +629,8 @@ class WP_SoundSytem_Core_LastFM{
             'success'   => false
         );
         
-        $track_args = array(
-            'title'     => ( isset($ajax_data['track']['title']) ) ?        $ajax_data['track']['title'] : null,
-            'artist'    => ( isset($ajax_data['track']['artist']) ) ?       $ajax_data['track']['artist'] : null,
-            'album'     => ( isset($ajax_data['track']['album']) ) ?        $ajax_data['track']['album'] : null,
-            'duration'  => ( isset($ajax_data['track']['duration']) ) ?     $ajax_data['track']['duration'] : null
-        );
-
-        $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
@@ -646,30 +649,29 @@ class WP_SoundSytem_Core_LastFM{
         
     }
     
-    function ajax_bot_scrobble_lastfm_track(){
+    function ajax_lastfm_scrobble_along_track(){
         
         $ajax_data = wp_unslash($_POST);
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $scrobble_along = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
 
         $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
+            'input' =>              $ajax_data,
+            'message' =>            null,
+            'success' =>            false,
+            'community_user_id' =>  $community_user_id,
+            'scrobble_along' =>     $scrobble_along,
         );
         
-        if ( $bot_user_id = (int)wpsstm()->get_options('lastfm_bot_user_id') ){
-            $track_args = array(
-                'title'     => ( isset($ajax_data['track']['title']) ) ?    $ajax_data['track']['title'] : null,
-                'artist'    => ( isset($ajax_data['track']['artist']) ) ?   $ajax_data['track']['artist'] : null,
-                'album'     => ( isset($ajax_data['track']['album']) ) ?    $ajax_data['track']['album'] : null,
-                'duration'  => ( isset($ajax_data['track']['duration']) ) ? $ajax_data['track']['duration'] : null
-            );
-
-            $track = $result['track'] = new WP_SoundSystem_Track($track_args);
+        if ( $community_user_id && $scrobble_along ){
             
+            $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+            $track = $result['track'] = new WP_SoundSystem_Track($post_id);
+
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';
             $track_arr = $track->array_export();
-            $last_scrobble = get_user_meta($bot_user_id, $last_scrobble_meta_key, true);
+            $last_scrobble = get_user_meta($community_user_id, $last_scrobble_meta_key, true);
             
             if ( $last_scrobble == $track_arr ){
                 
@@ -678,9 +680,8 @@ class WP_SoundSytem_Core_LastFM{
             }else{
                 
                 $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
-
-                $bot_user = new WP_SoundSytem_LastFM_User($bot_user_id);
-                $success = $bot_user->scrobble_lastfm_track($track,$start_timestamp);
+                $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
+                $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
 
                 if ( $success ){
                     if ( is_wp_error($success) ){
@@ -690,15 +691,13 @@ class WP_SoundSytem_Core_LastFM{
                         $result['success'] = true;
                         
                         //update last bot scrobble
-                        update_user_meta( $bot_user_id, $last_scrobble_meta_key, $track_arr );
+                        update_user_meta( $community_user_id, $last_scrobble_meta_key, $track_arr );
                         
                     }
                 }
                 
             }
 
-        }else{
-            $result['message'] = 'No bot user ID defined'; 
         }
         
         header('Content-type: application/json');
@@ -717,30 +716,12 @@ class WP_SoundSytem_Core_LastFM{
         $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-disable-scrobbling">%s</a>',__('Disable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
         return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
     }
-    
-    function get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
 
-        $wrapper_classes = array(
-            'wpsstm-love-unlove-track-links',
-            'wpsstm-lastfm-love-unlove-track-links'
-        );
-
-        if ( $track && $track->is_track_loved_by() ){
-            $wrapper_classes[] = 'wpsstm-is-loved';
-        }
-
-
-        $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-        $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to Last.fm favorites','wpsstm'));
-        $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from Last.fm favorites','wpsstm'));
-        return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
-    }
-    
 }
 
 
 function wpsstm_lastfm() {
-	return WP_SoundSytem_Core_LastFM::instance();
+	return WP_SoundSystem_Core_LastFM::instance();
 }
 
 wpsstm_lastfm();

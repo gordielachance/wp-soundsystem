@@ -1,0 +1,159 @@
+#wizard-wrapper{
+    position:relative;
+
+    input.fullwidth{
+        width:100%;
+    }
+    
+    #wpsstm-available-presets{
+        margin: 1em 0;
+    }
+    
+    .wpsstm-tracklist{
+
+    }
+    
+    &.wizard-wrapper-frontend{
+        text-align:center;
+        h2{
+            display:none;
+        }
+        p.submit{
+            margin:auto;
+            max-width:40%;
+        }
+        table.wizard-section-table{
+            margin:auto;
+            border:none;
+            th{
+                display:none;
+            }
+            th,td{
+                border:none;
+            }
+        }
+    }
+
+    &.wizard-wrapper-advanced{
+
+        table#wizard-regexes{
+            width:100%;
+            tr:first-child,td:first-child{
+                width:70%;
+            }
+        }
+
+        pre.spiff-raw, pre.spiff-raw code {
+            //Instead of the line below you could use @includebox-sizing($bs)
+            box-sizing: border-box;
+            webkit-box-sizing: border-box;
+            display: block;
+            white-space: pre-wrap;
+            white-space: -pre-wrap;
+            word-wrap: break-word;
+            width: 100%;
+            overflow: auto;
+        }
+
+        .tracks-selector-prefix {
+                color: lightgrey;
+                padding-right: 0.5em;
+        }
+        #wpsstm-wizard-tabs{
+                border-bottom: 1px solid #eee;
+                margin-bottom: 1em;
+                #wpsstm-wizard-tabs-header li {
+                        display: inline-block;
+                        &.ui-tabs-active a {
+                                background: white;
+                                border-bottom: 0;
+                        }
+                }
+                .wpsstm-wizard-step-content{
+                    .wpsstm-wizard-selector{
+                        input[type="text"]{
+                            min-width:50%;
+                        }
+                        .wpsstm-wizard-selector-advanced{
+                            display: none;
+                            &.active{
+                                display: block;
+                            }
+                            .wpsstm-wizard-track-selector-desc{
+                                padding: 1em;
+                                font-style:italic;
+                                code{
+                                    font-style:normal;
+                                }
+                            }
+                            table{
+                                td {
+                                    color: #999;
+                                    padding: 5px;
+                                    font-family: Consolas, Monaco, monospace;
+                                }
+                                .wpsstm-wizard-selector-regex {
+                                    &:before {
+                                            text-align: center;
+                                            width: 20px;
+                                            content: '~';
+                                    }
+                                    &:after {
+                                            text-align: center;
+                                            width: 20px;
+                                            content: '~m';
+                                    }
+                                    input {
+                                            width: 90%;
+                                            color: #999;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    &#wpsstm-wizard-step-tracks-content{
+                        .wpsstm-wizard-selector{
+                            input[type="text"]{
+                                min-width:100%;
+                            }
+                        }
+                    }
+                }
+        }
+        .wpsstm-wizard-selector-toggle-advanced {
+                text-decoration: none;
+        }
+
+        #spiff-station-tracks-raw{
+            max-height: calc(3 * 211px);
+            overflow-y: auto;
+        }
+
+        pre.spiff-raw {
+                max-height: 200px;
+                border: 1px solid lightgrey;
+                padding: 10px;
+                code {
+                        background: none;
+                }
+        }
+        .ui-tabs-panel > h3:first-of-type {
+                display: none;
+        }
+        .js &{
+            
+        }
+        .no-js &{
+            
+        }
+    }
+
+}
+
+//metabox
+.postbox#wpsstm-metabox-scraper-wizard{
+    position:relative;
+    .inside{
+        overflow:auto;
+    }
+}

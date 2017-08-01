@@ -1,10 +1,10 @@
 <?php
 
-class WP_SoundSytem_Core_Artists{
+class WP_SoundSystem_Core_Artists{
 
-    public $metakey = '_wpsstm_artist';
-    public $qvar_artist = 'lookup_artist';
-    public $mbtype = 'artist'; //musicbrainz type, for lookups
+    public $artist_metakey = '_wpsstm_artist';
+    public $qvar_artist_lookup = 'lookup_artist';
+    public $artist_mbtype = 'artist'; //musicbrainz type, for lookups
     
     /**
     * @var The one true Instance
@@ -13,7 +13,7 @@ class WP_SoundSytem_Core_Artists{
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_Artists;
+                    self::$instance = new WP_SoundSystem_Core_Artists;
                     self::$instance->init();
             }
             return self::$instance;
@@ -30,7 +30,7 @@ class WP_SoundSytem_Core_Artists{
 
         add_action( 'init', array($this,'register_post_type_artist' ));
         add_filter( 'query_vars', array($this,'add_query_var_artist') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_artist') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );
         add_action( 'save_post', array($this,'update_title_artist'), 99);
         
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
@@ -38,11 +38,7 @@ class WP_SoundSytem_Core_Artists{
         
         //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
         //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
-        
-        //ajax : artist lookup
-        //add_action('wp_ajax_wpsstm_artist_lookup', array($this,'ajax_artist_lookup') ); 
-        //add_action('wp_ajax_nopriv_wpsstm_artist_lookup', array($this,'ajax_artist_lookup') ); 
-        
+
     }
 
     function column_artist_register($defaults) {
@@ -69,7 +65,7 @@ class WP_SoundSytem_Core_Artists{
         
         switch ( $column ) {
                 case 'artist':
-                    if (!$artist = wpsstm_get_post_artist_link_for_post($post_id) ){
+                    if (!$artist = wpsstm_get_post_artist($post_id) ){
                         $artist = '—';
                     }
                     echo $artist;
@@ -78,14 +74,13 @@ class WP_SoundSytem_Core_Artists{
     }
 
 
-    function pre_get_posts_artist( $query ) {
+    function pre_get_posts_by_artist( $query ) {
 
-        if ( $search = $query->get( $this->qvar_artist ) ){
+        if ( $search = $query->get( $this->qvar_artist_lookup ) ){
             
-            //$query->set( 'meta_key', $this->metakey );
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->metakey,
+                     'key'     => $this->artist_metakey,
                      'value'   => $search,
                      'compare' => '='
                 )
@@ -111,10 +106,10 @@ class WP_SoundSytem_Core_Artists{
         $has_cap = current_user_can('edit_post', $post_id);
         if ( $is_autosave || $is_autodraft || $is_revision || !$has_cap ) return;
 
-        $post_title = wpsstm_get_post_artist($post_id);
-        if ( !$post_title ) return;
+        $artist = $post_title = wpsstm_get_post_artist($post_id);
+        if ( !$artist ) return;
         
-        //use get_post_field here instead of get_the_title() so title is not filtered
+        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
         if ( $post_title == get_post_field('post_title',$post_id) ) return;
 
         //log
@@ -134,16 +129,41 @@ class WP_SoundSytem_Core_Artists{
 
     function register_post_type_artist() {
 
-        $labels = array( 
-            'name' => _x( 'Artists', 'wpsstm' ),
-            'singular_name' => _x( 'Artist', 'wpsstm' )
+        $labels = array(
+            'name'                  => _x( 'Artists', 'Artists General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Artist', 'Artist Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Artists', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Artist', 'wpsstm' ),
+            'archives'              => __( 'Artist Archives', 'wpsstm' ),
+            'attributes'            => __( 'Artist Attributes', 'wpsstm' ),
+            'parent_item_colon'     => __( 'Parent Artist:', 'wpsstm' ),
+            'all_items'             => __( 'All Artists', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Artist', 'wpsstm' ),
+            //'add_new'               => __( 'Add New', 'wpsstm' ),
+            'new_item'              => __( 'New Artist', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Artist', 'wpsstm' ),
+            'update_item'           => __( 'Update Artist', 'wpsstm' ),
+            'view_item'             => __( 'View Artist', 'wpsstm' ),
+            'view_items'            => __( 'View Artists', 'wpsstm' ),
+            'search_items'          => __( 'Search Artists', 'wpsstm' ),
+            //'not_found'             => __( 'Not found', 'wpsstm' ),
+            //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
+            //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
+            //'set_featured_image'    => __( 'Set featured image', 'wpsstm' ),
+            //'remove_featured_image' => __( 'Remove featured image', 'wpsstm' ),
+            //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
+            'insert_into_item'      => __( 'Insert into artist', 'wpsstm' ),
+            'uploaded_to_this_item' => __( 'Uploaded to this artist', 'wpsstm' ),
+            'items_list'            => __( 'Artists list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Artists list navigation', 'wpsstm' ),
+            'filter_items_list'     => __( 'Filter artists list', 'wpsstm' ),
         );
 
         $args = array( 
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'title','thumbnail', 'comments' ),
+            'supports' => array( 'author','title','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,
@@ -191,7 +211,7 @@ class WP_SoundSytem_Core_Artists{
     }
     
     function add_query_var_artist( $qvars ) {
-        $qvars[] = $this->qvar_artist;
+        $qvars[] = $this->qvar_artist_lookup;
         return $qvars;
     }
     
@@ -216,7 +236,7 @@ class WP_SoundSytem_Core_Artists{
 
     function metabox_artist_content( $post ){
 
-        $artist_name = get_post_meta( $post->ID, $this->metakey, true );
+        $artist_name = get_post_meta( $post->ID, $this->artist_metakey, true );
         
         ?>
         <input type="text" name="wpsstm_artist" class="wpsstm-fullwidth wpsstm-lookup-artist" value="<?php echo $artist_name;?>" placeholder="<?php printf("Enter artist here",'wpsstm');?>"/>
@@ -253,30 +273,17 @@ class WP_SoundSytem_Core_Artists{
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
 
         if (!$artist){
-            delete_post_meta( $post_id, $this->metakey );
+            delete_post_meta( $post_id, $this->artist_metakey );
         }else{
-            update_post_meta( $post_id, $this->metakey, $artist );
+            update_post_meta( $post_id, $this->artist_metakey, $artist );
         }
 
     }
-    
-    function ajax_artist_lookup(){
 
-        if ( !isset($_REQUEST['q']) ) return;
-        $search = trim($_REQUEST['q']);
-
-        $artists_wp = wpsstm_get_post_id_by('artist',$search);
-        $artists = array();
-        foreach((array)$artists_wp as $post){
-            $artists[] = wpsstm_get_post_artist($post->ID);
-        }
-
-    }
-    
 }
 
 function wpsstm_artists() {
-	return WP_SoundSytem_Core_Artists::instance();
+	return WP_SoundSystem_Core_Artists::instance();
 }
 
 wpsstm_artists();

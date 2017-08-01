@@ -1,12 +1,12 @@
 <?php
 
-class WP_SoundSytem_Core_MusicBrainz {
+class WP_SoundSystem_Core_MusicBrainz {
     
     var $mb_api_sleep = 1;
 
     var $mb_api_errors_meta_name = '_wpsstm_mb_api_error';
-    var $mb_id_meta_name = '_wpsstm_mbid'; //to store the musicbrainz ID
-    var $mb_data_meta_name = '_wpsstm_mbdata'; //to store the musicbrainz datas
+    var $mbid_metakey = '_wpsstm_mbid'; //to store the musicbrainz ID
+    var $mbdata_metakey = '_wpsstm_mbdata'; //to store the musicbrainz datas
 
     var $mb_data_by_url_transient_prefix = 'wpsstm_mb_by_url_'; //to cache the musicbrainz API results
 
@@ -21,7 +21,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSytem_Core_MusicBrainz;
+                    self::$instance = new WP_SoundSystem_Core_MusicBrainz;
                     self::$instance->init();
             }
             return self::$instance;
@@ -41,7 +41,7 @@ class WP_SoundSytem_Core_MusicBrainz {
     function setup_actions(){
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 5);
-        add_action( 'save_post', array($this,'auto_guess_mbid'), 6);
+        add_action( 'save_post', array($this,'auto_set_mbid'), 6);
         add_action( 'save_post', array($this,'metabox_mbdata_save'), 7 ); //requires MBID to be set so be careful to hooks priorities
         
         add_action( 'wpsstm_updated_mbid', array($this,'update_mb_datas'), 9 );
@@ -65,10 +65,10 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         if ( $search = $query->get( $this->qvar_mbid ) ){
             
-            $query->set( 'meta_key', $this->mb_id_meta_name );
+            $query->set( 'meta_key', $this->mbid_metakey );
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->mb_id_meta_name,
+                     'key'     => $this->mbid_metakey,
                      'value'   => $search,
                      'compare' => '='
                 )
@@ -272,7 +272,7 @@ class WP_SoundSytem_Core_MusicBrainz {
             <?php
 
             require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-            $entries_table = new WP_SoundSytem_MB_Entries();
+            $entries_table = new WP_SoundSystem_MB_Entries();
 
             if ( is_wp_error($entries) ){
                 add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -293,7 +293,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WP_SoundSytem_MB_Entries();
+        $entries_table = new WP_SoundSystem_MB_Entries();
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -311,7 +311,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         if ( !$entries || is_wp_error($entries) ) return;
 
         require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WP_SoundSytem_MB_Entries();
+        $entries_table = new WP_SoundSystem_MB_Entries();
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
@@ -359,9 +359,9 @@ class WP_SoundSytem_Core_MusicBrainz {
         $mbid = trim($mbid);
         
         if (!$mbid){
-            delete_post_meta( $post_id, $this->mb_id_meta_name );
+            delete_post_meta( $post_id, $this->mbid_metakey );
         }else{
-            update_post_meta( $post_id, $this->mb_id_meta_name, $mbid );
+            update_post_meta( $post_id, $this->mbid_metakey, $mbid );
         }
         do_action('wpsstm_updated_mbid',$post_id);
     }
@@ -370,26 +370,28 @@ class WP_SoundSytem_Core_MusicBrainz {
     When saving an artist / track / album and that no MBID exists, guess it - if option enabled
     */
     
-    function auto_guess_mbid( $post_id ){
+    function auto_set_mbid( $post_id ){
         
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
         $is_revision = wp_is_post_revision( $post_id );
-        if ( $is_autosave || $is_autodraft || $is_revision ) return;
+        if ( $is_autosave || $skip_status || $is_revision ) return;
+
+        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
+        //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
+        if ( did_action('wpsstm_save_multiple_tracks') ) return;
 
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
-        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracklists.  Do not guess MBID.
-        if ( did_action('wpsstm_save_subtracks') ) return;
-        
+        //ignore if option disabled
         $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
         if (!$auto_id) return;
 
-        $mbid = wpsstm_get_post_mbid($post_id);        
-        if ($mbid) return;
+        $track = new WP_SoundSystem_Track($post_id);
+        if ($track->mbid) return;
         
         if ( ( !$mbid = $this->guess_mbid( $post_id ) ) || is_wp_error($mbid) ) return;
         
@@ -397,6 +399,8 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         //TO FIX should this filter be here ?
         add_filter( 'redirect_post_location', array($this,'redirect_to_switch_entries_after_new_mbid') );
+        
+        return $mbid;
     }
     
     /**
@@ -422,7 +426,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         //get MBID of first entry
         $mbid = wpsstm_get_array_value(array(0,'id'), $entries);
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WP_SoundSytem_Core_MusicBrainz::guess_mbid()" ); 
+        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WP_SoundSystem_Core_MusicBrainz::guess_mbid()" ); 
         
         return $mbid;
         
@@ -441,8 +445,8 @@ class WP_SoundSytem_Core_MusicBrainz {
         
         if (!$mbid){
             if ($mbdatas){
-                delete_post_meta( $post_id, $this->mb_data_meta_name );
-                wpsstm()->debug_log('WP_SoundSytem_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
+                delete_post_meta( $post_id, $this->mbdata_metakey );
+                wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
             }
         }else{
             
@@ -454,12 +458,12 @@ class WP_SoundSytem_Core_MusicBrainz {
             $data = $this->get_musicbrainz_api_entry($mb_post_type,$mbid);
 
             if ( is_wp_error($data) ){
-                wpsstm()->debug_log($data->get_error_message(),'WP_SoundSytem_Core_MusicBrainz::update_mb_datas() error'); 
+                wpsstm()->debug_log($data->get_error_message(),'WP_SoundSystem_Core_MusicBrainz::update_mb_datas() error'); 
                 add_settings_error('wpsstm_musicbrainz', 'api_lookup', $data->get_error_message(),'inline');
                 return;
             }else{
-                update_post_meta( $post_id, $this->mb_data_meta_name, $data );
-                wpsstm()->debug_log(json_encode($data),"WP_SoundSytem_Core_MusicBrainz::update_mb_datas()" ); 
+                $success = update_post_meta( $post_id, $this->mbdata_metakey, $data );
+                wpsstm()->debug_log($success,"WP_SoundSystem_Core_MusicBrainz::update_mb_datas()" ); 
             }
             
         }
@@ -512,8 +516,8 @@ class WP_SoundSytem_Core_MusicBrainz {
 
                 switch ($mbdatas_action){
                     case 'refresh':
-                        if ( delete_post_meta( $post_id, $this->mb_data_meta_name ) ){
-                            wpsstm()->debug_log('WP_SoundSytem_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
+                        if ( delete_post_meta( $post_id, $this->mbdata_metakey ) ){
+                            wpsstm()->debug_log('WP_SoundSystem_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
                             $this->update_mb_datas( $post_id );
                         }
 
@@ -530,7 +534,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         }else{
             //delete mdbata option 
-            delete_post_meta( $post_id, $this->mb_data_meta_name );
+            delete_post_meta( $post_id, $this->mbdata_metakey );
         }
     }
     
@@ -582,7 +586,7 @@ class WP_SoundSytem_Core_MusicBrainz {
             if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
 
             if ( in_array('tracklist',$post_type_items) ){
-                $tracklist = new WP_SoundSytem_Tracklist($post_id);
+                $tracklist = wpsstm_get_post_tracklist($post_id);
                 $tracklist->load_subtracks();
                 if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
             }
@@ -633,7 +637,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         }
         
         if ($artist){
-            update_post_meta( $post_id, wpsstm_artists()->metakey, $artist );
+            update_post_meta( $post_id, wpsstm_artists()->artist_metakey, $artist );
             wpsstm()->debug_log( $artist, "fill_post_artist_with_mbdatas()"); 
         }
 
@@ -654,7 +658,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         }
         
         if ($album){
-            update_post_meta( $post_id, wpsstm_albums()->metakey, $album );
+            update_post_meta( $post_id, wpsstm_albums()->album_metakey, $album );
             wpsstm()->debug_log( $album, "fill_post_album_with_mbdatas()"); 
         }
             
@@ -672,7 +676,7 @@ class WP_SoundSytem_Core_MusicBrainz {
         }
         
         if ($track){
-            update_post_meta( $post_id, wpsstm_tracks()->metakey, $track );
+            update_post_meta( $post_id, wpsstm_tracks()->title_metakey, $track );
             wpsstm()->debug_log( $track, "fill_post_track_with_mbdatas()"); 
         }
             
@@ -726,7 +730,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         if (!$save_tracks) return;
         
-        $tracklist = new WP_SoundSytem_Tracklist($post_id);
+        $tracklist = wpsstm_get_post_tracklist($post_id);
         $tracklist->add($save_tracks);
         $tracklist->save_subtracks();
 
@@ -858,7 +862,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 
         switch($api_type){
                 
-            case wpsstm_artists()->mbtype: //artist
+            case wpsstm_artists()->artist_mbtype: //artist
                 
                 if ( !$artist ) break;
                 
@@ -867,7 +871,7 @@ class WP_SoundSytem_Core_MusicBrainz {
                 
             break;
                 
-            case wpsstm_tracks()->mbtype: //track
+            case wpsstm_tracks()->track_mbtype: //track
                 
                 if ( !$artist || !$track ) break;
                 
@@ -877,7 +881,7 @@ class WP_SoundSytem_Core_MusicBrainz {
                 
             break;
                 
-            case wpsstm_albums()->mbtype: //album
+            case wpsstm_albums()->album_mbtype: //album
                 
                 if ( !$artist || !$album ) break;
                 
@@ -910,13 +914,13 @@ class WP_SoundSytem_Core_MusicBrainz {
         $mbtype = null;
         switch( $post_type ){
             case wpsstm()->post_type_artist:
-                $mbtype = wpsstm_artists()->mbtype;
+                $mbtype = wpsstm_artists()->artist_mbtype;
             break;
             case wpsstm()->post_type_track:
-                $mbtype = wpsstm_tracks()->mbtype;
+                $mbtype = wpsstm_tracks()->track_mbtype;
             break;
             case wpsstm()->post_type_album:
-                $mbtype = wpsstm_albums()->mbtype;
+                $mbtype = wpsstm_albums()->album_mbtype;
             break;
         }
         return $mbtype;
@@ -927,7 +931,7 @@ class WP_SoundSytem_Core_MusicBrainz {
 }
 
 function wpsstm_mb() {
-	return WP_SoundSytem_Core_MusicBrainz::instance();
+	return WP_SoundSystem_Core_MusicBrainz::instance();
 }
 
 wpsstm_mb();

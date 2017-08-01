@@ -11,6 +11,7 @@ function wpsstm_get_classes_attr($classes){
 
 //https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
 function wpsstm_get_html_attr($array){
+    $array = (array)$array;
     $str = join(' ', array_map(function($key) use ($array){
        if(is_bool($array[$key])){
           return $array[$key]?$key:'';
@@ -42,14 +43,34 @@ function wpsstm_get_post_mbid($post_id = null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, wpsstm_mb()->mb_id_meta_name, true );
+    return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
-function wpsstm_get_post_sources($post_id = null){
+function wpsstm_get_track_source_ids($post_id = null,$args = null){
+    
+    $default_args = array(
+        'post_status'=>     'any',
+        'posts_per_page' => -1,
+        'fields'  =>        'ids',
+        'post_parent' =>    $post_id
+    );
+    
+    if (!$args){
+        $args = $default_args;
+    }else{
+        $args = wp_parse_args($args,$default_args);
+    }
+    
+    $required_args = array(
+        'post_type' =>      wpsstm()->post_type_source,
+        'fields'  =>        'ids',
+        'post_parent' =>    $post_id
+    );
+    
+    $args = wp_parse_args($required_args,$args);
 
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, wpsstm_tracks()->sources_metakey, true );
+    $query = new WP_Query( $args );
+    return $query->posts; //ids
 }
 
 function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
@@ -58,7 +79,7 @@ function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, wpsstm_mb()->mb_data_meta_name, true );
+    $data = get_post_meta( $post_id, wpsstm_mb()->mbdata_metakey, true );
     
     if ($keys){
         return wpsstm_get_array_value($keys, $data);
@@ -72,134 +93,21 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_artists()->metakey, true );
+    return get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_tracks()->metakey, true );
+    return get_post_meta( $post_id, wpsstm_tracks()->title_metakey, true );
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, wpsstm_albums()->metakey, true );
-}
-
-/**
-Get a post ID by artist, album or track
-By artist : artist required
-By album : artist and album required
-By track : artist and track required, album optional
-**/
-
-function wpsstm_get_post_id_by($slug,$artist=null,$album=null,$track=null){
-    
-    $allowed_slugs = array('artist','album','track');
-    if ( !in_array($slug,$allowed_slugs) ) return;
-    
-    $post_id = null;
-    $query_args = null;
-    
-    switch($slug){
-        case 'artist':
-            
-            if (!$artist) return;
-            
-            $query_args = array(
-                wpsstm_artists()->qvar_artist   => $artist,
-                'post_type'                     => wpsstm()->post_type_artist,
-            );
-            
-        break;
-        case 'album':
-            
-            if (!$artist || !$album) return;
-            
-            $query_args = array(
-                wpsstm_artists()->qvar_artist    => $artist,
-                wpsstm_albums()->qvar_album     => $album,
-                'post_type'                     => wpsstm()->post_type_album,
-            );
-        break;
-        case 'track':
-            
-            if (!$artist || !$track) return;
-            
-            $query_args = array(
-                wpsstm_artists()->qvar_artist   => $artist,
-                wpsstm_tracks()->qvar_track     => $track,
-                'post_type'                     => wpsstm()->post_type_track,
-            );
-
-            if ($album){
-                $query_args[wpsstm_albums()->qvar_album] = $album;
-            }
-
-        break;
-    }
-
-    if (!$query_args) return;
-    
-    //wpsstm()->debug_log( json_encode($query_args,JSON_UNESCAPED_UNICODE), "wpsstm_get_post_id_by()"); 
-
-    $query = new WP_Query( $query_args );
-    if (!$query->posts) return;
-
-    $first_post = $query->posts[0];
-    return $first_post->ID;
-
-}
-
-/**
-Get the permalink of the artist post by post ID (eg. for a track or an album).
-If it does not exists, just returns the artist name.
-**/
-function wpsstm_get_post_artist_link_for_post($post_id){
-    $artist = null;
-    if ($artist = wpsstm_get_post_artist($post_id) ){
-        $artist = wpsstm_get_post_artist_link_by_name($artist);
-    }
-    return $artist;
-}
-
-/**
-Get the permalink of an artist post by name.
-If it does not exists, just returns the artist name.
-**/
-function wpsstm_get_post_artist_link_by_name($artist,$is_edit=false){
-    if ( $artistid_wp = wpsstm_get_post_id_by('artist',$artist) ){
-        $link = ($is_edit) ? get_edit_post_link( $artistid_wp ) : get_permalink($artistid_wp);
-        $artist = sprintf('<a href="%s">%s</a>',$link,$artist);
-    }
-    return $artist;
-}
-
-/**
-Get the permalink of an album post post by name.
-If it does not exists, just returns the album name.
-**/
-function wpsstm_get_post_album_link_by_name($album,$artist,$is_edit=false){
-    if ( $artist && ( $albumid_wp = wpsstm_get_post_id_by('album',$artist,$album) ) ){
-        $link = ($is_edit) ? get_edit_post_link( $albumid_wp ) : get_permalink($albumid_wp);
-        $album = sprintf('<a href="%s">%s</a>',$link,$album);
-    }
-    return $album;
-}
-
-/**
-Get the permalink of a track post post by name.
-If it does not exists, just returns the track name.
-**/
-function wpsstm_get_post_track_link_by_name($artist,$track,$album=null,$is_edit=false){
-    if ( $trackid_wp = wpsstm_get_post_id_by('track',$artist,$album,$track) ){
-        $link = ($is_edit) ? get_edit_post_link( $trackid_wp ) : get_permalink($trackid_wp);
-        $track = sprintf('<a href="%s">%s</a>',$link,$track);
-    }
-    return $track;
+    return get_post_meta( $post_id, wpsstm_albums()->album_metakey, true );
 }
 
 /**
@@ -210,9 +118,24 @@ function wpsstm_get_post_mb_link_for_post($post_id){
     if ($mbid = wpsstm_get_post_mbid($post_id) ){
 
         $post_type = get_post_type($post_id);
-        $class_instance = wpsstm_get_class_instance($post_id);
-        $mbtype = $class_instance->mbtype;
+        $mbtype = null;
         
+        switch($post_type){
+
+            case wpsstm()->post_type_artist:
+                $mbtype = wpsstm_artists()->artist_mbtype;
+            break;
+
+            case wpsstm()->post_type_track:
+                $mbtype = wpsstm_tracks()->track_mbtype;
+            break;
+
+            case wpsstm()->post_type_album:
+                $mbtype = wpsstm_albums()->album_mbtype;
+            break;
+
+        }
+
         if ( $url = wpsstm_mb()->get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
         }
@@ -226,13 +149,13 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
     
     $url = get_permalink($post_id);
     
-    if ($pagenum == 'xspf'){
+    if ($pagenum == 'export'){
         $url = get_permalink($post_id) . wpsstm_tracklists()->qvar_xspf;
         $url = add_query_arg(array('dl'=>(int)($download)),$url);
     }else{
         $pagenum = (int) $pagenum;
         if ($pagenum > 1){
-            $url = add_query_arg( array(WP_SoundSytem_Tracklist::$paged_var => $pagenum) );
+            $url = add_query_arg( array(WP_SoundSystem_Tracklist::$paged_var => $pagenum) );
         }
     }
 
@@ -240,28 +163,6 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
 
     return $url;
 
-}
-
-/*
-Get playlist love/unlove icons.
-*/
-
-function wpsstm_get_tracklist_loveunlove_icons($tracklist_id){
-    
-    $tracklist = new WP_SoundSytem_Tracklist($tracklist_id);
-
-    $wrapper_classes = array(
-        'wpsstm-love-unlove-playlist-links'
-    );
-    
-    if ( $tracklist->is_tracklist_loved_by() ){
-        $wrapper_classes[] = 'wpsstm-is-loved';
-    }
-    
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-tracklist-action wpsstm-tracklist-love"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add playlist to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-requires-auth wpsstm-tracklist-action wpsstm-tracklist-unlove"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove playlist from favorites','wpsstm'));
-    return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
 }
 
 function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
@@ -282,23 +183,141 @@ function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
 
     return $refresh_time_el;
 }
-/*
-Get track love/unlove icons.
-*/
 
-function wpsstm_get_track_loveunlove_icons(WP_SoundSystem_Track $track = null){
-
-    $wrapper_classes = array(
-        'wpsstm-love-unlove-track-links',
-        'wpsstm-wp-love-unlove-track-links'
+function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
+    
+    if ( !$user_id ) $user_id =  get_current_user_id();
+    if ( !$user_id ) return;
+    
+    //get user playlists
+    $default = array(
+        'posts_per_page'    => -1,
+        'orderby'=>'title',
+        'order'=>'ASC'
     );
     
-    if ( $track && $track->is_track_loved_by() ){
-        $wrapper_classes[] = 'wpsstm-is-loved';
+    $args = wp_parse_args((array)$args,$default);
+    
+    $forced = array(
+        'post_type'         => wpsstm()->post_type_playlist,
+        'author'            => $user_id,
+        'fields'            => 'ids'
+    );
+    
+    $args = wp_parse_args($forced,$args);
+
+    $query = new WP_Query( $args );
+    $post_ids = $query->posts;
+    
+    return $post_ids;
+}
+
+function wpsstm_get_user_playlists_list($args = null,$user_id = false){
+
+    if(!$user_id) $user_id = get_current_user_id();
+    if(!$user_id) return false;
+
+    $list = null;
+    $li_els = array();
+    
+    $defaults = array(
+        'post_status' =>    array('publish','private','future','pending','draft'),
+        'posts_per_page' => -1
+    );
+    $args = wp_parse_args($args,$defaults);
+
+    if ( $playlists_ids = wpsstm_get_playlists_ids_for_author($user_id,$args) ){
+        foreach($playlists_ids as $playlist_id){
+            $li_title = ( $title = get_the_title($playlist_id) ) ? $title : __('(no title)');
+            $status = get_post_status($playlist_id);
+            $li_classes = array($status);
+            $attr['id'] = sprintf('wpsstm-playlist-%s',$playlist_id);
+            $attr['classes'] = implode(' ',$li_classes);
+            
+            $attr_str = wpsstm_get_html_attr($attr);
+
+            $status_str = '';
+            switch ( $status ) {
+                case 'publish' :
+                    break;
+                case 'private' :
+                    $status_str = __('Private');
+                    break;
+                case 'future' :
+                    $status_str = __('Scheduled');
+                    break;
+                case 'pending' :
+                    $status_str = __('Pending Review');
+                    break;
+                case 'draft' :
+                    $status_str = __('Draft');
+                    break;
+            }
+            $status_str = ($status_str) ? sprintf(' <strong>— %s</strong>',$status_str) : null;
+            
+            //checked
+            $checked = ( isset($args['checked_ids']) && in_array($playlist_id,$args['checked_ids']) );
+            $checked_str = checked($checked,true,false);
+            
+            $li_els[] = sprintf('<li %s><input type="checkbox" value="%s" %s /> <label>%s%s</label></li>',$attr_str,$playlist_id,$checked_str,$li_title,$status_str);
+        }
+        $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
     }
 
-    $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-    $love_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-love wpsstm-track-action"><i class="fa fa-heart-o" aria-hidden="true"></i><span> %1$s</span></a>',__('Add track to favorites','wpsstm'));
-    $unlove_link = sprintf('<a href="#" title="%1$s" class="wpsstm-icon-link wpsstm-requires-auth wpsstm-track-unlove wpsstm-track-action"><i class="fa fa-heart" aria-hidden="true"></i><span> %1$s</span></a>',__('Remove track from favorites','wpsstm'));
-    return sprintf('<span %s>%s%s%s</span>',wpsstm_get_classes_attr($wrapper_classes),$loading,$love_link,$unlove_link);
+    return $list;
+}
+
+function wpsstm_get_blank_action(){
+    return array(
+        'text' =>           null,
+        'desc' =>           null,
+        'href' =>           '#',
+        'icon' =>           null,
+        'classes' =>        array('wpsstm-action'),
+        'link_classes' =>   array(),
+        'link_before' =>    null,
+        'link_after' =>     null,
+        'has_cap' =>        true,
+        'popup' =>          false,
+    );
+}
+
+function wpsstm_get_actions_list($actions,$prefix){
+    $track_actions_lis = array();
+
+    foreach($actions as $slug => $action){
+        //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
+
+        if ( $action['popup'] ){
+            $action['link_classes'][] = 'thickbox';
+            $action['href'] = add_query_arg(array('TB_iframe'=>true),$action['href']);
+        }
+
+        $actions[$slug] = $action;
+
+        $action_attr = array(
+            'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
+            'class'     => implode("\n",$action['classes'])
+        );
+
+        $link_attr = array(
+            'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
+            'href'      => $action['href'],
+            'class'     => implode("\n",$action['link_classes'])
+        );
+        $link = sprintf('<a %s>%s<label>%s</label></a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
+        $link = $action['link_before'].$link.$action['link_after'];
+
+        $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
+    }
+
+    if ( !empty($track_actions_lis) ){
+        return sprintf('<ul id="wpsstm-%s-actions" class="wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_lis));
+    }
+}
+
+function wpsstm_get_live_tracklist_url($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    return get_post_meta($post_id, wpsstm_live_playlists()->feed_url_meta_name, true );
 }
