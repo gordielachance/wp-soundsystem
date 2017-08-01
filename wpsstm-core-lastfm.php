@@ -247,11 +247,7 @@ class WP_SoundSystem_Core_LastFM{
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         $track = $result['track'] = new WP_SoundSystem_Track($post_id);
         $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
-        //$success = $this->lastfm_user->love_lastfm_track($track,$do_love);
-        
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
-        $success = $community_user->love_lastfm_track($track,$do_love);
+        $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
         
         if ( $success ){
             if ( is_wp_error($success) ){

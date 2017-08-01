@@ -243,11 +243,6 @@ class WP_SoundSystem_LastFM_User{
             'track' =>  $track->title
         );
         
-        $debug_args = $api_args;
-        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
-        
-        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"WP_SoundSystem_LastFM_User::lastfm_love_track()");
-        
         try {
             $track_api = new TrackApi($this->user_auth);
             if ($do_love){
@@ -258,6 +253,12 @@ class WP_SoundSystem_LastFM_User{
         }catch(Exception $e){
             return wpsstm_lastfm()->handle_api_exception($e);
         }
+        
+        $debug_args = $api_args;
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        $debug_args['success'] = $results;
+        
+        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"WP_SoundSystem_LastFM_User::lastfm_love_track()");
         
         return $results;
     }
