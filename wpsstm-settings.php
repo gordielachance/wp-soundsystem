@@ -707,6 +707,7 @@ class WP_SoundSystem_Settings {
 
     function section_frontend_wizard_desc(){
         _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
+        printf('  <small>%s</small>',__("This requires the community user ID to be set.","wpsstm") );
     }
     
     function wizard_page_id_callback(){
@@ -729,11 +730,10 @@ class WP_SoundSystem_Settings {
         $option = wpsstm()->get_options('visitors_wizard');
 
         printf(
-            '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s <small>%s</small>',
+            '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable frontend wizard for non-logged users.","wpsstm"),
-            __("This requires the community user ID to be set.","wpsstm")
+            __("Enable frontend wizard for non-logged users.","wpsstm")
         );
     }
     

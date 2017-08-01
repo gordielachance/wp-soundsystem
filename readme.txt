@@ -144,7 +144,7 @@ echo $tracklist->get_tracklist_table();
 
 == Changelog ==
 
-= XXX =
+= 1.5.0 =
 * tracks from live playlists are now saved as regular posts (with the community user as author) and flushed at each tracklist refresh
 * track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
@@ -153,13 +153,10 @@ echo $tracklist->get_tracklist_table();
 * Improved wizard backend & frontend
 * Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
 * removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
-
 * Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
 * improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)
-
-
 * more code cleanup & fixes
 
 = 1.0.2.9 =
