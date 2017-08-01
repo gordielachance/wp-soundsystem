@@ -289,8 +289,6 @@ class WP_SoundSystem_LastFM_User{
     }
     
     public function scrobble_lastfm_track(WP_SoundSystem_Track $track, $timestamp){
-        
-        
 
         if ( !$this->is_user_api_logged() ) return new WP_Error('lastfm_not_api_logged',__("User is not logged onto Last.fm",'wpsstm'));
 
@@ -304,8 +302,11 @@ class WP_SoundSystem_LastFM_User{
             'timestamp'     => $timestamp, //in seconds
             'album'         => $track->album,
             'chosenByUser'  => 0,
-            'duration'      => $track->duration
         );
+        
+        if ($track->duration){ //we NEED a duration to set this argument; or scrobble won't work.
+            $api_args['duration'] = $track->duration;
+        }
         
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
