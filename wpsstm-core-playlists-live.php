@@ -1,8 +1,6 @@
 <?php
 class WP_SoundSystem_Core_Live_Playlists{
-    
-    public $allowed_post_types; //TO FIX TO CHECK
-    
+
     public $feed_url_meta_name = '_wpsstm_scraper_url';
     public $scraper_meta_name = '_wpsstm_scraper_options';
     public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';

@@ -1,5 +1,9 @@
 <?php
 
+use LastFmApi\Api\AuthApi;
+use LastFmApi\Api\ArtistApi;
+use LastFmApi\Api\TrackApi;
+
 class WP_SoundSystem_Core_LastFM{
     
     var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
