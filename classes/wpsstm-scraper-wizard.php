@@ -197,7 +197,7 @@ class WP_SoundSystem_Core_Wizard{
             
             $tracklist = wpsstm_get_post_live_tracklist($post->ID);
 
-            $this->is_advanced = ( wpsstm_is_backend() && ( $tracklist->can_remote_request || ( $tracklist->feed_url && !$tracklist->tracks ) ) );
+            $this->is_advanced = ( wpsstm_is_backend() && ( $tracklist->feed_url && !$tracklist->tracks ) ); //TO CHECK TO FIX
 
             $this->wizard_enqueue_script_styles();
             
@@ -213,7 +213,7 @@ class WP_SoundSystem_Core_Wizard{
 
         if ($tracklist){
             
-            $tracklist->can_remote_request = true;
+            $tracklist->force_refresh = true;
             $tracklist->tracks_strict = false;
 
             if ($tracklist->feed_url){

@@ -247,6 +247,10 @@ class WpsstmTracklist {
         }
 
         $(document).trigger("wpsstmTracklistDomReady",[self]); //custom event
+        
+        if (self.expire_sec !== undefined){
+            self.init_refresh_timer();
+        }
 
     }
 
@@ -300,6 +304,7 @@ class WpsstmTracklist {
                     self.populate_tracklist( new_tracklist_el );
                     deferredTracklist.resolve();
                 }
+                
 
             });
 
@@ -315,12 +320,6 @@ class WpsstmTracklist {
                 $('#wpsstm-bottom-notice-' + notice_slug).remove();
 
                 self.tracklist_el.removeClass('loading');
-
-                //refresh timer
-                if (self.expire_sec !== undefined){
-                    self.init_refresh_timer();
-                }
-
                 self.tracklist_request = undefined;
             });
             
@@ -521,6 +520,7 @@ class WpsstmTracklist {
 
         //tracklist ready
         deferredTracklist.done(function() {
+            
             self.debug("play_tracklist_track #" +  self.current_track_idx + " source #" + source_idx);
             var play_track = self.get_track_obj(self.current_track_idx);
 

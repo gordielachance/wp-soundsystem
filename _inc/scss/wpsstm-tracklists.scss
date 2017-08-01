@@ -214,9 +214,10 @@
         }
     }
 
-    &[data-wpsstm-expire-sec="0"]{
-        .wpsstm-tracklist-refresh-time{
-            display:none;
+    &:not([data-wpsstm-expire-sec="0"]){
+        #wpsstm-tracklist-action-refresh{
+            @include opacity(.5);
+            pointer-events: none;
         }
     }
 }

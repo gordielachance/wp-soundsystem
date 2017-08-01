@@ -73,9 +73,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
                 $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
                 echo '<p><a href="'.$advanced_wizard_url.'">' . __('Advanced Settings','wpsstm') . '</a></p>';
             }
-
-                wpsstm_wizard()->submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
-
+            
         }else{ //frontend
             if ( is_page(wpsstm_wizard()->frontend_wizard_page_id) ){
                 wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[load-url]');
@@ -110,6 +108,8 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
             $input_id,
             __('Disable wizard','wpsstm')
         );
+        
+        wpsstm_wizard()->submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
     }
 
     //save settings

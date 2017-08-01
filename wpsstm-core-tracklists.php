@@ -215,7 +215,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
-                $tracklist->can_remote_request = true;
+                $tracklist->force_refresh = true;
                 $tracklist->load_subtracks();
                 if ( $tracklist->tracks ){
                     $result['success'] = true;

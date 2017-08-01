@@ -33,7 +33,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $is_expired = false;
     var $expiration_time = null;
-    var $can_remote_request = false;//by default, for speedness, disabble remote request tracks.  We have to enable it manually.
+    
+    var $ajax_refresh = true;
+    var $force_refresh = false;
 
     //response
     var $request_pagination = array(
@@ -130,11 +132,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         if ( $this->did_query_tracks ) return;
 
-        if ( $this->is_expired && $this->get_subtrack_ids() ){
-            $this->flush_subtracks();
+        if ( $this->is_expired ){
+            if ( $this->get_subtrack_ids() ){
+                 $this->flush_subtracks();
+            }
         }
 
-        if ( !$this->is_expired || !$this->can_remote_request){
+        if ( $this->ajax_refresh && !$this->force_refresh ){
             
             parent::load_subtracks();
             
@@ -190,11 +194,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
                     $this->save_subtracks($subtracks_args);
 
-                    //expiration time (kepp below save_subtracks() )
-                    $now = current_time( 'timestamp', true );
-                    $cache_duration_min = $this->get_options('datas_cache_min');
-                    $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-                    $this->expiration_time = $this->updated_time + $cache_duration_s;
+                    //reset expiration
+                    $this->populate_expiration_time(); //keep below save_subtracks()
 
                     //sort
                     if ($this->get_options('tracks_order') == 'asc'){
@@ -890,7 +891,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             array(
                 'is_expired' =>             $this->is_expired,
                 'cache_duration_min' =>     $cache_duration_min,
-                'can_remote_request' =>     (bool)$this->can_remote_request,
+                'force_refresh' =>          (bool)$this->force_refresh,
                 'updated' =>                wpsstm_tracklists()->get_human_tracklist_time($this->updated_time),
                 'expires' =>                wpsstm_tracklists()->get_human_tracklist_time($this->expiration_time),
                 'now' =>                    wpsstm_tracklists()->get_human_tracklist_time($now),

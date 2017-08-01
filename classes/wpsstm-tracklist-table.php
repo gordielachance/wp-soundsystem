@@ -157,10 +157,10 @@ class WP_SoundSystem_Tracklist_Table{
         $next_refresh_sec = null;
 
         if ( property_exists($this->tracklist,'expiration_time') ) {
-
-            $next_refresh_sec = $this->tracklist->expiration_time - current_time( 'timestamp', true ); //UTC
             
-            if ($next_refresh_sec <= 0){
+            $next_refresh_sec = $this->tracklist->expiration_time - current_time( 'timestamp', true ); //UTC
+
+            if ($this->tracklist->is_expired){
                 $next_refresh_sec = 0;
                 $this->no_items_label = __("The tracklist cache has expired.","wpsstm"); 
             }
