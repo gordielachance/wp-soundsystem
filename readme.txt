@@ -19,7 +19,7 @@ Playlists, Live Playlists, Albums, Artists, Tracks and Track Sources each uses a
 
 = Playlists =
 
-Managing the playlist tracks is a piece of cake using the *Tracklist metabox* :
+Managing the playlist tracks is a piece of cake using the *Tracklist metabox*:
 Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
 
 Import a tracklist from a file or a music service like Spotify using the *Tracklist Importer* (see below).
@@ -31,7 +31,7 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 **Attention:** The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
 The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)).  It should be OK when Wordpress 4.8.1 is released.
 
-**Supported sources** : Youtube, Soundcloud, regular audio files.
+**Supported sources**: Youtube, Soundcloud, regular audio files.
 
 = Track Sources =
 
@@ -51,7 +51,7 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 **Native presets**: Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing.
 
-You may also propose a **Frontend Tracklist Importer** to your visitors : just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
+You may also propose a **Frontend Tracklist Importer** to your visitors: just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 
@@ -77,13 +77,13 @@ The audio player can **scrobble** tracks to your Last.fm account; or add tracks 
 `[wpsstm-track post_id="150"]`
 
 To embed the single track #150.
-Optional arguments : *post_id*.
+Optional arguments: *post_id*.
 
 `[wpsstm-tracklist post_id="160"]`
 
 To embed the tracklist from the post #160.  
 Works for albums, playlists and live playlists.
-Optional arguments : *post_id*,*max_rows*.
+Optional arguments: *post_id*,*max_rows*.
 
 = Donate! =
 
@@ -123,7 +123,7 @@ Here's [how to fix it](https://github.com/gordielachance/wp-soundsystem/issues/1
 
 = How can I display the tracklist of a post in my templates ? =
 
-Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates :
+Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
 
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
@@ -154,9 +154,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
 * better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
-* new JS events : wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
+* new JS events: wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourcesDomReady
 * Improved wizard backend & frontend
-* Removed class 'WP_SoundSystem_Subtrack' : cleaner to handle everything with WP_SoundSystem_Track
+* Removed class 'WP_SoundSystem_Subtrack': cleaner to handle everything with WP_SoundSystem_Track
 * removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
 * Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
 * improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
@@ -166,7 +166,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 = 1.0.2.9 =
 
-* player.js - refresh playlists : use timeout instead of interval
+* player.js - refresh playlists: use timeout instead of interval
 * wpsstm-shortenTables > jquery.toggleChildren
 * scroll to playlist track when clicking the player's track number
 * tracklists GUI fixes
@@ -180,12 +180,12 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * wp_unslash() ajax_data 
 * improved wizard cache
 * WP_SoundSystem_Preset_Radionomy_Playlists_API
-* new dependency : forceutf8 + composer update
-* wizard : better cache handling for wizard
-* player.js : fix playlist no more refreshing
+* new dependency: forceutf8 + composer update
+* wizard: better cache handling for wizard
+* player.js: fix playlist no more refreshing
 * fix refresh link not always displayed
 * fix remove notices when playlist request failed
-* play_or_skip : ignore action if we've skipped the track + small timeout to fix fast tracks skips
+* play_or_skip: ignore action if we've skipped the track + small timeout to fix fast tracks skips
 
 = 1.0.2 =
 
@@ -195,22 +195,22 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = 1.0.1 =
 
 * Improved sources / autosource code
-* lastfm.js : fixed lastfm_auth_notice()
+* lastfm.js: fixed lastfm_auth_notice()
 * removed 'autoredirect' option
-* WP_SoundSystem_Core_Wizard : option to delete current cache
+* WP_SoundSystem_Core_Wizard: option to delete current cache
 * fixed ignore cache in wizard
-* bottom player : better GUI for source selection
+* bottom player: better GUI for source selection
 * if the track has 'native' sources and that they cannot play, try to autosource
 * improved WP_SoundSystem_Player_Provider subclasses
 * new action hook 'init_playable_tracklist'
 * fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
-* tracklist.js : tableToggleColumns()
-* track & tracklist : sources popup (thickbox) + ajaxed sources suggestions
+* tracklist.js: tableToggleColumns()
+* track & tracklist: sources popup (thickbox) + ajaxed sources suggestions
 
 = 1.0.0 =
 
-* player.js : now uses javascript classes
-* player.js : promises & deferred objects
+* player.js: now uses javascript classes
+* player.js: promises & deferred objects
 * "random" button
 * "loop" button
 * new preset for indieshuffle.com
@@ -227,44 +227,44 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
-* live tracklists : new expiration_time var
+* live tracklists: new expiration_time var
 * new Reddit preset (to be improved)
 * improved validate_track() 
 * last.FM scrobbling
-* settings : last.FM client ID & secret
+* settings: last.FM client ID & secret
 * Player: 'Choose a source'
 * improved tracklist table (schema.org) 
 * removed tracklist duration column
 
 = 0.9.9.4 =
 
-* WP_SoundSystem_Track:: get_unique_id() : use sanitize_title
-* Tracklists Table : share link
-* Tracklists Table : fixed time scraped
-* Scraper : handle Dropbox links
-* Scraper : Fix get_track_image() and get_track_source_urls()
-* Scraper : fixed XSPF options when xpsf content is loaded
-* Player : tracks sources preloads
-* Player : track infos (track title, provider link)
-* Player : sources switch
-* Player : redirection notice with timer
-* Player : confirmation popup when leaving the page with a media playing
-* Player : track button : new 'has-played' class
+* WP_SoundSystem_Track:: get_unique_id(): use sanitize_title
+* Tracklists Table: share link
+* Tracklists Table: fixed time scraped
+* Scraper: handle Dropbox links
+* Scraper: Fix get_track_image() and get_track_source_urls()
+* Scraper: fixed XSPF options when xpsf content is loaded
+* Player: tracks sources preloads
+* Player: track infos (track title, provider link)
+* Player: sources switch
+* Player: redirection notice with timer
+* Player: confirmation popup when leaving the page with a media playing
+* Player: track button: new 'has-played' class
 
 = 0.9.9.3 =
 
-* player buttons : previous/next track & previous/next page
+* player buttons: previous/next track & previous/next page
 * splitter presets into multiple files
 * improved wpsstm-live-tracklist-class.php
 
 = 0.9.9.2 =
 
 * new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
-* player : new settings : "enabled", "auto-play", "auto-redirect" and "auto-source".
+* player: new settings: "enabled", "auto-play", "auto-redirect" and "auto-source".
 
 = 0.9.9.1 =
 
-* sources : now an array (url,title,description) instead of just an url.
+* sources: now an array (url,title,description) instead of just an url.
 
 = 0.9.9.0 =
 
@@ -276,14 +276,14 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = 0.9.8.9 =
 
 * scraper now able to get an array of sources urls for each track.
-* get_track_node_content() : new argument '$single_value' (default to TRUE)
+* get_track_node_content(): new argument '$single_value' (default to TRUE)
 
 = 0.9.8.8 =
 
 * improved wizard GUI
-* scraper : now we can query an element's attribute (disabled if not HTML content)
-* scraper : improved options
-* scraper : now uses a dynamic selector for the tracklist title
+* scraper: now we can query an element's attribute (disabled if not HTML content)
+* scraper: improved options
+* scraper: now uses a dynamic selector for the tracklist title
 
 = 0.9.8.7 =
 
@@ -298,22 +298,22 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 = 0.9.8.5 =
 
-* scraper : set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
+* scraper: set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
 * sanitize string at the end of WP_SoundSystem_Remote_Tracklist::get_track_node_content()
 * new Hype Machine preset
 
 = 0.9.8.4 =
 
-* XSPF output : added title, author, timestamp, location and annotation nodes
-* xspf urls : moved download argument at the end
+* XSPF output: added title, author, timestamp, location and annotation nodes
+* xspf urls: moved download argument at the end
 * added rewrite rule for frontend wizard
 
 = 0.9.8.3 =
 
 * doc
-* live playlists : when not displaying a single page, add a notice to load the tracklist
-* scraper : cache only if several post are displayed (like an archive page)
+* live playlists: when not displaying a single page, add a notice to load the tracklist
+* scraper: cache only if several post are displayed (like an archive page)
 
 = 0.9.8.2 =
 
@@ -337,7 +337,7 @@ informations overriden
 = 0.9.8 =
 
 * show player column only if at least one track has sources
-* tracks : auto guess ID if not defined
+* tracks: auto guess ID if not defined
 * improved presets + fixed Soundsgood preset
 * header admin notice (review / donations)
 * abord update_title_artist() and update_title_album() if value missing
@@ -355,22 +355,22 @@ informations overriden
 
 = 0.9.6 =
 
-* Changed how subtracks are stored : now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.
+* Changed how subtracks are stored: now we store an array of subtrack IDs in the tracklist post; while before we were saving the tracklist ID in each track.
 * Hide subtracks' filter now works - still some work to do on this
 
 = 0.9.5 =
 
 * live playlists disabled by default
-* ajax : reorder tracklist tracks with ajax only
+* ajax: reorder tracklist tracks with ajax only
 * include scraper metabox even if live playlists are disabled
 * fixed bug when deleting subtracks
 * populate track sources only once
 * Add title support for albums, artists & tracks (wasn't showing the 'View Post' or permalink on the post page)
-* tracklists : add 'data-tracks-count' attribute
-* WIP : audio player
+* tracklists: add 'data-tracks-count' attribute
+* WIP: audio player
 * Show a play button in tracklist tables
 * Embed a tracklist for single tracks too
-* WIP : frontend scraper
+* WIP: frontend scraper
 
 = 0.9.4 =
 
