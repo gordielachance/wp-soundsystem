@@ -203,7 +203,7 @@ class WP_SoundSystem_Core_Tracks{
                         $source = new WP_SoundSystem_Source();
                         
                         $source_raw['track_id'] = $track->post_id;
-                        $source->populate_array( $source_raw );
+                        $source->from_array( $source_raw );
                         if (!$source->url) continue;
                     }
 

@@ -38,7 +38,7 @@ class WP_SoundSystem_Track{
         
     }
     
-    function populate_array( $args = null ){
+    function from_array( $args = null ){
 
         $args_default = $this->get_default();
         $args = wp_parse_args((array)$args,$args_default);
@@ -192,7 +192,7 @@ class WP_SoundSystem_Track{
     }
 
     //TO FIX do we need this ?
-    function array_export(){
+    function to_array(){
         $defaults = $this->get_default();
         $export = array();
         foreach ((array)$defaults as $param=>$dummy){
@@ -304,7 +304,7 @@ class WP_SoundSystem_Track{
             $source = new WP_SoundSystem_Source();
             $source->track_id = $this->post_id;
             
-            $source->populate_array($source_raw);
+            $source->from_array($source_raw);
             if ( !$duplicate_ids = $source->get_source_duplicates() ){
                 $this->add_community_source($source);
             }

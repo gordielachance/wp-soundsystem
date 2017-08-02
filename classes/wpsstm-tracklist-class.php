@@ -263,7 +263,7 @@ class WP_SoundSystem_Tracklist{
                 if ( is_array($track) ){
                     $track_args = $track;
                     $track = new WP_SoundSystem_Track();
-                    $track->populate_array($track_args);
+                    $track->from_array($track_args);
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
@@ -304,10 +304,10 @@ class WP_SoundSystem_Tracklist{
 
     }
 
-    function array_export(){
+    function to_array(){
         $export = array();
         foreach ($this->tracks as $track){
-            $export[] = $track->array_export();
+            $export[] = $track->to_array();
         }
 
         return array_filter($export);
@@ -427,11 +427,21 @@ class WP_SoundSystem_Tracklist{
         
         return $this->remove_subtrack_ids($rem_ids);
     }
+    
+    
 
     /**
     Read-only tracklist table
     **/
     function get_tracklist_table($args = null){
+        
+        ob_start();
+        the_post($this->post_id);
+        $template = wpsstm_locate_template( 'tracklist.php', true, false );
+        return ob_get_clean();
+        
+        return;
+        //OLD
 
         $this->load_subtracks();
 

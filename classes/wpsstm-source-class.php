@@ -40,7 +40,7 @@ class WP_SoundSystem_Source {
 
     }
     
-    function populate_array( $args = null ){
+    function from_array( $args = null ){
 
         $args_default = $this->defaults;
         $args = wp_parse_args((array)$args,$args_default);
