@@ -527,7 +527,7 @@ class WpsstmTrack {
         var self = this;
         
         var track_el    = self.get_track_instances();
-        $(track_el).find('.trackitem_sources').html('');
+        $(track_el).find('.wpsstm-track-sources').html('');
         
         var deferredObject = $.Deferred();
 
@@ -548,7 +548,7 @@ class WpsstmTrack {
         self.sources_request.done(function(data) {
 
             if ( (data.success === true) && ( data.new_html ) ){
-                $(track_el).find('.trackitem_sources').html(data.new_html); //append new sources
+                $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
                 self.populate_html_sources();
                 deferredObject.resolve();
             }else{
@@ -565,7 +565,7 @@ class WpsstmTrack {
         var self =      this;
         var track_el =  self.track_el; //page track
 
-        var new_sources_items = $(track_el).find('.trackitem_sources li');
+        var new_sources_items = $(track_el).find('.wpsstm-track-sources li');
 
         //self.debug("found "+new_sources_items.length +" sources");
         

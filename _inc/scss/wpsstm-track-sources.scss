@@ -24,7 +24,7 @@
     }
     #wpsstm-bottom-track-info &{
 
-        .column-trackitem_sources{
+        .wpsstm-track-sources{
             padding: 0;
             margin:0;
             line-height: 2em;
@@ -100,7 +100,7 @@
                     left: -1em;
                 }
             }
-            .column-trackitem_sources:hover{
+            .wpsstm-track-sources:hover{
                 ul.wpsstm-track-sources-list{
                     &:before{
                         content: "";

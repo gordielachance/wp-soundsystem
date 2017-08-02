@@ -66,7 +66,7 @@
             
             &:not(.active):not(:hover){
                 > span.wpsstm-track-column{
-                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
+                    &.wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
                         display:none;
                     }
                 }
@@ -74,7 +74,7 @@
 
             > span.wpsstm-track-column{
                 
-               &.column-trackitem_position{
+               &.wpsstm-track-position{
                     .wpsstm-reposition-track{
                         @extend .wpsstm-can-click;
                         i{
@@ -91,7 +91,7 @@
                     }
                 }
 
-                &.column-trackitem_image{
+                &.wpsstm-track-image{
                     width: 50px;
                     padding:0;
                     img{
@@ -101,13 +101,13 @@
                         @include transition-duration(.4s);
                     }
                 }
-                &.column-trackitem_sources{
+                &.wpsstm-track-sources{
                     display:none;
                     ul{
                         list-style-type: none;
                     }
                 }
-                &.column-trackitem_actions{
+                &.wpsstm-track-actions{
                     .wpsstm-actions-list{
                         display:inline;
                         li{
@@ -162,20 +162,20 @@
                         @extend .truncate;
                     }
                     
-                    &.column-trackitem_position{
+                    &.wpsstm-track-position{
                         width:3em;
                         text-align:center;
                     }
 
-                    &.column-trackitem_play_bt{
+                    &.wpsstm-track-play-bt{
                         width:2em;
                         text-align:center;
                     }
-                    &.column-trackitem_sources{
+                    &.wpsstm-track-sources{
                         display:none;
                     }
                     
-                    &.column-trackitem_actions{
+                    &.wpsstm-track-actions{
                         position:absolute;
                         right:0;
                     }
@@ -198,7 +198,7 @@
         .tracklist-nav{
             //display:none;
         }
-        .column-trackitem_position,#wpsstm-track-action-move{
+        .wpsstm-track-position,#wpsstm-track-action-move{
             display:none;
         }
     }

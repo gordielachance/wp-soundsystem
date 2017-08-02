@@ -7,11 +7,11 @@ global $wpsstm_track;
 $track = $wpsstm_track;
 ?>
 <li itemscope class="" data-wpsstm-track-id="<?php the_ID(); ?>" data-wpsstm-sources-count="<?php echo wpsstm_get_track_sources_count();?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
-    <span class="wpsstm-track-column trackitem_position column-trackitem_position">
+    <span class="wpsstm-track-column wpsstm-track-position">
         <i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>
         <span itemprop="position"><?php echo $track->position;?></span>
     </span>
-    <span class="wpsstm-track-column trackitem_play_bt column-trackitem_play_bt">
+    <span class="wpsstm-track-column wpsstm-track-play-bt">
         <a class="wpsstm-play-track wpsstm-icon-link" href="#">
         <i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i>
         <i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i>
@@ -21,20 +21,20 @@ $track = $wpsstm_track;
     <?php 
     if ( $track->image ){
         ?>
-        <span class="wpsstm-track-column trackitem_image column-trackitem_image" itemprop="image"><img src="<?php echo $track->image;?>" /></span>
+        <span class="wpsstm-track-column wpsstm-track-image" itemprop="image"><img src="<?php echo $track->image;?>" /></span>
         <?php
     }
     ?>
-    <span class="wpsstm-track-column trackitem_artist column-trackitem_artist" itemprop="byArtist"><?php echo $track->artist;?></span>
-    <span class="wpsstm-track-column trackitem_track column-trackitem_track" itemprop="name"><?php echo $track->title;?></span>
+    <span class="wpsstm-track-column wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></span>
+    <span class="wpsstm-track-column wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
     <?php 
     if ( $track->album ){
         ?>
-        <span class="wpsstm-track-column trackitem_album column-trackitem_album" itemprop="inAlbum"><img src="<?php echo $track->album;?>" /></span>
+        <span class="wpsstm-track-column wpsstm-track-album" itemprop="inAlbum"><img src="<?php echo $track->album;?>" /></span>
         <?php
     }
     ?>
-    <span class="wpsstm-track-column trackitem_actions column-trackitem_actions">
+    <span class="wpsstm-track-column wpsstm-track-actions">
         <?php 
             //tracklist actions
             if ( $actions = $track->get_track_actions($tracklist,'page') ){
@@ -42,7 +42,7 @@ $track = $wpsstm_track;
             }
         ?>
         </span>
-        <span class="wpsstm-track-column trackitem_sources column-trackitem_sources">
+        <span class="wpsstm-track-column wpsstm-track-sources">
             <?php
             //get track sources
             $source_ids = $track->get_track_source_ids();

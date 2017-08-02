@@ -113,11 +113,11 @@
                                 @extend .truncate;
                             }
 
-                            &.trackitem_play_bt{
+                            &.wpsstm-track-play-bt{
                                 display:none;
                             }
                             
-                            &.column-trackitem_actions{
+                            &.wpsstm-track-actions{
                                 position:inherit;
                                 font-size:1.5em;
                                 #wpsstm-track-action-remove{
@@ -125,13 +125,13 @@
                                 }
                             }
                             
-                            &.column-trackitem_sources{
+                            &.wpsstm-track-sources{
                                 display:inline-block;
                             }
 
                         }
 
-                        .trackitem_position{
+                        .wpsstm-track-position{
                             @extend .wpsstm-can-click;
                         }
 

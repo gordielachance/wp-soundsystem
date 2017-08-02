@@ -563,7 +563,7 @@ class WpsstmTracklist {
         var self = this;
         var all_rows = self.tracklist_el.find( '[itemprop="track"]' );
         jQuery.each( all_rows, function( key, value ) {
-            var position = jQuery(this).find('.column-trackitem_position [itemprop="position"]');
+            var position = jQuery(this).find('.wpsstm-track-position [itemprop="position"]');
             position.text(key + 1);
         });
     }

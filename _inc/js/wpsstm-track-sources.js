@@ -194,7 +194,7 @@ class WpsstmTrackSource {
         var ul_el = player_source_el.closest('ul');
 
         var sources_list = player_source_el.closest('ul');
-        var sources_list_wrapper = sources_list.closest('td.trackitem_sources');
+        var sources_list_wrapper = sources_list.closest('.wpsstm-track-sources');
 
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
 
