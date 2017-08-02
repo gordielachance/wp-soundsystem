@@ -892,9 +892,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 'is_expired' =>             $this->is_expired,
                 'cache_duration_min' =>     $cache_duration_min,
                 'force_refresh' =>          (bool)$this->force_refresh,
-                'updated' =>                wpsstm_tracklists()->get_human_tracklist_time($this->updated_time),
-                'expires' =>                wpsstm_tracklists()->get_human_tracklist_time($this->expiration_time),
-                'now' =>                    wpsstm_tracklists()->get_human_tracklist_time($now),
+                'updated' =>                wpsstm_get_datetime($this->updated_time),
+                'expires' =>                wpsstm_get_datetime($this->expiration_time),
+                'now' =>                    wpsstm_get_datetime($now),
             ),
             "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
         );

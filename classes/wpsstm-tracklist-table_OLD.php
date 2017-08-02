@@ -209,7 +209,7 @@ class WP_SoundSystem_Tracklist_Table{
 
 
         $icon_time = '<i class="fa fa-clock-o" aria-hidden="true"></i>';
-        $text_time = wpsstm_tracklists()->get_human_tracklist_time($this->tracklist->updated_time);
+        $text_time = wpsstm_get_datetime($this->tracklist->updated_time);
         $updated_time_el = sprintf('<time class="wpsstm-tracklist-published">%s %s</time>',$icon_time,$text_time);
         $refresh_time_el = wpsstm_get_tracklist_refresh_frequency_human($this->tracklist->post_id);
 

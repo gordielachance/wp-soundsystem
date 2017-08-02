@@ -31,7 +31,6 @@ class WP_SoundSystem_Track{
             $this->artist = wpsstm_get_post_artist($post_id);
             $this->album = wpsstm_get_post_album($post_id);
             $this->mbid = wpsstm_get_post_mbid($post_id);
-            $this->sources = $this->get_track_sources();
 
         }
 
@@ -455,13 +454,40 @@ class WP_SoundSystem_Track{
         return $list;
     }
     
-    function get_track_sources(){
-        $sources = array();
-        $source_ids = wpsstm_get_track_source_ids($this->post_id);
-        foreach((array)$source_ids as $source_id){
-            $sources[] = new WP_SoundSystem_Source($source_id);
+    function get_track_source_ids($args = null){
+        $default_args = array(
+            'post_status'=>     'any',
+            'posts_per_page' => -1,
+        );
+
+        if (!$args){
+            $args = $default_args;
+        }else{
+            $args = wp_parse_args($args,$default_args);
         }
-        return $sources;
+
+        $required_args = array(
+            'post_type' =>      wpsstm()->post_type_source,
+            'post_parent' =>    $this->post_id,
+            'fields'  =>        'ids',
+        );
+
+        $args = wp_parse_args($required_args,$args);
+
+        $query = new WP_Query( $args );
+        return $query->posts; //ids
+    }
+    
+    function get_track_sources(){
+        if ($this->sources === null) {
+            $sources = array();
+            $source_ids = $this->get_track_source_ids();
+            foreach((array)$source_ids as $source_id){
+                $sources[] = new WP_SoundSystem_Source($source_id);
+            }
+            $this->sources = $sources;
+        }
+        return $this->sources;
     }
 
     function save_auto_sources(){

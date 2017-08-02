@@ -46,33 +46,6 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
-function wpsstm_get_track_source_ids($post_id = null,$args = null){
-    
-    $default_args = array(
-        'post_status'=>     'any',
-        'posts_per_page' => -1,
-        'fields'  =>        'ids',
-        'post_parent' =>    $post_id
-    );
-    
-    if (!$args){
-        $args = $default_args;
-    }else{
-        $args = wp_parse_args($args,$default_args);
-    }
-    
-    $required_args = array(
-        'post_type' =>      wpsstm()->post_type_source,
-        'fields'  =>        'ids',
-        'post_parent' =>    $post_id
-    );
-    
-    $args = wp_parse_args($required_args,$args);
-
-    $query = new WP_Query( $args );
-    return $query->posts; //ids
-}
-
 function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     if ( wpsstm()->get_options('musicbrainz_enabled') != 'on' ) return false;
@@ -165,24 +138,7 @@ function wpsstm_get_tracklist_link($post_id=null,$pagenum=1,$download=false){
 
 }
 
-function wpsstm_get_tracklist_refresh_frequency_human($post_id = null){
-    if (!$post_id) $post_id = get_the_ID();
-    
-    $post_type = get_post_type($post_id);
-    $is_live_tracklist = ( $post_type == wpsstm()->post_type_live_playlist  );
-    
-    if (!$is_live_tracklist) return;
-    $tracklist = wpsstm_get_post_tracklist($post_id);
-    $freq = $tracklist->get_options('datas_cache_min');
 
-    $freq_secs = $freq * MINUTE_IN_SECONDS;
-    
-    $refresh_time_human = human_time_diff( 0, $freq_secs );
-    $refresh_time_human = sprintf('every %s',$refresh_time_human);
-    $refresh_time_el = sprintf('<time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i></i> %s</time>',$refresh_time_human);
-
-    return $refresh_time_el;
-}
 
 function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
     
@@ -320,4 +276,107 @@ function wpsstm_get_live_tracklist_url($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     return get_post_meta($post_id, wpsstm_live_playlists()->feed_url_meta_name, true );
+}
+
+
+///NEW
+function wpsstm_get_tracklist_class(){
+    global $wpsstm_tracklist;
+    $tracklist = $wpsstm_tracklist;
+    
+    $classes = array(
+        'wpsstm-tracklist',
+        'wpsstm-playable-tracklist',
+        'wpsstm-tracklist-table',
+    );
+    
+    if ( $tracklist->get_options('can_play') ){
+        $classes[] = 'wpsstm-playable-tracklist';
+    }
+    
+    return sprintf('class="%s"',implode(' ',$classes));
+}
+
+function wpsstm_tracklist_class(){
+    echo wpsstm_get_tracklist_class();
+}
+
+function wpsstm_get_tracklist_type(){
+    global $wpsstm_tracklist;
+    $tracklist = $wpsstm_tracklist;
+
+    return $wpsstm_tracklist->tracklist_type;
+}
+
+function wpsstm_tracklist_type(){
+    echo wpsstm_get_tracklist_type();
+}
+
+function wpsstm_get_tracklist_substracks_count(){
+    global $wpsstm_tracklist;
+    $tracklist = $wpsstm_tracklist;
+    
+    return count( $tracklist->get_subtrack_ids() );
+}
+
+function wpsstm_get_tracklist_remaining_cache_seconds(){
+    global $wpsstm_tracklist;
+    $tracklist = $wpsstm_tracklist;
+    
+    if ( wpsstm_get_tracklist_type() != 'live' ) return;
+    
+    return (int)$tracklist->expiration_time - current_time( 'timestamp', true );
+}
+
+function wpsstm_get_tracklist_refresh_rate(){
+    global $wpsstm_tracklist;
+    $tracklist = $wpsstm_tracklist;
+    
+    if ( wpsstm_get_tracklist_type() != 'live' ) return;
+    
+    $freq = $tracklist->get_options('datas_cache_min');
+
+    $freq_secs = $freq * MINUTE_IN_SECONDS;
+    
+    return $refresh_time_human = human_time_diff( 0, $freq_secs );
+}
+
+function wpsstm_get_datetime($timestamp){
+    if (!$timestamp) return;
+
+    $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), get_option( 'date_format' ) );
+    $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), get_option( 'time_format' ) );
+    return sprintf(__('on %s - %s','wpsstm'),$date,$time);
+}
+
+function wpsstm_get_track_sources_count(){
+    global $wpsstm_track;
+    $track = $wpsstm_track;
+    
+    return count( $track->get_track_source_ids() );
+}
+
+function wpsstm_get_source_provider(){
+    global $wpsstm_source;
+    $source = $wpsstm_source;
+    
+    return $source->provider;
+}
+
+function wpsstm_get_source_mime(){
+    global $wpsstm_source;
+    $source = $wpsstm_source;
+    
+    return $source->type;
+}
+
+function wpsstm_get_source_url($raw = false){
+    global $wpsstm_source;
+    $source = $wpsstm_source;
+    
+    if (!$raw){ //playable url
+        return $source->src;
+    }else{
+        return $source->url;
+    }
 }

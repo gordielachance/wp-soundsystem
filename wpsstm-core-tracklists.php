@@ -49,6 +49,8 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function setup_actions(){
+        
+        add_action( 'the_post', array($this,'the_tracklist'),10,2);
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
         add_action( 'init', array($this,'register_tracklist_endpoints' ));
@@ -121,6 +123,17 @@ class WP_SoundSystem_Core_Tracklists{
         //JS
         
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','thickbox','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
+    }
+    
+    /*
+    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
+    */
+    
+    function the_tracklist($post,$query){
+        if ( in_array(get_post_type($post),$this->tracklist_post_types) ) {
+            global $wpsstm_tracklist;
+            $wpsstm_tracklist = new WP_SoundSystem_Tracklist($post->ID);
+        }
     }
     
     function get_tracklist_action(){
@@ -625,13 +638,7 @@ class WP_SoundSystem_Core_Tracklists{
         return get_post_meta($post,$this->time_updated_substracks_meta_name,true);
     }
     
-    function get_human_tracklist_time($time){
-        if (!$time) return;
-        
-        $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $time ), get_option( 'date_format' ) );
-        $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $time ), get_option( 'time_format' ) );
-        return sprintf(__('on %s - %s','wpsstm'),$date,$time);
-    }
+
 
 }
 

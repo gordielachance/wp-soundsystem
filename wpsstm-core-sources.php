@@ -32,6 +32,8 @@ class WP_SoundSystem_Core_Sources{
         
         add_action( 'init', array($this,'register_post_type_sources' ));
         
+        add_action( 'the_post', array($this,'the_source'),10,2);
+        
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         add_action( 'save_post', array($this,'metabox_source_save'), 5); 
         
@@ -135,6 +137,17 @@ class WP_SoundSystem_Core_Sources{
         );
 
         register_post_type( wpsstm()->post_type_source, $args );
+    }
+    
+    /*
+    Register the global $wpsstm_source obj (hooked on 'the_post' action)
+    */
+    
+    function the_source($post,$query){
+        if ( get_post_type($post) == wpsstm()->post_type_source) {
+            global $wpsstm_source;
+            $wpsstm_source = new WP_SoundSystem_Source($post->ID);
+        }
     }
     
     function metabox_source_register(){

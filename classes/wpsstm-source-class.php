@@ -2,6 +2,7 @@
 class WP_SoundSystem_Source {
     var $post_id;
     var $track_id;
+    var $position = -1;
     var $url; //input URL
     var $title;
     var $is_auto; //is this an auto source ?

@@ -61,7 +61,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
-
+        
     }
     
     function get_options($keys=null){
@@ -78,6 +78,7 @@ class WP_SoundSystem_Tracklist{
         return array(
             'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource' => ( wpsstm()->get_options('autosource') == 'on' ),
+            'can_play' =>   ( wpsstm()->get_options('player_enabled') == 'on' ),
         );
     }
     
@@ -435,23 +436,25 @@ class WP_SoundSystem_Tracklist{
     **/
     function get_tracklist_table($args = null){
         
+        $args = array(
+            'p' =>  $this->post_id,
+            'post_type' => wpsstm_tracklists()->tracklist_post_types
+        );
+
+            
+        query_posts($args);
+        
         ob_start();
-        the_post($this->post_id);
-        $template = wpsstm_locate_template( 'tracklist.php', true, false );
+        
+        while ( have_posts() ){
+            the_post();
+            wpsstm_locate_template( 'content-tracklist-table.php', true, false );
+        }
+        
+        wp_reset_query();
+
         return ob_get_clean();
         
-        return;
-        //OLD
-
-        $this->load_subtracks();
-
-        require_once wpsstm()->plugin_dir . 'classes/wpsstm-tracklist-table.php';
-        $tracklist_table = new WP_SoundSystem_Tracklist_Table($this,$args);
-
-        ob_start();
-        $tracklist_table->prepare_items();
-        $tracklist_table->display();
-        return ob_get_clean();
     }
     
     public function set_tracklist_pagination( $args ) {
