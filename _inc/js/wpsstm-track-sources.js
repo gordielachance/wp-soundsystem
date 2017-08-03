@@ -9,12 +9,13 @@ jQuery(document).ready(function($){
         sources_links.click(function(e) {
             e.preventDefault();
             
-            if ( !$(track_el).hasClass('active') ) return;
+            //if ( !$(track_el).hasClass('active') ) return;
             
             var source_el = $(this).closest('li');
             var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
-            var source_obj = track_obj.get_track_source(source_idx);
-            source_obj.select_player_source();
+            
+            wpsstm_page_player.play_or_skip_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
+            
         });
 
         /*
