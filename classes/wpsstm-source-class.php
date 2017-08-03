@@ -23,6 +23,8 @@ class WP_SoundSystem_Source {
     
     function __construct($post_id = null){
         
+        $this->provider =       new WP_SoundSystem_Player_Provider(); //default
+        
         if ($post_id){
             $this->post_id = $post_id;
             $this->title = get_the_title($post_id);
@@ -35,8 +37,7 @@ class WP_SoundSystem_Source {
             $this->is_auto = ( $post_author_id == $community_user_id );
 
         }
-        
-        $this->populate_source_url();
+
         if (!$this->title && $this->provider) $this->title = $this->provider->name;
 
     }
@@ -154,7 +155,7 @@ class WP_SoundSystem_Source {
 
     }
     
-    private function populate_source_url(){
+    function populate_provider(){
         
         if (!$this->url) return;
 
@@ -169,6 +170,8 @@ class WP_SoundSystem_Source {
             break;
             
         }
+        
+        return $this->provider;
 
     }
 

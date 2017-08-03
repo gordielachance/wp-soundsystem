@@ -7,6 +7,12 @@
     text-overflow: ellipsis;
 }
 
+.flexible-table-cell{
+    //https://stackoverflow.com/questions/11267154/fit-cell-width-to-content
+    width:1%;
+    white-space:nowrap;
+}
+
 .wpsstm-icon-link{
     text-decoration:none;
     @include box-shadow(none !important); //twenty seventeen fix

@@ -14,7 +14,7 @@ jQuery(document).ready(function($){
             var source_el = $(this).closest('li');
             var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
             
-            wpsstm_page_player.play_or_skip_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
+            wpsstm_page_player.play_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
             
         });
 

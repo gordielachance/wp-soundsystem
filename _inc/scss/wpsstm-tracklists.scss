@@ -34,16 +34,10 @@
         list-style: none;
         
         li[itemprop="track"]{
-            
+            width: 100%;
             position:relative;
             line-height:3em;
             z-index:0;
-
-            &:not(.active):not(:hover){
-                .wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
-                    @include opacity(0);
-                }
-            }
  
            .wpsstm-track-position{
                 .wpsstm-reposition-track{
@@ -86,6 +80,19 @@
                     }
                 }
             }
+            
+            &:not(.active){
+                .wpsstm-track-sources{
+                    pointer-events:none;
+                }
+            }
+            
+            &:not(.active):not(:hover){
+                .wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
+                    @include opacity(0);
+                }
+            }
+            
         }
     }
     
@@ -93,9 +100,8 @@
         ul.wpsstm-tracklist-entries{
             li[itemprop="track"]{
                 display: table;
-                width: 100%;
 
-                .wpsstm-track-main,.wpsstm-track-left,.wpsstm-track-right{
+                > *{
                     display: table-cell;
                 }
                 .wpsstm-track-left{
@@ -103,11 +109,11 @@
                     text-align: center;
                 }
                 .wpsstm-track-right{
-                    padding-right:1em;
-
-                    //https://stackoverflow.com/questions/11267154/fit-cell-width-to-content
-                    width:1%;
-                    white-space:nowrap;
+                    @extend .flexible-table-cell;
+                }
+                
+                .wpsstm-track-sources{
+                    padding-right:2em;
                 }
 
                 .wpsstm-track-info{
@@ -183,20 +189,33 @@
             }
             
             .wpsstm-track-sources{
-                //display:none!important;
-                .wpsstm-current-source{
+                
+                .wpsstm-track-sources-list{
+                    position:absolute;
+                    margin-top: .5em;
                     .wpsstm-source-title{
                         display:none;
                     }
                 }
-                .wpsstm-track-sources-list{
-                    top:0;
-                    right:0;
-                    background:white;
-                    border:1px solid #DDD;
-                    font-size:.9em;
+
+            }
+            
+            &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                .wpsstm-track-sources:hover{
+                    .wpsstm-track-sources-list{
+                        top:0;
+                        right:-2em;
+                        border:1px solid #DDD;
+                        font-size:.9em;
+                        width:200px;
+                        position:absolute;
+                        background:white;
+                        z-index:1;
+                        .wpsstm-source-title{
+                            display:inline-block;
+                        }
+                    }
                 }
-                
             }
 
         }
@@ -232,38 +251,31 @@
             
             .wpsstm-track-sources{
                 @include opacity(.3);
-                
                 ul.wpsstm-track-sources-list{
-                    bottom:0;
-                    left:0;
-                    background:#222;
+                    width:200px;
+                    position:absolute;
+                    margin-top: .5em;
+                    li{
+                        line-height:2em;
+                        .wpsstm-provider-icon{
+                            font-size:2em;
+                        }
+                    }
                 }
-
                 &:hover{
                     @include opacity(1);
                 }
-                
-
-
             }
-            /*
             &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                ul.wpsstm-track-sources-list{
-                    &:before{
+                .wpsstm-track-sources:hover{
+                    ul.wpsstm-track-sources-list{
+                        bottom:0;
+                        left:0;
+                        background:#222;
                         position:absolute;
-                        font-family: FontAwesome;
-                        content: "\f077"; //chevron up
-                        display: block;
-                        width: 3em;
-                        text-align: center;
-                        bottom: 0;
-                        height: 4em;
-                        line-height: 4em;
-                        left: -1em;
                     }
                 }
             }
-            */
 
         }
 
@@ -345,13 +357,6 @@
                 li{
                     &.wpsstm-active-source{
                         font-weight: bold;
-                    }
-                }
-            }
-            &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                .wpsstm-track-sources-list{
-                    li{
-                        @extend .wpsstm-can-click;
                     }
                 }
             }

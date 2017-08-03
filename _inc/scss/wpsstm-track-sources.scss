@@ -8,27 +8,24 @@
 }
 
 .wpsstm-track-sources-list{
-    padding:0;
+    padding:0 1em;
     margin:0;
     list-style-type: none;
-    width:200px;
-    position:absolute;
-    padding:0 1em;
-    background:white;
-    z-index:1;
+    display:inline-block;
     
     li.wpsstm-source{
         line-height: 2em;
         position:relative;
         width:100%;
-        .wpsstm-provider-icon,.wpsstm-source-error{
+        .wpsstm-provider-icon{
             position:absolute;
             width:1em;
-            left:-.5em;
+            left:-.6em;
+            font-size:1.2em;
         }
 
         .wpsstm-source-title{
-            width: calc( 100% - 1em);
+            width: calc( 100% - 1.2em);
             padding-left:1em;
             @extend .ellipsis;
             display:inline-block;
@@ -46,11 +43,15 @@
 .wpsstm-track-sources{
     position:relative;
     .wpsstm-track-sources-list{
-        display:none;
+        li:not(.wpsstm-active-source){
+            display:none;
+        }
     }
     &:hover{
         .wpsstm-track-sources-list{
-            display:inherit;
+            li{
+                display:inherit;
+            }
         }
     }
 }

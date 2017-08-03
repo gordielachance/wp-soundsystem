@@ -349,8 +349,8 @@ function wpsstm_get_datetime($timestamp){
 function wpsstm_get_source_provider(){
     global $wpsstm_source;
     $source = $wpsstm_source;
-    
-    return $source->provider;
+
+    return $source->populate_provider();
 }
 
 function wpsstm_get_source_mime(){
@@ -369,4 +369,20 @@ function wpsstm_get_source_url($raw = false){
     }else{
         return $source->url;
     }
+}
+
+function wpsstm_get_source_class(){
+    global $wpsstm_source;
+    $source = $wpsstm_source;
+    
+    $classes = array('wpsstm-source');
+    if ($source->position == 1){
+        $classes[] = 'wpsstm-active-source';
+    }
+    
+    return sprintf('class="%s"',implode(' ',$classes));
+}
+
+function wpsstm_source_class(){
+    echo wpsstm_get_source_class();
 }

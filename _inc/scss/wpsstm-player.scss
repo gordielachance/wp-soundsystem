@@ -54,16 +54,18 @@
             font-size: 0.8em;
             padding:0 1em;
             
+            display: table;
+            width:100%;
+            
+            > *{
+                display: table-cell;
+            }
+            
             #wpsstm-bottom-track-actions{
-                position: absolute;
-                right: 1em;
-                top: 0;
-                width: 10%;
-                text-align: right;
+                @extend .flexible-table-cell;
                 > *{
                     padding: 0 .25em;
                     font-size:1.5em;
-                    width:calc(10% / 2);
                 }
                 a{
                     @include opacity(0.9);
