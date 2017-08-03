@@ -2,14 +2,23 @@
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
 
+//subtracks query
+$subtrack_ids = $tracklist->get_subtrack_ids();
+$subtracks_args = array(
+    'post__in' =>   $subtrack_ids,
+    'post_type' =>  wpsstm()->post_type_track,
+);
+
+$subtracks_query = new WP_Query($subtracks_args);
+
 if ( $tracklist->get_options('can_play') ){
     do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
 }
 ?>
 
 
-<div itemscope <?php wpsstm_tracklist_class();?> data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-type="<?php wpsstm_tracklist_type();?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo (int)wpsstm_get_tracklist_substracks_count();?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-sec="<?php echo wpsstm_get_tracklist_remaining_cache_seconds();?>">
-    <meta itemprop="numTracks" content="<?php echo (int)wpsstm_get_tracklist_substracks_count();?>" />
+<div itemscope <?php wpsstm_tracklist_class();?> data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-type="<?php wpsstm_tracklist_type();?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo wpsstm_get_tracklist_expire_time();?>">
+    <meta itemprop="numTracks" content="<?php echo $subtracks_query->post_count;?>" />
     <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
         <div>
             <strong class="wpsstm-tracklist-title" itemprop="name">
@@ -43,16 +52,6 @@ if ( $tracklist->get_options('can_play') ){
         }
     ?>
     <?php 
-    
-    //get subtracks
-    $subtrack_ids = $tracklist->get_subtrack_ids();
-    $subtracks_args = array(
-        'post__in' =>   $subtrack_ids,
-        'post_type' =>  wpsstm()->post_type_track,
-    );
-
-    $subtracks_query = new WP_Query($subtracks_args);
-    
     if ( $subtracks_query->have_posts() ) { ?>
         <ul class="wpsstm-tracklist-entries">
             <?php

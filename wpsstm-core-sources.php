@@ -45,8 +45,8 @@ class WP_SoundSystem_Core_Sources{
         add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
         
-        add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
-        add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 ); //'pages' because post is hierarchical
+        //add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
+        //add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 ); //'pages' because post is hierarchical
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
@@ -237,16 +237,20 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
+        global $wpsstm_track;
 
-        $track = new WP_SoundSystem_Track($post->ID);
-        $list = wpsstm_sources()->get_track_sources_list($track);
+        $wpsstm_track = new WP_SoundSystem_Track($post->ID);
         
-        $sources_url = $track->get_track_admin_gui_url('sources');
+        ob_start();
+        wpsstm_locate_template( 'track-sources.php', true, false );
+        $sources_list = ob_get_clean();
+
+        $sources_url = $wpsstm_track->get_track_admin_gui_url('sources');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
         
-        printf('<p>%s</p><p>%s</p>',$list,$manager_link);
+        printf('<p>%s</p><p>%s</p>',$sources_list,$manager_link);
         
     }
     
@@ -358,7 +362,6 @@ class WP_SoundSystem_Core_Sources{
         return array_merge($before,$defaults,$after);
     }
 
-    //TO FIX NOT WORKING
     function column_source_url_content($column,$post_id){
         global $post;
         switch ( $column ) {
@@ -378,39 +381,37 @@ class WP_SoundSystem_Core_Sources{
         }
     }
     
-    function get_track_sources_list(WP_SoundSystem_Track $track){
+    function sort_sources_by_track_match($sources,WP_SoundSystem_Track $track){
+        
+        if (!$sources) return;
+        
+        $artist_sanitized = sanitize_title($track->artist);
+        $title_sanitized = sanitize_title($track->title);
 
-        $lis = array();
-
-        $track->sort_sources_by_similarity();
-
-        foreach((array)$track->sources as $key=>$source){
-
-            $source_icon = $source_type = $source_title = null;            
-            $link = $source->get_provider_link();
+        //compute similarity
+        foreach($sources as $key=>$source){
             
-            $li_classes = array('wpsstm-source');
+            //sanitize data so it is easier to compare
+            $source_title_sanitized = sanitize_title($source->title);
             
-            $attr_arr = array(
-                'class' =>                          implode(' ',$li_classes),
-                'data-wpsstm-source-id' =>          $source->post_id,
-                'data-wpsstm-source-idx' =>         $key,
-                'data-wpsstm-source-type'   =>      $source->type,
-                'data-wpsstm-source-src'   =>       $source->src,
-                'data-wpsstm-auto-source'   =>      (int)$source->is_auto,
-            );
+            //remove artist from source title so the string to compare is shorter
+            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
             
-            $li_classes = null;
-            $error_icon = '<i class="wpsstm-source-error fa fa-exclamation-triangle" aria-hidden="true"></i>';
-            $lis[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($attr_arr),$error_icon,$link);
-            
+            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
+            $sources[$key]->similarity = $similarity_pc;
         }
-        if ( !empty($lis) ){
-            return sprintf('<ul class="wpsstm-track-sources-list">%s</ul>',implode("",$lis));
-        }
+        
+        //reorder by similarity
+        usort($sources, function ($a, $b){
+            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
+        });
+        
+        return $sources;
+        
     }
     
     function ajax_autosources_list(){
+        global $wpsstm_track;
         
         $ajax_data = wp_unslash($_POST);
         
@@ -426,9 +427,13 @@ class WP_SoundSystem_Core_Sources{
         $track = new WP_SoundSystem_Track($post_id);
         $track->save_auto_sources();
 
-        $track = $result['track'] = $track;
+        $wpsstm_track = $result['track'] = $track;
 
-        $result['new_html'] = wpsstm_sources()->get_track_sources_list($track);
+        ob_start();
+        wpsstm_locate_template( 'track-sources.php', true, false );
+        $sources_list = ob_get_clean();
+
+        $result['new_html'] = $sources_list;
         $result['success'] = true;
 
         header('Content-type: application/json');

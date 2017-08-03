@@ -294,6 +294,10 @@ function wpsstm_get_tracklist_class(){
         $classes[] = 'wpsstm-playable-tracklist';
     }
     
+    if ( ($tracklist->tracklist_type == 'live') && $tracklist->is_expired ){
+        $classes[] = 'wpsstm-expired-tracklist';
+    }
+    
     return sprintf('class="%s"',implode(' ',$classes));
 }
 
@@ -312,20 +316,13 @@ function wpsstm_tracklist_type(){
     echo wpsstm_get_tracklist_type();
 }
 
-function wpsstm_get_tracklist_substracks_count(){
+function wpsstm_get_tracklist_expire_time(){
     global $wpsstm_tracklist;
     $tracklist = $wpsstm_tracklist;
-    
-    return count( $tracklist->get_subtrack_ids() );
-}
 
-function wpsstm_get_tracklist_remaining_cache_seconds(){
-    global $wpsstm_tracklist;
-    $tracklist = $wpsstm_tracklist;
-    
     if ( wpsstm_get_tracklist_type() != 'live' ) return;
     
-    return (int)$tracklist->expiration_time - current_time( 'timestamp', true );
+    return (int)$tracklist->expiration_time;
 }
 
 function wpsstm_get_tracklist_refresh_rate(){
@@ -347,13 +344,6 @@ function wpsstm_get_datetime($timestamp){
     $date = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), get_option( 'date_format' ) );
     $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), get_option( 'time_format' ) );
     return sprintf(__('on %s - %s','wpsstm'),$date,$time);
-}
-
-function wpsstm_get_track_sources_count(){
-    global $wpsstm_track;
-    $track = $wpsstm_track;
-    
-    return count( $track->get_track_source_ids() );
 }
 
 function wpsstm_get_source_provider(){

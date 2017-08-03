@@ -192,11 +192,16 @@ class WpsstmPagePlayer {
         
     }
     
-    play_or_skip_tracklist(tracklist_idx){
+    play_or_skip_tracklist(tracklist_idx,track_idx,source_idx){
 
         var self = this;
         
-        self.debug("play_or_skip_tracklist #" + tracklist_idx);
+        var debug_msg = "play_or_skip_tracklist()";
+        if(typeof tracklist_idx !== 'undefined') debug_msg += " tracklist #" + tracklist_idx;
+        if(typeof track_idx !== 'undefined') debug_msg += " track #" + track_idx;
+        if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
+        self.debug(debug_msg);
+        
         var tracklist_obj = self.get_tracklist_obj(tracklist_idx);
 
         //cannot play this tracklist
@@ -205,7 +210,7 @@ class WpsstmPagePlayer {
             return;
         }
         
-        tracklist_obj.play_tracklist_track();
+        tracklist_obj.play_tracklist_track(track_idx,source_idx);
 
     }
 

@@ -756,7 +756,14 @@ class WP_SoundSystem_Core_Tracks{
         
         //get all sources
         $track = new WP_SoundSystem_Track($post_id);
-        $source_ids = $track->get_track_source_ids();
+        
+        $source_args = array(
+            'posts_per_page' => -1,
+            'fields'  =>        'ids',
+            'post_status'=>     'any',
+        );
+        
+        $source_ids = $track->query_track_sources($source_args);
         
         foreach((array)$source_ids as $source_id){
             $success = wp_trash_post($source_id);

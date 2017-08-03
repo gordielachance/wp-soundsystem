@@ -184,7 +184,7 @@ class WP_SoundSystem_Source {
             'title'     => $this->title
         );
         
-        $source_title = sprintf('<span class="wpsstm-source-title">%s</span>',$this->title);
+        $source_title = sprintf('<label class="wpsstm-source-title">%s</label>',$this->title);
 
         return sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon,$source_title);
     }

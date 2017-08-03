@@ -3,7 +3,7 @@
 
 .truncate {
     white-space: nowrap;
-    //overflow: hidden; //TO FIX breaks in bottom player
+    overflow: hidden;
     text-overflow: ellipsis;
 }
 

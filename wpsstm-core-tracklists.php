@@ -132,7 +132,7 @@ class WP_SoundSystem_Core_Tracklists{
     function the_tracklist($post,$query){
         if ( in_array(get_post_type($post),$this->tracklist_post_types) ) {
             global $wpsstm_tracklist;
-            $wpsstm_tracklist = new WP_SoundSystem_Tracklist($post->ID);
+            $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
         }
     }
     

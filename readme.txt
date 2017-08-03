@@ -148,6 +148,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* javascript expiration : use UTC timestamp instead of remaining sec
+
 = 1.5.0 =
 
 * tracks from live playlists are now saved as regular posts (with the community user as author) and flushed at each tracklist refresh

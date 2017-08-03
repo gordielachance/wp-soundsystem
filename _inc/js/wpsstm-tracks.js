@@ -422,13 +422,13 @@ class WpsstmTrack {
         //track infos
         
         var tracklist_el = self.get_tracklist_el();
-        var bottom_tracklist_el = tracklist_el.clone();
 
         //copy attributes from the original playlist 
         var attributes = $(tracklist_el).prop("attributes");
         $.each(attributes, function() {
             $(bottom_trackinfo_el).attr(this.name, this.value);
         });
+        $(bottom_trackinfo_el).removeClass('wpsstm-tracklist-table');
         
         var list = $('<ul class="wpsstm-tracklist-entries"></ul>');
 
@@ -623,7 +623,7 @@ class WpsstmTrack {
             return false;
         }
 
-        self.debug("set_track_source() #" + idx);
+        self.debug("set_track_source() #" + idx + ": "+new_source.src);
         new_source_obj.get_source_li_el().addClass('wpsstm-active-source');
 
         //player

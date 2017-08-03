@@ -27,95 +27,60 @@
     
     position:relative;
     font-family: sans-serif;
-    
-    .hentry &{
-        margin-bottom: 2em;
-    }
-    
-    //make it look like a table
-    /*
-    > ul{
-        list-style: none;
-        display: table;
-        border-collapse: collapse;
-        > li {
-            display:table-row;
-            > span{
-                display:table-column;
-            }
-        }
-    }
-    */
-    
 
-    
     ul.wpsstm-tracklist-entries{
         font-size:1em;
         margin:0;
         list-style: none;
         
-        > li[itemprop="track"]{
+        li[itemprop="track"]{
             
             position:relative;
+            line-height:3em;
+            z-index:0;
 
-            &.no-items{
-                .wpsstm-bottom-refresh-notice{
-                    display:inline;
+            &:not(.active):not(:hover){
+                .wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
+                    @include opacity(0);
                 }
             }
-            
-            &:not(.active):not(:hover){
-                > span.wpsstm-track-column{
-                    &.wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
+ 
+           .wpsstm-track-position{
+                .wpsstm-reposition-track{
+                    @extend .wpsstm-can-click;
+                    i{
                         display:none;
                     }
+                    &:hover{
+                        i{
+                            display:inherit;
+                        }
+                        [itemprop="position"]{
+                            display:none;
+                        }
+                    }
                 }
             }
 
-            > span.wpsstm-track-column{
-                
-               &.wpsstm-track-position{
-                    .wpsstm-reposition-track{
-                        @extend .wpsstm-can-click;
-                        i{
-                            display:none;
-                        }
-                        &:hover{
-                            i{
-                                display:inherit;
-                            }
-                            [itemprop="position"]{
-                                display:none;
-                            }
-                        }
-                    }
+            .wpsstm-track-image{
+                width: 50px;
+                padding:0;
+                img{
+                    max-width: 100%;
+                    @include opacity(0.2);
+                    @include transition-property(opacity);
+                    @include transition-duration(.4s);
                 }
+            }
 
-                &.wpsstm-track-image{
-                    width: 50px;
-                    padding:0;
-                    img{
-                        max-width: 100%;
-                        @include opacity(0.2);
-                        @include transition-property(opacity);
-                        @include transition-duration(.4s);
-                    }
-                }
-                &.wpsstm-track-sources{
-                    display:none;
-                    ul{
-                        list-style-type: none;
-                    }
-                }
-                &.wpsstm-track-actions{
-                    .wpsstm-actions-list{
-                        display:inline;
-                        li{
-                            a{
-                                @extend .wpsstm-icon-link;
-                                label{
-                                    display:none;
-                                }
+            .wpsstm-track-actions{
+                .wpsstm-actions-list{
+                    display:inline;
+                    li{
+                        a{
+                            @extend .wpsstm-icon-link;
+                            label{
+                                display:none;
                             }
                         }
                     }
@@ -125,60 +90,37 @@
     }
     
     &.wpsstm-tracklist-table{
-        width: 100%;
         ul.wpsstm-tracklist-entries{
+            li[itemprop="track"]{
+                display: table;
+                width: 100%;
 
-            > li[itemprop="track"]{
-                display:block;
-                @include transition-property(background);
-                @include transition-duration(.4s);
+                .wpsstm-track-main,.wpsstm-track-left,.wpsstm-track-right{
+                    display: table-cell;
+                }
+                .wpsstm-track-left{
+                    width: 4em;
+                    text-align: center;
+                }
+                .wpsstm-track-right{
+                    padding-right:1em;
 
-                &:nth-child(odd){
-                    background: rgba(0,0,0,0.0125);
+                    //https://stackoverflow.com/questions/11267154/fit-cell-width-to-content
+                    width:1%;
+                    white-space:nowrap;
                 }
-                &:hover{
-                    background: rgba(0,0,0,0.025);
-                    td.column-image img{
-                        @include opacity(.8);
-                    }
-                }
-                
-                &:not(.no-items):not(:last-child){
-                    border-bottom: 1px solid #eee;
-                }
-                
-                > span.wpsstm-track-column{
-                    display:inline-block;
-                    line-height: 2em;
-                    padding: .5em;
-                    
-                    &[itemprop="byArtist"]{
+
+                .wpsstm-track-info{
+
+                    display: table;
+                    table-layout: fixed;
+                    width: 100%;
+
+                    > *{
+                        display: table-cell;
                         @extend .truncate;
                     }
-                    &[itemprop="name"]{
-                        @extend .truncate;
-                    }
-                    &[itemprop="inAlbum"]{
-                        @extend .truncate;
-                    }
-                    
-                    &.wpsstm-track-position{
-                        width:3em;
-                        text-align:center;
-                    }
 
-                    &.wpsstm-track-play-bt{
-                        width:2em;
-                        text-align:center;
-                    }
-                    &.wpsstm-track-sources{
-                        display:none;
-                    }
-                    
-                    &.wpsstm-track-actions{
-                        position:absolute;
-                        right:0;
-                    }
                 }
             }
         }
@@ -214,12 +156,119 @@
         }
     }
 
-    &:not([data-wpsstm-expire-sec="0"]){
+    &:not(.wpsstm-expired-tracklist){
         #wpsstm-tracklist-action-refresh{
             @include opacity(.5);
             pointer-events: none;
         }
     }
+}
+
+.hentry .wpsstm-tracklist{
+    .wpsstm-tracklist-entries{
+
+        [itemprop="track"]{
+            @include transition-property(background);
+            @include transition-duration(.4s);
+
+            &:nth-child(odd){
+                background: rgba(0,0,0,0.0125);
+            }
+            &:hover{
+                background: rgba(0,0,0,0.025);
+            }
+
+            &:not(:last-child){
+                border-bottom: 1px solid #eee;
+            }
+            
+            .wpsstm-track-sources{
+                //display:none!important;
+                .wpsstm-current-source{
+                    .wpsstm-source-title{
+                        display:none;
+                    }
+                }
+                .wpsstm-track-sources-list{
+                    top:0;
+                    right:0;
+                    background:white;
+                    border:1px solid #DDD;
+                    font-size:.9em;
+                }
+                
+            }
+
+        }
+        
+    }
+}
+
+
+#wpsstm-bottom-track-info.wpsstm-tracklist{
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .6em;
+    position:relative;
+
+    .wpsstm-tracklist-entries{
+
+        li[itemprop="track"]{
+
+            .wpsstm-track-play-bt{
+                display:none;
+            }
+
+            .wpsstm-track-actions{
+                font-size:1.5em;
+                #wpsstm-track-action-remove{
+                    display:none;
+                }
+            }
+
+            .wpsstm-track-position{
+                @extend .wpsstm-can-click;
+            }
+            
+            .wpsstm-track-sources{
+                @include opacity(.3);
+                
+                ul.wpsstm-track-sources-list{
+                    bottom:0;
+                    left:0;
+                    background:#222;
+                }
+
+                &:hover{
+                    @include opacity(1);
+                }
+                
+
+
+            }
+            /*
+            &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                ul.wpsstm-track-sources-list{
+                    &:before{
+                        position:absolute;
+                        font-family: FontAwesome;
+                        content: "\f077"; //chevron up
+                        display: block;
+                        width: 3em;
+                        text-align: center;
+                        bottom: 0;
+                        height: 4em;
+                        line-height: 4em;
+                        left: -1em;
+                    }
+                }
+            }
+            */
+
+        }
+
+    }
+
 }
 
 .wpsstm-tracklist.wpsstm-playable-tracklist{

@@ -32,7 +32,7 @@
             e.preventDefault();
             //unset request status
             tracklist_obj.debug("clicked 'refresh' link");
-            tracklist_obj.get_tracklist_request(true); //initialize but do not set track to play
+            tracklist_obj.get_tracklist_request(); //initialize but do not set track to play
             
         });
 
@@ -189,14 +189,13 @@ class WpsstmTracklist {
         self.tracklist_id =             undefined;
         self.current_track_idx =        undefined;
         self.tracklist_request =        undefined;
-        self.refresh_timer =            undefined;
-        self.expire_sec =               undefined;
+        self.is_expired =               undefined;
+        self.expire_time =              undefined;
         self.autoplay =                 undefined;
         self.autosource =               undefined;
         self.tracklist_idx =            tracklist_index;
         self.tracks =                   [];
         self.tracks_shuffle_order =     [];
-        self.did_tracklist_request =    true;
         self.tracklist_can_play =       true;
         self.populate_tracklist(tracklist_el);
 
@@ -218,18 +217,16 @@ class WpsstmTracklist {
         self.tracklist_id = Number( self.tracklist_el.attr('data-wpsstm-tracklist-id') );
         self.autoplay = ( Number( self.tracklist_el.attr('data-wpsstm-autoplay') ) === 1);
         self.autosource = ( Number( self.tracklist_el.attr('data-wpsstm-autosource') ) === 1);
+        self.expire_time = Number( self.tracklist_el.attr('data-wpsstm-expire-time') );
         
-        var expire_sec_attr =  self.tracklist_el.attr('data-wpsstm-expire-sec');
-
-        if (typeof expire_sec_attr !== typeof undefined && expire_sec_attr !== false) { // For some browsers, `attr` is undefined; for others, `attr` is false.  Check for both.
-            
-            self.expire_sec = Number(expire_sec_attr);
-            
-            if ( self.expire_sec <= 0 ){
-                self.did_tracklist_request = false; 
-            }
+        
+        var now = Math.round( $.now() /1000);
+        self.is_expired = (self.expire_time && (now > self.expire_time) );
+        
+        if ( self.expire_time ){
+            self.debug("populate_tracklist() - is_expired: " + self.is_expired + ", now: " + now + " VS expire: " + self.expire_time);
         }
-        
+
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
         
         self.tracks = [];
@@ -248,83 +245,74 @@ class WpsstmTracklist {
 
         $(document).trigger("wpsstmTracklistDomReady",[self]); //custom event
         
-        if (self.expire_sec !== undefined){
+        if (self.expire_time){
             self.init_refresh_timer();
         }
 
     }
 
 
-    get_tracklist_request(force = false){
+    get_tracklist_request(){
         
         var self = this;
         var deferredTracklist = $.Deferred();
-        
-        if ( self.did_tracklist_request && !force ){
-            
-            deferredTracklist.resolve();
-            
-        }else{
-            
-            if (!self.tracklist_request){
-            
-                self.debug("get_tracklist_request");
+ 
+        if (!self.tracklist_request){
 
-                var ajax_data = {
-                    'action':           'wpsstm_refresh_tracklist',
-                    'post_id':          self.tracklist_id
-                };
+            self.debug("get_tracklist_request");
 
-                self.tracklist_request = $.ajax({
+            var ajax_data = {
+                'action':           'wpsstm_refresh_tracklist',
+                'post_id':          self.tracklist_id
+            };
 
-                    type: "post",
-                    url: wpsstmL10n.ajaxurl,
-                    data:ajax_data,
-                    dataType: 'json'
-                });
+            self.tracklist_request = $.ajax({
 
-                self.tracklist_el.addClass('loading');
+                type: "post",
+                url: wpsstmL10n.ajaxurl,
+                data:ajax_data,
+                dataType: 'json'
+            });
 
-                //bottom notice
-                var notice_slug = 'refresh-' + self.tracklist_idx;
-                var tracklist_title = self.tracklist_el.find('[itemprop="name"]').first().text();
-                var refresh_notice_bottom = $('<i class="fa fa-circle-o-notch fa-fw fa-spin"></i> '+wpsstmPlayer.refreshing_text+' <em>'+tracklist_title+'</em>');
-                wpsstm_bottom_notice(notice_slug,refresh_notice_bottom,false);
-                
-            }else{ 
-                //already requesting
+            self.tracklist_el.addClass('loading');
+
+            //bottom notice
+            var notice_slug = 'refresh-' + self.tracklist_idx;
+            var tracklist_title = self.tracklist_el.find('[itemprop="name"]').first().text();
+            var refresh_notice_bottom = $('<i class="fa fa-circle-o-notch fa-fw fa-spin"></i> '+wpsstmPlayer.refreshing_text+' <em>'+tracklist_title+'</em>');
+            wpsstm_bottom_notice(notice_slug,refresh_notice_bottom,false);
+
+        }else{ 
+            //already requesting
+        }
+
+        self.tracklist_request.done(function(data) {
+            if (data.success === false) {
+                deferredTracklist.reject();
+            }else{
+                var new_tracklist_el = $(data.new_html);
+                self.tracklist_el.replaceWith(new_tracklist_el);
+                self.populate_tracklist( new_tracklist_el );
+                deferredTracklist.resolve();
             }
 
-            self.tracklist_request.done(function(data) {
-                if (data.success === false) {
-                    deferredTracklist.reject();
-                }else{
-                    var new_tracklist_el = $(data.new_html);
-                    self.tracklist_el.replaceWith(new_tracklist_el);
-                    self.populate_tracklist( new_tracklist_el );
-                    deferredTracklist.resolve();
-                }
-                
 
-            });
+        });
 
-            self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
-                deferredTracklist.reject();
-            });  
-            
-            self.tracklist_request.always(function() {
-                self.did_tracklist_request = true; //so we can avoid running this function several times
-                
-                //remove notice
-                var notice_slug = 'refresh-' + self.tracklist_idx;
-                $('#wpsstm-bottom-notice-' + notice_slug).remove();
+        self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
+            deferredTracklist.reject();
+        });  
 
-                self.tracklist_el.removeClass('loading');
-                self.tracklist_request = undefined;
-            });
-            
-        }
-        
+        self.tracklist_request.always(function() {
+
+            //remove notice
+            var notice_slug = 'refresh-' + self.tracklist_idx;
+            $('#wpsstm-bottom-notice-' + notice_slug).remove();
+
+            self.tracklist_el.removeClass('loading');
+            self.tracklist_request = undefined;
+        });
+
         ////
         
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
@@ -461,31 +449,22 @@ class WpsstmTracklist {
     */
     
     init_refresh_timer(){
+        
         var self = this;
+        var now = Math.round( $.now() /1000);
+        var remaining_sec = self.expire_time - now;
+        var remaining_ms = remaining_sec * 1000;
+        
+        if (remaining_sec <= 0) return;
 
-        //expire countdown
-        if (self.expire_sec === 0) return;
-        if (self.expire_sec <= 0) return;
-        
-        var ms = self.expire_sec * 1000;
+        self.debug("init_refresh_timer() - could refresh in "+ remaining_sec +" seconds");
 
-        self.debug("init_refresh_timer()");
-        
-        if (self.refresh_timer){ //stop current timer if any
-            clearTimeout(self.refresh_timer);
-            self.refresh_timer = undefined;
-        }
-        
-        self.debug("could refresh in "+ self.expire_sec +" seconds");
-        
         setTimeout(function(){
+            self.is_expired = true;
+            self.tracklist_el.addClass('wpsstm-expired-tracklist'); //for CSS
+            self.debug("tracklist has expired");
             
-            self.expire_sec = 0;
-            self.tracklist_el.attr('data-wpsstm-expire-sec',0); //for CSS
-            self.did_tracklist_request = false;
-            self.debug("refresh timer expired");
-            
-        }, ms );
+        }, remaining_ms );
         
     }
 
@@ -512,16 +491,23 @@ class WpsstmTracklist {
         //no track idx defined, set first track and maybe refresh tracklist
         if ( track_idx === undefined ){
             track_idx = 0;
+        }
+        
+        if ( (track_idx === 0) && self.is_expired ){ //TO FIX + ajax enabled ?
             deferredTracklist = self.get_tracklist_request();
         }else{
             deferredTracklist.resolve();
         }
+        
         self.current_track_idx = track_idx;
 
         //tracklist ready
         deferredTracklist.done(function() {
             
-            self.debug("play_tracklist_track #" +  self.current_track_idx + " source #" + source_idx);
+            var debug_msg = "play_tracklist_track() #" + self.current_track_idx;
+            if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
+            self.debug(debug_msg);
+            
             var play_track = self.get_track_obj(self.current_track_idx);
 
             if (play_track){

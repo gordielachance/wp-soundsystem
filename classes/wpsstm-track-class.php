@@ -454,40 +454,21 @@ class WP_SoundSystem_Track{
         return $list;
     }
     
-    function get_track_source_ids($args = null){
-        $default_args = array(
-            'post_status'=>     'any',
-            'posts_per_page' => -1,
-        );
-
-        if (!$args){
-            $args = $default_args;
-        }else{
-            $args = wp_parse_args($args,$default_args);
-        }
+    function query_track_sources($args=null){
 
         $required_args = array(
             'post_type' =>      wpsstm()->post_type_source,
             'post_parent' =>    $this->post_id,
-            'fields'  =>        'ids',
         );
-
-        $args = wp_parse_args($required_args,$args);
-
-        $query = new WP_Query( $args );
-        return $query->posts; //ids
-    }
-    
-    function get_track_sources(){
-        if ($this->sources === null) {
-            $sources = array();
-            $source_ids = $this->get_track_source_ids();
-            foreach((array)$source_ids as $source_id){
-                $sources[] = new WP_SoundSystem_Source($source_id);
-            }
-            $this->sources = $sources;
+        
+        if ($args){
+            $args = wp_parse_args($required_args,$args);
+        }else{
+            $args = $required_args;
         }
-        return $this->sources;
+
+        return new WP_Query($args);
+
     }
 
     function save_auto_sources(){
@@ -525,11 +506,6 @@ class WP_SoundSystem_Track{
             }
             
             $new_source_ids[] = $post_id;
-        }
-        
-        //reload sources
-        if ($new_source_ids){
-            $this->sources = $this->get_track_sources();
         }
 
         return $new_source_ids;
@@ -598,33 +574,6 @@ class WP_SoundSystem_Track{
 
         return $sources;
 
-    }
-    
-    function sort_sources_by_similarity(){
-        
-        $artist_sanitized = sanitize_title($this->artist);
-        $title_sanitized = sanitize_title($this->title);
-        
-        if (!$this->sources) return;
-
-        //compute similarity
-        foreach($this->sources as $key=>$source){
-            
-            //sanitize data so it is easier to compare
-            $source_title_sanitized = sanitize_title($source->title);
-            
-            //remove artist from source title so the string to compare is shorter
-            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
-            
-            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
-            $this->sources[$key]->similarity = $similarity_pc;
-        }
-        
-        //reorder by similarity
-        usort($this->sources, function ($a, $b){
-            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
-        });
-        
     }
 
     function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
