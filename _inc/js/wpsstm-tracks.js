@@ -152,16 +152,19 @@
     
     $(document).on( "wpsstmTrackInit", function( event, track_obj ) {
         
+        //expand tracklist
         var track_el = track_obj.track_el;
         if ( track_el.is(":visible") ) return;
         
-        var tracklist_el = track_obj.get_tracklist_el();
+        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(track_obj.tracklist_idx);
+        
+        var tracklist_el = tracklist_obj.tracklist_el;
         var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
         var newTracksCount = track_obj.track_idx + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
-        
-        tracklist_el.toggleTracklist({
+
+        tracklist_obj.toggleTracklist({
             childrenMax:newTracksCount
         });
         

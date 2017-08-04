@@ -1,10 +1,7 @@
 (function($){
 
     $(document).on( "wpsstmTracklistDomReady", function( event, tracklist_obj ) {
-        
-        //toggle expand tracks
-        tracklist_obj.tracklist_el.toggleTracklist();
-        
+
         // sort rows
         tracklist_obj.tracklist_el.find( '.wpsstm-tracklist-entries' ).sortable({
             handle: '.wpsstm-reposition-track',
@@ -144,31 +141,10 @@
             tracklist_obj.delete_playlist_track(track_obj);
         });
         
-        tracklist_obj.tracklist_el.toggleTracklist();
+        //toggle expand tracks at init
+        tracklist_obj.toggleTracklist();
     });
 
-    $.fn.extend({ 
-        toggleTracklist: function(options){
-            // OPTIONS
-            var defaults = {
-                childrenShowCount:  true,
-                childrenMax:        3,
-                childrenSelector:   '.wpsstm-tracklist-entries > *',
-                moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-                lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
-            };
-            var options =  $.extend(defaults, options);
-            
-            $(this).each(function() {
-                if ( $(this).attr("data-tracks-count") > 0 ) {
-                    return $(this).toggleChildren(options);
-                }
-            });
-
-
-        }
-    });
-    
     
 })(jQuery);
 
@@ -759,5 +735,27 @@ class WpsstmTracklist {
         })
 
     }
+    
+    toggleTracklist(options){
+        
+        var self = this;
+
+        // OPTIONS
+        var defaults = {
+            childrenShowCount:  true,
+            childrenMax:        3,
+            childrenSelector:   '.wpsstm-tracklist-entries > *',
+            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
+            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
+        };
+        var options =  $.extend(defaults, options);
+
+        if ( $(this.tracklist_el).attr("data-tracks-count") > 0 ) {
+            return $(this.tracklist_el).toggleChildren(options);
+        }
+
+
+    }
+    
     
 }

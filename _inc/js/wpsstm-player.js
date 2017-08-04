@@ -58,11 +58,6 @@ $(document).ready(function(){
         var track_el = track_obj.track_el;
         var newTracksCount = track_obj.track_idx + 1;
 
-        //display request rows if needed
-        tracklist_el.toggleTracklist({
-            childrenMax:newTracksCount
-        });
-
         //https://stackoverflow.com/a/6677069/782013
         $('html, body').animate({
             scrollTop: track_el.offset().top - ( $(window).height() / 3) //not at the very top
