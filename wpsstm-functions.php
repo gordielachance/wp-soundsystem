@@ -245,6 +245,7 @@ Use this instead of 'new WP_SoundSystem_Tracklist' or 'new WP_SoundSystem_Remote
 */
 function wpsstm_get_post_tracklist($post_id=null){
     global $post;
+
     if (!$post_id && $post) $post_id = $post->ID;
     
     $tracklist = new WP_SoundSystem_Tracklist(); //default
@@ -252,9 +253,7 @@ function wpsstm_get_post_tracklist($post_id=null){
 
     switch ($post_type){
         case wpsstm()->post_type_track:
-            $tracklist = new WP_SoundSystem_Tracklist($post_id);
-            $track = new WP_SoundSystem_Track($post_id);
-            $tracklist->add($track);
+            $tracklist = new WP_SoundSystem_Single_Track_Tracklist($post_id);
         break;
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:

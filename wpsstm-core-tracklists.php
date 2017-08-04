@@ -277,7 +277,7 @@ class WP_SoundSystem_Core_Tracklists{
         $output = '—';
 
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $output = $tracklist->get_tracklist_table(array('display_type'=>'list','can_play'=>false));
+        $output = $tracklist->get_tracklist_table();
         
         echo $output;
     }
@@ -375,7 +375,7 @@ class WP_SoundSystem_Core_Tracklists{
     function metabox_tracklist_content( $post ){
         $tracklist = wpsstm_get_post_tracklist($post->ID);
         
-        echo $tracklist->get_tracklist_table(array('can_play'=>false));
+        echo $tracklist->get_tracklist_table();
 
     }
 

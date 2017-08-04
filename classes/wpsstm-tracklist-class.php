@@ -429,34 +429,24 @@ class WP_SoundSystem_Tracklist{
         return $this->remove_subtrack_ids($rem_ids);
     }
     
-    
-
-    /**
-    Read-only tracklist table
-    **/
-    function get_tracklist_table($args = null){
+    function get_tracklist_table(){
+        global $wpsstm_tracklist;
+        global $post;
         
-        $args = array(
-            'p' =>  $this->post_id,
-            'post_type' => wpsstm_tracklists()->tracklist_post_types
-        );
-
-            
-        query_posts($args);
+        //setup global post
+        $post = get_post($this->post_id);
+        setup_postdata( $post );
         
+        //setup global tracklist
+        $wpsstm_tracklist = $this;
+
         ob_start();
-        
-        while ( have_posts() ){
-            the_post();
-            wpsstm_locate_template( 'content-tracklist-table.php', true, false );
-        }
-        
-        wp_reset_query();
+
+        wpsstm_locate_template( 'content-tracklist-table.php', true, false );
 
         return ob_get_clean();
-        
     }
-    
+
     public function set_tracklist_pagination( $args ) {
 
         $args = wp_parse_args( $args, $this->pagination );
@@ -923,4 +913,10 @@ class WP_SoundSystem_Tracklist{
     }
     
 
+}
+
+class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
+    function get_subtrack_ids($args = null){
+        return array($this->post_id);
+    }
 }

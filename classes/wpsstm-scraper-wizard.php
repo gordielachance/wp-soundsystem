@@ -704,7 +704,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_tracklist_callback(){
-        echo wpsstm_wizard()->tracklist->get_tracklist_table(array('can_play'=>false));
+        echo wpsstm_wizard()->tracklist->get_tracklist_table();
     }
 
     function feedback_data_type_callback(){
