@@ -5,7 +5,6 @@ $tracklist = $wpsstm_tracklist;
 
 global $wpsstm_track;
 $track = $wpsstm_track;
-$track->album = "cococococoocococococococococo";
 
 $sources_query = $track->query_track_sources(array('posts_per_page'=>-1));
 
