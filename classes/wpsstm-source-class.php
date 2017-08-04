@@ -1,40 +1,42 @@
 <?php
 class WP_SoundSystem_Source {
     var $post_id;
-    var $track_id;
+    var $track;
     var $position = -1;
     var $url; //input URL
     var $title;
-    var $is_auto; //is this an auto source ?
+    var $is_community;
     
     var $src; //URL used in the 'source' tag (which could be not the same)
     var $provider;
     var $type;
     var $similarity;
+    
 
     private $defaults = array(
         'post_id'       => null,
         'track_id'      => null,
         'url'           => null,
         'title'         => null,
-        'is_auto'       => null, 
+        'is_community'  => null, 
         'similarity'    => null,
     );
     
     function __construct($post_id = null){
         
-        $this->provider =       new WP_SoundSystem_Player_Provider(); //default
+        $this->provider = new WP_SoundSystem_Player_Provider(); //default
         
         if ($post_id){
             $this->post_id = $post_id;
             $this->title = get_the_title($post_id);
-            $this->track_id = wp_get_post_parent_id( $post_id );
+            $track_id = wp_get_post_parent_id( $post_id );
+            $this->track = new WP_SoundSystem_Track($track_id);
 
             $this->url = get_post_meta($post_id,wpsstm_sources()->url_metakey,true);
 
             $post_author_id = get_post_field( 'post_author', $post_id );
             $community_user_id = wpsstm()->get_options('community_user_id');
-            $this->is_auto = ( $post_author_id == $community_user_id );
+            $this->is_community = ( $post_author_id == $community_user_id );
 
         }
 
@@ -55,38 +57,49 @@ class WP_SoundSystem_Source {
             $this->$key = $args[$key];
         }
 
-        //populate post ID if source already exists in the DB
-        if ( $duplicates = $this->get_source_duplicates() ){
-            $post_id = $duplicates[0];
-        }
-        
         $this->__construct( $post_id );
         
     }
 
     /*
-    Get the sources (IDs) that have the same URL than the current one
+    Get the sources that have the same URL or track informations than the current one
     */
-    function get_source_duplicates(){
-
-        $args = array(
-            'post_parent'       => $this->track_id,
-            'post_type'         => array(wpsstm()->post_type_source),
+    function get_source_duplicates_ids($args=null){
+        
+        $query_meta_trackinfo = array(
+            'relation' => 'AND',
+            wpsstm_artists()->artist_metakey    => $this->track->artist,
+            wpsstm_tracks()->title_metakey      => $this->track->title,
+            wpsstm_albums()->album_metakey      => $this->track->album,
+        );
+        $query_meta_trackinfo = array_filter($meta_track_info);
+        
+        $default = array(
             'post_status'       => 'any',
             'posts_per_page'    => -1,
-            'fields'            => 'ids',
+            'fields'            => 'ids'
+        );
+        
+        $args = wp_parse_args((array)$args,$default);
+
+        $required = array(
+            'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current source
+            'post_parent'       => $this->track->post_id,
+            'post_type'         => array(wpsstm()->post_type_source),
+
             'meta_query'        => array(
+                'relation' => 'OR',
+                //by source URL
                 'source_url' => array(
                     'key'     => wpsstm_sources()->url_metakey,
                     'value'   => $this->url
-                )
+                ),
+                //by track info, TO FIX TO CHECK required ?
+                //$query_meta_trackinfo,
             )
         );
-
-        if ($this->post_id){
-            $args['post__not_in'] = array($this->post_id);
-        }
-
+        
+        $args = wp_parse_args($required,$args);
 
         $query = new WP_Query( $args );
         return $query->posts;
@@ -100,20 +113,22 @@ class WP_SoundSystem_Source {
             return new WP_Error( 'no_source_url', __('Unable to save source : missing URL','wpsstm') );
         }
         
-        if (!$this->track_id){
-            return new WP_Error( 'no_source_url', __('Unable to save source : missing track ID','wpsstm') );
+        if (!$this->track->post_id){
+            return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
         }
         
         //check if this source exists already
-        if ( $duplicate_ids = $this->get_source_duplicates() ){
+        $duplicate_args = array('fields'=>'ids');
+        if ( $duplicates = $this->get_source_duplicates_ids($duplicate_args) ){
             $this->post_id = $duplicate_ids[0];
             return $this->post_id;
         }
-        
+
         $default_args = array(
-            'post_author' =>    get_current_user_id(),
+            'post_author' =>    ($this->is_community) ?wpsstm()->get_options('community_user_id') : get_current_user_id(),
             'post_status' =>    'publish',
         );
+
         $args = wp_parse_args((array)$args,$default_args);
         
         //capability check
@@ -123,14 +138,26 @@ class WP_SoundSystem_Source {
         if ( !user_can($args['post_author'],$required_cap) ){
             return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
         }
+        
+        //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
+        
+        $meta_input = array(
+            wpsstm_sources()->url_metakey       => $this->url,
+            /*
+            wpsstm_artists()->artist_metakey    => $this-track->artist,
+            wpsstm_tracks()->title_metakey      => $this-track->title,
+            wpsstm_albums()->album_metakey      => $this-track->album,
+            wpsstm_mb()->mbid_metakey           => $this-track->mbid,
+            */
+        );
+        
+        $meta_input = array_filter($meta_input);
 
         $required_args = array(
             'post_title' =>     $this->title,
             'post_type' =>      wpsstm()->post_type_source,
-            'post_parent' =>    $this->track_id,
-            'meta_input' =>     array(
-                wpsstm_sources()->url_metakey => $this->url,
-            ),
+            'post_parent' =>    $this->track->post_id,
+            'meta_input' =>     $meta_input,
         );
             
         $args = wp_parse_args($required_args,$args);
@@ -142,7 +169,7 @@ class WP_SoundSystem_Source {
         return $this->post_id;
         
     }
-    
+
     function sanitize_source(){
         
         $this->url = trim($this->url);

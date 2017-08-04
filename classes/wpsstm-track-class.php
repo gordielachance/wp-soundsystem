@@ -298,16 +298,14 @@ class WP_SoundSystem_Track{
         $this->post_id = $post_id;
         
         //save sources if any set
+        //TO FIX TO CHECK how often this runs; and when ?
         foreach ((array)$this->sources as $source_raw){
             
             $source = new WP_SoundSystem_Source();
-            $source->track_id = $this->post_id;
+            $source->track = $this;
             
             $source->from_array($source_raw);
-            if ( !$duplicate_ids = $source->get_source_duplicates() ){
-                $this->add_community_source($source);
-            }
-            
+            $source->is_community = true; //TO FIX TO CHECK should be this here ?            
         }
 
         return $this->post_id;
@@ -496,7 +494,9 @@ class WP_SoundSystem_Track{
 
         foreach((array)$auto_sources as $source){
             
-            $post_id = $this->add_community_source($source);
+            $source->is_community = true;
+            
+            $post_id = $source->save_source();
             
             if ( is_wp_error($post_id) ){
                 $code = $post_id->get_error_code();
@@ -511,16 +511,7 @@ class WP_SoundSystem_Track{
         return $new_source_ids;
 
     }
-    
-    function add_community_source($source){
-        $args = array(
-            'post_author'   => wpsstm()->get_options('community_user_id'),
-            'post_status'   => 'publish',
-        );
 
-        return $source->save_source($args);
-    }
-    
     /*
     Exclude sources that have one word of the banned words list in their titles (eg 'cover').
     */

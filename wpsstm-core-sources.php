@@ -278,7 +278,7 @@ class WP_SoundSystem_Core_Sources{
             $source_classes = array('wpsstm-source');
 
             //origin
-            if ( $source->is_auto ){
+            if ( $source->is_community ){
                 $disabled = $readonly = true;
                 $source_classes[] = 'wpsstm-source-auto';
             }
@@ -286,7 +286,7 @@ class WP_SoundSystem_Core_Sources{
             ob_start();
             
             ?>
-            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_auto;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
+            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_community;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
                 <span class="wpsstm-source-action">
                     <i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>
                     <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>

@@ -196,7 +196,7 @@ class WP_SoundSystem_Player_Provider{
             $source = new WP_SoundSystem_Source();
             $source->url = wpsstm_get_array_value('permalink',$item);
             $source->title = wpsstm_get_array_value('initTitle',$item);
-            $source->track_id = $track->post_id;
+            $source->track = $track;
             $sources[] = $source;
             
         }

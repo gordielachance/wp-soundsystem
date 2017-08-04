@@ -277,19 +277,22 @@ class WpsstmPagePlayer {
 
             var check_tracklist = self.get_tracklist_obj(tracklist_obj.tracklist_idx);
             
-            if( !check_tracklist.has_playable_tracks() ) return true; //continue
-            
-            playable_tracklist = check_tracklist;
-            return false;//break
+            check_tracklist.can_play_tracklist().then(function(value) {
+                
+                //get last tracklist track
+                var last_track_idx = check_tracklist.tracks.length -1;
+                check_tracklist.play_subtrack(last_track_idx);
+                return false;//break
+                
+            }, function(reason) {
+                
+                console.log('Cannot jump to previous tracklist from tracklist #' + tracklist_obj.tracklist_idx);
+                return true; //continue
+                
+            });
 
         });
-        
-        if (playable_tracklist){
-            //playable_tracklist.previous_track_jump(); //TO FIX SHOULD BE THIS BUT IS BROKEN
-            return playable_tracklist.play_subtrack();
-        }else{
-            console.log('Cannot jump to previous tracklist from tracklist #' + tracklist_obj.tracklist_idx);
-        }
+
         
     }
     
@@ -314,30 +317,27 @@ class WpsstmPagePlayer {
             }
 
         }
-        
-        console.log(current_tracklist_idx);
-        console.log(next_tracklist_idx);
-        console.log("next_tracklist_jump");
 
-        //try to get next playable playlist
+        //try to get next playlist
         $(self.tracklists).each(function( i, tracklist_obj ) {
 
             if ( tracklist_obj.tracklist_idx < next_tracklist_idx) return true; //continue
 
             var check_tracklist = self.get_tracklist_obj(tracklist_obj.tracklist_idx);
             
-            if( !check_tracklist.has_playable_tracks() ) return true; //continue
-            
-            playable_tracklist = check_tracklist;
-            return false;//break
+            check_tracklist.can_play_tracklist().then(function(value) {
+                
+                check_tracklist.play_subtrack();
+                return false;//break
+                
+            }, function(reason) {
+                
+                console.log('Cannot jump to previous tracklist from tracklist #' + tracklist_obj.tracklist_idx);
+                return true; //continue
+                
+            });
 
         });
-        
-        if (playable_tracklist){
-            return playable_tracklist.play_subtrack();
-        }else{
-            console.log('Cannot jump to next tracklist from tracklist #' + tracklist_obj.tracklist_idx);
-        }
 
     }
     

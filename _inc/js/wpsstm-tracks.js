@@ -205,39 +205,48 @@ class WpsstmTrack {
         var track_instances = self.get_track_instances();
         var can_play = false;
         var deferredObject = $.Deferred();
+        var track_position = self.track_idx + 1;
 
         if ( self.sources.length > 0 ) {
+
+            track_instances.removeClass('error');
             
-            can_play = true;
+            deferredObject.resolve("can play track() : track #" + self.track_idx + " has already sources, no need to request them");
             
         }else if ( tracklist_obj.autosource ) {
             
             var promise = self.get_sources_auto();
             
-            promise.done(function() {
+            promise.done(function(val) {
 
                 if ( self.sources.length > 0 ){
-                    can_play = true;
-                    deferredObject.resolve();
+                    
+                    track_instances.removeClass('error');
+
+                    deferredObject.resolve("can play track() : sources found for track #" + self.track_idx);
                 }else{
-                    can_play = false;
-                    deferredObject.reject();
+
+                    self.updateTrackClasses('error');
+                    deferredObject.reject("can play track() : no sources for track #" + self.track_idx);
                 }
 
             })
             
+            promise.fail(function() {
+                
+                self.updateTrackClasses('error');
+                deferredObject.reject("can play track() failed for track #" + self.track_idx);
+
+            })
+
+            promise.always(function(data, textStatus, jqXHR) {
+                //self.can_play_track = true;
+            })
+
         }
 
-        if ( can_play ){
-            track_instances.removeClass('error');
-        }else{
-            self.updateTrackClasses('error');
-        }
-        
-        var track_position = self.track_idx + 1;
-        console.log("can play tracklist #" + self.tracklist_idx +" track #" + track_position +" (idx:"+self.track_idx+" ): " + can_play);
+        return deferredObject.promise();
 
-        return can_play;
     }
     
     get_tracklist_el(){
@@ -302,9 +311,6 @@ class WpsstmTrack {
         var self = this;
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
-        //cannot play this track
-        if ( !self.can_play_track() ) return;
-
         self.playback_start = 0; //reset playback start
         
         wpsstm_currentTrack = self;
@@ -318,6 +324,8 @@ class WpsstmTrack {
         self.set_bottom_trackinfo();
         
         $(document).trigger( "wpsstmTrackInit",[self] ); //custom event
+        
+        
 
         self.load_in_player(source_idx);
 
@@ -339,25 +347,18 @@ class WpsstmTrack {
         var deferredObject = $.Deferred();
 
         if ( self.did_sources_request ) { //do not 
-            deferredObject.resolve();
+            deferredObject.resolve("already did sources auto request for track #" + self.track_idx);
         } else{
-            
-            self.debug("get_sources_auto for track #" + self.track_idx);
-            
+
             var promise = self.get_track_sources_request();
             track_instances.addClass('buffering');
             
             promise.fail(function() {
-
-                console.log("sources request failed for track #" + self.track_idx);
-                
-                deferredObject.reject();
-
+                deferredObject.reject("sources request failed for track #" + self.track_idx);
             })
             
-            promise.done(function() {
-                self.debug("get_sources_auto - success");
-                deferredObject.resolve();
+            promise.done(function(v) {
+                deferredObject.resolve(v);
             })
             
             promise.always(function(data, textStatus, jqXHR) {
@@ -620,13 +621,12 @@ class WpsstmTrack {
         var new_source_obj = self.get_track_source(idx);
         var new_source = { src: new_source_obj.src, 'type': new_source_obj.type };
 
-        if (self.current_source_idx == idx){
-            self.debug("source #"+idx+" is already set");
-            return false;
-        }
+        if (self.current_source_idx !== idx){
 
-        self.debug("set_track_source() #" + idx + ": "+new_source.src);
-        new_source_obj.get_source_li_el().addClass('wpsstm-active-source');
+            self.debug("set_track_source() #" + idx + ": "+new_source.src);
+            new_source_obj.get_source_li_el().addClass('wpsstm-active-source');
+            
+        }
 
         //player
         wpsstm_mediaElement.pause();
@@ -677,11 +677,15 @@ class WpsstmTrack {
                 self.debug(self);
                 
                 self.sources = []; //unset sources so autosource will work
-
-                //try again
-                self.play_source();
-                return;
                 
+                self.can_play_track().then(function(value) {
+                    self.play_source();
+                    return;
+                }, function(reason) {
+                    return;
+                });
+
+ 
             }else{
                 //No more sources - Play next song if any
                 self.debug("skip_bad_source() - No valid sources found");
