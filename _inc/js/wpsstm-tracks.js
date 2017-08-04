@@ -320,12 +320,10 @@ class WpsstmTrack {
         
         var track_instances = self.get_track_instances();
         track_instances.addClass('active buffering');
-        
+
         self.set_bottom_trackinfo();
         
         $(document).trigger( "wpsstmTrackInit",[self] ); //custom event
-        
-        
 
         self.load_in_player(source_idx);
 
@@ -437,6 +435,8 @@ class WpsstmTrack {
         var list = $('<ul class="wpsstm-tracklist-entries"></ul>');
 
         var row = self.track_el.clone(true,true);
+        row.show(); //be sure it will be displayed
+        
         $(list).append(row);
 
         $(bottom_trackinfo_el).html(list);
@@ -602,7 +602,7 @@ class WpsstmTrack {
     highligh_source(idx){
         var self = this;
         
-        self.debug("highligh_source(): #" + idx);
+        //self.debug("highligh_source(): #" + idx);
         
         var source_obj = self.get_track_source(idx);
         var track_instances = self.get_track_instances();

@@ -243,7 +243,6 @@ class WpsstmTracklist {
 
     }
 
-
     get_tracklist_request(){
         
         var self = this;
@@ -317,13 +316,19 @@ class WpsstmTracklist {
 
     }
     
-    can_play_tracklist(){
+    get_first_playable_track(tracks){
+        
+        var self = this;
+
+        if (typeof tracks === 'undefined'){
+            tracks = self.tracks;
+        }
         
         var hasPlayable = $.Deferred();
         
-        var unplayableTracks = [];
+        var unplayable = [];
         
-        $.each(self.tracks, function( index, track_obj ) {
+        $.each(tracks, function( index, track_obj ) {
             
             var unplayableTrack = $.Deferred();
             
@@ -332,56 +337,27 @@ class WpsstmTracklist {
             // treat it as a rejection so Promise.all immediately bails out.
             
             track_obj.can_play_track().then(
-                val => unplayableTrack.reject(track_obj.track_idx),
-                err => unplayableTrack.resolve(track_obj.track_idx),
+                val => unplayableTrack.reject(track_obj),
+                err => unplayableTrack.resolve(track_obj),
             );
             
-            unplayableTracks.push(unplayableTrack);
+            unplayable.push(unplayableTrack);
 
         });
 
-        Promise.all(unplayableTracks).then(
-            val => {
-                hasPlayable.reject(val);
-            },
-            err => {
-                console.log("can_play_tracklist() #" + self.tracklist_idx + ": yes, at least track #"+err+" can be played");
-                hasPlayable.resolve(err);
+        Promise.all(unplayable).then(
+            function(track_obj) {
+                console.log("get_first_playable_track() : skip non-playable track #" + track_obj.track_idx);
+                hasPlayable.reject();
+            }, function(track_obj) {
+                hasPlayable.resolve(track_obj);
             }
         );
         
         return hasPlayable.promise();
         
     }
-/*
-    can_play_tracklistTEST(){
-        
-        var all_promises;
-        
-        $.each(self.tracks, function( index, track ) {
-            var promise = track.can_play_track();
-            all_promises.push(promise);
-        });
-        
-        //https://stackoverflow.com/questions/37234191/resolve-es6-promise-with-first-success
-        
-        return Promise.all(all_promises.map(p => {
-            // If a request fails, count that as a resolution so it will keep
-            // waiting for other possible successes. If a request succeeds,
-            // treat it as a rejection so Promise.all immediately bails out.
-            return p.then(
-                val => Promise.reject(val),
-                err => Promise.resolve(err)
-            );
-            )).then(
-                // If '.all' resolved, we've just got an array of errors.
-                errors => Promise.reject(errors),
-                // If '.all' rejected, we've got the result we wanted.
-                val => Promise.resolve(val)
-            );
-    }
-*/
-    
+
     get_track_obj(track_idx){
         var self = this;
         
@@ -435,130 +411,80 @@ class WpsstmTracklist {
         
         var self = this;
         
-            self.can_play_tracklist().then(function(value) {
-                
-                var current_track_idx = ( self.current_track_idx === 'undefined') ? 0 : self.current_track_idx;
-                current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx);
-                var last_track_idx = self.tracks.length -1;
-                var previous_track_idx = ( current_track_idx <= 0) ? 0 : current_track_idx - 1;
-                var new_track_idx;
-
-                if (current_track_idx == 0){ //this is the first tracklist track
-
-                    if ( !wpsstm_page_player.can_repeat ){
-                        self.debug("previous_tracklist_jump() : Reached the first track and repeat is disabled; abord previous_track_jump()");
-                        return false;
-                    }else{
-                        wpsstm_page_player.previous_tracklist_jump();
-                        return;
-                    }
-
-                }
-
-                var tracks = $(self.tracks).get();
-                var tracks_before = tracks.slice(0,current_track_idx).reverse();
-                var tracks_after = tracks.slice(current_track_idx+1).reverse(); 
-
-                var tracks_reordered = tracks_before.concat(tracks_after);
-                var debug = [];
-
-
-                $(tracks_reordered).each(function( i, track_obj ) {
-                    debug.push(track_obj.track_idx);
-                });
-                console.log("previous tracks:");
-                console.log(debug);
-
-                $(tracks_reordered).each(function( i, track_obj ) {
-                    console.log(track_obj);
-                    if ( track_obj.can_play_track() ){
-                        new_track_idx = track_obj.track_idx;
-                        return false; //break
-                    }
-                });
-
-                if (new_track_idx !== 'undefined'){
-                    return self.play_subtrack(new_track_idx);
-                }else{
-                    console.log('Tracklist #' + tracklist_obj.tracklist_idx + ": cannot jump previous track");
-                    //wpsstm_page_player.previous_tracklist_jump();
-                }
-                
-            }, function(reason) {
-                
-                self.debug("previous_tracklist_jump() : No playable tracks");
+        var current_track_idx = ( self.current_track_idx === 'undefined') ? 0 : self.current_track_idx;
+        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx);
+        
+        //is first track
+        if ( current_track_idx === 0 ){
+            if ( wpsstm_page_player.can_repeat ){
+                wpsstm_page_player.previous_tracklist_jump();
                 return;
-                
-            });
+            }else{
+                console.log("previous_track_jump() for tracklist #"+self.tracklist_idx+" is the first track, and can_repeat is disabled.");
+                return;
+            }
+        }
+        
+        var tracks = $(self.tracks).get();
+        var tracks_before = tracks.slice(0,current_track_idx).reverse();
+        var tracks_after = [];
+        
+        if ( wpsstm_page_player.can_repeat ){
+            tracks_after = tracks.slice(current_track_idx+1).reverse(); 
+        }
 
+        var tracks_reordered = tracks_before.concat(tracks_after);
+        
+        //find first playable
+        self.get_first_playable_track(tracks_reordered).then(
+            function(track_obj) {
+                self.play_subtrack(track_obj.track_idx);
+            }, function(error) {
+                console.log("previous_track_jump() : unable to find any playable track for tracklist #" + self.tracklist_idx);
+                wpsstm_page_player.previous_tracklist_jump();
+            }
+        );
         
     }
     
     next_track_jump(){
-        
+
         var self = this;
         
-        self.can_play_tracklist().then(function(value) {
-
-            var current_track_idx = ( self.current_track_idx === 'undefined') ? 0 : self.current_track_idx;
-            current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx);
-            var last_track_idx = self.tracks.length -1;
-            var next_track_idx = ( current_track_idx >= last_track_idx) ? 0 : current_track_idx + 1;
-            var new_track_idx;
-
-            if (current_track_idx == last_track_idx){ //this is the last track
-
-                if ( !wpsstm_page_player.can_repeat ){
-                    self.debug("previous_tracklist_jump() : Reached the last track and repeat is disabled; abord next_track_jump()");
-                    return false;
-                }else{
-                    wpsstm_page_player.next_tracklist_jump();
-                    return;
-                }
-
-            }
-
-            console.log("next_track_jump - current:" + current_track_idx + ", next:" + next_track_idx);
-
-            var tracks = $(self.tracks).get();
-
-            //if we loop inside the playlist rather than the page, add the previous tracks too
-            var tracks_before = tracks.slice(0,current_track_idx);
-            var tracks_after = tracks.slice(current_track_idx+1); //do not including this one
-
-            var tracks_reordered = tracks_after.concat(tracks_before);
-            var debug = [];
-
-            /*
-            $(tracks_reordered).each(function( i, track_obj ) {
-                debug.push(track_obj.track_idx);
-            });
-            console.log("next tracks:");
-            console.log(debug);
-            */
-
-            $(tracks_reordered).each(function( i, track_obj ) {
-                if ( track_obj.can_play_track() ){
-                    new_track_idx = track_obj.track_idx;
-                    return false; //break
-                }
-            });
-
-            if (new_track_idx !== 'undefined'){
-                return self.play_subtrack(new_track_idx);
+        var current_track_idx = ( self.current_track_idx === 'undefined') ? 0 : self.current_track_idx;
+        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx);
+        var last_track_idx = self.tracks.length -1;
+        
+        //is last track
+        if ( current_track_idx === last_track_idx ){
+            if ( wpsstm_page_player.can_repeat ){
+                wpsstm_page_player.next_tracklist_jump();
+                return;
             }else{
-                console.log('Tracklist #' + tracklist_obj.tracklist_idx + ": cannot jump next track");
+                console.log("next_track_jump() for tracklist #"+self.tracklist_idx+" is the last track, and can_repeat is disabled.");
+                return;
+            }
+        }
+        
+        var tracks = $(self.tracks).get();
+        var tracks_after = tracks.slice(current_track_idx+1); 
+        var tracks_before = [];
+        
+        if ( wpsstm_page_player.can_repeat ){
+            tracks_before = tracks.slice(0,current_track_idx);
+        }
+        
+        var tracks_reordered = tracks_after.concat(tracks_before);
+        
+        //find first playable
+        self.get_first_playable_track(tracks_reordered).then(
+            function(track_obj) {
+                self.play_subtrack(track_obj.track_idx);
+            }, function(error) {
+                console.log("next_track_jump() : unable to find any playable track for tracklist #" + self.tracklist_idx);
                 wpsstm_page_player.next_tracklist_jump();
             }
-
-        }, function(reason) {
-
-            self.debug("next_track_jump() : No playable tracks");
-            return;
-
-        });
-        
-        
+        );
         
     }
 
