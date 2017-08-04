@@ -315,9 +315,9 @@
             }
         }
 
-        &.buffering{
+        &.buffering,&.loading-sources{
             .wpsstm-track-position{
-                .wpsstm-player-icon-buffering{
+                .wpsstm-player-icon-loading{
                     display:inline-block;
                 }
                 span{

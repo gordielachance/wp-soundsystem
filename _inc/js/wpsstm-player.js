@@ -138,31 +138,11 @@ $(document).ready(function(){
 
 $(document).on( "wpsstmPageDomReady", function( event ) {
     
-    /*
-    Autoplay at init
-    */
-    
-    //get playlists where autoplay is enabled
-    var autoplay_tracklists = [];
-    
-    $(wpsstm_page_player.tracklists).each(function( i, tracklist_obj ) {
-        if ( tracklist_obj.autoplay ){
-            autoplay_tracklists.push(tracklist_obj);
-        }
-    });
-        
-    //play first playable one
-    wpsstm_page_player.get_first_playable_tracklist().then(
-        function(tracklist_obj) {
-            //get last tracklist track
-            tracklist_obj.play_subtrack();
-        }, function(error) {
-            console.log("page autoplay : unable to find any playable tracklist");
-        }
-    );
+    //Autoplay at init
+    wpsstm_page_player.page_autoplay();
+
     
 });
-
 
 //Confirmation popup is a media is playing and that we leave the page
 
@@ -210,6 +190,34 @@ class WpsstmPagePlayer {
         self.tracklists_shuffle_order = wpsstm_shuffle(self.tracklists_shuffle_order);
         
     }
+    
+    page_autoplay(){
+        //get playlists where autoplay is enabled
+        var autoplay_tracklists = [];
+
+        $(wpsstm_page_player.tracklists).each(function( i, tracklist_obj ) {
+            if ( tracklist_obj.autoplay ){
+                autoplay_tracklists.push(tracklist_obj);
+            }
+        });
+
+        if (autoplay_tracklists.length === 0) return;
+
+        wpsstm_page_player.debug("page autoplay : trying to start first autoplay tracklist available...");
+        var idx_list = autoplay_tracklists.map(function(a) {return a.tracklist_idx;});
+        wpsstm_page_player.debug(idx_list);
+
+        //play first playable one
+        wpsstm_page_player.get_first_playable_tracklist(autoplay_tracklists).then(
+            function(tracklist_obj) {
+                //play first track
+                tracklist_obj.play_subtrack();
+            }, function(error) {
+                self.debug("page autoplay : unable to find any playable tracklist");
+            }
+        );
+    }
+
     
     play_tracklist(tracklist_idx,track_idx,source_idx){
 
@@ -280,21 +288,27 @@ class WpsstmPagePlayer {
             tracklists_after = tracklists.slice(current_tracklist_idx+1).reverse(); 
         }
         
+        //find first playable in reverse order
         var tracklists_reordered = tracklists_before.concat(tracklists_after);
-        
-        var tracklist_set = [];
-        $.each(tracklists_reordered, function( index, tracklist_obj ) {
-            tracklist_set.push(tracklist_obj.tracklist_idx);
-        });
-        console.log(tracklist_set);
-        
-        //find first playable
+
         self.get_first_playable_tracklist(tracklists_reordered).then(
             function(tracklist_obj) {
-                console.log("next_tracklist_jump() : jumped to tracklist #" + tracklist_obj.tracklist_idx);
-                tracklist_obj.play_subtrack();
+                self.debug("previous_tracklist_jump() : jumped to tracklist #" + tracklist_obj.tracklist_idx);
+                
+                //find first playable in reverse order
+                var tracks_reversed = $(tracklist_obj.tracks).get().reverse();
+                tracklist_obj.get_first_playable_track(tracks_reversed).then(
+                    function(track_obj) {
+                        tracklist_obj.play_subtrack(track_obj.track_idx);
+                    }, function(error) {
+                        self.debug("previous_tracklist_jump() : unable to find any playable track for tracklist #" + self.tracklist_idx);
+                        wpsstm_page_player.previous_tracklist_jump();
+                    }
+                );
+                
+                
             }, function(error) {
-                console.log("next_tracklist_jump() : unable to find any playable tracklist");
+                console.log("previous_tracklist_jump() : unable to find any playable tracklist");
             }
         );
         
@@ -330,14 +344,19 @@ class WpsstmPagePlayer {
     get_first_playable_tracklist(tracklists){
         
         var self = this;
+        var hasPlayable = $.Deferred();
+        var unplayable = [];
+        var tracklist_set = [];
 
         if (typeof tracklists === 'undefined'){
             tracklists = self.tracklists;
         }
         
-        var hasPlayable = $.Deferred();
+        if (tracklists.length === 0) hasPlayable.reject('empty tracklists input');
 
-        var unplayable = [];
+        self.debug("get_first_playable_tracklist() in tracklists :");
+        var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
+        self.debug(idx_list);
 
         $.each(tracklists, function( index, tracklist_obj ) {
 
@@ -357,8 +376,10 @@ class WpsstmPagePlayer {
         });
 
         Promise.all(unplayable).then(
-            function(tracklist_obj) {
-                console.log("get_first_playable_tracklist() : skip non-playable tracklist #" + tracklist_obj.tracklist_idx);
+            function(tracklists) {
+                self.debug("get_first_playable_tracklist() : skip non-playable tracklists:");
+                var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
+                self.debug(idx_list);
                 hasPlayable.reject();
             }, function(tracklist_obj) {
                 hasPlayable.resolve(tracklist_obj);

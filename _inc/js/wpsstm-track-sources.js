@@ -142,7 +142,7 @@ jQuery(document).ready(function($){
     */
     
     //toggle expand
-    $('.wpsstm-sources-edit-list').toggleTracklist();
+    $('.wpsstm-sources-edit-list').toggleChildren();
 
 })
 

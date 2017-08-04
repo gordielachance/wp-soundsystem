@@ -14,7 +14,7 @@ $sources_query = $track->query_track_sources(array('posts_per_page'=>-1));
 <li itemscope data-wpsstm-track-id="<?php the_ID(); ?>" data-wpsstm-sources-count="<?php echo $sources_query->post_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
-            <i class="wpsstm-player-icon wpsstm-player-icon-buffering fa fa-circle-o-notch fa-spin fa-fw"></i>
+            <i class="wpsstm-player-icon wpsstm-player-icon-loading fa fa-circle-o-notch fa-spin fa-fw"></i>
             <span itemprop="position"><?php echo (int)$track->position;?></span>
         </span>
         <span class="wpsstm-track-play-bt">
