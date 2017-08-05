@@ -14,7 +14,7 @@ if ( $sources_query->have_posts() ) { ?>
             
             global $wpsstm_source;
             
-            $provider = wpsstm_get_source_provider();
+            $provider = $wpsstm_source->populate_provider();
             if ( !$wpsstm_source->src ) continue;
             
             $source_position++;
@@ -25,8 +25,8 @@ if ( $sources_query->have_posts() ) { ?>
             
 
             ?>
-            <li <?php wpsstm_source_class();?> data-wpsstm-source-id="<?php the_ID(); ?>" data-wpsstm-source-idx="<?php echo ($source->position - 1);?>" data-wpsstm-source-type="<?php echo wpsstm_get_source_mime();?>" data-wpsstm-source-src="<?php echo wpsstm_get_source_url();?>" data-wpsstm-auto-source="1">
-                <a class="wpsstm-source-provider-link wpsstm-icon-link" href="<?php echo wpsstm_get_source_url(true);?>" target="_blank" title="<?php the_title();?>">
+            <li class="<?php echo implode( ' ',$source->get_source_class() );?>" data-wpsstm-source-id="<?php the_ID(); ?>" data-wpsstm-source-idx="<?php echo ($source->position - 1);?>" data-wpsstm-source-type="<?php echo $source->type;?>" data-wpsstm-source-src="<?php echo $source->get_source_url();?>" data-wpsstm-auto-source="1">
+                <a class="wpsstm-source-provider-link wpsstm-icon-link" href="<?php echo $source->get_source_url(true);?>" target="_blank" title="<?php the_title();?>">
                     <span class="wpsstm-provider-icon"><?php echo $provider->icon;?></span>
                     <span class="wpsstm-source-title"><?php the_title();?></span>
                 </a>

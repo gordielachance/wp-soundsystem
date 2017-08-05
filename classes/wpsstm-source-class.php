@@ -219,4 +219,26 @@ class WP_SoundSystem_Source {
         return sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon,$source_title);
     }
     
+    function get_source_class(){
+
+        $classes = array('wpsstm-source');
+        if ($this->position == 1){
+            $classes[] = 'wpsstm-active-source';
+        }
+
+        return $classes;
+    }
+    
+    //TO FIX TO CHECK should return only one type of URL
+    function get_source_url($raw = false){
+        global $wpsstm_source;
+        $source = $wpsstm_source;
+
+        if (!$raw){ //playable url
+            return $source->src;
+        }else{
+            return $source->url;
+        }
+    }
+    
 }

@@ -912,6 +912,54 @@ class WP_SoundSystem_Tracklist{
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
     
+    function get_tracklist_class(){
+
+        $classes = array(
+            'wpsstm-tracklist',
+            'wpsstm-playable-tracklist',
+            'wpsstm-tracklist-table',
+        );
+
+        if ( $this->get_options('can_play') ){
+            $classes[] = 'wpsstm-playable-tracklist';
+        }
+
+        if ( ($this->tracklist_type == 'live') && $this->is_expired ){
+            $classes[] = 'wpsstm-expired-tracklist';
+        }
+
+        return $classes;
+    }
+
+    function get_expire_time(){
+
+        if ( $this->tracklist_type != 'live' ) return;
+
+        return (int)$this->expiration_time;
+    }
+    
+    function get_refresh_rate(){
+
+        if ( $this->tracklist_type != 'live' ) return;
+
+        $freq = $this->get_options('datas_cache_min');
+
+        $freq_secs = $freq * MINUTE_IN_SECONDS;
+
+        return $refresh_time_human = human_time_diff( 0, $freq_secs );
+    }
+    
+    function query_subtracks($args = null){
+        $subtrack_ids = $this->get_subtrack_ids();
+        $required = array(
+            'post__in' =>   $subtrack_ids,
+            'post_type' =>  wpsstm()->post_type_track,
+        );
+        
+        $args = wp_parse_args($required,(array)$args);
+
+        return new WP_Query($args);
+    }
 
 }
 

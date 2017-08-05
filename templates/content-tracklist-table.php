@@ -3,21 +3,18 @@ global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
 
 //subtracks query
-$subtrack_ids = $tracklist->get_subtrack_ids();
-$subtracks_args = array(
-    'post__in' =>   $subtrack_ids,
-    'post_type' =>  wpsstm()->post_type_track,
-);
-
-$subtracks_query = new WP_Query($subtracks_args);
+$subtracks_query = $tracklist->query_subtracks();
 
 if ( $tracklist->get_options('can_play') ){
     do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
 }
+
+
+
 ?>
 
 
-<div itemscope <?php wpsstm_tracklist_class();?> data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-type="<?php wpsstm_tracklist_type();?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo wpsstm_get_tracklist_expire_time();?>">
+<div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class() );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
     <meta itemprop="numTracks" content="<?php echo $subtracks_query->post_count;?>" />
     <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
         <div>
@@ -29,7 +26,7 @@ if ( $tracklist->get_options('can_play') ){
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( get_post_modified_time('U') );?></time>
                 <?php 
-                if ( $rate = wpsstm_get_tracklist_refresh_rate() ){
+                if ( $rate = $tracklist->get_refresh_rate() ){
                     ?>
                     <time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i> <?php printf(__('every %s','wpsstm'),$rate);?></time>
                     <?php
@@ -70,7 +67,7 @@ if ( $tracklist->get_options('can_play') ){
         ?>
         <p class="wpsstm-notice">
             <?php 
-            if ( ( wpsstm_get_tracklist_type() == 'live' ) && $tracklist->is_expired){
+            if ( ( $tracklist->tracklist_type == 'live' ) && $tracklist->is_expired){
                 _e("The tracklist cache has expired.","wpsstm"); 
             }else{
                 _e( 'No tracks found.','wpsstm');
