@@ -204,7 +204,7 @@ class WP_SoundSystem_Track{
     http://www.xspf.org/xspf-v1.html#rfc.section.4.1.1.2.14.1.1
     */
     
-    function get_array_for_xspf(){
+    function to_xspf_array(){
         $xspf_track = array(
             'identifier'    => ( $this->mbid ) ? sprintf('https://musicbrainz.org/recording/%s',$this->mbid) : null,
             'title'         => $this->title,
