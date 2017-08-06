@@ -304,9 +304,11 @@ class WpsstmTracklist {
         
         if (tracks.length === 0) hasPlayable.reject('empty tracks input');
 
+        /*
         self.debug("get_first_playable_track() in tracklist #" + self.tracklist_idx + " for tracks :");
         var idx_list = tracks.map(function(a) {return a.track_idx;});
         self.debug(idx_list);
+        */
         
         $.each(tracks, function( index, track_obj ) {
             

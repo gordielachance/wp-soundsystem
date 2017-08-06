@@ -349,9 +349,11 @@ class WpsstmPagePlayer {
         
         if (tracklists.length === 0) hasPlayable.reject('empty tracklists input');
 
+        /*
         self.debug("get_first_playable_tracklist() in tracklists :");
         var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
         self.debug(idx_list);
+        */
 
         $.each(tracklists, function( index, tracklist_obj ) {
 

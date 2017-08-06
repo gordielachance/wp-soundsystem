@@ -72,7 +72,7 @@ class WP_SoundSystem_Source {
             wpsstm_tracks()->title_metakey      => $this->track->title,
             wpsstm_albums()->album_metakey      => $this->track->album,
         );
-        $query_meta_trackinfo = array_filter($meta_track_info);
+        $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         
         $default = array(
             'post_status'       => 'any',
