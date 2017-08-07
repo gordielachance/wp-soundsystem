@@ -781,8 +781,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             update_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name, $wizard_settings);
         }
 
-        do_action('spiff_save_wizard_settings', $wizard_settings, $this->post_id);
-
     }
     
     /*
@@ -919,6 +917,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
     
     function query_subtracks($args = null){
+        
+        $force_empty = false;
+        
         //check we should request remote tracks
         if ( $this->is_expired ){
 
@@ -948,11 +949,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
             }else{
+                $force_empty = true;
                 $this->add_notice( 'tracklist-header', 'tracklist-expired',__("The tracklist cache has expired.","wpsstm"),true );
             }
         }
+
+        if ($force_empty){
+            return new WP_Query( array('post__in'=>array(0)) ); //force to return nothing; ajax will query posts later
+        }else{
+            return parent::query_subtracks($args);;
+        }
         
-        return parent::query_subtracks($args);
     }
     
 }

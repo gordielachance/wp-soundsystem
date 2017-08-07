@@ -425,6 +425,11 @@ class WP_SoundSystem_Tracklist{
         
         //setup global tracklist
         $wpsstm_tracklist = $this;
+        
+        //TO FIX move at a smarter place ?
+        if ( $this->get_options('can_play') ){
+            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+        }
 
         ob_start();
 
@@ -465,17 +470,17 @@ class WP_SoundSystem_Tracklist{
     Render notices as WP settings_errors() would.
     */
     
-    function display_notices($slug){
-        echo $this->get_notices($slug);
+    function output_notices($context){
+        echo $this->get_notices_output($context);
     }
     
-    function get_notices($slug){
+    function get_notices_output($context){
         
         $notices = array();
 
         foreach ($this->notices as $notice){
-            if ( $notice['slug'] != $slug ) continue;
-
+            if ( $notice['slug'] != $context ) continue;
+            
             $notice_classes = array(
                 'inline',
                 'settings-error',
@@ -485,7 +490,12 @@ class WP_SoundSystem_Tracklist{
             
             //$notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
             
-            $notices[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_classes_attr($notice_classes),$notice['message']);
+            $notice_attr_arr = array(
+                'id'    => sprintf('wpsstm-notice-%s',$notice['code']),
+                'class' => implode(' ',$notice_classes),
+            );
+
+            $notices[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
         }
         
         return implode("\n",$notices);
@@ -937,10 +947,6 @@ class WP_SoundSystem_Tracklist{
     }
     
     function query_subtracks($args = null){
-        
-        if ( $this->get_options('can_play') ){
-            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
-        }
 
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
