@@ -763,10 +763,17 @@ class WP_SoundSystem_Core_Tracks{
             'post_status'=>     'any',
         );
         
-        $source_ids = $track->query_track_sources($source_args);
+        $source_ids = $track->query_sources($source_args);
+        $trashed = 0;
         
         foreach((array)$source_ids as $source_id){
-            $success = wp_trash_post($source_id);
+            if ( $success = wp_trash_post($source_id) ){
+                $trashed ++;
+            }
+        }
+        
+        if ($trashed){
+            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>count($source_ids),'trashed'=>$trashed)),"WP_SoundSystem_Tracklist::trash_track_sources()");
         }
 
     }
@@ -786,7 +793,7 @@ class WP_SoundSystem_Core_Tracks{
 
         //only for tracks
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        
+
         $type = true;
         $include = null;
 
@@ -803,36 +810,9 @@ class WP_SoundSystem_Core_Tracks{
             return;
         }
 
+        //get all subtracks; optionnally for a tracklist ID
         $tracklist_id = $query->get('tracklist_id');
-        $subtrack_ids = wpsstm_get_subtrack_ids($type,$tracklist_id);
-        
-        /*
-        filter subtracks to get only the orphans.
-        if $tracklist_id is defined; that tracklist will NOT be considered as a subtrack parent.
-        This is useful to get the flushable subtracks for a live tracklist.
-        */
-        
-        $orphans = $query->get('subtracks_orphan');
-
-        if ($orphans){
-
-            $ignore_parent_id = ($tracklist_id) ? $tracklist_id : null;
-            
-            foreach ((array)$subtrack_ids as $key=>$track_id){
-
-                $track = new WP_SoundSystem_Track($track_id);
-                $parent_ids = (array)$track->get_parent_ids();
-                $loved_by = $track->get_track_loved_by();
-
-                //ignore parent ID
-                if( $ignore_parent_id && ($ignore_parent_key = array_search($ignore_parent_id, $parent_ids)) !== false) unset($parent_ids[$ignore_parent_key]);
-
-                //is not an orphan
-                if ( !empty($parent_ids) || !empty($loved_by) ) unset($subtrack_ids[$key]);
-
-            }
-
-        }
+        $subtrack_ids = wpsstm_get_raw_subtrack_ids($type,$tracklist_id);
 
         if ($include){
             
@@ -840,7 +820,7 @@ class WP_SoundSystem_Core_Tracks{
             //https://core.trac.wordpress.org/ticket/28099
             //https://wordpress.stackexchange.com/a/140727/70449
             if (!$subtrack_ids){ 
-                $subtrack_ids[] = array(0);
+                $subtrack_ids[] = 0;
             }
             
             $query->set('post__in',(array)$subtrack_ids);
@@ -867,13 +847,13 @@ class WP_SoundSystem_Core_Tracks{
         $orderby = $query->get('orderby');
         $include_type = $query->get('subtracks_include');
         
-        if ( !$include_type || !$tracklist_id || $orderby ) return $orderby_sql;
+        if ( !$include_type || !$tracklist_id || ($orderby != 'subtrack_position') ) return $orderby_sql;
 
-        $subtrack_ids = wpsstm_get_subtrack_ids($include_type,$tracklist_id);
+        $subtrack_ids = wpsstm_get_raw_subtrack_ids($include_type,$tracklist_id);
         if (!$subtrack_ids) return $orderby_sql;
         
         $ordered_ids = implode(' ,',$subtrack_ids);
-        
+
         return sprintf('FIELD(ID, %s)',$ordered_ids);
 
     }

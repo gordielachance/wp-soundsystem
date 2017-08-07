@@ -119,7 +119,7 @@ class WP_SoundSystem_Source {
         
         //check if this source exists already
         $duplicate_args = array('fields'=>'ids');
-        if ( $duplicates = $this->get_source_duplicates_ids($duplicate_args) ){
+        if ( $duplicate_ids = $this->get_source_duplicates_ids($duplicate_args) ){
             $this->post_id = $duplicate_ids[0];
             return $this->post_id;
         }

@@ -41,8 +41,10 @@ class WP_SoundSystem_Core_Live_Playlists{
         
         add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
         
+        add_action( 'pre_get_posts', array($this, 'update_live_playlist'), 11);
+        
         //listing
-        add_action( 'pre_get_posts', array($this, 'sort_stations'));
+        add_action( 'pre_get_posts', array($this, 'sort_live_playlists'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
@@ -201,7 +203,58 @@ class WP_SoundSystem_Core_Live_Playlists{
         echo $output;
     }
     
-    function sort_stations( $query ) {
+    function update_live_playlist( $query ){
+
+        remove_action( 'pre_get_posts', array($this, 'update_live_playlist'), 11); //avoid infinite loop
+
+        $post_type = $query->get('post_type');
+        $tracklist_id = $query->get('tracklist_id');
+        $include_type = $query->get('subtracks_include');
+        
+        //check is a substracks query
+        if ( ( $post_type == wpsstm()->post_type_track ) && $tracklist_id && $include_type ){
+
+            $old_ids = $query->get('post__in'); // "old" subtrack ids
+
+            $tracklist = wpsstm_get_post_live_tracklist($tracklist_id);
+
+            //check we should request remote tracks
+            if ( ( $tracklist->tracklist_type == 'live' ) && $tracklist->is_expired ){
+                
+                $new_ids = $tracklist->populate_remote_tracklist();
+
+                $current_ids = array();
+                foreach((array)$tracklist->tracks as $track){
+                    if (!$track->post_id) continue;
+                    $current_ids[] = $track->post_id;
+                }
+
+                //flush orphan subtracks that do not belong to the current tracks
+                $flushed_ids = $tracklist->flush_subtracks($current_ids);
+                
+                //set new subtracks
+                $tracklist->set_subtrack_ids($current_ids);
+                
+                //reset expiration
+                $tracklist->populate_expiration_time(); //keep below set_subtrack_ids()
+
+                wpsstm()->debug_log( json_encode(array('tracklist_id'=>$tracklist_id,'old_ids'=>$old_ids,'current_ids'=>$current_ids,'new_ids'=>$new_ids,'flushed_ids'=>$flushed_ids)), "WP_SoundSystem_Core_Live_Playlists::update_live_playlist()");
+
+                //update current query
+                $all_ids = wpsstm_get_raw_subtrack_ids('live',$tracklist_id);
+                $query->set('post__in',$all_ids);
+
+
+            }
+
+        }
+        
+        add_action( 'pre_get_posts', array($this, 'update_live_playlist'), 11); //re-hook
+
+        return $query;
+    }
+    
+    function sort_live_playlists( $query ) {
 
         if ( ($query->get('post_type')==wpsstm()->post_type_live_playlist) && ( $orderby = $query->get( 'orderby' ) ) ){
 

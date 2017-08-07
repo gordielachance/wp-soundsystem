@@ -45,7 +45,7 @@ $xspf->addPlaylistInfo('annotation', $annotation);
 
 
 //subtracks
-$subtracks_query = $tracklist->query_subtracks();
+$subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
 if ( $subtracks_query->have_posts() ) {
     $track_position = 0;
     while ( $subtracks_query->have_posts() ) {

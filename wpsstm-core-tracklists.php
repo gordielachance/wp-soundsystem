@@ -68,7 +68,6 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_frontend' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_backend' ) );
-        
 
         add_filter( 'manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
@@ -228,15 +227,9 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
-                $tracklist->force_refresh = true;
-                $tracklist->load_subtracks();
-                if ( $tracklist->tracks ){
-                    $result['success'] = true;
-                    $result['new_html'] = $tracklist->get_tracklist_table(); 
-                }else{
-                    $result['message'] = 'No remote tracks found';
-                }
-
+                $tracklist->is_expired = true; //will force tracklist refresh
+                $result['new_html'] = $tracklist->get_tracklist_table();
+                $result['success'] = true;
             }
         }
 
@@ -429,11 +422,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ( $track_id && $tracklist_id && ($position != -1) ){
 
-            //populate a tracklist with the selected tracks
             $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $tracklist->load_subtracks();
-            $result['tracklist'] = $tracklist;
-            
             $success = $tracklist->save_track_position($track_id,$position);
             
             if ( is_wp_error($success) ){

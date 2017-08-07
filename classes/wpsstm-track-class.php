@@ -90,12 +90,13 @@ class WP_SoundSystem_Track{
     
     function populate_track_post_auto(){
         if ( $this->post_id || $this->did_post_id_lookup || (!$this->artist || !$this->title) ) return;
-            
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
 
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
-        } 
+            
+            wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
+            
+        }
 
         $this->did_post_id_lookup = true;
         return $this->post_id;
@@ -452,7 +453,7 @@ class WP_SoundSystem_Track{
         return $list;
     }
     
-    function query_track_sources($args=null){
+    function query_sources($args=null){
 
         $required_args = array(
             'post_type' =>      wpsstm()->post_type_source,

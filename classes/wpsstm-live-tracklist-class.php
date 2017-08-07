@@ -33,9 +33,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $is_expired = false;
     var $expiration_time = null;
-    
-    var $ajax_refresh = true;
-    var $force_refresh = false;
 
     //response
     var $request_pagination = array(
@@ -105,6 +102,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         }
         
+        $this->is_expired = true; //TO FIX TOUTOU
 
     }
 
@@ -128,101 +126,79 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
     }
 
-    function load_subtracks(){
+    function populate_remote_tracklist(){
 
-        if ( $this->did_query_tracks ) return;
+        //cache disabled notice
+        $cache_duration = $this->get_options('datas_cache_min');
+        $has_cache = (bool)$cache_duration;
 
-        if ( $this->is_expired ){
-            if ( $this->get_subtrack_ids() ){
-                 $this->flush_subtracks();
-            }
+        if ( !$has_cache ){
+            $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
         }
 
-        if ( $this->ajax_refresh && !$this->force_refresh ){
-            
-            parent::load_subtracks();
-            
-        }else{
+        //get remote stuff
+        $remote_tracks = $this->get_all_raw_tracks();
+        if ( !$remote_tracks ) return;
+        if ( is_wp_error($remote_tracks) ) {
+            $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+            return;
+        }
 
-            //cache disabled notice
-            $cache_duration = $this->get_options('datas_cache_min');
-            $has_cache = (bool)$cache_duration;
-
-            if ( !$has_cache ){
-                $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
+        if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
+            if ( $this->feed_url != $this->redirect_url ){
+                $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
             }
-
-            //get remote stuff
-            if ( $remote_tracks = $this->get_all_raw_tracks() ){
-
-                if ( !is_wp_error($remote_tracks) ) {
-
-                    if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
-                        if ( $this->feed_url != $this->redirect_url ){
-                            $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
-                        }
-                    }
-
-                    $this->add($remote_tracks);
-
-                    //set tracklist title
-                    $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
-                    $this->title = ($remote_title) ? $remote_title : __('Tracklist Wizard','wpsstm');
-
-                    //set tracklist author
-                    $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
-                    $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
-
-                    //update tracklist
-
-                    $now = current_time( 'timestamp', true );
-
-                    $tracklist_post = array(
-                        'ID'    => $this->post_id,
-                        'meta_input'    => array(
-                            wpsstm_live_playlists()->remote_title_meta_name => $remote_title,
-                            wpsstm_live_playlists()->remote_author_meta_name => $remote_author,
-                        )
-                    );
-                    wp_update_post( $tracklist_post );
-
-                    //save subtracks
-
-                    $subtracks_args = array(
-                        'post_author'   => wpsstm()->get_options('community_user_id'),
-                    );
-
-                    $this->save_subtracks($subtracks_args);
-
-                    //reset expiration
-                    $this->populate_expiration_time(); //keep below save_subtracks()
-
-                    //sort
-                    if ($this->get_options('tracks_order') == 'asc'){
-                        $this->tracks = array_reverse($this->tracks);
-                    }
-
-                    //populate page notices
-                    foreach($this->notices as $notice){
-                        $this->notices[] = $notice;
-                    }
-
-
-                }else{
-                    $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
-                }
-            }
-
-            $this->did_query_tracks = true;
-            
-            new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
-
-            wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'did_request'=>$this->did_query_tracks,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::load_subtracks()' );
-            
         }
         
+        //reset tracks
+        $this->tracks = array();
+        $new_ids = array();
+
+        //sort
+        if ($this->get_options('tracks_order') == 'asc'){
+            $remote_tracks = array_reverse($remote_tracks);
+        }
+
+        $this->add($remote_tracks);
+
+        //set tracklist title
+        $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
+        $this->title = ($remote_title) ? $remote_title : __('Tracklist Wizard','wpsstm');
+
+        //set tracklist author
+        $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
+        $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
+
+        //update tracklist
+        $tracklist_post = array(
+            'ID'    => $this->post_id,
+            'meta_input'    => array(
+                wpsstm_live_playlists()->remote_title_meta_name => $remote_title,
+                wpsstm_live_playlists()->remote_author_meta_name => $remote_author,
+            )
+        );
+        wp_update_post( $tracklist_post );
+
+        //save new subtracks
+        $subtracks_args = array(
+            'post_author'   => wpsstm()->get_options('community_user_id'),
+        );
+
+        $new_ids = $this->save_new_subtracks($subtracks_args);
+
+        //populate page notices
+        foreach($this->notices as $notice){
+            $this->notices[] = $notice;
+        }
+
+        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
+
+        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::populate_remote_tracklist()' );
+
         //TO FIX registering notices should be done in another way.  
         $this->wizard_community_author_notice();
+        
+        return $new_ids;
 
     }
     
@@ -891,7 +867,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             array(
                 'is_expired' =>             $this->is_expired,
                 'cache_duration_min' =>     $cache_duration_min,
-                'force_refresh' =>          (bool)$this->force_refresh,
                 'updated' =>                wpsstm_get_datetime($this->updated_time),
                 'expires' =>                wpsstm_get_datetime($this->expiration_time),
                 'now' =>                    wpsstm_get_datetime($now),
@@ -899,7 +874,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
         );
         */
-        
+
     }
     
     function get_cached_remote_title(){

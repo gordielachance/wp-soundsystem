@@ -379,7 +379,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
         //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
         //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
-        if ( did_action('wpsstm_save_multiple_tracks') ) return;
+        if ( did_action('wpsstm_before_save_new_subtracks') ) return;
 
         //check post type
         $post_type = get_post_type($post_id);
@@ -586,9 +586,10 @@ class WP_SoundSystem_Core_MusicBrainz {
             if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
 
             if ( in_array('tracklist',$post_type_items) ){
+                //TO FIX TO CHECK
                 $tracklist = wpsstm_get_post_tracklist($post_id);
-                $tracklist->load_subtracks();
-                if ( empty($tracklist->tracks) ) $items[] = 'tracklist';
+                $subtrack_ids = $tracklist->get_subtrack_ids();
+                if ( empty($subtrack_ids) ) $items[] = 'tracklist';
             }
 
         }
@@ -732,7 +733,10 @@ class WP_SoundSystem_Core_MusicBrainz {
         
         $tracklist = wpsstm_get_post_tracklist($post_id);
         $tracklist->add($save_tracks);
-        $tracklist->save_subtracks();
+        $new_ids = $tracklist->save_new_subtracks();
+        
+        //add new subtrack IDs
+        $tracklist->append_subtrack_ids($new_ids);
 
     }
 

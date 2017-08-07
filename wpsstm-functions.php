@@ -55,7 +55,7 @@ Get the IDs of subtracks; by type (static|live) and optional tracklist id.
 Used for subtrack queries; which will "filter" those subtracks (by post status, etc.); while this array will allow us to sort tracks.
 */
 
-function wpsstm_get_subtrack_ids($type='any',$tracklist_id=null){
+function wpsstm_get_raw_subtrack_ids($type='any',$tracklist_id=null){
     global $wpdb;
     
     $type_clauses = array();
@@ -73,9 +73,9 @@ function wpsstm_get_subtrack_ids($type='any',$tracklist_id=null){
         $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
     }
     
-    $type_clauses_str = implode(' OR ',$type_clauses);
+    if ( $type_clauses ) $type_clauses_str = sprintf('(%s)',implode(' OR ',$type_clauses));
     
-    $query = sprintf( "SELECT meta_value FROM $wpdb->postmeta WHERE " ) . $type_clauses_str . $parent_clause_str;
+    $query = "SELECT meta_value FROM $wpdb->postmeta WHERE " . $type_clauses_str . $parent_clause_str;
 
     $tracklists_subtrack_ids = $wpdb->get_col( $query );
     
@@ -194,7 +194,7 @@ function wpsstm_locate_template( $template_name, $load = false, $require_once = 
         $located = wpsstm()->plugin_dir . 'templates/' . $template_name;
     }
     
-    if ( $load && '' != $located ){
+    if ( $load && ('' != $located) ){
         load_template( $located, $require_once );
     }
     

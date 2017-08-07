@@ -354,7 +354,7 @@ informations overriden
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
 * improved how posts are automatically filled with MusicBrainz data
-* improved wpsstm_get_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
+* improved wpsstm_get_raw_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
 
 = 0.9.6 =
 
