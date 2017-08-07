@@ -748,7 +748,7 @@ class WP_SoundSystem_Core_Wizard{
             '<code>#content #tracklist .track</code>'
         );
         
-        $this->tracklist->display_notices('wizard-step-tracks');
+        $this->tracklist->output_notices('wizard-step-tracks');
     }
     
     function selector_tracks_callback(){  
@@ -799,7 +799,7 @@ class WP_SoundSystem_Core_Wizard{
         echo"<br/>";
         printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
         
-        $this->tracklist->display_notices('wizard-step-single-track');
+        $this->tracklist->output_notices('wizard-step-single-track');
         
     }
     

@@ -38,12 +38,13 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
             
     <?php 
         //tracklist notices
-        if ( $notices_el = $tracklist->get_notices('tracklist-header') ){
+        if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
             echo $notices_el;
         }
     ?>
     <?php 
-    if ( $subtracks_query->have_posts() ) { ?>
+    if ( $subtracks_query->have_posts() ) { 
+    ?>
         <ul class="wpsstm-tracklist-entries">
             <?php
             $track_position = 0;

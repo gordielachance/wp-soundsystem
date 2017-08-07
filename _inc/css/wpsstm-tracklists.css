@@ -558,3 +558,8 @@ body.wpsstm_track-template-admin .hentry #track-popup-tabs > ul li:not(.ui-state
 .wpsstm-actions-list#wpsstm-tracklist-actions .tracklist-action-favorite-toggle:not(.tracklist-action-favorite-active) {
   display: none;
 }
+
+/* line 464, ../scss/wpsstm-tracklists.scss */
+.wpsstm-notice#wpsstm-notice-tracklist-expired {
+  background: none;
+}
