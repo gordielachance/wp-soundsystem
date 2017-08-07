@@ -127,7 +127,7 @@
             var track_idx = track_el.attr('data-wpsstm-track-idx');
             var track_obj = tracklist_obj.get_track_obj(track_idx);
             
-            tracklist_obj.remove_playlist_track(track_obj);
+            tracklist_obj.remove_tracklist_track(track_obj);
         });
         
         //delete
@@ -665,7 +665,7 @@ class WpsstmTracklist {
 
     }
     
-    remove_playlist_track(track_obj){
+    remove_tracklist_track(track_obj){
         
         var self = this;
         var track_el = track_obj.track_el;
