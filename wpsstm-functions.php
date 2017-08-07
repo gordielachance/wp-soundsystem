@@ -62,8 +62,8 @@ function wpsstm_get_raw_subtrack_ids($type='any',$tracklist_id=null){
     $subtrack_ids = array();
     $type_clauses_str = $parent_clause_str = null;
     
-    if ($tracklist_id){
-        $parent_clause_str = sprintf(" AND `post_id` = '%d'",$tracklist_id);
+    if ($tracklist_id !== null){
+        $parent_clause_str = sprintf(" AND `post_id` = '%d'",(int)$tracklist_id);
     }
     
     if ( ($type=='any') || ($type=='static') ) {
