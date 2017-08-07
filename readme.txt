@@ -28,10 +28,13 @@ Import a tracklist from a file or a music service like Spotify using the *Trackl
 
 When viewing a post that contains a tracklist, an audio player will show up to play your tracks !
 
+**Supported sources**: Youtube, Soundcloud, regular audio files.
+
 **Attention:** The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
 The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)) until it is merged in Wordpress (planned for 4.9).
 
-**Supported sources**: Youtube, Soundcloud, regular audio files.
+Once you patched Wordpress, add this line to your config.php file to ignore Wordpress auto-updates (or your patch will be erased) :
+`define( 'WP_AUTO_UPDATE_CORE', false );`
 
 = Track Sources =
 
