@@ -116,9 +116,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function populate_remote_tracklist(){
         
         //capability check
-        $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        if ( !user_can($community_user_id,$tracklist_obj->cap->edit_posts) ){
+        if ( !wpsstm_live_playlists()->can_live_playlists() ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 

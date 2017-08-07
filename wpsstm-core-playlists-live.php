@@ -260,6 +260,12 @@ class WP_SoundSystem_Core_Live_Playlists{
         
         return $title;
     }
+    
+    function can_live_playlists(){
+        $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+    }
 
 }
 

@@ -128,15 +128,20 @@ class WP_SoundSystem_Tracklist{
         }
 
         //capability check
-        $post_type = get_post_type($this->post_id);
-        $tracklist_obj = get_post_type_object($post_type);
-        $user_id = get_current_user_id();
-
         if ($this->tracklist_type == 'live'){
-            $user_id = wpsstm()->get_options('community_user_id');
+            
+            $can_set_subtracks = wpsstm_live_playlists()->can_live_playlists();
+            
+        }else{
+            
+            $post_type = get_post_type($this->post_id);
+            $tracklist_obj = get_post_type_object($post_type);
+            $user_id = get_current_user_id();
+            $can_set_subtracks = user_can($user_id,$tracklist_obj->cap->edit_posts);
+            
         }
 
-        if ( !user_can($user_id,$tracklist_obj->cap->edit_posts) ){
+        if ( !$can_set_subtracks ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
