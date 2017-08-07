@@ -360,17 +360,35 @@ class WpsstmPagePlayer {
         $.each(tracklists, function( index, tracklist_obj ) {
 
             var unplayableTrackList = $.Deferred();
-
+            unplayable.push(unplayableTrackList);
+            
             // If a request fails, count that as a resolution so it will keep
             // waiting for other possible successes. If a request succeeds,
             // treat it as a rejection so Promise.all immediately bails out.
+            
+            //maybe refresh tracklist
+            if ( tracklist_obj.is_expired ){
 
-            tracklist_obj.get_first_playable_track().then(
-                val => unplayableTrackList.reject(tracklist_obj),
-                err => unplayableTrackList.resolve(tracklist_obj),
-            );
-
-            unplayable.push(unplayableTrackList);
+                tracklist_obj.get_tracklist_request().then(
+                    function(success){
+                        tracklist_obj.get_first_playable_track().then(
+                            val => unplayableTrackList.reject(tracklist_obj),
+                            err => unplayableTrackList.resolve(tracklist_obj),
+                        );
+                    },
+                    function(error){
+                        unplayableTrackList.resolve(error);
+                    }
+                );
+                
+            }else{
+                
+                tracklist_obj.get_first_playable_track().then(
+                    val => unplayableTrackList.reject(tracklist_obj),
+                    err => unplayableTrackList.resolve(tracklist_obj),
+                );
+                
+            }
 
         });
 
