@@ -125,14 +125,29 @@ class WP_SoundSystem_Core_Live_Playlists{
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
-                'edit_post'          => 'edit_live_playlist', 
-                'read_post'          => 'read_live_playlist', 
-                'delete_post'        => 'delete_live_playlist', 
-                'edit_posts'         => 'edit_live_playlists', 
-                'edit_others_posts'  => 'edit_others_live_playlists', 
-                'publish_posts'      => 'publish_live_playlists',       
-                'read_private_posts' => 'read_private_live_playlists', 
-                'create_posts'       => 'edit_live_playlists', 
+
+                // meta caps (don't assign these to roles)
+                'edit_post'              => 'edit_live_playlist',
+                'read_post'              => 'read_live_playlist',
+                'delete_post'            => 'delete_live_playlist',
+
+                // primitive/meta caps
+                'create_posts'           => 'create_live_playlists',
+
+                // primitive caps used outside of map_meta_cap()
+                'edit_posts'             => 'edit_live_playlists',
+                'edit_others_posts'      => 'manage_live_playlists',
+                'publish_posts'          => 'manage_live_playlists',
+                'read_private_posts'     => 'read',
+
+                // primitive caps used inside of map_meta_cap()
+                'read'                   => 'read',
+                'delete_posts'           => 'manage_live_playlists',
+                'delete_private_posts'   => 'manage_live_playlists',
+                'delete_published_posts' => 'manage_live_playlists',
+                'delete_others_posts'    => 'manage_live_playlists',
+                'edit_private_posts'     => 'edit_live_playlists',
+                'edit_published_posts'   => 'edit_live_playlists'
             )
 
         );

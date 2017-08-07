@@ -34,9 +34,7 @@
         list-style: none;
         
         li[itemprop="track"]{
-            width: 100%;
             position:relative;
-            line-height:3em;
             z-index:0;
  
            .wpsstm-track-position{
@@ -96,10 +94,103 @@
         }
     }
     
+    &.wpsstm-playable-tracklist{
+        [itemprop="track"]{
+
+            @include opacity(1);
+
+            &:not(.active){
+                @include opacity(.25);
+                &[data-wpsstm-sources-count="0"]:not(:hover){
+                    @include opacity(.1);
+                }
+                &.has-played{
+                    @include opacity(.5);
+                }
+
+            }
+
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
+            }
+
+            .wpsstm-play-track{
+                text-decoration:none;
+                border-bottom:none!important; //twentyfifteen fix
+
+                .wpsstm-player-icon{
+                    display:none;
+                    &.wpsstm-player-icon-play{
+                        display:inline-block;
+                    }
+                }
+            }
+
+            &.buffering,&.loading-sources{
+                .wpsstm-track-position{
+                    .wpsstm-player-icon-loading{
+                        display:inline-block;
+                    }
+                    span{
+                        display:none;
+                    }
+                }
+            }
+            &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-pause{
+                    display:inline-block;
+                }
+            }
+
+            &.error .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-error{
+                    display:inline-block;
+                }
+            }
+
+            &.active{
+                &:not(.error){
+                    @include opacity(1);
+                }
+
+                &.buffering{
+                    @extend .wpsstm-loading-el;
+                    @include opacity(.75);
+                }
+
+                .wpsstm-track-sources-list{
+                    li{
+                        &.wpsstm-active-source{
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+    
+    &:not(.wpsstm-playable-tracklist){
+        .wpsstm-track-play-bt{
+            display:none;
+        }
+    }
+    
     &.wpsstm-tracklist-table{
+        
         ul.wpsstm-tracklist-entries{
+
             li[itemprop="track"]{
+                
                 display: table;
+                width: 100%;
+                line-height:3em;
 
                 > *{
                     display: table-cell;
@@ -110,6 +201,50 @@
                 }
                 .wpsstm-track-right{
                     @extend .flexible-table-cell;
+                }
+                
+                @include transition-property(background);
+                @include transition-duration(.4s);
+
+                &:nth-child(odd){
+                    background: rgba(0,0,0,0.0125);
+                }
+                &:hover{
+                    background: rgba(0,0,0,0.025);
+                }
+
+                &:not(:last-child){
+                    border-bottom: 1px solid #eee;
+                }
+
+                .wpsstm-track-sources{
+
+                    .wpsstm-track-sources-list{
+                        position:absolute;
+                        margin-top: .5em;
+                        .wpsstm-source-title{
+                            display:none;
+                        }
+                    }
+
+                }
+
+                &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                    .wpsstm-track-sources:hover{
+                        .wpsstm-track-sources-list{
+                            top:0;
+                            right:-2em;
+                            border:1px solid #DDD;
+                            font-size:.9em;
+                            width:200px;
+                            position:absolute;
+                            background:white;
+                            z-index:1;
+                            .wpsstm-source-title{
+                                display:inline-block;
+                            }
+                        }
+                    }
                 }
                 
                 .wpsstm-track-sources{
@@ -171,56 +306,8 @@
 }
 
 .hentry .wpsstm-tracklist{
-    .wpsstm-tracklist-entries{
-
-        [itemprop="track"]{
-            @include transition-property(background);
-            @include transition-duration(.4s);
-
-            &:nth-child(odd){
-                background: rgba(0,0,0,0.0125);
-            }
-            &:hover{
-                background: rgba(0,0,0,0.025);
-            }
-
-            &:not(:last-child){
-                border-bottom: 1px solid #eee;
-            }
-            
-            .wpsstm-track-sources{
-                
-                .wpsstm-track-sources-list{
-                    position:absolute;
-                    margin-top: .5em;
-                    .wpsstm-source-title{
-                        display:none;
-                    }
-                }
-
-            }
-            
-            &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                .wpsstm-track-sources:hover{
-                    .wpsstm-track-sources-list{
-                        top:0;
-                        right:-2em;
-                        border:1px solid #DDD;
-                        font-size:.9em;
-                        width:200px;
-                        position:absolute;
-                        background:white;
-                        z-index:1;
-                        .wpsstm-source-title{
-                            display:inline-block;
-                        }
-                    }
-                }
-            }
-
-        }
-        
-    }
+    padding: 1em 0;
+    font-size:.8em;
 }
 
 
@@ -264,7 +351,6 @@
                 @include opacity(.3);
                 ul.wpsstm-track-sources-list{
                     width:200px;
-                    position:absolute;
                     margin-top: .5em;
                     li{
                         .wpsstm-provider-icon{
@@ -302,93 +388,6 @@
 
     }
 
-}
-
-.wpsstm-tracklist.wpsstm-playable-tracklist{
-    [itemprop="track"]{
-
-        @include opacity(1);
-
-        &:not(.active){
-            @include opacity(.25);
-            &[data-wpsstm-sources-count="0"]:not(:hover){
-                @include opacity(.1);
-            }
-            &.has-played{
-                @include opacity(.5);
-            }
-
-        }
-
-        &.wpsstm-invalid-track{
-            background:rgba(255, 0, 0, 0.10);
-        }
-        
-        .wpsstm-play-track{
-            text-decoration:none;
-            border-bottom:none!important; //twentyfifteen fix
-
-            .wpsstm-player-icon{
-                display:none;
-                &.wpsstm-player-icon-play{
-                    display:inline-block;
-                }
-            }
-        }
-
-        &.buffering,&.loading-sources{
-            .wpsstm-track-position{
-                .wpsstm-player-icon-loading{
-                    display:inline-block;
-                }
-                span{
-                    display:none;
-                }
-            }
-        }
-        &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
-            .wpsstm-player-icon{
-                display:none;
-            }
-            .wpsstm-player-icon-pause{
-                display:inline-block;
-            }
-        }
-
-        &.error .wpsstm-play-track{
-            .wpsstm-player-icon{
-                display:none;
-            }
-            .wpsstm-player-icon-error{
-                display:inline-block;
-            }
-        }
-
-        &.active{
-            &:not(.error){
-                @include opacity(1);
-            }
-
-            &.buffering{
-                @extend .wpsstm-loading-el;
-                @include opacity(.75);
-            }
-
-            .wpsstm-track-sources-list{
-                li{
-                    &.wpsstm-active-source{
-                        font-weight: bold;
-                    }
-                }
-            }
-        }
-
-    }
-}
-
-.hentry .wpsstm-tracklist{
-    padding: 1em 0;
-    font-size:.8em;
 }
 
 #wpsstm-tracklist-chooser-list{ //popup
