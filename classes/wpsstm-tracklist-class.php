@@ -130,13 +130,13 @@ class WP_SoundSystem_Tracklist{
         //capability check
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
-        $required_cap = $tracklist_obj->cap->edit_post;
-        
+        $user_id = get_current_user_id();
+
         if ($this->tracklist_type == 'live'){
-            $required_cap = 'read';
+            $user_id = wpsstm()->get_options('community_user_id');
         }
 
-        if ( !current_user_can($required_cap,$this->post_id) ){
+        if ( !user_can($user_id,$tracklist_obj->cap->edit_posts) ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         

@@ -114,6 +114,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     function populate_remote_tracklist(){
+        
+        //capability check
+        $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        if ( !user_can($community_user_id,$tracklist_obj->cap->edit_posts) ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
 
         //cache disabled notice
         $cache_duration = $this->get_options('datas_cache_min');
@@ -920,23 +927,27 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             if ( $this->can_remote_request ){
 
                 $new_ids = $this->populate_remote_tracklist();
+                
+                if ( !is_wp_error($new_ids) ){
+                    
+                    $current_ids = array();
+                    foreach((array)$this->tracks as $track){
+                        if (!$track->post_id) continue;
+                        $current_ids[] = $track->post_id;
+                    }
 
-                $current_ids = array();
-                foreach((array)$this->tracks as $track){
-                    if (!$track->post_id) continue;
-                    $current_ids[] = $track->post_id;
+                    //flush orphan subtracks that do not belong to the current tracks
+                    $flushed_ids = $this->flush_subtracks($current_ids);
+
+                    //set new subtracks
+                    $this->set_subtrack_ids($current_ids);
+
+                    //reset expiration
+                    $this->populate_expiration_time(); //keep below set_subtrack_ids()
+
+                    wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$current_ids,'new_ids'=>$new_ids,'flushed_ids'=>$flushed_ids)), "WP_SoundSystem_Core_Live_Playlists::update_live_playlist()");
+                    
                 }
-
-                //flush orphan subtracks that do not belong to the current tracks
-                $flushed_ids = $this->flush_subtracks($current_ids);
-
-                //set new subtracks
-                $this->set_subtrack_ids($current_ids);
-
-                //reset expiration
-                $this->populate_expiration_time(); //keep below set_subtrack_ids()
-
-                wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this_id,'old_ids'=>$old_ids,'current_ids'=>$current_ids,'new_ids'=>$new_ids,'flushed_ids'=>$flushed_ids)), "WP_SoundSystem_Core_Live_Playlists::update_live_playlist()");
 
             }else{
                 $this->add_notice( 'tracklist-header', 'tracklist-expired',__("The tracklist cache has expired.","wpsstm"),true );
