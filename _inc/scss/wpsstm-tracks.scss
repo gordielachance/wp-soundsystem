@@ -10,8 +10,8 @@
         font-size:.8em;
     }
 
-    .trackitem_position{
-        .wpsstm-player-icon-buffering{
+    .wpsstm-track-position{
+        .wpsstm-player-icon-loading{
             display:none;
         }
         span{
@@ -19,7 +19,7 @@
         }
     }
     
-    .trackitem_actions{
+    .wpsstm-track-actions{
         .wpsstm-actions-list{
             display:inline;
             padding: 0;

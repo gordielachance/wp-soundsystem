@@ -23,6 +23,7 @@
                 $playlist_type_obj =    get_post_type_object(wpsstm()->post_type_playlist);
                 $create_playlist_cap =  $playlist_type_obj->cap->edit_posts;
 
+                //TO FIX TO CHECK WHY FOR ?
                 if ( $post_type == wpsstm()->post_type_track ){
                     $track = new WP_SoundSystem_Track(get_the_ID());
                 }else{
@@ -39,13 +40,7 @@
                         <?php if ($track_admin_action == 'new-subtrack'){ //TO FIX NOT WORKING
                             printf('<h2>%s</h2>',$track_type_obj->labels->add_new_item);
                         }
-                        
-                        /*
-                        if ( $post_type == wpsstm()->post_type_track ) {
-                            $tracklist_table = $tracklist->get_tracklist_table(array('can_play'=>false));
-                            printf('<div id="wpsstm-track-popup-header">%s</div>',$tracklist_table);
-                        }
-                        */
+
                         ?>
 
                         <?php 

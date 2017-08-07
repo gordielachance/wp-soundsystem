@@ -9,12 +9,13 @@ jQuery(document).ready(function($){
         sources_links.click(function(e) {
             e.preventDefault();
             
-            if ( !$(track_el).hasClass('active') ) return;
+            //if ( !$(track_el).hasClass('active') ) return;
             
             var source_el = $(this).closest('li');
             var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
-            var source_obj = track_obj.get_track_source(source_idx);
-            source_obj.select_player_source();
+            
+            wpsstm_page_player.play_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
+            
         });
 
         /*
@@ -141,7 +142,7 @@ jQuery(document).ready(function($){
     */
     
     //toggle expand
-    $('.wpsstm-sources-edit-list').toggleTracklist();
+    $('.wpsstm-sources-edit-list').toggleChildren();
 
 })
 
@@ -194,7 +195,7 @@ class WpsstmTrackSource {
         var ul_el = player_source_el.closest('ul');
 
         var sources_list = player_source_el.closest('ul');
-        var sources_list_wrapper = sources_list.closest('td.trackitem_sources');
+        var sources_list_wrapper = sources_list.closest('.wpsstm-track-sources');
 
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
 

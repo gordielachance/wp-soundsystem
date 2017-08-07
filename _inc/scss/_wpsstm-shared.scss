@@ -3,8 +3,14 @@
 
 .truncate {
     white-space: nowrap;
-    //overflow: hidden; //TO FIX breaks in bottom player
+    overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.flexible-table-cell{
+    //https://stackoverflow.com/questions/11267154/fit-cell-width-to-content
+    width:1%;
+    white-space:nowrap;
 }
 
 .wpsstm-icon-link{

@@ -27,109 +27,182 @@
     
     position:relative;
     font-family: sans-serif;
-    
-    .hentry &{
-        margin-bottom: 2em;
-    }
-    
-    //make it look like a table
-    /*
-    > ul{
-        list-style: none;
-        display: table;
-        border-collapse: collapse;
-        > li {
-            display:table-row;
-            > span{
-                display:table-column;
-            }
-        }
-    }
-    */
-    
 
-    
     ul.wpsstm-tracklist-entries{
         font-size:1em;
         margin:0;
         list-style: none;
         
-        > li[itemprop="track"]{
-            
+        li[itemprop="track"]{
             position:relative;
-
-            &.no-items{
-                .wpsstm-bottom-refresh-notice{
-                    display:inline;
-                }
-            }
-            
-            &:not(.active):not(:hover){
-                > span.wpsstm-track-column{
-                    &.column-trackitem_actions{ //TO FIX TO MOVE under tracks ?
+            z-index:0;
+ 
+           .wpsstm-track-position{
+                .wpsstm-reposition-track{
+                    @extend .wpsstm-can-click;
+                    i{
                         display:none;
+                    }
+                    &:hover{
+                        i{
+                            display:inherit;
+                        }
+                        [itemprop="position"]{
+                            display:none;
+                        }
                     }
                 }
             }
 
-            > span.wpsstm-track-column{
-                
-               &.column-trackitem_position{
-                    .wpsstm-reposition-track{
-                        @extend .wpsstm-can-click;
-                        i{
-                            display:none;
-                        }
-                        &:hover{
-                            i{
-                                display:inherit;
-                            }
-                            [itemprop="position"]{
+            .wpsstm-track-image{
+                width: 50px;
+                padding:0;
+                img{
+                    max-width: 100%;
+                    @include opacity(0.2);
+                    @include transition-property(opacity);
+                    @include transition-duration(.4s);
+                }
+            }
+
+            .wpsstm-track-actions{
+                .wpsstm-actions-list{
+                    display:inline;
+                    li{
+                        a{
+                            @extend .wpsstm-icon-link;
+                            label{
                                 display:none;
                             }
                         }
                     }
                 }
+            }
+            
+            &:not(.active){
+                .wpsstm-track-sources{
+                    pointer-events:none;
+                }
+            }
+            
+            &:not(.active):not(:hover){
+                .wpsstm-track-actions{ //TO FIX TO MOVE under tracks ?
+                    @include opacity(0);
+                }
+            }
+            
+        }
+    }
+    
+    &.wpsstm-playable-tracklist{
+        [itemprop="track"]{
 
-                &.column-trackitem_image{
-                    width: 50px;
-                    padding:0;
-                    img{
-                        max-width: 100%;
-                        @include opacity(0.2);
-                        @include transition-property(opacity);
-                        @include transition-duration(.4s);
-                    }
+            @include opacity(1);
+
+            &:not(.active){
+                @include opacity(.25);
+                &[data-wpsstm-sources-count="0"]:not(:hover){
+                    @include opacity(.1);
                 }
-                &.column-trackitem_sources{
+                &.has-played{
+                    @include opacity(.5);
+                }
+
+            }
+
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
+            }
+
+            .wpsstm-play-track{
+                text-decoration:none;
+                border-bottom:none!important; //twentyfifteen fix
+
+                .wpsstm-player-icon{
                     display:none;
-                    ul{
-                        list-style-type: none;
+                    &.wpsstm-player-icon-play{
+                        display:inline-block;
                     }
                 }
-                &.column-trackitem_actions{
-                    .wpsstm-actions-list{
-                        display:inline;
-                        li{
-                            a{
-                                @extend .wpsstm-icon-link;
-                                label{
-                                    display:none;
-                                }
-                            }
+            }
+
+            &.buffering,&.loading-sources{
+                .wpsstm-track-position{
+                    .wpsstm-player-icon-loading{
+                        display:inline-block;
+                    }
+                    span{
+                        display:none;
+                    }
+                }
+            }
+            &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-pause{
+                    display:inline-block;
+                }
+            }
+
+            &.error .wpsstm-play-track{
+                .wpsstm-player-icon{
+                    display:none;
+                }
+                .wpsstm-player-icon-error{
+                    display:inline-block;
+                }
+            }
+
+            &.active{
+                &:not(.error){
+                    @include opacity(1);
+                }
+
+                &.buffering{
+                    @extend .wpsstm-loading-el;
+                    @include opacity(.75);
+                }
+
+                .wpsstm-track-sources-list{
+                    li{
+                        &.wpsstm-active-source{
+                            font-weight: bold;
                         }
                     }
                 }
             }
+
+        }
+    }
+    
+    &:not(.wpsstm-playable-tracklist){
+        .wpsstm-track-play-bt{
+            display:none;
         }
     }
     
     &.wpsstm-tracklist-table{
-        width: 100%;
+        
         ul.wpsstm-tracklist-entries{
 
-            > li[itemprop="track"]{
-                display:block;
+            li[itemprop="track"]{
+                
+                display: table;
+                width: 100%;
+                line-height:3em;
+
+                > *{
+                    display: table-cell;
+                }
+                .wpsstm-track-left{
+                    width: 4em;
+                    text-align: center;
+                }
+                .wpsstm-track-right{
+                    @extend .flexible-table-cell;
+                }
+                
                 @include transition-property(background);
                 @include transition-duration(.4s);
 
@@ -138,47 +211,57 @@
                 }
                 &:hover{
                     background: rgba(0,0,0,0.025);
-                    td.column-image img{
-                        @include opacity(.8);
-                    }
                 }
-                
-                &:not(.no-items):not(:last-child){
+
+                &:not(:last-child){
                     border-bottom: 1px solid #eee;
                 }
-                
-                > span.wpsstm-track-column{
-                    display:inline-block;
-                    line-height: 2em;
-                    padding: .5em;
-                    
-                    &[itemprop="byArtist"]{
-                        @extend .truncate;
-                    }
-                    &[itemprop="name"]{
-                        @extend .truncate;
-                    }
-                    &[itemprop="inAlbum"]{
-                        @extend .truncate;
-                    }
-                    
-                    &.column-trackitem_position{
-                        width:3em;
-                        text-align:center;
+
+                .wpsstm-track-sources{
+
+                    .wpsstm-track-sources-list{
+                        position:absolute;
+                        margin-top: .5em;
+                        .wpsstm-source-title{
+                            display:none;
+                        }
                     }
 
-                    &.column-trackitem_play_bt{
-                        width:2em;
-                        text-align:center;
+                }
+
+                &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
+                    .wpsstm-track-sources:hover{
+                        .wpsstm-track-sources-list{
+                            top:0;
+                            right:-2em;
+                            border:1px solid #DDD;
+                            font-size:.9em;
+                            width:200px;
+                            position:absolute;
+                            background:white;
+                            z-index:1;
+                            .wpsstm-source-title{
+                                display:inline-block;
+                            }
+                        }
                     }
-                    &.column-trackitem_sources{
-                        display:none;
+                }
+                
+                .wpsstm-track-sources{
+                    padding-right:2em;
+                }
+
+                .wpsstm-track-info{
+
+                    display: table;
+                    table-layout: fixed;
+                    width: 100%;
+
+                    > *{
+                        display: table-cell;
+                        @extend .truncate;
                     }
-                    
-                    &.column-trackitem_actions{
-                        position:absolute;
-                        right:0;
-                    }
+
                 }
             }
         }
@@ -198,7 +281,7 @@
         .tracklist-nav{
             //display:none;
         }
-        .column-trackitem_position,#wpsstm-track-action-move{
+        .wpsstm-track-position,#wpsstm-track-action-move{
             display:none;
         }
     }
@@ -214,7 +297,7 @@
         }
     }
 
-    &:not([data-wpsstm-expire-sec="0"]){
+    &:not(.wpsstm-expired-tracklist){
         #wpsstm-tracklist-action-refresh{
             @include opacity(.5);
             pointer-events: none;
@@ -222,98 +305,89 @@
     }
 }
 
-.wpsstm-tracklist.wpsstm-playable-tracklist{
-    [itemprop="track"]{
+.hentry .wpsstm-tracklist{
+    padding: 1em 0;
+    font-size:.8em;
+}
 
-        @include opacity(1);
 
-        &:not(.active){
-            @include opacity(.25);
-            &[data-wpsstm-sources-count="0"]:not(:hover){
-                @include opacity(.1);
+#wpsstm-bottom-track-info.wpsstm-tracklist{
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .6em;
+    position:relative;
+
+    .wpsstm-tracklist-entries{
+
+        li[itemprop="track"]{
+            
+            > * {
+                padding:0 1em;
             }
-            &.has-played{
-                @include opacity(.5);
-            }
 
-        }
-
-        &.wpsstm-invalid-track{
-            background:rgba(255, 0, 0, 0.10);
-        }
-        
-        .wpsstm-play-track{
-            text-decoration:none;
-            border-bottom:none!important; //twentyfifteen fix
-
-            .wpsstm-player-icon{
+            .wpsstm-track-play-bt{
                 display:none;
-                &.wpsstm-player-icon-play{
-                    display:inline-block;
-                }
             }
-        }
 
-        &.buffering{
-            .trackitem_position{
-                .wpsstm-player-icon-buffering{
-                    display:inline-block;
-                }
-                span{
+            .wpsstm-track-actions{
+                font-size:1.5em;
+                #wpsstm-track-action-remove{
                     display:none;
                 }
             }
-        }
-        &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
-            .wpsstm-player-icon{
-                display:none;
-            }
-            .wpsstm-player-icon-pause{
-                display:inline-block;
-            }
-        }
 
-        &.error .wpsstm-play-track{
-            .wpsstm-player-icon{
-                display:none;
+            .wpsstm-track-position{
+                @extend .wpsstm-can-click;
             }
-            .wpsstm-player-icon-error{
-                display:inline-block;
+            
+            .wpsstm-track-title{
+                &:before{
+                    content: "—";
+                    margin:0 1em;
+                }
             }
-        }
-
-        &.active{
-            &:not(.error){
-                @include opacity(1);
-            }
-
-            &.buffering{
-                @extend .wpsstm-loading-el;
-                @include opacity(.75);
-            }
-
-            .wpsstm-track-sources-list{
-                li{
-                    &.wpsstm-active-source{
-                        font-weight: bold;
+            
+            .wpsstm-track-sources{
+                @include opacity(.3);
+                ul.wpsstm-track-sources-list{
+                    width:200px;
+                    margin-top: .5em;
+                    li{
+                        .wpsstm-provider-icon{
+                            font-size:2em;
+                        }
+                    }
+                }
+                &:hover{
+                    @include opacity(1);
+                    ul.wpsstm-track-sources-list{
+                        width:400px;
+                        li{
+                            padding: 1em .5em;
+                            margin-left: 2em;
+                            width:calc( 100% - 2em);
+                            a{
+                                
+                            }
+                        }
                     }
                 }
             }
             &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
-                .wpsstm-track-sources-list{
-                    li{
-                        @extend .wpsstm-can-click;
+                .wpsstm-track-sources:hover{
+                    ul.wpsstm-track-sources-list{
+                        bottom:0;
+                        left:0;
+                        background:#222;
+                        position:absolute;
                     }
                 }
             }
+
         }
 
     }
-}
 
-.hentry .wpsstm-tracklist{
-    padding: 1em 0;
-    font-size:.8em;
 }
 
 #wpsstm-tracklist-chooser-list{ //popup
@@ -382,5 +456,11 @@
 .wpsstm-actions-list#wpsstm-tracklist-actions{
     .tracklist-action-favorite-toggle:not(.tracklist-action-favorite-active){
         display:none;
+    }
+}
+
+.wpsstm-notice{
+    &#wpsstm-notice-tracklist-expired{
+        background:none;
     }
 }

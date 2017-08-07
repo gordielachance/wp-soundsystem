@@ -50,6 +50,8 @@ class WP_SoundSystem_Core_Tracks{
         add_filter( 'template_include', array($this,'track_admin_template_filter'));
         add_action( 'wp', array($this,'track_save_admin_gui'));
         
+        add_action( 'the_post', array($this,'the_track'),10,2);
+        
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_frontend' ) );
@@ -84,13 +86,17 @@ class WP_SoundSystem_Core_Tracks{
         //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
 
-        //ajax : add new tracklist
-        add_action('wp_ajax_wpsstm_append_to_new_playlist', array($this,'ajax_append_to_new_playlist'));
-        
-        //ajax : add/remove playlist track
-        add_action('wp_ajax_wpsstm_add_playlist_track', array($this,'ajax_add_playlist_track'));
-        add_action('wp_ajax_wpsstm_remove_playlist_track', array($this,'ajax_remove_playlist_track'));
-
+    }
+    
+    /*
+    Register the global $wpsstm_track obj (hooked on 'the_post' action)
+    */
+    
+    function the_track($post,$query){
+        if ( get_post_type($post) == wpsstm()->post_type_track) {
+            global $wpsstm_track;
+            $wpsstm_track = new WP_SoundSystem_Track($post->ID);
+        }
     }
     
     function register_track_endpoints(){
@@ -203,7 +209,7 @@ class WP_SoundSystem_Core_Tracks{
                         $source = new WP_SoundSystem_Source();
                         
                         $source_raw['track_id'] = $track->post_id;
-                        $source->populate_array( $source_raw );
+                        $source->from_array( $source_raw );
                         if (!$source->url) continue;
                     }
 
@@ -439,10 +445,29 @@ class WP_SoundSystem_Core_Tracks{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => true,
-            //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
-            'capability_type' => 'post', //track
-            //'map_meta_cap'        => true,
-            /*
+            /**
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
+             * can use a string or an array (for singular and plural forms).  The array is useful if the 
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * array( 'box', 'boxes' ).
+             */
+            'capability_type'     => 'track', // string|array (defaults to 'post')
+
+            /**
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * 'map_meta_cap' hook.
+             */
+            'map_meta_cap'        => true, // bool (defaults to FALSE)
+
+            /**
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
+             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
+             * this results in many extra capabilities that you probably don't need.  The following is how 
+             * I set up capabilities for many post types, which only uses three basic capabilities you need 
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * is unique though, so you'll want to adjust it to fit your needs.
+             */
             'capabilities' => array(
 
                 // meta caps (don't assign these to roles)
@@ -467,8 +492,7 @@ class WP_SoundSystem_Core_Tracks{
                 'delete_others_posts'    => 'manage_tracks',
                 'edit_private_posts'     => 'edit_tracks',
                 'edit_published_posts'   => 'edit_tracks'
-            ),
-            */
+            )
         );
 
         register_post_type( wpsstm()->post_type_track, $args );
@@ -614,138 +638,31 @@ class WP_SoundSystem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-
-    function ajax_append_to_new_playlist(){
-        $ajax_data = wp_unslash($_POST);
-
-        wpsstm()->debug_log($ajax_data,"ajax_append_to_new_playlist()");
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-
-        $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
-        $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-
-        $playlist = wpsstm_get_post_tracklist();
-        $playlist->title = $tracklist_title;
-        
-        $tracklist_id = $playlist->save_playlist();
-
-        if ( is_wp_error($tracklist_id) ){
-            
-            $code = $tracklist_id->get_error_code();
-            $result['message'] = $tracklist_id->get_error_message($code);
-            
-        }else{
-
-            $parent_ids = null;
-            $result['playlist_id'] = $tracklist_id;
-            $result['success'] = true;
-            
-            if ($track_id){
-                
-                $track = new WP_SoundSystem_Track($track_id);
-                $append_success = $playlist->append_subtrack_ids($track->post_id);
-                $parent_ids = $track->get_parent_ids();
-                
-            }
-
-            $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$parent_ids));
-            
-            $result['new_html'] = $list_all;
-
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-        
-    }
-    
-    function ajax_add_playlist_track(){
-        $ajax_data = wp_unslash($_POST);
-        
-        wpsstm()->debug_log($ajax_data,"ajax_add_playlist_track()"); 
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-        
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-        $playlist_id  = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        
-        if ($post_id && $playlist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
-            $track = new WP_SoundSystem_Track( $post_id );
-
-            wpsstm()->debug_log($track,"ajax_add_playlist_track()");
-
-            $result['track_id'] = $track->post_id;
-            $success = $tracklist->append_subtrack_ids($track->post_id);
-
-            if ( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code);
-            }else{
-                $result['success'] = $success;
-            }
-            
-        }
-   
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
-    function ajax_remove_playlist_track(){
-        $ajax_data = wp_unslash($_POST);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-        
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-        $playlist_id = $result['playlist_id'] = isset($ajax_data['playlist_id']) ? $ajax_data['playlist_id'] : null;
-        
-        if ($post_id && $playlist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($playlist_id);
-            $track = new WP_SoundSystem_Track( $post_id );
-
-            //wpsstm()->debug_log($track,"ajax_remove_playlist_track()"); 
-
-            $success = $tracklist->remove_subtrack_ids($track->post_id);
-
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
-        }
-
-        
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
     
     function trash_track_sources($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
         
         //get all sources
-        $source_ids = wpsstm_get_track_source_ids($post_id);
+        $track = new WP_SoundSystem_Track($post_id);
         
-        foreach((array)$source_ids as $source_id){
-            $success = wp_trash_post($source_id);
+        $source_args = array(
+            'posts_per_page' => -1,
+            'fields'  =>        'ids',
+            'post_status'=>     'any',
+        );
+        
+        $sources_query = $track->query_sources($source_args);
+        $trashed = 0;
+        
+        foreach($sources_query->posts as $source_id){
+            if ( $success = wp_trash_post($source_id) ){
+                $trashed ++;
+            }
+        }
+
+        if ($trashed){
+            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WP_SoundSystem_Tracklist::trash_track_sources()");
         }
 
     }
@@ -765,7 +682,7 @@ class WP_SoundSystem_Core_Tracks{
 
         //only for tracks
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        
+
         $type = true;
         $include = null;
 
@@ -782,36 +699,9 @@ class WP_SoundSystem_Core_Tracks{
             return;
         }
 
+        //get all subtracks; optionnally for a tracklist ID
         $tracklist_id = $query->get('tracklist_id');
-        $subtrack_ids = wpsstm_get_subtrack_ids($type,$tracklist_id);
-        
-        /*
-        filter subtracks to get only the orphans.
-        if $tracklist_id is defined; that tracklist will NOT be considered as a subtrack parent.
-        This is useful to get the flushable subtracks for a live tracklist.
-        */
-        
-        $orphans = $query->get('subtracks_orphan');
-
-        if ($orphans){
-
-            $ignore_parent_id = ($tracklist_id) ? $tracklist_id : null;
-            
-            foreach ((array)$subtrack_ids as $key=>$track_id){
-
-                $track = new WP_SoundSystem_Track($track_id);
-                $parent_ids = (array)$track->get_parent_ids();
-                $loved_by = $track->get_track_loved_by();
-
-                //ignore parent ID
-                if( $ignore_parent_id && ($ignore_parent_key = array_search($ignore_parent_id, $parent_ids)) !== false) unset($parent_ids[$ignore_parent_key]);
-
-                //is not an orphan
-                if ( !empty($parent_ids) || !empty($loved_by) ) unset($subtrack_ids[$key]);
-
-            }
-
-        }
+        $subtrack_ids = wpsstm_get_raw_subtrack_ids($type,$tracklist_id);
 
         if ($include){
             
@@ -819,7 +709,7 @@ class WP_SoundSystem_Core_Tracks{
             //https://core.trac.wordpress.org/ticket/28099
             //https://wordpress.stackexchange.com/a/140727/70449
             if (!$subtrack_ids){ 
-                $subtrack_ids[] = array(0);
+                $subtrack_ids[] = 0;
             }
             
             $query->set('post__in',(array)$subtrack_ids);
@@ -846,13 +736,13 @@ class WP_SoundSystem_Core_Tracks{
         $orderby = $query->get('orderby');
         $include_type = $query->get('subtracks_include');
         
-        if ( !$include_type || !$tracklist_id || $orderby ) return $orderby_sql;
+        if ( !$include_type || !$tracklist_id || ($orderby != 'subtrack_position') ) return $orderby_sql;
 
-        $subtrack_ids = wpsstm_get_subtrack_ids($include_type,$tracklist_id);
+        $subtrack_ids = wpsstm_get_raw_subtrack_ids($include_type,$tracklist_id);
         if (!$subtrack_ids) return $orderby_sql;
         
         $ordered_ids = implode(' ,',$subtrack_ids);
-        
+
         return sprintf('FIELD(ID, %s)',$ordered_ids);
 
     }

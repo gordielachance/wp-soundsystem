@@ -1,5 +1,10 @@
 <?php
+
 the_post();
+
+global $wpsstm_tracklist;
+$tracklist = $wpsstm_tracklist;
+
 
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
     $filename = $post->post_name;
@@ -15,11 +20,10 @@ require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
 $xspf = new mptre\Xspf();
 
-$tracklist = wpsstm_get_post_tracklist(get_the_ID());
-$tracklist->load_subtracks();
+
 
 //playlist
-if ( $title = $tracklist->title ){
+if ( $title = get_the_title() ){
     $xspf->addPlaylistInfo('title', $title);
 }
 
@@ -40,10 +44,18 @@ $annotation = sprintf( __('Station generated with the %s plugin — %s','wpsstm'
 $xspf->addPlaylistInfo('annotation', $annotation);
 
 
-//tracks
-foreach ( $tracklist->tracks as $track){
-    $arr = $track->get_array_for_xspf();
-    $xspf->addTrack($arr);
+//subtracks
+$subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
+if ( $subtracks_query->have_posts() ) {
+    $track_position = 0;
+    while ( $subtracks_query->have_posts() ) {
+        $subtracks_query->the_post();
+        global $wpsstm_track;
+        $track_position++;
+        $wpsstm_track->position = $track_position;
+        $arr = $wpsstm_track->to_xspf_array();
+        $xspf->addTrack($arr);
+    }
 }
 
 echo $xspf->output();

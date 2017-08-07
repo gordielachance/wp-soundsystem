@@ -19,10 +19,10 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         
         $reset_checked = false;
 
-        wpsstm_wizard()->tracklist->display_notices('wizard-header');
+        wpsstm_wizard()->tracklist->output_notices('wizard-header');
 
         if ( wpsstm_wizard()->is_advanced ){
-            wpsstm_wizard()->tracklist->display_notices('wizard-header-advanced');
+            wpsstm_wizard()->tracklist->output_notices('wizard-header-advanced');
         }
 
         ?>

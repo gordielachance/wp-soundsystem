@@ -40,9 +40,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         
         add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
-        
+
         //listing
-        add_action( 'pre_get_posts', array($this, 'sort_stations'));
+        add_action( 'pre_get_posts', array($this, 'sort_live_playlists'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
@@ -98,36 +98,58 @@ class WP_SoundSystem_Core_Live_Playlists{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => true,
+            
             //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
-            'capability_type' => 'post', //playlist
-            //'map_meta_cap'        => true,
-            /*
+            
+            /**
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
+             * can use a string or an array (for singular and plural forms).  The array is useful if the 
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * array( 'box', 'boxes' ).
+             */
+            'capability_type'     => 'live_playlist', // string|array (defaults to 'post')
+
+            /**
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * 'map_meta_cap' hook.
+             */
+            'map_meta_cap'        => true, // bool (defaults to FALSE)
+
+            /**
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
+             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
+             * this results in many extra capabilities that you probably don't need.  The following is how 
+             * I set up capabilities for many post types, which only uses three basic capabilities you need 
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * is unique though, so you'll want to adjust it to fit your needs.
+             */
             'capabilities' => array(
 
                 // meta caps (don't assign these to roles)
-                'edit_post'              => 'edit_playlist',
-                'read_post'              => 'read_playlist',
-                'delete_post'            => 'delete_playlist',
+                'edit_post'              => 'edit_live_playlist',
+                'read_post'              => 'read_live_playlist',
+                'delete_post'            => 'delete_live_playlist',
 
                 // primitive/meta caps
-                'create_posts'           => 'create_playlists',
+                'create_posts'           => 'create_live_playlists',
 
                 // primitive caps used outside of map_meta_cap()
-                'edit_posts'             => 'edit_playlists',
-                'edit_others_posts'      => 'manage_playlists',
-                'publish_posts'          => 'manage_playlists',
+                'edit_posts'             => 'edit_live_playlists',
+                'edit_others_posts'      => 'manage_live_playlists',
+                'publish_posts'          => 'manage_live_playlists',
                 'read_private_posts'     => 'read',
 
                 // primitive caps used inside of map_meta_cap()
                 'read'                   => 'read',
-                'delete_posts'           => 'manage_playlists',
-                'delete_private_posts'   => 'manage_playlists',
-                'delete_published_posts' => 'manage_playlists',
-                'delete_others_posts'    => 'manage_playlists',
-                'edit_private_posts'     => 'edit_playlists',
-                'edit_published_posts'   => 'edit_playlists'
-            ),
-            */
+                'delete_posts'           => 'manage_live_playlists',
+                'delete_private_posts'   => 'manage_live_playlists',
+                'delete_published_posts' => 'manage_live_playlists',
+                'delete_others_posts'    => 'manage_live_playlists',
+                'edit_private_posts'     => 'edit_live_playlists',
+                'edit_published_posts'   => 'edit_live_playlists'
+            )
+
         );
 
         register_post_type( wpsstm()->post_type_live_playlist, $args );
@@ -200,8 +222,8 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         echo $output;
     }
-    
-    function sort_stations( $query ) {
+
+    function sort_live_playlists( $query ) {
 
         if ( ($query->get('post_type')==wpsstm()->post_type_live_playlist) && ( $orderby = $query->get( 'orderby' ) ) ){
 
@@ -252,6 +274,12 @@ class WP_SoundSystem_Core_Live_Playlists{
         }
         
         return $title;
+    }
+    
+    function can_live_playlists(){
+        $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
     }
 
 }

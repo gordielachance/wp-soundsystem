@@ -31,14 +31,13 @@ class WP_SoundSystem_Track{
             $this->artist = wpsstm_get_post_artist($post_id);
             $this->album = wpsstm_get_post_album($post_id);
             $this->mbid = wpsstm_get_post_mbid($post_id);
-            $this->sources = $this->get_track_sources();
 
         }
 
         
     }
     
-    function populate_array( $args = null ){
+    function from_array( $args = null ){
 
         $args_default = $this->get_default();
         $args = wp_parse_args((array)$args,$args_default);
@@ -91,12 +90,13 @@ class WP_SoundSystem_Track{
     
     function populate_track_post_auto(){
         if ( $this->post_id || $this->did_post_id_lookup || (!$this->artist || !$this->title) ) return;
-            
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
 
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
-        } 
+            
+            wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Track::populate_track_post_auto()');
+            
+        }
 
         $this->did_post_id_lookup = true;
         return $this->post_id;
@@ -192,7 +192,7 @@ class WP_SoundSystem_Track{
     }
 
     //TO FIX do we need this ?
-    function array_export(){
+    function to_array(){
         $defaults = $this->get_default();
         $export = array();
         foreach ((array)$defaults as $param=>$dummy){
@@ -205,7 +205,7 @@ class WP_SoundSystem_Track{
     http://www.xspf.org/xspf-v1.html#rfc.section.4.1.1.2.14.1.1
     */
     
-    function get_array_for_xspf(){
+    function to_xspf_array(){
         $xspf_track = array(
             'identifier'    => ( $this->mbid ) ? sprintf('https://musicbrainz.org/recording/%s',$this->mbid) : null,
             'title'         => $this->title,
@@ -299,16 +299,14 @@ class WP_SoundSystem_Track{
         $this->post_id = $post_id;
         
         //save sources if any set
+        //TO FIX TO CHECK how often this runs; and when ?
         foreach ((array)$this->sources as $source_raw){
             
             $source = new WP_SoundSystem_Source();
-            $source->track_id = $this->post_id;
+            $source->track = $this;
             
-            $source->populate_array($source_raw);
-            if ( !$duplicate_ids = $source->get_source_duplicates() ){
-                $this->add_community_source($source);
-            }
-            
+            $source->from_array($source_raw);
+            $source->is_community = true; //TO FIX TO CHECK should be this here ?            
         }
 
         return $this->post_id;
@@ -455,16 +453,30 @@ class WP_SoundSystem_Track{
         return $list;
     }
     
-    function get_track_sources(){
-        $sources = array();
-        $source_ids = wpsstm_get_track_source_ids($this->post_id);
-        foreach((array)$source_ids as $source_id){
-            $sources[] = new WP_SoundSystem_Source($source_id);
+    function query_sources($args=null){
+        
+        global $wpsstm_tracklist;
+
+        $required_args = array(
+            'post_type' =>      wpsstm()->post_type_source,
+            'post_parent' =>    $this->post_id,
+        );
+        
+        if ($args){
+            $args = wp_parse_args($required_args,$args);
+        }else{
+            $args = $required_args;
         }
-        return $sources;
+
+        return new WP_Query($args);
+
     }
 
     function save_auto_sources(){
+        
+        if ( wpsstm()->get_options('autosource') != 'on' ){
+            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        }
 
         if (!$this->artist || !$this->title) return;
 
@@ -489,7 +501,9 @@ class WP_SoundSystem_Track{
 
         foreach((array)$auto_sources as $source){
             
-            $post_id = $this->add_community_source($source);
+            $source->is_community = true;
+            
+            $post_id = $source->save_source();
             
             if ( is_wp_error($post_id) ){
                 $code = $post_id->get_error_code();
@@ -500,25 +514,11 @@ class WP_SoundSystem_Track{
             
             $new_source_ids[] = $post_id;
         }
-        
-        //reload sources
-        if ($new_source_ids){
-            $this->sources = $this->get_track_sources();
-        }
 
         return $new_source_ids;
 
     }
-    
-    function add_community_source($source){
-        $args = array(
-            'post_author'   => wpsstm()->get_options('community_user_id'),
-            'post_status'   => 'publish',
-        );
 
-        return $source->save_source($args);
-    }
-    
     /*
     Exclude sources that have one word of the banned words list in their titles (eg 'cover').
     */
@@ -572,33 +572,6 @@ class WP_SoundSystem_Track{
 
         return $sources;
 
-    }
-    
-    function sort_sources_by_similarity(){
-        
-        $artist_sanitized = sanitize_title($this->artist);
-        $title_sanitized = sanitize_title($this->title);
-        
-        if (!$this->sources) return;
-
-        //compute similarity
-        foreach($this->sources as $key=>$source){
-            
-            //sanitize data so it is easier to compare
-            $source_title_sanitized = sanitize_title($source->title);
-            
-            //remove artist from source title so the string to compare is shorter
-            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
-            
-            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
-            $this->sources[$key]->similarity = $similarity_pc;
-        }
-        
-        //reorder by similarity
-        usort($this->sources, function ($a, $b){
-            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
-        });
-        
     }
 
     function get_track_admin_gui_url($track_action = null,$tracklist_id = null){

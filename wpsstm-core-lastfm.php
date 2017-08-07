@@ -344,7 +344,7 @@ class WP_SoundSystem_Core_LastFM{
 
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';
-            $track_arr = $track->array_export();
+            $track_arr = $track->to_array();
             $last_scrobble = get_user_meta($community_user_id, $last_scrobble_meta_key, true);
             
             if ( $last_scrobble == $track_arr ){

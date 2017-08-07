@@ -668,14 +668,16 @@ class WP_SoundSystem_Settings {
         $warning_icon = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
 
         //live playlists
-        /*
-        $live_playlist_cap = $live_playlist_post_type_obj->cap->edit_posts;
-        $is_checked = user_can($community_user_id,$live_playlist_cap);
-        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $is_checked, true, false ));
+        
 
-        $cap_str = sprintf(__('%s %s'),$icon,$live_playlist_cap);
+        $can_live_playlists = wpsstm_live_playlists()->can_live_playlists();
+        $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        $live_playlists_cap = $live_playlist_post_type_obj->cap->edit_posts;
+        $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_live_playlists, true, false ));
+
+        $cap_str = sprintf(__('%s %s'),$icon,$live_playlists_cap);
         printf('<p>%s: %s</p>','<strong>'.__('Live Playlists','wpsstm').'</strong>',$cap_str);
-        */
+
 
         //frontend wizard
         $can_frontend_wizard = wpsstm_wizard()->can_frontend_wizard();

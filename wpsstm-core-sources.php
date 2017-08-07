@@ -32,6 +32,8 @@ class WP_SoundSystem_Core_Sources{
         
         add_action( 'init', array($this,'register_post_type_sources' ));
         
+        add_action( 'the_post', array($this,'the_source'),10,2);
+        
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         add_action( 'save_post', array($this,'metabox_source_save'), 5); 
         
@@ -102,10 +104,29 @@ class WP_SoundSystem_Core_Sources{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => true,
-            //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
-            'capability_type' => 'post', //track
-            //'map_meta_cap'        => true,
-            /*
+            /**
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
+             * can use a string or an array (for singular and plural forms).  The array is useful if the 
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * array( 'box', 'boxes' ).
+             */
+            'capability_type'     => 'track', // string|array (defaults to 'post')
+
+            /**
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * 'map_meta_cap' hook.
+             */
+            'map_meta_cap'        => true, // bool (defaults to FALSE)
+
+            /**
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
+             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
+             * this results in many extra capabilities that you probably don't need.  The following is how 
+             * I set up capabilities for many post types, which only uses three basic capabilities you need 
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * is unique though, so you'll want to adjust it to fit your needs.
+             */
             'capabilities' => array(
 
                 // meta caps (don't assign these to roles)
@@ -130,11 +151,21 @@ class WP_SoundSystem_Core_Sources{
                 'delete_others_posts'    => 'manage_tracks',
                 'edit_private_posts'     => 'edit_tracks',
                 'edit_published_posts'   => 'edit_tracks'
-            ),
-            */
+            )
         );
 
         register_post_type( wpsstm()->post_type_source, $args );
+    }
+    
+    /*
+    Register the global $wpsstm_source obj (hooked on 'the_post' action)
+    */
+    
+    function the_source($post,$query){
+        if ( get_post_type($post) == wpsstm()->post_type_source) {
+            global $wpsstm_source;
+            $wpsstm_source = new WP_SoundSystem_Source($post->ID);
+        }
     }
     
     function metabox_source_register(){
@@ -224,16 +255,20 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function metabox_sources_content( $post ){
+        global $wpsstm_track;
 
-        $track = new WP_SoundSystem_Track($post->ID);
-        $list = wpsstm_sources()->get_track_sources_list($track);
+        $wpsstm_track = new WP_SoundSystem_Track($post->ID);
         
-        $sources_url = $track->get_track_admin_gui_url('sources');
+        ob_start();
+        wpsstm_locate_template( 'track-sources.php', true, false );
+        $sources_list = ob_get_clean();
+
+        $sources_url = $wpsstm_track->get_track_admin_gui_url('sources');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
         
-        printf('<p>%s</p><p>%s</p>',$list,$manager_link);
+        printf('<p>%s</p><p>%s</p>',$sources_list,$manager_link);
         
     }
     
@@ -261,7 +296,7 @@ class WP_SoundSystem_Core_Sources{
             $source_classes = array('wpsstm-source');
 
             //origin
-            if ( $source->is_auto ){
+            if ( $source->is_community ){
                 $disabled = $readonly = true;
                 $source_classes[] = 'wpsstm-source-auto';
             }
@@ -269,7 +304,7 @@ class WP_SoundSystem_Core_Sources{
             ob_start();
             
             ?>
-            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_auto;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
+            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_community;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
                 <span class="wpsstm-source-action">
                     <i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>
                     <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>
@@ -345,7 +380,6 @@ class WP_SoundSystem_Core_Sources{
         return array_merge($before,$defaults,$after);
     }
 
-    //TO FIX NOT WORKING
     function column_source_url_content($column,$post_id){
         global $post;
         switch ( $column ) {
@@ -353,51 +387,44 @@ class WP_SoundSystem_Core_Sources{
                 $output = '—';
                 $source = new WP_SoundSystem_Source($post_id);
                 if( $source->post_id ){
-                    $playable_source = $source->get_provider_link();
-                    if ($playable_source){
-                        $output = $playable_source;
-                    }else{
-                        $output = $source->url;
-                    }
+                    $output = $source->url;
                 }
                 echo $output;
             break;
         }
     }
     
-    function get_track_sources_list(WP_SoundSystem_Track $track){
+    function sort_sources_by_track_match($sources,WP_SoundSystem_Track $track){
+        
+        if (!$sources) return;
+        
+        $artist_sanitized = sanitize_title($track->artist);
+        $title_sanitized = sanitize_title($track->title);
 
-        $lis = array();
-
-        $track->sort_sources_by_similarity();
-
-        foreach((array)$track->sources as $key=>$source){
-
-            $source_icon = $source_type = $source_title = null;            
-            $link = $source->get_provider_link();
+        //compute similarity
+        foreach($sources as $key=>$source){
             
-            $li_classes = array('wpsstm-source');
+            //sanitize data so it is easier to compare
+            $source_title_sanitized = sanitize_title($source->title);
             
-            $attr_arr = array(
-                'class' =>                          implode(' ',$li_classes),
-                'data-wpsstm-source-id' =>          $source->post_id,
-                'data-wpsstm-source-idx' =>         $key,
-                'data-wpsstm-source-type'   =>      $source->type,
-                'data-wpsstm-source-src'   =>       $source->src,
-                'data-wpsstm-auto-source'   =>      (int)$source->is_auto,
-            );
+            //remove artist from source title so the string to compare is shorter
+            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
             
-            $li_classes = null;
-            $error_icon = '<i class="wpsstm-source-error fa fa-exclamation-triangle" aria-hidden="true"></i>';
-            $lis[] = sprintf('<li %s>%s %s</li>',wpsstm_get_html_attr($attr_arr),$error_icon,$link);
-            
+            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
+            $sources[$key]->similarity = $similarity_pc;
         }
-        if ( !empty($lis) ){
-            return sprintf('<ul class="wpsstm-track-sources-list">%s</ul>',implode("",$lis));
-        }
+        
+        //reorder by similarity
+        usort($sources, function ($a, $b){
+            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
+        });
+        
+        return $sources;
+        
     }
     
     function ajax_autosources_list(){
+        global $wpsstm_track;
         
         $ajax_data = wp_unslash($_POST);
         
@@ -410,13 +437,23 @@ class WP_SoundSystem_Core_Sources{
 
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
 
-        $track = new WP_SoundSystem_Track($post_id);
-        $track->save_auto_sources();
+        $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        $new_source_ids = $wpsstm_track->save_auto_sources();
+        
+        if ( is_wp_error($new_source_ids) ){
+            
+            $result['message'] = $new_source_ids->get_error_message();
+            
+        }else{
+            
+            ob_start();
+            wpsstm_locate_template( 'track-sources.php', true, false );
+            $sources_list = ob_get_clean();
 
-        $track = $result['track'] = $track;
-
-        $result['new_html'] = wpsstm_sources()->get_track_sources_list($track);
-        $result['success'] = true;
+            $result['new_html'] = $sources_list;
+            $result['success'] = true;
+            
+        }
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
@@ -434,15 +471,24 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $track = new WP_SoundSystem_Track($ajax_data['post_id']);
-        $track = $result['track'] = $track;
-        
+        $track = $result['track'] = new WP_SoundSystem_Track($ajax_data['post_id']);
         $new_source_ids = $track->save_auto_sources();
-        $result['success'] = true;
         
-        if ( $new_source_ids ){
-            $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
+        if ( is_wp_error($new_source_ids) ){
+            
+            $result['message'] = $new_source_ids->get_error_message();
+            
+        }else{
+            
+            $result['success'] = true;
+
+            if ( $new_source_ids ){
+                $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
+            }
+            
         }
+        
+
 
         header('Content-type: application/json');
         wp_send_json( $result ); 

@@ -136,6 +136,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function get_wizard_form($wrapper=true){
+        
 
         ob_start();
         
@@ -196,6 +197,9 @@ class WP_SoundSystem_Core_Wizard{
             if( !in_array($screen->post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
             
             $tracklist = wpsstm_get_post_live_tracklist($post->ID);
+            $tracklist->can_remote_request = true;
+            $tracklist->options['autoplay'] = false;
+            $tracklist->options['can_play'] = false;
 
             $this->is_advanced = ( wpsstm_is_backend() && ( $tracklist->feed_url && !$tracklist->tracks ) ); //TO CHECK TO FIX
 
@@ -212,16 +216,8 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         if ($tracklist){
-            
-            $tracklist->force_refresh = true;
             $tracklist->tracks_strict = false;
-
-            if ($tracklist->feed_url){
-                $tracklist->load_subtracks();
-            }
-
             $this->tracklist = $tracklist;
-            
         }
 
     }
@@ -530,7 +526,7 @@ class WP_SoundSystem_Core_Wizard{
         display tracklist if available.  
         Not shown this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
-        if ($this->tracklist->tracks){
+        if ( !is_page($this->frontend_wizard_page_id) ){ //do not show it on wizard
             $this->add_wizard_field(
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
@@ -539,6 +535,8 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_source_feedback'
             );
         }
+
+
 
     }
 
@@ -704,7 +702,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_tracklist_callback(){
-        echo wpsstm_wizard()->tracklist->get_tracklist_table(array('can_play'=>false));
+        echo wpsstm_wizard()->tracklist->get_tracklist_table();
     }
 
     function feedback_data_type_callback(){
@@ -756,7 +754,7 @@ class WP_SoundSystem_Core_Wizard{
             '<code>#content #tracklist .track</code>'
         );
         
-        $this->tracklist->display_notices('wizard-step-tracks');
+        $this->tracklist->output_notices('wizard-step-tracks');
     }
     
     function selector_tracks_callback(){  
@@ -807,7 +805,7 @@ class WP_SoundSystem_Core_Wizard{
         echo"<br/>";
         printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
         
-        $this->tracklist->display_notices('wizard-step-single-track');
+        $this->tracklist->output_notices('wizard-step-single-track');
         
     }
     

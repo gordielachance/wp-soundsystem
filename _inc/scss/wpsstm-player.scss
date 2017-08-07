@@ -54,16 +54,18 @@
             font-size: 0.8em;
             padding:0 1em;
             
+            display: table;
+            width:100%;
+            
+            > *{
+                display: table-cell;
+            }
+            
             #wpsstm-bottom-track-actions{
-                position: absolute;
-                right: 1em;
-                top: 0;
-                width: 10%;
-                text-align: right;
+                @extend .flexible-table-cell;
                 > *{
                     padding: 0 .25em;
                     font-size:1.5em;
-                    width:calc(10% / 2);
                 }
                 a{
                     @include opacity(0.9);
@@ -74,71 +76,6 @@
                         @include opacity(1);
                     }
                 }
-            }
-            
-            #wpsstm-bottom-track-info{
-                text-transform: uppercase;
-                letter-spacing: .05em;
-                font-size: .6em;
-                position:relative;
-                width: 90%;
-                
-                .wpsstm-tracklist-entries{
-                    padding:0;
-                    margin:0;
-                    width:100%;
-                    
-                    li[itemprop="track"]{
-                        width:100%;
-                        position:relative;
-                        display:block!important; //jQuery would set 'table-row'
-                        .wpsstm-track-column{
-                            
-                            line-height:2em;
-
-                            &[itemprop="image"]{
-                                padding: 0;
-                                width:4em;
-                                img {
-
-                                    max-height:3em;
-                                }
-                            }
-                            &[itemprop="name"]:before{
-                                content:"\002014";
-                                padding-right:.5em;
-                            }
-                            &[itemprop="inAlbum"]{
-                                display:none;
-                                @extend .truncate;
-                            }
-
-                            &.trackitem_play_bt{
-                                display:none;
-                            }
-                            
-                            &.column-trackitem_actions{
-                                position:inherit;
-                                font-size:1.5em;
-                                #wpsstm-track-action-remove{
-                                    display:none;
-                                }
-                            }
-                            
-                            &.column-trackitem_sources{
-                                display:inline-block;
-                            }
-
-                        }
-
-                        .trackitem_position{
-                            @extend .wpsstm-can-click;
-                        }
-
-                    }
-                    
-                }
-
             }
             
         }

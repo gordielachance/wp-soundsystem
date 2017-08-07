@@ -69,6 +69,7 @@ class WP_SoundSystem_Core_Player{
         <div id="wpsstm-bottom-wrapper">
             <div id="wpsstm-bottom">
                 <div id="wpsstm-bottom-track-wrapper">
+                    <div id="wpsstm-bottom-track-info"></div>
                     <div id="wpsstm-bottom-track-actions">
                         <?php 
                         //scrobbling
@@ -77,7 +78,6 @@ class WP_SoundSystem_Core_Player{
                         }
                         ?>
                     </div>
-                    <div id="wpsstm-bottom-track-info"></div>
                 </div>
                 
                 <div id="wpsstm-bottom-player-wrapper">
@@ -120,7 +120,7 @@ class WP_SoundSystem_Core_Player{
     }
 }
 
-abstract class WP_SoundSystem_Player_Provider{
+class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug;
@@ -134,14 +134,18 @@ abstract class WP_SoundSystem_Player_Provider{
     Check if the provider can handle the source by returning a cleaned URL
     */
     
-    abstract public function format_source_src($url);
+    public function format_source_src($url){
+        
+    }
 
     /*
     Returns the the mime type or pseudo-mime type for this source
     https://github.com/mediaelement/mediaelement/blob/master/docs/usage.md
     */
     
-    abstract public function get_source_type($url);
+    public function get_source_type($url){
+        
+    }
     
     function format_source_icon(){
         if ( !$prefix = $this->icon ){
@@ -192,7 +196,7 @@ abstract class WP_SoundSystem_Player_Provider{
             $source = new WP_SoundSystem_Source();
             $source->url = wpsstm_get_array_value('permalink',$item);
             $source->title = wpsstm_get_array_value('initTitle',$item);
-            $source->track_id = $track->post_id;
+            $source->track = $track;
             $sources[] = $source;
             
         }
@@ -347,6 +351,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     Get the ID of a Soundcloud track URL (eg. https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou)
     Requires a Soundcloud Client ID.
     Store result in a transient to speed up page load.
+    //TO FIX IMPORTANT slows down the website on page load.  Rather should run when source is saved ?
     */
     
     private function request_sc_track_id($url){
@@ -356,7 +361,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
         $transient_name = 'wpsstm_sc_track_id_' . md5($url);
 
         if ( false === ( $sc_id = get_transient($transient_name ) ) ) {
-        
+
             $api_args = array(
                 'url' =>        urlencode ($url),
                 'client_id' =>  $this->client_id

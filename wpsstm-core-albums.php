@@ -184,10 +184,29 @@ class WP_SoundSystem_Core_Albums{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => true,
-            //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
-            'capability_type' => 'post', //album
-            //'map_meta_cap'        => true,
-            /*
+            /**
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
+             * can use a string or an array (for singular and plural forms).  The array is useful if the 
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * array( 'box', 'boxes' ).
+             */
+            'capability_type'     => 'album', // string|array (defaults to 'post')
+
+            /**
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * 'map_meta_cap' hook.
+             */
+            'map_meta_cap'        => true, // bool (defaults to FALSE)
+
+            /**
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
+             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
+             * this results in many extra capabilities that you probably don't need.  The following is how 
+             * I set up capabilities for many post types, which only uses three basic capabilities you need 
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * is unique though, so you'll want to adjust it to fit your needs.
+             */
             'capabilities' => array(
 
                 // meta caps (don't assign these to roles)
@@ -212,8 +231,7 @@ class WP_SoundSystem_Core_Albums{
                 'delete_others_posts'    => 'manage_albums',
                 'edit_private_posts'     => 'edit_albums',
                 'edit_published_posts'   => 'edit_albums'
-            ),
-            */
+            )
         );
 
         register_post_type( wpsstm()->post_type_album, $args );

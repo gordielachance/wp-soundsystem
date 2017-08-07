@@ -151,9 +151,13 @@ class WP_SoundSystem {
         
         
     }
-    function setup_actions(){  
+    function setup_actions(){
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
+
+        //roles & capabilities
+        register_activation_hook( $this->file, array( $this, 'add_custom_capabilites' ) );
+        register_deactivation_hook( $this->file, array( $this, 'remove_custom_capabilities' ) );
 
         add_action( 'admin_init', array($this,'load_textdomain'));
 
@@ -349,6 +353,93 @@ class WP_SoundSystem {
         $views['community'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Community','wpsstm'),$count);
         
         return $views;
+    }
+    
+    /*
+    List of capabilities and which roles should get them
+    */
+
+    function get_roles_capabilities($role_slug){
+
+        //array('subscriber','contributor','author','editor','administrator'),
+        
+        $all = array(
+            
+            //live playlists
+            'manage_live_playlists'     => array('editor','administrator'),
+            'edit_live_playlists'       => array('contributor','author','editor','administrator'),
+            'create_live_playlists'     => array('contributor','author','editor','administrator'),
+            
+            //playlists
+            'manage_playlists'     => array('editor','administrator'),
+            'edit_playlists'       => array('contributor','author','editor','administrator'),
+            'create_playlists'     => array('contributor','author','editor','administrator'),
+            
+            //tracks
+            'manage_tracks'     => array('editor','administrator'),
+            'edit_tracks'       => array('contributor','author','editor','administrator'),
+            'create_tracks'     => array('contributor','author','editor','administrator'),
+            
+            //tracks & tracks sources
+            'manage_tracks'     => array('editor','administrator'),
+            'edit_tracks'       => array('contributor','author','editor','administrator'),
+            'create_tracks'     => array('contributor','author','editor','administrator'),
+            
+            //artists
+            'manage_artists'     => array('editor','administrator'),
+            'edit_artists'       => array('contributor','author','editor','administrator'),
+            'create_artists'     => array('contributor','author','editor','administrator'),
+            
+            //albums
+            'manage_albums'     => array('editor','administrator'),
+            'edit_albums'       => array('contributor','author','editor','administrator'),
+            'create_albums'     => array('contributor','author','editor','administrator'),
+            
+        );
+        
+        $role_caps = array();
+        
+        foreach ((array)$all as $cap=>$allowed_roles){
+            if ( !in_array($role_slug,$allowed_roles) ) continue;
+            $role_caps[] = $cap;
+        }
+        
+        return $role_caps;
+        
+    }
+    
+    /*
+    https://wordpress.stackexchange.com/questions/35165/how-do-i-create-a-custom-role-capability
+    */
+    
+    function add_custom_capabilites(){
+
+        $roles = get_editable_roles();
+        foreach ($GLOBALS['wp_roles']->role_objects as $role_slug => $role) {
+            if ( !isset($roles[$role_slug]) ) continue;
+            $custom_caps = $this->get_roles_capabilities($role_slug);
+            
+            foreach($custom_caps as $caps){
+                $role->add_cap($caps);
+            }
+            
+        }
+
+    }
+    
+    function remove_custom_capabilities(){
+        
+        $roles = get_editable_roles();
+        foreach ($GLOBALS['wp_roles']->role_objects as $role_slug => $role) {
+            if ( !isset($roles[$role_slug]) ) continue;
+            $custom_caps = $this->get_roles_capabilities($role_slug);
+            
+            foreach($custom_caps as $caps){
+                $role->remove_cap($caps);
+            }
+            
+        }
+        
     }
 
 }
