@@ -233,6 +233,10 @@
     .wpsstm-tracklist-entries{
 
         li[itemprop="track"]{
+            
+            > * {
+                padding:0 1em;
+            }
 
             .wpsstm-track-play-bt{
                 display:none;
@@ -249,6 +253,13 @@
                 @extend .wpsstm-can-click;
             }
             
+            .wpsstm-track-title{
+                &:before{
+                    content: "—";
+                    margin:0 1em;
+                }
+            }
+            
             .wpsstm-track-sources{
                 @include opacity(.3);
                 ul.wpsstm-track-sources-list{
@@ -256,7 +267,6 @@
                     position:absolute;
                     margin-top: .5em;
                     li{
-                        line-height:2em;
                         .wpsstm-provider-icon{
                             font-size:2em;
                         }
@@ -264,6 +274,17 @@
                 }
                 &:hover{
                     @include opacity(1);
+                    ul.wpsstm-track-sources-list{
+                        width:400px;
+                        li{
+                            padding: 1em .5em;
+                            margin-left: 2em;
+                            width:calc( 100% - 2em);
+                            a{
+                                
+                            }
+                        }
+                    }
                 }
             }
             &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){

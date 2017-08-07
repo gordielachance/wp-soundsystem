@@ -15,7 +15,7 @@
         var li_el =                 $(checkbox).closest('li');
 
         var ajax_data = {
-            action:         (is_checked ? 'wpsstm_add_playlist_track' : 'wpsstm_remove_playlist_track'),
+            action:         (is_checked ? 'wpsstm_add_tracklist_track' : 'wpsstm_remove_tracklist_track'),
             track_id:       track_id,
             tracklist_id:   tracklist_id,
         };
@@ -61,7 +61,7 @@
         }
         
         var ajax_data = {
-            action:         'wpsstm_append_to_new_playlist',
+            action:         'wpsstm_append_to_new_tracklist',
             playlist_title: newPlaylistTitle_el.val(),
             track_id:       track_id,
         };
