@@ -274,11 +274,12 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         
         if ($column != 'tracklist') return;
-        
-        $output = '—';
 
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $output = $tracklist->get_tracklist_table();
+
+        if ( !$output = $tracklist->get_tracklist_list() ){
+            $output = '—';
+        }
         
         echo $output;
     }
