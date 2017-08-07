@@ -353,16 +353,16 @@ class WpsstmTrack {
 
             var promise = self.get_track_sources_request();
             track_instances.addClass('loading-sources');
-            
+
             promise.fail(function() {
                 deferredObject.reject("sources request failed for track #" + self.track_idx);
             })
-            
+
             promise.done(function(v) {
                 self.did_sources_request = true;
                 deferredObject.resolve(v);
             })
-            
+
             promise.always(function(data, textStatus, jqXHR) {
                 track_instances.removeClass('loading-sources');
             })

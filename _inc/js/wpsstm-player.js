@@ -198,9 +198,11 @@ class WpsstmPagePlayer {
 
         if (autoplay_tracklists.length === 0) return;
 
+        /*
         wpsstm_page_player.debug("page autoplay : trying to start first autoplay tracklist available...");
         var idx_list = autoplay_tracklists.map(function(a) {return a.tracklist_idx;});
         wpsstm_page_player.debug(idx_list);
+        */
 
         //play first playable one
         wpsstm_page_player.get_first_playable_tracklist(autoplay_tracklists).then(
@@ -374,9 +376,11 @@ class WpsstmPagePlayer {
 
         Promise.all(unplayable).then(
             function(tracklists) {
+                /*
                 self.debug("get_first_playable_tracklist() : skip non-playable tracklists:");
                 var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
                 self.debug(idx_list);
+                */
                 hasPlayable.reject();
             }, function(tracklist_obj) {
                 hasPlayable.resolve(tracklist_obj);

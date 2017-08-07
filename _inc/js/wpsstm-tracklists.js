@@ -20,9 +20,10 @@
             e.preventDefault();
             //unset request status
             tracklist_obj.debug("clicked 'refresh' link");
-            tracklist_obj.get_tracklist_request(); //initialize but do not set track to play
-            
+            tracklist_obj.get_tracklist_request();
+
         });
+
 
         //favorite
         tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a').click(function(e) {
@@ -182,8 +183,7 @@ class WpsstmTracklist {
         self.autoplay = ( Number( self.tracklist_el.attr('data-wpsstm-autoplay') ) === 1);
         self.autosource = ( Number( self.tracklist_el.attr('data-wpsstm-autosource') ) === 1);
         self.expire_time = Number( self.tracklist_el.attr('data-wpsstm-expire-time') );
-        
-        
+
         var now = Math.round( $.now() /1000);
         self.is_expired = (self.expire_time && (now > self.expire_time) );
         
@@ -281,7 +281,7 @@ class WpsstmTracklist {
         });
 
         ////
-        
+
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
             self.tracklist_el.addClass('refresh-error');
             self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
@@ -329,9 +329,11 @@ class WpsstmTracklist {
 
         Promise.all(unplayable).then(
             function(tracks) {
+                /*
                 self.debug("get_first_playable_track() in tracklist #" + self.tracklist_idx + ": skip non-playable tracks :");
                 var idx_list = tracks.map(function(a) {return a.track_idx;});
                 self.debug(idx_list);
+                */
                 hasPlayable.reject();
             }, function(track_obj) {
                 hasPlayable.resolve(track_obj);
@@ -535,7 +537,7 @@ class WpsstmTracklist {
         track_idx = ( track_idx !== undefined ) ? track_idx : 0;
 
         //maybe refresh tracklist if this is the first track
-        if ( (track_idx === 0) && self.is_expired ){ //TO FIX + ajax enabled ?
+        if ( (track_idx === 0) && self.is_expired ){
             upToDateTracklist = self.get_tracklist_request();
         }else{
             upToDateTracklist.resolve();
