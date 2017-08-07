@@ -419,17 +419,23 @@ class WP_SoundSystem_Core_Sources{
 
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
 
-        $track = new WP_SoundSystem_Track($post_id);
-        $track->save_auto_sources();
+        $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        $new_source_ids = $wpsstm_track->save_auto_sources();
+        
+        if ( is_wp_error($new_source_ids) ){
+            
+            $result['message'] = $new_source_ids->get_error_message();
+            
+        }else{
+            
+            ob_start();
+            wpsstm_locate_template( 'track-sources.php', true, false );
+            $sources_list = ob_get_clean();
 
-        $wpsstm_track = $result['track'] = $track;
-
-        ob_start();
-        wpsstm_locate_template( 'track-sources.php', true, false );
-        $sources_list = ob_get_clean();
-
-        $result['new_html'] = $sources_list;
-        $result['success'] = true;
+            $result['new_html'] = $sources_list;
+            $result['success'] = true;
+            
+        }
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
@@ -447,15 +453,24 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $track = new WP_SoundSystem_Track($ajax_data['post_id']);
-        $track = $result['track'] = $track;
-        
+        $track = $result['track'] = new WP_SoundSystem_Track($ajax_data['post_id']);
         $new_source_ids = $track->save_auto_sources();
-        $result['success'] = true;
         
-        if ( $new_source_ids ){
-            $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
+        if ( is_wp_error($new_source_ids) ){
+            
+            $result['message'] = $new_source_ids->get_error_message();
+            
+        }else{
+            
+            $result['success'] = true;
+
+            if ( $new_source_ids ){
+                $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
+            }
+            
         }
+        
+
 
         header('Content-type: application/json');
         wp_send_json( $result ); 

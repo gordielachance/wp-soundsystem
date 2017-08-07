@@ -763,17 +763,17 @@ class WP_SoundSystem_Core_Tracks{
             'post_status'=>     'any',
         );
         
-        $source_ids = $track->query_sources($source_args);
+        $sources_query = $track->query_sources($source_args);
         $trashed = 0;
         
-        foreach((array)$source_ids as $source_id){
+        foreach($sources_query->posts as $source_id){
             if ( $success = wp_trash_post($source_id) ){
                 $trashed ++;
             }
         }
-        
+
         if ($trashed){
-            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>count($source_ids),'trashed'=>$trashed)),"WP_SoundSystem_Tracklist::trash_track_sources()");
+            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WP_SoundSystem_Tracklist::trash_track_sources()");
         }
 
     }

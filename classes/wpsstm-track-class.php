@@ -454,6 +454,8 @@ class WP_SoundSystem_Track{
     }
     
     function query_sources($args=null){
+        
+        global $wpsstm_tracklist;
 
         $required_args = array(
             'post_type' =>      wpsstm()->post_type_source,
@@ -471,6 +473,10 @@ class WP_SoundSystem_Track{
     }
 
     function save_auto_sources(){
+        
+        if ( wpsstm()->get_options('autosource') != 'on' ){
+            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        }
 
         if (!$this->artist || !$this->title) return;
 

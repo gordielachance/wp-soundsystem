@@ -550,6 +550,7 @@ class WP_SoundSystem_Tracklist{
             $actions['refresh'] = array(
                 'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
                 'text' =>      __('Refresh', 'wpsstm'),
+                'href' =>      $permalink,
             );
         }
         
@@ -798,6 +799,7 @@ class WP_SoundSystem_Tracklist{
         $orphan_ids = array();
         $flushed_ids = array();
         
+        
         $subtrack_ids = wpsstm_get_raw_subtrack_ids($this->tracklist_type,$this->post_id);
         if ( !$subtrack_ids ) return;
 
@@ -808,20 +810,22 @@ class WP_SoundSystem_Tracklist{
         foreach( (array)$flush_ids as $track_id ){
             
             $track = new WP_SoundSystem_Track($track_id);
-            $parent_ids = (array)$track->get_parent_ids();
-            $loved_by = $track->get_track_loved_by();
             
+            $parent_ids = (array)$track->get_parent_ids();
+            
+            $loved_by = $track->get_track_loved_by();
+
             //remove this tracklist from track parents (we can consider a subtrack as orphan if it has no other parent than this tracklist)
             $tracklist_parent_key = array_search($this->post_id, $parent_ids);
             if ( $tracklist_parent_key !== false ) unset($parent_ids[$tracklist_parent_key]);
 
             //is an orphan
             if ( empty($parent_ids) && empty($loved_by) ) $orphan_ids[] = $track_id;
-            
+
         }
 
         if ( !$orphan_ids ) return;
-        
+
         foreach( (array)$orphan_ids as $track_id ){
             $success = wp_trash_post($track_id);
             if ( $success ) $flushed_ids[] = $track_id;
@@ -922,6 +926,10 @@ class WP_SoundSystem_Tracklist{
     }
     
     function query_subtracks($args = null){
+        
+        if ( $this->get_options('can_play') ){
+            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+        }
 
         $required = array(
             'post_type'         => wpsstm()->post_type_track,

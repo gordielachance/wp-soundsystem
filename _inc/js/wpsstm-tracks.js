@@ -553,13 +553,17 @@ class WpsstmTrack {
         });
 
         self.sources_request.done(function(data) {
+            
+            if (data.success === true){
 
-            if ( (data.success === true) && ( data.new_html ) ){
-                $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
-                self.populate_html_sources();
+                if ( data.new_html ){
+                    $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
+                    self.populate_html_sources();
+                    
+                }
+                
                 deferredObject.resolve();
-            }else{
-                deferredObject.reject();
+                
             }
 
         });

@@ -227,7 +227,9 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ($tracklist_id){
             if ( $tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
+                
                 $tracklist->is_expired = true; //will force tracklist refresh
+                
                 $result['new_html'] = $tracklist->get_tracklist_table();
                 $result['success'] = true;
             }

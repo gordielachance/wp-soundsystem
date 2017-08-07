@@ -5,12 +5,6 @@ $tracklist = $wpsstm_tracklist;
 //subtracks query
 $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
 
-if ( $tracklist->get_options('can_play') ){
-    do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
-}
-
-
-
 ?>
 
 
@@ -66,13 +60,7 @@ if ( $tracklist->get_options('can_play') ){
     }else{
         ?>
         <p class="wpsstm-notice">
-            <?php 
-            if ( ( $tracklist->tracklist_type == 'live' ) && $tracklist->is_expired){
-                _e("The tracklist cache has expired.","wpsstm"); 
-            }else{
-                _e( 'No tracks found.','wpsstm');
-            }
-            ?>
+            <?php _e( 'No tracks found.','wpsstm');?>
         </p>
         <?php
     }

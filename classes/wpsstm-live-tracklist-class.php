@@ -1,19 +1,5 @@
 <?php
 
-/*
-How the scraper works :
-
-It would be too much queries to save the real tracks history for a live playlist : 
-it would require to query each remote playlist URL every ~30sec to check if a new track has been played, 
-which would use a LOT of resources; and create thousands and thousands of track posts.
-
-Also, we want live playlists tracklists to be related to an URL rather than to a post ID, allowing us to cache a tracklist based on 
-its URL and not on a post meta - which would require to create a post first.
-
-Tracklist cache based on a URL is stored as WordPress Transients.
-When the tracklist is displayed, we refresh the tracklist only if the transient is expired.
-*/
-
 use \ForceUTF8\Encoding;
 
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
@@ -32,6 +18,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public $feed_url = null;
     
     public $is_expired = false;
+    public $can_remote_request = false; //remote request will be done later through ajax
     var $expiration_time = null;
 
     //response
@@ -101,8 +88,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             */
 
         }
-        
-        $this->is_expired = true; //TO FIX TOUTOU
+
+        $this->can_remote_request = (defined('DOING_AJAX') && DOING_AJAX);
 
     }
 
@@ -924,6 +911,39 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
     function is_wizard_tracklist(){
         return get_post_meta($this->post_id,$this->frontend_wizard_meta_key,true);
+    }
+    
+    function query_subtracks($args = null){
+        //check we should request remote tracks
+        if ( $this->is_expired ){
+
+            if ( $this->can_remote_request ){
+
+                $new_ids = $this->populate_remote_tracklist();
+
+                $current_ids = array();
+                foreach((array)$this->tracks as $track){
+                    if (!$track->post_id) continue;
+                    $current_ids[] = $track->post_id;
+                }
+
+                //flush orphan subtracks that do not belong to the current tracks
+                $flushed_ids = $this->flush_subtracks($current_ids);
+
+                //set new subtracks
+                $this->set_subtrack_ids($current_ids);
+
+                //reset expiration
+                $this->populate_expiration_time(); //keep below set_subtrack_ids()
+
+                wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this_id,'old_ids'=>$old_ids,'current_ids'=>$current_ids,'new_ids'=>$new_ids,'flushed_ids'=>$flushed_ids)), "WP_SoundSystem_Core_Live_Playlists::update_live_playlist()");
+
+            }else{
+                $this->add_notice( 'tracklist-header', 'tracklist-expired',__("The tracklist cache has expired.","wpsstm"),true );
+            }
+        }
+        
+        return parent::query_subtracks($args);
     }
     
 }

@@ -212,11 +212,8 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         if ($tracklist){
-            
-            $tracklist->is_expired = true; //will force tracklist refresh
             $tracklist->tracks_strict = false;
             $this->tracklist = $tracklist;
-            
         }
 
     }
