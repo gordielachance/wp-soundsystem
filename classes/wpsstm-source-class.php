@@ -3,10 +3,9 @@ class WP_SoundSystem_Source {
     var $post_id;
     var $track;
     var $position = -1;
-    var $url; //input URL
     var $title;
     var $is_community;
-    
+    var $url; //input URL
     var $src; //URL used in the 'source' tag (which could be not the same)
     var $provider;
     var $type;
@@ -66,12 +65,15 @@ class WP_SoundSystem_Source {
     */
     function get_source_duplicates_ids($args=null){
         
+        /*
         $query_meta_trackinfo = array(
             'relation' => 'AND',
             wpsstm_artists()->artist_metakey    => $this->track->artist,
             wpsstm_tracks()->title_metakey      => $this->track->title,
             wpsstm_albums()->album_metakey      => $this->track->album,
         );
+        */
+        
         $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         
         $default = array(
@@ -107,15 +109,21 @@ class WP_SoundSystem_Source {
     
     function save_source($args = null){
         
-        $this->sanitize_source();
+        if (!$this->track->post_id){
+            return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
+        }
+        
+        $this->url = trim($this->url);
+        
+        if ( !filter_var($this->url, FILTER_VALIDATE_URL) ){
+            $this->url = null;
+        }
         
         if (!$this->url){
             return new WP_Error( 'no_source_url', __('Unable to save source : missing URL','wpsstm') );
         }
         
-        if (!$this->track->post_id){
-            return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
-        }
+        $this->title = trim($this->title);
         
         //check if this source exists already
         $duplicate_args = array('fields'=>'ids');
@@ -170,18 +178,6 @@ class WP_SoundSystem_Source {
         
     }
 
-    function sanitize_source(){
-        
-        $this->url = trim($this->url);
-        
-        if ( !filter_var($this->url, FILTER_VALIDATE_URL) ){
-            $this->url = null;
-        }
-        
-        $this->title = trim($this->title);
-
-    }
-    
     function populate_provider(){
         
         if (!$this->url) return;

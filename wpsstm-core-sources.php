@@ -35,8 +35,9 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'the_post', array($this,'the_source'),10,2);
         
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
-        add_action( 'save_post', array($this,'metabox_source_save'), 5); 
-        
+        add_action( 'save_post', array($this,'metabox_parent_track_save')); 
+        add_action( 'save_post', array($this,'metabox_source_urls_save')); 
+
         add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
 
@@ -56,6 +57,7 @@ class WP_SoundSystem_Core_Sources{
         add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));
 
     }
+
     
     function register_post_type_sources() {
 
@@ -91,8 +93,8 @@ class WP_SoundSystem_Core_Sources{
 
         $args = array( 
             'labels' => $labels,
-            'hierarchical' => true, //TO FIX not working
-            'supports' => array( 'author','title','page-attributes'),
+            'hierarchical' => true,
+            'supports' => array( 'author','title'),
             'taxonomies' => array(),
             'public' => true,
             'show_ui' => true,
@@ -169,9 +171,20 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function metabox_source_register(){
+        
+        $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        
+        add_meta_box(
+            'wpsstm-parent-track', 
+            $track_post_type_obj->labels->parent_item_colon, 
+            array($this,'parent_track_content'),
+            wpsstm()->post_type_source, 
+            'side', 
+            'core'
+        );
 
         add_meta_box( 
-            'wpsstm-artist', 
+            'wpsstm-source-urls', 
             __('Source URL','wpsstm'),
             array($this,'metabox_source_content'),
             wpsstm()->post_type_source, 
@@ -180,50 +193,78 @@ class WP_SoundSystem_Core_Sources{
         );
         
     }
+    
+    function parent_track_content( $post ){
+        ?>
+        <div style="text-align:center">
+        <label class="screen-reader-text" for="wpsstm_source_parent_id"><?php _e('Parent') ?></label>
+        <input name="wpsstm_source_parent_id" type="number" value="<?php echo $post->post_parent;?>" />
+        </div>
+        <?php
+        wp_nonce_field( 'wpsstm_track_parent_meta_box', 'wpsstm_track_parent_meta_box_nonce' );
+    }
+    
+    /**
+    Save source URL field for this post
+    **/
+    
+    function metabox_parent_track_save( $post_id ) {
+
+        //check save status
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $is_revision = wp_is_post_revision( $post_id );
+        $is_valid_nonce = ( isset($_POST['wpsstm_track_parent_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_track_parent_meta_box_nonce'], 'wpsstm_track_parent_meta_box' ) );
+        if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
+
+        $parent_id = ( isset($_POST[ 'wpsstm_source_parent_id' ]) ) ? $_POST[ 'wpsstm_source_parent_id' ] : null;
+        
+        remove_action( 'save_post', array($this,'metabox_parent_track_save'));  //avoid infinite loop
+
+        wp_update_post(array(
+            'ID' =>             $post_id,
+            'post_parent' =>    $parent_id,
+        ));
+        
+        add_action( 'save_post', array($this,'metabox_parent_track_save'));  //re-hook
+
+    }
 
     function metabox_source_content( $post ){
 
         $source_url = get_post_meta( $post->ID, $this->url_metakey, true );
         
         ?>
-        <input type="text" name="wpsstm_source" class="wpsstm-fullwidth" value="<?php echo $source_url;?>" placeholder="<?php printf("Enter source URL here",'wpsstm');?>"/>
+        <p>
+            <h2><?php _e('URL','wpsstm');?></h2>
+            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source_url;?>" />
+        </p>
         <?php
         wp_nonce_field( 'wpsstm_source_meta_box', 'wpsstm_source_meta_box_nonce' );
 
     }
-    
+
     /**
-    Save artist field for this post
+    Save source URL field for this post
     **/
     
-    function metabox_source_save( $post_id ) {
+    function metabox_source_urls_save( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_source_meta_box_nonce']);
-        if ( !$is_metabox || $is_autodraft || $is_autosave || $is_revision ) return;
-        
-        //check post type
-        $post_type = get_post_type($post_id);
-        if ( $post_type != wpsstm()->post_type_source ) return;
+        $is_valid_nonce = ( isset($_POST['wpsstm_source_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_source_meta_box_nonce'], 'wpsstm_source_meta_box' ) );
+        if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
 
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_source_meta_box_nonce'], 'wpsstm_source_meta_box' ) );
-        if ( !$is_valid_nonce ) return;
-        
-        //this should run only once (for the main post); so unset meta box nonce.
-        //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_source_meta_box_nonce']);
-
-        $source = ( isset($_POST[ 'wpsstm_source' ]) ) ? $_POST[ 'wpsstm_source' ] : null;
+        $source_url = ( isset($_POST[ 'wpsstm_source_url' ]) ) ? $_POST[ 'wpsstm_source_url' ] : null;
         
         //TO FIX validate URL
 
-        if (!$source){
+        if (!$source_url){
             delete_post_meta( $post_id, $this->url_metakey );
         }else{
-            update_post_meta( $post_id, $this->url_metakey, $source );
+            update_post_meta( $post_id, $this->url_metakey, $source_url );
         }
 
     }
