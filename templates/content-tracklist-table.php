@@ -50,9 +50,6 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
             $track_position = 0;
             while ( $subtracks_query->have_posts() ) {
                 $subtracks_query->the_post();
-                global $wpsstm_track;
-                $track_position++;
-                $wpsstm_track->position = $track_position;
                 wpsstm_locate_template( 'content-track-table.php', true, false );
             } 
             ?>

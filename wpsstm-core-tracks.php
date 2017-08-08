@@ -96,6 +96,7 @@ class WP_SoundSystem_Core_Tracks{
         if ( get_post_type($post) == wpsstm()->post_type_track) {
             global $wpsstm_track;
             $wpsstm_track = new WP_SoundSystem_Track($post->ID);
+            $wpsstm_track->position = $query->current_post + 1;
         }
     }
     
