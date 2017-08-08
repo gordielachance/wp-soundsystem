@@ -134,7 +134,7 @@ class WP_SoundSystem_Player_Provider{
     Check if the provider can handle the source by returning a cleaned URL
     */
     
-    public function format_source_src($url){
+    public function get_stream_url($url){
         
     }
 
@@ -223,7 +223,7 @@ class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provid
         return $ext;
     }
     
-    function format_source_src($url){
+    function get_stream_url($url){
         
         if ( !$ext = $this->get_file_url_ext($url) ) return;
         
@@ -260,7 +260,7 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
         return $url_matches[1];
     }
     
-    function format_source_src($url){
+    function get_stream_url($url){
         if ( !$yt_id = $this->get_youtube_id($url) ) return;
         return sprintf('https://youtube.com/watch?v=%s',$yt_id);
     }
@@ -382,7 +382,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
         return $sc_id;
     }
 
-    function format_source_src($url){
+    function get_stream_url($url){
 
         if ( !$track_id = $this->get_sc_track_id($url) ) return;
 
@@ -422,7 +422,7 @@ class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Prov
     var $slug = 'mixcloud';
     var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
     
-    function format_source_src($url){
+    function get_stream_url($url){
         //mixcloud
         $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
         preg_match($pattern, $url, $url_matches);

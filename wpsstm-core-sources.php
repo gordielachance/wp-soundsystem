@@ -3,7 +3,8 @@
 class WP_SoundSystem_Core_Sources{
 
     var $providers = array();
-    var $url_metakey = '_wpsstm_source';
+    var $source_url_metakey = '_wpsstm_source_url';
+    var $source_stream_metakey = '_wpsstm_source_stream';
 
     /**
     * @var The one true Instance
@@ -256,7 +257,7 @@ class WP_SoundSystem_Core_Sources{
 
     function metabox_source_content( $post ){
 
-        $source_url = get_post_meta( $post->ID, $this->url_metakey, true );
+        $source_url = get_post_meta( $post->ID, $this->source_url_metakey, true );
         
         ?>
         <p>
@@ -286,9 +287,9 @@ class WP_SoundSystem_Core_Sources{
         //TO FIX validate URL
 
         if (!$source_url){
-            delete_post_meta( $post_id, $this->url_metakey );
+            delete_post_meta( $post_id, $this->source_url_metakey );
         }else{
-            update_post_meta( $post_id, $this->url_metakey, $source_url );
+            update_post_meta( $post_id, $this->source_url_metakey, $source_url );
         }
 
     }
@@ -591,5 +592,4 @@ class WP_SoundSystem_Core_Sources{
 function wpsstm_sources() {
 	return WP_SoundSystem_Core_Sources::instance();
 }
-
 wpsstm_sources();

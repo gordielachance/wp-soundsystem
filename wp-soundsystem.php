@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '150';
+    public $db_version = '151';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -197,6 +197,15 @@ class WP_SoundSystem {
             */
 
         }else{
+            
+            if($current_version < 151){ //switch post type to 'pin'
+                
+                //rename old source URL metakeys
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", wpsstm_sources()->source_url_metakey, '_wpsstm_source' );
+
+                $result = $wpdb->get_results ( $querystr );
+                
+            }
 
         }
         

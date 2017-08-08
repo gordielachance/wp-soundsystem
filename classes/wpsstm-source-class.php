@@ -31,7 +31,7 @@ class WP_SoundSystem_Source{
             $track_id = wp_get_post_parent_id( $post_id );
             $this->track = new WP_SoundSystem_Track($track_id);
 
-            $this->url = get_post_meta($post_id,wpsstm_sources()->url_metakey,true);
+            $this->url = get_post_meta($post_id,wpsstm_sources()->source_url_metakey,true);
 
             $post_author_id = get_post_field( 'post_author', $post_id );
             $community_user_id = wpsstm()->get_options('community_user_id');
@@ -93,7 +93,7 @@ class WP_SoundSystem_Source{
                 'relation' => 'OR',
                 //by source URL
                 'source_url' => array(
-                    'key'     => wpsstm_sources()->url_metakey,
+                    'key'     => wpsstm_sources()->source_url_metakey,
                     'value'   => $this->url
                 ),
                 //by track info, TO FIX TO CHECK required ?
@@ -187,7 +187,7 @@ class WP_SoundSystem_Source{
         //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
         
         $meta_input = array(
-            wpsstm_sources()->url_metakey       => $this->url,
+            wpsstm_sources()->source_url_metakey       => $this->url,
             /*
             wpsstm_artists()->artist_metakey    => $this-track->artist,
             wpsstm_tracks()->title_metakey      => $this-track->title,
@@ -275,7 +275,7 @@ class WP_SoundSystem_Source{
 
         foreach( (array)wpsstm_player()->providers as $provider ){
 
-            if ( !$src_url = $provider->format_source_src($this->url) ) continue;
+            if ( !$src_url = $provider->get_stream_url($this->url) ) continue;
             
             $this->provider =       $provider;
             $this->type =           $provider->get_source_type($src_url);
