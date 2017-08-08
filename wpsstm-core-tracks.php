@@ -213,7 +213,7 @@ class WP_SoundSystem_Core_Tracks{
                         if (!$source->url) continue;
                     }
 
-                    if ($source->post_id){ //confirm source by updating its author
+                    if ($source->post_id){ //confirm a source by updating its author
                         
                         wp_update_post(array(
                             'ID' =>             $source->post_id,

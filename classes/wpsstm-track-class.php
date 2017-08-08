@@ -500,10 +500,12 @@ class WP_SoundSystem_Track{
         }
 
         foreach((array)$auto_sources as $source){
+
+            $source_args = array(
+                'post_author'   => wpsstm()->get_options('community_user_id')
+            );
             
-            $source->is_community = true;
-            
-            $post_id = $source->save_source();
+            $post_id = $source->save_source($source_args);
             
             if ( is_wp_error($post_id) ){
                 $code = $post_id->get_error_code();

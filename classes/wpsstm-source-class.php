@@ -72,9 +72,9 @@ class WP_SoundSystem_Source {
             wpsstm_tracks()->title_metakey      => $this->track->title,
             wpsstm_albums()->album_metakey      => $this->track->album,
         );
+        $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         */
         
-        $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         
         $default = array(
             'post_status'       => 'any',
@@ -133,7 +133,7 @@ class WP_SoundSystem_Source {
         }
 
         $default_args = array(
-            'post_author' =>    ($this->is_community) ?wpsstm()->get_options('community_user_id') : get_current_user_id(),
+            'post_author' =>    get_current_user_id(),
             'post_status' =>    'publish',
         );
 
