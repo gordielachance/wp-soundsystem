@@ -165,7 +165,7 @@
                 }
 
                 .wpsstm-track-sources-list{
-                    li{
+                    a{
                         &.wpsstm-active-source{
                             font-weight: bold;
                         }
@@ -218,7 +218,7 @@
                 }
 
                 .wpsstm-track-sources{
-
+                    display:none;
                     .wpsstm-track-sources-list{
                         position:absolute;
                         margin-top: .5em;
@@ -349,37 +349,37 @@
             
             .wpsstm-track-sources{
                 @include opacity(.3);
-                ul.wpsstm-track-sources-list{
+                .wpsstm-track-sources-list{
                     width:200px;
-                    margin-top: .5em;
-                    li{
+                    a{
                         .wpsstm-provider-icon{
                             font-size:2em;
+                        }
+                        .wpsstm-source-title{
+                            width: calc(100% - 5em);
                         }
                     }
                 }
                 &:hover{
                     @include opacity(1);
-                    ul.wpsstm-track-sources-list{
+                    .wpsstm-track-sources-list{
                         width:400px;
-                        li{
+                        a{
                             padding: 1em .5em;
-                            margin-left: 2em;
-                            width:calc( 100% - 2em);
-                            a{
-                                
-                            }
                         }
                     }
                 }
             }
             &:not([data-wpsstm-sources-count="0"]):not([data-wpsstm-sources-count="1"]){
                 .wpsstm-track-sources:hover{
-                    ul.wpsstm-track-sources-list{
+                    .wpsstm-track-sources-list{
                         bottom:0;
                         left:0;
                         background:#222;
                         position:absolute;
+                        .wpsstm-source:hover{
+                            background:lighten(#222, 5%);
+                        }
                     }
                 }
             }

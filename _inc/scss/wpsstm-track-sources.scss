@@ -8,27 +8,32 @@
 }
 
 .wpsstm-track-sources-list{
-    padding:0 1em;
+    padding:0;
     margin:0;
     list-style-type: none;
     display:inline-block;
     
-    li.wpsstm-source{
+
+
+    .wpsstm-source{
         line-height: 2em;
         position:relative;
         width:100%;
+        display:block;
+        text-decoration: none;
+        border:none;
+        padding: 0 .5em;
         .wpsstm-provider-icon{
-            position:absolute;
-            width:1em;
-            left:-.6em;
-            font-size:1.2em;
+            width: 2em;
+            font-size: 1.2em;
+            display: inline-block;
+            text-align: center;
         }
 
         .wpsstm-source-title{
-            width: calc( 100% - 1.2em);
-            padding-left:1em;
             @extend .ellipsis;
-            display:inline-block;
+            display: inline-block;
+            width:calc(100% - 2.4em);
         }
 
         &.wpsstm-bad-source{
@@ -37,26 +42,23 @@
             }
         }
     }
-
 }
 
 .wpsstm-track-sources{
     position:relative;
     .wpsstm-track-sources-list{
-        li:not(.wpsstm-active-source){
+        .wpsstm-source:not(.wpsstm-active-source){
             display:none;
         }
     }
     &:hover{
         .wpsstm-track-sources-list{
-            li{
+            .wpsstm-source{
                 display:inherit;
             }
         }
     }
 }
-
-
 
 #wpsstm-track-admin-sources{
     form{
@@ -126,9 +128,6 @@
 
     }
 }
-
-
-
 
 //metabox
 .postbox#wpsstm-track-sources .inside{

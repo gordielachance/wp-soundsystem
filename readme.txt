@@ -152,10 +152,12 @@ A track that belongs to another playlist or that has been favorited by a user wi
 == Changelog ==
 
 = 1.6.0 =
+
 * use templates files to display stuff (tracklists, wizard, etc); see /templates directory
 * improved JS player
 * improved capabilities
 * javascript expiration : use UTC timestamp instead of remaining sec
+* set auto source status to 'pending' if it seems unreliable
 
 = 1.5.0 =
 
