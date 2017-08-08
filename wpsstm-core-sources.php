@@ -215,6 +215,12 @@ class WP_SoundSystem_Core_Sources{
     function parent_track_content( $post ){
         ?>
         <div style="text-align:center">
+            <?php
+                $track = new WP_SoundSystem_Track($post->post_parent);
+                if ($track->post_id){
+                    printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
+                }
+            ?>
         <label class="screen-reader-text" for="wpsstm_source_parent_id"><?php _e('Parent') ?></label>
         <input name="wpsstm_source_parent_id" type="number" value="<?php echo $post->post_parent;?>" />
         </div>
@@ -420,8 +426,8 @@ class WP_SoundSystem_Core_Sources{
                 $published_str = $pending_str = null;
 
                 $track = new WP_SoundSystem_Track($post_id);
-                $sources_published_query = $track->query_sources(array('posts_per_page'=>-1,'post_status'=>'publish'));
-                $sources_pending_query = $track->query_sources(array('posts_per_page'=>-1,'post_status'=>'pending'));
+                $sources_published_query = $track->query_sources();
+                $sources_pending_query = $track->query_sources(array('post_status'=>'pending'));
 
                 $url = admin_url('edit.php');
                 $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'publish'),$url );

@@ -456,17 +456,19 @@ class WP_SoundSystem_Track{
     function query_sources($args=null){
         
         global $wpsstm_tracklist;
+        
+        $default_args = array(
+            'post_status'       => 'publish',
+            'posts_per_page'    => -1,
+        );
 
         $required_args = array(
-            'post_type' =>      wpsstm()->post_type_source,
-            'post_parent' =>    $this->post_id,
+            'post_type'     => wpsstm()->post_type_source,
+            'post_parent'   => $this->post_id,
         );
         
-        if ($args){
-            $args = wp_parse_args($required_args,$args);
-        }else{
-            $args = $required_args;
-        }
+        $args = wp_parse_args((array)$args,$default_args);
+        $args = wp_parse_args($required_args,$args);
 
         return new WP_Query($args);
 

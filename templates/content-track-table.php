@@ -6,7 +6,7 @@ $tracklist = $wpsstm_tracklist;
 global $wpsstm_track;
 $track = $wpsstm_track;
 
-$sources_query = $track->query_sources(array('posts_per_page'=>-1));
+$sources_query = $track->query_sources();
 
 
 ?>
