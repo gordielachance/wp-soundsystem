@@ -3,6 +3,7 @@
 class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
+    var $position = -1;
     var $tracklist_type = 'static';
     
     var $options_default = array();

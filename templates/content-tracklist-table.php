@@ -7,8 +7,7 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
 
 ?>
 
-
-<div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class() );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
+<div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class() );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-autosource="<?php echo (int)$tracklist->get_options('autosource');?>" data-wpsstm-autoplay="<?php echo (int)$tracklist->get_options('autoplay');?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
     <meta itemprop="numTracks" content="<?php echo $subtracks_query->post_count;?>" />
     <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
         <div>
