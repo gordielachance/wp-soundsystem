@@ -34,6 +34,8 @@ class WP_SoundSystem_Core_Sources{
         
         add_action( 'the_post', array($this,'the_source'),10,2);
         
+        add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
+        
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         add_action( 'save_post', array($this,'metabox_parent_track_save')); 
         add_action( 'save_post', array($this,'metabox_source_urls_save')); 
@@ -58,7 +60,6 @@ class WP_SoundSystem_Core_Sources{
 
     }
 
-    
     function register_post_type_sources() {
 
         $labels = array(
@@ -168,6 +169,23 @@ class WP_SoundSystem_Core_Sources{
             global $wpsstm_source;
             $wpsstm_source = new WP_SoundSystem_Source($post->ID);
         }
+    }
+    
+    /*
+    On backend sources listings, allow to filter by track ID
+    */
+    
+    function filter_backend_sources_by_track_id($query){
+
+        if ( !is_admin() ) return $query;
+        if ( !$query->is_main_query() ) return $query;
+        if ( $query->get('post_type') != wpsstm()->post_type_source ) return $query;
+
+        $track_id = ( isset($_GET['post_parent']) ) ? $_GET['post_parent'] : null;
+        
+        if ( !$track_id ) return $query;
+        
+        $query->set('post_parent',$track_id);
     }
     
     function metabox_source_register(){
@@ -398,9 +416,26 @@ class WP_SoundSystem_Core_Sources{
         
         switch ( $column ) {
             case 'sources':
-                $output = '—';
+                
+                $published_str = $pending_str = null;
+
                 $track = new WP_SoundSystem_Track($post_id);
-                echo count($track->sources);
+                $sources_published_query = $track->query_sources(array('posts_per_page'=>-1,'post_status'=>'publish'));
+                $sources_pending_query = $track->query_sources(array('posts_per_page'=>-1,'post_status'=>'pending'));
+
+                $url = admin_url('edit.php');
+                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'publish'),$url );
+                $published_str = sprintf('<a href="%s">%d</a>',$url,$sources_published_query->post_count);
+                
+                if ($sources_pending_query->post_count){
+                    $url = admin_url('edit.php');
+                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'pending'),$url );
+                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$sources_pending_query->post_count);
+                    $pending_str = sprintf('<small> +%s</small>',$pending_link);
+                }
+                
+                echo $published_str . $pending_str;
+                
             break;
         }
     }
