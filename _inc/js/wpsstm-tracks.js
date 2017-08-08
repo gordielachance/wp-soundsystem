@@ -576,13 +576,13 @@ class WpsstmTrack {
         var self =      this;
         var track_el =  self.track_el; //page track
 
-        var new_sources_items = $(track_el).find('.wpsstm-track-sources li');
+        var new_sources_items = $(track_el).find('a.wpsstm-source');
 
         //self.debug("found "+new_sources_items.length +" sources");
         
         self.sources = [];
-        $.each(new_sources_items, function( index, li_item ) {
-            var new_source = new WpsstmTrackSource(li_item,self);
+        $.each(new_sources_items, function( index, source_link ) {
+            var new_source = new WpsstmTrackSource(source_link,self);
             self.sources.push(new_source);            
         });
 
@@ -592,9 +592,7 @@ class WpsstmTrack {
         }
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
-        
-        
-        
+
     }
     
     get_track_source(source_idx){
@@ -613,11 +611,11 @@ class WpsstmTrack {
         
         var source_obj = self.get_track_source(idx);
         var track_instances = self.get_track_instances();
-        var trackinfo_sources = track_instances.find('.wpsstm-track-sources-list li');
+        var trackinfo_sources = track_instances.find('.wpsstm-track-sources-list .wpsstm-source');
         $(trackinfo_sources).removeClass('wpsstm-active-source');
 
-        var source_li = source_obj.get_source_li_el();
-        $(source_li).addClass('wpsstm-active-source');
+        var source_el = source_obj.get_source_el();
+        $(source_el).addClass('wpsstm-active-source');
     }
     
     set_track_source(idx){
@@ -626,12 +624,13 @@ class WpsstmTrack {
         if (idx === undefined) idx = 0;
 
         var new_source_obj = self.get_track_source(idx);
+
         var new_source = { src: new_source_obj.src, 'type': new_source_obj.type };
 
         if (self.current_source_idx !== idx){
 
             self.debug("set_track_source() #" + idx + ": "+new_source.src);
-            new_source_obj.get_source_li_el().addClass('wpsstm-active-source');
+            new_source_obj.get_source_el().addClass('wpsstm-active-source');
             
         }
 
@@ -656,7 +655,7 @@ class WpsstmTrack {
         source_obj.source_can_play = false;
         self.current_source_idx = undefined;
         
-        var source_el = source_obj.get_source_li_el();
+        var source_el = source_obj.get_source_el();
         source_el.removeClass('wpsstm-active-source').addClass('wpsstm-bad-source');
         
         //

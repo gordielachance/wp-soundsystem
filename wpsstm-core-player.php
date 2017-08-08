@@ -120,7 +120,7 @@ class WP_SoundSystem_Core_Player{
     }
 }
 
-class WP_SoundSystem_Player_Provider{
+abstract class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug;

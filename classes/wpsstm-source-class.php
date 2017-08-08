@@ -5,8 +5,8 @@ class WP_SoundSystem_Source{
     var $position = -1;
     var $title;
     var $is_community;
-    var $url; //input URL
-    var $src; //URL used in the 'source' tag (which could be not the same)
+    var $url; //source link
+    var $stream_url;
     var $provider;
     var $type;
     var $similarity;
@@ -22,9 +22,7 @@ class WP_SoundSystem_Source{
     );
     
     function __construct($post_id = null){
-        
-        $this->provider = new WP_SoundSystem_Player_Provider(); //default
-        
+
         if ($post_id){
             $this->post_id = $post_id;
             $this->title = get_the_title($post_id);
@@ -38,8 +36,6 @@ class WP_SoundSystem_Source{
             $this->is_community = ( $post_author_id == $community_user_id );
 
         }
-
-        if (!$this->title && $this->provider) $this->title = $this->provider->name;
 
     }
     
@@ -183,11 +179,15 @@ class WP_SoundSystem_Source{
             }
         }
 
-        
-        //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
-        
+        //provider
+        $this->populate_source_provider();
+
         $meta_input = array(
-            wpsstm_sources()->source_url_metakey       => $this->url,
+            wpsstm_sources()->source_url_metakey        => $this->url,
+            wpsstm_sources()->source_stream_metakey     => $this->stream_url,
+            wpsstm_sources()->source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
+            
+            //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
             /*
             wpsstm_artists()->artist_metakey    => $this-track->artist,
             wpsstm_tracks()->title_metakey      => $this-track->title,
@@ -219,7 +219,7 @@ class WP_SoundSystem_Source{
     }
     
     /*
-    Exclude sources that have one word of the banned words list in their titles (eg 'cover').
+    Source have one word of the banned words list in their titles (eg 'cover').
     */
     
     function source_has_banned_word(){
@@ -245,7 +245,7 @@ class WP_SoundSystem_Source{
     }
     
     /*
-    Remove sources where that the track artist is not contained in the source title
+    The track artist is not contained in the source title
     https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
     */
     
@@ -268,42 +268,74 @@ class WP_SoundSystem_Source{
         return false;
 
     }
+    
+    /*
+    Populate provider and stream URL.
+    This should be called only when necessary since provider could do API requests to get the stream URL.
+    */
 
-    function populate_provider(){
-        
-        if (!$this->url) return;
+    function populate_source_provider(){
 
-        foreach( (array)wpsstm_player()->providers as $provider ){
+        if ( $meta = get_post_meta($this->post_id,wpsstm_sources()->source_stream_metakey,true) ){
+            $this->stream_url = $meta;
+        }
 
-            if ( !$src_url = $provider->get_stream_url($this->url) ) continue;
+        //try to populate it from the stored value
+        if ( $provider_slug = get_post_meta($this->post_id,wpsstm_sources()->source_provider_metakey,true) ){
             
-            $this->provider =       $provider;
-            $this->type =           $provider->get_source_type($src_url);
-            $this->src =            $src_url;
+            foreach( (array)wpsstm_player()->providers as $provider ){
+                if ($provider_slug != $provider->slug) continue;
+                $this->provider = $provider;
+                if (!$this->stream_url && $this->url){
+                    $this->stream_url = $this->provider->get_stream_url($this->url);
+                }
                 
-            break;
+                break;
+            }
             
         }
         
+        //try to find a match using the input URL
+        if ( !$this->provider && $this->url){
+            
+            foreach( (array)wpsstm_player()->providers as $provider ){
+
+                if ( !$match_url = $provider->get_stream_url($this->url) ) continue;
+
+                $this->provider = $provider;
+                $this->stream_url = $match_url;
+            }
+
+        }
+        
+        if ($this->provider){
+            
+            $this->type = $provider->get_source_type($this->stream_url);
+            
+            //set provider as title if no title set
+            if ( $this->provider && !$this->title){
+                $this->title = $this->provider->name;
+            }
+        }
+        
+
+
         return $this->provider;
 
     }
 
     function get_provider_link(){
+        $this->populate_source_provider();
         if ( !$this->provider ) return;
-
-        $classes = array('wpsstm-source-provider-link','wpsstm-icon-link');
-
-        $attr_arr = array(
-            'class'     => implode(' ',$classes),
-            'href'      => $this->url,
-            'target'    => '_blank',
-            'title'     => $this->title
-        );
         
-        $source_title = sprintf('<label class="wpsstm-source-title">%s</label>',$this->title);
+        global $wpsstm_source;
+        $wpsstm_source = $this;
 
-        return sprintf('<a %s>%s %s</a>',wpsstm_get_html_attr($attr_arr),$this->provider->icon,$source_title);
+        ob_start();
+        wpsstm_locate_template( 'content-source.php', true, false );
+        $source_link = ob_get_clean();
+        
+        return $source_link;
     }
     
     function get_source_class(){
@@ -315,17 +347,5 @@ class WP_SoundSystem_Source{
 
         return $classes;
     }
-    
-    //TO FIX TO CHECK should return only one type of URL
-    function get_source_url($raw = false){
-        global $wpsstm_source;
-        $source = $wpsstm_source;
 
-        if (!$raw){ //playable url
-            return $source->src;
-        }else{
-            return $source->url;
-        }
-    }
-    
 }

@@ -10,9 +10,7 @@ jQuery(document).ready(function($){
             e.preventDefault();
             
             //if ( !$(track_el).hasClass('active') ) return;
-            
-            var source_el = $(this).closest('li');
-            var source_idx = Number( source_el.attr('data-wpsstm-source-idx') );
+            var source_idx = Number( $(this).attr('data-wpsstm-source-idx') );
             
             wpsstm_page_player.play_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
             
@@ -152,9 +150,7 @@ class WpsstmTrackSource {
         var self = this;
         self.tracklist_idx = track.tracklist_idx;
         self.track_idx = track.track_idx;
-        self.source_idx = track.sources.length;
-        $(source_html).attr('data-wpsstm-source-idx',this.source_idx);
-        
+        self.source_idx = $(source_html).attr('data-wpsstm-source-idx');
         self.src =    $(source_html).attr('data-wpsstm-source-src');
         self.type =    $(source_html).attr('data-wpsstm-source-type');
         self.source_can_play = true;
@@ -168,7 +164,7 @@ class WpsstmTrackSource {
         wpsstm_debug(msg,prefix);
     }
 
-    get_source_li_el(ancestor){
+    get_source_el(ancestor){
         
         var self = this;
         var track_obj = wpsstm_page_player.get_tracklist_track_obj(self.tracklist_idx,self.track_idx);
@@ -191,7 +187,7 @@ class WpsstmTrackSource {
         
         self.debug("select_player_source()");
 
-        var player_source_el = self.get_source_li_el(bottom_el);
+        var player_source_el = self.get_source_el(bottom_el);
         var ul_el = player_source_el.closest('ul');
 
         var sources_list = player_source_el.closest('ul');
@@ -199,8 +195,8 @@ class WpsstmTrackSource {
 
         if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
 
-            var lis_el = player_source_el.closest('ul').find('li');
-            lis_el.removeClass('wpsstm-active-source');
+            var links_el = player_source_el.closest('ul').find('a');
+            links_el.removeClass('wpsstm-active-source');
             player_source_el.addClass('wpsstm-active-source');
 
             track_obj.set_track_source(self.source_idx);

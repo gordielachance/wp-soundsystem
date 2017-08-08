@@ -5,6 +5,7 @@ class WP_SoundSystem_Core_Sources{
     var $providers = array();
     var $source_url_metakey = '_wpsstm_source_url';
     var $source_stream_metakey = '_wpsstm_source_stream';
+    var $source_provider_metakey = '_wpsstm_source_provider';
 
     /**
     * @var The one true Instance
@@ -169,6 +170,7 @@ class WP_SoundSystem_Core_Sources{
         if ( get_post_type($post) == wpsstm()->post_type_source) {
             global $wpsstm_source;
             $wpsstm_source = new WP_SoundSystem_Source($post->ID);
+            $wpsstm_source->position = $query->current_post + 1;
         }
     }
     
@@ -256,13 +258,16 @@ class WP_SoundSystem_Core_Sources{
     }
 
     function metabox_source_content( $post ){
-
-        $source_url = get_post_meta( $post->ID, $this->source_url_metakey, true );
+        
+        $source = new WP_SoundSystem_Source($post->ID);
         
         ?>
         <p>
             <h2><?php _e('URL','wpsstm');?></h2>
-            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source_url;?>" />
+            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->url;?>" />
+        </p>
+        <p>
+            <?php echo $source->get_provider_link();?>
         </p>
         <?php
         wp_nonce_field( 'wpsstm_source_meta_box', 'wpsstm_source_meta_box_nonce' );
@@ -467,12 +472,13 @@ class WP_SoundSystem_Core_Sources{
         global $post;
         switch ( $column ) {
             case 'sources_list':
-                $output = '—';
+                
                 $source = new WP_SoundSystem_Source($post_id);
-                if( $source->post_id ){
-                    $output = $source->url;
+                if ( $link = $source->get_provider_link() ){
+                    echo $link;
+                }else{
+                    echo '—';
                 }
-                echo $output;
             break;
         }
     }
