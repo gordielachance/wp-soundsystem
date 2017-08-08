@@ -9,7 +9,7 @@ class WP_SoundSystem_Source{
     var $stream_url;
     var $provider;
     var $type;
-    var $similarity;
+    var $match;
     
 
     private $defaults = array(
@@ -18,7 +18,7 @@ class WP_SoundSystem_Source{
         'url'           => null,
         'title'         => null,
         'is_community'  => null, 
-        'similarity'    => null,
+        'match'    => null,
     );
     
     function __construct($post_id = null){
@@ -34,6 +34,8 @@ class WP_SoundSystem_Source{
             $post_author_id = get_post_field( 'post_author', $post_id );
             $community_user_id = wpsstm()->get_options('community_user_id');
             $this->is_community = ( $post_author_id == $community_user_id );
+            
+            $this->match = $this->get_track_match();
 
         }
 
@@ -322,6 +324,27 @@ class WP_SoundSystem_Source{
 
         return $this->provider;
 
+    }
+    
+    function get_track_match(){
+        
+        //TO FIX what if source has been populated at tracklist request ? Should be 100% ?
+
+        //sanitize data so it is easier to compare
+        $source_title_sanitized = sanitize_title($this->title);
+        $track_artist_sanitized = sanitize_title($this->track->artist);
+        $track_title_sanitized = sanitize_title($this->track->title);
+
+        //remove artist from source title so the string to compare is shorter
+        $maybe_remove_artist = str_replace($track_artist_sanitized,"", $source_title_sanitized,$count);
+        if ($count){
+            $source_title_sanitized = $maybe_remove_artist;
+        }
+        
+        //TO FIX remove banned words from source title and track title before compare ?
+
+        similar_text($source_title_sanitized, $track_title_sanitized, $similarity_pc);
+        return round($similarity_pc);
     }
 
     function get_provider_link(){

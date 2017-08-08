@@ -51,7 +51,10 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
         
         add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
-        add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 ); //'pages' because post is hierarchical
+        add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 );
+        
+        add_filter( 'manage_posts_columns', array($this,'column_track_match_register'), 10, 2 ); 
+        add_action( 'manage_pages_custom_column', array($this,'column_track_match_content'), 10, 2 );
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
@@ -483,29 +486,52 @@ class WP_SoundSystem_Core_Sources{
         }
     }
     
-    function sort_sources_by_track_match($sources,WP_SoundSystem_Track $track){
-        
-        if (!$sources) return;
-        
-        $artist_sanitized = sanitize_title($track->artist);
-        $title_sanitized = sanitize_title($track->title);
+    function column_track_match_register($defaults) {
+        global $post;
 
-        //compute similarity
-        foreach($sources as $key=>$source){
-            
-            //sanitize data so it is easier to compare
-            $source_title_sanitized = sanitize_title($source->title);
-            
-            //remove artist from source title so the string to compare is shorter
-            $source_title_sanitized = str_replace($artist_sanitized,"", $source_title_sanitized); 
-            
-            similar_text($source_title_sanitized, $title_sanitized, $similarity_pc);
-            $sources[$key]->similarity = $similarity_pc;
+        $before = array();
+        $after = array();
+        
+        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
+        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
+        
+        if ( $post_type == wpsstm()->post_type_source ){
+            $after['track_match'] = __('Match','wpsstm');
         }
         
+        return array_merge($before,$defaults,$after);
+    }
+
+    function column_track_match_content($column,$post_id){
+        global $post;
+        switch ( $column ) {
+            case 'track_match':
+                
+                $source = new WP_SoundSystem_Source($post_id);
+                if ( $match = $source->match ){
+                    
+                    $track = new WP_SoundSystem_Track($post->post_parent);
+                    if ($track->artist && $track->artist){
+                        printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
+                    }
+                    
+                    $percent_bar = wpsstm_get_percent_bar($match);
+                    printf('<p>%s</p>',$percent_bar);
+                    
+                    
+                }else{
+                    echo '—';
+                }
+            break;
+        }
+    }
+    
+    //TO FIX TO enable somewhere
+    function sort_sources_by_track_match($sources,WP_SoundSystem_Track $track){
+
         //reorder by similarity
         usort($sources, function ($a, $b){
-            return $a->similarity === $b->similarity ? 0 : ($a->similarity > $b->similarity ? -1 : 1);
+            return $a->match === $b->match ? 0 : ($a->match > $b->match ? -1 : 1);
         });
         
         return $sources;
