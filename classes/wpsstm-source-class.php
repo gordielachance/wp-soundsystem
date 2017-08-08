@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Source {
+class WP_SoundSystem_Source{
     var $post_id;
     var $track;
     var $position = -1;
@@ -163,6 +163,27 @@ class WP_SoundSystem_Source {
             return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
         }
         
+        //specific checks for community sources
+        
+        if ( $args['post_author'] == wpsstm()->get_options('community_user_id') ){
+            
+            $has_banned_word = $lacks_artist = false;
+            
+            if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
+                $has_banned_word = $this->source_has_banned_word();
+            }
+            
+            if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
+                $lacks_artist = $this->source_lacks_track_artist();
+            }
+            
+            //this is not a good source.  Set it as pending.
+            if ( $has_banned_word || $lacks_artist ){
+                $args['post_status'] = 'pending';
+            }
+        }
+
+        
         //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
         
         $meta_input = array(
@@ -195,6 +216,57 @@ class WP_SoundSystem_Source {
         wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
         
         return $this->post_id;
+    }
+    
+    /*
+    Exclude sources that have one word of the banned words list in their titles (eg 'cover').
+    */
+    
+    function source_has_banned_word(){
+        
+        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
+
+        foreach((array)$ban_words as $word){
+            
+            //this track HAS the word in its title; (the cover IS a cover), abord
+            $ignore_this_word = stripos($this->track->title, $word);//case insensitive
+            if ( $ignore_this_word ) continue;
+            
+            //check source for the word
+            $source_has_word = stripos($this->title, $word);//case insensitive
+            if ( !$source_has_word ) continue;
+            
+            wpsstm()->debug_log( json_encode( array('source_title'=>$this->title,'word'=>$word),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Source::source_has_banned_word()");
+            
+            return true;
+        }
+
+        return false;
+    }
+    
+    /*
+    Remove sources where that the track artist is not contained in the source title
+    https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
+    */
+    
+    function source_lacks_track_artist(){
+
+        /*TO FIX check if it works when artist has special characters like / or &
+        What if the artist is written a little differently ?
+        We should compare text somehow here and accept a certain percent match.
+        */
+
+        //sanitize data so it is easier to compare
+        $source_sanitized = sanitize_title($this->title);
+        $artist_sanitized = sanitize_title($this->track->artist);
+
+        if (strpos($source_sanitized, $artist_sanitized) === false) {
+            wpsstm()->debug_log( json_encode( array('artist'=>$this->track->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->track->title,'source_title'=>$this->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Source::source_lacks_track_artist()");
+            return true;
+        }
+
+        return false;
+
     }
 
     function populate_provider(){

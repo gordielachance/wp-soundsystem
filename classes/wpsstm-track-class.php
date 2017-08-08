@@ -492,13 +492,6 @@ class WP_SoundSystem_Track{
         //allow plugins to filter this
         $auto_sources = apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
 
-        if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
-            $auto_sources = $this->autosource_filter_ban_words($auto_sources);
-        }
-        if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
-            $auto_sources = $this->autosource_filter_title_requires_artist($auto_sources);
-        }
-
         foreach((array)$auto_sources as $source){
 
             $source_args = array(
@@ -518,61 +511,6 @@ class WP_SoundSystem_Track{
         }
 
         return $new_source_ids;
-
-    }
-
-    /*
-    Exclude sources that have one word of the banned words list in their titles (eg 'cover').
-    */
-    
-    function autosource_filter_ban_words($sources){
-        
-        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
-
-        foreach((array)$ban_words as $word){
-            
-            //this track HAS the word in its title; (the cover IS a cover), abord
-            $ignore_this_word = stripos($this->title, $word);//case insensitive
-            if ( $ignore_this_word ) continue;
-            
-            //check sources for the word
-            foreach((array)$sources as $key=>$source){
-                $source_has_word = stripos($source->title, $word);//case insensitive
-                if ( !$source_has_word ) continue;
-                unset($source[$key]);
-            }
-        }
-
-        return $sources;
-    }
-    
-    /*
-    Remove sources where that the track artist is not contained in the source title
-    https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
-    */
-    
-    function autosource_filter_title_requires_artist($sources){
-
-        foreach((array)$sources as $key=>$source){
-            
-            /*TO FIX check if it works when artist has special characters like / or &
-            What if the artist is written a little differently ?
-            We should compare text somehow here and accept a certain percent match.
-            */
-            
-            $remove_sources = array();
-            
-            //sanitize data so it is easier to compare
-            $source_sanitized = sanitize_title($source->title);
-            $artist_sanitized = sanitize_title($this->artist);
-
-            if (strpos($source_sanitized, $artist_sanitized) === false) {
-                wpsstm()->debug_log( json_encode( array('artist'=>$this->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$this->title,'source_title'=>$source->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Track::autosource_filter_title_requires_artist() - source ignored as artist is not contained in its title");
-                unset($sources[$key]);
-            }
-        }
-
-        return $sources;
 
     }
 
