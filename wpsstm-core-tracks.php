@@ -222,7 +222,7 @@ class WP_SoundSystem_Core_Tracks{
                         
                     }else{ //add source
                         
-                        $source->save_source();
+                        $source->add_source();
                         
                     }
                     

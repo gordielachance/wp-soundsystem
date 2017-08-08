@@ -505,7 +505,7 @@ class WP_SoundSystem_Track{
                 'post_author'   => wpsstm()->get_options('community_user_id')
             );
             
-            $post_id = $source->save_source($source_args);
+            $post_id = $source->add_source($source_args);
             
             if ( is_wp_error($post_id) ){
                 $code = $post_id->get_error_code();

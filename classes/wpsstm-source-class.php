@@ -107,8 +107,7 @@ class WP_SoundSystem_Source {
         return $query->posts;
     }
     
-    function save_source($args = null){
-        
+    function sanitize_source(){
         if (!$this->track->post_id){
             return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
         }
@@ -124,13 +123,30 @@ class WP_SoundSystem_Source {
         }
         
         $this->title = trim($this->title);
+    }
+    
+    function add_source($args = null){
         
+        $sanitized = $this->sanitize_source();
+        if ( is_wp_error($sanitized) ) return $sanitized;
+
         //check if this source exists already
         $duplicate_args = array('fields'=>'ids');
         if ( $duplicate_ids = $this->get_source_duplicates_ids($duplicate_args) ){
             $this->post_id = $duplicate_ids[0];
             return $this->post_id;
         }
+
+        wpsstm()->debug_log(json_encode(array('args'=>$args)),"WP_SoundSystem_Source::add_source()");
+        
+        return $this->save_source($args);
+        
+    }
+    
+    function save_source($args = null){
+        
+        $sanitized = $this->sanitize_source();
+        if ( is_wp_error($sanitized) ) return $sanitized;
 
         $default_args = array(
             'post_author' =>    get_current_user_id(),
@@ -170,12 +186,15 @@ class WP_SoundSystem_Source {
             
         $args = wp_parse_args($required_args,$args);
 
-        $this->post_id = wp_insert_post( $args );
+        if (!$this->post_id){
+            $this->post_id = wp_insert_post( $args );
+        }else{
+            $this->post_id = wp_update_post( $args );
+        }
 
         wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
         
         return $this->post_id;
-        
     }
 
     function populate_provider(){
