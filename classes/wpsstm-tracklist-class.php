@@ -966,7 +966,18 @@ class WP_SoundSystem_Tracklist{
     }
     
     function get_tracklist_options_attr(){
-        return htmlspecialchars( json_encode($this->options), ENT_QUOTES, 'UTF-8');
+        
+        $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist');
+        
+        $attr_options = array();
+        
+        foreach((array)$this->options as $slug=>$value){
+            if ( !in_array($slug,$allowed_options) ) continue;
+            $attr_options[$slug] = $value;
+        }
+        
+        
+        return htmlspecialchars( json_encode($attr_options), ENT_QUOTES, 'UTF-8');
     }
 
     function get_expire_time(){
