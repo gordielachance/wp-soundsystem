@@ -143,7 +143,12 @@
         });
         
         //toggle expand tracks at init
-        tracklist_obj.toggleTracklist();
+        if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
+            tracklist_obj.toggleTracklist({
+                childrenMax:showSubtracksCount
+            });
+        }
+        
     });
 
     

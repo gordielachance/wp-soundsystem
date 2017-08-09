@@ -76,9 +76,10 @@ class WP_SoundSystem_Tracklist{
     
     protected function get_default_options(){
         return array(
-            'autoplay' =>   ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource' => ( wpsstm()->get_options('autosource') == 'on' ),
-            'can_play' =>   ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'autoplay'          => ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'        => ( wpsstm()->get_options('autosource') == 'on' ),
+            'can_play'          => ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'toggle_tracklist'  => 3,
         );
     }
     

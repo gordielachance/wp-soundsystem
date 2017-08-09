@@ -164,9 +164,11 @@
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        tracklist_obj.toggleTracklist({
-            childrenMax:newTracksCount
-        });
+        if ( tracklist_obj.options.toggle_tracklist ){
+            tracklist_obj.toggleTracklist({
+                childrenMax:newTracksCount
+            });
+        }
         
     });
 
