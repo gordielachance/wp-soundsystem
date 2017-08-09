@@ -47,7 +47,8 @@ class WP_SoundSystem_Core_Wizard{
         add_action( 'wp', array($this,'frontend_wizard_create_tracklist' ) );
         add_action( 'wp',  array($this, 'frontend_wizard_add_tracklist'));
         
-        add_filter( 'the_content', array($this,'wizard_page_content'));
+        add_filter( 'page_template', array($this,'wizard_page_template'));
+
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
 
@@ -83,16 +84,6 @@ class WP_SoundSystem_Core_Wizard{
         );
 
         return array_merge($wizard_rule, $rules);
-    }
-    
-    
-    function get_last_wizard_tracklists(){
-        
-        ob_start();
-        
-        $template = wpsstm_locate_template( 'wizard-last-entries.php', true, false );
-        
-        return ob_get_clean();
     }
 
     function wizard_register_scripts_style_shared(){
@@ -134,53 +125,16 @@ class WP_SoundSystem_Core_Wizard{
         );
 
     }
-    
-    function get_wizard_form($wrapper=true){
-        
 
-        ob_start();
-        
-        $template = wpsstm_locate_template( 'wizard-form.php', true, false );
-        
-        $form = ob_get_clean();
-
-        if ($wrapper){
-            if( $frontend_id = $this->frontend_wizard_page_id ){
-                $form = sprintf('<form action="%s" method="POST">%s</form>',get_permalink($this->tracklist->post_id),$form);
-            }
-        }
-
-        return $form;
-    }
-    
     function metabox_wizard_display(){
-        echo $this->get_wizard_form(false);
+        wpsstm_locate_template( 'wizard-form.php', true );
     }
     
-    function wizard_page_content($content){
+    function wizard_page_template($template){
+        if ( !is_page($this->frontend_wizard_page_id) ) return $template;
+        if ( !$this->can_frontend_wizard() ) return $template;
 
-        if ( !is_page($this->frontend_wizard_page_id) ) return $content;
-        if ( !$this->can_frontend_wizard() ) return $content;
-
-        $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
-        $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
-
-        if ( $can_wizard ){
-            
-            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            $form = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
-            
-        }else{
-            $form = $this->get_wizard_form();
-        }
-
-        $last_entries = wpsstm_wizard()->get_last_wizard_tracklists();
-        $content .= $form . $last_entries;
-
-        return $content;
-        
+        return wpsstm_locate_template( 'frontend-wizard.php' );
     }
 
     function wizard_populate_tracklist(){
