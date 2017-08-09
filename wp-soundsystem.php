@@ -257,11 +257,7 @@ class WP_SoundSystem {
             // css
             wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
             wp_enqueue_style( 'wpsstm-admin' );
-        
-            // js
-            wp_register_script( 'wpsstm-admin', $this->plugin_url . '_inc/js/wpsstm-admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','suggest','wpsstm-shared','wpsstm-tracklists'),$this->version);
 
-            wp_enqueue_script( 'wpsstm-admin' );
             
             
         //}
