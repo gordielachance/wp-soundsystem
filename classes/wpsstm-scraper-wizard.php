@@ -198,6 +198,7 @@ class WP_SoundSystem_Core_Wizard{
             
             $tracklist = wpsstm_get_post_live_tracklist($post->ID);
             $tracklist->can_remote_request = true;
+            $tracklist->is_expired = true;
             $tracklist->options['autoplay'] = false;
             $tracklist->options['can_play'] = false;
 
