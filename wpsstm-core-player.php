@@ -99,7 +99,7 @@ class WP_SoundSystem_Core_Player{
         wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wpsstm-shared','wp-mediaelement'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
