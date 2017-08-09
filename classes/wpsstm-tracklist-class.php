@@ -61,7 +61,6 @@ class WP_SoundSystem_Tracklist{
         }
 
         $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
-        
     }
     
     function get_options($keys=null){
@@ -970,13 +969,12 @@ class WP_SoundSystem_Tracklist{
         $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist');
         
         $attr_options = array();
-        
-        foreach((array)$this->options as $slug=>$value){
+
+        foreach((array)$this->get_options() as $slug=>$value){
             if ( !in_array($slug,$allowed_options) ) continue;
             $attr_options[$slug] = $value;
         }
-        
-        
+
         return htmlspecialchars( json_encode($attr_options), ENT_QUOTES, 'UTF-8');
     }
 
