@@ -377,6 +377,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function metabox_tracklist_content( $post ){
         $tracklist = wpsstm_get_post_tracklist($post->ID);
+        $tracklist->options['autoplay'] = false;
+        $tracklist->options['can_play'] = false;
         
         echo $tracklist->get_tracklist_table();
 
