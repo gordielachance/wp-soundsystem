@@ -17,7 +17,7 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
             </strong>
 
             <small class="wpsstm-tracklist-time">
-                <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( get_post_modified_time('U') );?></time>
+                <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
                 <?php 
                 if ( $rate = $tracklist->get_refresh_rate() ){
                     ?>
