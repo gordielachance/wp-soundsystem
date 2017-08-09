@@ -12,7 +12,7 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
     var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'.tablelist-schedule tr'),
-            'track_artist'      => array('path'=>'a','regex'=>'.+?(?= - )'),
+            'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
             'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
         )
     );
