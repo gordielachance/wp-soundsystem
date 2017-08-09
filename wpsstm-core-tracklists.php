@@ -92,7 +92,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
 
         //ajax : row actions
-        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_tracklist_track_position'));
+        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_playlist_track_position'));
         add_action('wp_ajax_wpsstm_playlist_trash_track', array($this,'ajax_trash_tracklist_track'));
         
         //ajax : add new tracklist
@@ -419,7 +419,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
 
-    function ajax_update_tracklist_track_position(){
+    function ajax_update_playlist_track_position(){
         $ajax_data = $_POST;
         
         $result = array(

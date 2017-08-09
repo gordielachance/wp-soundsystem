@@ -135,10 +135,7 @@ class WP_SoundSystem_Tracklist{
             
         }else{
             
-            $post_type = get_post_type($this->post_id);
-            $tracklist_obj = get_post_type_object($post_type);
-            $user_id = get_current_user_id();
-            $can_set_subtracks = user_can($user_id,$tracklist_obj->cap->edit_posts);
+            $can_set_subtracks = $this->user_can_reorder_tracks();
             
         }
 
@@ -642,7 +639,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //add track
-        if ( $this->user_can_add_tracks() ){
+        if ( $this->user_can_reorder_tracks() ){
             
             $new_subtrack_url = $this->get_tracklist_admin_gui_url('new-subtrack');
             $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
@@ -822,6 +819,11 @@ class WP_SoundSystem_Tracklist{
     }
     
     function save_track_position($track_id,$position){
+        
+        if ( !$this->user_can_reorder_tracks() ){
+            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
         $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
         
         //delete current
@@ -925,7 +927,7 @@ class WP_SoundSystem_Tracklist{
         
     }
     
-    function user_can_add_tracks(){
+    function user_can_reorder_tracks(){
         
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
@@ -933,7 +935,7 @@ class WP_SoundSystem_Tracklist{
         
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
-    
+
     function get_tracklist_class($extra_classes = null){
 
         $classes = array(

@@ -24,7 +24,7 @@
 }
 
 .wpsstm-tracklist{
-    
+
     position:relative;
     font-family: sans-serif;
 
@@ -32,7 +32,7 @@
         font-size:1em;
         margin:0;
         list-style: none;
-        
+
         li[itemprop="track"]{
             position:relative;
             z-index:0;
@@ -44,14 +44,7 @@
                     display:none;
                     @extend .wpsstm-can-click;
                 }
-                &:hover{
-                    .wpsstm-reposition-track{
-                        display:inherit;
-                    }
-                    [itemprop="position"]{
-                        display:none;
-                    }
-                }
+
             }
 
             .wpsstm-track-image{
@@ -92,6 +85,24 @@
             }
             
         }
+    }
+    
+    &.wpsstm-can-manage-tracklist{
+        &[data-wpsstm-tracklist-type="static"]{
+            ul.wpsstm-tracklist-entries{
+                li[itemprop="track"]{
+                    .wpsstm-track-position:hover{
+                        .wpsstm-reposition-track{
+                            display:inherit;
+                        }
+                        [itemprop="position"]{
+                            display:none;
+                        }
+                    }
+                }
+            }
+        }
+
     }
     
     &.wpsstm-playable-tracklist{
