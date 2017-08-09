@@ -300,50 +300,43 @@ class WpsstmTracklist {
         
         var self = this;
         var hasPlayable = $.Deferred();
-        var unplayable = [];
 
         if (typeof tracks === 'undefined'){
             tracks = self.tracks;
         }
         
         if (tracks.length === 0) hasPlayable.reject('empty tracks input');
-
+        
         /*
         self.debug("get_first_playable_track() in tracklist #" + self.tracklist_idx + " for tracks :");
         var idx_list = tracks.map(function(a) {return a.track_idx;});
         self.debug(idx_list);
         */
         
-        $.each(tracks, function( index, track_obj ) {
+        /*
+        This function will loop until a promise is resolved
+        */
+
+        (function iterateTrack(index) {
+
+            if (index >= tracks.length) {
+                hasPlayable.reject("unable to find a playable track");
+                return;
+            }
             
-            var unplayableTrack = $.Deferred();
-            
-            // If a request fails, count that as a resolution so it will keep
-            // waiting for other possible successes. If a request succeeds,
-            // treat it as a rejection so Promise.all immediately bails out.
+            var track_obj = tracks[index];
             
             track_obj.can_play_track().then(
-                val => unplayableTrack.reject(track_obj),
-                err => unplayableTrack.resolve(track_obj),
+                function(success_msg) {
+                    hasPlayable.resolve(track_obj);
+                },
+                function(error_msg){
+                    iterateTrack(index + 1);
+                }
             );
             
-            unplayable.push(unplayableTrack);
+        })(0);
 
-        });
-
-        Promise.all(unplayable).then(
-            function(tracks) {
-                /*
-                self.debug("get_first_playable_track() in tracklist #" + self.tracklist_idx + ": skip non-playable tracks :");
-                var idx_list = tracks.map(function(a) {return a.track_idx;});
-                self.debug(idx_list);
-                */
-                hasPlayable.reject();
-            }, function(track_obj) {
-                hasPlayable.resolve(track_obj);
-            }
-        );
-        
         return hasPlayable.promise();
         
     }
@@ -574,15 +567,15 @@ class WpsstmTracklist {
             if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
             self.debug(debug_msg);
             
-            subtrack.can_play_track().then(function(value) {
-                
-                return subtrack.play_source(source_idx);
-                
-            }, function(reason) {
-                
-                self.next_track_jump();
-                
-            });
+            subtrack.can_play_track().then(
+                function(msg) {
+                    return subtrack.play_source(source_idx);
+                },
+                function(error) {
+                    self.debug(error);
+                    self.next_track_jump();
+                }
+            );
 
         });
 

@@ -5,7 +5,6 @@ var bottom_track_wraper_el;
 var wpsstm_currentTrack;
 var wpsstm_mediaElement;
 var wpsstm_mediaElementPlayer;
-var wpsstm_track_source_requests_limit = 5; //number of following tracks we want to populate the sources for when clicking a track
 var wpsstm_player_shuffle_el; //shuffle button
 //those are the globals for autoplay and tracks navigation
 var wpsstm_page_player;
@@ -209,8 +208,8 @@ class WpsstmPagePlayer {
             function(tracklist_obj) {
                 //play first track
                 tracklist_obj.play_subtrack();
-            }, function(error) {
-                self.debug("page autoplay : unable to find any playable tracklist");
+            }, function(error_msg) {
+                self.debug(error_msg);
             }
         );
     }
@@ -342,8 +341,6 @@ class WpsstmPagePlayer {
         
         var self = this;
         var hasPlayable = $.Deferred();
-        var unplayable = [];
-        var tracklist_set = [];
 
         if (typeof tracklists === 'undefined'){
             tracklists = self.tracklists;
@@ -352,60 +349,52 @@ class WpsstmPagePlayer {
         if (tracklists.length === 0) hasPlayable.reject('empty tracklists input');
 
         /*
-        self.debug("get_first_playable_tracklist() in tracklists :");
-        var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
-        self.debug(idx_list);
+        This function will loop until a promise is resolved
         */
+        
+        (function iterateTracklist(index) {
 
-        $.each(tracklists, function( index, tracklist_obj ) {
-
-            var unplayableTrackList = $.Deferred();
-            unplayable.push(unplayableTrackList);
+            if (index >= tracklists.length) {
+                hasPlayable.reject("unable to find a playable tracklist");
+                return;
+            }
             
-            // If a request fails, count that as a resolution so it will keep
-            // waiting for other possible successes. If a request succeeds,
-            // treat it as a rejection so Promise.all immediately bails out.
+            var tracklist_obj = tracklists[index];
             
             //maybe refresh tracklist
             if ( tracklist_obj.is_expired ){
-
                 tracklist_obj.get_tracklist_request().then(
                     function(success){
                         tracklist_obj.get_first_playable_track().then(
-                            val => unplayableTrackList.reject(tracklist_obj),
-                            err => unplayableTrackList.resolve(tracklist_obj),
+                            function(success_msg){
+                                hasPlayable.resolve(tracklist_obj);
+                            },
+                            function(error_msg){
+                                iterateTracklist(index + 1);
+                            }
                         );
                     },
                     function(error){
-                        unplayableTrackList.resolve(error);
+                        iterateTracklist(index + 1);
                     }
                 );
                 
             }else{
-                
                 tracklist_obj.get_first_playable_track().then(
-                    val => unplayableTrackList.reject(tracklist_obj),
-                    err => unplayableTrackList.resolve(tracklist_obj),
+                    function(success_msg){
+                        hasPlayable.resolve(tracklist_obj);
+                    },
+                    function(error_msg){
+                        iterateTracklist(index + 1);
+                    }
                 );
                 
             }
 
-        });
-
-        Promise.all(unplayable).then(
-            function(tracklists) {
-                /*
-                self.debug("get_first_playable_tracklist() : skip non-playable tracklists:");
-                var idx_list = tracklists.map(function(a) {return a.tracklist_idx;});
-                self.debug(idx_list);
-                */
-                hasPlayable.reject();
-            }, function(tracklist_obj) {
-                hasPlayable.resolve(tracklist_obj);
-            }
-        );
+        })(0);
 
         return hasPlayable.promise();
+
     }
     
     end_current_tracklist(){

@@ -219,7 +219,7 @@ class WpsstmTrack {
             deferredObject.resolve("can play track() : track #" + self.track_idx + " has already sources, no need to request them");
             
         }else if ( tracklist_obj.options.autosource ) {
-            
+
             var promise = self.get_sources_auto();
             
             promise.done(function(val) {
@@ -248,6 +248,8 @@ class WpsstmTrack {
                 //self.can_play_track = true;
             })
 
+        }else{
+            deferredObject.reject("can play track() : no sources for track #" + self.track_idx + " and autosource is disabled");
         }
 
         return deferredObject.promise();
@@ -383,7 +385,7 @@ class WpsstmTrack {
         var self = this;
         var tracklist = wpsstm_page_player.tracklists[self.tracklist_idx];
 
-        var max_items = wpsstm_track_source_requests_limit;
+        var max_items = 4; //number of following tracks to preload
         var rtrack_in = self.track_idx + 1;
         var rtrack_out = self.track_idx + max_items + 1;
 
@@ -689,7 +691,8 @@ class WpsstmTrack {
                 self.can_play_track().then(function(value) {
                     self.play_source();
                     return;
-                }, function(reason) {
+                }, function(error) {
+                    self.debug(error);
                     return;
                 });
 
