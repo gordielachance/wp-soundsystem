@@ -361,11 +361,22 @@ class WP_SoundSystem_Source{
         return $source_link;
     }
     
-    function get_source_class(){
+    function get_source_class($extra_classes = null){
 
         $classes = array('wpsstm-source');
+        
+        $classes = array_merge($classes,(array)$extra_classes);
+        
         if ($this->position == 1){
             $classes[] = 'wpsstm-active-source';
+        }
+
+        //capabilities
+        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $can_manage_source = current_user_can($source_type_obj->cap->edit_post,$this->post_id);
+        
+        if ($can_manage_source){
+            $classes[] = 'wpsstm-can-manage-source';
         }
 
         return $classes;

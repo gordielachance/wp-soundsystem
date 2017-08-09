@@ -678,4 +678,23 @@ class WP_SoundSystem_Track{
 
     }
     
+    function get_track_class($extra_classes = null){
+
+        $classes = array(
+            'wpsstm-track',
+        );
+        
+        $classes = array_merge($classes,(array)$extra_classes);
+        
+        //capabilities
+        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_manage_track = current_user_can($track_type_obj->cap->edit_post,$this->post_id);
+        
+        if ($can_manage_track){
+            $classes[] = 'wpsstm-can-manage-track';
+        }
+
+        return $classes;
+    }
+    
 }

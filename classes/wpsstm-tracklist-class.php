@@ -934,12 +934,13 @@ class WP_SoundSystem_Tracklist{
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
     
-    function get_tracklist_class(){
+    function get_tracklist_class($extra_classes = null){
 
         $classes = array(
             'wpsstm-tracklist',
-            'wpsstm-tracklist-table',
         );
+        
+        $classes = array_merge($classes,(array)$extra_classes);
 
         if ( $this->get_options('can_play') ){
             $classes[] = 'wpsstm-playable-tracklist';
@@ -947,6 +948,15 @@ class WP_SoundSystem_Tracklist{
 
         if ( ($this->tracklist_type == 'live') && $this->is_expired ){
             $classes[] = 'wpsstm-expired-tracklist';
+        }
+        
+        //capabilities
+        $tracklist_type = get_post_type($this->post_id);
+        $tracklist_type_obj = get_post_type_object($tracklist_type);
+        $can_manage_tracklist = current_user_can($tracklist_type_obj->cap->edit_post,$this->post_id);
+        
+        if ($can_manage_tracklist){
+            $classes[] = 'wpsstm-can-manage-tracklist';
         }
 
         return $classes;

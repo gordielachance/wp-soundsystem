@@ -10,7 +10,7 @@ $sources_query = $track->query_sources();
 
 
 ?>
-<li itemscope data-wpsstm-track-id="<?php the_ID(); ?>" data-wpsstm-sources-count="<?php echo $sources_query->post_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
+<li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php the_ID(); ?>" data-wpsstm-sources-count="<?php echo $sources_query->post_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
             <i class="wpsstm-player-icon wpsstm-player-icon-loading fa fa-circle-o-notch fa-spin fa-fw"></i>
