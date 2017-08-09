@@ -23,7 +23,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     //response
     var $request_pagination = array(
-        'total_items'       => null, //When possible (eg. APIs), return the count of total tracks so we know how much tracks we should request.  Override this in your preset.
         'total_pages'       => 1,
         'page_items_limit'  => -1, //When possible (eg. APIs), set the limit of tracks each request can get
         'current_page'      => 1
@@ -121,7 +120,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     function populate_remote_tracklist(){
-        
+
         //capability check
         if ( !wpsstm_live_playlists()->can_live_playlists() ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
@@ -138,9 +137,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //get remote stuff
         $raw_tracks = $this->get_all_raw_tracks();
         if ( !$raw_tracks ) return;
+        
         if ( is_wp_error($raw_tracks) ) {
-            $this->add_notice( 'wizard-header', 'remote-tracks', $raw_tracks->get_error_message(),true );
-            return;
+            return new WP_Error( 'remote-tracks', $raw_tracks->get_error_message(),true );
         }
 
         if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
@@ -149,16 +148,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             }
         }
         
-        //reset tracks
-        $this->tracks = array();
-        $new_ids = array();
-
-        $this->add_tracks($raw_tracks);
-        
         //sort
         if ($this->get_options('tracks_order') == 'asc'){
-            $this->tracks = array_reverse($this->tracks);
+            $raw_tracks = array_reverse($raw_tracks);
         }
+        
+        //reset tracks
+        $this->tracks = array();
+        $this->add_tracks($raw_tracks);
 
         //set tracklist title
         $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
@@ -168,6 +165,21 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
         $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
 
+    }
+    
+    function sync_live_tracklist(){
+        
+        if (!$this->post_id) return;
+        
+        $populated = $this->populate_remote_tracklist();
+        
+        if ( is_wp_error($populated) ) {
+            $this->add_notice( 'wizard-header', 'remote-tracks', $populated->get_error_message(),true );
+            return;
+        }
+        
+        $new_ids = array();
+        
         //update tracklist
         $tracklist_post = array(
             'ID'    => $this->post_id,
@@ -185,20 +197,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $new_ids = $this->save_new_subtracks($subtracks_args);
 
-        //populate page notices
-        foreach($this->notices as $notice){
-            $this->notices[] = $notice;
-        }
-
         new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
 
-        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::populate_remote_tracklist()' );
+        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::sync_live_tracklist()' );
 
         //TO FIX registering notices should be done in another way.  
         $this->wizard_community_author_notice();
         
         return $new_ids;
-
     }
     
     public function get_all_raw_tracks(){
@@ -712,7 +718,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $args = wp_parse_args( $args, $this->request_pagination );
 
         if ( $args['page_items_limit'] > 0 ){
-            $args['total_pages'] = ceil( $args['total_items'] / $args['page_items_limit'] );
+            $args['total_pages'] = ceil( $this->track_count / $args['page_items_limit'] );
         }
 
         $this->request_pagination = $args;
@@ -760,7 +766,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $this->enable_wizard();
         }
         
-        //flush substracks since selectors could have changed
+        //flush subtracks since selectors could have changed
         //TO FIX seems it does not work
         $this->flush_subtracks();
 
@@ -930,7 +936,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             if ( $this->can_remote_request ){
 
-                $new_ids = $this->populate_remote_tracklist();
+                $new_ids = $this->sync_live_tracklist();
                 
                 if ( !is_wp_error($new_ids) ){
                     

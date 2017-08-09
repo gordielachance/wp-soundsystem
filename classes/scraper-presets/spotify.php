@@ -38,11 +38,10 @@ class WP_SoundSystem_Preset_Spotify_Playlists_Api extends WP_SoundSystem_Live_Pl
     
     function get_all_raw_tracks(){
         
-        $tracks_count = $this->get_spotify_playlist_track_count();
+        $this->track_count = $this->get_spotify_playlist_track_count();
         
         //init pagination before request
         $pagination_args = array(
-            'total_items'       => $tracks_count,
             'page_items_limit'  => 100
         );
 

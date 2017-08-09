@@ -9,7 +9,7 @@ class WP_SoundSystem_Core_Tracklists{
     public $qvar_xspf = 'xspf';
     public $qvar_tracklist_admin = 'admin';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
-    public $time_updated_substracks_meta_name = 'wpsstm_remote_query_time';
+    public $time_updated_subtracks_meta_name = 'wpsstm_remote_query_time';
     public $tracklist_post_types = array();
     
     /**
@@ -723,7 +723,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function get_subtracks_update_time($post = null){
-        return get_post_meta($post,$this->time_updated_substracks_meta_name,true);
+        return get_post_meta($post,$this->time_updated_subtracks_meta_name,true);
     }
     
 

@@ -2,8 +2,6 @@
 //TO FIX rather extend WP_SoundSystem_Remote_Tracklist ?
 class WP_SoundSystem_Core_Wizard{
 
-    var $tracklist;
-    
     var $is_advanced = false; //is advanced wizard ?
 
     var $wizard_sections  = array();
@@ -179,6 +177,7 @@ class WP_SoundSystem_Core_Wizard{
     
     function frontend_wizard_add_tracklist(){
         global $post;
+        global $wpsstm_tracklist;
         if (!$post) return;
         
         $wizard_data = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
@@ -192,7 +191,7 @@ class WP_SoundSystem_Core_Wizard{
             //TO FIX debug log
         }elseif($saved){
             //redirect so we repopulate everything
-            $wizard_permalink = $this->tracklist->get_wizard_permalink();
+            $wizard_permalink = $wpsstm_tracklist->get_wizard_permalink();
             wp_redirect($wizard_permalink);
             exit();
         }
@@ -237,7 +236,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $wizard_data = isset($_POST[ 'wpsstm_wizard' ]) ? $_POST[ 'wpsstm_wizard' ] : array();
         
-        if ( !isset($wizard_data['load-url']) ) return;
+        if ( !isset($wizard_data['save-url']) ) return; //TOUTOU
 
         //capability check
 
@@ -276,6 +275,7 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function wizard_settings_init(){
+        global $wpsstm_tracklist;
 
         /*
         Source
@@ -314,7 +314,7 @@ class WP_SoundSystem_Core_Wizard{
             Regex matches
             */
 
-            if ( $this->tracklist->variables ){
+            if ( $wpsstm_tracklist->variables ){
                 $this->add_wizard_field(
                     'regex_matches', 
                     __('Regex matches','wpsstm'), 
@@ -503,22 +503,22 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function css_selector_block($selector){
-        
+        global $wpsstm_tracklist;
         ?>
         <div class="wpsstm-wizard-selector">
             <?php
 
             //path
-            $path = $this->tracklist->get_options( array('selectors',$selector,'path') );
+            $path = $wpsstm_tracklist->get_options( array('selectors',$selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
 
             //regex
-            $regex = $this->tracklist->get_options( array('selectors',$selector,'regex') );
+            $regex = $wpsstm_tracklist->get_options( array('selectors',$selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
-            $attr_disabled = ( $this->tracklist->response_type != 'text/html');
-            $attr = $this->tracklist->get_options( array('selectors',$selector,'attr') );
+            $attr_disabled = ( $wpsstm_tracklist->response_type != 'text/html');
+            $attr = $wpsstm_tracklist->get_options( array('selectors',$selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
 
@@ -627,8 +627,9 @@ class WP_SoundSystem_Core_Wizard{
 
 
     function feed_url_callback(){
-
-        $option = $this->tracklist->feed_url;
+        global $wpsstm_tracklist;
+        
+        $option = $wpsstm_tracklist->feed_url;
 
         printf(
             '<input type="text" name="%s[feed_url]" value="%s" class="fullwidth" placeholder="%s" />',
@@ -657,15 +658,16 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_tracklist_callback(){
-        echo wpsstm_wizard()->tracklist->get_tracklist_table();
+        echo $wpsstm_tracklist->get_tracklist_table();
     }
 
     function feedback_data_type_callback(){
+        global $wpsstm_tracklist;
 
         $output = "—";
 
-        if ( $this->tracklist->response_type ){
-            $output = $this->tracklist->response_type;
+        if ( $wpsstm_tracklist->response_type ){
+            $output = $wpsstm_tracklist->response_type;
         }
         
         echo $output;
@@ -673,18 +675,20 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_regex_matches_callback(){
-
-        foreach($this->tracklist->variables as $variable_slug => $variable){
+        global $wpsstm_tracklist;
+        
+        foreach($wpsstm_tracklist->variables as $variable_slug => $variable){
             $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
             printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
         }
     }   
 
     function feedback_source_content_callback(){
+        global $wpsstm_tracklist;
 
         $output = "—";
         
-        if ( $body_node = $this->tracklist->body_node ){
+        if ( $body_node = $wpsstm_tracklist->body_node ){
             
             $content = $body_node->html();
 
@@ -702,6 +706,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function section_tracks_desc(){
+        global $wpsstm_tracklist;
 
         printf(
             __('Enter a <a href="%s" target="_blank">jQuery selector</a> to target each track item from the tracklist page, for example: %s.','wpsstm'),
@@ -709,7 +714,7 @@ class WP_SoundSystem_Core_Wizard{
             '<code>#content #tracklist .track</code>'
         );
         
-        $this->tracklist->output_notices('wizard-step-tracks');
+        $wpsstm_tracklist->output_notices('wizard-step-tracks');
     }
     
     function selector_tracks_callback(){  
@@ -717,11 +722,12 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function feedback_tracks_callback(){
+        global $wpsstm_tracklist;
 
         $output = "—"; //none
         $tracks_output = array();
         
-        if ( $track_nodes = $this->tracklist->track_nodes ){
+        if ( $track_nodes = $wpsstm_tracklist->track_nodes ){
 
             foreach ($track_nodes as $single_track_node){
                 
@@ -736,7 +742,7 @@ class WP_SoundSystem_Core_Wizard{
             if ($tracks_output){
                 
                 //reverse
-                if ( $this->tracklist->get_options('tracks_order') == 'asc' ){
+                if ( $wpsstm_tracklist->get_options('tracks_order') == 'asc' ){
                     $tracks_output = array_reverse($tracks_output);
                 }
                 
@@ -752,6 +758,7 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function section_single_track_desc(){
+        global $wpsstm_tracklist;
         
         $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
         $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
@@ -760,13 +767,14 @@ class WP_SoundSystem_Core_Wizard{
         echo"<br/>";
         printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
         
-        $this->tracklist->output_notices('wizard-step-single-track');
+        $wpsstm_tracklist->output_notices('wizard-step-single-track');
         
     }
     
     function get_track_detail_selector_prefix(){
-
-        $selector = $this->tracklist->get_options(array('selectors','tracks','path'));
+        global $wpsstm_tracklist;
+        
+        $selector = $wpsstm_tracklist->get_options(array('selectors','tracks','path'));
 
         if (!$selector) return;
         return sprintf(
@@ -796,7 +804,9 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function cache_callback(){
-        $option = $this->tracklist->get_options('datas_cache_min');
+        global $wpsstm_tracklist;
+        
+        $option = $wpsstm_tracklist->get_options('datas_cache_min');
 
         printf(
             '<input type="number" name="%1$s[datas_cache_min]" size="4" min="0" value="%2$s" /><span class="wizard-field-desc">%3$s</span>',
@@ -809,8 +819,9 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function musicbrainz_callback(){
+        global $wpsstm_tracklist;
         
-        $option = $this->tracklist->get_options('musicbrainz');
+        $option = $wpsstm_tracklist->get_options('musicbrainz');
         
         printf(
             '<input type="checkbox" name="%1$s[musicbrainz]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span>',
@@ -825,8 +836,9 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function tracks_order_callback(){
+        global $wpsstm_tracklist;
         
-        $option = $this->tracklist->get_options('tracks_order');
+        $option = $wpsstm_tracklist->get_options('tracks_order');
         
         $desc_text = sprintf(
             '<input type="radio" name="%1$s[tracks_order]" value="desc" %2$s /><span class="wizard-field-desc">%3$s</span>',
@@ -848,6 +860,7 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function wizard_tabs( $active_tab = '' ) {
+        global $wpsstm_tracklist;
 
         $tabs_html    = '';
         $idle_class   = 'nav-tab';
@@ -861,7 +874,7 @@ class WP_SoundSystem_Core_Wizard{
         );
 
         $icon_source_tab = $status_icons[0];
-        if ( $this->tracklist->body_node ){
+        if ( $wpsstm_tracklist->body_node ){
             $icon_source_tab = $status_icons[1];
         }
 
@@ -872,7 +885,7 @@ class WP_SoundSystem_Core_Wizard{
         );
 
         $icon_tracks_tab = $status_icons[0];
-        if ( $this->tracklist->track_nodes ){
+        if ( $wpsstm_tracklist->track_nodes ){
             $icon_tracks_tab = $status_icons[1];
         }
 
@@ -884,7 +897,7 @@ class WP_SoundSystem_Core_Wizard{
 
         $icon_track_details_tab = $status_icons[0];
 
-        if ( $this->tracklist->tracks ){
+        if ( $wpsstm_tracklist->tracks ){
             $icon_track_details_tab = $status_icons[1];
         }
 

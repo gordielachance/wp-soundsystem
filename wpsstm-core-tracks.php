@@ -673,11 +673,11 @@ class WP_SoundSystem_Core_Tracks{
     Include or exclude subtracks from tracks queries.
     Subtrack type can be 'static', 'live' or true (both).
     
-    include & true : returns all substracks
-    include & live|static : returns live|static substracks
+    include & true : returns all subtracks
+    include & live|static : returns live|static subtracks
     
     exclude & true : return all tracks that are not subtracks
-    exclude & live|static : return all tracks that are not live|static substracks
+    exclude & live|static : return all tracks that are not live|static subtracks
 .   */
     
     function pre_get_posts_subtracks( $query ) {

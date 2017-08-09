@@ -1,10 +1,11 @@
 <?php
 
 global $post;
+global $wpsstm_tracklist;
 
 wpsstm_wizard()->wizard_settings_init();
 
-$is_wizard_disabled = wpsstm_wizard()->tracklist->is_wizard_disabled();
+$is_wizard_disabled = $wpsstm_tracklist->is_wizard_disabled();
 
 
 $classes = array();
@@ -19,10 +20,10 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         
         $reset_checked = false;
 
-        wpsstm_wizard()->tracklist->output_notices('wizard-header');
+        $wpsstm_tracklist->output_notices('wizard-header');
 
         if ( wpsstm_wizard()->is_advanced ){
-            wpsstm_wizard()->tracklist->output_notices('wizard-header-advanced');
+            $wpsstm_tracklist->output_notices('wizard-header-advanced');
         }
 
         ?>
@@ -63,12 +64,12 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
             $reset_checked = false;
             //import tracks
             $post_type = get_post_type();
-            if ( ($post_type != wpsstm()->post_type_live_playlist ) && (wpsstm_wizard()->tracklist->tracks) ){
+            if ( ($post_type != wpsstm()->post_type_live_playlist ) && ($wpsstm_tracklist->tracks) ){
                 wpsstm_wizard()->submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
 
             }
             //advanced wizard
-            if ( wpsstm_wizard()->tracklist->feed_url && !isset($_REQUEST['advanced_wizard']) ){
+            if ( $wpsstm_tracklist->feed_url && !isset($_REQUEST['advanced_wizard']) ){
                 $advanced_wizard_url = get_edit_post_link();
                 $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
                 echo '<p><a href="'.$advanced_wizard_url.'">' . __('Advanced Settings','wpsstm') . '</a></p>';
@@ -96,7 +97,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
     //toggle disable wizard
     if ( wpsstm_is_backend() ){
         
-        $is_wizard_disabled = wpsstm_wizard()->tracklist->is_wizard_disabled();
+        $is_wizard_disabled = $wpsstm_tracklist->is_wizard_disabled();
 
         $input_id = 'wpsstm_wizard_disable';
 

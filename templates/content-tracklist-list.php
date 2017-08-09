@@ -2,24 +2,21 @@
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
 
-//subtracks query
-$subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
-
-if ($subtracks_query->post_count){
+if ($track_count){
 
     ?>
 
 
-    <div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class() );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-tracklist-options="<?php echo $tracklist->get_tracklist_options_attr();?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
-        <meta itemprop="numTracks" content="<?php echo $subtracks_query->post_count;?>" />
+    <div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class() );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-tracklist-options="<?php echo $tracklist->get_tracklist_options_attr();?>" data-tracks-count="<?php echo $track_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
+        <meta itemprop="numTracks" content="<?php echo $track_count;?>" />
         <?php 
-        if ( $subtracks_query->have_posts() ) { 
+        if ( $->have_tracks() ) { 
         ?>
             <ol class="wpsstm-tracklist-entries">
                 <?php
                 $track_position = 0;
-                while ( $subtracks_query->have_posts() ) {
-                    $subtracks_query->the_post();
+                while ( $->have_tracks() ) {
+                    $the_track();
                     global $wpsstm_track;
                     $track_position++;
                     $wpsstm_track->position = $track_position;

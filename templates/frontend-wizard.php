@@ -32,6 +32,12 @@ get_header(); ?>
                     <?php the_content(); ?>
                     
                     <?php 
+            
+                    global $wpsstm_tracklist;
+
+                    $feed_url = isset( $_POST['wpsstm_wizard']['feed_url'] ) ? $_POST['wpsstm_wizard']['feed_url'] : null;
+                    $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+                    $wpsstm_tracklist->populate_remote_tracklist();
 
                     $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
                     $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
@@ -51,6 +57,15 @@ get_header(); ?>
                             ?>
                         </form>
                         <?php
+                        
+
+
+                        //TO FIX move at a smarter place ?
+                        if ( $wpsstm_tracklist->get_options('can_play') ){
+                            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+                        }
+                        wpsstm_locate_template( 'content-tracklist-table.php', true, false );
+                        
                         wpsstm_locate_template( 'wizard-last-entries.php', true );
                     }
                     

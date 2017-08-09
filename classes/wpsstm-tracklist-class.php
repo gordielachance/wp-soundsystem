@@ -21,7 +21,6 @@ class WP_SoundSystem_Tracklist{
     var $updated_time = null;
     
     var $pagination = array(
-        'total_items'  => null,
         'total_pages'   => null,
         'per_page'      => null,
         'current_page'  => null
@@ -29,7 +28,14 @@ class WP_SoundSystem_Tracklist{
     
     var $tracks_strict = true; //requires a title AND an artist
     
+    var $subtracks_query = null;
+    
     static $paged_var = 'tracklist_page';
+    
+    var $track;
+    var $current_track = -1;
+    var $track_count = 0;
+    var $in_track_loop = false;
 
     function __construct($post_id = null ){
         
@@ -39,7 +45,8 @@ class WP_SoundSystem_Tracklist{
         );
 
         $this->set_tracklist_pagination($pagination_args);
-
+        
+        $this->subtracks_query = new WP_Query();
 
         if ($post_id){
             
@@ -178,10 +185,10 @@ class WP_SoundSystem_Tracklist{
         
         if ( is_wp_error($success) ) return $success;
         
-        //update substracks time
+        //update subtracks time
         $now = current_time( 'timestamp', true );
         $this->updated_time = $now;
-        return update_post_meta($this->post_id,wpsstm_tracklists()->time_updated_substracks_meta_name,$this->updated_time);
+        return update_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name,$this->updated_time);
 
     }
     
@@ -271,9 +278,7 @@ class WP_SoundSystem_Tracklist{
         $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         
         $this->tracks = $this->validate_tracks($add_tracks);
-        
-        $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
-
+        $this->track_count = count($this->tracks);
     }
 
     protected function validate_tracks($tracks){
@@ -435,18 +440,19 @@ class WP_SoundSystem_Tracklist{
     function get_tracklist_table(){
         global $wpsstm_tracklist;
         global $post;
-        
-        //setup global post
-        $post = get_post($this->post_id);
-        setup_postdata( $post );
-        
-        //setup global tracklist
-        $wpsstm_tracklist = $this;
-        
-        //TO FIX move at a smarter place ?
-        if ( $this->get_options('can_play') ){
-            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+
+        if ($this->post_id){
+            $post = get_post($this->post_id);
+            setup_postdata( $post );
+            
+            $this->subtracks_query = $this->query_subtracks(array('posts_per_page'=>-1));
+
+            //setup global tracklist
+            $wpsstm_tracklist = $this;
+
         }
+
+
 
         ob_start();
 
@@ -459,8 +465,8 @@ class WP_SoundSystem_Tracklist{
 
         $args = wp_parse_args( $args, $this->pagination );
 
-        if ( ( $args['per_page'] > 0 ) && ( $args['total_items'] ) ){
-            $args['total_pages'] = ceil( $args['total_items'] / $args['per_page'] );
+        if ( ( $args['per_page'] > 0 ) && ( $this->track_count ) ){
+            $args['total_pages'] = ceil( $this->track_count / $args['per_page'] );
         }
 
         $this->pagination = $args;
@@ -575,11 +581,11 @@ class WP_SoundSystem_Tracklist{
 
         //track
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
+        $can_edit_tracklist = ($this->post_id && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) );
         
         $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
-        $can_share = true; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
-        $can_favorite = true; //call to action
+        $can_share = $this->post_id; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
+        $can_favorite = $this->post_id; //call to action
 
         $actions = array();
 
@@ -791,7 +797,7 @@ class WP_SoundSystem_Tracklist{
     }
     
     function enable_wizard(){
-        delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_substracks_meta_name); //force subtracks refresh
+        delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name); //force subtracks refresh
         return delete_post_meta($this->post_id, '_wpsstm_wizard_disabled' );
     }
 
@@ -982,6 +988,7 @@ class WP_SoundSystem_Tracklist{
     
     function get_refresh_rate(){
 
+        if ( !$this->post_id ) return;
         if ( $this->tracklist_type != 'live' ) return;
 
         $freq = $this->get_options('datas_cache_min');
@@ -1006,6 +1013,80 @@ class WP_SoundSystem_Tracklist{
 
         return $query;
     }
+
+    /**
+	 * Set up the next track and iterate current track index.
+	 * @return WP_Post Next track.
+	 */
+	public function next_track() {
+
+		$this->current_track++;
+
+		$this->track = $this->tracks[$this->current_track];
+		return $this->track;
+	}
+
+	/**
+	 * Sets up the current track.
+	 * Retrieves the next track, sets up the track, sets the 'in the loop'
+	 * property to true.
+	 * @global WP_Post $wpsstm_track
+	 */
+	public function the_track() {
+		global $wpsstm_track;
+		$this->in_track_loop = true;
+
+		if ( $this->current_track == -1 ) // loop has just started
+			/**
+			 * Fires once the loop is started.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param WP_Query &$this The WP_Query instance (passed by reference).
+			 */
+			do_action_ref_array( 'wpsstm_tracks_loop_start', array( &$this ) );
+
+		$wpsstm_track = $this->next_track();
+		//$this->setup_trackdata( $wpsstm_track );
+	}
+
+	/**
+	 * Determines whether there are more tracks available in the loop.
+	 * Calls the {@see 'wpsstm_tracks_loop_end'} action when the loop is complete.
+	 * @return bool True if tracks are available, false if end of loop.
+	 */
+	public function have_tracks() {
+		if ( $this->current_track + 1 < $this->track_count ) {
+			return true;
+		} elseif ( $this->current_track + 1 == $this->track_count && $this->track_count > 0 ) {
+			/**
+			 * Fires once the loop has ended.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param WP_Query &$this The WP_Query instance (passed by reference).
+			 */
+			do_action_ref_array( 'wpsstm_tracks_loop_end', array( &$this ) );
+			// Do some cleaning up after the loop
+			$this->rewind_tracks();
+		}
+
+		$this->in_track_loop = false;
+		return false;
+	}
+    
+
+
+	/**
+	 * Rewind the tracks and reset track index.
+	 * @access public
+	 */
+	public function rewind_tracks() {
+		$this->current_track = -1;
+		if ( $this->track_count > 0 ) {
+			$this->track = $this->tracks[0];
+		}
+	}
 
 }
 
