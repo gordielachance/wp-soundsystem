@@ -46,6 +46,23 @@ function wpsstm_get_post_mbid($post_id = null){
     return get_post_meta( $post_id, wpsstm_mb()->mbid_metakey, true );
 }
 
+function wpsstm_get_post_image_url($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    
+    //easier to use a meta like this than to upload the remote image if the track is imported
+    
+    $image_url = get_post_meta( $post_id, wpsstm_tracks()->image_url_metakey, true ); //remote track
+    
+    //regular WP post
+    if( has_post_thumbnail($post_id) ){
+        $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ) );
+        $image_url = $image[0];
+    }
+    
+    return $image_url;
+}
+
 function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     if ( wpsstm()->get_options('musicbrainz_enabled') != 'on' ) return false;

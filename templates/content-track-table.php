@@ -28,9 +28,9 @@ $sources_query = $track->query_sources();
     <span class="wpsstm-track-main">
         <span class="wpsstm-track-info">
             <?php 
-            if ( $track->image ){
+            if ( $track->image_url ){
                 ?>
-                <span class="wpsstm-track-image" itemprop="image">CACA<img src="<?php echo $track->image;?>" /></span>
+                <span class="wpsstm-track-image" itemprop="image"><img src="<?php echo $track->image_url;?>" /></span>
                 <?php
             }
             ?>

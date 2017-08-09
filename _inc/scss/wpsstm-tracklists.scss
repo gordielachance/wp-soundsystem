@@ -50,12 +50,6 @@
             .wpsstm-track-image{
                 width: 50px;
                 padding:0;
-                img{
-                    max-width: 100%;
-                    @include opacity(0.2);
-                    @include transition-property(opacity);
-                    @include transition-duration(.4s);
-                }
             }
 
             .wpsstm-track-actions{
@@ -271,8 +265,13 @@
                     > *{
                         display: table-cell;
                         @extend .truncate;
+                        padding: 0 .25em;
                     }
-
+                    
+                    .wpsstm-track-image{
+                        
+                        width: 3.5em; //line height + 2x .25 padding
+                    }
                 }
             }
         }
