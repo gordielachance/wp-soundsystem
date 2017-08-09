@@ -181,7 +181,7 @@ class WpsstmLastFM {
                 $(self.icon_scrobble_el).addClass('loading');
             },
             success: function(data){ 
-                if (!data.success === true) {
+                if (data.success === true) {
                 }else{
                     console.log(data);
                 }

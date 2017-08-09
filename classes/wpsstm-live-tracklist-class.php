@@ -89,7 +89,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         }
 
-        $this->can_remote_request = (defined('DOING_AJAX') && DOING_AJAX);
+        $this->can_remote_request = wpsstm_is_ajax();
 
     }
 
