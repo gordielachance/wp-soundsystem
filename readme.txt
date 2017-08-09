@@ -151,6 +151,13 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.6.1 =
+
+* JS: better way to iterate promises in get_first_playable_tracklist() and get_first_playable_track()
+* tracklists : fixed tracks reordering and tracks removing
+* improved tracklists/tracks/sources classes HTML attribute
+* load tracklist options as a json string in the 'data-wpsstm-tracklist-options' HTML attribute
+
 = 1.6.0 =
 
 * use templates files to display stuff (tracklists, wizard, etc); see /templates directory
