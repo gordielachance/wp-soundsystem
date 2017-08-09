@@ -151,6 +151,11 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* new filter 'wpsstm_input_tracks'
+* upgraded validate_tracks()
+* new preset for Online Radio Box
+
 = 1.6.1 =
 
 * JS: better way to iterate promises in get_first_playable_tracklist() and get_first_playable_track()

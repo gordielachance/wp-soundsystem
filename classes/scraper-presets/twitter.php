@@ -19,7 +19,7 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
     function __construct($post_id = null){
         parent::__construct($post_id);
 
-        $this->preset_name = __('Twitter','wpsstm');
+        $this->preset_name = 'Twitter';
 
     }
     

@@ -90,6 +90,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         $this->can_remote_request = wpsstm_is_ajax();
+        
+
+        //when testing tracks requests, uncomment this
+        /*
+        $this->can_remote_request = true; //disable ajax-only remote requests
+        $this->is_expired = true; //force tracklist refresh
+        */
 
     }
 

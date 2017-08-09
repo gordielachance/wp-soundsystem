@@ -16,7 +16,7 @@ class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_P
     
     function __construct($post_id = null){
         parent::__construct($post_id);
-        $this->preset_name =    __('Hype Machine','wpsstm');
+        $this->preset_name = 'Hype Machine';
     }
  
 }

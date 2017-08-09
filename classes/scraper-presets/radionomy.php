@@ -89,7 +89,7 @@ abstract class WP_SoundSystem_Preset_Radionomy extends WP_SoundSystem_Live_Playl
     
     function get_tracklist_title(){
         if ( !$slug = $this->get_variable_value('radionomy-slug') ) return;
-        return sprintf(__('Radionomy : %s','wppstm'),$slug);
+        return sprintf(__('Radionomy: %s','wppstm'),$slug);
     }
     
 }
