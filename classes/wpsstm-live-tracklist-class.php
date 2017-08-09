@@ -759,6 +759,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }else{
             $this->enable_wizard();
         }
+        
+        //flush substracks since selectors could have changed
+        //TO FIX seems it does not work
+        $this->flush_subtracks();
 
         //is disabled
         if ( $has_form_displayed ){
