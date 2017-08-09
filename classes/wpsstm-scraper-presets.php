@@ -38,18 +38,23 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
         $defaults = parent::get_default_options();
         return array_replace_recursive((array)$defaults,(array)$this->preset_options); //last one has priority
     }
-
-    /**
-    If $url_matches is empty, it means that the feed url does not match the pattern.
-    **/
     
-    public function can_load_tracklist_url($url){
+    /*
+    Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
+    */
+    
+    private function variables_fill_string($str){
 
-        if (!$this->pattern) return true;
+        foreach($this->variables as $variable_slug => $variable_value){
+            $pattern = '%' . $variable_slug . '%';
+            $value = $variable_value;
+            
+            if ($value) {
+                $str = str_replace($pattern,$value,$str);
+            }
+        }
 
-        preg_match($this->pattern, $url, $url_matches);
-
-        return (bool)$url_matches;
+        return $str;
     }
     
     /**
@@ -57,7 +62,7 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     The array keys from the preset $variables and the input $values_arr have to match.
     **/
 
-    protected function populate_variable_values($values_arr){
+    private function populate_variable_values($values_arr){
         
         $key = 0;
 
@@ -77,7 +82,7 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
         $this->variables[$slug] = $value;
     }
     
-    public function get_variable_value($slug){
+    protected function get_variable_value($slug){
 
         foreach($this->variables as $variable_slug => $variable){
             
@@ -100,23 +105,26 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     }
     
     /*
-    Update a string and replace all the %variable-key% parts of it with the value of that variable if it exists.
+    Override this functions if your preset needs to filter the tracks.  
+    Don't forget the call to the parent function at the end.
     */
     
-    public function variables_fill_string($str){
-
-        foreach($this->variables as $variable_slug => $variable_value){
-            $pattern = '%' . $variable_slug . '%';
-            $value = $variable_value;
-            
-            if ($value) {
-                $str = str_replace($pattern,$value,$str);
-            }
-        }
-
-        return $str;
+    protected function validate_tracks($tracks){
+        return parent::validate_tracks($tracks);
     }
+
+    /**
+    If $url_matches is empty, it means that the feed url does not match the pattern.
+    **/
     
+    public function can_load_tracklist_url($url){
+
+        if (!$this->pattern) return true;
+
+        preg_match($this->pattern, $url, $url_matches);
+
+        return (bool)$url_matches;
+    }
 
 }
 

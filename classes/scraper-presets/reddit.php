@@ -119,15 +119,15 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         return $str;
     }
 
-    protected function get_track_artist($track_node){
-        $artist = parent::get_track_artist($track_node);
-        return $this->filter_string($artist);
-    }
-    
-    protected function get_track_title($track_node){
-        $title = parent::get_track_title($track_node);
-        return $this->filter_string($title);
+    protected function validate_tracks($tracks){
 
+        foreach((array)$tracks as $key=>$track){
+            $track->artist = $this->filter_string($track->artist);
+            $track->title = $this->filter_string($track->title);
+
+        }
+
+        return parent::validate_tracks($tracks);
     }
 
 }

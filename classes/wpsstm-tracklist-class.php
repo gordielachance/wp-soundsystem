@@ -239,15 +239,17 @@ class WP_SoundSystem_Tracklist{
     }
 
     /*
-    $tracks = array of tracks objects or array of track IDs
+    $input_tracks = array of tracks objects or array of track IDs
     */
     
-    function add_tracks($tracks){
+    function add_tracks($input_tracks){
+        
+        $add_tracks = array();
 
         //force array
-        if ( !is_array($tracks) ) $tracks = array($tracks);
+        if ( !is_array($input_tracks) ) $input_tracks = array($input_tracks);
 
-        foreach ($tracks as $track){
+        foreach ($input_tracks as $track){
 
             if ( !is_a($track, 'WP_SoundSystem_Track') ){
                 
@@ -262,22 +264,22 @@ class WP_SoundSystem_Tracklist{
                 }
             }
 
-            $this->tracks[] = $track;
+            $add_tracks[] = $track;
         }
 
-        //allow users to alter the input tracks
-        $this->tracks = apply_filters('wpsstm_input_tracks',$this->tracks,$this);
+        //allow users to alter the input tracks.
+        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         
-        $this->validate_tracks();
+        $this->tracks = $this->validate_tracks($add_tracks);
         
         $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
 
     }
 
-    protected function validate_tracks(){
+    protected function validate_tracks($tracks){
 
         //array unique
-        $pending_tracks = array_unique($this->tracks, SORT_REGULAR);
+        $pending_tracks = array_unique($tracks, SORT_REGULAR);
         $valid_tracks = array();
         
         foreach($pending_tracks as $track){
@@ -285,7 +287,7 @@ class WP_SoundSystem_Tracklist{
             $valid_tracks[] = $track;
         }
         
-        $this->tracks = $valid_tracks;
+        return $valid_tracks;
     }
 
     function to_array(){
