@@ -159,8 +159,7 @@ class WpsstmTracklist {
         self.tracklist_request =        undefined;
         self.is_expired =               undefined;
         self.expire_time =              undefined;
-        self.autoplay =                 undefined;
-        self.autosource =               undefined;
+        self.options =                  {};
         self.tracklist_idx =            tracklist_index;
         self.tracks =                   [];
         self.tracks_shuffle_order =     [];
@@ -180,9 +179,9 @@ class WpsstmTracklist {
         self.tracklist_el.attr('data-wpsstm-tracklist-idx',self.tracklist_idx);
 
         self.tracklist_id = Number( self.tracklist_el.attr('data-wpsstm-tracklist-id') );
-        self.autoplay = ( Number( self.tracklist_el.attr('data-wpsstm-autoplay') ) === 1);
-        self.autosource = ( Number( self.tracklist_el.attr('data-wpsstm-autosource') ) === 1);
         self.expire_time = Number( self.tracklist_el.attr('data-wpsstm-expire-time') );
+        
+        self.options = $.parseJSON( self.tracklist_el.attr('data-wpsstm-tracklist-options') );
 
         var now = Math.round( $.now() /1000);
         self.is_expired = (self.expire_time && (now > self.expire_time) );

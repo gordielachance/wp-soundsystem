@@ -191,7 +191,7 @@ class WpsstmPagePlayer {
         var autoplay_tracklists = [];
 
         $(wpsstm_page_player.tracklists).each(function( i, tracklist_obj ) {
-            if ( tracklist_obj.autoplay ){
+            if ( tracklist_obj.options.autoplay ){
                 autoplay_tracklists.push(tracklist_obj);
             }
         });

@@ -216,7 +216,7 @@ class WpsstmTrack {
             
             deferredObject.resolve("can play track() : track #" + self.track_idx + " has already sources, no need to request them");
             
-        }else if ( tracklist_obj.autosource ) {
+        }else if ( tracklist_obj.options.autosource ) {
             
             var promise = self.get_sources_auto();
             
@@ -330,7 +330,7 @@ class WpsstmTrack {
 
         self.load_in_player(source_idx);
 
-        if ( tracklist_obj.autosource ) {
+        if ( tracklist_obj.options.autosource ) {
             self.get_next_tracks_sources_auto();
         }
 

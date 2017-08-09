@@ -963,6 +963,10 @@ class WP_SoundSystem_Tracklist{
 
         return $classes;
     }
+    
+    function get_tracklist_options_attr(){
+        return htmlspecialchars( json_encode($this->options), ENT_QUOTES, 'UTF-8');
+    }
 
     function get_expire_time(){
 
