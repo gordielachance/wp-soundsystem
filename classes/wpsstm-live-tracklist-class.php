@@ -129,10 +129,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         //get remote stuff
-        $remote_tracks = $this->get_all_raw_tracks();
-        if ( !$remote_tracks ) return;
-        if ( is_wp_error($remote_tracks) ) {
-            $this->add_notice( 'wizard-header', 'remote-tracks', $remote_tracks->get_error_message(),true );
+        $raw_tracks = $this->get_all_raw_tracks();
+        if ( !$raw_tracks ) return;
+        if ( is_wp_error($raw_tracks) ) {
+            $this->add_notice( 'wizard-header', 'remote-tracks', $raw_tracks->get_error_message(),true );
             return;
         }
 
@@ -146,12 +146,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->tracks = array();
         $new_ids = array();
 
+        $this->add_tracks($raw_tracks);
+        
         //sort
         if ($this->get_options('tracks_order') == 'asc'){
-            $remote_tracks = array_reverse($remote_tracks);
+            $this->tracks = array_reverse($this->tracks);
         }
-
-        $this->add($remote_tracks);
 
         //set tracklist title
         $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
@@ -846,6 +846,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $this->is_expired = ( $now >= $this->expiration_time );
 
+        /*
         wpsstm()->debug_log(
             array(
                 'is_expired' =>             $this->is_expired,
@@ -856,6 +857,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             ),
             "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
         );
+        */
 
     }
     

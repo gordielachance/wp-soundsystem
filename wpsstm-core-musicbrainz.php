@@ -732,7 +732,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         if (!$save_tracks) return;
         
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $tracklist->add($save_tracks);
+        $tracklist->add_tracks($save_tracks);
         $new_ids = $tracklist->save_new_subtracks();
         
         //add new subtrack IDs

@@ -242,7 +242,7 @@ class WP_SoundSystem_Tracklist{
     $tracks = array of tracks objects or array of track IDs
     */
     
-    function add($tracks){
+    function add_tracks($tracks){
 
         //force array
         if ( !is_array($tracks) ) $tracks = array($tracks);
@@ -267,19 +267,12 @@ class WP_SoundSystem_Tracklist{
         
         $this->validate_tracks();
         
-        $tracks_count = null;
-        foreach((array)$this->tracks as $key=>$track){
-            //increment count
-            $tracks_count++;
-            $this->tracks[$key]->position = $tracks_count;
-        }
-
         $this->set_tracklist_pagination( array('total_items'=>count($this->tracks) ) );
 
     }
 
     protected function validate_tracks(){
-        
+
         //array unique
         $pending_tracks = array_unique($this->tracks, SORT_REGULAR);
         $valid_tracks = array();
@@ -290,9 +283,6 @@ class WP_SoundSystem_Tracklist{
         }
         
         $this->tracks = $valid_tracks;
-        $tracks_count = count($valid_tracks);
-        $this->set_tracklist_pagination( array('total_items'=>$tracks_count) );
-
     }
 
     function to_array(){
