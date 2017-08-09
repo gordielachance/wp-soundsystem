@@ -55,7 +55,7 @@ function wpsstm_get_post_image_url($post_id = null){
     $image_url = get_post_meta( $post_id, wpsstm_tracks()->image_url_metakey, true ); //remote track
     
     //regular WP post
-    if (has_post_thumbnail( $post->ID ) ){
+    if( has_post_thumbnail($post_id) ){
         $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ) );
         $image_url = $image[0];
     }
