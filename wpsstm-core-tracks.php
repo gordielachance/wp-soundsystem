@@ -3,6 +3,7 @@
 class WP_SoundSystem_Core_Tracks{
 
     public $title_metakey = '_wpsstm_track';
+    public $image_url_metakey = '_wpsstm_track_image_url';
     public $qvar_track_admin = 'admin';
     public $qvar_track_lookup = 'lookup_track';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups

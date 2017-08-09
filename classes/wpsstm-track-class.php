@@ -10,7 +10,7 @@ class WP_SoundSystem_Track{
     public $duration; //in seconds
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     
-    public $image;
+    public $image_url;
     public $location;
 
     public $parent_ids = array();
@@ -27,11 +27,11 @@ class WP_SoundSystem_Track{
 
             //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
 
-            $this->title = wpsstm_get_post_track($post_id);
-            $this->artist = wpsstm_get_post_artist($post_id);
-            $this->album = wpsstm_get_post_album($post_id);
-            $this->mbid = wpsstm_get_post_mbid($post_id);
-
+            $this->title        = wpsstm_get_post_track($post_id);
+            $this->artist       = wpsstm_get_post_artist($post_id);
+            $this->album        = wpsstm_get_post_album($post_id);
+            $this->mbid         = wpsstm_get_post_mbid($post_id);
+            $this->image_url    = wpsstm_get_post_image_url($post_id);
         }
 
         
@@ -266,6 +266,7 @@ class WP_SoundSystem_Track{
             wpsstm_tracks()->title_metakey      => $this->title,
             wpsstm_albums()->album_metakey      => $this->album,
             wpsstm_mb()->mbid_metakey           => $this->mbid,
+            wpsstm_tracks()->image_url_metakey  => $this->image_url,
         );
         
         $meta_input = array_filter($meta_input);
