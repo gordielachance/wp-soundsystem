@@ -14,6 +14,7 @@ $sources_query = $track->query_sources();
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
             <i class="wpsstm-player-icon wpsstm-player-icon-loading fa fa-circle-o-notch fa-spin fa-fw"></i>
+            <span class="wpsstm-reposition-track"><i class="fa fa-arrows-v" aria-hidden="true"></i></span>
             <span itemprop="position"><?php echo (int)$track->position;?></span>
         </span>
         <span class="wpsstm-track-play-bt">

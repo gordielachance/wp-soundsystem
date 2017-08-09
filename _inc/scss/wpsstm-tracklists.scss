@@ -38,18 +38,18 @@
             z-index:0;
  
            .wpsstm-track-position{
+               position:relative;
                 .wpsstm-reposition-track{
+                    
+                    display:none;
                     @extend .wpsstm-can-click;
-                    i{
-                        display:none;
+                }
+                &:hover{
+                    .wpsstm-reposition-track{
+                        display:inherit;
                     }
-                    &:hover{
-                        i{
-                            display:inherit;
-                        }
-                        [itemprop="position"]{
-                            display:none;
-                        }
+                    [itemprop="position"]{
+                        display:none;
                     }
                 }
             }
