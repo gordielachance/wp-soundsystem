@@ -264,6 +264,9 @@ class WP_SoundSystem_Tracklist{
 
             $this->tracks[] = $track;
         }
+
+        //allow users to alter the input tracks
+        $this->tracks = apply_filters('wpsstm_input_tracks',$this->tracks,$this);
         
         $this->validate_tracks();
         
