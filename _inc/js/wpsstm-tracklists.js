@@ -671,7 +671,7 @@ class WpsstmTracklist {
         var track_el = track_obj.track_el;
 
         var ajax_data = {
-            action            : 'wpsstm_playlist_remove_track',
+            action            : 'wpsstm_remove_tracklist_track',
             tracklist_id      : self.tracklist_id,
             track_id          : track_obj.post_id
         };
