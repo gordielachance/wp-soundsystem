@@ -321,10 +321,10 @@ class WpsstmTrack {
         wpsstm_currentTrack = self;
         
         var all_tracks = $('[itemprop="track"]');
-        all_tracks.removeClass('active playing buffering');
+        all_tracks.removeClass('playing buffering');
         
         var track_instances = self.get_track_instances();
-        track_instances.addClass('active buffering');
+        track_instances.addClass('buffering');
 
         self.set_bottom_trackinfo();
         

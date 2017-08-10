@@ -562,6 +562,13 @@ class WpsstmTracklist {
             
             //set this track as the active one
             self.current_track_idx = track_idx;
+
+            var all_tracks = $('[itemprop="track"]');
+            all_tracks.removeClass('active');
+
+            var track_obj = self.get_track_obj();
+            var track_instances = track_obj.get_track_instances();
+            track_instances.addClass('active');
             
             var debug_msg = "play_subtrack() #" + self.current_track_idx;
             if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
