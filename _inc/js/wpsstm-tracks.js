@@ -180,7 +180,7 @@ class WpsstmTrack {
         var self =                  this;
         self.track_el =             $(track_html);
         self.tracklist_idx =        tracklist_idx; //cast to number;
-        self.track_idx =            track_idx;
+        self.track_idx =            self.track_el.attr('data-wpsstm-track-idx');
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
         self.title =                self.track_el.find('[itemprop="name"]').text();
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
@@ -193,9 +193,7 @@ class WpsstmTrack {
         self.playback_start =       null; //seconds - used by lastFM
        
         //self.debug("new track");
-        
-        self.track_el.attr('data-wpsstm-track-idx',this.track_idx);
-        
+
         //populate existing sources
         self.populate_html_sources();
         
@@ -557,17 +555,17 @@ class WpsstmTrack {
         });
 
         self.sources_request.done(function(data) {
-            
             if (data.success === true){
-
                 if ( data.new_html ){
                     $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
                     self.populate_html_sources();
-                    
                 }
                 
                 deferredObject.resolve();
                 
+            }else{
+                
+                deferredObject.reject(data.message);
             }
 
         });
@@ -591,7 +589,6 @@ class WpsstmTrack {
         });
 
         if (self.sources.length){ //we've got sources
-            //self.debug("populate_html_sources(): " +self.sources.length);
             $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event
         }
 

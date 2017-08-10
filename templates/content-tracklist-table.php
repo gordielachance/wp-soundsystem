@@ -2,6 +2,11 @@
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
 
+//TO FIX move at a smarter place ?
+if ( $wpsstm_tracklist->get_options('can_play') ){
+    do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+}
+
 ?>
 
 <div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class('wpsstm-tracklist-table') );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-tracklist-options="<?php echo $tracklist->get_tracklist_options_attr();?>" data-tracks-count="<?php echo $tracklist->track_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">

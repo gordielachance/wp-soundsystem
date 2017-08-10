@@ -27,9 +27,7 @@ class WP_SoundSystem_Tracklist{
     );
     
     var $tracks_strict = true; //requires a title AND an artist
-    
-    var $subtracks_query = null;
-    
+
     static $paged_var = 'tracklist_page';
     
     var $track;
@@ -45,8 +43,6 @@ class WP_SoundSystem_Tracklist{
         );
 
         $this->set_tracklist_pagination($pagination_args);
-        
-        $this->subtracks_query = new WP_Query();
 
         if ($post_id){
             
@@ -276,9 +272,11 @@ class WP_SoundSystem_Tracklist{
 
         //allow users to alter the input tracks.
         $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
-        
-        $this->tracks = $this->validate_tracks($add_tracks);
+        $add_tracks = $this->validate_tracks($add_tracks);
+        $this->tracks = $add_tracks;
         $this->track_count = count($this->tracks);
+        
+        return $add_tracks;
     }
 
     protected function validate_tracks($tracks){

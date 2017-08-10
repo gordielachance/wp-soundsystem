@@ -4,7 +4,7 @@ the_post();
 
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
-$tracklist->subtracks_query = $tracklist->populate_tracks(array('posts_per_page'=>-1));
+$tracklist->populate_tracks(array('posts_per_page'=>-1));
 
 
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
@@ -51,8 +51,6 @@ if ( $tracklist->have_tracks() ) {
     while ( $tracklist->have_tracks() ) {
         $tracklist->the_track();
         global $wpsstm_track;
-        $track_position++;
-        $wpsstm_track->position = $track_position;
         $arr = $wpsstm_track->to_xspf_array();
         $xspf->addTrack($arr);
     }

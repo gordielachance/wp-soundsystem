@@ -15,11 +15,17 @@ class WP_SoundSystem_Track{
 
     public $parent_ids = array();
 
-    public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
     private $did_post_id_lookup = false;
     private $did_parents_query = false;
+    
+    var $source;
+    public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    var $current_source = -1;
+    var $source_count = 0;
+    var $in_source_loop = false;
 
     function __construct( $post_id = null ){
+
         //has track ID
         if ( $post_id && ($post = get_post($post_id) ) ){
 
@@ -455,9 +461,6 @@ class WP_SoundSystem_Track{
     }
     
     function query_sources($args=null){
-        
-        global $wpsstm_tracklist;
-        
         $default_args = array(
             'post_status'       => 'publish',
             'posts_per_page'    => -1,
@@ -470,21 +473,33 @@ class WP_SoundSystem_Track{
         
         $args = wp_parse_args((array)$args,$default_args);
         $args = wp_parse_args($required_args,$args);
-
         return new WP_Query($args);
-
     }
-
-    function save_auto_sources(){
+    
+    function populate_sources($args=null){
+        $query = $this->query_sources(array('fields'=>'ids'));
         
+        $source_ids = $query->posts;
+
+        $this->add_sources($source_ids);
+        
+    }
+    
+    function populate_auto_sources(){
+
         if ( wpsstm()->get_options('autosource') != 'on' ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
         }
 
-        if (!$this->artist || !$this->title) return;
+        if ( !$this->artist ){
+            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing','wpsstm') );
+        }
+        
+        if ( !$this->title ){
+            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing','wpsstm') );
+        }
 
         $auto_sources = array();
-        $new_source_ids = array();
 
         foreach( (array)wpsstm_player()->providers as $provider ){
             if ( !$provider_sources = $provider->sources_lookup( $this ) ) continue; //cannot play source
@@ -494,8 +509,25 @@ class WP_SoundSystem_Track{
 
         //allow plugins to filter this
         $auto_sources = apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
+        $new_sources = $this->add_sources($auto_sources);
+        
+        return $new_sources;
+        
+    }
 
-        foreach((array)$auto_sources as $source){
+    function save_auto_sources(){
+
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_track_no_post_id', __('Required track ID missing','wpsstm') );
+        }
+
+        $new_source_ids = array();
+        
+        $new_sources = $this->populate_auto_sources();
+
+        if ( is_wp_error($new_sources) ) return $new_sources;
+
+        foreach((array)$new_sources as $source){
 
             $source_args = array(
                 'post_author'   => wpsstm()->get_options('community_user_id')
@@ -697,5 +729,118 @@ class WP_SoundSystem_Track{
 
         return $classes;
     }
+    
+    /*
+    $input_sources = array of sources objects or array of source IDs
+    */
+    
+    function add_sources($input_sources){
+        
+        $add_sources = array();
+
+        //force array
+        if ( !is_array($input_sources) ) $input_sources = array($input_sources);
+
+        foreach ($input_sources as $source){
+
+            if ( !is_a($source, 'WP_SoundSystem_Source') ){
+                
+                if ( is_array($source) ){
+                    $source_args = $source;
+                    $source = new WP_SoundSystem_Source();
+                    $source->from_array($source_args);
+                }else{ //source ID
+                    $source_id = $source;
+                    //TO FIX check for int ?
+                    $source = new WP_SoundSystem_Source($source_id);
+                }
+            }
+            
+            $source->track_id = $this->post_id;
+            $add_sources[] = $source;
+        }
+
+        //allow users to alter the input sources.
+        $add_sources = apply_filters('wpsstm_input_sources',$add_sources,$this);
+        
+        $this->sources = $add_sources; //$this->sources = $this->validate_sources($add_sources);
+        $this->source_count = count($this->sources);
+        
+        return $add_sources;
+    }
+    
+    /**
+	 * Set up the next source and iterate current source index.
+	 * @return WP_Post Next source.
+	 */
+	public function next_source() {
+
+		$this->current_source++;
+
+		$this->source = $this->sources[$this->current_source];
+		return $this->source;
+	}
+
+	/**
+	 * Sets up the current source.
+	 * Retrieves the next source, sets up the source, sets the 'in the loop'
+	 * property to true.
+	 * @global WP_Post $wpsstm_source
+	 */
+	public function the_source() {
+		global $wpsstm_source;
+		$this->in_source_loop = true;
+
+		if ( $this->current_source == -1 ) // loop has just started
+			/**
+			 * Fires once the loop is started.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param WP_Query &$this The WP_Query instance (passed by reference).
+			 */
+			do_action_ref_array( 'wpsstm_sources_loop_start', array( &$this ) );
+
+		$wpsstm_source = $this->next_source();
+		//$this->setup_sourcedata( $wpsstm_source );
+	}
+
+	/**
+	 * Determines whether there are more sources available in the loop.
+	 * Calls the {@see 'wpsstm_sources_loop_end'} action when the loop is complete.
+	 * @return bool True if sources are available, false if end of loop.
+	 */
+	public function have_sources() {
+		if ( $this->current_source + 1 < $this->source_count ) {
+			return true;
+		} elseif ( $this->current_source + 1 == $this->source_count && $this->source_count > 0 ) {
+			/**
+			 * Fires once the loop has ended.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param WP_Query &$this The WP_Query instance (passed by reference).
+			 */
+			do_action_ref_array( 'wpsstm_sources_loop_end', array( &$this ) );
+			// Do some cleaning up after the loop
+			$this->rewind_sources();
+		}
+
+		$this->in_source_loop = false;
+		return false;
+	}
+    
+
+
+	/**
+	 * Rewind the sources and reset source index.
+	 * @access public
+	 */
+	public function rewind_sources() {
+		$this->current_source = -1;
+		if ( $this->source_count > 0 ) {
+			$this->source = $this->sources[0];
+		}
+	}
     
 }

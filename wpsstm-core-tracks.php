@@ -50,9 +50,7 @@ class WP_SoundSystem_Core_Tracks{
         
         add_filter( 'template_include', array($this,'track_admin_template_filter'));
         add_action( 'wp', array($this,'track_save_admin_gui'));
-        
-        add_action( 'the_post', array($this,'the_track'),10,2);
-        
+
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_frontend' ) );
@@ -88,19 +86,7 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
 
     }
-    
-    /*
-    Register the global $wpsstm_track obj (hooked on 'the_post' action)
-    */
-    
-    function the_track($post,$query){
-        if ( get_post_type($post) == wpsstm()->post_type_track) {
-            global $wpsstm_track;
-            $wpsstm_track = new WP_SoundSystem_Track($post->ID);
-            $wpsstm_track->position = $query->current_post + 1;
-        }
-    }
-    
+
     function register_track_endpoints(){
         // (existing track) admin
         add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK ); 

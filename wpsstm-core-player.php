@@ -172,7 +172,7 @@ abstract class WP_SoundSystem_Player_Provider{
             'limit'         => 3
         );
 
-        $sources = array();
+        $sources_raw = array();
 
         $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
         $api_args = array(
@@ -193,17 +193,18 @@ abstract class WP_SoundSystem_Player_Provider{
 
         foreach( (array)$items as $item ){
 
-            $source = new WP_SoundSystem_Source();
-            $source->url = wpsstm_get_array_value('permalink',$item);
-            $source->title = wpsstm_get_array_value('initTitle',$item);
-            $source->track = $track;
-            $sources[] = $source;
+            $raw = array(
+                'url'   => wpsstm_get_array_value('permalink',$item),
+                'title' => wpsstm_get_array_value('initTitle',$item),
+            );
+            
+            $sources_raw[] = $raw;
             
         }
 
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
+        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources_raw)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
 
-        return $sources;
+        return $sources_raw;
     }
     
 }

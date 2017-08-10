@@ -56,11 +56,6 @@ get_header(); ?>
                             <?php
                             wpsstm_locate_template( 'wizard-form.php', true );
                         
-                            //TO FIX move at a smarter place ?
-                            if ( $wpsstm_tracklist->get_options('can_play') ){
-                                do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
-                            }
-                        
                             if ($wpsstm_tracklist->feed_url){
                                 wpsstm_locate_template( 'content-tracklist-table.php', true, false );
                             }
