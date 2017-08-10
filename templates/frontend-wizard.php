@@ -43,7 +43,7 @@ get_header(); ?>
                     $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
                     $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
 
-                    if ( !$can_wizard ){
+                    if ( $can_wizard ){
 
                         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));

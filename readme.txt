@@ -151,12 +151,13 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.6.5 =
 * new filter 'wpsstm_input_tracks'
 * upgraded validate_tracks()
+* ability to load tracklist and sources without storing the tracklist neither the sources; this is a huge thing!
+* lots of improvements on the Wizard; including that it doesn't store things anymore when previewing a tracklist.
+* Custom loop functions for tracks & sources
 * new preset for Online Radio Box
-* lots of improvements on the Wizard
-* ability to load tracklist and sources without storing the tracklist neither the sources !!!
 
 = 1.6.1 =
 
