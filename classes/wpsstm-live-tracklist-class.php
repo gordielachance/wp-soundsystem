@@ -570,8 +570,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 'artist'        => $artist,
                 'title'         => $title,
                 'album'         => $album,
-                'image'         => $this->get_track_image($single_track_node),
-                'sources'       => $this->get_track_sources($single_track_node),
+                'image_url'     => $this->get_track_image($single_track_node),
+                'source_urls'   => $this->get_track_sources($single_track_node),
             );
 
             $tracks_arr[] = array_filter($args);
@@ -610,10 +610,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $sources = array();
         $source_urls = $this->get_track_source_urls($track_node);
         
-        //TO FIX source match should be high here since the source was set on the remote page
         foreach((array)$source_urls as $source_url){
             $source = new WP_SoundSystem_Source();
-            $source_args = array('url'=>$source_url);
+            $source_args = array('url'=>$source_url,'is_remote'=>true);
             $source->from_array($source_args);
             $sources[] = $source;
         }

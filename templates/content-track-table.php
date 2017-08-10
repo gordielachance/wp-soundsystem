@@ -26,22 +26,10 @@ $track->populate_sources();
     </span>
     <span class="wpsstm-track-main">
         <span class="wpsstm-track-info">
-            <?php 
-            if ( $track->image_url ){
-                ?>
-                <span class="wpsstm-track-image" itemprop="image"><img src="<?php echo $track->image_url;?>" /></span>
-                <?php
-            }
-            ?>
+            <span class="wpsstm-track-image" itemprop="image"><img src="<?php echo $track->image_url;?>" /></span>
             <span class="wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></span>
             <span class="wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
-            <?php 
-            if ( $track->album ){
-                ?>
-                <span class="wpsstm-track-album" itemprop="inAlbum"><?php echo $track->album;?></span>
-                <?php
-            }
-            ?>
+            <span class="wpsstm-track-album" itemprop="inAlbum"><?php echo $track->album;?></span>
         </span>
     </span>
     <?php

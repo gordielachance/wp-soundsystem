@@ -50,14 +50,14 @@ class WP_SoundSystem_Track{
 
         //set properties from args input
         foreach ($args as $key=>$value){
-            if ( !array_key_exists($key,$args_default) ) continue;
-            if ( !isset($args[$key]) ) continue; //value has not been set
             
             switch($key){
-                case 'sources':
+                case 'source_urls':
                     $this->add_sources($value); //TO FIX we should not need this line, but it does not work without - this should be done in populate_sources()
                 break;
                 default:
+                    if ( !array_key_exists($key,$args_default) ) continue;
+                    if ( !isset($args[$key]) ) continue; //value has not been set
                     $this->$key = $args[$key];
                 break;
             }
@@ -125,7 +125,7 @@ class WP_SoundSystem_Track{
             'title'         =>null,
             'artist'        =>null,
             'album'         =>null,
-            'image'         =>null,
+            'image_url'     =>null,
             'location'      =>null,
             'mbid'          =>null,
             'duration'      =>null,

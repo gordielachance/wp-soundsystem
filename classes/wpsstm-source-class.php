@@ -4,7 +4,8 @@ class WP_SoundSystem_Source{
     var $track_id;
     var $position = -1;
     var $title;
-    var $is_community;
+    var $is_community; //TRUE if source was populated automatically
+    var $is_remote; //TRUE if source was found on the remonte source
     var $url; //source link
     var $stream_url;
     var $provider;
@@ -17,8 +18,9 @@ class WP_SoundSystem_Source{
         'track_id'      => null,
         'url'           => null,
         'title'         => null,
-        'is_community'  => null, 
-        'match'    => null,
+        'is_community'  => null,
+        'is_remote'     => null,
+        'match'         => null,
     );
     
     function __construct($post_id = null){
@@ -50,9 +52,15 @@ class WP_SoundSystem_Source{
 
         //set properties from args input
         foreach ($args as $key=>$value){
-            if ( !array_key_exists($key,$args_default) ) continue;
-            if ( !isset($args[$key]) ) continue; //value has not been set
-            $this->$key = $args[$key];
+            
+            switch($key){
+                default:
+                    if ( !array_key_exists($key,$args_default) ) continue;
+                    if ( !isset($args[$key]) ) continue; //value has not been set
+                    $this->$key = $args[$key];
+                break;
+            }
+  
         }
 
         $this->__construct( $post_id );
@@ -145,7 +153,7 @@ class WP_SoundSystem_Source{
     }
     
     function save_source($args = null){
-        
+
         $sanitized = $this->sanitize_source();
         if ( is_wp_error($sanitized) ) return $sanitized;
 
