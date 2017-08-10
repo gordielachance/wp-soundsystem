@@ -173,7 +173,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //reset expiration
         $this->populate_expiration_time(); //keep below set_subtrack_ids()
-        
+
         return true;
 
     }
@@ -610,6 +610,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $sources = array();
         $source_urls = $this->get_track_source_urls($track_node);
         
+        //TO FIX source match should be high here since the source was set on the remote page
         foreach((array)$source_urls as $source_url){
             $source = new WP_SoundSystem_Source();
             $source_args = array('url'=>$source_url);

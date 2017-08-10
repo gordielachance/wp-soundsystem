@@ -120,10 +120,10 @@ class WP_SoundSystem_Core_Player{
     }
 }
 
-abstract class WP_SoundSystem_Player_Provider{
+class WP_SoundSystem_Player_Provider{
     
     var $name;
-    var $slug;
+    var $slug = 'default';
     var $icon;
     
     function __construct(){

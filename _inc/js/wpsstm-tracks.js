@@ -541,12 +541,19 @@ class WpsstmTrack {
         var deferredObject = $.Deferred();
 
         //self.debug("get_track_sources_request()");
+        
+        var track_data = {
+            artist:     track_el.find('[itemprop="byArtist"]').text(),
+            title:      track_el.find('[itemprop="name"]').text(),
+            album:      track_el.find('[itemprop="inAlbum"]').text(),
+        };
 
         var ajax_data = {
-            action:           'wpsstm_autosources_list',
-            post_id:          self.post_id
+            action:             'wpsstm_autosources_list',
+            post_id:            self.post_id,
+            track_data:         track_data       
         };
-        
+
         self.sources_request = $.ajax({
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
@@ -555,6 +562,7 @@ class WpsstmTrack {
         });
 
         self.sources_request.done(function(data) {
+            console.log(data);
             if (data.success === true){
                 if ( data.new_html ){
                     $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources

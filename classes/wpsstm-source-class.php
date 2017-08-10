@@ -22,6 +22,8 @@ class WP_SoundSystem_Source{
     );
     
     function __construct($post_id = null){
+        
+        $this->provider = new WP_SoundSystem_Player_Provider(); //default
 
         if ($post_id){
             $this->post_id = $post_id;
@@ -302,7 +304,7 @@ class WP_SoundSystem_Source{
         }
         
         //try to find a match using the input URL
-        if ( !$this->provider && $this->url){
+        if ( ($this->provider->slug == 'default') && $this->url){
             
             foreach( (array)wpsstm_player()->providers as $provider ){
 
@@ -314,9 +316,10 @@ class WP_SoundSystem_Source{
 
         }
         
-        if ($this->provider){
+        //populate things
+        if ( $this->provider ){
             
-            $this->type = $provider->get_source_type($this->stream_url);
+            $this->type = $this->provider->get_source_type($this->stream_url);
             
             //set provider as title if no title set
             if ( $this->provider && !$this->title){
@@ -355,7 +358,7 @@ class WP_SoundSystem_Source{
 
     function get_provider_link(){
         $this->populate_source_provider();
-        if ( !$this->provider ) return;
+        if ( ($this->provider->slug == 'default') ) return;
 
         ob_start();
         wpsstm_locate_template( 'content-source.php', true, false );
@@ -372,7 +375,7 @@ class WP_SoundSystem_Source{
 
         //capabilities
         $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $can_manage_source = current_user_can($source_type_obj->cap->edit_post,$this->post_id);
+        $can_manage_source = ( $this->post_id && current_user_can($source_type_obj->cap->edit_post,$this->post_id) );
         
         if ($can_manage_source){
             $classes[] = 'wpsstm-can-manage-source';

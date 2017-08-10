@@ -52,7 +52,16 @@ class WP_SoundSystem_Track{
         foreach ($args as $key=>$value){
             if ( !array_key_exists($key,$args_default) ) continue;
             if ( !isset($args[$key]) ) continue; //value has not been set
-            $this->$key = $args[$key];
+            
+            switch($key){
+                case 'sources':
+                    $this->add_sources($value); //TO FIX we should not need this line, but it does not work without - this should be done in populate_sources()
+                break;
+                default:
+                    $this->$key = $args[$key];
+                break;
+            }
+
         }
 
         //populate post ID if track already exists in the DB
@@ -471,18 +480,25 @@ class WP_SoundSystem_Track{
             'post_parent'   => $this->post_id,
         );
         
+        //we need a parent track or it will return all sources; so force return nothing
+        if(!$this->post_id){
+            $required_args['post__in'] = array(0);
+        }
+        
+        
         $args = wp_parse_args((array)$args,$default_args);
         $args = wp_parse_args($required_args,$args);
         return new WP_Query($args);
     }
     
     function populate_sources($args=null){
-        $query = $this->query_sources(array('fields'=>'ids'));
-        
-        $source_ids = $query->posts;
-
-        $this->add_sources($source_ids);
-        
+        if ($this->post_id){
+            $query = $this->query_sources(array('fields'=>'ids'));
+            $source_ids = $query->posts;
+            $this->add_sources($source_ids);
+        }else{
+            $this->add_sources($this->sources); //so we're sure the sources count is set
+        }
     }
     
     function populate_auto_sources(){

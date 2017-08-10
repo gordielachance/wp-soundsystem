@@ -1,8 +1,8 @@
 <?php
-//TO FIX rather extend WP_SoundSystem_Remote_Tracklist ?
+
 class WP_SoundSystem_Core_Wizard{
 
-    var $is_advanced = false; //is advanced wizard ?
+    var $is_advanced = false;
 
     var $wizard_sections  = array();
     var $wizard_fields = array();
@@ -152,7 +152,7 @@ class WP_SoundSystem_Core_Wizard{
         $wpsstm_tracklist->is_expired = true; //force tracklist refresh
         $wpsstm_tracklist->tracks_strict = false;
         $wpsstm_tracklist->options['autoplay'] = false;
-        $wpsstm_tracklist->options['can_play'] = false;
+        //$wpsstm_tracklist->options['can_play'] = false;
 
     }
 

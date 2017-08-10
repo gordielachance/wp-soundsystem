@@ -546,10 +546,19 @@ class WP_SoundSystem_Core_Sources{
         );
 
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-
-        $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
-
-        $result['message'] = $wpsstm_track->post_id;
+        
+        $track_args = array(
+            'artist' => isset($ajax_data['track_data']['artist']) ? $ajax_data['track_data']['artist'] : null,
+            'title' => isset($ajax_data['track_data']['title']) ? $ajax_data['track_data']['title'] : null,
+            'album' => isset($ajax_data['track_data']['album']) ? $ajax_data['track_data']['album'] : null,
+        );
+            
+        if ($post_id){
+            $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        }else{
+            $wpsstm_track = $result['track'] = new WP_SoundSystem_Track();
+            $wpsstm_track->from_array($track_args);
+        }
 
         if ($wpsstm_track->post_id){
             $success = $wpsstm_track->save_auto_sources();
