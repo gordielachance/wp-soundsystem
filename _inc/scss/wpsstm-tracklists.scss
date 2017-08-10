@@ -1,28 +1,6 @@
 @import "compass";
 @import "wpsstm-shared";
 
-.toggle-children-container{
-    .wpsstm-tracklist{
-        margin:0;
-    }
-    //more - less
-    .toggle-children-link{
-        @extend .wpsstm-icon-link;
-        display: block;
-        width: 100%;
-        text-decoration: none;
-        border-bottom: none;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1.5em;
-        small{
-            font-size: .5em;
-            line-height: 1em;
-            vertical-align: middle;
-        }
-    }
-}
-
 .wpsstm-tracklist{
 
     position:relative;
@@ -193,19 +171,17 @@
 
             li[itemprop="track"]{
                 
-                display: table;
+                @extend .wpsstm-table-row;
+
                 width: 100%;
                 line-height:3em;
 
-                > *{
-                    display: table-cell;
-                }
                 .wpsstm-track-left{
                     width: 4em;
                     text-align: center;
                 }
                 .wpsstm-track-right{
-                    @extend .flexible-table-cell;
+                    @extend .wpsstm-flexible-cell;
                 }
                 
                 @include transition-property(background);
@@ -257,13 +233,12 @@
                 }
 
                 .wpsstm-track-info{
-
+                    @extend .wpsstm-table-row;
                     display: table;
                     table-layout: fixed;
                     width: 100%;
 
                     > *{
-                        display: table-cell;
                         @extend .truncate;
                         padding: 0 .25em;
                     }
@@ -324,15 +299,23 @@
 #wpsstm-bottom-track-info.wpsstm-tracklist{
     text-transform: uppercase;
     letter-spacing: .05em;
-    font-size: .6em;
     position:relative;
-
+    font-size:.6em;
+    vertical-align: middle;
     .wpsstm-tracklist-entries{
 
         li[itemprop="track"]{
-            
+            height:50px;
             > * {
                 padding:0 1em;
+                
+            }
+            
+            .wpsstm-track-image{
+                padding:0;
+                img{
+                    height:50px;
+                }
             }
 
             .wpsstm-track-play-bt{

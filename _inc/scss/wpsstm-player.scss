@@ -52,17 +52,14 @@
             height:3em;
             position:relative;
             font-size: 0.8em;
-            padding:0 1em;
+            padding:0;
             
-            display: table;
             width:100%;
-            
-            > *{
-                display: table-cell;
-            }
+
+            @extend .wpsstm-table-row;
             
             #wpsstm-bottom-track-actions{
-                @extend .flexible-table-cell;
+                @extend .wpsstm-flexible-cell;
                 > *{
                     padding: 0 .25em;
                     font-size:1.5em;
