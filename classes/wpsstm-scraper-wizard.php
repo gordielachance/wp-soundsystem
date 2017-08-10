@@ -148,11 +148,16 @@ class WP_SoundSystem_Core_Wizard{
             $feed_url = wpsstm_wizard()->wizard_url;
             $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($feed_url);
         }
+        
         $wpsstm_tracklist->can_remote_request = true; //disable ajax-only remote requests
         $wpsstm_tracklist->is_expired = true; //force tracklist refresh
         $wpsstm_tracklist->tracks_strict = false;
-        $wpsstm_tracklist->options['autoplay'] = false;
-        //$wpsstm_tracklist->options['can_play'] = false;
+        
+        if (wpsstm_is_backend() ){
+            $wpsstm_tracklist->options['autoplay'] = false;
+            $wpsstm_tracklist->options['can_play'] = false;
+        }
+
 
     }
 
@@ -284,8 +289,10 @@ class WP_SoundSystem_Core_Wizard{
         $new_post_id = wp_insert_post( $post_args );
         if ( is_wp_error($new_post_id) ) return $new_post_id;
         
+        $tracklist = wpsstm_get_post_live_tracklist($new_post_id);  
+        $tracklist->update_from_remote();
+        
         if($static){
-            $tracklist = wpsstm_get_post_live_tracklist($new_post_id);            
             $converted = $tracklist->convert_to_static_playlist();
 
             if ( is_wp_error($converted) ){
