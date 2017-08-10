@@ -1,11 +1,11 @@
 <?php
 
 global $post;
+global $wpsstm_tracklist;
 
 wpsstm_wizard()->wizard_settings_init();
-
-$is_wizard_disabled = wpsstm_wizard()->tracklist->is_wizard_disabled();
-
+$is_wizard_disabled = $wpsstm_tracklist->is_wizard_disabled();
+$post_type = get_post_type();
 
 $classes = array();
 $classes[]  = ( wpsstm_wizard()->is_advanced ) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
@@ -14,15 +14,16 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
 
 <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
     <?php
+  
+    $reset_checked = false;
     
-    if (!$is_wizard_disabled){
-        
-        $reset_checked = false;
+    if(!$is_wizard_disabled){
 
-        wpsstm_wizard()->tracklist->output_notices('wizard-header');
+        $wpsstm_tracklist->output_notices('wizard-header');
+        
 
         if ( wpsstm_wizard()->is_advanced ){
-            wpsstm_wizard()->tracklist->output_notices('wizard-header-advanced');
+            $wpsstm_tracklist->output_notices('wizard-header-advanced');
         }
 
         ?>
@@ -58,58 +59,84 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
             <?php } ?>
         </div>
         <?php
-
-        if ( wpsstm_is_backend() ){
-            $reset_checked = false;
-            //import tracks
-            $post_type = get_post_type();
-            if ( ($post_type != wpsstm()->post_type_live_playlist ) && (wpsstm_wizard()->tracklist->tracks) ){
-                wpsstm_wizard()->submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
-
-            }
-            //advanced wizard
-            if ( wpsstm_wizard()->tracklist->feed_url && !isset($_REQUEST['advanced_wizard']) ){
-                $advanced_wizard_url = get_edit_post_link();
-                $advanced_wizard_url = add_query_arg(array('advanced_wizard'=>true),$advanced_wizard_url);
-                echo '<p><a href="'.$advanced_wizard_url.'">' . __('Advanced Settings','wpsstm') . '</a></p>';
-            }
-            
-        }else{ //frontend
-            if ( is_page(wpsstm_wizard()->frontend_wizard_page_id) ){
-                wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[load-url]');
-            }
-
-        }
         
-        if ( wpsstm_wizard()->is_advanced ){
-            ?>
-            <input type="hidden" name="advanced_wizard" value="1" />
-            <?php
-        }
-        
-    }else{
+    }
+    
+    //load URL (frontend)
+    if ( !wpsstm_is_backend() ){
+        wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[load-url]');
+    }
+    
+    //convert
+    if ( $wpsstm_tracklist->feed_url && $wpsstm_tracklist->track_count ){
         ?>
-        <p class="wpsstm-notice"><?php _e("Uncheck 'disabled wizard' and save to open settings.",'wpsstm');?></p>
+        <span id="wpsstm-wizard-convert-tracklist">
+            <?php
+            if ( wpsstm_is_backend() ){
+                if ( $post_type == wpsstm()->post_type_live_playlist ){
+                    wpsstm_wizard()->submit_button(__('Convert to static playlist','wpsstm'),'primary','wpsstm_wizard[save-playlist][type][static]');
+                }
+            }else{
+                if ( get_current_user_id() ){
+
+                    //save live
+                    $live_tracklist_obj =   get_post_type_object(wpsstm()->post_type_live_playlist);
+                    $can_edit_cap =         $live_tracklist_obj->cap->edit_posts;
+                    $can_save_live =        current_user_can($can_edit_cap);
+
+                    if ($can_save_live){
+                        wpsstm_wizard()->submit_button(__('Save as live playlist','wpsstm'),'primary','wpsstm_wizard[save-playlist][type][live]');
+                    }
+
+                    //save static
+                    $static_tracklist_obj =   get_post_type_object(wpsstm()->post_type_playlist);
+                    $can_edit_cap =         $static_tracklist_obj->cap->edit_posts;
+                    $can_save_static =        current_user_can($can_edit_cap);
+
+                    if ($can_save_static){
+                        wpsstm_wizard()->submit_button(__('Save as static playlist','wpsstm'),'primary','wpsstm_wizard[save-playlist][type][static]');
+                    }
+
+                }else{
+
+                    $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+                    $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+                    $wp_auth_text = sprintf(__('You could save this playlist if you were logged.  Login or subscribe %s.','wpsstm'),$wp_auth_link);
+                    printf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+
+                }
+
+            }
+            ?>
+        </span>
         <?php
     }
 
-    //toggle disable wizard
     if ( wpsstm_is_backend() ){
+        //import tracks
         
-        $is_wizard_disabled = wpsstm_wizard()->tracklist->is_wizard_disabled();
-
-        $input_id = 'wpsstm_wizard_disable';
-
-        printf(
-            '<small><input id="%s" type="checkbox" name="%s[disable]" value="on" %s /><label for="%s" class="wizard-field-desc">%s</label></small>',
-            $input_id,
-            'wpsstm_wizard',
-            checked($is_wizard_disabled, true, false),
-            $input_id,
-            __('Disable wizard','wpsstm')
-        );
         
-        wpsstm_wizard()->submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
+        if ( ( $post_type == wpsstm()->post_type_playlist ) && $wpsstm_tracklist->track_count ){
+            wpsstm_wizard()->submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
+        }
+
+        //toggle wizard
+        if ( get_post_status() != 'auto-draft' ){
+            if( $is_wizard_disabled ){
+                wpsstm_wizard()->submit_button(__('Enable Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][enable]');
+            }else{
+                wpsstm_wizard()->submit_button(__('Disable Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][disable]');
+            }
+        }
+        
+        //save wizard
+        if( !$is_wizard_disabled ){
+            if ($wpsstm_tracklist->feed_url){
+                wpsstm_wizard()->submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
+            }else{
+                wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[save-wizard]');
+            }
+        }
     }
 
     //save settings

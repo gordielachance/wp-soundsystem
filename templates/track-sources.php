@@ -3,20 +3,18 @@
 global $wpsstm_track;
 $track = $wpsstm_track;
 
-//track sources
-$sources_query = $track->query_sources();
-if ( $sources_query->have_posts() ) { ?>
+if ( $track->have_sources() ) { ?>
     <div class="wpsstm-track-sources-list">
         <?php
-        while ( $sources_query->have_posts() ) {
+        while ( $track->have_sources() ) {
             
-            $sources_query->the_post();
+            $track->the_source();
             global $wpsstm_source;
-            
+
             if ( $source_link = $wpsstm_source->get_provider_link() ){
                 echo $source_link;
             }
-            
+
         }
         ?>
     </div>

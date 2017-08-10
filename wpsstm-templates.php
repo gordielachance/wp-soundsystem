@@ -56,7 +56,7 @@ function wpsstm_get_post_image_url($post_id = null){
     
     //regular WP post
     if( has_post_thumbnail($post_id) ){
-        $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ) );
+        $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
         $image_url = $image[0];
     }
     

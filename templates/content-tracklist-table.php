@@ -2,20 +2,21 @@
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
 
-//subtracks query
-$subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
+//TO FIX move at a smarter place ?
+if ( $wpsstm_tracklist->get_options('can_play') ){
+    do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+}
 
 ?>
 
-<div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class('wpsstm-tracklist-table') );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-tracklist-options="<?php echo $tracklist->get_tracklist_options_attr();?>" data-tracks-count="<?php echo $subtracks_query->post_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
-    <meta itemprop="numTracks" content="<?php echo $subtracks_query->post_count;?>" />
+<div itemscope class="<?php echo implode(' ',$tracklist->get_tracklist_class('wpsstm-tracklist-table') );?>" data-wpsstm-tracklist-id="<?php the_ID(); ?>" data-wpsstm-tracklist-idx="<?php echo $tracklist->position;?>" data-wpsstm-tracklist-type="<?php echo $tracklist->tracklist_type;?>" data-wpsstm-tracklist-options="<?php echo $tracklist->get_tracklist_options_attr();?>" data-tracks-count="<?php echo $tracklist->track_count;?>" itemtype="http://schema.org/MusicPlaylist" data-wpsstm-expire-time="<?php echo $tracklist->get_expire_time();?>">
+    <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
         <div>
             <strong class="wpsstm-tracklist-title" itemprop="name">
                 <i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>
-                <a href="<?php the_permalink();?>"><?php the_title();?></a>
+                <a href="<?php the_permalink();?>"><?php echo $tracklist->title;?></a>
             </strong>
-
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
                 <?php 
@@ -41,14 +42,13 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
             echo $notices_el;
         }
     ?>
-    <?php 
-    if ( $subtracks_query->have_posts() ) { 
+    <?php
+    if ( $tracklist->have_tracks() ) {
     ?>
         <ul class="wpsstm-tracklist-entries">
             <?php
-            $track_position = 0;
-            while ( $subtracks_query->have_posts() ) {
-                $subtracks_query->the_post();
+            while ( $tracklist->have_tracks() ) {
+                $tracklist->the_track();
                 wpsstm_locate_template( 'content-track-table.php', true, false );
             } 
             ?>
@@ -61,9 +61,6 @@ $subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
         </p>
         <?php
     }
-    
-    //clear query
-    wp_reset_query();
-    
+
     ?>
 </div>

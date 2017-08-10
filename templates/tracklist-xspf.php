@@ -4,6 +4,7 @@ the_post();
 
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
+$tracklist->populate_tracks(array('posts_per_page'=>-1));
 
 
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
@@ -45,14 +46,11 @@ $xspf->addPlaylistInfo('annotation', $annotation);
 
 
 //subtracks
-$subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
-if ( $subtracks_query->have_posts() ) {
+if ( $tracklist->have_tracks() ) {
     $track_position = 0;
-    while ( $subtracks_query->have_posts() ) {
-        $subtracks_query->the_post();
+    while ( $tracklist->have_tracks() ) {
+        $tracklist->the_track();
         global $wpsstm_track;
-        $track_position++;
-        $wpsstm_track->position = $track_position;
         $arr = $wpsstm_track->to_xspf_array();
         $xspf->addTrack($arr);
     }

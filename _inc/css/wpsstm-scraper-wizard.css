@@ -154,3 +154,12 @@
 .postbox#wpsstm-metabox-scraper-wizard .inside {
   overflow: auto;
 }
+
+/* line 162, ../scss/wpsstm-scraper-wizard.scss */
+#wpsstm-frontend-wizard p.submit {
+  padding: .25em;
+}
+/* line 166, ../scss/wpsstm-scraper-wizard.scss */
+#wpsstm-frontend-wizard #wpsstm-wizard-convert-tracklist p.submit {
+  display: inline-block;
+}

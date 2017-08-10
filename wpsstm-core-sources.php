@@ -33,9 +33,7 @@ class WP_SoundSystem_Core_Sources{
     function setup_actions(){
         
         add_action( 'init', array($this,'register_post_type_sources' ));
-        
-        add_action( 'the_post', array($this,'the_source'),10,2);
-        
+
         add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
@@ -164,19 +162,7 @@ class WP_SoundSystem_Core_Sources{
 
         register_post_type( wpsstm()->post_type_source, $args );
     }
-    
-    /*
-    Register the global $wpsstm_source obj (hooked on 'the_post' action)
-    */
-    
-    function the_source($post,$query){
-        if ( get_post_type($post) == wpsstm()->post_type_source) {
-            global $wpsstm_source;
-            $wpsstm_source = new WP_SoundSystem_Source($post->ID);
-            $wpsstm_source->position = $query->current_post + 1;
-        }
-    }
-    
+
     /*
     On backend sources listings, allow to filter by track ID
     */
@@ -195,6 +181,11 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function metabox_source_register(){
+        global $post;
+        global $wpsstm_source;
+        
+        //TO FIX move elsewhere ? the_post filter ?
+        $wpsstm_source = new WP_SoundSystem_Source($post->ID);
         
         $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         
@@ -246,17 +237,17 @@ class WP_SoundSystem_Core_Sources{
         $is_revision = wp_is_post_revision( $post_id );
         $is_valid_nonce = ( isset($_POST['wpsstm_track_parent_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_track_parent_meta_box_nonce'], 'wpsstm_track_parent_meta_box' ) );
         if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
+        
+        unset($_POST['wpsstm_track_parent_meta_box_nonce']); //so we avoid the infinite loop
 
         $parent_id = ( isset($_POST[ 'wpsstm_source_parent_id' ]) ) ? $_POST[ 'wpsstm_source_parent_id' ] : null;
-        
-        remove_action( 'save_post', array($this,'metabox_parent_track_save'));  //avoid infinite loop
+        $parent_post_type = get_post_type($parent_id);
+        if ( $parent_post_type != wpsstm()->post_type_track ) $parent_id = null;
 
         wp_update_post(array(
             'ID' =>             $post_id,
             'post_parent' =>    $parent_id,
         ));
-        
-        add_action( 'save_post', array($this,'metabox_parent_track_save'));  //re-hook
 
     }
 
@@ -332,6 +323,7 @@ class WP_SoundSystem_Core_Sources{
         global $wpsstm_track;
 
         $wpsstm_track = new WP_SoundSystem_Track($post->ID);
+        $wpsstm_track->populate_sources();
         
         ob_start();
         wpsstm_locate_template( 'track-sources.php', true, false );
@@ -473,11 +465,13 @@ class WP_SoundSystem_Core_Sources{
 
     function column_source_url_content($column,$post_id){
         global $post;
+        global $wpsstm_source;
+        
         switch ( $column ) {
             case 'sources_list':
                 
-                $source = new WP_SoundSystem_Source($post_id);
-                if ( $link = $source->get_provider_link() ){
+                $wpsstm_source = new WP_SoundSystem_Source($post_id);
+                if ( $link = $wpsstm_source->get_provider_link() ){
                     echo $link;
                 }else{
                     echo '—';
@@ -504,11 +498,12 @@ class WP_SoundSystem_Core_Sources{
 
     function column_track_match_content($column,$post_id){
         global $post;
+        global $wpsstm_source;
         switch ( $column ) {
             case 'track_match':
                 
-                $source = new WP_SoundSystem_Source($post_id);
-                if ( $match = $source->match ){
+                $wpsstm_source = new WP_SoundSystem_Source($post_id);
+                if ( $match = $wpsstm_source->match ){
                     
                     $track = new WP_SoundSystem_Track($post->post_parent);
                     if ($track->artist && $track->artist){
@@ -551,23 +546,39 @@ class WP_SoundSystem_Core_Sources{
         );
 
         $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-
-        $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
-        $new_source_ids = $wpsstm_track->save_auto_sources();
         
-        if ( is_wp_error($new_source_ids) ){
+        $track_args = array(
+            'artist' => isset($ajax_data['track_data']['artist']) ? $ajax_data['track_data']['artist'] : null,
+            'title' => isset($ajax_data['track_data']['title']) ? $ajax_data['track_data']['title'] : null,
+            'album' => isset($ajax_data['track_data']['album']) ? $ajax_data['track_data']['album'] : null,
+        );
             
-            $result['message'] = $new_source_ids->get_error_message();
-            
+        if ($post_id){
+            $wpsstm_track = $result['track'] = new WP_SoundSystem_Track($post_id);
         }else{
+            $wpsstm_track = $result['track'] = new WP_SoundSystem_Track();
+            $wpsstm_track->from_array($track_args);
+        }
+
+        if ($wpsstm_track->post_id){
+            $success = $wpsstm_track->save_auto_sources();
+        }else{
+            $success = $wpsstm_track->populate_auto_sources();
+        }
+
+        if ( is_wp_error($success) ){
             
+            $result['message'] = $success->get_error_message();
+            
+        }elseif( $success ){
+
             ob_start();
             wpsstm_locate_template( 'track-sources.php', true, false );
             $sources_list = ob_get_clean();
 
             $result['new_html'] = $sources_list;
             $result['success'] = true;
-            
+
         }
 
         header('Content-type: application/json');

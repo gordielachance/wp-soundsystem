@@ -5,17 +5,16 @@ $tracklist = $wpsstm_tracklist;
 
 global $wpsstm_track;
 $track = $wpsstm_track;
-
-$sources_query = $track->query_sources();
+$track->populate_sources();
 
 
 ?>
-<li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php the_ID(); ?>" data-wpsstm-sources-count="<?php echo $sources_query->post_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
+<li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php echo $track->post_id; ?>" data-wpsstm-track-idx="<?php echo $tracklist->current_track; ?>" data-wpsstm-sources-count="<?php echo $track->source_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
             <i class="wpsstm-player-icon wpsstm-player-icon-loading fa fa-circle-o-notch fa-spin fa-fw"></i>
             <span class="wpsstm-reposition-track"><i class="fa fa-arrows-v" aria-hidden="true"></i></span>
-            <span itemprop="position"><?php echo (int)$track->position;?></span>
+            <span itemprop="position"><?php echo $tracklist->current_track + 1;?></span>
         </span>
         <span class="wpsstm-track-play-bt">
             <a class="wpsstm-play-track wpsstm-icon-link" href="#">

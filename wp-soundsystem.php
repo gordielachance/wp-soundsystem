@@ -267,11 +267,6 @@ class WP_SoundSystem {
     function enqueue_scripts_styles_frontend(){
         
         //TO FIX TO CHECK embed only for music post types ?
-        
-        //css
-        wp_register_style( 'wpsstm-frontend',  $this->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
-        wp_enqueue_style( 'wpsstm-frontend' );
-        
         wp_enqueue_script( 'wpsstm-shared' );
         
     }

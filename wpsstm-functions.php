@@ -79,7 +79,7 @@ function wpsstm_get_raw_subtrack_ids($type='any',$tracklist_id=null){
 
     $tracklists_subtrack_ids = $wpdb->get_col( $query );
     
-    //unserialize all those substracks lists
+    //unserialize all those subtracks lists
     foreach((array)$tracklists_subtrack_ids as $meta){
         $ids = maybe_unserialize($meta);
         $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
@@ -246,8 +246,6 @@ Use this instead of 'new WP_SoundSystem_Tracklist' or 'new WP_SoundSystem_Remote
 function wpsstm_get_post_tracklist($post_id=null){
     global $post;
 
-    if (!$post_id && $post) $post_id = $post->ID;
-    
     $tracklist = new WP_SoundSystem_Tracklist(); //default
     $post_type = get_post_type($post_id);
 
@@ -271,27 +269,25 @@ function wpsstm_get_post_tracklist($post_id=null){
 }
 
 function wpsstm_get_post_live_tracklist($post_id=null){
+    $feed_url = wpsstm_get_live_tracklist_url($post_id);
+    $tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+    $tracklist->__construct($post_id); //repopulate post id since it is not populated in the registered preset.
+    return $tracklist;
+}
 
-    /*
-    Check if one of the available presets (which are extending WP_SoundSystem_Remote_Tracklist) can load the tracklist url
-    If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist; 
-    and repopulate post id since it is not populated in the registered preset.
-    */
-    
-    $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
-
-    if ( $feed_url = wpsstm_get_live_tracklist_url($post_id) ){
-
-        foreach((array)wpsstm_live_playlists()->get_available_presets() as $preset){
-
-            if ( $preset->can_load_tracklist_url($feed_url) ){
-                $tracklist = $preset;
-                $tracklist->__construct($post_id);
-                wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_post_live_tracklist()");
-                break;
-            }
+/*
+Check if one of the available presets (which are extending WP_SoundSystem_Remote_Tracklist) can load the tracklist url
+If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist
+*/
+function wpsstm_get_live_tracklist_preset($feed_url){
+    $tracklist = new WP_SoundSystem_Remote_Tracklist();
+    foreach((array)wpsstm_live_playlists()->get_available_presets() as $preset){
+        if ( $preset->can_load_tracklist_url($feed_url) ){
+            $tracklist = $preset;
+            $tracklist->feed_url = $feed_url;
+            wpsstm()->debug_log( json_encode(array('feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_live_tracklist_preset()");
+            break;
         }
     }
-    
     return $tracklist;
 }

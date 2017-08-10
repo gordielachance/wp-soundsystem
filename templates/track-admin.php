@@ -33,10 +33,10 @@
                 $track_type_obj =       get_post_type_object(wpsstm()->post_type_track);
                 
                 ?>
-                <article id="post-<?php the_ID(); ?>" <?php post_class('wpsstm-track-admin'); ?> data-wpsstm-track-id="<?php echo $track->post_id;?>">
+                <article id="post-<?php echo $track->post_id; ?>" <?php post_class('wpsstm-track-admin'); ?> data-wpsstm-track-id="<?php echo $track->post_id;?>">
 
                     <header class="entry-header">
-                        <h1 class="entry-title"><?php the_title();?></h1>
+                        <h1 class="entry-title"><?php echo $track->title;?></h1>
                         <?php if ($track_admin_action == 'new-subtrack'){ //TO FIX NOT WORKING
                             printf('<h2>%s</h2>',$track_type_obj->labels->add_new_item);
                         }
