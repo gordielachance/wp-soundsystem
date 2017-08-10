@@ -4,7 +4,7 @@ the_post();
 
 global $wpsstm_tracklist;
 $tracklist = $wpsstm_tracklist;
-$tracklist->subtracks_query = $tracklist->query_subtracks(array('posts_per_page'=>-1));
+$tracklist->subtracks_query = $tracklist->populate_tracks(array('posts_per_page'=>-1));
 
 
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){

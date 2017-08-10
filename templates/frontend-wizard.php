@@ -11,6 +11,13 @@
  * @since Twenty Fifteen 1.0
  */
 
+global $wpsstm_tracklist;
+wpsstm_wizard()->populate_wizard_tracklist(null);
+if ($wpsstm_tracklist->feed_url){
+    $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
+}
+
+
 get_header(); ?>
 
 	<div id="primary" class="content-area">
@@ -22,7 +29,7 @@ get_header(); ?>
             the_post();
             
             ?>
-            <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+            <article id="wpsstm-frontend-wizard" <?php post_class(); ?>>
 
                 <header class="entry-header">
                     <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
@@ -31,13 +38,7 @@ get_header(); ?>
                 <div class="entry-content">
                     <?php the_content(); ?>
                     
-                    <?php 
-            
-                    global $wpsstm_tracklist;
-
-                    $feed_url = isset( $_POST['wpsstm_wizard']['feed_url'] ) ? $_POST['wpsstm_wizard']['feed_url'] : null;
-                    $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($feed_url);
-                    $wpsstm_tracklist->populate_remote_tracklist();
+                    <?php
 
                     $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
                     $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
@@ -54,19 +55,20 @@ get_header(); ?>
                         <form action="<?php the_permalink();?>" method="POST">
                             <?php
                             wpsstm_locate_template( 'wizard-form.php', true );
+                        
+                            //TO FIX move at a smarter place ?
+                            if ( $wpsstm_tracklist->get_options('can_play') ){
+                                do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
+                            }
+                        
+                            if ($wpsstm_tracklist->feed_url){
+                                wpsstm_locate_template( 'content-tracklist-table.php', true, false );
+                            }
+                        
                             ?>
                         </form>
                         <?php
                         
-
-
-                        //TO FIX move at a smarter place ?
-                        if ( $wpsstm_tracklist->get_options('can_play') ){
-                            do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
-                        }
-                        wpsstm_locate_template( 'content-tracklist-table.php', true, false );
-                        
-                        wpsstm_locate_template( 'wizard-last-entries.php', true );
                     }
                     
                     ?>

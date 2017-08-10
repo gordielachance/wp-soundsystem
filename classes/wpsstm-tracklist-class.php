@@ -438,27 +438,15 @@ class WP_SoundSystem_Tracklist{
     }
 
     function get_tracklist_table(){
-        global $wpsstm_tracklist;
         global $post;
-
-        if ($this->post_id){
-            $post = get_post($this->post_id);
-            setup_postdata( $post );
-            
-            $this->subtracks_query = $this->query_subtracks(array('posts_per_page'=>-1));
-
-            //setup global tracklist
-            $wpsstm_tracklist = $this;
-
-        }
-
-
+        global $wpsstm_tracklist;
+        $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
 
         ob_start();
-
         wpsstm_locate_template( 'content-tracklist-table.php', true, false );
+        $output = ob_get_clean();
 
-        return ob_get_clean();
+        return $output;
     }
 
     public function set_tracklist_pagination( $args ) {
@@ -562,10 +550,10 @@ class WP_SoundSystem_Tracklist{
     
     function get_tracklist_actions($context = null){
         
-        $tracklist_type = get_post_type($this->post_id);
+        $tracklist_post_type = get_post_type($this->post_id);
         
         //no tracklist actions if this is a "track" tracklist
-        if ($tracklist_type == wpsstm()->post_type_track ) return;
+        if ($tracklist_post_type == wpsstm()->post_type_track ) return;
         
         /*
         Capability check
@@ -574,7 +562,7 @@ class WP_SoundSystem_Tracklist{
         //playlist
         $permalink = get_permalink($this->post_id);
         
-        $tracklist_obj = get_post_type_object($tracklist_type);
+        $tracklist_obj = get_post_type_object($tracklist_post_type);
         
         $tracklist_status = get_post_status($this->post_id);
         $current_status_obj = get_post_status_object( $tracklist_status );
@@ -583,7 +571,7 @@ class WP_SoundSystem_Tracklist{
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = ($this->post_id && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) );
         
-        $can_refresh = ($tracklist_type == wpsstm()->post_type_live_playlist );
+        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) );
         $can_share = $this->post_id; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
         $can_favorite = $this->post_id; //call to action
 
@@ -678,9 +666,9 @@ class WP_SoundSystem_Tracklist{
                 'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
             );
         }
-        
+
         //lock
-        if ( $this->user_can_lock_tracklist() ){
+        if ( !wpsstm_is_backend() && $this->user_can_lock_tracklist() ){
             $actions['lock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Lock', 'wpsstm'),
@@ -692,7 +680,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         //unlock
-        if ( $this->user_can_unlock_tracklist() ){
+        if ( !wpsstm_is_backend() && $this->user_can_unlock_tracklist() ){
             $actions['unlock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Unlock', 'wpsstm'),
@@ -755,10 +743,12 @@ class WP_SoundSystem_Tracklist{
         return $url;
     }
 
-    function move_wizard_tracks(){
-        if (!$this->post_id) return;
+    function move_live_tracks(){
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
         
-        wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_wizard_tracks()");
+        wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
         
         $this->append_wizard_tracks();
         
@@ -770,12 +760,14 @@ class WP_SoundSystem_Tracklist{
         $this->tracklist_type = 'static';
         
         //clear wizard datas
-        $this->disable_wizard();
+        $this->toggle_enable_wizard(false);
 
     }
     
     function append_wizard_tracks(){
-        if (!$this->post_id) return;
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
 
         //get live IDs
         $this->tracklist_type = 'live';
@@ -786,19 +778,6 @@ class WP_SoundSystem_Tracklist{
         $this->append_subtrack_ids($live_ids);
 
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WP_SoundSystem_Tracklist::append_wizard_tracks()");
-    }
-    
-    function is_wizard_disabled(){
-        return (bool)get_post_meta($this->post_id, '_wpsstm_wizard_disabled', true );
-    }
-    
-    function disable_wizard(){
-        return update_post_meta($this->post_id, '_wpsstm_wizard_disabled', true );
-    }
-    
-    function enable_wizard(){
-        delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name); //force subtracks refresh
-        return delete_post_meta($this->post_id, '_wpsstm_wizard_disabled' );
     }
 
     function convert_to_live_playlist(){
@@ -813,7 +792,7 @@ class WP_SoundSystem_Tracklist{
         
         $converted = set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
         
-        $this->enable_wizard();
+        $this->toggle_enable_wizard();
 
         return $converted;
 
@@ -998,7 +977,7 @@ class WP_SoundSystem_Tracklist{
         return $refresh_time_human = human_time_diff( 0, $freq_secs );
     }
     
-    function query_subtracks($args = null){
+    function populate_tracks($args = null){
 
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
@@ -1009,9 +988,8 @@ class WP_SoundSystem_Tracklist{
         
         $args = wp_parse_args($required,(array)$args);
         
-        $query = new WP_Query($args);
-
-        return $query;
+        $subtrack_ids = $this->get_subtrack_ids();
+        $this->add_tracks($subtrack_ids);
     }
 
     /**
@@ -1087,6 +1065,19 @@ class WP_SoundSystem_Tracklist{
 			$this->track = $this->tracks[0];
 		}
 	}
+    
+    function is_wizard_disabled(){
+        return (bool)get_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey, true );
+    }
+    
+    function toggle_enable_wizard($enable=true){
+        if (!$enable){
+            return update_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey, true );
+        }else{
+            delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name); //force subtracks refresh
+            return delete_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey );
+        }
+    }
 
 }
 

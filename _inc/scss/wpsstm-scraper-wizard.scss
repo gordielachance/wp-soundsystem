@@ -157,3 +157,14 @@
         overflow:auto;
     }
 }
+
+#wpsstm-frontend-wizard{
+    p.submit{
+        padding: .25em;
+    }
+    #wpsstm-wizard-convert-tracklist{
+        p.submit{
+            display:inline-block;
+        }
+    }
+}

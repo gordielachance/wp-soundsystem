@@ -596,6 +596,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function shortcode_track( $atts ) {
         global $post;
+        global $wpsstm_tracklist;
 
         // Attributes
         $default = array(
@@ -603,9 +604,9 @@ class WP_SoundSystem_Core_Tracks{
         );
         $atts = shortcode_atts($default,$atts);
 
-        $tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+        $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
         
-        return $tracklist->get_tracklist_table();
+        return $wpsstm_tracklist->get_tracklist_table();
 
     }
     

@@ -10,9 +10,8 @@ $tracklist = $wpsstm_tracklist;
         <div>
             <strong class="wpsstm-tracklist-title" itemprop="name">
                 <i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>
-                <a href="<?php the_permalink();?>"><?php the_title();?></a>
+                <a href="<?php the_permalink();?>"><?php echo $tracklist->title;?></a>
             </strong>
-
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
                 <?php 
@@ -39,7 +38,7 @@ $tracklist = $wpsstm_tracklist;
         }
     ?>
     <?php
-    if ( $tracklist->have_tracks() ) { 
+    if ( $tracklist->have_tracks() ) {
     ?>
         <ul class="wpsstm-tracklist-entries">
             <?php
@@ -57,9 +56,6 @@ $tracklist = $wpsstm_tracklist;
         </p>
         <?php
     }
-    
-    //clear query
-    wp_reset_query();
-    
+
     ?>
 </div>
