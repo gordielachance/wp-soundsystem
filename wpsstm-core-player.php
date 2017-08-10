@@ -202,7 +202,9 @@ class WP_SoundSystem_Player_Provider{
             
         }
 
+        /*
         wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources_raw)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
+        */
 
         return $sources_raw;
     }

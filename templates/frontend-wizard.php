@@ -43,12 +43,12 @@ get_header(); ?>
                     $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
                     $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
 
-                    if ( $can_wizard ){
+                    if ( !$can_wizard ){
 
                         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
                         $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-                        $form = sprintf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
+                        printf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
 
                     }else{
                         ?>

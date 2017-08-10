@@ -155,6 +155,8 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * new filter 'wpsstm_input_tracks'
 * upgraded validate_tracks()
 * new preset for Online Radio Box
+* lots of improvements on the Wizard
+* ability to load tracklist and sources without storing the tracklist neither the sources !!!
 
 = 1.6.1 =
 

@@ -562,7 +562,6 @@ class WpsstmTrack {
         });
 
         self.sources_request.done(function(data) {
-            console.log(data);
             if (data.success === true){
                 if ( data.new_html ){
                     $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
