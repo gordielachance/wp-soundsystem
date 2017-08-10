@@ -10,6 +10,9 @@ $track->populate_sources();
 
 ?>
 <li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php echo $track->post_id; ?>" data-wpsstm-track-idx="<?php echo $tracklist->current_track; ?>" data-wpsstm-sources-count="<?php echo $track->source_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
+    <span class="wpsstm-track-image" itemprop="image">
+        <img src="<?php echo $track->image_url;?>" />
+    </span>
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
             <i class="wpsstm-player-icon wpsstm-player-icon-loading fa fa-circle-o-notch fa-spin fa-fw"></i>
@@ -26,7 +29,6 @@ $track->populate_sources();
     </span>
     <span class="wpsstm-track-main">
         <span class="wpsstm-track-info">
-            <span class="wpsstm-track-image" itemprop="image"><img src="<?php echo $track->image_url;?>" /></span>
             <span class="wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></span>
             <span class="wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
             <span class="wpsstm-track-album" itemprop="inAlbum"><?php echo $track->album;?></span>
