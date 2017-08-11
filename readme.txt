@@ -153,6 +153,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.6.6.2 =
+* fix previous_tracklist_jump() / next_tracklist_jump() when repeat is enabled and that no other playlist is available to play
+* tracklist option to hide columns (JS) when all of its cells have the same value (or are empty)
+
 = 1.6.6 =
 * fix broken JS player navigation
 * some minor improvements

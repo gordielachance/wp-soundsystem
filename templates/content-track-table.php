@@ -11,7 +11,13 @@ $track->populate_sources();
 ?>
 <li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php echo $track->post_id; ?>" data-wpsstm-track-idx="<?php echo $tracklist->current_track; ?>" data-wpsstm-sources-count="<?php echo $track->source_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
     <span class="wpsstm-track-image" itemprop="image">
-        <img src="<?php echo $track->image_url;?>" />
+        <?php 
+        if ($track->image_url){
+            ?>
+            <img src="<?php echo $track->image_url;?>" />
+            <?php
+        }
+        ?>
     </span>
     <span class="wpsstm-track-left">
         <span class="wpsstm-track-position">
