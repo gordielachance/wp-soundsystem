@@ -56,8 +56,8 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     <?php 
     }else{
         ?>
-        <p class="wpsstm-notice">
-            <?php _e( 'No tracks found.','wpsstm');?>
+        <p id="wpsstm-notice-empty-tracklist" class="wpsstm-notice">
+            <?php echo $tracklist->empty_tracks_msg();?>
         </p>
         <?php
     }

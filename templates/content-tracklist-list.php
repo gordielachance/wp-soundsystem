@@ -29,8 +29,13 @@ if ($tracklist->track_count){
                 ?>
            </ol>
         <?php 
+        }else{
+            ?>
+            <p id="wpsstm-notice-empty-tracklist" class="wpsstm-notice">
+                <?php echo $tracklist->empty_tracks_msg();?>
+            </p>
+            <?php
         }
-
         ?>
     </div>
     <?php

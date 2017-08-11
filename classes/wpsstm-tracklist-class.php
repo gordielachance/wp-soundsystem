@@ -1076,6 +1076,10 @@ class WP_SoundSystem_Tracklist{
             return delete_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey );
         }
     }
+    
+    function empty_tracks_msg(){
+        return __( 'No tracks found.','wpsstm');
+    }
 
 }
 

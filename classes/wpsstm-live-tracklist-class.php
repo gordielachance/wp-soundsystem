@@ -962,13 +962,27 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
             }else{
-                $this->add_notice( 'tracklist-header', 'tracklist-expired',__("The tracklist cache has expired.","wpsstm"),true );
                 return;
+                
             }
         }else{
             parent::populate_tracks($args);
         }
 
+    }
+    
+    function empty_tracks_msg(){
+        if ( !$this->is_expired ) return parent::empty_tracks_msg();
+        
+        $refresh_notice = __("The tracklist cache has expired.","wpsstm");
+        $actions = $this->get_tracklist_actions();
+        $refresh = wpsstm_get_array_value('refresh',$actions);
+        if ($refresh){
+            //use same ID than original link or JS won't work
+            $refresh_link = sprintf('<span id="%s"><a href=""%s>%s</a><span>','wpsstm-tracklist-action-refresh',$refresh['href'],$refresh['text']);
+            $refresh_notice .= "  " . $refresh_link;
+        }
+        return $refresh_notice;
     }
     
 }
