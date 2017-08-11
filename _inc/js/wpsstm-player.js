@@ -275,6 +275,7 @@ class WpsstmPagePlayer {
         
         var self = this;
         var current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(self.current_tracklist_idx);
+        var current_tracklist = self.get_tracklist_obj();
         
         var tracklists = $(self.tracklists).get();
         var tracklists_before = tracklists.slice(0,current_tracklist_idx).reverse();
@@ -286,6 +287,11 @@ class WpsstmPagePlayer {
         
         //find first playable in reverse order
         var tracklists_reordered = tracklists_before.concat(tracklists_after);
+        
+        //no other tracklist to play; but repeat is enabled
+        if ( (tracklists_reordered.length == 0) && ( wpsstm_page_player.can_repeat ) ){
+            tracklists_reordered.push(current_tracklist);
+        }
 
         self.get_first_playable_tracklist(tracklists_reordered).then(
             function(tracklist_obj) {
@@ -314,6 +320,7 @@ class WpsstmPagePlayer {
         
         var self = this;
         var current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(self.current_tracklist_idx);
+        var current_tracklist = self.get_tracklist_obj();
 
         var tracklists = $(self.tracklists).get();
         var tracklists_after = tracklists.slice(current_tracklist_idx+1); 
@@ -325,12 +332,17 @@ class WpsstmPagePlayer {
         
         var tracklists_reordered = tracklists_after.concat(tracklists_before);
         
+        //no other tracklist to play; but repeat is enabled
+        if ( (tracklists_reordered.length == 0) && ( wpsstm_page_player.can_repeat ) ){
+            tracklists_reordered.push(current_tracklist);
+        }
+
         //find first playable
         self.get_first_playable_tracklist(tracklists_reordered).then(
             function(tracklist_obj) {
                 tracklist_obj.play_subtrack();
             }, function(error) {
-                console.log("next_tracklist_jump() : unable to find any playable tracklist");
+                self.debug("next_tracklist_jump() : unable to find any playable tracklist");
             }
         );
         
