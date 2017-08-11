@@ -60,6 +60,13 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         </div>
         <?php
         
+    }else{
+        ?>
+        <p id="wpsstm-wizard-preview-feed-url">
+            <?php printf($wpsstm_tracklist->feed_url);?>
+        </p>
+        <?php
+        
     }
     
     //load URL (frontend)
@@ -68,7 +75,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
     }
     
     //convert
-    if ( $wpsstm_tracklist->feed_url && $wpsstm_tracklist->track_count ){
+    if ( !$is_wizard_disabled && $wpsstm_tracklist->feed_url && $wpsstm_tracklist->track_count ){
         ?>
         <span id="wpsstm-wizard-convert-tracklist">
             <?php
@@ -116,16 +123,16 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         //import tracks
         
         
-        if ( ( $post_type == wpsstm()->post_type_playlist ) && $wpsstm_tracklist->track_count ){
+        if ( !$is_wizard_disabled && ( $post_type == wpsstm()->post_type_playlist ) && $wpsstm_tracklist->track_count ){
             wpsstm_wizard()->submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
         }
 
         //toggle wizard
         if ( get_post_status() != 'auto-draft' ){
             if( $is_wizard_disabled ){
-                wpsstm_wizard()->submit_button(__('Enable Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][enable]');
+                wpsstm_wizard()->submit_button(__('Open Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][enable]');
             }else{
-                wpsstm_wizard()->submit_button(__('Disable Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][disable]');
+                wpsstm_wizard()->submit_button(__('Close Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][disable]');
             }
         }
         

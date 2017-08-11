@@ -874,7 +874,7 @@ class WP_SoundSystem_Tracklist{
         $can_edit_static =    current_user_can($can_edit_static_cap);
 
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
-        return ( $can_edit_tracklist && !$this->is_wizard_disabled() && $can_edit_static );
+        return ( $can_edit_tracklist && $can_edit_static );
         
     }
     
@@ -890,7 +890,7 @@ class WP_SoundSystem_Tracklist{
 
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
 
-        return ( $can_edit_tracklist && $this->is_wizard_disabled() && $can_edit_live );
+        return ( $can_edit_tracklist && $can_edit_live );
     }
     
     function user_can_store_tracklist(){

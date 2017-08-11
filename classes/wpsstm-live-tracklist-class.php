@@ -56,15 +56,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         parent::__construct($post_id);
         
         if ($this->post_id){
-            
-            if ( !$this->is_wizard_disabled() ){
-                
-                $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
 
-                if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
-                    $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
-                }
-                
+            $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
+
+            if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
+                $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
             }
 
             if ($this->feed_url){
@@ -821,14 +817,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $disable = (bool)isset($wizard_data['disable']);
         $this->toggle_enable_wizard(!$disable);
 
-        $has_form_displayed = !$this->is_wizard_disabled(); //keep above changing disable status
-
-
         //is disabled
-        if ( $has_form_displayed ){
-            $this->save_feed_url(wpsstm_wizard()->wizard_url);
-            return $this->save_wizard_settings($wizard_data);
-        }
+        if ( $this->is_wizard_disabled() ) return;
+        
+        $this->save_feed_url(wpsstm_wizard()->wizard_url);
+        return $this->save_wizard_settings($wizard_data);
 
     }
     

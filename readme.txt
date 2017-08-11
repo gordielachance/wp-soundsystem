@@ -22,7 +22,7 @@ Playlists, Live Playlists, Albums, Artists, Tracks and Track Sources each uses a
 Managing the playlist tracks is a piece of cake using the *Tracklist metabox*:
 Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
 
-Import a tracklist from a file or a music service like Spotify using the *Tracklist Importer* (see below).
+Import a tracklist from a file or a music service like Spotify using the *Remote Tracklist Manager* (see below).
 
 = Audio player =
 
@@ -42,7 +42,7 @@ If you didn't set sources for your tracks (see below) and that the **auto-source
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
-= Tracklist Importer Metabox =
+= Remote Tracklist Manager Metabox =
 
 Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
 
@@ -52,7 +52,7 @@ But if the URL is not recognized, the advanced wizard will show up and you will 
 
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-**Native presets**: Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing.
+**Native presets**: Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing, Online Radio Box.
 
 You may also propose a **Frontend Tracklist Importer** to your visitors: just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
@@ -62,6 +62,8 @@ Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 
 Live Playlists lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
 For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically !
+
+How does it work ?  Each time the tracklist refreshes; old tracks are flushed and the new ones are inserted.  If one of the old tracks appears in other playlists or is liked by some users; it will not be trashed.
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 

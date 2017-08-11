@@ -116,7 +116,7 @@ class WP_SoundSystem_Core_Wizard{
 
         add_meta_box( 
             'wpsstm-metabox-scraper-wizard', 
-            __('Tracklist Importer','wpsstm'),
+            __('Remote Tracklist Manager','wpsstm'),
             array($this,'metabox_wizard_display'),
             wpsstm_tracklists()->tracklist_post_types, 
             'normal', //context
@@ -149,7 +149,7 @@ class WP_SoundSystem_Core_Wizard{
             $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($feed_url);
         }
         
-        $wpsstm_tracklist->can_remote_request = true; //disable ajax-only remote requests
+        $wpsstm_tracklist->can_remote_request = !$wpsstm_tracklist->is_wizard_disabled();
         $wpsstm_tracklist->is_expired = true; //force tracklist refresh
         $wpsstm_tracklist->tracks_strict = false;
         
