@@ -11,6 +11,12 @@
             }
         });
         
+        // hide column when data is empty or identical
+        if ( tracklist_obj.options.column_hide_unique ){
+            tracklist_obj.hideEmptyColumns();
+        }
+        
+        
         /*
         Tracklist actions
         */
@@ -762,6 +768,55 @@ class WpsstmTracklist {
             return $(this.tracklist_el).toggleChildren(options);
         }
 
+
+    }
+    
+    hideEmptyColumns() {
+        
+        var self = this;
+        
+        var column_selectors = ['[itemprop="image"]','[itemprop="byArtist"]','[itemprop="inAlbum"]'];
+        var column_values = [];
+        var hidable_column_selectors = []; //columns that have a unique value
+        
+        /*
+        per column, make an array of every cell value
+        */
+        
+        $.each(column_selectors, function( index, selector ) {
+            var cells = $(self.tracklist_el).find(selector);
+            var cells_values = [];
+            $.each(cells, function( index, cell ) {
+                var value = $(cell).html();
+                cells_values.push(value);
+            });
+            column_values.push(cells_values);
+        });
+        
+        /*
+        count number of different values per column
+        */
+        function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
+        }
+
+        var unique_value_per_column = [];
+        $.each(column_values, function( index, cells_values ) {
+            var column_selector = column_selectors[index];
+            var unique_cells_values = cells_values.filter( onlyUnique );
+            if (unique_cells_values.length <= 1){
+                hidable_column_selectors.push(column_selector);
+            }
+        });
+
+        /*
+        add class to cells that could be hidden
+        */
+        
+        $.each(hidable_column_selectors, function( index, selector ) {
+            self.debug("hide this column: " + selector + " as it has the same value everywhere");
+            var cells = $(self.tracklist_el).find(selector).hide();
+        });
 
     }
     

@@ -78,10 +78,11 @@ class WP_SoundSystem_Tracklist{
     
     protected function get_default_options(){
         return array(
-            'autoplay'          => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'        => ( wpsstm()->get_options('autosource') == 'on' ),
-            'can_play'          => ( wpsstm()->get_options('player_enabled') == 'on' ),
-            'toggle_tracklist'  => 3,
+            'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
+            'can_play'              => ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'toggle_tracklist'      => 3,
+            'column_hide_unique'    => true, //hide a tracklist column when it has a unique value for every row
         );
     }
     
@@ -944,7 +945,7 @@ class WP_SoundSystem_Tracklist{
     
     function get_tracklist_options_attr(){
         
-        $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist');
+        $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist','column_hide_unique');
         
         $attr_options = array();
 
