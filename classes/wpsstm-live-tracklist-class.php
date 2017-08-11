@@ -70,8 +70,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             //expiration time
             $this->populate_expiration_time();
             
-            //title
-            if ($meta_title = $this->get_cached_remote_title() ){
+            //set remote title if no title already set
+            if ( !$this->title && ($meta_title = $this->get_cached_remote_title() ) ){
                 $this->title = $meta_title;
             }
             
