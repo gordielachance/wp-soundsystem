@@ -161,7 +161,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     function get_available_presets(){
         
         //default class
-        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-presets.php');
+        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-preset.php');
 
         //get all files in /presets directory
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );

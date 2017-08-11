@@ -12,7 +12,7 @@
         });
         
         // hide column when data is empty or identical
-        if ( tracklist_obj.options.column_hide_unique ){
+        if ( tracklist_obj.options.hide_empty_columns ){
             tracklist_obj.hideEmptyColumns();
         }
         

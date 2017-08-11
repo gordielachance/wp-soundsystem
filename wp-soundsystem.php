@@ -94,7 +94,8 @@ class WP_SoundSystem {
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
-            'autosource_cache'                  => 1* WEEK_IN_SECONDS,
+            'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
+            'hide_empty_columns'                => 'on', //hide a tracklist column when it has a unique value for every row
             'autosource_filter_ban_words'       => array('cover'),
             'autosource_filter_requires_artist' => 'off'
         );

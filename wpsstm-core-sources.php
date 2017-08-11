@@ -56,7 +56,7 @@ class WP_SoundSystem_Core_Sources{
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        //ajax : get track auto-sources
+        //ajax : get track autosources
         add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
         add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
         add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));
@@ -370,7 +370,7 @@ class WP_SoundSystem_Core_Sources{
             ob_start();
             
             ?>
-            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-auto-source="<?php echo (int)$source->is_community;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
+            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-autosource="<?php echo (int)$source->is_community;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
                 <span class="wpsstm-source-action">
                     <i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>
                     <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>

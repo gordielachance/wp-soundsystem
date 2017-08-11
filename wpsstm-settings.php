@@ -104,16 +104,23 @@ class WP_SoundSystem_Settings {
             $new_input['lastfm_community_scrobble'] = ( isset($input['lastfm_community_scrobble']) ) ? 'on' : 'off';
             
             /*
-            Player
+            Tracklist
             */
             
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
+            $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+            $new_input['hide_empty_columns'] = ( isset($input['hide_empty_columns']) ) ? 'on' : 'off';
+            
+            //shorten tracklist
+            if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
+                $new_input['toggle_tracklist'] = $input['toggle_tracklist'];
+            }
 
             /*
             Sources
             */
-            $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+            
             
             if( isset($input['autosource_filter_ban_words']) ){
                 $ban_words = explode(',',$input['autosource_filter_ban_words']);
@@ -231,40 +238,56 @@ class WP_SoundSystem_Settings {
         Player
         */
         add_settings_section(
-            'player_settings', // ID
-            __('Audio Player','wpsstm'), // Title
+            'tracklist_settings', // ID
+            __('Tracklists','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
         add_settings_field(
             'player_enabled', 
-            __('Enabled','wpsstm'), 
+            __('Audio Player','wpsstm'), 
             array( $this, 'player_enabled_callback' ), 
             'wpsstm-settings-page', 
-            'player_settings'
+            'tracklist_settings'
         );
         
         add_settings_field(
             'autoplay', 
-            __('Auto-play','wpsstm'), 
+            __('Autoplay','wpsstm'), 
             array( $this, 'autoplay_callback' ), 
             'wpsstm-settings-page', 
-            'player_settings'
+            'tracklist_settings'
+        );
+        
+        add_settings_field(
+            'autosource', 
+            __('Autosource','wpsstm'), 
+            array( $this, 'autosource_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_settings'
+        );
+
+        add_settings_field(
+            'hide_empty_columns', 
+            __('Hide empty columns','wpsstm'), 
+            array( $this, 'hide_empty_columns_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_settings'
+        );
+        
+        add_settings_field(
+            'toggle_tracklist', 
+            __('Shorten tracklist','wpsstm'), 
+            array( $this, 'toggle_tracklist_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_settings'
         );
         
         
         /*
         Sources
         */
-        
-        add_settings_field(
-            'autosource', 
-            __('Auto-source','wpsstm'), 
-            array( $this, 'autosource_callback' ), 
-            'wpsstm-settings-page', 
-            'sources'
-        );
         
         add_settings_section(
             'sources', // ID
@@ -521,14 +544,13 @@ class WP_SoundSystem_Settings {
         $option = wpsstm()->get_options('player_enabled');
         
         $buglink = sprintf('<a target="_blank" href="%s">%s</a>','https://core.trac.wordpress.org/ticket/39686',__('this bug','wpsstm'));
-        $desc = sprintf( __('Requires Wordpress 4.8 - see %s.','wppsm'),$buglink);
-        $desc = sprintf('— <small>%s</small>',$desc);
+        $desc = sprintf( __('Requires Wordpress 4.9 or needs patch - see %s.','wppsm'),$buglink);
+        $desc = sprintf('<small>%s</small>',$desc);
         
         printf(
-            '<input type="checkbox" name="%s[player_enabled]" value="on" %s /> %s %s',
+            '<input type="checkbox" name="%s[player_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable Audio Player","wpsstm"),
             $desc
         );
     }
@@ -540,7 +562,7 @@ class WP_SoundSystem_Settings {
             '<input type="checkbox" name="%s[autoplay]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Auto-play the first track displayed.","wpsstm")
+            __("Autoplay the first track displayed.","wpsstm")
         );
     }
     
@@ -548,7 +570,7 @@ class WP_SoundSystem_Settings {
 
         $desc = array();
         $desc[]= sprintf(
-            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when one of those words is contained in its title","wpsstm")
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an autosource when one of those words is contained in its title and isn't in the track title.","wpsstm")
         );
         
         $desc[]= sprintf('<small>%s</small>',__('List of comma-separated words'));
@@ -568,17 +590,7 @@ class WP_SoundSystem_Settings {
         echo implode("\n",$desc);
         
     }
-    function autosource_filter_requires_artist_callback(){
-        $option = wpsstm()->get_options('autosource_filter_requires_artist');
-
-        printf(
-            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an auto-source when the track artist is not contained in its title.","wpsstm")
-        );
-    }
-
+    
     function autosource_callback(){
         $option = wpsstm()->get_options('autosource');
 
@@ -586,8 +598,46 @@ class WP_SoundSystem_Settings {
             '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s <small>%s</small>',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("If no source is set for the track, try to find an online source automatically.","wpsstm"),
+            __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
             __("This requires the community user ID to be set.","wpsstm")
+        );
+    }
+    
+    function hide_empty_columns_callback(){
+        $option = wpsstm()->get_options('hide_empty_columns');
+
+        printf(
+            '<input type="checkbox" name="%s[hide_empty_columns]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("If all the tracks have the same value (artist, album, image...); hide the corresponding tracklist column.","wpsstm")
+        );
+    }
+    
+    function toggle_tracklist_callback(){
+        $option = (int)wpsstm()->get_options('toggle_tracklist');
+
+        $desc = __("When the tracklist loads, only show a limited amout of tracks and display a button to expand it.","wpsstm");
+        $help = __("0 = Disabled.","wpsstm");
+        $help = sprintf("<small>%s</small>",$help);
+
+        printf(
+            '<input type="number" name="%s[toggle_tracklist]" size="4" min="0" value="%s" />%s %s',
+            wpsstm()->meta_name_options,
+            $option,
+            $desc,
+            $help
+        );
+    }
+    
+    function autosource_filter_requires_artist_callback(){
+        $option = wpsstm()->get_options('autosource_filter_requires_artist');
+
+        printf(
+            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an autosource when the track artist is not contained in its title and isn't in the track title.","wpsstm")
         );
     }
     
@@ -696,7 +746,7 @@ class WP_SoundSystem_Settings {
         $icon = sprintf('<input type="checkbox" disabled="disabled" %s />',checked( $can_autosource, true, false ));
 
         $cap_str = sprintf(__('%s %s'),$icon,$autosource_cap);
-        printf('<p>%s: %s</p>','<strong>'.__('Auto-source','wpsstm').'</strong>',$cap_str);
+        printf('<p>%s: %s</p>','<strong>'.__('Autosource','wpsstm').'</strong>',$cap_str);
         
         //scrobble along
         $can_community_scrobble = wpsstm_lastfm()->can_community_scrobble();

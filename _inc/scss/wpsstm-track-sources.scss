@@ -109,7 +109,7 @@
                     }
                 }
             }
-            &[data-wpsstm-auto-source="1"]{
+            &[data-wpsstm-autosource="1"]{
                 @include opacity(.5);
                 .wpsstm-source-icon{
                     &.wpsstm-source-icon-delete{
