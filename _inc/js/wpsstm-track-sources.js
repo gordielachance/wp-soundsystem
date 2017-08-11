@@ -80,7 +80,7 @@ jQuery(document).ready(function($){
         
         var row = $(this).closest('.wpsstm-source');
         //auto source
-        if ( row.attr('data-wpsstm-auto-source') == '1' ){
+        if ( Number(row.attr('data-wpsstm-auto-source')) == 1 ){
             row.attr('data-wpsstm-auto-source', '0');
             row.find('input').prop("disabled", false);
             row.removeClass('wpsstm-source-auto');
@@ -150,7 +150,7 @@ class WpsstmTrackSource {
         var self = this;
         self.tracklist_idx = track.tracklist_idx;
         self.track_idx = track.track_idx;
-        self.source_idx = $(source_html).attr('data-wpsstm-source-idx');
+        self.source_idx = Number($(source_html).attr('data-wpsstm-source-idx'));
         self.src =    $(source_html).attr('data-wpsstm-source-src');
         self.type =    $(source_html).attr('data-wpsstm-source-type');
         self.source_can_play = true;

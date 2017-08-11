@@ -8,7 +8,7 @@
 
         var checkbox =              $(this);
         var tracklistSelector =     $(this).closest('#wpsstm-tracklist-chooser-list');
-        var track_id =              $(tracklistSelector).attr('data-wpsstm-track-id');
+        var track_id =              Number($(tracklistSelector).attr('data-wpsstm-track-id'));
         
         var is_checked =            $(checkbox).is(':checked');
         var tracklist_id =          $(this).val();
@@ -49,7 +49,7 @@
         e.preventDefault();
         var bt =                        $(this);
         var tracklistSelector =         bt.closest('#wpsstm-tracklist-chooser-list');
-        var track_id =                  $(tracklistSelector).attr('data-wpsstm-track-id');
+        var track_id =                  Number($(tracklistSelector).attr('data-wpsstm-track-id'));
         
         var existingPlaylists_el =      $(tracklistSelector).find('ul');
         var newPlaylistTitle_el =       $(tracklistSelector).find('#wpsstm-playlists-filter');

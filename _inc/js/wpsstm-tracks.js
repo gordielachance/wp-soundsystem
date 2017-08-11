@@ -59,10 +59,10 @@
             var link = $(this);
 
             var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
-            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+            var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
 
             var track_el = link.closest('[itemprop="track"]');
-            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
 
             var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
 
@@ -108,10 +108,10 @@
             var link = $(this);
 
             var tracklist_el = link.closest('[data-wpsstm-tracklist-idx]');
-            var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+            var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
 
             var track_el = link.closest('[itemprop="track"]');
-            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
 
             var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
 
@@ -180,19 +180,17 @@ class WpsstmTrack {
         var self =                  this;
         self.track_el =             $(track_html);
         self.tracklist_idx =        tracklist_idx; //cast to number;
-        self.track_idx =            self.track_el.attr('data-wpsstm-track-idx');
+        self.track_idx =            Number(self.track_el.attr('data-wpsstm-track-idx'));
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
         self.title =                self.track_el.find('[itemprop="name"]').text();
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
-        self.post_id =              self.track_el.attr('data-wpsstm-track-id');
+        self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
         self.sources_request =      null;
         self.did_sources_request =  false;
         self.track_can_play =       undefined;
         self.sources =              [];
         self.current_source_idx =   undefined;
         self.playback_start =       null; //seconds - used by lastFM
-       
-        //self.debug("new track");
 
         //populate existing sources
         self.populate_html_sources();
@@ -205,14 +203,12 @@ class WpsstmTrack {
         
         var self = this;
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
-        var track_instances = self.get_track_instances();
+        
         var can_play = false;
         var deferredObject = $.Deferred();
         var track_position = self.track_idx + 1;
 
         if ( self.sources.length > 0 ) {
-
-            track_instances.removeClass('error');
             
             deferredObject.resolve("can play track() : track #" + self.track_idx + " has already sources, no need to request them");
             
@@ -223,21 +219,17 @@ class WpsstmTrack {
             promise.done(function(val) {
 
                 if ( self.sources.length > 0 ){
-                    
-                    track_instances.removeClass('error');
 
                     deferredObject.resolve("can play track() : sources found for track #" + self.track_idx);
                 }else{
 
-                    self.updateTrackClasses('error');
                     deferredObject.reject("can play track() : no sources for track #" + self.track_idx);
                 }
 
             })
             
             promise.fail(function() {
-                
-                self.updateTrackClasses('error');
+
                 deferredObject.reject("can play track() failed for track #" + self.track_idx);
 
             })
@@ -349,27 +341,20 @@ class WpsstmTrack {
         
         var deferredObject = $.Deferred();
 
-        if ( self.did_sources_request ) { //do not 
-            deferredObject.resolve("already did sources auto request for track #" + self.track_idx);
-        } else{
+        var promise = self.get_track_sources_request();
+        track_instances.addClass('loading-sources');
 
-            var promise = self.get_track_sources_request();
-            track_instances.addClass('loading-sources');
+        promise.fail(function() {
+            deferredObject.reject("sources request failed for track #" + self.track_idx);
+        })
 
-            promise.fail(function() {
-                deferredObject.reject("sources request failed for track #" + self.track_idx);
-            })
+        promise.done(function(v) {
+            deferredObject.resolve(v);
+        })
 
-            promise.done(function(v) {
-                self.did_sources_request = true;
-                deferredObject.resolve(v);
-            })
-
-            promise.always(function(data, textStatus, jqXHR) {
-                track_instances.removeClass('loading-sources');
-            })
-
-        }
+        promise.always(function(data, textStatus, jqXHR) {
+            track_instances.removeClass('loading-sources');
+        })
 
         return deferredObject.promise();
     }
@@ -534,48 +519,63 @@ class WpsstmTrack {
     get_track_sources_request() {
 
         var self = this;
-        
-        var track_el    = self.get_track_instances();
-        $(track_el).find('.wpsstm-track-sources').html('');
-        
         var deferredObject = $.Deferred();
-
-        //self.debug("get_track_sources_request()");
         
-        var track_data = {
-            artist:     track_el.find('[itemprop="byArtist"]').text(),
-            title:      track_el.find('[itemprop="name"]').text(),
-            album:      track_el.find('[itemprop="inAlbum"]').text(),
-        };
+        if ( self.did_sources_request ) {
+            
+            deferredObject.resolve("already did sources auto request for track #" + self.track_idx);
+            
+        } else{
+        
+            var track_el    = self.track_el;
+            var track_instances = self.get_track_instances();
+            $(track_el).find('.wpsstm-track-sources').html('');
 
-        var ajax_data = {
-            action:             'wpsstm_autosources_list',
-            post_id:            self.post_id,
-            track_data:         track_data       
-        };
+            //self.debug("get_track_sources_request()");
 
-        self.sources_request = $.ajax({
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-        });
+            var track_data = {
+                artist:     track_el.find('[itemprop="byArtist"]').text(),
+                title:      track_el.find('[itemprop="name"]').text(),
+                album:      track_el.find('[itemprop="inAlbum"]').text(),
+            };
 
-        self.sources_request.done(function(data) {
-            if (data.success === true){
-                if ( data.new_html ){
-                    $(track_el).find('.wpsstm-track-sources').html(data.new_html); //append new sources
-                    self.populate_html_sources();
+            var ajax_data = {
+                action:             'wpsstm_autosources_list',
+                post_id:            self.post_id,
+                track_data:         track_data       
+            };
+
+            self.sources_request = $.ajax({
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+            });
+
+            self.sources_request.done(function(data) {
+
+                self.did_sources_request = true;
+
+                if (data.success === true){
+                    if ( data.new_html ){
+                        $(track_instances).find('.wpsstm-track-sources').html(data.new_html); //append new sources
+                        self.populate_html_sources();
+                    }
+
+                    deferredObject.resolve();
+
+                }else{
+                    track_instances.addClass('error');
+                    deferredObject.reject(data.message);
                 }
-                
-                deferredObject.resolve();
-                
-            }else{
-                
-                deferredObject.reject(data.message);
-            }
 
-        });
+            });
+            
+            self.sources_request.fail(function() {
+                track_instances.addClass('error');
+            })
+            
+        }
         
         return deferredObject.promise();
 

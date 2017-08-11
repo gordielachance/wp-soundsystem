@@ -47,10 +47,10 @@ $(document).ready(function(){
     $('#wpsstm-bottom').on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
         e.preventDefault();
         var player_track_el = $(this).parents('[itemprop="track"]');
-        var track_idx = player_track_el.attr('data-wpsstm-track-idx');
+        var track_idx = Number(player_track_el.attr('data-wpsstm-track-idx'));
         
         var tracklist_el = player_track_el.closest('[data-wpsstm-tracklist-idx]');
-        var tracklist_idx = tracklist_el.attr('data-wpsstm-tracklist-idx');
+        var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
         var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
 
         var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);

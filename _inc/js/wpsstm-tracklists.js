@@ -33,7 +33,7 @@
 
             var link = $(this);
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
-            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
+            var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
 
             if (!tracklist_id) return;
 
@@ -76,7 +76,7 @@
 
             var link = $(this);
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
-            var tracklist_id = tracklist_wrapper.attr('data-wpsstm-tracklist-id');
+            var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
 
             if (!tracklist_id) return;
 
@@ -124,7 +124,7 @@
             
             //get track
             var track_el = $(this).closest('[itemprop="track"]');
-            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
             var track_obj = tracklist_obj.get_track_obj(track_idx);
             
             tracklist_obj.remove_tracklist_track(track_obj);
@@ -136,7 +136,7 @@
             
             //get track
             var track_el = $(this).closest('[itemprop="track"]');
-            var track_idx = track_el.attr('data-wpsstm-track-idx');
+            var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
             var track_obj = tracklist_obj.get_track_obj(track_idx);
             
             tracklist_obj.delete_playlist_track(track_obj);
@@ -629,7 +629,7 @@ class WpsstmTracklist {
         
         //get track
         var track_el = $(ui.item);
-        var track_idx = track_el.attr('data-wpsstm-track-idx');
+        var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
         var track_obj = wpsstm_page_player.get_tracklist_track_obj(self.tracklist_idx,track_idx);
 
         var new_position = $( rows_container ).index( track_el );
@@ -758,7 +758,7 @@ class WpsstmTracklist {
         };
         var options =  $.extend(defaults, options);
 
-        if ( $(this.tracklist_el).attr("data-tracks-count") > 0 ) {
+        if ( Number($(this.tracklist_el).attr("data-tracks-count")) > 0 ) {
             return $(this.tracklist_el).toggleChildren(options);
         }
 
