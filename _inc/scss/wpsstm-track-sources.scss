@@ -16,24 +16,20 @@
 
 
     .wpsstm-source{
+        @extend .wpsstm-table-row;
         line-height: 2em;
         position:relative;
         width:100%;
-        display:block;
         text-decoration: none;
         border:none;
         padding: 0 .5em;
         .wpsstm-provider-icon{
             width: 2em;
-            font-size: 1.2em;
-            display: inline-block;
-            text-align: center;
+            font-size: 1.2em;;
         }
 
         .wpsstm-source-title{
             @extend .ellipsis;
-            display: inline-block;
-            width:calc(100% - 2.4em);
         }
 
         &.wpsstm-bad-source{
@@ -54,7 +50,7 @@
     &:hover{
         .wpsstm-track-sources-list{
             .wpsstm-source{
-                display:inherit;
+                @extend .wpsstm-table-row;
             }
         }
     }

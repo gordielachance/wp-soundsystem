@@ -153,7 +153,6 @@ class WP_SoundSystem_Source{
     }
     
     function save_source($args = null){
-
         $sanitized = $this->sanitize_source();
         if ( is_wp_error($sanitized) ) return $sanitized;
 
@@ -376,6 +375,7 @@ class WP_SoundSystem_Source{
     }
     
     function get_source_class($extra_classes = null){
+        global $wpsstm_track;
 
         $classes = array('wpsstm-source');
         
@@ -387,6 +387,9 @@ class WP_SoundSystem_Source{
         
         if ($can_manage_source){
             $classes[] = 'wpsstm-can-manage-source';
+        }
+        if ($wpsstm_track->current_source == 0){
+            $classes[] = 'wpsstm-active-source';
         }
 
         return $classes;

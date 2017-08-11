@@ -344,12 +344,9 @@
                 @include opacity(.3);
                 .wpsstm-track-sources-list{
                     width:200px;
-                    a{
+                    .wpsstm-source{
                         .wpsstm-provider-icon{
                             font-size:2em;
-                        }
-                        .wpsstm-source-title{
-                            width: calc(100% - 5em);
                         }
                     }
                 }
@@ -449,11 +446,5 @@
 .wpsstm-actions-list#wpsstm-tracklist-actions{
     .tracklist-action-favorite-toggle:not(.tracklist-action-favorite-active){
         display:none;
-    }
-}
-
-.wpsstm-notice{
-    &#wpsstm-notice-tracklist-expired{
-        background:none;
     }
 }

@@ -151,6 +151,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.6.6 =
+* fix broken JS player navigation
+* some minor improvements
+
 = 1.6.5 =
 * new filter 'wpsstm_input_tracks'
 * upgraded validate_tracks()
