@@ -38,7 +38,7 @@ Once you patched Wordpress, add this line to your config.php file to ignore Word
 
 = Track Sources =
 
-If you didn't set sources for your tracks (see below) and that the **auto-source** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
+If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
@@ -63,7 +63,7 @@ Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 Live Playlists lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
 For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically !
 
-How does it work ?  Each time the tracklist refreshes; old tracks are flushed and the new ones are inserted.  If one of the old tracks appears in other playlists or is liked by some users; it will not be trashed.
+**How does it work ?**  Each time the tracklist refreshes; old tracks are flushed and the new ones are inserted.  If one of the old tracks appears in other playlists or is liked by some users; it will not be trashed.
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 
@@ -152,6 +152,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.6.8 =
+* better way to include presets
+* more tracklist settings
 
 = 1.6.7 =
 * fix broken JS player navigation
@@ -292,8 +296,8 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 = 0.9.9.2 =
 
-* new "auto-source" feature !  Try to find a track source online if none is set in the database (ajaxed).
-* player: new settings: "enabled", "auto-play", "auto-redirect" and "auto-source".
+* new "autosource" feature !  Try to find a track source online if none is set in the database (ajaxed).
+* player: new settings: "enabled", "autoplay", "auto-redirect" and "autosource".
 
 = 0.9.9.1 =
 
