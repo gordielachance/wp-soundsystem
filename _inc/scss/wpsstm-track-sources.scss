@@ -43,8 +43,11 @@
 .wpsstm-track-sources{
     position:relative;
     .wpsstm-track-sources-list{
-        .wpsstm-source:not(.wpsstm-active-source){
+        .wpsstm-source{
             display:none;
+            &.wpsstm-active-source{
+                @extend .wpsstm-table-row;
+            }
         }
     }
     &:hover{
