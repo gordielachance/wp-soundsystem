@@ -47,3 +47,12 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
     }
     
 }
+
+//register preset
+
+function register_soundsgood_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Soundsgood_Playlists_Api';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_soundsgood_preset');

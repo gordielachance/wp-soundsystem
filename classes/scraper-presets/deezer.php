@@ -19,3 +19,12 @@ class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlis
         $this->preset_name =    __('Deezer Playlists','wpsstm');
     }
 }
+
+//register preset
+
+function register_deezer_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Deezer_Playlists';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_deezer_preset');

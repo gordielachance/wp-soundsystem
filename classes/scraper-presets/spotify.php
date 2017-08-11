@@ -148,3 +148,12 @@ class WP_SoundSystem_Preset_Spotify_Playlists_Api extends WP_SoundSystem_Live_Pl
     }
     
 }
+
+//register preset
+
+function register_spotify_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Spotify_Playlists_Api';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_spotify_preset');

@@ -131,3 +131,12 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     }
 
 }
+
+//register preset
+
+function register_reddit_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Reddit_Api';
+    return $presets;
+}
+
+add_filter('register_reddit_preset','register_preset');

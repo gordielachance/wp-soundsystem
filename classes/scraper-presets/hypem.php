@@ -20,3 +20,12 @@ class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_P
     }
  
 }
+
+//register preset
+
+function register_hypem_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Hypem_Scraper';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_hypem_preset');

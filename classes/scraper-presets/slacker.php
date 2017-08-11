@@ -23,3 +23,12 @@ class WP_SoundSystem_Preset_Slacker_Stations extends WP_SoundSystem_Live_Playlis
     } 
 
 }
+
+//register preset
+
+function register_slacker_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Slacker_Stations';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_slacker_preset');

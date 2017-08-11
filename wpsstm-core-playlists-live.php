@@ -155,18 +155,32 @@ class WP_SoundSystem_Core_Live_Playlists{
         register_post_type( wpsstm()->post_type_live_playlist, $args );
     }
 
+    /*
+    Register scraper presets.
+    */
     function get_available_presets(){
         
+        //default class
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-presets.php');
-        
-        $available_presets = array();
-        $available_presets = apply_filters( 'wpsstm_get_scraper_presets',$available_presets );
-        
-        foreach((array)$available_presets as $key=>$preset){
-            if ( !$preset->can_use_preset ) unset($available_presets[$key]);
+
+        //get all files in /presets directory
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
+        $preset_files = glob( $presets_path . '*.php' );
+
+        foreach ($preset_files as $file) {
+            require_once($file);   
         }
 
-        return $available_presets;
+        $class_names = apply_filters( 'wpsstm_get_scraper_presets',array() );
+
+        //check and run
+        foreach((array)$class_names as $class_name){
+            if ( !class_exists($class_name) ) continue;
+            $preset = new $class_name();
+            if ( !$preset->can_use_preset ) continue;
+            $presets[] = $preset;
+        }
+        return $presets;
     }
 
     function post_column_register($columns){

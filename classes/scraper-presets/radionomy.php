@@ -124,3 +124,12 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_Scraper extends WP_SoundSystem_P
     );
 
 }
+
+//register preset
+
+function register_radionomy_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Radionomy_Playlists_Api';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_radionomy_preset');

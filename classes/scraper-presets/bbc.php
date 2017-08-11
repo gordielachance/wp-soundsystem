@@ -47,3 +47,13 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
     } 
 
 }
+
+//register preset
+
+function register_bbc_presets($presets){
+    $presets[] = 'WP_SoundSystem_Preset_BBC_Stations';
+    $presets[] = 'WP_SoundSystem_Preset_BBC_Playlists';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_bbc_presets');

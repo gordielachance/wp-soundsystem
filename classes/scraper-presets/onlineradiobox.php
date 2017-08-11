@@ -30,3 +30,12 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
     }
  
 }
+
+//register preset
+
+function register_onlineradiobox_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_OnlineRadioBox_Scraper';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_onlineradiobox_preset');

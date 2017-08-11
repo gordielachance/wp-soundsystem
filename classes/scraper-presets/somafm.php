@@ -31,3 +31,12 @@ class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist
     }
 
 }
+
+//register preset
+
+function register_somafm_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_SomaFM_Stations';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_somafm_preset');

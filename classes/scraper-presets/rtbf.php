@@ -26,3 +26,12 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
 
     } 
 }
+
+//register preset
+
+function register_rtbf_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_RTBF_Stations';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_rtbf_preset');

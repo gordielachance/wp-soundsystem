@@ -116,3 +116,12 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
     }
 
 }
+
+//register preset
+
+function register_soundcloud_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Soundcloud_Api';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_soundcloud_preset');

@@ -33,3 +33,12 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
     }
 
 }
+
+//register preset
+
+function register_twitter_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Twitter_Timelines';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_twitter_preset');

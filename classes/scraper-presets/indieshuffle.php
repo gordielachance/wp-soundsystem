@@ -32,3 +32,12 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
     }
 
 }
+
+//register preset
+
+function register_indieshuffle_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_IndieShuffle_Scraper';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_indieshuffle_preset');

@@ -25,3 +25,12 @@ class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_
     }
 
 }
+
+//register preset
+
+function register_lastfm_preset($presets){
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Scraper';
+    return $presets;
+}
+
+add_filter('wpsstm_get_scraper_presets','register_lastfm_preset');
