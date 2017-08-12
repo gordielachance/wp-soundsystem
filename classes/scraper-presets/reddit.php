@@ -139,4 +139,4 @@ function register_reddit_preset($presets){
     return $presets;
 }
 
-add_filter('register_reddit_preset','register_preset');
+add_filter('wpsstm_get_scraper_presets','register_reddit_preset');

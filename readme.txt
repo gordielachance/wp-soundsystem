@@ -153,6 +153,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.6.9 =
+* fix typo when including reddit preset
+
 = 1.6.8 =
 * better way to include presets
 * more tracklist settings
