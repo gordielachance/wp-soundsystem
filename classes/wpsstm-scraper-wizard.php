@@ -1079,10 +1079,16 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function can_frontend_wizard(){
-        $community_user_id = wpsstm()->get_options('community_user_id');
+        
+        if ( !$user_id = get_current_user_id() ){
+            $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') == 'on' );
+            if (!$can_wizard_unlogged) return false;
+            $user_id = wpsstm()->get_options('community_user_id');
+        }
+
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
-        return user_can($community_user_id,$required_cap);
+        return user_can($user_id,$required_cap);
     }
 
 }
