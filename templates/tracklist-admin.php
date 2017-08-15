@@ -38,7 +38,8 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                             case 'share':
 
                                 $text = __("Use this link to share this playlist:","wpsstm");
-                                $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,get_permalink());
+                                $link = $tracklist->get_tracklist_permalink();
+                                $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                                 
                             break;
                         }

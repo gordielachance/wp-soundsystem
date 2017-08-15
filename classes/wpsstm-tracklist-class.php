@@ -28,7 +28,7 @@ class WP_SoundSystem_Tracklist{
     
     var $tracks_strict = true; //requires a title AND an artist
 
-    static $paged_var = 'tracklist_page';
+    var $paged_var = 'tracklist_page';
     
     var $track;
     var $current_track = -1;
@@ -39,7 +39,7 @@ class WP_SoundSystem_Tracklist{
         
         $pagination_args = array(
             'per_page'      => 0, //TO FIX default option
-            'current_page'  => ( isset($_REQUEST[self::$paged_var]) ) ? $_REQUEST[self::$paged_var] : 1
+            'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
 
         $this->set_tracklist_pagination($pagination_args);
@@ -571,8 +571,9 @@ class WP_SoundSystem_Tracklist{
         $can_edit_tracklist = ($this->post_id && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) );
         
         $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) );
-        $can_share = $this->post_id; //TO FIX no conditions (call to action) BUT there should be a notice if post cannot be shared
-        $can_favorite = $this->post_id; //call to action
+        $share_url = $this->get_tracklist_permalink();
+        $export_url = $this->get_tracklist_permalink(array('export'=>true));
+        $can_favorite = $this->post_id; //call to action TO FIX to CHECK
 
         $actions = array();
 
@@ -586,7 +587,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //share
-        if ($can_share){
+        if ($share_url){
             $actions['share'] = array(
                 'icon' =>       '<i class="fa fa-share-alt" aria-hidden="true"></i>',
                 'text' =>       __('Share', 'wpsstm'),
@@ -595,12 +596,12 @@ class WP_SoundSystem_Tracklist{
         }
         
         //XSPF
-        if ($can_share){
+        if ($export_url){
             $actions['export'] = array(
                 'icon' =>       '<i class="fa fa-download" aria-hidden="true"></i>',
                 'text' =>       __('Export', 'wpsstm'),
                 'desc' =>       __('Export to XSPF', 'wpsstm'),
-                'href' =>       wpsstm_get_tracklist_link($this->post_id,'export'),
+                'href' =>       $export_url,
             );
         }
         
@@ -1080,6 +1081,45 @@ class WP_SoundSystem_Tracklist{
     
     function empty_tracks_msg(){
         return __( 'No tracks found.','wpsstm');
+    }
+    
+    function get_tracklist_permalink($args = array()){
+        global $post;
+        global $wpsstm_tracklist;
+        
+        $url = null;
+        
+        $defaults = array(
+            'page'      => null,
+            'export'    => false,
+            'download'  => false,
+        );
+
+        $args = wp_parse_args($args,$defaults);
+
+        //get tracklist (or wizard) url
+        if ($this->post_id){
+            $url = get_permalink($this->post_id);
+        }elseif ( wpsstm_wizard()->can_frontend_wizard() && ($frontend_wizard_id = wpsstm_wizard()->frontend_wizard_page_id) && $wpsstm_tracklist->feed_url){
+            $url = get_permalink($frontend_wizard_id);
+            $args['wpsstm_wizard']['feed_url'] = $wpsstm_tracklist->feed_url;
+        }else{
+            return;
+        }
+    
+        //export
+        if ($args['export']){
+            $url .= wpsstm_tracklists()->qvar_xspf;
+            $args['dl'] = (int)$args['download'];
+        }
+        //pagination
+        if ($args['page'] > 1){
+            $args[$this->paged_var] = $args['page'];
+        }
+        
+        $args = array_filter($args);
+        $url = add_query_arg($args,$url);
+        return apply_filters('wpsstm_get_tracklist_permalink',$url,$this,$args);
     }
 
 }
