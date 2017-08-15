@@ -14,16 +14,12 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
 
 <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
     <?php
-  
-    $reset_checked = false;
-    
+
     if(!$is_wizard_disabled){
 
-        $wpsstm_tracklist->output_notices('wizard-header');
-        
-
-        if ( wpsstm_wizard()->is_advanced ){
-            $wpsstm_tracklist->output_notices('wizard-header-advanced');
+        //wizard notices
+        if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
+            echo $notices_el;
         }
 
         ?>

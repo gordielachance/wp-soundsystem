@@ -37,10 +37,10 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     </div>
             
     <?php 
-        //tracklist notices
-        if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
-            echo $notices_el;
-        }
+    //tracklist notices
+    if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
+        echo $notices_el;
+    }
     ?>
     <?php
     if ( $tracklist->have_tracks() ) {

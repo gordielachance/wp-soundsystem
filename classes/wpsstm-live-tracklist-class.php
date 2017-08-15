@@ -126,7 +126,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $has_cache = (bool)$cache_duration;
 
         if ( !$has_cache ){
-            $this->add_notice( 'wizard-header-advanced', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
+            $this->add_notice( 'wizard-header', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
         }
         
         $now = current_time( 'timestamp', true );
@@ -145,7 +145,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
             if ( $this->feed_url != $this->redirect_url ){
-                $this->add_notice( 'wizard-header-advanced', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
+                $this->add_notice( 'wizard-header', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
             }
         }
         
@@ -423,7 +423,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 //maybe libxml will output error but will work; do not abord here.
                 $xml_errors = libxml_get_errors();
                 foreach( $xml_errors as $xml_error_obj ) {
-                    $this->add_notice( 'wizard-header-advanced', 'xml_error', sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message), true );
+                    $this->add_notice( 'wizard-header', 'xml_error', sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message), true );
       
                 }
 
@@ -452,7 +452,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 
                 if ($xml){
 
-                    $this->add_notice( 'wizard-header-advanced', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
+                    $this->add_notice( 'wizard-header', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
  
                     $this->response_type = 'text/xml';
                     return $this->get_body_node($xml);
@@ -537,7 +537,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         if ( $track_nodes->length == 0 ){
-            return new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist – you may perhaps try again later.','spiff') );
+            return new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist.','spiff') );
         }
 
         return $track_nodes;
@@ -940,12 +940,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $this->is_expired ){
     
             if ( $this->can_remote_request ){
-                if ($this->post_id){
+                if ($this->post_id){ //populate & save tracks
                     $populated = $this->update_from_remote();
-                }else{ //wizard
+                }else{ //only populate tracks (wizard)
                     $populated = $this->populate_remote_tracklist();
                 }
-                
+
                 if ( is_wp_error($populated) ){
                     $this->add_notice( 'tracklist-header', 'populate-tracks', $populated->get_error_message(),true );
                 }

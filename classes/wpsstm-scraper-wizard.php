@@ -743,7 +743,6 @@ class WP_SoundSystem_Core_Wizard{
             '<code>#content #tracklist .track</code>'
         );
         
-        $wpsstm_tracklist->output_notices('wizard-step-tracks');
     }
     
     function selector_tracks_callback(){  
@@ -795,9 +794,7 @@ class WP_SoundSystem_Core_Wizard{
         printf(__('Enter a %s to extract the data for each track.','wpsstm'),$jquery_selectors_link);
         echo"<br/>";
         printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
-        
-        $wpsstm_tracklist->output_notices('wizard-step-single-track');
-        
+
     }
     
     function get_track_detail_selector_prefix(){
