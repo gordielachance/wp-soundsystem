@@ -108,7 +108,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             ),
             'tracks_order'              => 'desc',
             'datas_cache_min'           => (int)wpsstm()->get_options('live_playlists_cache_min'), //time tracklist is cached - if set to null, will take plugin value
-            'musicbrainz'               => wpsstm()->get_options('mb_auto_id') //should we use musicbrainz to get the tracks data ? - if set to null, will take plugin value
         );
         
         return array_replace_recursive((array)parent::get_default_options(),$live_options); //last one has priority
@@ -892,9 +891,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //order
         $new_input['tracks_order'] = ( isset($input['tracks_order']) ) ? $input['tracks_order'] : null;
 
-        //musicbrainz
-        $new_input['musicbrainz'] = ( isset($input['musicbrainz']) ) ? $input['musicbrainz'] : null;
-        
         $default_args = $default_args = $this->options_default;
         $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
 

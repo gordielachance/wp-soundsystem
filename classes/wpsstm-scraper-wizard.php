@@ -505,14 +505,6 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-options'
             );
 
-            $this->add_wizard_field(
-                'enable_musicbrainz', 
-                __('Use MusicBrainz','wpsstm'), 
-                array( $this, 'musicbrainz_callback' ), 
-                'wpsstm-wizard-step-options',
-                'wizard-section-options'
-            );
-
         }
         
         /*
@@ -855,23 +847,6 @@ class WP_SoundSystem_Core_Wizard{
         
     }
 
-    function musicbrainz_callback(){
-        global $wpsstm_tracklist;
-        
-        $option = $wpsstm_tracklist->get_options('musicbrainz');
-        
-        printf(
-            '<input type="checkbox" name="%1$s[musicbrainz]" value="on" %2$s /><span class="wizard-field-desc">%3$s</span>',
-            'wpsstm_wizard',
-            checked((bool)$option, true, false),
-            sprintf(
-                __('Try to fix tracks information using <a href="%1$s" target="_blank">MusicBrainz</a>.'),
-                'http://musicbrainz.org/').'  <small>'.__('This makes the station render slower : each track takes about ~1 second to be checked!').'</small>'
-        );
-
-        
-    }
-    
     function tracks_order_callback(){
         global $wpsstm_tracklist;
         
