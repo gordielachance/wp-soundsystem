@@ -12,13 +12,8 @@
  */
 
 global $wpsstm_tracklist;
-wpsstm_wizard()->populate_wizard_tracklist(null);
-if ($wpsstm_tracklist->feed_url){
-    $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
-}
-
-
-get_header(); ?>
+get_header(); 
+?>
 
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
@@ -40,10 +35,9 @@ get_header(); ?>
                     
                     <?php
 
-                    $visitors_wizard = ( wpsstm()->get_options('visitors_wizard') == 'on' );
-                    $can_wizard = ( !get_current_user_id() && !$visitors_wizard );
+                    $can_wizard = wpsstm_wizard()->can_frontend_wizard();
 
-                    if ( $can_wizard ){
+                    if ( !$can_wizard ){
 
                         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
                         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
@@ -52,12 +46,12 @@ get_header(); ?>
 
                     }else{
                         ?>
-                        <form action="<?php the_permalink();?>" method="POST">
+                        <form action="<?php the_permalink();?>" method="GET">
                             <?php
                             wpsstm_locate_template( 'wizard-form.php', true );
                         
                             if ($wpsstm_tracklist->feed_url){
-                                wpsstm_locate_template( 'content-tracklist-table.php', true, false );
+                                echo $wpsstm_tracklist->get_tracklist_table();
                             }
                         
                             ?>

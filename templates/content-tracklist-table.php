@@ -1,6 +1,10 @@
 <?php
 global $wpsstm_tracklist;
+$wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
+
 $tracklist = $wpsstm_tracklist;
+
+
 
 //TO FIX move at a smarter place ?
 if ( $wpsstm_tracklist->get_options('can_play') ){

@@ -137,10 +137,11 @@ class WP_SoundSystem_Core_Tracklists{
     function the_tracklist($post,$query){
         global $wpsstm_tracklist;
         
-        if ( in_array(get_post_type($post),$this->tracklist_post_types) ) {
-            $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
-            $wpsstm_tracklist->position = $query->current_post + 1;
-        }
+        if ( !in_array(get_post_type($post),$this->tracklist_post_types) ) return;
+        
+        $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
+        $wpsstm_tracklist->position = $query->current_post + 1;
+        
     }
     
     function get_tracklist_action(){
@@ -176,9 +177,12 @@ class WP_SoundSystem_Core_Tracklists{
         if ( $admin_action == 'new-subtrack' ){ //this will be handled by track_admin_template_filter()
             set_query_var( wpsstm_tracks()->qvar_track_admin, 'new-subtrack' );
             return $template;
-        }  
+        }
+        
+        $is_tracklist_post = in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types );
+        $is_wizard = ( $post->ID == wpsstm_wizard()->frontend_wizard_page_id );
 
-        if ( !in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types ) ) return $template;
+        if ( !$is_tracklist_post && !$is_wizard ) return $template;
 
         if ( $template = wpsstm_locate_template( 'tracklist-admin.php' ) ) {
             add_filter( 'body_class', array($this,'tracklist_popup_body_classes'));
@@ -258,9 +262,12 @@ class WP_SoundSystem_Core_Tracklists{
     function xspf_template_filter($template){
         global $wp_query;
         global $post;
+        global $wpsstm_tracklist;
 
         if( !isset( $wp_query->query_vars[$this->qvar_xspf] ) ) return $template; //don't use $wp_query->get() here
         
+        the_post();
+
         return wpsstm_locate_template( 'tracklist-xspf.php' );
     }
     

@@ -41,6 +41,8 @@ class WP_SoundSystem_Core_Wizard{
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
+        
+        add_action( 'the_post',array($this,'the_wizard_tracklist'),10,2 );
 
         //frontend
         add_action( 'wp', array($this,'do_frontend_wizard_form' ) );
@@ -128,7 +130,7 @@ class WP_SoundSystem_Core_Wizard{
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
         global $post;
-        $this->populate_wizard_tracklist($post->ID);
+        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
         wpsstm_locate_template( 'wizard-form.php', true );
     }
     
@@ -139,26 +141,39 @@ class WP_SoundSystem_Core_Wizard{
         return wpsstm_locate_template( 'frontend-wizard.php' );
     }
     
-    function populate_wizard_tracklist($post_id=null,$feed_url=null){
+    /*
+    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
+    */
+    
+    function the_wizard_tracklist($post,$query){
         global $wpsstm_tracklist;
+        global $post;
         
+        if( $post->ID != $this->frontend_wizard_page_id ) return;
+        $wpsstm_tracklist = $this->get_wizard_tracklist(null,$this->wizard_url);
+    }
+    
+    function get_wizard_tracklist($post_id=null,$feed_url=null){
+        
+        $tracklist = null;
+
         if ($post_id){
-            $wpsstm_tracklist = wpsstm_get_post_live_tracklist($post_id);
+            $tracklist = wpsstm_get_post_live_tracklist($post_id);
         }else{
             $feed_url = wpsstm_wizard()->wizard_url;
-            $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+            $tracklist = wpsstm_get_live_tracklist_preset($feed_url);
         }
         
-        $wpsstm_tracklist->can_remote_request = !$wpsstm_tracklist->is_wizard_disabled();
-        $wpsstm_tracklist->is_expired = true; //force tracklist refresh
-        $wpsstm_tracklist->tracks_strict = false;
+        $tracklist->can_remote_request = !$tracklist->is_wizard_disabled();
+        $tracklist->is_expired = true; //force tracklist refresh
+        $tracklist->tracks_strict = false;
         
         if (wpsstm_is_backend() ){
-            $wpsstm_tracklist->options['autoplay'] = false;
-            $wpsstm_tracklist->options['can_play'] = false;
+            $tracklist->options['autoplay'] = false;
+            $tracklist->options['can_play'] = false;
         }
 
-
+        return $tracklist;
     }
 
     function init_backend_wizard(){

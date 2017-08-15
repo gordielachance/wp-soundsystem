@@ -1,11 +1,10 @@
 <?php
 
-the_post();
-
 global $wpsstm_tracklist;
-$tracklist = $wpsstm_tracklist;
-$tracklist->populate_tracks(array('posts_per_page'=>-1));
+$wpsstm_tracklist->can_remote_request = true;
+$wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
 
+$tracklist = $wpsstm_tracklist;
 
 if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
     $filename = $post->post_name;
@@ -16,15 +15,12 @@ if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
     header("Content-Type: text/xml");
 }
 
-
 require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
 $xspf = new mptre\Xspf();
 
-
-
 //playlist
-if ( $title = get_the_title() ){
+if ( $title = $tracklist->title ){
     $xspf->addPlaylistInfo('title', $title);
 }
 

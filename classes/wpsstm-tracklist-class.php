@@ -416,8 +416,6 @@ class WP_SoundSystem_Tracklist{
         $this->options['autoplay'] = false;
         $this->options['autosource'] = false;
         $this->options['can_play'] = false;
-        
-        //return $this->get_tracklist_table();
 
         global $wpsstm_tracklist;
         global $post;
@@ -439,9 +437,10 @@ class WP_SoundSystem_Tracklist{
     function get_tracklist_table(){
         global $post;
         global $wpsstm_tracklist;
-        $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
+        
 
         ob_start();
+        
         wpsstm_locate_template( 'content-tracklist-table.php', true, false );
         $output = ob_get_clean();
 
@@ -521,6 +520,7 @@ class WP_SoundSystem_Tracklist{
         /*
         $post_type = get_post_type($this->post_id);
         $tracklist_obj = get_post_type_object($post_type);
+        if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return false;
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
             return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
@@ -733,12 +733,8 @@ class WP_SoundSystem_Tracklist{
 
     function get_tracklist_admin_gui_url($tracklist_action = null){
 
-        $url = null;
-        
-        if($this->post_id){
-            $url = get_permalink($this->post_id);
-            $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$tracklist_action),$url);
-        }
+        $url = $this->get_tracklist_permalink();
+        $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$tracklist_action),$url);
 
         return $url;
     }
@@ -908,8 +904,9 @@ class WP_SoundSystem_Tracklist{
     }
     
     function user_can_reorder_tracks(){
-        
         $post_type = get_post_type($this->post_id);
+        if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return false;
+        
         $tracklist_obj = get_post_type_object($post_type);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
         
