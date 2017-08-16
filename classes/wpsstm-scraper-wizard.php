@@ -328,7 +328,7 @@ class WP_SoundSystem_Core_Wizard{
         global $post;
         global $wpsstm_tracklist;
         
-        wpsstm_wizard()->is_advanced = ( $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->track_count && wpsstm_is_backend() );
+        wpsstm_wizard()->is_advanced = ( $wpsstm_tracklist->feed_url && wpsstm_is_backend() );
 
         /*
         Source
