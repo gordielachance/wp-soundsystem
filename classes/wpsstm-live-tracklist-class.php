@@ -45,6 +45,25 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
     
+    //TO FIX not working yet but we would like it to work !
+    /*
+    Compare Tracks / Tracks Details wizard options to check if the user settings match the preset settings.
+    */
+    function has_default_options(){
+        
+        //array diff can only compare one dimension arrays, so build them
+        
+        $default_options = $this->options_default;
+        $options = $this->options;
+
+        //compare multi-dimensionnal array
+        $diff = wpsstm_array_recursive_diff($options,$default_options);
+        
+        //print_r($diff);die();
+        
+        return empty($diff);
+    }
+    
     public function __construct($post_id = null) {
         
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
@@ -61,6 +80,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
                 $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
+                
+                //TO FIX not working yet but we would like it to work !
+                /*
+                if ( !$this->has_default_options() ){
+                    $this->add_notice( 'wizard-header', 'not_preset_defaults', __("The Tracks / Track Details settings do not match the default preset.  Clear the values and save to restore them.",'wpsstm') );
+                }
+                */
+                
             }
 
             if ($this->feed_url){
@@ -834,9 +861,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( !$wizard_settings ) return;
         if ( !$this->post_id ) return;
 
-        //while updating the live tracklist settings, ignore caching
-        
-
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
         //keep only NOT default values
@@ -859,6 +883,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $previous_values = $this->get_options();
         $new_input = $previous_values;
+        
+        //TO FIX we should filter previous_values to exclude keys that does not exists in the default options (trash non-used keys)
         
         //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
