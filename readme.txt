@@ -153,6 +153,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* wizard : share / export works properly + better way of populating wizard
+
 = 1.6.9 =
 * fix typo when including reddit preset
 

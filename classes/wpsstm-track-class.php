@@ -610,7 +610,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $actions['edit'] = array(
                 'icon' =>       '<i class="fa fa-pencil" aria-hidden="true"></i>',
-                'text' =>      __('Track details', 'wpsstm'),
+                'text' =>      __('Track Details', 'wpsstm'),
                 'href' =>       $this->get_track_admin_gui_url('edit',$tracklist_id),
             );
         }

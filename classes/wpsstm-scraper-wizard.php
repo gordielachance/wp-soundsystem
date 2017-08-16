@@ -437,7 +437,7 @@ class WP_SoundSystem_Core_Wizard{
 
             $this->add_wizard_section(
                 'wizard-section-single-track', //id
-                __('Track details','wpsstm'),
+                __('Track Details','wpsstm'),
                 array( $this, 'section_single_track_desc' ),
                 'wpsstm-wizard-step-single-track' //page
             );
@@ -926,7 +926,7 @@ class WP_SoundSystem_Core_Wizard{
 
         $track_details_tab = array(
             'icon'    => $icon_track_details_tab,
-            'title'  => __('Track details','spiff'),
+            'title'  => __('Track Details','spiff'),
             'href'  => '#wpsstm-wizard-step-single-track-content'
         );
 
