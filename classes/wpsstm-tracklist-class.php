@@ -1096,7 +1096,7 @@ class WP_SoundSystem_Tracklist{
             $url = get_permalink($this->post_id);
         }elseif ( wpsstm_wizard()->can_frontend_wizard() && ($frontend_wizard_id = wpsstm_wizard()->frontend_wizard_page_id) && $wpsstm_tracklist->feed_url){
             $url = get_permalink($frontend_wizard_id);
-            $args['wpsstm_wizard']['feed_url'] = $wpsstm_tracklist->feed_url;
+            $args['feed_url'] = $wpsstm_tracklist->feed_url;
         }else{
             return;
         }

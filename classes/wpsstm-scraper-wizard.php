@@ -34,7 +34,7 @@ class WP_SoundSystem_Core_Wizard{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        $this->wizard_url = isset($_REQUEST[ 'wpsstm_wizard' ]['feed_url']) ? trim($_REQUEST[ 'wpsstm_wizard' ]['feed_url']) : null;
+        $this->wizard_url = isset($_REQUEST[ 'feed_url']) ? trim($_REQUEST[ 'feed_url']) : null;
     }
 
     function setup_actions(){
@@ -675,8 +675,7 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         printf(
-            '<input type="text" name="%s[feed_url]" value="%s" class="fullwidth" placeholder="%s" />',
-            'wpsstm_wizard',
+            '<input type="text" name="feed_url" value="%s" class="fullwidth" placeholder="%s" />',
             $option,
             __('URL of the tracklist you would like to get','wpsstm')
         );
