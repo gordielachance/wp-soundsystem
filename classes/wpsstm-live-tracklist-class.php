@@ -422,9 +422,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 
                 //maybe libxml will output error but will work; do not abord here.
                 $xml_errors = libxml_get_errors();
-                foreach( $xml_errors as $xml_error_obj ) {
-                    $this->add_notice( 'wizard-header', 'xml_error', sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message), true );
-      
+                
+                if ($xml_errors){
+                    $this->add_notice( 'wizard-header', 'xml_error', __("There has been some errors while parsing the input XML.",'wpsstm'), true );
+                    /*
+                    foreach( $xml_errors as $xml_error_obj ) {
+                        $this->add_notice( 'wizard-header', 'xml_error', sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message), true );
+                    }
+                    */
                 }
 
                 //QueryPath
