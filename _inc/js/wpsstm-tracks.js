@@ -337,11 +337,13 @@ class WpsstmTrack {
         var self = this;
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
-        var track_instances = self.get_track_instances();
+        
         
         var deferredObject = $.Deferred();
 
         var promise = self.get_track_sources_request();
+        
+        var track_instances = self.get_track_instances(); //repopulate instances - they might have changed since
         track_instances.addClass('loading-sources');
 
         promise.fail(function() {
@@ -353,6 +355,7 @@ class WpsstmTrack {
         })
 
         promise.always(function(data, textStatus, jqXHR) {
+            track_instances = self.get_track_instances(); //repopulate instances - they might have changed since
             track_instances.removeClass('loading-sources');
         })
 
