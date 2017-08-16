@@ -145,7 +145,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         if ( current_user_can('administrator') ){ //this could reveal 'secret' urls (API keys, etc.) So limit the notice display.
             if ( $this->feed_url != $this->redirect_url ){
-                $this->add_notice( 'wizard-header', 'scrapped_from', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
+                $this->add_notice( 'wizard-header', 'redirect_url', sprintf(__('Scraped from : %s','wpsstm'),'<em>'.$this->redirect_url.'</em>') );
             }
         }
         
@@ -935,6 +935,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
     
     function populate_tracks($args = null){
+        
+        if ( $this->did_query_tracks ) return;
 
         //check we should request remote tracks
         if ( $this->is_expired ){
@@ -957,6 +959,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }else{
             parent::populate_tracks($args);
         }
+        
+        $this->did_query_tracks = true;
 
     }
     

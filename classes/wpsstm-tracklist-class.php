@@ -34,6 +34,7 @@ class WP_SoundSystem_Tracklist{
     var $current_track = -1;
     var $track_count = 0;
     var $in_track_loop = false;
+    var $did_query_tracks = false;
 
     function __construct($post_id = null ){
         
@@ -474,15 +475,7 @@ class WP_SoundSystem_Tracklist{
         );
 
     }
-       
-    /*
-    Render notices as WP settings_errors() would.
-    */
-    
-    function output_notices($context){
-        echo $this->get_notices_output($context);
-    }
-    
+
     function get_notices_output($context){
         
         $notices = array();
@@ -975,6 +968,8 @@ class WP_SoundSystem_Tracklist{
     }
     
     function populate_tracks($args = null){
+        
+        if ( $this->did_query_tracks ) return;
 
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
@@ -987,6 +982,8 @@ class WP_SoundSystem_Tracklist{
         
         $subtrack_ids = $this->get_subtrack_ids();
         $this->add_tracks($subtrack_ids);
+        
+        $this->did_query_tracks = true;
     }
 
     /**
