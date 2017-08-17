@@ -60,13 +60,7 @@ class WP_SoundSystem_Live_Playlist_Stats{
 
         $meta = get_post_meta($post_id, self::$meta_key_health, true);
 
-        //TO FIX is an upgrade for Spiff plugin.  Should be removed later.
-        if ( is_array($meta) ) {
-            delete_post_meta($post_id, self::$meta_key_health);
-            return;
-        }
-        
-        $percent = $meta * 100;
+        $percent = (int)$meta * 100;
 
         return $percent;     
 
