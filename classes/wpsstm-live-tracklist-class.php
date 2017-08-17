@@ -863,7 +863,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
-        //keep only NOT default values
+        //remove all default values so we store only user-edited stuff
         $default_args = $this->options_default;
         $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
@@ -881,11 +881,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function sanitize_wizard_settings($input){
 
-        $previous_values = $this->get_options();
-        $new_input = $previous_values;
-        
-        //TO FIX we should filter previous_values to exclude keys that does not exists in the default options (trash non-used keys)
-        
+        $new_input = array();
+
         //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
         //cache
@@ -914,7 +911,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
                 $new_input['selectors'][$selector_slug] = array_filter($value);
-
 
             }
         }
