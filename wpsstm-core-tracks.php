@@ -590,9 +590,12 @@ class WP_SoundSystem_Core_Tracks{
         );
         $atts = shortcode_atts($default,$atts);
 
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+        setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
+        $output = $wpsstm_tracklist->get_tracklist_table();
         
-        return $wpsstm_tracklist->get_tracklist_table();
+        wp_reset_postdata();
+        
+        return $output;
 
     }
     

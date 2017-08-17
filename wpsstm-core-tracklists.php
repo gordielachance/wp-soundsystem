@@ -137,7 +137,10 @@ class WP_SoundSystem_Core_Tracklists{
     function the_tracklist($post,$query){
         global $wpsstm_tracklist;
         
-        if ( !in_array(get_post_type($post),$this->tracklist_post_types) ) return;
+        $allowed_post_types = $this->tracklist_post_types;
+        $allowed_post_types[] = wpsstm()->post_type_track;
+        
+        if ( !in_array(get_post_type($post),$allowed_post_types) ) return;
         
         $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
         $wpsstm_tracklist->position = $query->current_post + 1;
@@ -241,13 +244,12 @@ class WP_SoundSystem_Core_Tracklists{
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
 
         if ($tracklist_id){
-            if ( $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id) ){
-                
-                $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
-                
-                $result['new_html'] = $wpsstm_tracklist->get_tracklist_table();
-                $result['success'] = true;
-            }
+            
+            setup_postdata($tracklist_id); //this will populate the $wpsstm_tracklist
+            $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
+
+            $result['new_html'] = $wpsstm_tracklist->get_tracklist_table();
+            $result['success'] = true;
         }
 
         header('Content-type: application/json');
@@ -388,7 +390,6 @@ class WP_SoundSystem_Core_Tracklists{
     
     function metabox_tracklist_content( $post ){
         global $wpsstm_tracklist;
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
         $wpsstm_tracklist->options['autoplay'] = false;
         $wpsstm_tracklist->options['can_play'] = false;
         echo $wpsstm_tracklist->get_tracklist_table();
@@ -424,8 +425,11 @@ class WP_SoundSystem_Core_Tracklists{
         $post_type = get_post_type($atts['post_id']);
         if ( !in_array($post_type,$this->tracklist_post_types) ) return;
         
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
-        return $wpsstm_tracklist->get_tracklist_table();
+        setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
+        $output = $wpsstm_tracklist->get_tracklist_table();
+        wp_reset_postdata();
+        
+        return $output;
 
     }
 

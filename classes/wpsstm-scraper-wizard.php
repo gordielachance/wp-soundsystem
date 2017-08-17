@@ -42,7 +42,7 @@ class WP_SoundSystem_Core_Wizard{
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
         
-        add_action( 'the_post',array($this,'the_wizard_tracklist'),10,2 );
+        add_action( 'the_post',array($this,'the_frontend_wizard_tracklist'),10,2 );
 
         //frontend
         add_action( 'wp', array($this,'do_frontend_wizard_form' ) );
@@ -130,7 +130,6 @@ class WP_SoundSystem_Core_Wizard{
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
         global $post;
-        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
         wpsstm_locate_template( 'wizard-form.php', true );
     }
     
@@ -140,19 +139,7 @@ class WP_SoundSystem_Core_Wizard{
 
         return wpsstm_locate_template( 'frontend-wizard.php' );
     }
-    
-    /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
-    */
-    
-    function the_wizard_tracklist($post,$query){
-        global $wpsstm_tracklist;
-        global $post;
-        
-        if( $post->ID != $this->frontend_wizard_page_id ) return;
-        $wpsstm_tracklist = $this->get_wizard_tracklist(null,$this->wizard_url);
-    }
-    
+
     function get_wizard_tracklist($post_id=null,$feed_url=null){
         
         $tracklist = null;
@@ -175,6 +162,10 @@ class WP_SoundSystem_Core_Wizard{
 
         return $tracklist;
     }
+    
+    /*
+    Register the global $wpsstm_tracklist obj backend + enqueue scripts & styles
+    */
 
     function init_backend_wizard(){
         global $post;
@@ -185,12 +176,27 @@ class WP_SoundSystem_Core_Wizard{
             $screen = get_current_screen();
 
             if ($screen->base != 'post') return;
-
             if( !in_array($screen->post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
 
+            $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
+            
             $this->wizard_enqueue_script_styles();
             
         }
+
+    }
+    
+    /*
+    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
+    */
+    
+    function the_frontend_wizard_tracklist($post,$query){
+        global $wpsstm_tracklist;
+        global $post;
+        
+        if (!$post) return;
+        if( $post->ID != $this->frontend_wizard_page_id ) return;
+        $wpsstm_tracklist = $this->get_wizard_tracklist(null,$this->wizard_url);
 
     }
     
