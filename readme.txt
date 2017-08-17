@@ -153,8 +153,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.7.0 =
 * wizard : share / export works properly + better way of populating wizard
+* wizard : notice if using a preset and that the scraper options do not match the preset scraper options
+* some bug fixes & improvements
 
 = 1.6.9 =
 * fix typo when including reddit preset
