@@ -788,6 +788,7 @@ class WpsstmTracklist {
             var cells_values = [];
             $.each(cells, function( index, cell ) {
                 var value = $(cell).html();
+                value = $.trim(value);
                 cells_values.push(value);
             });
             column_values.push(cells_values);
@@ -802,11 +803,18 @@ class WpsstmTracklist {
 
         var unique_value_per_column = [];
         $.each(column_values, function( index, cells_values ) {
+            
             var column_selector = column_selectors[index];
             var unique_cells_values = cells_values.filter( onlyUnique );
-            if (unique_cells_values.length <= 1){
-                hidable_column_selectors.push(column_selector);
+            
+            if (cells_values.length > 1){ //several rows
+                if (unique_cells_values.length > 1) return true; // several values, continue
+            }else{ //single row
+                var value = $(unique_cells_values).get(0);
+                if (value) return true; //continue
             }
+            
+            hidable_column_selectors.push(column_selector);
         });
 
         /*
