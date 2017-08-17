@@ -1094,13 +1094,12 @@ class WP_SoundSystem_Tracklist{
         //get tracklist (or wizard) url
         if ($this->post_id){
             $url = get_permalink($this->post_id);
-        }elseif ( wpsstm_wizard()->can_frontend_wizard() && ($frontend_wizard_id = wpsstm_wizard()->frontend_wizard_page_id) && $wpsstm_tracklist->feed_url){
+        }elseif ( ( $this->tracklist_type == 'live') && $this->feed_url && wpsstm_wizard()->can_frontend_wizard() && ($frontend_wizard_id = wpsstm_wizard()->frontend_wizard_page_id) ) {
             $url = get_permalink($frontend_wizard_id);
             $args['feed_url'] = $wpsstm_tracklist->feed_url;
         }else{
             return;
         }
-    
         //export
         if ($args['export']){
             $url .= wpsstm_tracklists()->qvar_xspf;
