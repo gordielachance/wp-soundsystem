@@ -44,27 +44,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         'convert_from_encoding'     => 'UTF-8', //our input is always UTF8 - look for fixUTF8() in code
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
-    
-    //TO FIX not working yet but we would like it to work !
-    /*
-    Compare Tracks / Tracks Details wizard options to check if the user settings match the preset settings.
-    */
-    function has_default_options(){
-        
-        //array diff can only compare one dimension arrays, so build them
-        
-        $default_options = $this->options_default;
-        $options = $this->options;
 
-        //compare multi-dimensionnal array
-        $diff = wpsstm_array_recursive_diff($options,$default_options);
-        
-        //print_r($diff);die();
-        
-        return empty($diff);
-    }
-    
     public function __construct($post_id = null) {
+        
+        parent::__construct($post_id);
         
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
 
@@ -72,22 +55,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         $this->options = $this->options_default = $this->get_default_options();
 
-        parent::__construct($post_id);
-        
         if ($this->post_id){
 
             $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
 
             if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
                 $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
-                
-                //TO FIX not working yet but we would like it to work !
-                /*
-                if ( !$this->has_default_options() ){
-                    $this->add_notice( 'wizard-header', 'not_preset_defaults', __("The Tracks / Track Details settings do not match the default preset.  Clear the values and save to restore them.",'wpsstm') );
-                }
-                */
-                
             }
 
             if ($this->feed_url){
@@ -139,6 +112,24 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         return array_replace_recursive((array)parent::get_default_options(),$live_options); //last one has priority
         
+    }
+    
+    /*
+    Compare Tracks / Tracks Details wizard options to check if the user settings match the default preset settings.
+    */
+    function get_user_edited_scraper_options(){
+
+        $default_options = $this->options_default;
+        $options = $this->options;
+
+        //compare multi-dimensionnal array
+        $diff = wpsstm_array_recursive_diff($options,$default_options);
+        
+        //keep only scraper options
+        $check_keys = array('selectors', 'tracks_order');
+        $diff = array_intersect_key($diff, array_flip($check_keys));
+
+        return $diff;
     }
 
     function populate_remote_tracklist(){
@@ -916,7 +907,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         //order
-        $new_input['tracks_order'] = ( isset($input['tracks_order']) ) ? $input['tracks_order'] : null;
+        if ( isset($input['tracks_order']) ){
+            $new_input['tracks_order'] = $input['tracks_order'];
+        }
 
         $default_args = $default_args = $this->options_default;
         $new_input = array_replace_recursive($default_args,$new_input); //last one has priority

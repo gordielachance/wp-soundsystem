@@ -251,6 +251,16 @@ class WP_SoundSystem_Core_Wizard{
         }elseif( isset($wizard_data['toggle-wizard']) ){
             $enable = ( isset($wizard_data['toggle-wizard']['enable']) );
             $wpsstm_tracklist->toggle_enable_wizard($enable);
+        }elseif( isset($wizard_data['restore-scraper']) ){
+
+            $check_keys = array('selectors', 'tracks_order');
+            foreach($check_keys as $key){
+                if ( array_key_exists($key,$wizard_data) ){
+                    unset($wizard_data[$key]);
+                }
+            }
+
+            $success = $wpsstm_tracklist->save_wizard($wizard_data);
         }
 
     }
@@ -329,6 +339,13 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
         
         wpsstm_wizard()->is_advanced = ( $wpsstm_tracklist->feed_url && wpsstm_is_backend() );
+        
+        if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
+            $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
+            $restore_link = wpsstm_wizard()->get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
+            $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
+            $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
+        }
 
         /*
         Source
@@ -519,7 +536,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wpsstm-wizard-step-options',
                 'wizard-section-options'
             );
-
+            
         }
         
         /*
