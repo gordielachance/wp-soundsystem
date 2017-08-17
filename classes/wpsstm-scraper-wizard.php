@@ -130,6 +130,8 @@ class WP_SoundSystem_Core_Wizard{
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
         global $post;
+                
+        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
         wpsstm_locate_template( 'wizard-form.php', true );
     }
     
@@ -177,8 +179,6 @@ class WP_SoundSystem_Core_Wizard{
 
             if ($screen->base != 'post') return;
             if( !in_array($screen->post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
-
-            $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
             
             $this->wizard_enqueue_script_styles();
             
@@ -343,7 +343,7 @@ class WP_SoundSystem_Core_Wizard{
     function wizard_settings_init(){
         global $post;
         global $wpsstm_tracklist;
-        
+
         wpsstm_wizard()->is_advanced = ( $wpsstm_tracklist->feed_url && wpsstm_is_backend() );
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){

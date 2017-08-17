@@ -390,9 +390,16 @@ class WP_SoundSystem_Core_Tracklists{
     
     function metabox_tracklist_content( $post ){
         global $wpsstm_tracklist;
+        
+        setup_postdata($post->ID); //this will populate the $wpsstm_tracklist
+        
         $wpsstm_tracklist->options['autoplay'] = false;
         $wpsstm_tracklist->options['can_play'] = false;
-        echo $wpsstm_tracklist->get_tracklist_table();
+        $output = $wpsstm_tracklist->get_tracklist_table();
+
+        wp_reset_postdata();
+        
+        echo $output;
     }
 
     function content_append_tracklist_table($content){

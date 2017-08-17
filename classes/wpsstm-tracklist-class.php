@@ -417,8 +417,6 @@ class WP_SoundSystem_Tracklist{
 
         global $wpsstm_tracklist;
 
-        setup_postdata( $this->post_id ); //this will populate the $wpsstm_tracklist
-        
         $wpsstm_tracklist->options['autoplay'] = false;
         $wpsstm_tracklist->options['autosource'] = false;
         $wpsstm_tracklist->options['can_play'] = false;
@@ -435,7 +433,6 @@ class WP_SoundSystem_Tracklist{
     function get_tracklist_table(){
         global $wpsstm_tracklist;
         
-        setup_postdata( $this->post_id ); //this will populate the $wpsstm_tracklist
         ob_start();
         wpsstm_locate_template( 'content-tracklist-table.php', true, false );
         $output = ob_get_clean();
