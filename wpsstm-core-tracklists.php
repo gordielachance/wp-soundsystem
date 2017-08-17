@@ -406,6 +406,8 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         global $wpsstm_tracklist;
         
+        if (!$wpsstm_tracklist) return $content;
+        
         //check post type
         $allowed_post_types = $this->tracklist_post_types;
         $allowed_post_types[] =  wpsstm()->post_type_track;
