@@ -624,7 +624,7 @@ class WP_SoundSystem_Tracklist{
                 'icon'      =>  '<i class="fa fa-plus" aria-hidden="true"></i>',
                 'text'     =>   $track_obj->labels->add_new_item,
                 'href'      =>  $new_subtrack_url,
-                'classes'   =>  array('wpsstm-requires-auth','tracklist-action'),
+                'classes'   =>  array('wpsstm-requires-auth'),
             );
         }
         
@@ -650,7 +650,7 @@ class WP_SoundSystem_Tracklist{
                 'icon' =>       '<i class="fa fa-calendar-check-o" aria-hidden="true"></i>',
                 'text' =>      __('Status'),
                 'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
-                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -661,7 +661,7 @@ class WP_SoundSystem_Tracklist{
                 'text' =>      __('Lock', 'wpsstm'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('lock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
+                'classes' =>    array('wpsstm-requires-auth'),
 
             );
         }
@@ -673,7 +673,7 @@ class WP_SoundSystem_Tracklist{
                 'text' =>      __('Unlock', 'wpsstm'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('unlock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth','tracklist-action'),
+                'classes' =>    array('wpsstm-requires-auth'),
 
             );
         }
@@ -712,7 +712,10 @@ class WP_SoundSystem_Tracklist{
         $default_action['classes'][] = 'wpsstm-tracklist-action';
         
         foreach((array)$actions as $slug=>$action){
-            $actions[$slug] = wp_parse_args($action,$default_action);
+            $action = wp_parse_args($action,$default_action);
+            $action['classes'][] = 'wpsstm-action';
+            $action['classes'][] = 'wpsstm-tracklist-action';
+            $actions[$slug] = $action;
         }
         return $actions;
         

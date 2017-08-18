@@ -718,10 +718,12 @@ class WP_SoundSystem_Track{
         $actions = apply_filters('wpsstm_track_actions',$actions,$context);
         
         $default_action = wpsstm_get_blank_action();
-        $default_action['classes'][] = 'wpsstm-track-action';
         
         foreach((array)$actions as $slug=>$action){
-            $actions[$slug] = wp_parse_args($action,$default_action);
+            $action = wp_parse_args($action,$default_action);
+            $action['classes'][] = 'wpsstm-action';
+            $action['classes'][] = 'wpsstm-track-action';
+            $actions[$slug] = $action;
         }
         return $actions;
 

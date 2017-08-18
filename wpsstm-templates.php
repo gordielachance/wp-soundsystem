@@ -222,7 +222,7 @@ function wpsstm_get_blank_action(){
         'desc' =>           null,
         'href' =>           '#',
         'icon' =>           null,
-        'classes' =>        array('wpsstm-action'),
+        'classes' =>        array(),
         'link_classes' =>   array(),
         'link_before' =>    null,
         'link_after' =>     null,
