@@ -11,14 +11,10 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         a{
             @extend .wpsstm-no-underline;
         }
-        &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
-            display:none;
-        }
     }
-
 }
 
-.tracklist-nav .wpsstm-actions-list, #track-popup-tabs .wpsstm-actions-list{
+.wpsstm-actions-list:not(#wpsstm-track-actions){
     text-align: center;
     font-size:.8em;
     line-height: 3em;
@@ -43,15 +39,6 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         ul#wpsstm-tracklist-actions{
             text-align: center;
             font-size:.8em;
-            li{
-                &#wpsstm-tracklist-action-status-switch{
-                    form{
-                        select{
-                            font-size:1em;
-                        }
-                    }
-                }
-            }
         }
     }
     
@@ -172,53 +159,60 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
     letter-spacing: .05em;
     
     #wpsstm-bottom-track-info.wpsstm-tracklist{
-
-        .wpsstm-track-image{
-            padding-left:0!important;
-        }
-        .wpsstm-track-sources{
-            position:relative;
-            width: 20%;
-            @include opacity(.25);
-            ul{
-                width:100%;
-                padding:0;
-                line-height: 2em;
-                a{
-                    @extend .wpsstm-ellipsis;
-                    display:block;
-                    width:calc(100% - 2em);
-                    padding: 0 .75em;
-                    .wpsstm-provider-icon{
-                        position:absolute;
-                        width:2em;
-                    }
-                    label{
-                        margin-left:1.5em;
-                        display:initial;
-                    }
-                    &:not(.wpsstm-active-source){
-                        @include opacity(.25);
-                        display:none;
-                        &:hover{
-                            @include opacity(.5);
+        
+        table{
+            td{
+                &.wpsstm-track-image{
+                    padding-left:0!important;
+                }
+                &.wpsstm-track-album{
+                    display:none!important;
+                }
+                &.wpsstm-track-sources{
+                    position:relative;
+                    width: 20%;
+                    @include opacity(.25);
+                    ul{
+                        width:100%;
+                        padding:0;
+                        line-height: 2em;
+                        a{
+                            @extend .wpsstm-ellipsis;
+                            display:block;
+                            width:calc(100% - 2em);
+                            padding: 0 .75em;
+                            .wpsstm-provider-icon{
+                                position:absolute;
+                                width:2em;
+                            }
+                            label{
+                                margin-left:1.5em;
+                                display:initial;
+                            }
+                            &:not(.wpsstm-active-source){
+                                @include opacity(.25);
+                                display:none;
+                                &:hover{
+                                    @include opacity(.5);
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            &:hover{
-                width: 30%;
-                @include opacity(1);
-                ul{
-                    background: $player-bg-color;
-                    text-align: left;
-                    position: absolute;
-                    bottom: -1em;
-                    padding-bottom:1em;
-                    a{
+                    &:hover{
+                        width: 30%;
+                        @include opacity(1);
+                        ul{
+                            background: $player-bg-color;
+                            text-align: left;
+                            position: absolute;
+                            bottom: -1em;
+                            padding-bottom:1em;
+                            a{
 
-                        display:block;
+                                display:block;
+                            }
+                        }
                     }
                 }
             }
