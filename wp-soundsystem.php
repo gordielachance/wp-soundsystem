@@ -97,7 +97,8 @@ class WP_SoundSystem {
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
             'hide_empty_columns'                => 'on', //hide a tracklist column when it has a unique value for every row
             'autosource_filter_ban_words'       => array('cover'),
-            'autosource_filter_requires_artist' => 'off'
+            'autosource_filter_requires_artist' => 'off',
+            'minimal_css'                       => 'off',
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);

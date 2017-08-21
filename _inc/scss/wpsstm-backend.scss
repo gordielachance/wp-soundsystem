@@ -1,6 +1,11 @@
 @import "wpsstm-shared";
 @import "pure-tree"; //for MBdata
 
+#wpsstm-promo-notice{
+    padding: .75em;
+    border-bottom:1px solid #DDD;
+}
+
 body{
     //hide title input as we set it automatically - but keep the feature sine it outputs the permalink and 'view' link
     &.post-type-wpsstm_artist,&.post-type-wpsstm_release,&.post-type-wpsstm_track{
@@ -10,11 +15,6 @@ body{
             }
         }
     }
-}
-
-#wpsstm-promo-notice{
-    padding: .75em;
-    border-bottom:1px solid #DDD;
 }
 
 .wp-list-table{
@@ -34,6 +34,37 @@ body{
 }
 
 .postbox{
+    
+    .wpsstm-fullwidth{
+        padding: 3px 8px;
+        font-size: 1.7em;
+        line-height: 100%;
+        height: 1.7em;
+        width: 100%;
+        outline: 0;
+        margin: 0 0 3px;
+        background-color: #fff;
+    }
+    
+    //sources metabox
+    &#wpsstm-track-sources .inside{
+        text-align:center;
+    }
+    
+    &#wpsstm-metabox-scraper-wizard{
+        position:relative;
+        .inside{
+            overflow:auto;
+            .wpsstm-tracklist{
+                #wpsstm-tracklist-actions{
+                    #wpsstm-tracklist-action-status-switch,#wpsstm-tracklist-action-lock-tracklist,#wpsstm-tracklist-action-unlock-tracklist{
+                        display:none;
+                    }
+                }
+            }
+        }
+    }
+    
     &#wpsstm-artist,&#wpsstm-track,&#wpsstm-album,&#wpsstm-mbid{
         background:none;
         border:none;
@@ -121,9 +152,7 @@ body{
                 }
             }
         }
-        
 
-        
     }
     
 }

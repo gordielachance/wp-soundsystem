@@ -364,8 +364,12 @@ class WP_SoundSystem_Source{
     }
 
     function get_provider_link(){
+        global $wpsstm_source;
+        
         $this->populate_source_provider();
         if ( ($this->provider->slug == 'default') ) return;
+        
+        $wpsstm_source = $this;
 
         ob_start();
         wpsstm_locate_template( 'content-source.php', true, false );

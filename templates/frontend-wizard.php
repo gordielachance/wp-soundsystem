@@ -51,7 +51,7 @@ get_header();
                             wpsstm_locate_template( 'wizard-form.php', true );
                         
                             if ($wpsstm_tracklist->feed_url){
-                                echo $wpsstm_tracklist->get_tracklist_table();
+                                echo $wpsstm_tracklist->get_tracklist_html();
                             }
                         
                             ?>

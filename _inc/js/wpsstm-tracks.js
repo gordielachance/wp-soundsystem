@@ -313,10 +313,10 @@ class WpsstmTrack {
         wpsstm_currentTrack = self;
         
         var all_tracks = $('[itemprop="track"]');
-        all_tracks.removeClass('playing buffering');
+        all_tracks.removeClass('active playing buffering');
         
         var track_instances = self.get_track_instances();
-        track_instances.addClass('buffering');
+        track_instances.addClass('active buffering');
 
         self.set_bottom_trackinfo();
         
@@ -425,7 +425,7 @@ class WpsstmTrack {
         });
         $(bottom_trackinfo_el).removeClass('wpsstm-tracklist-table');
         
-        var list = $('<ul class="wpsstm-tracklist-entries"></ul>');
+        var list = $('<table class="wpsstm-tracklist-entries"></table>');
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed

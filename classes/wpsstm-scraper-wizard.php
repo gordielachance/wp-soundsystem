@@ -724,7 +724,7 @@ class WP_SoundSystem_Core_Wizard{
     
     function feedback_tracklist_callback(){
         global $wpsstm_tracklist;
-        echo $wpsstm_tracklist->get_tracklist_table();
+        echo $wpsstm_tracklist->get_tracklist_html();
     }
 
     function feedback_data_type_callback(){

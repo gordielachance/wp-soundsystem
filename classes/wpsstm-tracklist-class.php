@@ -84,6 +84,7 @@ class WP_SoundSystem_Tracklist{
             'can_play'              => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'      => (int)wpsstm()->get_options('toggle_tracklist'),
             'hide_empty_columns'    => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
+            'template'              => 'table',
         );
     }
     
@@ -413,33 +414,19 @@ class WP_SoundSystem_Tracklist{
         }
     }
     
-    function get_tracklist_list(){
-
-        global $wpsstm_tracklist;
-
-        $wpsstm_tracklist->options['autoplay'] = false;
-        $wpsstm_tracklist->options['autosource'] = false;
-        $wpsstm_tracklist->options['can_play'] = false;
+    function get_tracklist_html(){
         
+        $template = $this->get_options('template');
+        $template_file = sprintf('content-tracklist-%s.php',$template);
+
         ob_start();
-        wpsstm_locate_template( 'content-tracklist-list.php', true, false );
+        wpsstm_locate_template( $template_file, true, false );
         $output = ob_get_clean();
 
         wp_reset_postdata();
         
         return $output;
-    }
-
-    function get_tracklist_table(){
-        global $wpsstm_tracklist;
         
-        ob_start();
-        wpsstm_locate_template( 'content-tracklist-table.php', true, false );
-        $output = ob_get_clean();
-        
-        wp_reset_postdata();
-
-        return $output;
     }
 
     public function set_tracklist_pagination( $args ) {
@@ -629,7 +616,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //switch status
-        if ( $can_edit_tracklist && !wpsstm_is_backend() ){
+        if ( $can_edit_tracklist ){
             $status_options = array();
             $statii = array('draft','publish','private','trash');
 
@@ -655,7 +642,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         //lock
-        if ( !wpsstm_is_backend() && $this->user_can_lock_tracklist() ){
+        if ( $this->user_can_lock_tracklist() ){
             $actions['lock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Lock', 'wpsstm'),
@@ -667,7 +654,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         //unlock
-        if ( !wpsstm_is_backend() && $this->user_can_unlock_tracklist() ){
+        if ( $this->user_can_unlock_tracklist() ){
             $actions['unlock-tracklist'] = array(
                 'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Unlock', 'wpsstm'),
@@ -918,7 +905,7 @@ class WP_SoundSystem_Tracklist{
         if ( ($this->tracklist_type == 'live') && $this->is_expired ){
             $classes[] = 'wpsstm-expired-tracklist';
         }
-        
+
         //capabilities
         $tracklist_type = get_post_type($this->post_id);
         $tracklist_type_obj = get_post_type_object($tracklist_type);
@@ -933,7 +920,7 @@ class WP_SoundSystem_Tracklist{
     
     function get_tracklist_options_attr(){
         
-        $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist','hide_empty_columns');
+        $allowed_options = array('autoplay','autosource','can_play','toggle_tracklist','hide_empty_columns','template');
         
         $attr_options = array();
 

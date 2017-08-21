@@ -1,0 +1,227 @@
+/*
+Default styles to improve the GUI, can be disabled in the plugin's settings
+*/
+
+@import "compass";
+@import "wpsstm-shared";
+
+.wpsstm-actions-list{
+    li{
+        display:inline-block;
+        a{
+            @extend .wpsstm-no-underline;
+        }
+        &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
+            display:none;
+        }
+    }
+
+}
+
+.tracklist-nav .wpsstm-actions-list, #track-popup-tabs .wpsstm-actions-list{
+    text-align: center;
+    font-size:.8em;
+    line-height: 3em;
+    li{
+        background: #EEE;
+        padding: 0 .5em;
+        line-height: 2.5em;
+        a{
+            i{
+                padding-right:.25em;
+            }
+        }
+    }
+}
+
+.wpsstm-tracklist{
+        
+    font-family: sans-serif;
+    font-size:0.8em;
+
+    .tracklist-nav{
+        ul#wpsstm-tracklist-actions{
+            text-align: center;
+            font-size:.8em;
+            li{
+                &#wpsstm-tracklist-action-status-switch{
+                    form{
+                        select{
+                            font-size:1em;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    [itemprop="track"]{
+        .wpsstm-track-actions{
+            width:6em;
+            ul{
+                display:none;
+            }
+        }
+        &:hover,&.active{
+            .wpsstm-track-actions ul{
+                display:inherit;
+            }
+        }
+        
+        .wpsstm-track-play-bt{
+            a{
+                @extend .wpsstm-no-underline;
+            }
+        }
+
+        .wpsstm-track-sources{
+            a{
+                @extend .wpsstm-no-underline;
+            }
+            .entry-content & { //hide souce column in WP posts frontend
+                display:none;
+            }
+        }
+    }
+
+    table.wpsstm-tracklist-entries{
+        margin:0;
+        padding:0;
+        th,tr,td{
+            padding:0;
+            margin:0;
+        }
+        
+        //no borders
+        border-collapse: collapse;
+        border:none;
+        td,th{
+            border:none;
+            outline:none;
+        }
+        
+        //hide header
+        .wpsstm-tracklist-entries-header{
+            display:none;
+        }
+        
+        tr{ //[itemprop="track"]
+
+            td,th{
+                padding:.5em 0;
+                
+                &.wpsstm-track-image{
+                    width:2em;
+                    box-sizing: content-box;
+                }
+                &.wpsstm-track-position{
+                    width:2em;
+                }
+                &.wpsstm-track-play-bt{
+                    width:2em;
+                }
+                &.wpsstm-track-info{
+                    @extend .wpsstm-ellipsis;
+                    [itemprop="byArtist"]{
+                        font-weight: bold;
+                    }
+                    [itemprop="inAlbum"]{
+                        font-size:.8em;
+                    }
+                }
+                &.wpsstm-track-sources{
+                    ul{
+                        a{
+                            label{
+                                @extend .wpsstm-can-click;
+                            }
+                            &.wpsstm-bad-source{
+                                text-decoration: line-through;
+                            }
+                            &.wpsstm-active-source{
+                                font-weight: bold;
+                            }
+                        }
+
+                    }
+                }
+            }
+            th{
+                text-align:center;
+            }
+
+            @include transition-property(background);
+            @include transition-duration(.4s);
+
+            &:hover{
+                background: rgba(0,0,0,0.02);
+            }
+
+            &:not(:last-child){
+                border-bottom: 1px solid #eee;
+            }
+
+        }
+    }
+
+}
+
+#wpsstm-bottom-track-wrapper{
+    text-transform: uppercase;
+    font-size: .75em;
+    letter-spacing: .05em;
+    
+    #wpsstm-bottom-track-info.wpsstm-tracklist{
+
+        .wpsstm-track-image{
+            padding-left:0!important;
+        }
+        .wpsstm-track-sources{
+            position:relative;
+            width: 20%;
+            @include opacity(.25);
+            ul{
+                width:100%;
+                padding:0;
+                line-height: 2em;
+                a{
+                    @extend .wpsstm-ellipsis;
+                    display:block;
+                    width:calc(100% - 2em);
+                    padding: 0 .75em;
+                    .wpsstm-provider-icon{
+                        position:absolute;
+                        width:2em;
+                    }
+                    label{
+                        margin-left:1.5em;
+                        display:initial;
+                    }
+                    &:not(.wpsstm-active-source){
+                        @include opacity(.25);
+                        display:none;
+                        &:hover{
+                            @include opacity(.5);
+                        }
+                    }
+                }
+            }
+
+            &:hover{
+                width: 30%;
+                @include opacity(1);
+                ul{
+                    background: $player-bg-color;
+                    text-align: left;
+                    position: absolute;
+                    bottom: -1em;
+                    padding-bottom:1em;
+                    a{
+
+                        display:block;
+                    }
+                }
+            }
+        }
+    }
+}

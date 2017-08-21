@@ -4,7 +4,7 @@ global $wpsstm_track;
 $track = $wpsstm_track;
 
 if ( $track->have_sources() ) { ?>
-    <div class="wpsstm-track-sources-list">
+    <ul class="wpsstm-track-sources-list">
         <?php
         while ( $track->have_sources() ) {
             
@@ -12,11 +12,13 @@ if ( $track->have_sources() ) { ?>
             global $wpsstm_source;
 
             if ( $source_link = $wpsstm_source->get_provider_link() ){
-                echo $source_link;
+                ?>
+                <li><?php echo $source_link;?></li>
+                <?php
             }
 
         }
         ?>
-    </div>
+    </ul>
     <?php 
 }

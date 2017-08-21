@@ -93,8 +93,6 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function register_tracks_scripts_styles_shared(){
-        //CSS
-        wp_register_style( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/css/wpsstm-tracks.css', array('font-awesome','thickbox','wpsstm-track-sources'),wpsstm()->version );
         //JS
         wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','thickbox','wpsstm-track-sources'),wpsstm()->version );
         
@@ -102,7 +100,6 @@ class WP_SoundSystem_Core_Tracks{
     
     function enqueue_tracks_scripts_styles_frontend(){
         //TO FIX load only when single track is displayed ? but anyway is loaded through wpsstm-tracklists ?
-        wp_enqueue_style( 'wpsstm-tracks' );
         wp_enqueue_script( 'wpsstm-tracks' );
         
     }
@@ -112,7 +109,6 @@ class WP_SoundSystem_Core_Tracks{
         if ( !wpsstm()->is_admin_page() ) return;
         
         wp_enqueue_script( 'wpsstm-tracks' );
-        wp_enqueue_style( 'wpsstm-tracks' );
 
     }
     
@@ -591,7 +587,7 @@ class WP_SoundSystem_Core_Tracks{
         $atts = shortcode_atts($default,$atts);
 
         setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
-        $output = $wpsstm_tracklist->get_tracklist_table();
+        $output = $wpsstm_tracklist->get_tracklist_html();
         
         wp_reset_postdata();
         

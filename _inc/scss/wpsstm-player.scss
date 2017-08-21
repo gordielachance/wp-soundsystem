@@ -2,98 +2,109 @@
 @import "wpsstm-shared";
 
 #wpsstm-bottom-wrapper{
+    
     position:fixed;
     width:100%;
     padding:0;
     bottom: 0;
-    z-index: 50;
     min-height:0em;
-    
-    a{
-       color:white; 
-    }
-    
-    .wpsstm-bottom-notice{
-        font-size:0.8em;
-        margin: 0;
-        padding-bottom:1.5em;
-        a{
-            color:#222;
-            text-decoration: underline;
-        }
-        p{
-            padding:0;
-            margin:0;
-        }
-        .wpsstm-close-notice{
-            position:absolute;
-            right:0;
-            top:0;
-            display: block;
-            padding: .5em;
-            @include opacity(.8);
-            @extend .wpsstm-can-click;
-            &:hover{
-                @include opacity(1);
-            }
-            
-        }
-    }
+    z-index: 50;
+
     
     #wpsstm-bottom{
         display:none;
-        position: relative;
-        color:white;
-        font-family:sans-serif;
-        
+        background:$player-bg-color;
+        color:$player-text-color;
+        a{
+            color:$player-text-color;
+        }
         #wpsstm-bottom-track-wrapper{
-            background:#222;
-            line-height:3em;
-            height:3em;
-            position:relative;
-            font-size: 0.8em;
-            padding:0;
-            
-            width:100%;
 
-            @extend .wpsstm-table-row;
-            
-            #wpsstm-bottom-track-actions{
-                @extend .wpsstm-flexible-cell;
-                > *{
-                    padding: 0 .25em;
-                    font-size:1.5em;
-                }
-                a{
-                    @include opacity(0.9);
-                    color:white;
-                    text-decoration: none;
-                    border:none!important;
-                    &:hover{
-                        @include opacity(1);
+            width:100%;
+            table-layout:auto;
+            padding:0;
+            margin:0;
+            td{
+                padding:0;
+                margin:0;
+                &#wpsstm-bottom-track-info{
+                    vertical-align: top;
+                    table{
+                        td{
+                            display:inline-block;
+                            padding: 0 .75em;
+                            box-sizing: content-box;
+                            &.wpsstm-track-position{
+                                @extend .wpsstm-can-click;
+                            }
+                            &.wpsstm-track-play-bt{
+                                display:none;
+                            }
+                            &.wpsstm-track-title{
+                                &:before{
+                                    content: "—";
+                                    margin-right:1.5em;
+                                }
+                            }
+                        }
                     }
                 }
+                &#wpsstm-bottom-track-actions{
+
+                    #wpsstm-player-toggle-scrobble{
+                        > :nth-child(1){ //loading
+                            display:none;
+                        }
+                        > :nth-child(2){ //disable
+                            display:none;
+
+                        }
+                        > :nth-child(3){ //enable
+                            display:inline-block;
+                            i{
+                                @include opacity(.25);
+                            }
+                        }
+
+                        &.active{
+                            > :nth-child(2){ //disable
+                                display:inline-block;
+                            }
+                            > :nth-child(3){ //enable
+                                display:none;
+                            }
+                        }
+                        &.loading{
+                            pointer-events: none;
+                            > :nth-child(1){ //loading
+                                display:inline-block;
+                            }
+                            > :nth-child(2){ //disable
+                                display:none;
+                            }
+                            > :nth-child(3){ //enable
+                                display:none;
+                            }
+                        }
+                    }
+                }
+
             }
-            
         }
 
         #wpsstm-bottom-player-wrapper{
-            background:#222;
-            position:relative;
-            overflow: hidden;
-            a{
-                color:white;
+            width:100%;
+            padding:0;
+            margin:0;
+            td{
+                text-align:center;
+                vertical-align:middle;
             }
-
-            > * {
-                display: block;
-                height: 40px;
-                float: left;
-                line-height:40px;
+            #wpsstm-player{
+                width:80%;
+                margin:auto;
             }
             .wpsstm-player-extra{
-                width:calc(20% / 4); //number of extra icons
-                text-align:center;
                 &#wpsstm-player-shuffle:not(.active){
                     @include opacity(.3);
                 }
@@ -101,47 +112,7 @@
                     @include opacity(.3);
                 }
             }
-            #wpsstm-player{
-                width:80%;
-                margin:auto;
-            }
-        }
-    }
-}
-
-#wpsstm-player-toggle-scrobble{
-    > :nth-child(1){ //loading
-        display:none;
-    }
-    > :nth-child(2){ //disable
-        display:none;
-        
-    }
-    > :nth-child(3){ //enable
-        display:inline-block;
-        i{
-            @include opacity(.25);
         }
     }
 
-    &.active{
-        > :nth-child(2){ //disable
-            display:inline-block;
-        }
-        > :nth-child(3){ //enable
-            display:none;
-        }
-    }
-    &.loading{
-        pointer-events: none;
-        > :nth-child(1){ //loading
-            display:inline-block;
-        }
-        > :nth-child(2){ //disable
-            display:none;
-        }
-        > :nth-child(3){ //enable
-            display:none;
-        }
-    }
 }

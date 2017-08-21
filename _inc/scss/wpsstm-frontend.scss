@@ -1,62 +1,101 @@
-//sources
 @import "compass";
 @import "wpsstm-shared";
 
-.wpsstm-submit-wrapper{
-    text-align:center;
-    margin: .5em 0;
-}
+/*
+Thickbox popups
+*/
 
-.wpsstm-track-sources-list{
-    padding:0;
-    margin:0;
-    list-style-type: none;
-    display:inline-block;
-    
-
-
-    .wpsstm-source{
-        @extend .wpsstm-table-row;
-        line-height: 2em;
-        position:relative;
+body.wpsstm_track-template-admin,body.wpsstm_tracklist-template-admin{
+    header{
+        margin: 2em 0;
+    }
+    //hide default styles - this may have to be adapted to your theme
+    #sidebar,#colophon{
+        display:none;
+    }
+    #content{
         width:100%;
-        text-decoration: none;
-        border:none;
-        padding: 0 .5em;
-        .wpsstm-provider-icon{
-            width: 2em;
-            font-size: 1.2em;;
-        }
-
-        .wpsstm-source-title{
-            @extend .ellipsis;
-        }
-
-        &.wpsstm-bad-source{
-            .wpsstm-source-title{
-                text-decoration: line-through;
+        margin:0;
+    }
+    #main{
+        margin:0;
+        padding:0;
+    }
+    #wpadminbar{
+        display:none;
+    }
+    // !hide default styles
+    
+    .hentry{
+        margin:0;
+        padding:0;
+        #track-popup-tabs{
+            > ul{
+                list-style: none;
+                li{
+                    &:not(.ui-state-active){
+                        @include opacity(.8);
+                    }
+                }
             }
         }
+    }
+    
+    //tracklists chooser
+    #wpsstm-tracklist-chooser-list{
+        #wpsstm-filter-playlists{
+            position:relative;
+            ul{
+                font-size:.8em;
+                list-style: none;
+                //@include column-count(2);
+                li{
+                    @extend .wpsstm-ellipsis;
+                    padding: 1em;
+                    border-bottom: 1px solid rgba(51, 51, 51, 0.1);
+                    &.loading{
+                        @extend .wpsstm-loading-el;
+                    }
+
+                }
+            }
+        }
+
+        #wpsstm-new-playlist-add{
+            display:none;
+            margin: 1em;
+            text-align: center;
+
+            input[type="submit"]{
+            } 
+        }
+
+        &.loading{
+            @extend .wpsstm-loading-el;
+        }
+    }
+    
+    //submit bt
+    .wpsstm-submit-wrapper{
+        text-align:center;
+        margin: .5em 0;
+    }
+    
+}
+
+#TB_window{
+    font-family:sans-serif;
+    #TB_ajaxWindowTitle{
+        
+    }
+    #TB_ajaxContent{
+        margin: 0;
+        padding: 1em;
     }
 }
 
-.wpsstm-track-sources{
-    position:relative;
-    .wpsstm-track-sources-list{
-        .wpsstm-source{
-            display:none;
-            &.wpsstm-active-source{
-                @extend .wpsstm-table-row;
-            }
-        }
-    }
-    &:hover{
-        .wpsstm-track-sources-list{
-            .wpsstm-source{
-                @extend .wpsstm-table-row;
-            }
-        }
-    }
+ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
+    @extend .comma-list;
 }
 
 #wpsstm-track-admin-sources{
@@ -74,7 +113,7 @@
 
             .wpsstm-source-icon{
                 text-align:center;
-                display:inline-block;
+                display:inline;
             }
 
             .wpsstm-source-fields{
@@ -126,9 +165,4 @@
         }
 
     }
-}
-
-//metabox
-.postbox#wpsstm-track-sources .inside{
-    text-align:center;
 }

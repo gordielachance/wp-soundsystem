@@ -240,9 +240,10 @@ class WpsstmTracklist {
 
             var ajax_data = {
                 'action':           'wpsstm_refresh_tracklist',
-                'post_id':          self.tracklist_id
+                'post_id':          self.tracklist_id,
+                'options':          self.options,
             };
-
+            
             self.tracklist_request = $.ajax({
 
                 type: "post",
@@ -568,13 +569,6 @@ class WpsstmTracklist {
             
             //set this track as the active one
             self.current_track_idx = track_idx;
-
-            var all_tracks = $('[itemprop="track"]');
-            all_tracks.removeClass('active');
-
-            var track_obj = self.get_track_obj();
-            var track_instances = track_obj.get_track_instances();
-            track_instances.addClass('active');
             
             var debug_msg = "play_subtrack() #" + self.current_track_idx;
             if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
@@ -774,58 +768,51 @@ class WpsstmTracklist {
     hideEmptyColumns() {
         
         var self = this;
-        
-        var column_selectors = ['[itemprop="image"]','[itemprop="byArtist"]','[itemprop="inAlbum"]'];
-        var column_values = [];
-        var hidable_column_selectors = []; //columns that have a unique value
-        
+
         /*
         per column, make an array of every cell value
         */
+        var all_rows = $(self.tracklist_el).find('tr');
+        var header_row = all_rows.filter('.wpsstm-tracklist-entries-header');
         
-        $.each(column_selectors, function( index, selector ) {
-            var cells = $(self.tracklist_el).find(selector);
-            var cells_values = [];
-            $.each(cells, function( index, cell ) {
-                var value = $(cell).html();
-                value = $.trim(value);
-                cells_values.push(value);
-            });
-            column_values.push(cells_values);
-        });
-        
-        /*
-        count number of different values per column
-        */
-        function onlyUnique(value, index, self) { 
-            return self.indexOf(value) === index;
-        }
+        //get the IDX of the columns we should check
+        var toggable_header_cells = $(header_row).find('th.wpsstm-toggle-same-value');
+        $.each( toggable_header_cells, function( i,e ) {
+            var column_idx = $( this ).index() + 1;
 
-        var unique_value_per_column = [];
-        $.each(column_values, function( index, cells_values ) {
+            var column = all_rows.find('>*:nth-child('+column_idx+')');
+            var column_head = column.filter('th');
+            var column_body = column.filter('td');
             
-            var column_selector = column_selectors[index];
-            var unique_cells_values = cells_values.filter( onlyUnique );
+            //collect tracks data for this column
+            var column_datas = [];
             
-            if (cells_values.length > 1){ //several rows
-                if (unique_cells_values.length > 1) return true; // several values, continue
-            }else{ //single row
-                var value = $(unique_cells_values).get(0);
-                if (value) return true; //continue
+            $.each( column_body, function() {
+                var value = $(this).html();
+                value = $.trim(value);
+                column_datas.push(value);
+            });
+
+            //check status
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
             }
             
-            hidable_column_selectors.push(column_selector);
-        });
+            //exceptions
+            if (column_datas.length == 1){ //there is only a single row displayed
+                var value = $(column_datas).get(0);
+                if (value) return true; //the cell is not empty; show this column (continue)
+            }else{
+                var unique_values = column_datas.filter( onlyUnique );
+                if (unique_values.length > 1){
+                    return true; //column has several values; show this column (continue)
+                }
+            }
+            
+            column.hide();
 
-        /*
-        add class to cells that could be hidden
-        */
+        });
         
-        $.each(hidable_column_selectors, function( index, selector ) {
-            self.debug("hide this column: " + selector + " as it has the same value everywhere");
-            var cells = $(self.tracklist_el).find(selector).hide();
-        });
-
     }
     
     

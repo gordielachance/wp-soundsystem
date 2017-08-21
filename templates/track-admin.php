@@ -150,6 +150,8 @@
                             break;
                             case 'sources':
                                 
+                                $track->populate_sources();
+                                
                                 ?>
                                 <div id="wpsstm-track-admin-sources" class="wpsstm-track-admin">
                                     <p>

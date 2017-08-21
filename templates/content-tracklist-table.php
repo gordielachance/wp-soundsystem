@@ -49,14 +49,24 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     <?php
     if ( $tracklist->have_tracks() ) {
     ?>
-        <ul class="wpsstm-tracklist-entries">
+        <table class="wpsstm-tracklist-entries">
+            <tr class="wpsstm-tracklist-entries-header">
+                <th class="wpsstm-track-image wpsstm-toggle-same-value" itemprop="image"></th>
+                <th class="wpsstm-track-play-bt"></th>
+                <th class="wpsstm-track-position">#</th>
+                <th class="wpsstm-track-info wpsstm-track-artist wpsstm-toggle-same-value"><?php _e('Artist','wpsstm');?></th>
+                <th class="wpsstm-track-info wpsstm-track-title wpsstm-toggle-same-value"><?php _e('Title','wpsstm');?></th>
+                <th class="wpsstm-track-info wpsstm-track-album wpsstm-toggle-same-value"><?php _e('Album','wpsstm');?></th>
+                <th class="wpsstm-track-actions"><?php _e('Actions','wpsstm');?></th>
+                <th class="wpsstm-track-sources wpsstm-toggle-same-value"><?php _e('Sources','wpsstm');?></th>
+            </tr>
             <?php
             while ( $tracklist->have_tracks() ) {
                 $tracklist->the_track();
                 wpsstm_locate_template( 'content-track-table.php', true, false );
             } 
             ?>
-       </ul>
+       </table>
     <?php 
     }else{
         ?>

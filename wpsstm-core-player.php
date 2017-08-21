@@ -68,25 +68,28 @@ class WP_SoundSystem_Core_Player{
         ?>
         <div id="wpsstm-bottom-wrapper">
             <div id="wpsstm-bottom">
-                <div id="wpsstm-bottom-track-wrapper">
-                    <div id="wpsstm-bottom-track-info"></div>
-                    <div id="wpsstm-bottom-track-actions">
-                        <?php 
-                        //scrobbling
-                        if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                            echo wpsstm_lastfm()->get_scrobbler_icons();
-                        }
-                        ?>
-                    </div>
-                </div>
-                
-                <div id="wpsstm-bottom-player-wrapper">
-                    <div id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player"></div>
-                    <div id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></div>
-                    <div id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></div>
-                </div>
+                <table id="wpsstm-bottom-track-wrapper">
+                    <tr>
+                        <td id="wpsstm-bottom-track-info"></td>
+                        <td id="wpsstm-bottom-track-actions">
+                            <?php 
+                            //scrobbling
+                            if ( wpsstm()->get_options('lastfm_scrobbling') ){
+                                echo wpsstm_lastfm()->get_scrobbler_icons();
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                </table>
+                <table id="wpsstm-bottom-player-wrapper">
+                    <tr>
+                        <td id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></td>
+                        <td id="wpsstm-player"></td>
+                        <td id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></td>
+                        <td id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></td>
+                        <td id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></td>
+                    </tr>
+                </table>
             </div>
         </div>
         <?php

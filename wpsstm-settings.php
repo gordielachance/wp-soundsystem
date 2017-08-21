@@ -180,6 +180,12 @@ class WP_SoundSystem_Settings {
             //soundcloud
             $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
             $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
+            
+            /*
+            System
+            */
+            
+            $new_input['minimal_css'] = ( isset($input['minimal_css']) ) ? 'on' : 'off';
     
         }
         
@@ -483,7 +489,14 @@ class WP_SoundSystem_Settings {
             'wpsstm-settings-page' // Page
         );
 
-        //
+        add_settings_field(
+            'minimal_css', 
+            __('Minimal CSS','wpsstm'), 
+            array( $this, 'minimal_css_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_system'//section
+        );
+        
         add_settings_field(
             'reset_options', 
             __('Reset Options','wpsstm'), 
@@ -895,6 +908,17 @@ class WP_SoundSystem_Settings {
     }
     
     //System
+    
+    function minimal_css_callback(){
+        $option = wpsstm()->get_options('minimal_css');
+        
+        printf(
+            '<input type="checkbox" name="%s[minimal_css]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Do not include default styling.","wpsstm")
+        );
+    }
     
     function reset_options_callback(){
         printf(
