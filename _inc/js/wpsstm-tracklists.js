@@ -745,17 +745,18 @@ class WpsstmTracklist {
     }
     
     toggleTracklist(options){
-        
+
         var self = this;
 
         // OPTIONS
         var defaults = {
             childrenShowCount:  true,
             childrenMax:        3,
-            childrenSelector:   '.wpsstm-tracklist-entries > *',
+            childrenSelector:   '[itemprop="track"]',
             moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
             lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
         };
+
         var options =  $.extend(defaults, options);
 
         if ( Number($(this.tracklist_el).attr("data-tracks-count")) > 0 ) {

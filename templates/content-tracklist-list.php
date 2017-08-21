@@ -18,7 +18,7 @@ $tracklist = $wpsstm_tracklist;
                 global $wpsstm_track;
                 $track = $wpsstm_track;
                 ?>
-                <li>
+                <li class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php echo $track->post_id; ?>" data-wpsstm-track-idx="<?php echo $tracklist->current_track; ?>" data-wpsstm-sources-count="<?php echo $track->source_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
                     <strong class="wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></strong>
                     <span class="wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
                 </li>
