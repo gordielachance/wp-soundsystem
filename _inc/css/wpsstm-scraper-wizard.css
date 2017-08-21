@@ -152,19 +152,10 @@
 }
 
 /* line 159, ../scss/wpsstm-scraper-wizard.scss */
-.postbox#wpsstm-metabox-scraper-wizard {
-  position: relative;
-}
-/* line 161, ../scss/wpsstm-scraper-wizard.scss */
-.postbox#wpsstm-metabox-scraper-wizard .inside {
-  overflow: auto;
-}
-
-/* line 167, ../scss/wpsstm-scraper-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;
 }
-/* line 171, ../scss/wpsstm-scraper-wizard.scss */
+/* line 163, ../scss/wpsstm-scraper-wizard.scss */
 #wpsstm-frontend-wizard #wpsstm-wizard-convert-tracklist p.submit {
   display: inline-block;
 }

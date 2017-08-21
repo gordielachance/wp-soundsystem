@@ -132,7 +132,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
-echo $tracklist->get_tracklist_table();
+echo $tracklist->get_tracklist_html();
 ?>`
 
 = How does live playlists handle tracks ? =
@@ -152,6 +152,11 @@ A track that belongs to another playlist or that has been favorited by a user wi
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.7.1 =
+* option to disable default styling
+* improved CSS
+* JS: pass tracklist options in get_tracklist_request()
 
 = 1.7.0 =
 * wizard : share / export works properly + better way of populating wizard

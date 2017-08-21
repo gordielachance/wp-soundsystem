@@ -246,13 +246,13 @@ function wpsstm_get_actions_list($actions,$prefix){
 
         $action_attr = array(
             'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
-            'class'     => implode("\n",$action['classes'])
+            'class'     => implode(" ",$action['classes'])
         );
 
         $link_attr = array(
             'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
             'href'      => $action['href'],
-            'class'     => implode("\n",$action['link_classes'])
+            'class'     => implode(" ",$action['link_classes'])
         );
         $link = sprintf('<a %s>%s<label>%s</label></a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
