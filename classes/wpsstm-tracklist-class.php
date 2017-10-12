@@ -544,7 +544,7 @@ class WP_SoundSystem_Tracklist{
         $track_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_tracklist = ($this->post_id && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) );
         
-        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) );
+        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && wpsstm_live_playlists()->can_live_playlists() );
         $share_url = $this->get_tracklist_permalink();
         $export_url = $this->get_tracklist_permalink(array('export'=>true));
         $can_favorite = $this->post_id; //call to action TO FIX to CHECK
