@@ -197,6 +197,11 @@
             .wpsstm-track-image{
                 box-sizing: content-box;
             }
+            td{
+                &.wpsstm-column-identical-value{
+                    display:none;
+                }
+            }
         }
     }
     
