@@ -58,7 +58,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                 <th class="wpsstm-track-info wpsstm-track-title wpsstm-toggle-same-value"><?php _e('Title','wpsstm');?></th>
                 <th class="wpsstm-track-info wpsstm-track-album wpsstm-toggle-same-value"><?php _e('Album','wpsstm');?></th>
                 <th class="wpsstm-track-actions"><?php _e('Actions','wpsstm');?></th>
-                <th class="wpsstm-track-sources wpsstm-toggle-same-value"><?php _e('Sources','wpsstm');?></th>
+                <th class="wpsstm-track-sources"><?php _e('Sources','wpsstm');?></th>
             </tr>
             <?php
             while ( $tracklist->have_tracks() ) {
