@@ -2,7 +2,6 @@ var bottom_wrapper_el;
 var bottom_el;
 var bottom_track_wraper_el;
 
-var wpsstm_currentTrack;
 var wpsstm_mediaElement;
 var wpsstm_mediaElementPlayer;
 var wpsstm_player_shuffle_el; //shuffle button

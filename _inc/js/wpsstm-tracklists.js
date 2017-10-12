@@ -537,8 +537,30 @@ class WpsstmTracklist {
 
         var self = this;
         var upToDateTracklist = $.Deferred();
+
+        var current_track = self.get_track_obj();
+        var track_idx = ( track_idx !== undefined ) ? track_idx : 0;
+        var queued_track = self.get_track_obj(track_idx);
+
+        //maybe stop current tracklist
+        if ( ( wpsstm_page_player.current_tracklist_idx !== undefined ) && ( wpsstm_page_player.current_tracklist_idx !== self.tracklist_idx ) ){
+                wpsstm_page_player.end_current_tracklist();
+        }
         
-        track_idx = ( track_idx !== undefined ) ? track_idx : 0;
+        //maybe stop current track
+        if (current_track){
+            self.end_current_track();
+        }
+
+        if (queued_track){
+            wpsstm_page_player.current_tracklist_idx = self.tracklist_idx; //set this tracklist as the active one
+            self.current_track_idx = queued_track.track_idx; //set this track as the active one
+            $(document).trigger( "wpsstmRequestTrack",[queued_track] ); //custom event
+            //bottom track info
+            queued_track.set_bottom_trackinfo();
+        }
+
+        self.debug("PLAY SUBTRACK: " + track_idx + ", SOURCE: " + source_idx);
 
         //maybe refresh tracklist if this is the first track
         if ( (track_idx === 0) && self.is_expired ){
@@ -549,40 +571,31 @@ class WpsstmTracklist {
 
         //tracklist ready
         upToDateTracklist.done(function() {
-            
-            //maybe stop current tracklist
-            if ( wpsstm_page_player.current_tracklist_idx !== undefined ){
-                if ( wpsstm_page_player.current_tracklist_idx !== self.tracklist_idx ){
-                    wpsstm_page_player.end_current_tracklist();
-                }
-            }
+
             //set this tracklist as the active one
             wpsstm_page_player.current_tracklist_idx = self.tracklist_idx;
-            
-            //populate request track
-            var subtrack = self.get_track_obj(track_idx);
 
-            if (!subtrack){
+            if (queued_track){
+
+                var debug_msg = "play_subtrack() #" + self.current_track_idx;
+                if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
+                self.debug(debug_msg);
+
+                queued_track.can_play_track().then(
+                    function(msg) {
+                        if (track_idx == self.current_track_idx){ //play only if this track is the requested track
+                            return queued_track.play_source(source_idx);
+                        }
+                    },
+                    function(error) {
+                        self.debug(error);
+                        self.next_track_jump();
+                    }
+                );
+                
+            }else{
                 self.debug("Track #"+self.current_track_idx+" does not exists");
-                return false;
             }
-            
-            //set this track as the active one
-            self.current_track_idx = track_idx;
-            
-            var debug_msg = "play_subtrack() #" + self.current_track_idx;
-            if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
-            self.debug(debug_msg);
-            
-            subtrack.can_play_track().then(
-                function(msg) {
-                    return subtrack.play_source(source_idx);
-                },
-                function(error) {
-                    self.debug(error);
-                    self.next_track_jump();
-                }
-            );
 
         });
 
@@ -603,14 +616,11 @@ class WpsstmTracklist {
                 wpsstm_mediaElement.currentTime = 0;
                 current_track.updateTrackClasses('ended');
             }
-            
-            if (current_track.sources_request){
-                current_track.sources_request.abort();
-            }
-            
-            current_track.current_track_idx = undefined;
+
+            self.current_track_idx = undefined;
             current_track.current_source_idx = undefined;
         }
+        
     }
     
     update_rows_order(){

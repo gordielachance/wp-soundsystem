@@ -150,7 +150,7 @@
 
     });
     
-    $(document).on( "wpsstmTrackInit", function( event, track_obj ) {
+    $(document).on( "wpsstmRequestTrack", function( event, track_obj ) {
         
         //expand tracklist
         var track_el = track_obj.track_el;
@@ -309,18 +309,12 @@ class WpsstmTrack {
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
         self.playback_start = 0; //reset playback start
-        
-        wpsstm_currentTrack = self;
-        
+
         var all_tracks = $('[itemprop="track"]');
         all_tracks.removeClass('active playing buffering');
         
         var track_instances = self.get_track_instances();
         track_instances.addClass('active buffering');
-
-        self.set_bottom_trackinfo();
-        
-        $(document).trigger( "wpsstmTrackInit",[self] ); //custom event
 
         self.load_in_player(source_idx);
 
@@ -337,8 +331,6 @@ class WpsstmTrack {
         var self = this;
         var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
-        
-        
         var deferredObject = $.Deferred();
 
         var promise = self.get_track_sources_request();
