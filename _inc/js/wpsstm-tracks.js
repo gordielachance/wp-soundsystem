@@ -470,7 +470,7 @@ class WpsstmTrack {
                 self.debug("wpsstmMediaReady");
                 $(document).trigger( "wpsstmMediaReady",[wpsstm_mediaElement,self] ); //custom event
 
-                wpsstm_mediaElement.addEventListener('error', function(error) {
+                $(wpsstm_mediaElement).on('error', function(error) {
                     var source_obj = self.get_track_source(self.current_source_idx);
                     console.log('player event - source error for source: '+self.current_source_idx);
                     //self.debug(error);
@@ -479,13 +479,13 @@ class WpsstmTrack {
 
                 });
 
-                wpsstm_mediaElement.addEventListener('loadeddata', function() {
+                $(wpsstm_mediaElement).on('loadeddata', function() {
                     self.debug('player event - loadeddata');
                     self.updateTrackClasses('loadeddata');
                     wpsstm_mediaElement.play();
                 });
 
-                wpsstm_mediaElement.addEventListener('play', function() {
+                $(wpsstm_mediaElement).on('play', function() {
                     
                     if (!self.playback_start){
                         self.playback_start = Math.round( $.now() /1000);
@@ -495,12 +495,12 @@ class WpsstmTrack {
                     self.updateTrackClasses('play');
                 });
 
-                wpsstm_mediaElement.addEventListener('pause', function() {
+                $(wpsstm_mediaElement).on('pause', function() {
                     self.debug('player - pause');
                     self.updateTrackClasses('pause');
                 });
 
-                wpsstm_mediaElement.addEventListener('ended', function() {
+                $(wpsstm_mediaElement).on('ended', function() {
                     self.debug('MediaElement.js event - ended');
                     self.updateTrackClasses('ended');
                     wpsstm_mediaElement = undefined;
@@ -656,6 +656,7 @@ class WpsstmTrack {
     }
     
     skip_bad_source(source_idx){
+
         //https://github.com/mediaelement/mediaelement/issues/2179#issuecomment-297090067
         
         var self = this;

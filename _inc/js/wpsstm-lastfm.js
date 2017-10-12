@@ -207,13 +207,13 @@ class WpsstmLastFM {
     
     $(document).on( "wpsstmMediaReady", function( event, media, track ) {
 
-        media.addEventListener('loadeddata', function() {
+        $(media).on('loadeddata', function() {
             if (wpsstm_lastfm.has_user_scrobbler){
                 wpsstm_lastfm.updateNowPlaying(track);
             }
         });
         
-        media.addEventListener('ended', function() {
+        $(media).on('ended', function() {
             if ( media.duration > 30) { //scrobble
                 if (wpsstm_lastfm.has_user_scrobbler){
                     wpsstm_lastfm.user_scrobble(track);
