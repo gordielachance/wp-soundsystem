@@ -778,12 +778,14 @@ class WpsstmTracklist {
         
         //get the IDX of the columns we should check
         var toggable_header_cells = $(header_row).find('th.wpsstm-toggle-same-value');
+        
         $.each( toggable_header_cells, function( i,e ) {
+            
             var column_idx = $( this ).index() + 1;
-
             var column = all_rows.find('>*:nth-child('+column_idx+')');
             var column_head = column.filter('th');
             var column_body = column.filter('td');
+            var hide_column = false;
             
             //collect tracks data for this column
             var column_datas = [];
@@ -802,15 +804,19 @@ class WpsstmTracklist {
             //exceptions
             if (column_datas.length == 1){ //there is only a single row displayed
                 var value = $(column_datas).get(0);
-                if (value) return true; //the cell is not empty; show this column (continue)
+                if (!value) hide_column = true; //the is not empty; hide this column
             }else{
                 var unique_values = column_datas.filter( onlyUnique );
-                if (unique_values.length > 1){
-                    return true; //column has several values; show this column (continue)
+                if (unique_values.length <= 1){
+                    hide_column = true; //column has a single values; hide this column
                 }
             }
             
-            column.hide();
+            if (hide_column){
+                column.addClass('wpsstm-column-identical-value');
+            }else{
+                column.removeClass('wpsstm-column-identical-value');
+            }
 
         });
         

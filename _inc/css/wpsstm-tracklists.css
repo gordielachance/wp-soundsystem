@@ -310,3 +310,7 @@
 .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-image {
   box-sizing: content-box;
 }
+/* line 201, ../scss/wpsstm-tracklists.scss */
+.wpsstm-tracklist table.wpsstm-tracklist-entries tr td.wpsstm-column-identical-value {
+  display: none;
+}
