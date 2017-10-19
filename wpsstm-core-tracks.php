@@ -56,6 +56,8 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_frontend' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_backend' ) );
         
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
+        
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
         add_action( 'save_post', array($this,'update_title_track'), 99);
 
@@ -85,6 +87,23 @@ class WP_SoundSystem_Core_Tracks{
         //ajax : toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
 
+    }
+    
+    //add custom admin submenu under WPSSTM
+    function backend_tracks_submenu($parent_slug){
+
+        //capability check
+        $post_type_slug = wpsstm()->post_type_track;
+        $post_type_obj = get_post_type_object($post_type_slug);
+        
+         add_submenu_page(
+                $parent_slug,
+                $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
+                $post_type_obj->labels->name, //submenu title
+                $post_type_obj->cap->edit_posts, //cap required
+                sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
+         );
+        
     }
 
     function register_track_endpoints(){

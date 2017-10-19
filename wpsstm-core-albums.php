@@ -32,11 +32,29 @@ class WP_SoundSystem_Core_Albums{
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
         add_action( 'save_post', array($this,'update_title_album'), 99);
         
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
         add_action( 'save_post', array($this,'metabox_album_save'), 5); 
         
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
+    }
+    
+    //add custom admin submenu under WPSSTM
+    function backend_albums_submenu($parent_slug){
+
+        //capability check
+        $post_type_slug = wpsstm()->post_type_album;
+        $post_type_obj = get_post_type_object($post_type_slug);
+        
+         add_submenu_page(
+                $parent_slug,
+                $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
+                $post_type_obj->labels->name, //submenu title
+                $post_type_obj->cap->edit_posts, //cap required
+                sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
+         );
+        
     }
     
     function column_album_register($defaults) {

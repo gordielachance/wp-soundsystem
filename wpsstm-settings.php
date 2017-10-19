@@ -7,9 +7,8 @@ class WP_SoundSystem_Settings {
     var $menu_page;
 
 	function __construct() {
-		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 9 );
+		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ) );
-        add_action( 'admin_menu', array( $this, 'register_admin_submenus' ), 9 );
 	}
 
     function create_admin_menu(){
@@ -37,47 +36,10 @@ class WP_SoundSystem_Settings {
             self::$menu_slug, // same slug than the menu page
             array($this,'settings_page') // same output function too
         );
-
-    }
-    
-    function register_admin_submenus(){ //TO FIX - this function should be under each type of item ?
         
-        $menu_slug = WP_SoundSystem_Settings::$menu_slug;
-        
-        $allowed_post_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_track,
-            wpsstm()->post_type_source,
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
+        //custom hook to add submenu pages.
+        do_action('wpsstm_register_submenus',self::$menu_slug);
 
-        foreach ($allowed_post_types as $post_type_slug){
-
-            $post_type = get_post_type_object($post_type_slug);
-            if (!$post_type) continue;
-
-             add_submenu_page(
-                    $menu_slug,
-                    $post_type->labels->name, //page title - I never understood why this parameter is needed for.  Put what you like ?
-                    $post_type->labels->name, //submenu title
-                    'edit_posts',
-                    sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
-
-             );
-            /*
-             add_submenu_page(
-                    $menu_slug,
-                    $post_type->labels->add_new_item,
-                    $post_type->labels->add_new_item,
-                    'edit_posts',
-                    sprintf('post-new.php?post_type=%s',$post_type_slug) //url or slug
-
-             );
-             */
-            
-        }
     }
     
     function settings_sanitize( $input ){

@@ -38,6 +38,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
         
         add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
 
@@ -153,6 +154,23 @@ class WP_SoundSystem_Core_Live_Playlists{
         );
 
         register_post_type( wpsstm()->post_type_live_playlist, $args );
+    }
+    
+    //add custom admin submenu under WPSSTM
+    function backend_live_playlists_submenu($parent_slug){
+
+        //capability check
+        $post_type_slug = wpsstm()->post_type_live_playlist;
+        $post_type_obj = get_post_type_object($post_type_slug);
+        
+         add_submenu_page(
+                $parent_slug,
+                $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
+                $post_type_obj->labels->name, //submenu title
+                $post_type_obj->cap->edit_posts, //cap required
+                sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
+         );
+        
     }
 
     /*

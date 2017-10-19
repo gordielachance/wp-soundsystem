@@ -36,7 +36,9 @@ class WP_SoundSystem_Core_Sources{
 
         add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
         
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_sources_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
+        
         add_action( 'save_post', array($this,'metabox_parent_track_save')); 
         add_action( 'save_post', array($this,'metabox_source_urls_save')); 
 
@@ -161,6 +163,23 @@ class WP_SoundSystem_Core_Sources{
         );
 
         register_post_type( wpsstm()->post_type_source, $args );
+    }
+    
+    //add custom admin submenu under WPSSTM
+    function backend_sources_submenu($parent_slug){
+
+        //capability check
+        $post_type_slug = wpsstm()->post_type_source;
+        $post_type_obj = get_post_type_object($post_type_slug);
+        
+         add_submenu_page(
+                $parent_slug,
+                $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
+                $post_type_obj->labels->name, //submenu title
+                $post_type_obj->cap->edit_posts, //cap required
+                sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
+         );
+        
     }
 
     /*
