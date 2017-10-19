@@ -1,10 +1,11 @@
 <?php
-class WP_SoundSystem_Preset_Spotify_Playlists_Api extends WP_SoundSystem_Live_Playlist_Preset{
+
+class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Live_Playlist_Preset{
 
     var $preset_slug =      'spotify-playlist';
     var $preset_url =       'https://open.spotify.com';
     
-    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([^?/]+)~i';
+    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([\w\d]+)~i';
     var $redirect_url =     'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
     var $variables =        array(
         'spotify-user' => null,
@@ -149,11 +150,16 @@ class WP_SoundSystem_Preset_Spotify_Playlists_Api extends WP_SoundSystem_Live_Pl
     
 }
 
-//register preset
+class WP_SoundSystem_Preset_Spotify_URI_Playlists_Api extends WP_SoundSystem_Preset_Spotify_URL_Playlists_Api{
+    var $pattern = '~^spotify:user:([^/]+):playlist:([\w\d]+)~i';
+}
 
-function register_spotify_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_Spotify_Playlists_Api';
+//register presets
+
+function register_spotify_playlist_presets($presets){
+    $presets[] = 'WP_SoundSystem_Preset_Spotify_URL_Playlists_Api';
+    $presets[] = 'WP_SoundSystem_Preset_Spotify_URI_Playlists_Api';
     return $presets;
 }
 
-add_filter('wpsstm_get_scraper_presets','register_spotify_preset');
+add_filter('wpsstm_get_scraper_presets','register_spotify_playlist_presets');
