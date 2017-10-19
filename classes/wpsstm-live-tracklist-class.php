@@ -152,7 +152,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         //get remote stuff
         $raw_tracks = $this->get_all_raw_tracks();
-        
+
         if ( !$raw_tracks ){
             $raw_tracks = new WP_Error( 'remote-tracks',__('No remote tracks found','wpsstm'),true );
         }
@@ -474,8 +474,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
                 
                 if ($xml){
-
-                    $this->add_notice( 'wizard-header', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
+                    
+                    if ( current_user_can('administrator') ){
+                        $this->add_notice( 'wizard-header', 'json2xml', __("The json input has been converted to XML.",'wpsstm') );
+                    }
  
                     $this->response_type = 'text/xml';
                     return $this->get_body_node($xml);
