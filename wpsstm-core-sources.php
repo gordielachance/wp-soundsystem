@@ -521,11 +521,26 @@ class WP_SoundSystem_Core_Sources{
             case 'track_match':
                 
                 $wpsstm_source = new WP_SoundSystem_Source($post_id);
+                
                 if ( $match = $wpsstm_source->match ){
                     
                     $track = new WP_SoundSystem_Track($post->post_parent);
                     if ($track->artist && $track->artist){
-                        printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
+                        
+                        $sources_url = admin_url('edit.php');
+                        $sources_url = add_query_arg( 
+                            array(
+                                'post_type'     => wpsstm()->post_type_source,
+                                'post_parent'   => $track->post_id,
+                                //'post_status' => 'publish'
+                            ),$sources_url 
+                        );
+                        
+                        $track_edit_url = get_edit_post_link( $track->post_id );
+                        $track_edit_link = sprintf('<a href="%s"><strong>%s</strong> — %s</a>',$track_edit_url,$track->artist,$track->title);
+                        $track_sources_link = sprintf('<a href="%s">%s</a>',$sources_url,__('Filter sources','wpsstm'));
+
+                        printf('<p>%s | <small>%s</small></p>',$track_edit_link,$track_sources_link);
                     }
                     
                     $percent_bar = wpsstm_get_percent_bar($match);
