@@ -16,22 +16,21 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     public function __construct($post_id = null){
         
         parent::__construct($post_id);
+        $this->populate_url_variables(); //TO FIX TO CHECK not needed here ?
         
-        if ($post_id){
-            
-            //populate variables from URL
-            if ($this->feed_url && $this->pattern){
+    }
+    
+    function populate_url_variables(){
+        //populate variables from URL
+        if ($this->feed_url && $this->pattern){
 
-                preg_match($this->pattern, $this->feed_url, $url_matches);
-                if ( $url_matches ){
+            preg_match($this->pattern, $this->feed_url, $url_matches);
+            if ( $url_matches ){
 
-                    array_shift($url_matches); //remove first item (full match)
-                    $this->populate_variable_values($url_matches);
-                }
+                array_shift($url_matches); //remove first item (full match)
+                $this->populate_variable_values($url_matches);
             }
-            
         }
-        
     }
     
     function get_default_options(){
