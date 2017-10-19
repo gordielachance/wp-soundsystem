@@ -2,7 +2,7 @@
 
 class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Live_Playlist_Preset{
 
-    var $preset_slug =      'spotify-playlist';
+    var $preset_slug =      'spotify-playlist-url';
     var $preset_url =       'https://open.spotify.com';
     
     var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([\w\d]+)~i';
@@ -39,7 +39,13 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     
     function get_all_raw_tracks(){
         
-        $this->track_count = $this->get_spotify_playlist_track_count();
+        $track_count = $this->get_spotify_playlist_track_count();
+        
+        if ( is_wp_error($track_count) ){
+            return $track_count;
+        }
+        
+        $this->track_count = $track_count;
         
         //init pagination before request
         $pagination_args = array(
@@ -79,10 +85,13 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         
         $json = wp_remote_retrieve_body($response);
         
-        if ( !is_wp_error($json) ){
+        if ( is_wp_error($json) ){
+            return $json;
+        }else{
             $api = json_decode($json,true);
             return wpsstm_get_array_value(array('tracks','total'), $api);
         }
+        
     }
     
     protected function get_request_url(){
@@ -150,16 +159,17 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     
 }
 
+//Spotify Playlists URIs
 class WP_SoundSystem_Preset_Spotify_URI_Playlists_Api extends WP_SoundSystem_Preset_Spotify_URL_Playlists_Api{
+    var $preset_slug =      'spotify-playlist-uri';
     var $pattern = '~^spotify:user:([^/]+):playlist:([\w\d]+)~i';
 }
 
 //register presets
-
-function register_spotify_playlist_presets($presets){
+function register_spotify_presets($presets){
     $presets[] = 'WP_SoundSystem_Preset_Spotify_URL_Playlists_Api';
     $presets[] = 'WP_SoundSystem_Preset_Spotify_URI_Playlists_Api';
     return $presets;
 }
 
-add_filter('wpsstm_get_scraper_presets','register_spotify_playlist_presets');
+add_filter('wpsstm_get_scraper_presets','register_spotify_presets');
