@@ -150,6 +150,20 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 
         }
     }
+    
+    .hentry &{
+        [itemprop="track"]{
+            [data-wpsstm-source-idx]{
+                display:inline;
+                .wpsstm-source-title{
+                    display:none;
+                }
+                &:not(.wpsstm-active-source){
+                    @include opacity(.75);
+                }
+            }
+        }
+    }
 
 }
 
@@ -172,20 +186,22 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     position:relative;
                     width: 20%;
                     @include opacity(.25);
-                    ul{
+                    .wpsstm-track-sources-list{
                         width:100%;
                         padding:0;
                         line-height: 2em;
-                        a{
+                        [data-wpsstm-source-idx]{
                             @extend .wpsstm-ellipsis;
                             display:block;
                             width:calc(100% - 2em);
                             padding: 0 .75em;
-                            .wpsstm-provider-icon{
+                            .wpsstm-source-provider{ //provider link
                                 position:absolute;
                                 width:2em;
+                                left:0;
+                                text-align:center;
                             }
-                            label{
+                            .wpsstm-source-title{ //source text
                                 margin-left:1.5em;
                                 display:initial;
                             }
@@ -202,15 +218,15 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     &:hover{
                         width: 30%;
                         @include opacity(1);
-                        ul{
+                        .wpsstm-track-sources-list{
                             background: $player-bg-color;
                             text-align: left;
                             position: absolute;
                             bottom: -1em;
                             padding-bottom:1em;
-                            a{
-
-                                display:block;
+                            [data-wpsstm-source-idx]{
+                                padding:.4em;
+                                display:inherit;
                             }
                         }
                     }

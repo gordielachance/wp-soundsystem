@@ -279,9 +279,6 @@ class WP_SoundSystem_Core_Sources{
             <h2><?php _e('URL','wpsstm');?></h2>
             <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->url;?>" />
         </p>
-        <p>
-            <?php echo $source->get_provider_link();?>
-        </p>
         <?php
         wp_nonce_field( 'wpsstm_source_meta_box', 'wpsstm_source_meta_box_nonce' );
 
@@ -373,6 +370,7 @@ class WP_SoundSystem_Core_Sources{
             $key++;
 
             $source = new WP_SoundSystem_Source($source_id);
+            $source->populate_source_provider();
 
             $disabled = $readonly = false;
             $source_title_el = $source_url_el = null;
@@ -394,7 +392,10 @@ class WP_SoundSystem_Core_Sources{
                     <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>
                 </span>
                 <span class="wpsstm-source-icon">
-                    <?php echo $source->get_provider_link();?> <small><?php echo $source->url;?></small>
+                    <a class="wpsstm-source-provider" href="<?php echo $source->url;?>" target="_blank" title="<?php echo $source->title;?>">
+                        <?php echo $source->provider->icon;?>
+                        <small><?php echo $source->url;?></small>
+                    </a>
                 </span>
                 <span class="wpsstm-source-fields">
                     <?php 
@@ -489,11 +490,11 @@ class WP_SoundSystem_Core_Sources{
             case 'sources_list':
                 
                 $wpsstm_source = new WP_SoundSystem_Source($post_id);
-                if ( $link = $wpsstm_source->get_provider_link() ){
-                    echo $link;
-                }else{
-                    echo '—';
-                }
+                
+                $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->url,$wpsstm_source->title,$wpsstm_source->url);
+                
+                echo $link;
+                
             break;
         }
     }

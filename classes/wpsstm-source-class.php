@@ -362,26 +362,25 @@ class WP_SoundSystem_Source{
         similar_text($source_title_sanitized, $track_title_sanitized, $similarity_pc);
         return round($similarity_pc);
     }
-
-    function get_provider_link(){
-        global $wpsstm_source;
+    
+    function get_single_source_attributes(){
+        global $wpsstm_track;
         
-        $this->populate_source_provider();
-        if ( ($this->provider->slug == 'default') ) return;
-        
-        $wpsstm_source = $this;
-
-        ob_start();
-        wpsstm_locate_template( 'content-source.php', true, false );
-        $source_link = ob_get_clean();
-        
-        return $source_link;
+        $attr = array(
+            'data-wpsstm-source-id' =>      $this->post_id,
+            'data-wpsstm-source-idx' =>     $wpsstm_track->current_source,
+            'data-wpsstm-source-type' =>    $this->type,
+            'data-wpsstm-source-src' =>     $this->stream_url,
+            'data-wpsstm-autosource' =>     (int)$this->is_community,
+            'class'                 =>      implode( ' ',$this->get_source_class() ),
+        );
+        return $attr;
     }
     
     function get_source_class($extra_classes = null){
         global $wpsstm_track;
 
-        $classes = array('wpsstm-source');
+        $classes = array('wpsstm-source','wpsstm-can-click');
         
         $classes = array_merge($classes,(array)$extra_classes);
 

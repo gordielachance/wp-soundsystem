@@ -1,24 +1,12 @@
 jQuery(document).ready(function($){
 
-    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-        var track_el = track_obj.track_el;
-        
-        var sources_links = $(track_el).find('.wpsstm-track-sources-list a');
+    $(document).on( "wpsstmTrackSourceDomReady", function( event, source_obj ) {
 
-        //click on source link
-        sources_links.click(function(e) {
+        //click on source trigger
+        source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
             e.preventDefault();
-            
-            //if ( !$(track_el).hasClass('active') ) return;
-            var source_idx = Number( $(this).attr('data-wpsstm-source-idx') );
-            
-            wpsstm_page_player.play_tracklist(track_obj.tracklist_idx,track_obj.track_idx,source_idx);
-            
+            source_obj.play_source();
         });
-
-        /*
-        Single Track Playlists manager popup
-        */
 
     });
     
@@ -147,12 +135,13 @@ jQuery(document).ready(function($){
 class WpsstmTrackSource {
     constructor(source_html,track) {
 
-        var self = this;
-        self.tracklist_idx = track.tracklist_idx;
-        self.track_idx = track.track_idx;
-        self.source_idx = Number($(source_html).attr('data-wpsstm-source-idx'));
-        self.src =    $(source_html).attr('data-wpsstm-source-src');
-        self.type =    $(source_html).attr('data-wpsstm-source-type');
+        var self =              this;
+        self.source_el =        $(source_html);
+        self.tracklist_idx =    track.tracklist_idx;
+        self.track_idx =        track.track_idx;
+        self.source_idx =       Number($(source_html).attr('data-wpsstm-source-idx'));
+        self.src =              $(source_html).attr('data-wpsstm-source-src');
+        self.type =             $(source_html).attr('data-wpsstm-source-type');
         self.source_can_play = true;
         
         //self.debug("new WpsstmTrackSource");
@@ -164,46 +153,26 @@ class WpsstmTrackSource {
         wpsstm_debug(msg,prefix);
     }
 
-    get_source_el(ancestor){
-        
+    get_track_el(){
         var self = this;
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(self.tracklist_idx,self.track_idx);
-        var track_el = track_obj.get_track_instances(ancestor);
-        return $(track_el).find('[data-wpsstm-source-idx="'+self.source_idx+'"]');
+        return self.track_el.closest('[data-wpsstm-track-idx="'+self.track_idx+'"]');
     }
-    
-    /*
-    get_player_source_el(){
-        return $(bottom_el).find('audio source').eq(this.source_idx).get(0);
-    }
-    */
 
-    select_player_source(){
+    get_source_instances(ancestor){
         var self = this;
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(self.tracklist_idx,self.track_idx);
-
-        var track_sources_count = track_obj.sources.length;
-        if ( track_sources_count <= 1 ) return;
+        var selector = '[data-wpsstm-tracklist-idx="'+self.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+self.track_idx+'"] [data-wpsstm-source-idx="'+self.source_idx+'"]';
         
-        self.debug("select_player_source()");
-
-        var player_source_el = self.get_source_el(bottom_el);
-        var ul_el = player_source_el.closest('ul');
-
-        var sources_list = player_source_el.closest('ul');
-        var sources_list_wrapper = sources_list.closest('.wpsstm-track-sources');
-
-        if ( !player_source_el.hasClass('wpsstm-active-source') ){ //source switch
-
-            var links_el = player_source_el.closest('ul').find('a');
-            links_el.removeClass('wpsstm-active-source');
-            player_source_el.addClass('wpsstm-active-source');
-
-            track_obj.set_track_source(self.source_idx);
+        if (ancestor !== undefined){
+            return $(ancestor).find(selector);
+        }else{
+            return $(selector);
         }
-
     }
 
+    play_source(){
+        var self = this;
+        wpsstm_page_player.play_tracklist(self.tracklist_idx,self.track_idx,self.source_idx);
+    }
 }
 
 

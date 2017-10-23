@@ -257,10 +257,11 @@ class WpsstmTrack {
     }
 
     get_track_instances(ancestor){
+        var selector = '[data-wpsstm-tracklist-idx="'+this.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.track_idx+'"]';
         if (ancestor !== undefined){
-            return $(ancestor).find('[data-wpsstm-tracklist-idx="'+this.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.track_idx+'"]');
+            return $(ancestor).find(selector);
         }else{
-            return $('[data-wpsstm-tracklist-idx="'+this.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.track_idx+'"]');
+            return $(selector);
         }
     }
     
@@ -580,19 +581,16 @@ class WpsstmTrack {
         var self =      this;
         var track_el =  self.track_el; //page track
 
-        var new_sources_items = $(track_el).find('a.wpsstm-source');
+        var new_sources_items = $(track_el).find('[data-wpsstm-source-idx]');
 
         //self.debug("found "+new_sources_items.length +" sources");
         
         self.sources = [];
         $.each(new_sources_items, function( index, source_link ) {
-            var new_source = new WpsstmTrackSource(source_link,self);
-            self.sources.push(new_source);            
+            var source_obj = new WpsstmTrackSource(source_link,self);
+            self.sources.push(source_obj);
+            $(document).trigger("wpsstmTrackSourceDomReady",[source_obj]); //custom event
         });
-
-        if (self.sources.length){ //we've got sources
-            $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event
-        }
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
 
@@ -614,11 +612,11 @@ class WpsstmTrack {
         
         var source_obj = self.get_track_source(idx);
         var track_instances = self.get_track_instances();
-        var trackinfo_sources = track_instances.find('.wpsstm-track-sources-list .wpsstm-source');
+        var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
         $(trackinfo_sources).removeClass('wpsstm-active-source');
 
-        var source_el = source_obj.get_source_el();
-        $(source_el).addClass('wpsstm-active-source');
+        var source_instances = source_obj.get_source_instances();
+        $(source_instances).addClass('wpsstm-active-source');
     }
     
     set_track_source(idx){
@@ -633,7 +631,8 @@ class WpsstmTrack {
         if (self.current_source_idx !== idx){
 
             self.debug("set_track_source() #" + idx + ": "+new_source.src);
-            new_source_obj.get_source_el().addClass('wpsstm-active-source');
+            var source_instances = new_source_obj.get_source_instances();
+            source_instances.addClass('wpsstm-active-source');
             
         }
 
@@ -659,8 +658,8 @@ class WpsstmTrack {
         source_obj.source_can_play = false;
         self.current_source_idx = undefined;
         
-        var source_el = source_obj.get_source_el();
-        source_el.removeClass('wpsstm-active-source').addClass('wpsstm-bad-source');
+        var source_instances = source_obj.get_source_instances();
+        source_instances.removeClass('wpsstm-active-source').addClass('wpsstm-bad-source');
         
         //
         var new_source_idx;
