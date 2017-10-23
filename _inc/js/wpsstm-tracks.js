@@ -216,7 +216,7 @@ class WpsstmTrack {
 
             var promise = self.get_sources_auto();
             
-            promise.done(function(val) {
+            promise.done(function(data) {
 
                 if ( self.sources.length > 0 ){
 

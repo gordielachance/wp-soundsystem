@@ -178,9 +178,10 @@
                     }
                 }
             }
-            .wpsstm-track-sources{
+            .wpsstm-track-sources-list{
+                position:relative;
                 [data-wpsstm-source-idx]{
-                    
+                    position:relative;
                 }
             }
             

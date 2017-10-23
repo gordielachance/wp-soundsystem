@@ -285,28 +285,36 @@ ul.comma-list li:not(:last-child):after {
 .wpsstm-tracklist .wpsstm-tracklist-entries [itemprop="track"] .wpsstm-track-actions ul li.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active) {
   display: none;
 }
-/* line 187, ../scss/wpsstm-tracklists.scss */
+/* line 181, ../scss/wpsstm-tracklists.scss */
+.wpsstm-tracklist .wpsstm-tracklist-entries [itemprop="track"] .wpsstm-track-sources-list {
+  position: relative;
+}
+/* line 183, ../scss/wpsstm-tracklists.scss */
+.wpsstm-tracklist .wpsstm-tracklist-entries [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx] {
+  position: relative;
+}
+/* line 188, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist .wpsstm-tracklist-entries [itemprop="track"].wpsstm-invalid-track {
   background: rgba(255, 0, 0, 0.1);
 }
-/* line 194, ../scss/wpsstm-tracklists.scss */
+/* line 195, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist table.wpsstm-tracklist-entries {
   table-layout: fixed;
   width: 100%;
 }
-/* line 198, ../scss/wpsstm-tracklists.scss */
+/* line 199, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist table.wpsstm-tracklist-entries tr > * {
   vertical-align: middle;
 }
-/* line 201, ../scss/wpsstm-tracklists.scss */
+/* line 202, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-image, .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-position, .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-play-bt, .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-actions, .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-sources {
   text-align: center;
 }
-/* line 204, ../scss/wpsstm-tracklists.scss */
+/* line 205, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist table.wpsstm-tracklist-entries tr .wpsstm-track-image {
   box-sizing: content-box;
 }
-/* line 208, ../scss/wpsstm-tracklists.scss */
+/* line 209, ../scss/wpsstm-tracklists.scss */
 .wpsstm-tracklist table.wpsstm-tracklist-entries tr td.wpsstm-column-identical-value {
   display: none;
 }
