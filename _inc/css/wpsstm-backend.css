@@ -71,16 +71,16 @@
 }
 
 /* line 67, ../scss/_wpsstm-shared.scss */
-.comma-list {
+ul.comma-list {
   list-style: none;
   display: inline;
 }
 /* line 70, ../scss/_wpsstm-shared.scss */
-.comma-list li {
+ul.comma-list li {
   display: inline;
 }
 /* line 72, ../scss/_wpsstm-shared.scss */
-.comma-list li:not(:last-child):after {
+ul.comma-list li:not(:last-child):after {
   content: ", ";
 }
 

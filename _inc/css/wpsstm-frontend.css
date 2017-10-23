@@ -71,16 +71,16 @@
 }
 
 /* line 67, ../scss/_wpsstm-shared.scss */
-.comma-list, ul.wpsstm-track-loved-by-list, ul.wpsstm-track-parents {
+ul.comma-list, ul.wpsstm-track-loved-by-list, ul.wpsstm-track-parents {
   list-style: none;
   display: inline;
 }
 /* line 70, ../scss/_wpsstm-shared.scss */
-.comma-list li, ul.wpsstm-track-loved-by-list li, ul.wpsstm-track-parents li {
+ul.comma-list li, ul.wpsstm-track-loved-by-list li, ul.wpsstm-track-parents li {
   display: inline;
 }
 /* line 72, ../scss/_wpsstm-shared.scss */
-.comma-list li:not(:last-child):after, ul.wpsstm-track-loved-by-list li:not(:last-child):after, ul.wpsstm-track-parents li:not(:last-child):after {
+ul.comma-list li:not(:last-child):after, ul.wpsstm-track-loved-by-list li:not(:last-child):after, ul.wpsstm-track-parents li:not(:last-child):after {
   content: ", ";
 }
 
