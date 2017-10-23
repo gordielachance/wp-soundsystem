@@ -20,7 +20,7 @@ if ( $track->have_sources() ) { ?>
             }
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
-                <label class="wpsstm-source-title"><?php echo $wpsstm_source->title;?></label>
+                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->title;?></label>
                 <a class="wpsstm-source-provider" href="<?php echo $wpsstm_source->url;?>" target="_blank" title="<?php echo $wpsstm_source->title;?>">
                     <?php echo $wpsstm_source->provider->icon;?>
                 </a>

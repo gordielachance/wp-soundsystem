@@ -397,7 +397,7 @@ class WP_SoundSystem_Source{
     function get_source_class($extra_classes = null){
         global $wpsstm_track;
 
-        $classes = array('wpsstm-source','wpsstm-can-click');
+        $classes = array('wpsstm-source');
         
         $classes = array_merge($classes,(array)$extra_classes);
 
