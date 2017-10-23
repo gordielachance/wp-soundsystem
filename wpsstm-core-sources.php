@@ -536,11 +536,14 @@ class WP_SoundSystem_Core_Sources{
                             ),$sources_url 
                         );
                         
+                        $track_label = sprintf('<strong>%s</strong> — %s',$track->artist,$track->title);
+                        
                         $track_edit_url = get_edit_post_link( $track->post_id );
-                        $track_edit_link = sprintf('<a href="%s"><strong>%s</strong> — %s</a>',$track_edit_url,$track->artist,$track->title);
-                        $track_sources_link = sprintf('<a href="%s">%s</a>',$sources_url,__('Filter sources','wpsstm'));
+                        $track_edit_link = sprintf('<a href="%s" alt="%s">%s</a>',$track_edit_url,__('Edit track','wpsstm'),$track_label);
+                        
+                        $track_sources_link = sprintf('<a href="%s" alt="%s">%s</a>',$sources_url,__('Filter sources','wpsstm'),'<i class="fa fa-filter" aria-hidden="true"></i>');
 
-                        printf('<p>%s | <small>%s</small></p>',$track_edit_link,$track_sources_link);
+                        printf('<p>%s %s</p>',$track_edit_link,$track_sources_link);
                     }
                     
                     $percent_bar = wpsstm_get_percent_bar($match);
