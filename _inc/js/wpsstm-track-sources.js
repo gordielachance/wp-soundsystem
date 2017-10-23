@@ -217,10 +217,10 @@ class WpsstmTrackSource {
         })
         
         ajax_request.done(function(data){
-            console.log(data);
             if (data.success === true){
                 deferredObject.resolve();
             }else{
+                console.log(data);
                 deferredObject.reject(data.message);
             }
         });
