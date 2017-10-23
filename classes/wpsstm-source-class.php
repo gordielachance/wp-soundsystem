@@ -230,6 +230,23 @@ class WP_SoundSystem_Source{
         return $this->post_id;
     }
     
+    function delete_source(){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_source_missing_post_id', __("Missing source ID.",'wpsstm') );
+        }
+        
+        //capability check
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
+
+        if (!$can_delete_source){
+            return new WP_Error( 'wpsstm_source_no_delete_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
+        }
+        
+        return wp_delete_post( $this->post_id );
+    }
+    
     /*
     Source have one word of the banned words list in their titles (eg 'cover').
     */

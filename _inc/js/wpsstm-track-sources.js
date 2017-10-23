@@ -7,6 +7,26 @@ jQuery(document).ready(function($){
             e.preventDefault();
             source_obj.play_source();
         });
+        
+        //delete source
+        source_obj.source_el.find('.wpsstm-source-delete-action').click(function(e) {
+            e.preventDefault();
+            
+            var source_el = $(this).parents();
+            var promise = source_obj.delete_source();
+            
+            promise.done(function(data) {
+                var source_instances = source_obj.get_source_instances();
+                source_instances.remove();
+                
+                if ( source_el.hasClass('wpsstm-active-source') ){
+                    //TO FIX TO DO skip to next source ? what if it is the last one ?
+                }
+                
+            })
+            
+        });
+        
 
     });
     
@@ -139,9 +159,10 @@ class WpsstmTrackSource {
         self.source_el =        $(source_html);
         self.tracklist_idx =    track.tracklist_idx;
         self.track_idx =        track.track_idx;
-        self.source_idx =       Number($(source_html).attr('data-wpsstm-source-idx'));
-        self.src =              $(source_html).attr('data-wpsstm-source-src');
-        self.type =             $(source_html).attr('data-wpsstm-source-type');
+        self.post_id =          Number(self.source_el.attr('data-wpsstm-source-id'));
+        self.source_idx =       Number(self.source_el.attr('data-wpsstm-source-idx'));
+        self.src =              self.source_el.attr('data-wpsstm-source-src');
+        self.type =             self.source_el.attr('data-wpsstm-source-type');
         self.source_can_play = true;
         
         //self.debug("new WpsstmTrackSource");
@@ -172,6 +193,48 @@ class WpsstmTrackSource {
     play_source(){
         var self = this;
         wpsstm_page_player.play_tracklist(self.tracklist_idx,self.track_idx,self.source_idx);
+    }
+    
+    delete_source(){
+        
+        var self = this;
+        var deferredObject = $.Deferred();
+        var source_instances = self.get_source_instances();
+        
+        var ajax_data = {
+            action:         'wpsstm_delete_source',
+            post_id:        self.post_id
+        };
+        
+        source_instances.addClass('loading');
+
+        var ajax_request = $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json'
+        })
+        
+        ajax_request.done(function(data){
+            console.log(data);
+            if (data.success === true){
+                deferredObject.resolve();
+            }else{
+                deferredObject.reject(data.message);
+            }
+        });
+
+        ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
+            deferredObject.reject();
+        })
+
+        ajax_request.always(function(data, textStatus, jqXHR) {
+            source_instances.removeClass('loading');
+        })
+        
+        return deferredObject.promise();
+        
     }
 }
 
