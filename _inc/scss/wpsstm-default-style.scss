@@ -65,9 +65,15 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
             a{
                 @extend .wpsstm-no-underline;
             }
-            .entry-content & { //hide souce column in WP posts frontend
-                display:none;
+            [data-wpsstm-source-idx]{
+                &:not(.wpsstm-active-source){
+                    @include opacity(.25);
+                    &:hover{
+                        @include opacity(.5);
+                    }
+                }
             }
+
         }
     }
 
@@ -151,28 +157,24 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         }
     }
     
+    //tracklists inside posts
     .hentry &{
         [itemprop="track"]{
+            .wpsstm-track-sources{
+                display:none;
+            }
             [data-wpsstm-source-idx]{
                 display:inline;
-                .wpsstm-source-title{
-                    display:none;
-                }
-                &:not(.wpsstm-active-source){
-                    @include opacity(.75);
-                }
             }
         }
     }
-
-}
-
-#wpsstm-bottom-track-wrapper{
-    text-transform: uppercase;
-    font-size: .75em;
-    letter-spacing: .05em;
     
-    #wpsstm-bottom-track-info.wpsstm-tracklist{
+    //tracklist from bottom player
+    #wpsstm-bottom-track-wrapper &{
+        
+        text-transform: uppercase;
+        font-size: .75em;
+        letter-spacing: .05em;
         
         table{
             td{
@@ -187,30 +189,42 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     width: 20%;
                     @include opacity(.25);
                     .wpsstm-track-sources-list{
-                        width:100%;
+                        
                         padding:0;
                         line-height: 2em;
                         [data-wpsstm-source-idx]{
-                            @extend .wpsstm-ellipsis;
+                            
                             display:block;
-                            width:calc(100% - 2em);
-                            margin: 0 .75em;
-                            .wpsstm-source-provider{ //provider link
-                                position:absolute;
-                                width:2em;
-                                left:0;
-                                text-align:center;
-                            }
-                            .wpsstm-source-title{ //source text
-                                margin-left:2em;
-                            }
-                            &:not(.wpsstm-active-source){
-                                @include opacity(.25);
-                                display:none;
-                                &:hover{
-                                    @include opacity(.5);
+                            padding: 0 .75em;
+                            width:100%;
+                            box-sizing: border-box;
+                            
+                            @include display-flex();
+
+                            .wpsstm-source-links{
+                                
+                                @include order(1);
+                                @include flex(0 0 auto);
+                                padding-right: .5em;
+                                
+                                > * {
+                                    text-align:center;
+                                    width:2em;
                                 }
                             }
+                            
+                            .wpsstm-source-title{ //source text
+                                @include order(2);
+                                @include flex(0 1 auto); /*important*/
+                                min-width:0;
+                                
+                                @extend .wpsstm-ellipsis;
+                                overflow:hidden;
+                                
+                                
+                            }
+
+
                         }
                     }
 
@@ -225,12 +239,22 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                             padding-bottom:1em;
                             [data-wpsstm-source-idx]{
                                 line-height:2.5em;
-                                display:inherit;
                             }
                         }
                     }
+                    
+                    &:not(:hover){
+                        [data-wpsstm-source-idx]{
+                            &:not(.wpsstm-active-source){
+                                display:none;
+                            }
+                        }
+                    }
+                    
                 }
             }
         }
     }
+    
+
 }

@@ -20,23 +20,25 @@ if ( $track->have_sources() ) { ?>
             }
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
-                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->title;?></label>
-                <a class="wpsstm-source-provider" href="<?php echo $wpsstm_source->url;?>" target="_blank" title="<?php echo $wpsstm_source->title;?>">
-                    <?php echo $wpsstm_source->provider->icon;?>
-                </a>
-                <?php
-            
-                //delete source
-                $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-                $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$wpsstm_source->post_id);
-                
-                if ($can_delete_source){
-                    ?>
-                    <a class="wpsstm-source-action wpsstm-source-delete-action" href="#" title="<?php _e('Delete this source','wpsstm');?>"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                <span class="wpsstm-source-links">
+                    <a class="wpsstm-source-provider" href="<?php echo $wpsstm_source->url;?>" target="_blank" title="<?php echo $wpsstm_source->title;?>">
+                        <?php echo $wpsstm_source->provider->icon;?>
+                    </a>
                     <?php
-                }
-            
-                ?>
+
+                    //delete source
+                    $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+                    $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$wpsstm_source->post_id);
+
+                    if ($can_delete_source){
+                        ?>
+                        <a class="wpsstm-source-action wpsstm-source-delete-action" href="#" title="<?php _e('Delete this source','wpsstm');?>"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        <?php
+                    }
+
+                    ?>
+                </span>
+                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->title;?></label>
             </li>
             <?php
 
