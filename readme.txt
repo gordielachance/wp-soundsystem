@@ -153,6 +153,17 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* sources : improved styles frontend
+* sources: icon to delete a track source frontend
+
+= 1.7.3 =
+* Fix broken frontend wizard
+* add support for Spotify Playlists URIs
+* Better backend settings notices
+* Submenus now registered in each post type + new hook 'wpsstm_register_submenus'
+* Sources: 'Filter sources' (by track) link in the 'match' column + edit track link
+
 = 1.7.2 =
 * JS : improve player
 
