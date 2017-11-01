@@ -156,6 +156,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = XXX =
 * sources : improved styles frontend
 * sources: icon to delete a track source frontend
+* new preset for 8tracks.com
 
 = 1.7.3 =
 * Fix broken frontend wizard
