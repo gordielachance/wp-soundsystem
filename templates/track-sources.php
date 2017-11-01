@@ -35,6 +35,16 @@ if ( $track->have_sources() ) { ?>
                         <a class="wpsstm-source-action wpsstm-source-delete-action" href="#" title="<?php _e('Delete this source','wpsstm');?>"><i class="fa fa-trash" aria-hidden="true"></i></a>
                         <?php
                     }
+            
+                    //validate community source
+                    $can_validate_source = current_user_can($post_type_obj->cap->delete_post,$wpsstm_source->post_id);
+                    $can_edit_source = current_user_can($post_type_obj->cap->edit_post,$wpsstm_source->post_id);
+
+                    if ($wpsstm_source->is_community && $can_edit_source){
+                        ?>
+                        <a class="wpsstm-source-action wpsstm-source-validate-action" href="#" title="<?php _e('Validate this source','wpsstm');?>"><i class="fa fa-check-circle-o" aria-hidden="true"></i></a>
+                        <?php
+                    }
 
                     ?>
                 </span>

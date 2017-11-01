@@ -231,7 +231,7 @@ class WP_SoundSystem_Source{
     function delete_source(){
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_source_missing_post_id', __("Missing source ID.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
         }
         
         //capability check
@@ -239,10 +239,41 @@ class WP_SoundSystem_Source{
         $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
         if (!$can_delete_source){
-            return new WP_Error( 'wpsstm_source_no_delete_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
         }
         
         return wp_delete_post( $this->post_id );
+    }
+    
+    //when a logged user with required capabilities validates a community source, the source post is updated and the user gets the autorship of that source.
+    
+    function validate_community_source(){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
+        }
+        
+        if (!$this->is_community){
+            return new WP_Error( 'wpsstm_no_community_post', __("This is not a community source.",'wpsstm') );
+        }
+        
+        //capability check
+        $user_id = get_current_user_id();
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $can_edit_source = current_user_can($post_type_obj->cap->edit_post,$this->post_id);
+        
+        if (!$can_edit_source){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
+        }
+        
+        //let's do this.
+        $arg = array(
+            'ID' =>             $this->post_id,
+            'post_author' =>    $user_id,
+        );
+        return wp_update_post( $arg );
+        
+        
     }
     
     /*

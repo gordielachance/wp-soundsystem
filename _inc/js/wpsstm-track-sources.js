@@ -10,9 +10,8 @@ jQuery(document).ready(function($){
         
         //delete source
         source_obj.source_el.find('.wpsstm-source-delete-action').click(function(e) {
-            e.preventDefault();
             
-            var source_el = $(this).parents();
+            e.preventDefault();
             var promise = source_obj.delete_source();
             
             promise.done(function(data) {
@@ -23,6 +22,19 @@ jQuery(document).ready(function($){
                     //TO FIX TO DO skip to next source ? what if it is the last one ?
                 }
                 
+            })
+            
+        });
+        
+        //validate community source
+        source_obj.source_el.find('.wpsstm-source-validate-action').click(function(e) {
+            
+            e.preventDefault();
+            var promise = source_obj.validate_community_source();
+            
+            promise.done(function(data) {
+                var source_instances = source_obj.get_source_instances();
+                source_instances.find('.wpsstm-source-validate-action').remove();
             })
             
         });
@@ -203,6 +215,48 @@ class WpsstmTrackSource {
         
         var ajax_data = {
             action:         'wpsstm_delete_source',
+            post_id:        self.post_id
+        };
+        
+        source_instances.addClass('loading');
+
+        var ajax_request = $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json'
+        })
+        
+        ajax_request.done(function(data){
+            if (data.success === true){
+                deferredObject.resolve();
+            }else{
+                console.log(data);
+                deferredObject.reject(data.message);
+            }
+        });
+
+        ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
+            deferredObject.reject();
+        })
+
+        ajax_request.always(function(data, textStatus, jqXHR) {
+            source_instances.removeClass('loading');
+        })
+        
+        return deferredObject.promise();
+        
+    }
+    
+    validate_community_source(){
+        
+        var self = this;
+        var deferredObject = $.Deferred();
+        var source_instances = self.get_source_instances();
+        
+        var ajax_data = {
+            action:         'wpsstm_validate_community_source',
             post_id:        self.post_id
         };
         
