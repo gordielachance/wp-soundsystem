@@ -11,6 +11,8 @@ class WP_SoundSystem_Core_Wizard{
     public $qvar_wizard_posts = 'wpsstm_wizard_posts';
     public $wizard_search;
     public $wizard_disabled_metakey = '_wpsstm_wizard_disabled';
+    
+    public $tracklist;
 
     /**
     * @var The one true Instance
@@ -47,6 +49,7 @@ class WP_SoundSystem_Core_Wizard{
         //frontend
         add_action( 'wp', array($this,'do_frontend_wizard_form' ) );
         add_action( 'wp',  array($this, 'frontend_wizard_add_tracklist'));
+        add_filter('document_title_parts',  array($this, 'frontend_wizard_title_parts'));
         
         add_filter( 'page_template', array($this,'wizard_page_template'));
 
@@ -142,9 +145,12 @@ class WP_SoundSystem_Core_Wizard{
         return wpsstm_locate_template( 'frontend-wizard.php' );
     }
 
-    function get_wizard_tracklist($post_id=null,$feed_url=null){
+    function get_wizard_tracklist($post_id=null){
         
-        $tracklist = null;
+        //already populated
+        if ($this->tracklist) return $this->tracklist;
+        
+        $tracklist = new WP_SoundSystem_Tracklist();
 
         if ($post_id){
             $tracklist = wpsstm_get_post_live_tracklist($post_id);
@@ -196,7 +202,7 @@ class WP_SoundSystem_Core_Wizard{
         
         if (!$post) return;
         if( $post->ID != $this->frontend_wizard_page_id ) return;
-        $wpsstm_tracklist = $this->get_wizard_tracklist(null,$this->wizard_search);
+        $wpsstm_tracklist = $this->get_wizard_tracklist();
 
     }
     
@@ -221,6 +227,21 @@ class WP_SoundSystem_Core_Wizard{
             exit();
         }
 
+    }
+    
+    function frontend_wizard_title_parts($title){
+        global $wpsstm_tracklist;
+        global $post;
+        
+        if( is_admin() ) return;
+        if( $post->ID != $this->frontend_wizard_page_id ) return;
+   
+        $wpsstm_tracklist = $this->get_wizard_tracklist();
+        if ( $tracklist_title = $wpsstm_tracklist->get_tracklist_title() ){
+            $title['title'] = sprintf('%s - %s',$title['title'],$tracklist_title);
+        }
+
+        return $title;
     }
 
     function backend_wizard_save($post_id){
