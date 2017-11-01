@@ -330,13 +330,13 @@ class WP_SoundSystem_Track{
     }
     
     function trash_track(){
-        
+
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $post_type_obj->cap->delete_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to delete tracks.",'wpsstm') );
         }
         
         $success = wp_trash_post($this->post_id);
@@ -406,11 +406,13 @@ class WP_SoundSystem_Track{
         
         if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
- 
+
+        //track does not exists yet, create it
         if ( !$this->post_id ){
-            return new WP_Error('no_track_id',__("This track does not exists in the database",'wpsstm'));
+            $success = $this->save_track();
+            if ( is_wp_error($success) ) return $success;
         }
-        
+
         //set post status to 'publish' if it is not done yet (it could be a temporary post)
         $track_post_type = get_post_status($this->post_id);
         if ($track_post_type != 'publish'){

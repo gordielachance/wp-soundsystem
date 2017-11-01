@@ -42,7 +42,7 @@ jQuery(document).ready(function($){
 
         var ajax_data = {
             action:     'wpsstm_autosources_form',
-            post_id:    track_id
+            post_id:    track_id //TO FIX we should send a track_obj here (see track_obj.to_ajax())
         };
 
         var existing_rows_count = $(form).find('.wpsstm-source').length;

@@ -61,11 +61,11 @@ class WpsstmLastFM {
         var self = this;
 
         var ajax_data = {
-            action:           'wpsstm_user_update_now_playing_lastfm_track',
-            post_id:          track_obj.post_id
+            action:     'wpsstm_user_update_now_playing_lastfm_track',
+            track:      track_obj.to_ajax()
         };
 
-        self.debug("lastfm - ajax track.updateNowPlaying: #" + track_obj.post_id);
+        self.debug(ajax_data);
 
         return $.ajax({
 
@@ -97,11 +97,11 @@ class WpsstmLastFM {
 
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_user_track',
-            post_id:            track_obj.post_id,
+            track:              track_obj.to_ajax(),
             playback_start:     track_obj.playback_start
         };
 
-        self.debug("lastfm - ajax user scrobble: #" + track_obj.post_id + ", start_timestamp: " + track_obj.playback_start);
+        self.debug(ajax_data);
 
         return $.ajax({
 
@@ -132,11 +132,11 @@ class WpsstmLastFM {
 
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_community_track',
-            post_id:            track_obj.post_id,
+            track:              track_obj.to_ajax(),
             playback_start:     track_obj.playback_start
         };
 
-        self.debug("lastfm - ajax community scrobble: #" + track_obj.post_id + ", start_timestamp: " + track_obj.playback_start);
+        self.debug(ajax_data);
 
         return $.ajax({
 
@@ -165,11 +165,11 @@ class WpsstmLastFM {
 
         var ajax_data = {
             action:     'wpsstm_lastfm_user_toggle_love_track',
-            do_love:    do_love,
-            post_id:    track_obj.post_id
+            track:      track_obj.to_ajax(),
+            do_love:    do_love
         };
 
-        self.debug("lastFM - love/unlove track: #" + track_obj.post_id);
+        self.debug(ajax_data);
 
         return $.ajax({
 

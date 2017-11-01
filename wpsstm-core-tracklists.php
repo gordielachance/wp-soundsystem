@@ -613,18 +613,16 @@ class WP_SoundSystem_Core_Tracklists{
             'input'     => $ajax_data
         );
 
-        $track_id = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
 
-        if ( $track_id ){
+        $success = $track->trash_track();
+        $result['track'] = $track;
 
-            $track = $result['track'] = new WP_SoundSystem_Track($track_id);
-            $success = $track->trash_track();
-            
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
         }
 
         header('Content-type: application/json');

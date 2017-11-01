@@ -244,10 +244,13 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false,
             'message'   => null
         );
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+        
         $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
         $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
+        $result['track'] = $track;
         
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -272,10 +275,12 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false
         );
         
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
-        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+        
         
         $success = $this->lastfm_user->now_playing_lastfm_track($track);
+        $result['track'] = $track;
 
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -300,11 +305,13 @@ class WP_SoundSystem_Core_LastFM{
             'success'   => false
         );
         
-        $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
         $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
-        $track = $result['track'] = new WP_SoundSystem_Track($post_id);
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
+        $result['track'] = $track;
 
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -336,11 +343,12 @@ class WP_SoundSystem_Core_LastFM{
         );
         
         if ( $community_user_id && $enabled ){
-            
-            $post_id = isset($ajax_data['post_id']) ? $ajax_data['post_id'] : null;
+
             $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
             
-            $track = $result['track'] = new WP_SoundSystem_Track($post_id);
+            $track = new WP_SoundSystem_Track();
+            $track->from_array($ajax_data['track']);
+            $result['track'] = $track;
 
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';

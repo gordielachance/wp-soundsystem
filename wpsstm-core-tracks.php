@@ -614,6 +614,8 @@ class WP_SoundSystem_Core_Tracks{
 
     }
     
+
+    
     function ajax_love_unlove_track(){
 
         $ajax_data = wp_unslash($_POST);
@@ -624,9 +626,10 @@ class WP_SoundSystem_Core_Tracks{
             'success'   => false
         );
 
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+        
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
-
-        $track = new WP_SoundSystem_Track($ajax_data['post_id']);
 
         if ( ($do_love!==null) ){
             
