@@ -5,7 +5,6 @@ class WP_SoundSystem_Source{
     var $position = -1;
     var $title;
     var $is_community; //TRUE if source was populated automatically
-    var $is_remote; //TRUE if source was found on the remonte source
     var $url; //source link
     var $stream_url;
     var $provider;
@@ -19,7 +18,6 @@ class WP_SoundSystem_Source{
         'url'           => null,
         'title'         => null,
         'is_community'  => null,
-        'is_remote'     => null,
         'match'         => null,
     );
     

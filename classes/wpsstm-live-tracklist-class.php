@@ -632,7 +632,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         foreach((array)$source_urls as $source_url){
             $source = new WP_SoundSystem_Source();
-            $source_args = array('url'=>$source_url,'is_remote'=>true);
+            $source_args = array('url'=>$source_url);
             $source->from_array($source_args);
             $sources[] = $source;
         }
