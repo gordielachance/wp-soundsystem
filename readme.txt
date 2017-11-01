@@ -153,10 +153,14 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
-* sources : improved styles frontend
-* sources: icon to delete a track source frontend
+= 1.7.4 =
 * new preset for 8tracks.com
+* sources: improved styles frontend
+* sources: icon to delete a track source frontend
+* tracks JS: new 'to_ajax()' function
+* tracks JS & lastm JS: send track data instead of track ID only
+* tracks : can be loved even if track does not exists yet (thus create it)
+* if loved track has been created, updates the 'data-wpsstm-track-id' attribute
 
 = 1.7.3 =
 * Fix broken frontend wizard
