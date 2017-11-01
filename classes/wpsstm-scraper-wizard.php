@@ -147,28 +147,28 @@ class WP_SoundSystem_Core_Wizard{
 
     function get_wizard_tracklist($post_id=null){
         
-        //already populated
-        if ($this->tracklist) return $this->tracklist;
-        
-        $tracklist = new WP_SoundSystem_Tracklist();
+        //not yet populated
+        if (!$this->tracklist){
+            $this->tracklist = new WP_SoundSystem_Tracklist();
 
-        if ($post_id){
-            $tracklist = wpsstm_get_post_live_tracklist($post_id);
-        }else{
-            $feed_url = wpsstm_wizard()->wizard_search;
-            $tracklist = wpsstm_get_live_tracklist_preset($feed_url);
-        }
-        
-        $tracklist->can_remote_request = !$tracklist->is_wizard_disabled();
-        $tracklist->is_expired = true; //force tracklist refresh
-        $tracklist->tracks_strict = false;
-        
-        if (wpsstm_is_backend() ){
-            $tracklist->options['autoplay'] = false;
-            $tracklist->options['can_play'] = false;
+            if ($post_id){
+                $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
+            }else{
+                $feed_url = wpsstm_wizard()->wizard_search;
+                $this->tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+            }
+
+            $this->tracklist->can_remote_request = !$this->tracklist->is_wizard_disabled();
+            $this->tracklist->is_expired = true; //force tracklist refresh
+            $this->tracklist->tracks_strict = false;
+
+            if (wpsstm_is_backend() ){
+                $this->tracklist->options['autoplay'] = false;
+                $this->tracklist->options['can_play'] = false;
+            }
         }
 
-        return $tracklist;
+        return $this->tracklist;
     }
     
     /*
@@ -233,8 +233,8 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
         global $post;
         
-        if( is_admin() ) return;
-        if( $post->ID != $this->frontend_wizard_page_id ) return;
+        if( is_admin() ) return $title;
+        if( $post->ID != $this->frontend_wizard_page_id ) return $title;
    
         $wpsstm_tracklist = $this->get_wizard_tracklist();
         if ( $tracklist_title = $wpsstm_tracklist->get_tracklist_title() ){
