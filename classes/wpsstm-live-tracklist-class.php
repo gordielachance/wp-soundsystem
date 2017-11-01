@@ -844,7 +844,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //is disabled
         if ( $this->is_wizard_disabled() ) return;
         
-        $this->save_feed_url(wpsstm_wizard()->wizard_url);
+        $this->save_feed_url(wpsstm_wizard()->wizard_search);
         return $this->save_wizard_settings($wizard_data);
 
     }
