@@ -596,10 +596,12 @@ class WpsstmTrack {
         $.each(new_sources_items, function( index, source_link ) {
             var source_obj = new WpsstmTrackSource(source_link,self);
             self.sources.push(source_obj);
-            $(document).trigger("wpsstmTrackSourceDomReady",[source_obj]); //custom event
+            $(document).trigger("wpsstmTrackSingleSourceDomReady",[source_obj]); //custom event for single source
         });
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
+        
+        $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event for all sources
 
     }
     

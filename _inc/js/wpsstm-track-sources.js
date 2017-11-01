@@ -1,6 +1,22 @@
 jQuery(document).ready(function($){
+    
+    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
+        var track_el = track_obj.track_el;
+        
+        // sort sources
+        track_obj.track_el.find( '.wpsstm-track-sources-list > *' ).sortable({
+            handle: '.wpsstm-source-validate-action',
+            /*
+            update: function(event, ui) {
+                tracklist_obj.update_playlist_track_position(ui);
+            }
+            */
+        });
+        
 
-    $(document).on( "wpsstmTrackSourceDomReady", function( event, source_obj ) {
+    });
+
+    $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
         //click on source trigger
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
