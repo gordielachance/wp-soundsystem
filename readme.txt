@@ -153,6 +153,11 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* frontend wizard: if a tracklist is successfully loaded; add the tracklist title to the page title
+* wizard: wizard input can be not only URLs (eg. spotify playlists URIs)
+* sources list: add "validate source" link for community sources - logged user gets the authorship
+
 = 1.7.4 =
 * new preset for 8tracks.com
 * sources: improved styles frontend
