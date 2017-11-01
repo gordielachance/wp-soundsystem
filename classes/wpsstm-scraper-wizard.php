@@ -402,14 +402,14 @@ class WP_SoundSystem_Core_Wizard{
         if ( $this->is_advanced ){
             
             /*
-            Regex matches
+            Variables
             */
 
             if ( $wpsstm_tracklist->variables ){
                 $this->add_wizard_field(
-                    'regex_matches', 
-                    __('Regex matches','wpsstm'), 
-                    array( $this, 'feedback_regex_matches_callback' ), 
+                    'variables', 
+                    __('Variables','wpsstm'), 
+                    array( $this, 'feedback_variables_callback' ), 
                     'wpsstm-wizard-step-source', 
                     'wizard_section_source_feedback'
                 );
@@ -755,7 +755,7 @@ class WP_SoundSystem_Core_Wizard{
 
     }
     
-    function feedback_regex_matches_callback(){
+    function feedback_variables_callback(){
         global $wpsstm_tracklist;
         
         foreach($wpsstm_tracklist->variables as $variable_slug => $variable){
