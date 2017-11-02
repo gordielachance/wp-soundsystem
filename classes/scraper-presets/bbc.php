@@ -43,7 +43,7 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
 
     function __construct($post_id = null){
         parent::__construct($post_id);
-        $this->preset_name =    __('BBC playlist','wpsstm');
+        $this->preset_name =    __('BBC playlists','wpsstm');
     } 
 
 }
