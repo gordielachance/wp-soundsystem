@@ -92,7 +92,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
 
         //ajax : row actions
-        add_action('wp_ajax_wpsstm_playlist_update_track_position', array($this,'ajax_update_playlist_track_position'));
+        add_action('wp_ajax_wpsstm_playlist_update_track_index', array($this,'ajax_update_track_index'));
         add_action('wp_ajax_wpsstm_playlist_trash_track', array($this,'ajax_trash_tracklist_track'));
         
         //ajax : add new tracklist
@@ -150,7 +150,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( !in_array(get_post_type($post),$allowed_post_types) ) return;
         
         $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
-        $wpsstm_tracklist->position = $query->current_post + 1;
+        $wpsstm_tracklist->index = $query->current_post + 1;
         
     }
     
@@ -459,7 +459,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
 
-    function ajax_update_playlist_track_position(){
+    function ajax_update_track_index(){
         $ajax_data = $_POST;
         
         $result = array(
@@ -467,15 +467,16 @@ class WP_SoundSystem_Core_Tracklists{
             'success'   => false,
             'input'     => $ajax_data
         );
+        
+        $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
+        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
+        
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+        $result['track'] = $track;
 
-        $result['track_id']  =          $track_id =         ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-        $result['tracklist_id']  =      $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $result['position']  =          $position =         ( isset($ajax_data['position']) ) ? $ajax_data['position'] : -1;
-
-        if ( $track_id && $tracklist_id && ($position != -1) ){
-
-            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $success = $tracklist->save_track_position($track_id,$position);
+        if ( $tracklist->post_id && $track->post_id && ($track->index != -1) ){
+            $success = $tracklist->save_track_position($track->post_id,$track->index);
             
             if ( is_wp_error($success) ){
                 $result['message'] = $success->get_error_message();

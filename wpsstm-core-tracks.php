@@ -84,8 +84,15 @@ class WP_SoundSystem_Core_Tracks{
         //delete sources when post is deleted
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         
-        //ajax : toggle love track
+        /*
+        ajax
+        */
+        
+        //toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
+        
+        //update source index
+         add_action('wp_ajax_wpsstm_track_update_source_index', array($this,'ajax_update_source_index'));
 
     }
     
@@ -643,6 +650,33 @@ class WP_SoundSystem_Core_Tracks{
             }else{
                 $result['success'] = $success; 
             }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_update_source_index(){
+        $ajax_data = $_POST;
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+
+        $source = new WP_SoundSystem_Source();
+        $source->from_array($ajax_data['source']);
+        
+        $track = $result['track'] = new WP_SoundSystem_Track($source->track_id);
+        
+        $success = $track->save_source_position($source->post_id,$source->index);
+        $result['source'] = $source;
+
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
         }
 
         header('Content-type: application/json');

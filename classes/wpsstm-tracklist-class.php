@@ -3,7 +3,7 @@
 class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
-    var $position = -1;
+    var $index = -1;
     var $tracklist_type = 'static';
     
     var $options_default = array();
@@ -146,7 +146,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         if ( !$can_set_subtracks ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
         if ($ordered_ids){
@@ -496,7 +496,7 @@ class WP_SoundSystem_Tracklist{
         $tracklist_obj = get_post_type_object($post_type);
         if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return false;
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         */
 
@@ -771,10 +771,10 @@ class WP_SoundSystem_Tracklist{
 
     }
     
-    function save_track_position($track_id,$position){
+    function save_track_position($track_id,$index){
         
         if ( !$this->user_can_reorder_tracks() ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
         $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
@@ -785,7 +785,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //insert at position
-        array_splice( $ordered_ids, $position, 0, $track_id );
+        array_splice( $ordered_ids, $index, 0, $track_id );
         
         //save
         return $this->set_subtrack_ids($ordered_ids);

@@ -54,6 +54,7 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 );
         
         add_filter( 'manage_posts_columns', array($this,'column_track_match_register'), 10, 2 ); 
+        add_filter( 'manage_posts_columns', array($this,'column_order_register'), 10, 2 ); 
         add_action( 'manage_pages_custom_column', array($this,'column_track_match_content'), 10, 2 );
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
@@ -67,7 +68,6 @@ class WP_SoundSystem_Core_Sources{
         
         //delete source
         add_action('wp_ajax_wpsstm_delete_source', array($this,'ajax_delete_source'));
-        add_action('wp_ajax_wpsstm_validate_community_source', array($this,'ajax_validate_community_source'));
 
     }
 
@@ -319,7 +319,7 @@ class WP_SoundSystem_Core_Sources{
     function register_sources_scripts_styles_shared(){
         //CSS
         //JS
-        wp_register_script( 'wpsstm-track-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-track-sources.js', array('jquery'),wpsstm()->version );
+        wp_register_script( 'wpsstm-track-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-track-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version );
     }
 
     
@@ -520,15 +520,39 @@ class WP_SoundSystem_Core_Sources{
         
         return array_merge($before,$defaults,$after);
     }
+    
+    function column_order_register($defaults) {
+        global $post;
+
+        $before = array();
+        $after = array();
+        
+        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
+        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
+        
+        if ( $post_type == wpsstm()->post_type_source ){
+            $after['order'] = __('Order','wpsstm');
+        }
+        
+        return array_merge($before,$defaults,$after);
+    }
 
     function column_track_match_content($column,$post_id){
         global $post;
         global $wpsstm_source;
+        
+        $wpsstm_source = new WP_SoundSystem_Source($post_id);
+        
         switch ( $column ) {
+            case 'order':
+                if ($wpsstm_source->index != -1){
+                    echo $wpsstm_source->index;
+                }else{
+                    echo '—';
+                }
+            break;
             case 'track_match':
-                
-                $wpsstm_source = new WP_SoundSystem_Source($post_id);
-                
+
                 if ( $match = $wpsstm_source->match ){
                     
                     $track = new WP_SoundSystem_Track($post->post_parent);
@@ -677,32 +701,7 @@ class WP_SoundSystem_Core_Sources{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
-    function ajax_validate_community_source(){
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
-        );
 
-        $source = new WP_SoundSystem_Source($ajax_data['post_id']);
-        $success = $source->validate_community_source();
-        
-        if ( is_wp_error($success) ){
-            
-            $result['message'] = $success->get_error_message();
-            
-        }else{
-            
-            $result['success'] = true;
-            
-        }
-        
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
     
     function can_autosource(){
         $community_user_id = wpsstm()->get_options('community_user_id');

@@ -32,13 +32,13 @@ $(document).ready(function(){
 
     bt_prev_track.click(function(e) {
         e.preventDefault();
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj();
+        var tracklist_obj = wpsstm_page_player.get_page_tracklist();
         tracklist_obj.previous_track_jump();
     });
 
     bt_next_track.click(function(e) {
         e.preventDefault();
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj();
+        var tracklist_obj = wpsstm_page_player.get_page_tracklist();
         tracklist_obj.next_track_jump();
     });
     
@@ -51,10 +51,12 @@ $(document).ready(function(){
         var tracklist_el = player_track_el.closest('[data-wpsstm-tracklist-idx]');
         var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
         var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
-
-        var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+        
+        var tracklist_obj =  wpsstm_page_player.get_page_tracklist(tracklist_idx);
+        var track_obj = tracklist_obj.get_track_obj(track_idx);
+        
         var track_el = track_obj.track_el;
-        var newTracksCount = track_obj.track_idx + 1;
+        var newTracksCount = track_obj.index + 1;
 
         //https://stackoverflow.com/a/6677069/782013
         $('html, body').animate({
@@ -198,7 +200,7 @@ class WpsstmPagePlayer {
 
         /*
         wpsstm_page_player.debug("page autoplay : trying to start first autoplay tracklist available...");
-        var idx_list = autoplay_tracklists.map(function(a) {return a.tracklist_idx;});
+        var idx_list = autoplay_tracklists.map(function(a) {return a.index;});
         wpsstm_page_player.debug(idx_list);
         */
 
@@ -224,12 +226,12 @@ class WpsstmPagePlayer {
         if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
         self.debug(debug_msg);
         
-        var tracklist_obj = self.get_tracklist_obj(tracklist_idx);
+        var tracklist_obj = self.get_page_tracklist(tracklist_idx);
         return tracklist_obj.play_subtrack(track_idx,source_idx);
 
     }
 
-    get_tracklist_obj(tracklist_idx){
+    get_page_tracklist(tracklist_idx){
         
         var self = this;
 
@@ -241,14 +243,6 @@ class WpsstmPagePlayer {
         var tracklist_obj = this.tracklists[tracklist_idx];
         if(typeof tracklist_obj === 'undefined') return false;
         return tracklist_obj;
-    }
-    
-    get_tracklist_track_obj(tracklist_idx,track_idx){
-        var tracklist_obj = this.get_tracklist_obj(tracklist_idx);
-        if (!tracklist_obj) return false;
-        var track_obj = tracklist_obj.get_track_obj(track_idx);
-        if (!track_obj) return false;
-        return track_obj;
     }
 
     get_maybe_shuffle_tracklist_idx(idx){
@@ -274,7 +268,7 @@ class WpsstmPagePlayer {
         
         var self = this;
         var current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(self.current_tracklist_idx);
-        var current_tracklist = self.get_tracklist_obj();
+        var current_tracklist = self.get_page_tracklist();
         
         var tracklists = $(self.tracklists).get();
         var tracklists_before = tracklists.slice(0,current_tracklist_idx).reverse();
@@ -294,15 +288,15 @@ class WpsstmPagePlayer {
 
         self.get_first_playable_tracklist(tracklists_reordered).then(
             function(tracklist_obj) {
-                self.debug("previous_tracklist_jump() : jumped to tracklist #" + tracklist_obj.tracklist_idx);
+                self.debug("previous_tracklist_jump() : jumped to tracklist #" + tracklist_obj.index);
                 
                 //find first playable in reverse order
                 var tracks_reversed = $(tracklist_obj.tracks).get().reverse();
                 tracklist_obj.get_first_playable_track(tracks_reversed).then(
                     function(track_obj) {
-                        tracklist_obj.play_subtrack(track_obj.track_idx);
+                        tracklist_obj.play_subtrack(track_obj.index);
                     }, function(error) {
-                        self.debug("previous_tracklist_jump() : unable to find any playable track for tracklist #" + self.tracklist_idx);
+                        self.debug("previous_tracklist_jump() : unable to find any playable track for tracklist #" + tracklist_obj.index);
                         wpsstm_page_player.previous_tracklist_jump();
                     }
                 );
@@ -319,7 +313,7 @@ class WpsstmPagePlayer {
         
         var self = this;
         var current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(self.current_tracklist_idx);
-        var current_tracklist = self.get_tracklist_obj();
+        var current_tracklist = self.get_page_tracklist();
 
         var tracklists = $(self.tracklists).get();
         var tracklists_after = tracklists.slice(current_tracklist_idx+1); 
@@ -410,9 +404,9 @@ class WpsstmPagePlayer {
     
     end_current_tracklist(){
         var self = this;
-        var current_tracklist = self.get_tracklist_obj();
+        var current_tracklist = self.get_page_tracklist();
         if (current_tracklist !== false){
-            self.debug("end_current_tracklist() #" + current_tracklist.tracklist_idx);
+            self.debug("end_current_tracklist() #" + current_tracklist.index);
             current_tracklist.abord_tracks_sources_request(); //abord current requests
             current_tracklist.end_current_track();
             self.current_tracklist_idx = undefined;

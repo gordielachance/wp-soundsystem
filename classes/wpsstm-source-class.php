@@ -2,7 +2,7 @@
 class WP_SoundSystem_Source{
     var $post_id;
     var $track_id;
-    var $position = -1;
+    var $index = -1;
     var $title;
     var $is_community; //TRUE if source was populated automatically
     var $url; //source link
@@ -10,23 +10,13 @@ class WP_SoundSystem_Source{
     var $provider;
     var $type;
     var $match;
-    
 
-    private $defaults = array(
-        'post_id'       => null,
-        'track_id'      => null,
-        'url'           => null,
-        'title'         => null,
-        'is_community'  => null,
-        'match'         => null,
-    );
-    
     function __construct($post_id = null){
         
         $this->provider = new WP_SoundSystem_Player_Provider(); //default
 
         if ($post_id){
-            $this->post_id = $post_id;
+            $this->post_id = (int)$post_id;
             $this->title = get_the_title($post_id);
             $this->track_id = wp_get_post_parent_id( $post_id );
 
@@ -37,14 +27,30 @@ class WP_SoundSystem_Source{
             $this->is_community = ( $post_author_id == $community_user_id );
             
             $this->match = $this->get_track_match();
+            
+            if ($this->index == -1){ //if not set yet
+                $this->index = get_post_field('menu_order', $this->post_id);
+            }
 
         }
 
     }
     
+    function get_default(){
+        return array(
+            'post_id'       => null,
+            'index'         => -1,
+            'track_id'      => null,
+            'url'           => null,
+            'title'         => null,
+            'is_community'  => null,
+            'match'         => null,
+        );
+    }
+    
     function from_array( $args = null ){
 
-        $args_default = $this->defaults;
+        $args_default = $this->get_default();
         $args = wp_parse_args((array)$args,$args_default);
         $post_id = null;
 
@@ -61,7 +67,7 @@ class WP_SoundSystem_Source{
   
         }
 
-        $this->__construct( $post_id );
+        $this->__construct( $this->post_id );
         
     }
 
@@ -243,37 +249,6 @@ class WP_SoundSystem_Source{
         }
         
         return wp_delete_post( $this->post_id );
-    }
-    
-    //when a logged user with required capabilities validates a community source, the source post is updated and the user gets the autorship of that source.
-    
-    function validate_community_source(){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
-        }
-        
-        if (!$this->is_community){
-            return new WP_Error( 'wpsstm_no_community_post', __("This is not a community source.",'wpsstm') );
-        }
-        
-        //capability check
-        $user_id = get_current_user_id();
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $can_edit_source = current_user_can($post_type_obj->cap->edit_post,$this->post_id);
-        
-        if (!$can_edit_source){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
-        }
-        
-        //let's do this.
-        $arg = array(
-            'ID' =>             $this->post_id,
-            'post_author' =>    $user_id,
-        );
-        return wp_update_post( $arg );
-        
-        
     }
     
     /*

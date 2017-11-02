@@ -2,7 +2,7 @@
 
 class WP_SoundSystem_Track{
     public $post_id = null;
-    public $position = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
+    public $index = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
 
     public $title;
     public $artist;
@@ -29,7 +29,7 @@ class WP_SoundSystem_Track{
         //has track ID
         if ( $post_id && ($post = get_post($post_id) ) ){
 
-            $this->post_id = $post_id;
+            $this->post_id = (int)$post_id;
 
             //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
 
@@ -122,6 +122,7 @@ class WP_SoundSystem_Track{
     function get_default(){
         return array(
             'post_id'       =>null,
+            'index'         => -1,
             'title'         =>null,
             'artist'        =>null,
             'album'         =>null,
@@ -862,5 +863,61 @@ class WP_SoundSystem_Track{
 			$this->source = $this->sources[0];
 		}
 	}
+    
+    function user_can_reorder_sources(){
+        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $required_cap = $track_type_obj->cap->edit_posts;
+        $can_edit_track = current_user_can($required_cap,$this->post_id);
+
+        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $can_edit_sources = current_user_can($source_type_obj->cap->edit_posts);
+        
+        return ($can_edit_track && $can_edit_sources);
+    }
+    
+    function save_source_position($source_id,$index){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
+        }
+        
+        $source = new WP_SoundSystem_Source($source_id);
+        
+        if (!$source->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
+        }
+        
+        if ($index < 0){
+            return new WP_Error( 'wpsstm_invalid_menu_order', __("Invalid source order.",'wpsstm') );
+        }
+
+        if ( !$this->user_can_reorder_sources() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
+        }
+
+        $post = array(
+            'ID' =>         $source_id,
+            'menu_order' => $index, 
+        );
+        
+        //TO FIX should we update the other sources position too ?
+
+        return wp_update_post( $post, true );
+
+        /*
+        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
+
+        //delete current
+        if(($key = array_search($track_id, $ordered_ids)) !== false) {
+            unset($ordered_ids[$key]);
+        }
+
+        //insert at position
+        array_splice( $ordered_ids, $index, 0, $track_id );
+
+        //save
+        return $this->set_subtrack_ids($ordered_ids);
+        */
+    }
     
 }
