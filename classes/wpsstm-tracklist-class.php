@@ -34,7 +34,7 @@ class WP_SoundSystem_Tracklist{
     var $current_track = -1;
     var $track_count = 0;
     var $in_track_loop = false;
-    var $did_query_tracks = false;
+    var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
 
     function __construct($post_id = null ){
         
@@ -131,7 +131,7 @@ class WP_SoundSystem_Tracklist{
         $success = false;
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
 
         //capability check
@@ -718,7 +718,7 @@ class WP_SoundSystem_Tracklist{
 
     function move_live_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
         
         wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
@@ -739,7 +739,7 @@ class WP_SoundSystem_Tracklist{
     
     function append_wizard_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
 
         //get live IDs
