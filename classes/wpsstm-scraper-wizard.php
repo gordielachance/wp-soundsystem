@@ -156,10 +156,12 @@ class WP_SoundSystem_Core_Wizard{
             }else{
                 $feed_url = wpsstm_wizard()->wizard_search;
                 $this->tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+                $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
             }
 
             $this->tracklist->can_remote_request = !$this->tracklist->is_wizard_disabled();
             $this->tracklist->is_expired = true; //force tracklist refresh
+            
             $this->tracklist->tracks_strict = false;
 
             if (wpsstm_is_backend() ){
@@ -336,7 +338,7 @@ class WP_SoundSystem_Core_Wizard{
         if ( is_wp_error($new_post_id) ) return $new_post_id;
         
         $tracklist = wpsstm_get_post_live_tracklist($new_post_id);  
-        $tracklist->update_from_remote();
+        $tracklist->populate_and_save_tracks();
         
         if($static){
             $converted = $tracklist->convert_to_static_playlist();
