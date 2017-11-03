@@ -813,7 +813,7 @@ class WP_SoundSystem_Settings {
         $option = (int)wpsstm()->get_options('live_playlists_cache_min');
         
         $help = array();
-        $help[]= __("Number of minutes a playlist is cached before requesting the remote page again.","wpsstm");
+        $help[]= __("(in minutes) — If set, a track post will be created for each track found then deleted when we request the page again.","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
 

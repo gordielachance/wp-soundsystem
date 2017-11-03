@@ -1,15 +1,17 @@
 <?php
 
 global $wpsstm_track;
-$track = $wpsstm_track;
+$track_type_obj = get_post_type_object(wpsstm()->post_type_track);
+$can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
 
-if ( $track->have_sources() ) { ?>
+if ( $wpsstm_track->have_sources() ) { ?>
     <ul class="wpsstm-track-sources-list">
         <?php
-        while ( $track->have_sources() ) {
+        while ( $wpsstm_track->have_sources() ) {
             
-            $track->the_source();
+            $wpsstm_track->the_source();
             global $wpsstm_source;
+            $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
             
             $wpsstm_source->populate_source_provider();
             if ( ($wpsstm_source->provider->slug == 'default') ) continue;//we cannot play this source
@@ -27,22 +29,17 @@ if ( $track->have_sources() ) { ?>
                     <?php
 
                     //delete source
-                    $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-                    $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$wpsstm_source->post_id);
+                    $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$wpsstm_source->post_id);
 
                     if ($can_delete_source){
                         ?>
                         <a class="wpsstm-source-action wpsstm-source-delete-action" href="#" title="<?php _e('Delete this source','wpsstm');?>"><i class="fa fa-trash" aria-hidden="true"></i></a>
                         <?php
                     }
-            
-                    //validate community source
-                    $can_validate_source = current_user_can($post_type_obj->cap->delete_post,$wpsstm_source->post_id);
-                    $can_edit_source = current_user_can($post_type_obj->cap->edit_post,$wpsstm_source->post_id);
 
-                    if ($wpsstm_source->is_community && $can_edit_source){
+                    if ( $wpsstm_track->user_can_reorder_sources() ){
                         ?>
-                        <a class="wpsstm-source-action wpsstm-source-validate-action" href="#" title="<?php _e('Validate this source','wpsstm');?>"><i class="fa fa-check-circle-o" aria-hidden="true"></i></a>
+                        <a class="wpsstm-source-action wpsstm-source-reorder-action" href="#" title="<?php _e('Reorder track','wpsstm');?>"><i class="fa fa-arrows-v" aria-hidden="true"></i></a>
                         <?php
                     }
 

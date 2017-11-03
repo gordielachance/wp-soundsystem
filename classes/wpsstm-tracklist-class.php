@@ -3,7 +3,7 @@
 class WP_SoundSystem_Tracklist{
     
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
-    var $position = -1;
+    var $index = -1;
     var $tracklist_type = 'static';
     
     var $options_default = array();
@@ -34,7 +34,7 @@ class WP_SoundSystem_Tracklist{
     var $current_track = -1;
     var $track_count = 0;
     var $in_track_loop = false;
-    var $did_query_tracks = false;
+    var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
 
     function __construct($post_id = null ){
         
@@ -131,7 +131,7 @@ class WP_SoundSystem_Tracklist{
         $success = false;
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
 
         //capability check
@@ -146,7 +146,7 @@ class WP_SoundSystem_Tracklist{
         }
 
         if ( !$can_set_subtracks ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
         if ($ordered_ids){
@@ -496,7 +496,7 @@ class WP_SoundSystem_Tracklist{
         $tracklist_obj = get_post_type_object($post_type);
         if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return false;
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         */
 
@@ -718,7 +718,7 @@ class WP_SoundSystem_Tracklist{
 
     function move_live_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
         
         wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
@@ -739,7 +739,7 @@ class WP_SoundSystem_Tracklist{
     
     function append_wizard_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
 
         //get live IDs
@@ -771,10 +771,10 @@ class WP_SoundSystem_Tracklist{
 
     }
     
-    function save_track_position($track_id,$position){
+    function save_track_position($track_id,$index){
         
         if ( !$this->user_can_reorder_tracks() ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
         $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
@@ -785,7 +785,7 @@ class WP_SoundSystem_Tracklist{
         }
         
         //insert at position
-        array_splice( $ordered_ids, $position, 0, $track_id );
+        array_splice( $ordered_ids, $index, 0, $track_id );
         
         //save
         return $this->set_subtrack_ids($ordered_ids);
@@ -889,12 +889,41 @@ class WP_SoundSystem_Tracklist{
         
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
+    
+    function get_tracklist_attr($args=array()){
+        
+        $extra_classes = ( isset($args['extra_classes']) ) ? $args['extra_classes'] : null;
+
+        $values_attr = array(
+            'class' =>                          implode(' ',$this->get_tracklist_class($extra_classes) ),
+            'itemscope' =>                      false,
+            'itemtype' =>                       "http://schema.org/MusicPlaylist",
+            'data-wpsstm-tracklist-id' =>       $this->post_id,
+            'data-wpsstm-tracklist-idx' =>      $this->index,
+            'data-wpsstm-tracklist-type' =>     $this->tracklist_type,
+            'data-wpsstm-tracklist-options' =>  $this->get_tracklist_options_attr(),
+            'data-tracks-count' =>              $this->track_count,
+        );
+        
+        //should we set an expiration time ?
+        if ( ( $this->tracklist_type != 'live' ) && ($time = $this->get_expiration_time() ) ){
+            $values_attr['data-wpsstm-expire-time'] =  $time;
+        }
+        
+        $static_attr = array('itemscope');
+        
+        return wpsstm_get_html_attr($values_attr,$static_attr);
+    }
 
     function get_tracklist_class($extra_classes = null){
 
         $classes = array(
             'wpsstm-tracklist',
         );
+        
+        if ($extra_classes){
+            if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
+        }
         
         $classes = array_merge($classes,(array)$extra_classes);
 
@@ -930,25 +959,6 @@ class WP_SoundSystem_Tracklist{
         }
 
         return htmlspecialchars( json_encode($attr_options), ENT_QUOTES, 'UTF-8');
-    }
-
-    function get_expire_time(){
-
-        if ( $this->tracklist_type != 'live' ) return;
-
-        return (int)$this->expiration_time;
-    }
-    
-    function get_refresh_rate(){
-
-        if ( !$this->post_id ) return;
-        if ( $this->tracklist_type != 'live' ) return;
-
-        $freq = $this->get_options('datas_cache_min');
-
-        $freq_secs = $freq * MINUTE_IN_SECONDS;
-
-        return $refresh_time_human = human_time_diff( 0, $freq_secs );
     }
     
     function populate_tracks($args = null){

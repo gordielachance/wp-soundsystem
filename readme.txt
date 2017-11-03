@@ -153,10 +153,15 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.7.5 =
+* live tracklists : rewritten some code, improved caching stuff
 * frontend wizard: if a tracklist is successfully loaded; add the tracklist title to the page title
 * wizard: wizard input can be not only URLs (eg. spotify playlists URIs)
-* sources list: add "validate source" link for community sources - logged user gets the authorship
+* new custom event 'wpsstmTrackSourcesDomReady' and renamed 'wpsstmTrackSourceDomReady' to 'wpsstmTrackSingleSourceDomReady'
+* tracklist/track/source 'position' property renamed to 'index'
+* JS: don't use tracklist_idx/track_idx/source_idx but reference original object (tracklist/track/source)
+* JS: removed a lot of references to get_tracklist_obj() and renamed to get_page_tracklist(), removed function get_tracklist_track_obj()
+* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
 
 = 1.7.4 =
 * new preset for 8tracks.com
@@ -228,7 +233,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
 * better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
-* new JS events: wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSourceDomReady
+* new JS events: wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSingleSourceDomReady
 * Improved wizard backend & frontend
 * Removed class 'WP_SoundSystem_Subtrack': cleaner to handle everything with WP_SoundSystem_Track
 * removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table

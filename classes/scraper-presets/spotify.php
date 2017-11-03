@@ -27,7 +27,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     function __construct($post_id = null){
         parent::__construct($post_id);
 
-        $this->preset_name = __('Spotify Playlist','wpsstm');
+        $this->preset_name = __('Spotify Playlists','wpsstm');
 
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');

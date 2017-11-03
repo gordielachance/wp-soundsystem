@@ -10,16 +10,29 @@ function wpsstm_get_classes_attr($classes){
 }
 
 //https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
-function wpsstm_get_html_attr($array){
-    $array = (array)$array;
-    $str = join(' ', array_map(function($key) use ($array){
-       if(is_bool($array[$key])){
-          return $array[$key]?$key:'';
-       }
-       return $key.'="'.$array[$key].'"';
-    }, array_keys($array)));
+function wpsstm_get_html_attr($values_arr=null,$static_arr=null){
+    $str = null;
+    $values_arr = (array)$values_arr;
+    $static_arr = (array)$static_arr;
+    
+    //attributes with values
+    if (!empty($values_arr) ){
+        $values_arr = (array)$values_arr;
+        $str .= join(' ', array_map(function($key) use ($values_arr){
+           if(is_bool($values_arr[$key])){
+              return $values_arr[$key]?$key:'';
+           }
+           return $key.'="'.$values_arr[$key].'"';
+        }, array_keys($values_arr)));
+    }
+
+    //static attributes
+    if ( !empty($static_arr) ){
+        $str.=' '.implode(' ',$static_arr);
+    }
     return $str;
 }
+
 
 function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');

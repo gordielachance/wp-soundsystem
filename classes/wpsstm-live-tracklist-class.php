@@ -17,9 +17,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $feed_url = null;
     
-    public $is_expired = false;
-    public $can_remote_request = false; //remote request will be done later through ajax
-    var $expiration_time = null;
+    public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
+    public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     //response
     var $request_pagination = array(
@@ -67,9 +66,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $this->location = $this->feed_url;
             }
 
-            //expiration time
-            $this->populate_expiration_time();
-            
             //set remote title if no title already set
             if ( !$this->title && ($meta_title = $this->get_cached_remote_title() ) ){
                 $this->title = $meta_title;
@@ -84,14 +80,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         }
 
-        $this->can_remote_request = wpsstm_is_ajax();
-        
-
-        //when testing tracks requests, uncomment this
-        /*
-        $this->can_remote_request = true; //disable ajax-only remote requests
-        $this->is_expired = true; //force tracklist refresh
-        */
+        $this->is_expired = $this->check_has_expired(); //set expiration bool & time
 
     }
 
@@ -133,20 +122,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     function populate_remote_tracklist(){
-
-        //capability check
-        if ( !wpsstm_live_playlists()->can_live_playlists() ){
-            return new WP_Error( 'wpsstm_tracklist_no_edit_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-
-        //cache disabled notice
-        $cache_duration = $this->get_options('datas_cache_min');
-        $has_cache = (bool)$cache_duration;
-
-        if ( !$has_cache ){
-            $this->add_notice( 'wizard-header', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
-        }
         
+        if ($this->did_query_tracks) return; //we already did it
+
         $now = current_time( 'timestamp', true );
         $this->updated_time = $now;
 
@@ -183,25 +161,28 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //set tracklist author
         $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
         $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
+
+        $this->expired = $this->check_has_expired(); //set expiration bool & time
         
-        //reset expiration
-        $this->populate_expiration_time(); //keep below set_subtrack_ids()
-
-        return true;
-
+        $this->did_query_tracks = true; //so we don't run this function multiple times
     }
     
     /*
     Populate remote tracklist, save WP post, flush old subtracks and update subtracks IDs.
     */
     
-    function update_from_remote(){
+    function populate_and_save_tracks(){
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
+        }
+        
+        //capability check
+        if ( !wpsstm_live_playlists()->can_live_playlists() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
-        //populate remote tracklist
+        //populate remote tracklist if not done yet
         $populated = $this->populate_remote_tracklist();
 
         if ( is_wp_error($populated) ) {
@@ -232,7 +213,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         $this->flush_update_subtrack_ids($new_ids);
 
-        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::update_from_remote()' );
+        wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::populate_and_save_tracks()' );
 
         return true;
     }
@@ -784,12 +765,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function convert_to_static_playlist(){
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_tracklist_no_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
         }
         
-        $populated = $this->update_from_remote();
+        $updated = $this->populate_and_save_tracks();
 
-        if ( is_wp_error($populated) ) return $populated;
+        if ( is_wp_error($updated) ) return $updated;
         
         $moved_tracks = $this->move_live_tracks();
         if ( is_wp_error($moved_tracks) ) return $moved_tracks;
@@ -919,28 +900,43 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $new_input;
     }
     
-    function populate_expiration_time(){
+    //UTC
+    function get_expiration_time(){
+        if ( !$cache_duration_min = $this->get_options('datas_cache_min') ) return false;
         
         $now = current_time( 'timestamp', true );
-        $cache_duration_min = $this->get_options('datas_cache_min');
         $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-        $this->expiration_time = $this->updated_time + $cache_duration_s; //UTC
+        return $this->updated_time + $cache_duration_s;
+    }
 
-        $this->is_expired = ( $now >= $this->expiration_time );
+    
+    // checks if the playlist has expired (and thus should be refreshed)
+    // set 'expiration_time'
+    function check_has_expired(){
+        
+        $cache_duration_min = $this->get_options('datas_cache_min');
+        $has_cache = (bool)$cache_duration_min;
+        
+        if (!$has_cache){
+            return true;
+        }else{
+            $now = current_time( 'timestamp', true );
+            $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
+            $expiration_time = $this->get_expiration_time(); //set expiration time
+            return ( $now >= $expiration_time );
+        }
 
-        /*
-        wpsstm()->debug_log(
-            array(
-                'is_expired' =>             $this->is_expired,
-                'cache_duration_min' =>     $cache_duration_min,
-                'updated' =>                wpsstm_get_datetime($this->updated_time),
-                'expires' =>                wpsstm_get_datetime($this->expiration_time),
-                'now' =>                    wpsstm_get_datetime($now),
-            ),
-            "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
-        );
-        */
+    }
+    
+    function get_refresh_rate(){
 
+        $freq = $this->get_options('datas_cache_min');
+        
+        if (!$freq) return false;
+
+        $freq_secs = $freq * MINUTE_IN_SECONDS;
+
+        return $refresh_time_human = human_time_diff( 0, $freq_secs );
     }
     
     function get_cached_remote_title(){
@@ -958,31 +954,41 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function populate_tracks($args = null){
         
-        if ( $this->did_query_tracks ) return;
+        if ( $this->did_query_tracks ) return; //we already did it
+        
+        $cache_duration = $this->get_options('datas_cache_min');
+        $has_cache = (bool)$cache_duration;
 
         //check we should request remote tracks
         if ( $this->is_expired ){
-    
-            if ( $this->can_remote_request ){
-                if ($this->post_id){ //populate & save tracks
-                    $populated = $this->update_from_remote();
-                }else{ //only populate tracks (wizard)
-                    $populated = $this->populate_remote_tracklist();
-                }
+            
+             $can_remote_request = ( ( $this->ajax_refresh && wpsstm_is_ajax() ) || !$this->ajax_refresh );
+            
+            if ( $can_remote_request ){
+                /*
+                fetch remote tracks
+                */
 
+                $populated = $this->populate_remote_tracklist();
                 if ( is_wp_error($populated) ){
                     $this->add_notice( 'tracklist-header', 'populate-tracks', $populated->get_error_message(),true );
                 }
 
-            }else{
-                return;
+                /*
+                update playlist (only if cache is enabled)
+                */
                 
+                if ($has_cache){ //populate & save tracks
+                    $updated = $this->populate_and_save_tracks();
+                    if ( is_wp_error($updated) ){
+                        $this->add_notice( 'tracklist-header', 'populate-tracks', $updated->get_error_message(),true );
+                    }
+                }
             }
+            
         }else{
             parent::populate_tracks($args);
         }
-        
-        $this->did_query_tracks = true;
 
     }
     

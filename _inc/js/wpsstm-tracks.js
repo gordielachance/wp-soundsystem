@@ -45,7 +45,7 @@
                     wpsstm_mediaElement.play();
                 }
             }else{
-                wpsstm_page_player.play_tracklist(track_obj.tracklist_idx,track_obj.track_idx);
+                wpsstm_page_player.play_tracklist(track_obj.tracklist.index,track_obj.index);
             }
 
         });
@@ -64,7 +64,8 @@
             var track_el = link.closest('[itemprop="track"]');
             var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
             
-            var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+            var tracklist_obj =  wpsstm_page_player.get_page_tracklist(tracklist_idx);
+            var track_obj = tracklist_obj.get_track_obj(track_idx);
             var track_ajax = track_obj.to_ajax();
 
             var ajax_data = {
@@ -122,8 +123,9 @@
 
             var track_el = link.closest('[itemprop="track"]');
             var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
-
-            var track_obj = wpsstm_page_player.get_tracklist_track_obj(tracklist_idx,track_idx);
+            
+            var tracklist_obj =  wpsstm_page_player.get_page_tracklist(tracklist_idx);
+            var track_obj = tracklist_obj.get_track_obj(track_idx);
             var track_ajax = track_obj.to_ajax();
 
             var ajax_data = {
@@ -169,17 +171,15 @@
         //expand tracklist
         var track_el = track_obj.track_el;
         if ( track_el.is(":visible") ) return;
-        
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(track_obj.tracklist_idx);
-        
-        var tracklist_el = tracklist_obj.tracklist_el;
+
+        var tracklist_el = track_obj.tracklist.tracklist_el;
         var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
-        var newTracksCount = track_obj.track_idx + 1;
+        var newTracksCount = track_obj.index + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        if ( tracklist_obj.options.toggle_tracklist ){
-            tracklist_obj.toggleTracklist({
+        if ( track_obj.tracklist.options.toggle_tracklist ){
+            track_obj.tracklist.toggleTracklist({
                 childrenMax:newTracksCount
             });
         }
@@ -189,12 +189,13 @@
 })(jQuery);
 
 class WpsstmTrack {
-    constructor(track_html,tracklist_idx,track_idx) {
+    constructor(track_html,tracklist,track_idx) {
 
         var self =                  this;
+        self.tracklist =            tracklist;
         self.track_el =             $(track_html);
-        self.tracklist_idx =        tracklist_idx; //cast to number;
-        self.track_idx =            Number(self.track_el.attr('data-wpsstm-track-idx'));
+        
+        self.index =                Number(self.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
         self.title =                self.track_el.find('[itemprop="name"]').text();
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
@@ -216,17 +217,16 @@ class WpsstmTrack {
     can_play_track(){
         
         var self = this;
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
-        
+
         var can_play = false;
         var deferredObject = $.Deferred();
-        var track_position = self.track_idx + 1;
+        var track_position = self.index + 1;
 
         if ( self.sources.length > 0 ) {
             
-            deferredObject.resolve("can play track() : track #" + self.track_idx + " has already sources, no need to request them");
+            deferredObject.resolve("can play track() : track #" + self.index + " has already sources, no need to request them");
             
-        }else if ( tracklist_obj.options.autosource ) {
+        }else if ( self.tracklist.options.autosource ) {
 
             var promise = self.get_sources_auto();
             
@@ -234,17 +234,17 @@ class WpsstmTrack {
 
                 if ( self.sources.length > 0 ){
 
-                    deferredObject.resolve("can play track() : sources found for track #" + self.track_idx);
+                    deferredObject.resolve("can play track() : sources found for track #" + self.index);
                 }else{
 
-                    deferredObject.reject("can play track() : no sources for track #" + self.track_idx);
+                    deferredObject.reject("can play track() : no sources for track #" + self.index);
                 }
 
             })
             
             promise.fail(function() {
 
-                deferredObject.reject("can play track() failed for track #" + self.track_idx);
+                deferredObject.reject("can play track() failed for track #" + self.index);
 
             })
 
@@ -253,25 +253,20 @@ class WpsstmTrack {
             })
 
         }else{
-            deferredObject.reject("can play track() : no sources for track #" + self.track_idx + " and autosource is disabled");
+            deferredObject.reject("can play track() : no sources for track #" + self.index + " and autosource is disabled");
         }
 
         return deferredObject.promise();
 
     }
-    
-    get_tracklist_el(){
-        var self = this;
-        return self.track_el.closest('[data-wpsstm-tracklist-idx="'+self.tracklist_idx+'"]');
-    }
-    
+
     debug(msg){
-        var prefix = "WpsstmTrack #" + this.track_idx + " in playlist #"+ this.tracklist_idx +": ";
+        var prefix = "WpsstmTrack #" + this.index + " in playlist #"+ this.tracklist.index +": ";
         wpsstm_debug(msg,prefix);
     }
 
     get_track_instances(ancestor){
-        var selector = '[data-wpsstm-tracklist-idx="'+this.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.track_idx+'"]';
+        var selector = '[data-wpsstm-tracklist-idx="'+this.tracklist.index+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.index+'"]';
         if (ancestor !== undefined){
             return $(ancestor).find(selector);
         }else{
@@ -321,7 +316,6 @@ class WpsstmTrack {
     play_source(source_idx){
 
         var self = this;
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
         self.playback_start = 0; //reset playback start
 
@@ -333,7 +327,7 @@ class WpsstmTrack {
 
         self.load_in_player(source_idx);
 
-        if ( tracklist_obj.options.autosource ) {
+        if ( self.tracklist.options.autosource ) {
             self.get_next_tracks_sources_auto();
         }
 
@@ -344,7 +338,6 @@ class WpsstmTrack {
     get_sources_auto(){
 
         var self = this;
-        var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
 
         var deferredObject = $.Deferred();
 
@@ -354,7 +347,7 @@ class WpsstmTrack {
         track_instances.addClass('loading-sources');
 
         promise.fail(function() {
-            deferredObject.reject("sources request failed for track #" + self.track_idx);
+            deferredObject.reject("sources request failed for track #" + self.index);
         })
 
         promise.done(function(v) {
@@ -376,11 +369,11 @@ class WpsstmTrack {
     get_next_tracks_sources_auto() {
 
         var self = this;
-        var tracklist = wpsstm_page_player.tracklists[self.tracklist_idx];
+        var tracklist = wpsstm_page_player.tracklists[self.tracklist.index];
 
         var max_items = 4; //number of following tracks to preload
-        var rtrack_in = self.track_idx + 1;
-        var rtrack_out = self.track_idx + max_items + 1;
+        var rtrack_in = self.index + 1;
+        var rtrack_out = self.index + max_items + 1;
 
         var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
 
@@ -423,7 +416,7 @@ class WpsstmTrack {
         var self = this;
         //track infos
         
-        var tracklist_el = self.get_tracklist_el();
+        var tracklist_el = self.tracklist.tracklist_el;
 
         //copy attributes from the original playlist 
         var attributes = $(tracklist_el).prop("attributes");
@@ -478,7 +471,7 @@ class WpsstmTrack {
                 $(document).trigger( "wpsstmMediaReady",[wpsstm_mediaElement,self] ); //custom event
 
                 $(wpsstm_mediaElement).on('error', function(error) {
-                    var source_obj = self.get_track_source(self.current_source_idx);
+                    var source_obj = self.get_source_obj(self.current_source_idx);
                     console.log('player event - source error for source: '+self.current_source_idx);
                     //self.debug(error);
                     self.updateTrackClasses('loadeddata');
@@ -513,8 +506,7 @@ class WpsstmTrack {
                     wpsstm_mediaElement = undefined;
                     
                     //Play next song if any
-                    var tracklist_obj = wpsstm_page_player.get_tracklist_obj(self.tracklist_idx);
-                    tracklist_obj.next_track_jump();
+                    self.tracklist.next_track_jump();
                 });
 
             },error(mediaElement) {
@@ -533,7 +525,7 @@ class WpsstmTrack {
         
         if ( self.did_sources_request ) {
             
-            deferredObject.resolve("already did sources auto request for track #" + self.track_idx);
+            deferredObject.resolve("already did sources auto request for track #" + self.index);
             
         } else{
         
@@ -596,14 +588,16 @@ class WpsstmTrack {
         $.each(new_sources_items, function( index, source_link ) {
             var source_obj = new WpsstmTrackSource(source_link,self);
             self.sources.push(source_obj);
-            $(document).trigger("wpsstmTrackSourceDomReady",[source_obj]); //custom event
+            $(document).trigger("wpsstmTrackSingleSourceDomReady",[source_obj]); //custom event for single source
         });
 
         $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
+        
+        $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event for all sources
 
     }
     
-    get_track_source(source_idx){
+    get_source_obj(source_idx){
         var self = this;
 
         source_idx = Number(source_idx);
@@ -617,7 +611,7 @@ class WpsstmTrack {
         
         //self.debug("highligh_source(): #" + idx);
         
-        var source_obj = self.get_track_source(idx);
+        var source_obj = self.get_source_obj(idx);
         var track_instances = self.get_track_instances();
         var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
         $(trackinfo_sources).removeClass('wpsstm-active-source');
@@ -631,7 +625,7 @@ class WpsstmTrack {
         
         if (idx === undefined) idx = 0;
 
-        var new_source_obj = self.get_track_source(idx);
+        var new_source_obj = self.get_source_obj(idx);
 
         var new_source = { src: new_source_obj.src, 'type': new_source_obj.type };
 
@@ -658,7 +652,7 @@ class WpsstmTrack {
         //https://github.com/mediaelement/mediaelement/issues/2179#issuecomment-297090067
         
         var self = this;
-        var source_obj = self.get_track_source(source_idx);
+        var source_obj = self.get_source_obj(source_idx);
         
         self.debug("skip_bad_source(): #" + source_idx + ": " +source_obj.src);
 
@@ -678,7 +672,7 @@ class WpsstmTrack {
 
         $( sources_reordered ).each(function(i, source_attr) {
             if (!source_attr.source_can_play) return true; //continue;
-            new_source_idx = source_attr.source_idx;
+            new_source_idx = source_attr.index;
             return false;//break
         });
         
@@ -706,8 +700,7 @@ class WpsstmTrack {
             }else{
                 //No more sources - Play next song if any
                 self.debug("skip_bad_source() - No valid sources found");
-                var tracklist = wpsstm_page_player.get_tracklist_obj(this.tracklist_idx);
-                tracklist.next_track_jump();
+                this.tracklist.next_track_jump();
             }
        }
 
@@ -716,7 +709,7 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['artist', 'title','album','post_id'];
+        var allowed = ['index','artist', 'title','album','post_id'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
@@ -725,5 +718,39 @@ class WpsstmTrack {
         }, {});
         return filtered;
     }
+    
+    update_source_index(source_obj){
+        var self = this;
 
+        //ajax update order
+        var ajax_data = {
+            action:     'wpsstm_track_update_source_index',
+            source:     source_obj.to_ajax()
+        };
+
+        jQuery.ajax({
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                self.track_el.addClass('loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    //self.update_sources_order();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                self.track_el.removeClass('loading');
+            }
+        })
+
+    }
 }

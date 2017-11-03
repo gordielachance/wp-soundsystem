@@ -9,7 +9,7 @@ $track->populate_sources();
 
 
 ?>
-<tr class="<?php echo implode(' ',$track->get_track_class() );?>" itemscope data-wpsstm-track-id="<?php echo $track->post_id; ?>" data-wpsstm-track-idx="<?php echo $tracklist->current_track; ?>" data-wpsstm-sources-count="<?php echo $track->source_count;?>" itemtype="http://schema.org/MusicRecording" itemprop="track">
+<tr <?php echo $track->get_track_attr();?>>
     <td class="wpsstm-track-image" itemprop="image">
         <?php 
         if ($track->image_url){

@@ -1,6 +1,30 @@
 jQuery(document).ready(function($){
+    
+    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
+        var track_el = track_obj.track_el;
 
-    $(document).on( "wpsstmTrackSourceDomReady", function( event, source_obj ) {
+        // sort track sources
+        track_obj.track_el.find('.wpsstm-track-sources-list').sortable({
+            handle: '.wpsstm-source-reorder-action',
+            update: function(event, ui) {
+                console.log('update: '+ui.item.index())
+
+                //get source
+                var source_el = $(ui.item);
+                var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
+                var source_obj = track_obj.get_source_obj(source_idx);
+                console.log(source_obj);
+
+                //new position
+                source_obj.index = ui.item.index();
+                track_obj.update_source_index(source_obj);
+            }
+        });
+        
+
+    });
+
+    $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
         //click on source trigger
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
@@ -25,20 +49,6 @@ jQuery(document).ready(function($){
             })
             
         });
-        
-        //validate community source
-        source_obj.source_el.find('.wpsstm-source-validate-action').click(function(e) {
-            
-            e.preventDefault();
-            var promise = source_obj.validate_community_source();
-            
-            promise.done(function(data) {
-                var source_instances = source_obj.get_source_instances();
-                source_instances.find('.wpsstm-source-validate-action').remove();
-            })
-            
-        });
-        
 
     });
     
@@ -168,11 +178,11 @@ class WpsstmTrackSource {
     constructor(source_html,track) {
 
         var self =              this;
+        self.track =            track;
         self.source_el =        $(source_html);
-        self.tracklist_idx =    track.tracklist_idx;
-        self.track_idx =        track.track_idx;
+        
+        self.index =            Number(self.source_el.attr('data-wpsstm-source-idx'));
         self.post_id =          Number(self.source_el.attr('data-wpsstm-source-id'));
-        self.source_idx =       Number(self.source_el.attr('data-wpsstm-source-idx'));
         self.src =              self.source_el.attr('data-wpsstm-source-src');
         self.type =             self.source_el.attr('data-wpsstm-source-type');
         self.source_can_play = true;
@@ -182,18 +192,18 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = "WpsstmTrackSource #" + this.source_idx + " in playlist #"+ this.tracklist_idx +"; track #"+ this.track_idx +": ";
+        var prefix = "WpsstmTrackSource #" + this.index + " in playlist #"+ this.track.tracklist.index +"; track #"+ this.track.index +": ";
         wpsstm_debug(msg,prefix);
     }
 
     get_track_el(){
         var self = this;
-        return self.track_el.closest('[data-wpsstm-track-idx="'+self.track_idx+'"]');
+        return self.track_el.closest('[data-wpsstm-track-idx="'+self.track.index+'"]');
     }
 
     get_source_instances(ancestor){
         var self = this;
-        var selector = '[data-wpsstm-tracklist-idx="'+self.tracklist_idx+'"] [itemprop="track"][data-wpsstm-track-idx="'+self.track_idx+'"] [data-wpsstm-source-idx="'+self.source_idx+'"]';
+        var selector = '[data-wpsstm-tracklist-idx="'+self.track.tracklist.index+'"] [itemprop="track"][data-wpsstm-track-idx="'+self.track.index+'"] [data-wpsstm-source-idx="'+self.index+'"]';
         
         if (ancestor !== undefined){
             return $(ancestor).find(selector);
@@ -204,7 +214,7 @@ class WpsstmTrackSource {
 
     play_source(){
         var self = this;
-        wpsstm_page_player.play_tracklist(self.tracklist_idx,self.track_idx,self.source_idx);
+        wpsstm_page_player.play_tracklist(self.track.tracklist.index,self.track.index,self.index);
     }
     
     delete_source(){
@@ -249,47 +259,19 @@ class WpsstmTrackSource {
         
     }
     
-    validate_community_source(){
-        
+    //reduce object for communication between JS & PHP
+    to_ajax(){
         var self = this;
-        var deferredObject = $.Deferred();
-        var source_instances = self.get_source_instances();
-        
-        var ajax_data = {
-            action:         'wpsstm_validate_community_source',
-            post_id:        self.post_id
-        };
-        
-        source_instances.addClass('loading');
-
-        var ajax_request = $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json'
-        })
-        
-        ajax_request.done(function(data){
-            if (data.success === true){
-                deferredObject.resolve();
-            }else{
-                console.log(data);
-                deferredObject.reject(data.message);
-            }
-        });
-
-        ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
-            deferredObject.reject();
-        })
-
-        ajax_request.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('loading');
-        })
-        
-        return deferredObject.promise();
-        
+        var allowed = ['index','post_id'];
+        var filtered = Object.keys(self)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+        obj[key] = self[key];
+        return obj;
+        }, {});
+        return filtered;
     }
+    
 }
 
 
