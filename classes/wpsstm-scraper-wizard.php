@@ -159,7 +159,7 @@ class WP_SoundSystem_Core_Wizard{
                 $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
             }
 
-            $this->tracklist->ajax_refresh = false;
+            $this->tracklist->ajax_refresh = false; //TO FIX we should use ajax here too
             $this->tracklist->is_expired = !$this->tracklist->is_wizard_disabled(); //force tracklist refresh
             
             $this->tracklist->tracks_strict = false;
@@ -892,7 +892,7 @@ class WP_SoundSystem_Core_Wizard{
             '<input type="number" name="%1$s[datas_cache_min]" size="4" min="0" value="%2$s" /><span class="wizard-field-desc">%3$s</span>',
             'wpsstm_wizard',
             $option,
-            __('Time the remote tracks should be cached (in minutes).','spiff')
+            __('(in minutes) — If set, a track post will be created for each track found then deleted when we request the page again.','spiff')
         );
 
         

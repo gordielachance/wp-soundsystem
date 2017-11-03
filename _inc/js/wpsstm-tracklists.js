@@ -198,13 +198,23 @@ class WpsstmTracklist {
         self.tracklist_el.attr('data-wpsstm-tracklist-idx',self.index);
 
         self.post_id = Number( self.tracklist_el.attr('data-wpsstm-tracklist-id') );
-        self.expire_time = Number( self.tracklist_el.attr('data-wpsstm-expire-time') );
         
         self.options = $.parseJSON( self.tracklist_el.attr('data-wpsstm-tracklist-options') );
-
-        var now = Math.round( $.now() /1000);
-        self.is_expired = (self.expire_time && (now > self.expire_time) );
         
+        /*
+        expiration
+        */
+        var expire_time_attr = self.tracklist_el.attr('data-wpsstm-expire-time');
+
+        if (typeof expire_time_attr !== typeof undefined && expire_time_attr !== false) { //value exists
+            self.expire_time = Number(expire_time_attr);
+            var now = Math.round( $.now() /1000);
+            self.is_expired = now > self.expire_time;
+        }else{
+            self.expire_time = false;
+            self.is_expired = true;
+        }
+
         /*
         if ( self.expire_time ){
             self.debug("populate_tracklist() - is_expired: " + self.is_expired + ", now: " + now + " VS expire: " + self.expire_time);

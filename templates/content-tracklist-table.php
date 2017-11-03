@@ -24,9 +24,9 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
                 <?php 
-                if ( $rate = $tracklist->get_refresh_rate() ){
+                if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_refresh_rate() ) ){
                     ?>
-                    <time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i> <?php printf(__('every %s','wpsstm'),$rate);?></time>
+                    <time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i> <?php printf(__('cached for %s','wpsstm'),$rate);?></time>
                     <?php
                 }
                 ?>

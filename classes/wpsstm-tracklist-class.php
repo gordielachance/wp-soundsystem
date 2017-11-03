@@ -903,8 +903,12 @@ class WP_SoundSystem_Tracklist{
             'data-wpsstm-tracklist-type' =>     $this->tracklist_type,
             'data-wpsstm-tracklist-options' =>  $this->get_tracklist_options_attr(),
             'data-tracks-count' =>              $this->track_count,
-            'data-wpsstm-expire-time' =>        $this->get_expire_time(),
         );
+        
+        //should we set an expiration time ?
+        if ( ( $this->tracklist_type != 'live' ) && ($time = $this->get_expiration_time() ) ){
+            $values_attr['data-wpsstm-expire-time'] =  $time;
+        }
         
         $static_attr = array('itemscope');
         
@@ -955,25 +959,6 @@ class WP_SoundSystem_Tracklist{
         }
 
         return htmlspecialchars( json_encode($attr_options), ENT_QUOTES, 'UTF-8');
-    }
-
-    function get_expire_time(){
-
-        if ( $this->tracklist_type != 'live' ) return;
-
-        return (int)$this->get_expiration_time();
-    }
-    
-    function get_refresh_rate(){
-
-        if ( !$this->post_id ) return;
-        if ( $this->tracklist_type != 'live' ) return;
-
-        $freq = $this->get_options('datas_cache_min');
-
-        $freq_secs = $freq * MINUTE_IN_SECONDS;
-
-        return $refresh_time_human = human_time_diff( 0, $freq_secs );
     }
     
     function populate_tracks($args = null){

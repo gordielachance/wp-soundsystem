@@ -80,7 +80,7 @@ class WP_SoundSystem {
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'community_user_id'                 => null,
-            'live_playlists_cache_min'          => 15,
+            'live_playlists_cache_min'          => 0,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'lastfm_client_id'                  => null,
             'lastfm_client_secret'              => null,

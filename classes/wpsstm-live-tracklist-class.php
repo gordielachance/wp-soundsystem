@@ -17,7 +17,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $feed_url = null;
     
-    var $expiration_time = null;
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
     public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
@@ -929,6 +928,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
     
+    function get_refresh_rate(){
+
+        $freq = $this->get_options('datas_cache_min');
+        
+        if (!$freq) return false;
+
+        $freq_secs = $freq * MINUTE_IN_SECONDS;
+
+        return $refresh_time_human = human_time_diff( 0, $freq_secs );
+    }
+    
     function get_cached_remote_title(){
         return get_post_meta($this->post_id,wpsstm_live_playlists()->remote_title_meta_name,true);
     }
@@ -947,16 +957,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $this->did_query_tracks ) return; //we already did it
         
         $cache_duration = $this->get_options('datas_cache_min');
-        
-        //cache disabled notice
-        //TO FIX TO IMPROVE
-        //only for published posts ?
-        //move in wizard ?
         $has_cache = (bool)$cache_duration;
-
-        if ( !$has_cache && is_admin() ){
-            $this->add_notice( 'wizard-header', 'cache_disabled', __("The cache is currently disabled.  Once you're happy with your settings, it is recommanded to enable it (see the Options tab).",'wpsstm') );
-        }
 
         //check we should request remote tracks
         if ( $this->is_expired ){
@@ -976,7 +977,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 /*
                 update playlist (only if cache is enabled)
                 */
-
+                
                 if ($has_cache){ //populate & save tracks
                     $updated = $this->populate_and_save_tracks();
                     if ( is_wp_error($updated) ){
