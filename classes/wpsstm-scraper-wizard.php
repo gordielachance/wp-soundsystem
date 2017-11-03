@@ -159,8 +159,8 @@ class WP_SoundSystem_Core_Wizard{
                 $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
             }
 
-            $this->tracklist->can_remote_request = !$this->tracklist->is_wizard_disabled();
-            $this->tracklist->is_expired = true; //force tracklist refresh
+            $this->tracklist->ajax_refresh = false;
+            $this->tracklist->is_expired = !$this->tracklist->is_wizard_disabled(); //force tracklist refresh
             
             $this->tracklist->tracks_strict = false;
 

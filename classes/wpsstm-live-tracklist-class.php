@@ -19,8 +19,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $expiration_time = null;
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
-    
-    public $can_remote_request = false; //by default, only ajax requests will fetch remote tracks. Set to true to request remote tracks through PHP.
+    public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     //response
     var $request_pagination = array(
@@ -83,7 +82,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         $this->is_expired = $this->check_has_expired(); //set expiration bool & time
-        $this->can_remote_request = wpsstm_is_ajax();
 
     }
 
@@ -944,6 +942,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //cache disabled notice
         //TO FIX TO IMPROVE
         //only for published posts ?
+        //move in wizard ?
         $has_cache = (bool)$cache_duration;
 
         if ( !$has_cache && is_admin() ){
@@ -951,9 +950,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         //check we should request remote tracks
-        if ( !$cache_duration || $this->is_expired ){
+        if ( $this->is_expired ){
             
-            if ($this->can_remote_request){
+             $can_remote_request = ( $this->ajax_refresh && wpsstm_is_ajax() ) || !$this->ajax_refresh );
+            
+            if ( $can_remote_request ){
                 /*
                 fetch remote tracks
                 */
