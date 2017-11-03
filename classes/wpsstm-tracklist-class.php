@@ -889,12 +889,37 @@ class WP_SoundSystem_Tracklist{
         
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
+    
+    function get_tracklist_attr($args=array()){
+        
+        $extra_classes = ( isset($args['extra_classes']) ) ? $args['extra_classes'] : null;
+
+        $values_attr = array(
+            'class' =>                          implode(' ',$this->get_tracklist_class($extra_classes) ),
+            'itemscope' =>                      false,
+            'itemtype' =>                       "http://schema.org/MusicPlaylist",
+            'data-wpsstm-tracklist-id' =>       $this->post_id,
+            'data-wpsstm-tracklist-idx' =>      $this->index,
+            'data-wpsstm-tracklist-type' =>     $this->tracklist_type,
+            'data-wpsstm-tracklist-options' =>  $this->get_tracklist_options_attr(),
+            'data-tracks-count' =>              $this->track_count,
+            'data-wpsstm-expire-time' =>        $this->get_expire_time(),
+        );
+        
+        $static_attr = array('itemscope');
+        
+        return wpsstm_get_html_attr($values_attr,$static_attr);
+    }
 
     function get_tracklist_class($extra_classes = null){
 
         $classes = array(
             'wpsstm-tracklist',
         );
+        
+        if ($extra_classes){
+            if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
+        }
         
         $classes = array_merge($classes,(array)$extra_classes);
 
@@ -936,7 +961,7 @@ class WP_SoundSystem_Tracklist{
 
         if ( $this->tracklist_type != 'live' ) return;
 
-        return (int)$this->expiration_time;
+        return (int)$this->get_expiration_time();
     }
     
     function get_refresh_rate(){

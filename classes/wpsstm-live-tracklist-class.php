@@ -901,22 +901,31 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $new_input;
     }
     
+    //UTC
+    function get_expiration_time(){
+        if ( !$cache_duration_min = $this->get_options('datas_cache_min') ) return false;
+        
+        $now = current_time( 'timestamp', true );
+        $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
+        return $this->updated_time + $cache_duration_s;
+    }
+
+    
     // checks if the playlist has expired (and thus should be refreshed)
     // set 'expiration_time'
     function check_has_expired(){
         
         $cache_duration_min = $this->get_options('datas_cache_min');
-        $has_cache = (bool)$cache_duration;
+        $has_cache = (bool)$cache_duration_min;
         
         if (!$has_cache){
             return true;
         }else{
             $now = current_time( 'timestamp', true );
             $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-            $this->expiration_time = $this->updated_time + $cache_duration_s; //set expiration time (UTC)
-            return ( $now >= $this->expiration_time );
+            $expiration_time = $this->get_expiration_time(); //set expiration time
+            return ( $now >= $expiration_time );
         }
-        
 
     }
     
@@ -952,7 +961,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //check we should request remote tracks
         if ( $this->is_expired ){
             
-             $can_remote_request = ( $this->ajax_refresh && wpsstm_is_ajax() ) || !$this->ajax_refresh );
+             $can_remote_request = ( ( $this->ajax_refresh && wpsstm_is_ajax() ) || !$this->ajax_refresh );
             
             if ( $can_remote_request ){
                 /*
