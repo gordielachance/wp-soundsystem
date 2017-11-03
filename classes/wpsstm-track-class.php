@@ -732,11 +732,38 @@ class WP_SoundSystem_Track{
 
     }
     
+    function get_track_attr($args=array()){
+        global $wpsstm_tracklist;
+        
+        $extra_classes = ( isset($args['extra_classes']) ) ? $args['extra_classes'] : null;
+
+        $values_attr = array(
+            'class' =>                          implode(' ',$this->get_track_class($extra_classes) ),
+            'itemscope' =>                      false,
+            'itemtype' =>                       "http://schema.org/MusicRecording",
+            'itemprop' =>                       'track',
+            'data-wpsstm-track-id' =>           $this->post_id,
+            'data-wpsstm-sources-count' =>      $this->source_count,
+        );
+        
+        if ($wpsstm_tracklist){
+            $values_attr['data-wpsstm-track-idx'] = $wpsstm_tracklist->current_track;
+        }
+        
+        $static_attr = array('itemscope');
+
+        return wpsstm_get_html_attr($values_attr,$static_attr);
+    }
+    
     function get_track_class($extra_classes = null){
 
         $classes = array(
             'wpsstm-track',
         );
+        
+        if ($extra_classes){
+            if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
+        }
         
         $classes = array_merge($classes,(array)$extra_classes);
         
