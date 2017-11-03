@@ -17,9 +17,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public $feed_url = null;
     
-    public $is_expired = false;
-    public $can_remote_request = false; //remote request will be done later through ajax
     var $expiration_time = null;
+    public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
+    
+    public $can_remote_request = false; //by default, only ajax requests will fetch remote tracks. Set to true to request remote tracks through PHP.
 
     //response
     var $request_pagination = array(
@@ -67,9 +68,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $this->location = $this->feed_url;
             }
 
-            //expiration time
-            $this->populate_expiration_time();
-            
             //set remote title if no title already set
             if ( !$this->title && ($meta_title = $this->get_cached_remote_title() ) ){
                 $this->title = $meta_title;
@@ -84,14 +82,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         }
 
+        $this->is_expired = $this->check_has_expired(); //set expiration bool & time
         $this->can_remote_request = wpsstm_is_ajax();
-        
-
-        //when testing tracks requests, uncomment this
-        /*
-        $this->can_remote_request = true; //disable ajax-only remote requests
-        $this->is_expired = true; //force tracklist refresh
-        */
 
     }
 
@@ -172,9 +164,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //set tracklist author
         $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
         $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
-        
-        //reset expiration
-        $this->populate_expiration_time(); //keep below set_subtrack_ids()
+
+        $this->expired = $this->check_has_expired(); //set expiration bool & time
         
         $this->did_query_tracks = true; //so we don't run this function multiple times
     }
@@ -912,27 +903,22 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $new_input;
     }
     
-    function populate_expiration_time(){
+    // checks if the playlist has expired (and thus should be refreshed)
+    // set 'expiration_time'
+    function check_has_expired(){
         
-        $now = current_time( 'timestamp', true );
         $cache_duration_min = $this->get_options('datas_cache_min');
-        $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-        $this->expiration_time = $this->updated_time + $cache_duration_s; //UTC
-
-        $this->is_expired = ( $now >= $this->expiration_time );
-
-        /*
-        wpsstm()->debug_log(
-            array(
-                'is_expired' =>             $this->is_expired,
-                'cache_duration_min' =>     $cache_duration_min,
-                'updated' =>                wpsstm_get_datetime($this->updated_time),
-                'expires' =>                wpsstm_get_datetime($this->expiration_time),
-                'now' =>                    wpsstm_get_datetime($now),
-            ),
-            "WP_SoundSystem_Remote_Tracklist::populate_expiration_time()"
-        );
-        */
+        $has_cache = (bool)$cache_duration;
+        
+        if (!$has_cache){
+            return true;
+        }else{
+            $now = current_time( 'timestamp', true );
+            $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
+            $this->expiration_time = $this->updated_time + $cache_duration_s; //set expiration time (UTC)
+            return ( $now >= $this->expiration_time );
+        }
+        
 
     }
     
