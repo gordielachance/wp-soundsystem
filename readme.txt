@@ -153,14 +153,15 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.7.5 =
+* live tracklists : rewritten some code, improved caching stuff
 * frontend wizard: if a tracklist is successfully loaded; add the tracklist title to the page title
 * wizard: wizard input can be not only URLs (eg. spotify playlists URIs)
 * new custom event 'wpsstmTrackSourcesDomReady' and renamed 'wpsstmTrackSourceDomReady' to 'wpsstmTrackSingleSourceDomReady'
 * tracklist/track/source 'position' property renamed to 'index'
 * JS: don't use tracklist_idx/track_idx/source_idx but reference original object (tracklist/track/source)
 * JS: removed a lot of references to get_tracklist_obj() and renamed to get_page_tracklist(), removed function get_tracklist_track_obj()
-* sources list: add link to reorder sources (drag & drop)
+* WIP sources list: add link to reorder sources (drag & drop)
 
 = 1.7.4 =
 * new preset for 8tracks.com
