@@ -160,7 +160,7 @@ class WP_SoundSystem_Core_Wizard{
             }
 
             $this->tracklist->ajax_refresh = false; //TO FIX we should use ajax here too
-            $this->tracklist->is_expired = !$this->tracklist->is_wizard_disabled(); //force tracklist refresh
+            $this->tracklist->is_expired = !$this->tracklist->is_wizard_disabled(); //force tracklist refresh (or disable it if wizard is closed)
             
             $this->tracklist->tracks_strict = false;
 
