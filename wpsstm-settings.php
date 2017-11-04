@@ -110,11 +110,6 @@ class WP_SoundSystem_Settings {
                 
             }
 
-            //cache duration
-            if ( isset ($input['live_playlists_cache_min']) && ctype_digit($input['live_playlists_cache_min']) ){
-                $new_input['live_playlists_cache_min'] = $input['live_playlists_cache_min'];
-            }
-            
             /* 
             Musicbrainz 
             */
@@ -315,14 +310,6 @@ class WP_SoundSystem_Settings {
             'frontend_wizard_settings'
         );
 
-        add_settings_field(
-            'cache_tracks_intval', 
-            __('Playlist cache duration','wpsstm'), 
-            array( $this, 'live_playlists_cache_callback' ), 
-            'wpsstm-settings-page', 
-            'live_playlists_settings'
-        );
-        
         /*
         MusicBrainz
         */
@@ -808,24 +795,7 @@ class WP_SoundSystem_Settings {
             $option
         );
     }
-    
-    function live_playlists_cache_callback(){
-        $option = (int)wpsstm()->get_options('live_playlists_cache_min');
-        
-        $help = array();
-        $help[]= __("(in minutes) — If set, a track post will be created for each track found then deleted when we request the page again.","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
 
-        printf(
-            '<input type="number" name="%s[live_playlists_cache_min]" size="4" min="0" value="%s" /><br/>%s',
-            wpsstm()->meta_name_options,
-            $option,
-            $help
-        );
-        
-    }
-    
     //APIs
     
     function lastfm_client_callback(){

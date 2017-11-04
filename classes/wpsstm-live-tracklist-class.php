@@ -96,7 +96,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
             ),
             'tracks_order'              => 'desc',
-            'datas_cache_min'           => (int)wpsstm()->get_options('live_playlists_cache_min'), //time tracklist is cached - if set to null, will take plugin value
+            /*
+            TRACKLIST CACHE
+            time (in minutes) a tracklist is cached.  
+            If enabled, a post will be temporary stored for each track fetched.
+            It will be deleted at next refresh; if the track is no more part of the tracklist; and does not belong to any user tracklist or likes.
+            */
+            'datas_cache_min'           => 0, 
         );
         
         return array_replace_recursive((array)parent::get_default_options(),$live_options); //last one has priority

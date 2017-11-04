@@ -888,11 +888,17 @@ class WP_SoundSystem_Core_Wizard{
         
         $option = $wpsstm_tracklist->get_options('datas_cache_min');
 
+        $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
+        $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
+        $desc[] = __("This can be useful if you have a lot of traffic - there will be less remote requests ans track sources will be searched only once.",'wpsstm');
+        $desc = implode("<br/>",$desc);
+
         printf(
-            '<input type="number" name="%1$s[datas_cache_min]" size="4" min="0" value="%2$s" /><span class="wizard-field-desc">%3$s</span>',
+            '<input type="number" name="%s[datas_cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
             'wpsstm_wizard',
             $option,
-            __('(in minutes) — If set, a track post will be created for each track found then deleted when we request the page again.','spiff')
+            __('minutes','spiff'),
+            $desc
         );
 
         
