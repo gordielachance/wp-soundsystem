@@ -274,7 +274,7 @@ class WP_SoundSystem_Track{
         $required_cap = $post_type_obj->cap->edit_posts;
 
         if ( !user_can($user_id,$required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
         $meta_input = array(
@@ -337,7 +337,7 @@ class WP_SoundSystem_Track{
         $required_cap = $post_type_obj->cap->delete_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to delete tracks.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete tracks.",'wpsstm') );
         }
         
         $success = wp_trash_post($this->post_id);
@@ -511,11 +511,11 @@ class WP_SoundSystem_Track{
         }
 
         if ( !$this->artist ){
-            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing','wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
         }
         
         if ( !$this->title ){
-            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing','wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing.','wpsstm') );
         }
 
         $auto_sources = array();
@@ -537,7 +537,7 @@ class WP_SoundSystem_Track{
     function save_auto_sources(){
 
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_track_no_post_id', __('Required track ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_post_id', __('Required track ID missing.','wpsstm') );
         }
 
         $new_source_ids = array();
@@ -633,7 +633,7 @@ class WP_SoundSystem_Track{
             $actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
-                'desc' =>       __('Add track to favorites','wpsstm'),
+                'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-action-toggle-favorite'),
             );
             if ( !$this->is_track_loved_by() ) $actions['favorite']['classes'][] = 'wpsstm-toggle-favorite-active';

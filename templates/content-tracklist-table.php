@@ -40,8 +40,20 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         </div>
     </div>
             
-    <?php 
+    <?php
     //tracklist notices
+    
+    //wizard temporary tracklist notice
+    //TO FIX should be in get_wizard_tracklist() ?
+    if ( !wpsstm_is_backend() && $tracklist->user_can_get_autorship() ){
+        $autorship_url = $tracklist->get_tracklist_admin_gui_url('get-autorship');
+        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+        $message = __("This is a temporary playlist.","wpsstm");
+        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+        $tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
+        
+    }
+
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
         echo $notices_el;
     }

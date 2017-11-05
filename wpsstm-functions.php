@@ -286,7 +286,7 @@ function wpsstm_get_live_tracklist_preset($feed_url){
             $tracklist = $preset;
             $tracklist->feed_url = $feed_url;
             $tracklist->populate_url_variables();
-            //wpsstm()->debug_log( json_encode(array('wizard_s'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_live_tracklist_preset()");
+            //wpsstm()->debug_log( json_encode(array('feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_live_tracklist_preset()");
             break;
         }
     }

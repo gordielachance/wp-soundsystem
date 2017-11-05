@@ -35,6 +35,7 @@ class WP_SoundSystem_Tracklist{
     var $track_count = 0;
     var $in_track_loop = false;
     var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
+    var $is_community = false; //if set to true, this is a community tracklists (created through the frontend wizard)
 
     function __construct($post_id = null ){
         
@@ -53,6 +54,8 @@ class WP_SoundSystem_Tracklist{
             
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
+            $community_user_id = wpsstm()->get_options('community_user_id');
+            $this->is_community = ( $post_author_id == $community_user_id );
             
             //tracklist time
             $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
@@ -131,7 +134,7 @@ class WP_SoundSystem_Tracklist{
         $success = false;
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
 
         //capability check
@@ -200,7 +203,7 @@ class WP_SoundSystem_Tracklist{
         if ( !is_array($append_ids) ) $append_ids = array($append_ids);
         
         if ( empty($append_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
 
         $old_ids = (array)$this->get_subtrack_ids();
@@ -220,7 +223,7 @@ class WP_SoundSystem_Tracklist{
         if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
         
         if ( empty($remove_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing','wpsstm') );
+            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
         
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
@@ -319,12 +322,12 @@ class WP_SoundSystem_Tracklist{
         $create_playlist_cap = $playlist_type_obj->cap->edit_posts;
 
         if ( !current_user_can($create_playlist_cap) ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __("You don't have the capability required to create a new playlist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new playlist.",'wpsstm') );
         }
         
         $validated = $this->validate_playlist();
         if ( !$validated ){
-            return new WP_Error( 'wpsstm_track_cap_missing', __('Error while validating the playlist.','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_cap', __('Error while validating the playlist.','wpsstm') );
         }elseif( is_wp_error($validated) ){
             return $validated;
         }
@@ -584,7 +587,7 @@ class WP_SoundSystem_Tracklist{
             $actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
-                'desc' =>       __('Add track to favorites','wpsstm'),
+                'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-action-toggle-favorite'),
             );
             if ( !$this->is_tracklist_loved_by() ) $actions['favorite']['classes'][] = 'wpsstm-toggle-favorite-active';
@@ -649,7 +652,6 @@ class WP_SoundSystem_Tracklist{
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('lock-tracklist'),
                 'classes' =>    array('wpsstm-requires-auth'),
-
             );
         }
 
@@ -668,7 +670,7 @@ class WP_SoundSystem_Tracklist{
         //context
         switch($context){
             case 'page':
-
+                
                 /*
                 if ($can_edit_tracklist){
                     $actions['advanced'] = array(
@@ -711,14 +713,19 @@ class WP_SoundSystem_Tracklist{
     function get_tracklist_admin_gui_url($tracklist_action = null){
 
         $url = $this->get_tracklist_permalink();
-        $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$tracklist_action),$url);
+        $url = add_query_arg(
+            array(
+                wpsstm_tracklists()->qvar_tracklist_admin=>$tracklist_action
+            ),
+            $url
+        );
 
         return $url;
     }
 
     function move_live_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
         wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
@@ -739,7 +746,7 @@ class WP_SoundSystem_Tracklist{
     
     function append_wizard_tracks(){
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
 
         //get live IDs
@@ -753,9 +760,44 @@ class WP_SoundSystem_Tracklist{
         wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WP_SoundSystem_Tracklist::append_wizard_tracks()");
     }
 
+    /*
+    Get autorship for a community tracklist (created through wizard)
+    */
+    
+    function get_autorship(){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
+        }
+        
+        if (!$this->is_community){
+            return new WP_Error( 'wpsstm_not_community_post', __('This is not a community post.','wpsstm') );
+        }
+            
+        //capability check
+        $can_get_authorship = $this->user_can_get_autorship();
+        
+        if ( !$can_get_authorship ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
+        $args = array(
+            'ID'            => $this->post_id,
+            'post_author'   => get_current_user_id(),
+        );
+
+        return wp_update_post( $args );
+            
+    }
+
     function convert_to_live_playlist(){
 
         //TO FIX CAPABILITIES
+        
+        if ($this->is_community){
+            $got_autorship = $this->get_autorship();
+            if ( is_wp_error($got_autorship) ) return $got_autorship;
+        }
 
         /*
         Existing playlist
@@ -838,6 +880,17 @@ class WP_SoundSystem_Tracklist{
 
     }
     
+    function user_can_get_autorship(){
+        
+        if ( !$this->post_id ) return false;
+        if ( !$this->is_community ) return false;
+            
+        //capability check
+        $post_type = get_post_type($this->post_id);
+        $post_type_obj = get_post_type_object($post_type);
+        return current_user_can($post_type_obj->cap->edit_posts);
+    }
+    
     function user_can_lock_tracklist(){
 
         if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ) return;
@@ -849,6 +902,7 @@ class WP_SoundSystem_Tracklist{
         $can_edit_static =    current_user_can($can_edit_static_cap);
 
         $can_edit_tracklist = current_user_can($live_post_obj->cap->edit_post,$this->post_id);
+
         return ( $can_edit_tracklist && $can_edit_static );
         
     }
@@ -1085,12 +1139,9 @@ class WP_SoundSystem_Tracklist{
 
         $args = wp_parse_args($args,$defaults);
 
-        //get tracklist (or wizard) url
+        //get tracklist url
         if ($this->post_id){
             $url = get_permalink($this->post_id);
-        }elseif ( ( $this->tracklist_type == 'live') && $this->feed_url && wpsstm_wizard()->can_frontend_wizard() && ($frontend_wizard_id = wpsstm_wizard()->frontend_wizard_page_id) ) {
-            $url = get_permalink($frontend_wizard_id);
-            $args['wizard_s'] = $wpsstm_tracklist->feed_url;
         }else{
             return;
         }
@@ -1108,6 +1159,7 @@ class WP_SoundSystem_Tracklist{
         $url = add_query_arg($args,$url);
         return apply_filters('wpsstm_get_tracklist_permalink',$url,$this,$args);
     }
+    
 
 }
 
