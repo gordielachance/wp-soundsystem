@@ -419,6 +419,8 @@ class WpsstmTracklist {
         
         var self = this;
         
+        var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
+        
         var current_track_idx = ( self.current_track_idx === 'undefined') ? 0 : self.current_track_idx;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx);
         
