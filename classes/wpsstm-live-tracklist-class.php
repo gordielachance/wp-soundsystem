@@ -1010,6 +1010,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $this->is_expired ){
             $classes[] = 'wpsstm-expired-tracklist';
         }
+        
+        if ( $this->ajax_refresh ){
+            $classes[] = 'wpsstm-ajax-refresh';
+        }
 
         return parent::get_tracklist_class($classes);
     }
