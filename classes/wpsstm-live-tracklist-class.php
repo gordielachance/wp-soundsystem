@@ -999,4 +999,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $refresh_notice;
     }
     
+    function get_tracklist_class($extra_classes = null){
+
+        $default = array(
+            'wpsstm-live-tracklist',
+        );
+        
+        $classes = array_merge($default,(array)$extra_classes);
+
+        if ( $this->is_expired ){
+            $classes[] = 'wpsstm-expired-tracklist';
+        }
+
+        return parent::get_tracklist_class($classes);
+    }
+    
 }
