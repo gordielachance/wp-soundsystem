@@ -998,7 +998,7 @@ class WP_SoundSystem_Tracklist{
             $classes[] = 'wpsstm-can-manage-tracklist';
         }
 
-        return $classes;
+        return array_filter(array_unique($classes));
     }
     
     function get_tracklist_options_attr(){
