@@ -140,6 +140,8 @@ class WP_SoundSystem_Core_Wizard{
     /*
     For wizard tracklists (created with the community user); 
     Redirect to wizard and pass tracklist ID as parameter
+    
+    If user try to hacks this (by passing a tracklist ID that is not a community post); redirect to regular tracklist.
     */
     
     function community_tracklist_redirect(){
@@ -378,10 +380,17 @@ class WP_SoundSystem_Core_Wizard{
         $tracklist_id = isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
         $tracklist = $this->get_wizard_tracklist($tracklist_id);
         
-        //populate it only if this is trully a community tracklist
-        if ($tracklist->is_community){
-            $wpsstm_tracklist = $tracklist;
+        //this is not a community tracklist, abord wizard
+        if ($tracklist->is_community){ 
+            $link = get_permalink($tracklist_id);
+            wp_redirect($link);
+            exit();
+            
         }
+        
+        //do populate.
+        $wpsstm_tracklist = $tracklist;
+        
     }
 
     function wizard_settings_init(){
