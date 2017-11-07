@@ -9,7 +9,7 @@ $track->populate_sources();
 
 
 ?>
-<tr <?php echo $track->get_track_attr();?>>
+<tr class="<?php echo implode(' ',$track->get_track_class());?>" <?php echo $track->get_track_attr();?>>
     <td class="wpsstm-track-image" itemprop="image">
         <?php 
         if ($track->image_url){

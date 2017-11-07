@@ -999,23 +999,28 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $refresh_notice;
     }
     
-    function get_tracklist_class($extra_classes = null){
-
-        $default = array(
+    function get_tracklist_class($extra_classes=null){
+        
+        $defaults = array(
             'wpsstm-live-tracklist',
         );
         
-        $classes = array_merge($default,(array)$extra_classes);
+        $defaults[] = ( $this->ajax_refresh ) ? 'wpsstm-ajax-refresh' : null;
+        $defaults[] = ( $this->is_expired ) ? 'wpsstm-is-expired' : null;
 
-        if ( $this->is_expired ){
-            $classes[] = 'wpsstm-expired-tracklist';
-        }
-        
-        if ( $this->ajax_refresh ){
-            $classes[] = 'wpsstm-ajax-refresh';
-        }
+        $classes = array_merge($defaults,(array)$extra_classes);
 
         return parent::get_tracklist_class($classes);
+    }
+
+    function get_tracklist_attr($values_attr=null){
+        
+        $values_default = array(
+        );
+
+        $values_attr = array_merge($values_default,(array)$values_attr);
+
+        return parent::get_tracklist_attr($values_attr);
     }
     
 }

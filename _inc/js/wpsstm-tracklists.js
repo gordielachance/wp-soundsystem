@@ -19,8 +19,7 @@
             }
         });
         
-        // hide column when data is empty or identical
-        if ( tracklist_obj.options.hide_empty_columns ){
+        if ( tracklist_obj.tracklist_el.hasClass("wpsstm-hide-empty-columns" ) ){
             tracklist_obj.hideEmptyColumns();
         }
         
@@ -157,7 +156,7 @@
         });
         
         //toggle expand tracks at init
-        if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
+        if ( showSubtracksCount = tracklist_obj.tracklist_el.attr('wpsstm-toggle-tracklist') ){
             tracklist_obj.toggleTracklist({
                 childrenMax:showSubtracksCount
             });
@@ -546,7 +545,7 @@ class WpsstmTracklist {
 
         setTimeout(function(){
             self.is_expired = true;
-            self.tracklist_el.addClass('wpsstm-expired-tracklist'); //for CSS
+            self.tracklist_el.addClass('wpsstm-is-expired');
             self.debug("tracklist has expired");
             
         }, remaining_ms );

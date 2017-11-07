@@ -10,26 +10,21 @@ function wpsstm_get_classes_attr($classes){
 }
 
 //https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes
-function wpsstm_get_html_attr($values_arr=null,$static_arr=null){
+function wpsstm_get_html_attr($arr=null){
     $str = null;
-    $values_arr = (array)$values_arr;
-    $static_arr = (array)$static_arr;
+    $arr = (array)$arr;
     
     //attributes with values
-    if (!empty($values_arr) ){
-        $values_arr = (array)$values_arr;
-        $str .= join(' ', array_map(function($key) use ($values_arr){
-           if(is_bool($values_arr[$key])){
-              return $values_arr[$key]?$key:'';
+    if (!empty($arr) ){
+        $arr = (array)$arr;
+        $str .= join(' ', array_map(function($key) use ($arr){
+           if(is_bool($arr[$key])){
+              return $arr[$key]?$key:'';
            }
-           return $key.'="'.$values_arr[$key].'"';
-        }, array_keys($values_arr)));
+           return $key.'="'.$arr[$key].'"';
+        }, array_keys($arr)));
     }
 
-    //static attributes
-    if ( !empty($static_arr) ){
-        $str.=' '.implode(' ',$static_arr);
-    }
     return $str;
 }
 

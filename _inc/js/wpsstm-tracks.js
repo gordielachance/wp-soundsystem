@@ -178,7 +178,7 @@
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        if ( track_obj.tracklist.options.toggle_tracklist ){
+        if ( track_obj.tracklist.is('[wpsstm-toggle-tracklist]') ){
             track_obj.tracklist.toggleTracklist({
                 childrenMax:newTracksCount
             });
@@ -202,7 +202,6 @@ class WpsstmTrack {
         self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
         self.sources_request =      null;
         self.did_sources_request =  false;
-        self.track_can_play =       undefined;
         self.sources =              [];
         self.current_source_idx =   undefined;
         self.playback_start =       null; //seconds - used by lastFM
@@ -226,7 +225,7 @@ class WpsstmTrack {
             
             deferredObject.resolve("can play track() : track #" + self.index + " has already sources, no need to request them");
             
-        }else if ( self.tracklist.options.autosource ) {
+        }else if ( self.tracklist.tracklist_el.hasClass('wpsstm-autosource') ) {
 
             var promise = self.get_sources_auto();
             
@@ -327,7 +326,7 @@ class WpsstmTrack {
 
         self.load_in_player(source_idx);
 
-        if ( self.tracklist.options.autosource ) {
+        if ( self.tracklist.tracklist_el.hasClass('wpsstm-autosource') ) {
             self.get_next_tracks_sources_auto();
         }
 
