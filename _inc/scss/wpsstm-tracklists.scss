@@ -50,7 +50,7 @@
         }
     }
     
-    &.wpsstm-is-expired{
+    &:not(.wpsstm-is-expired){
         .tracklist-nav{
             ul#wpsstm-tracklist-actions{
                 li#wpsstm-tracklist-action-refresh{

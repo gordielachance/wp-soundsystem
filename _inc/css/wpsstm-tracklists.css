@@ -192,7 +192,7 @@ ul.comma-list li:not(:last-child):after {
   list-style: none;
 }
 /* line 56, ../scss/wpsstm-tracklists.scss */
-.wpsstm-tracklist:not(.wpsstm-expired-tracklist) .tracklist-nav ul#wpsstm-tracklist-actions li#wpsstm-tracklist-action-refresh {
+.wpsstm-tracklist:not(.wpsstm-is-expired) .tracklist-nav ul#wpsstm-tracklist-actions li#wpsstm-tracklist-action-refresh {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
