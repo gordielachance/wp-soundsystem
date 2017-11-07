@@ -26,11 +26,12 @@ class WP_SoundSystem_Preset_LastFM_User_Scraper extends WP_SoundSystem_Live_Play
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Artist_Similar_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_LastFM_Similar_Artist_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
 
     var $preset_slug =      'last-fm-artist';
     var $preset_url =       'https://www.last.fm';
     var $pattern =          '~^https?://(?:www.)?last.fm/music/([^/]+)/\+similar~';
+    var $redirect_url =     'https://www.last.fm/player/station/music/%lastfm-artist-slug%?ajax=1';
     var $variables =        array(
         'lastfm-artist-slug' => null,
     );
@@ -60,7 +61,7 @@ class WP_SoundSystem_Preset_LastFM_Artist_Similar_Scraper extends WP_SoundSystem
 
 function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Similar_Scraper';
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Similar_Artist_Scraper';
     return $presets;
 }
 
