@@ -45,7 +45,7 @@
                     wpsstm_mediaElement.play();
                 }
             }else{
-                wpsstm_page_player.play_tracklist(track_obj.tracklist.index,track_obj.index);
+                track_obj.tracklist.play_subtrack(track_obj.index);
             }
 
         });
@@ -178,7 +178,7 @@
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        if ( track_obj.tracklist.is('[wpsstm-toggle-tracklist]') ){
+        if ( tracklist_el.is('[wpsstm-toggle-tracklist]') ){
             track_obj.tracklist.toggleTracklist({
                 childrenMax:newTracksCount
             });
@@ -260,7 +260,7 @@ class WpsstmTrack {
     }
 
     debug(msg){
-        var prefix = "WpsstmTrack #" + this.index + " in playlist #"+ this.tracklist.index +": ";
+        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.index + ": ";
         wpsstm_debug(msg,prefix);
     }
 
@@ -308,31 +308,6 @@ class WpsstmTrack {
 
     }
 
-    /*
-    Initialize a track : either play it if it has sources; or get the sources then call this function again (with after_ajax = true)
-    */
-
-    play_source(source_idx){
-
-        var self = this;
-
-        self.playback_start = 0; //reset playback start
-
-        var all_tracks = $('[itemprop="track"]');
-        all_tracks.removeClass('active playing buffering');
-        
-        var track_instances = self.get_track_instances();
-        track_instances.addClass('active buffering');
-
-        self.load_in_player(source_idx);
-
-        if ( self.tracklist.tracklist_el.hasClass('wpsstm-autosource') ) {
-            self.get_next_tracks_sources_auto();
-        }
-
-        return true;
-
-    }
     
     get_sources_auto(){
 
@@ -340,17 +315,17 @@ class WpsstmTrack {
 
         var deferredObject = $.Deferred();
 
-        var promise = self.get_track_sources_request();
+        var promise = self.maybe_load_sources();
         
         var track_instances = self.get_track_instances(); //repopulate instances - they might have changed since
         track_instances.addClass('loading-sources');
 
         promise.fail(function() {
-            deferredObject.reject("sources request failed for track #" + self.index);
+            deferredObject.reject();
         })
 
         promise.done(function(v) {
-            deferredObject.resolve(v);
+            deferredObject.resolve();
         })
 
         promise.always(function(data, textStatus, jqXHR) {
@@ -361,26 +336,7 @@ class WpsstmTrack {
         return deferredObject.promise();
     }
     
-    /*
-    Init a sources request for this track and the X following ones (if not populated yet)
-    */
-    
-    get_next_tracks_sources_auto() {
 
-        var self = this;
-        var tracklist = wpsstm_page_player.tracklists[self.tracklist.index];
-
-        var max_items = 4; //number of following tracks to preload
-        var rtrack_in = self.index + 1;
-        var rtrack_out = self.index + max_items + 1;
-
-        var tracks_slice = $(tracklist.tracks).slice( rtrack_in, rtrack_out );
-
-        $(tracks_slice).each(function(index, track_to_preload) {
-            if ( track_to_preload.sources.length > 0 ) return true; //continue;
-            track_to_preload.get_sources_auto();
-        });
-    }
     
     set_bottom_audio_el(){
         
@@ -436,12 +392,20 @@ class WpsstmTrack {
         $(bottom_el).show();//show in not done yet
     }
 
-    load_in_player(source_idx){
-        
+    play_source(source_idx){
+
         var self = this;
+        var deferredObject = $.Deferred();
+        
+        //is a track init!
+        if ( source_idx === undefined ){
+            source_idx = 0;
+        }
+        
+        var source_obj = self.get_source_obj(source_idx);
+        source_obj.debug("play source?");
 
         self.set_bottom_audio_el(); //build <audio/> el
-        self.debug("load_in_player");
         
         var audio_el = $('#wpsstm-player-audio');
 
@@ -464,17 +428,13 @@ class WpsstmTrack {
                 wpsstm_mediaElement = mediaElement;
 
                 //handle source
-                self.set_track_source(source_idx);
-                
+                self.load_track_source(source_idx);
+
                 self.debug("wpsstmMediaReady");
                 $(document).trigger( "wpsstmMediaReady",[wpsstm_mediaElement,self] ); //custom event
 
                 $(wpsstm_mediaElement).on('error', function(error) {
-                    var source_obj = self.get_source_obj(self.current_source_idx);
-                    console.log('player event - source error for source: '+self.current_source_idx);
-                    //self.debug(error);
-                    self.updateTrackClasses('loadeddata');
-                    self.skip_bad_source(self.current_source_idx);
+                    deferredObject.reject(source_obj);
 
                 });
 
@@ -492,6 +452,8 @@ class WpsstmTrack {
 
                     self.debug('player event - play');
                     self.updateTrackClasses('play');
+                    source_obj.debug("play source!");
+                    deferredObject.resolve(source_obj);
                 });
 
                 $(wpsstm_mediaElement).on('pause', function() {
@@ -512,15 +474,37 @@ class WpsstmTrack {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
                 console.log("mediaElement error");
+                deferredObject.reject();
             }
         });
+        
+        return deferredObject.promise();
 
+    }
+    
+    maybe_load_sources(){
+        var self = this;
+        var deferredObject = $.Deferred();
+        if (self.sources.length > 0){
+            deferredObject.resolve();
+        }else{
+            var promise = self.get_track_sources_request();
+            promise.fail(function() {
+                deferredObject.reject();
+            })
+            promise.done(function(v) {
+                deferredObject.resolve(v);
+            })
+        }
+        return deferredObject.promise();
     }
 
     get_track_sources_request() {
 
         var self = this;
         var deferredObject = $.Deferred();
+        
+        self.debug("get_track_sources_request");
         
         if ( self.did_sources_request ) {
             
@@ -598,6 +582,10 @@ class WpsstmTrack {
     
     get_source_obj(source_idx){
         var self = this;
+        
+        if(typeof source_idx === 'undefined'){
+            source_idx = self.current_source_idx;
+        }
 
         source_idx = Number(source_idx);
         var source_obj = self.sources[source_idx];
@@ -619,7 +607,7 @@ class WpsstmTrack {
         $(source_instances).addClass('wpsstm-active-source');
     }
     
-    set_track_source(idx){
+    load_track_source(idx){
         var self = this;
         
         if (idx === undefined) idx = 0;
@@ -630,7 +618,7 @@ class WpsstmTrack {
 
         if (self.current_source_idx !== idx){
 
-            self.debug("set_track_source() #" + idx + ": "+new_source.src);
+            new_source_obj.debug("load_track_source: " + new_source.src);
             var source_instances = new_source_obj.get_source_instances();
             source_instances.addClass('wpsstm-active-source');
             
@@ -640,68 +628,6 @@ class WpsstmTrack {
         wpsstm_mediaElement.pause();
         wpsstm_mediaElement.setSrc(new_source.src);
         wpsstm_mediaElement.load();
-        
-        self.current_source_idx = idx;
-        self.highligh_source(idx);
-
-    }
-    
-    skip_bad_source(source_idx){
-
-        //https://github.com/mediaelement/mediaelement/issues/2179#issuecomment-297090067
-        
-        var self = this;
-        var source_obj = self.get_source_obj(source_idx);
-        
-        self.debug("skip_bad_source(): #" + source_idx + ": " +source_obj.src);
-
-        source_obj.source_can_play = false;
-        self.current_source_idx = undefined;
-        
-        var source_instances = source_obj.get_source_instances();
-        source_instances.removeClass('wpsstm-active-source').addClass('wpsstm-bad-source');
-        
-        //
-        var new_source_idx;
-        
-        //make a reordered array of sources
-        var sources_before = self.sources.slice(0,source_idx);
-        var sources_after = self.sources.slice(source_idx+1); //do not including this one
-        var sources_reordered = sources_after.concat(sources_before);
-
-        $( sources_reordered ).each(function(i, source_attr) {
-            if (!source_attr.source_can_play) return true; //continue;
-            new_source_idx = source_attr.index;
-            return false;//break
-        });
-        
-        if (new_source_idx !== undefined){
-            
-            self.set_track_source(new_source_idx);
-            
-        }else{
-           
-            if (!self.did_sources_request){
-                self.debug("skip_bad_source() - No valid sources found but no sources requested yet - unset sources and try again");
-                self.debug(self);
-                
-                self.sources = []; //unset sources so autosource will work
-                
-                self.can_play_track().then(function(value) {
-                    self.play_source();
-                    return;
-                }, function(error) {
-                    self.debug(error);
-                    return;
-                });
-
- 
-            }else{
-                //No more sources - Play next song if any
-                self.debug("skip_bad_source() - No valid sources found");
-                this.tracklist.next_track_jump();
-            }
-       }
 
     }
     

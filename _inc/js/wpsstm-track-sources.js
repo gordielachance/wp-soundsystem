@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
         //click on source trigger
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
             e.preventDefault();
-            source_obj.play_source();
+            source_obj.track.tracklist.play_subtrack(source_obj.track.index,source_obj.index);
         });
         
         //delete source
@@ -192,7 +192,7 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = "WpsstmTrackSource #" + this.index + " in playlist #"+ this.track.tracklist.index +"; track #"+ this.track.index +": ";
+        var prefix = " WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index + ": ";
         wpsstm_debug(msg,prefix);
     }
 
@@ -212,11 +212,6 @@ class WpsstmTrackSource {
         }
     }
 
-    play_source(){
-        var self = this;
-        wpsstm_page_player.play_tracklist(self.track.tracklist.index,self.track.index,self.index);
-    }
-    
     delete_source(){
         
         var self = this;

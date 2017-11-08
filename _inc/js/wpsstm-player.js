@@ -131,14 +131,6 @@ $(document).ready(function(){
 
 });
 
-$(document).on( "wpsstmPageDomReady", function( event ) {
-    
-    //Autoplay at init
-    wpsstm_page_player.page_autoplay();
-
-    
-});
-
 //Confirmation popup is a media is playing and that we leave the page
 
 $(window).bind('beforeunload', function(){
@@ -151,7 +143,7 @@ class WpsstmPagePlayer {
     constructor(){
         var self = this;
         self.debug("new WpsstmPagePlayer()");
-        self.current_tracklist_idx;
+        self.current_tracklist_idx      = undefined;
         self.tracklists                 = [];
         self.tracklists_shuffle_order   = [];
         self.is_shuffle                 = ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
@@ -174,8 +166,6 @@ class WpsstmPagePlayer {
         $(all_tracklists).each(function( i, tracklist_el ) {
 
             var tracklist = new WpsstmTracklist(tracklist_el,i);
-            self.tracklists.push(tracklist);
-            self.tracklists_shuffle_order.push(i);  
 
         });
         
@@ -184,51 +174,6 @@ class WpsstmPagePlayer {
         //shuffle
         self.tracklists_shuffle_order = wpsstm_shuffle(self.tracklists_shuffle_order);
         
-    }
-    
-    page_autoplay(){
-        //get playlists where autoplay is enabled
-        var autoplay_tracklists = [];
-
-        $(wpsstm_page_player.tracklists).each(function( i, tracklist_obj ) {
-            if ( tracklist_obj.tracklist_el.hasClass('wpsstm-autoplay') ){
-                autoplay_tracklists.push(tracklist_obj);
-            }
-        });
-
-        if (autoplay_tracklists.length === 0) return;
-
-        /*
-        wpsstm_page_player.debug("page autoplay : trying to start first autoplay tracklist available...");
-        var idx_list = autoplay_tracklists.map(function(a) {return a.index;});
-        wpsstm_page_player.debug(idx_list);
-        */
-
-        //play first playable one
-        wpsstm_page_player.get_first_playable_tracklist(autoplay_tracklists).then(
-            function(tracklist_obj) {
-                //play first track
-                tracklist_obj.play_subtrack();
-            }, function(error_msg) {
-                self.debug(error_msg);
-            }
-        );
-    }
-
-    
-    play_tracklist(tracklist_idx,track_idx,source_idx){
-
-        var self = this;
-        
-        var debug_msg = "play_tracklist()";
-        if(typeof tracklist_idx !== 'undefined') debug_msg += " #" + tracklist_idx;
-        if(typeof track_idx !== 'undefined') debug_msg += " track #" + track_idx;
-        if(typeof source_idx !== 'undefined') debug_msg += " source #" + source_idx;
-        self.debug(debug_msg);
-        
-        var tracklist_obj = self.get_page_tracklist(tracklist_idx);
-        return tracklist_obj.play_subtrack(track_idx,source_idx);
-
     }
 
     get_page_tracklist(tracklist_idx){
@@ -285,6 +230,8 @@ class WpsstmPagePlayer {
         if ( (tracklists_reordered.length == 0) && ( wpsstm_page_player.can_repeat ) ){
             tracklists_reordered.push(current_tracklist);
         }
+        
+        
 
         self.get_first_playable_tracklist(tracklists_reordered).then(
             function(tracklist_obj) {
@@ -343,7 +290,7 @@ class WpsstmPagePlayer {
     }
     
     get_first_playable_tracklist(tracklists){
-        
+
         var self = this;
         var hasPlayable = $.Deferred();
 
@@ -360,41 +307,20 @@ class WpsstmPagePlayer {
         (function iterateTracklist(index) {
 
             if (index >= tracklists.length) {
-                hasPlayable.reject("unable to find a playable tracklist");
+                hasPlayable.reject();
                 return;
             }
             
             var tracklist_obj = tracklists[index];
-            
-            //maybe refresh tracklist
-            if ( tracklist_obj.is_expired ){
-                tracklist_obj.get_tracklist_request().then(
-                    function(success){
-                        tracklist_obj.get_first_playable_track().then(
-                            function(success_msg){
-                                hasPlayable.resolve(tracklist_obj);
-                            },
-                            function(error_msg){
-                                iterateTracklist(index + 1);
-                            }
-                        );
-                    },
-                    function(error){
-                        iterateTracklist(index + 1);
-                    }
-                );
-                
-            }else{
-                tracklist_obj.get_first_playable_track().then(
-                    function(success_msg){
-                        hasPlayable.resolve(tracklist_obj);
-                    },
-                    function(error_msg){
-                        iterateTracklist(index + 1);
-                    }
-                );
-                
-            }
+ 
+            tracklist_obj.init().then(
+                function(success_msg){
+                    hasPlayable.resolve(tracklist_obj);
+                },
+                function(error_msg){
+                    iterateTracklist(index + 1);
+                }
+            );
 
         })(0);
 
