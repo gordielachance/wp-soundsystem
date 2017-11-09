@@ -205,7 +205,7 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $(document).on( "wpsstmMediaReady", function( event, media, track ) {
+    $(document).on( "wpsstmSourceMediaReady", function( event, media, track ) {
 
         $(media).on('loadeddata', function() {
             if (wpsstm_lastfm.has_user_scrobbler){

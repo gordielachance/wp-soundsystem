@@ -214,7 +214,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 = 1.6.1 =
 
-* JS: better way to iterate promises in get_first_playable_tracklist() and get_first_playable_track()
+* JS: better way to iterate promises in play_first_availablelist() and play_first_available()
 * tracklists : fixed tracks reordering and tracks removing
 * improved tracklists/tracks/sources classes HTML attribute
 * load tracklist options as a json string in the 'data-wpsstm-tracklist-options' HTML attribute

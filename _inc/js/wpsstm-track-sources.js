@@ -185,7 +185,8 @@ class WpsstmTrackSource {
         self.post_id =          Number(self.source_el.attr('data-wpsstm-source-id'));
         self.src =              self.source_el.attr('data-wpsstm-source-src');
         self.type =             self.source_el.attr('data-wpsstm-source-type');
-        self.source_can_play = true;
+        self.source_can_play =  true;
+        self.media =            undefined;
         
         //self.debug("new WpsstmTrackSource");
 
@@ -266,7 +267,90 @@ class WpsstmTrackSource {
         }, {});
         return filtered;
     }
-    
+
+    init_source(){
+
+        var self = this;
+        var success = $.Deferred();
+        
+
+        var new_source = { src: self.src, 'type': self.type };
+        
+        self.debug("init_source: " + new_source.src);
+        
+        self.debug("play source?");
+
+        var audio_el = $('#wpsstm-player-audio');
+        var source_instances = self.get_source_instances();
+
+        $(audio_el).mediaelementplayer({
+            classPrefix: 'mejs-',
+            // All the config related to HLS
+            hls: {
+                debug:          wpsstmL10n.debug,
+                autoStartLoad:  true
+            },
+            // Do not forget to put a final slash (/)
+            pluginPath: 'https://cdnjs.com/libraries/mediaelement/',
+            //audioWidth: '100%',
+            stretching: 'responsive',
+            features: ['playpause','loop','progress','current','duration','volume'],
+            loop: false,
+            success: function(mediaElement, originalNode, player) {
+
+                self.media = mediaElement;
+                wpsstm_page_player.current_media = self.media;
+
+                self.debug("wpsstmSourceMediaReady");
+                $(document).trigger( "wpsstmSourceMediaReady",[self.media,self] ); //custom event
+
+                $(self.media).on('error', function(error) {
+
+                    self.can_play_source = false;
+                    self.debug('media - error');
+
+                    source_instances.addClass('wpsstm-bad-source');
+
+                    success.reject(error);
+                });
+
+                $(self.media).on('loadeddata', function() {
+
+                    self.can_play_source = true;
+
+                    self.debug('media - loadeddata');
+                    success.resolve();
+                });
+
+                $(self.media).on('play', function() {
+                    var track_instances = self.track.get_track_instances();
+                    var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
+                    $(trackinfo_sources).removeClass('wpsstm-active-source');
+                    
+                    source_instances.addClass('wpsstm-active-source');
+                });
+                
+                
+                
+            },error(mediaElement) {
+                // Your action when mediaElement had an error loading
+                //TO FIX is this required ?
+                console.log("mediaElement error");
+                var source_instances = self.get_source_instances();
+                source_instances.addClass('wpsstm-bad-source');
+                success.reject();
+            }
+        });
+
+        //player
+        self.media.pause();
+        self.media.setSrc(new_source.src);
+        self.media.load();
+        
+        return success.promise();
+
+    }
+
 }
 
 
