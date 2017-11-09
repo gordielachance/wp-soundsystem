@@ -374,36 +374,6 @@ class WpsstmTracklist {
         return deferredTracklist.promise();
 
     }
-    
-    /*
-    Get the first playable track from an array - which is useful if we reverse; slice, etc. tracks.
-    */
-    
-    get_first_available(tracks){
-        
-        var self = this;
-        var first = undefined;
-
-        if (typeof tracks === 'undefined'){
-            tracks = self.tracks;
-        }
-        
-        if (tracks.length === 0){
-            self.debug('get_first_available - empty tracks input');
-            return;
-        }
-
-        //reject only if we CANNOT play this track. If we don't know yet or that we can, return track.
-        $.each(tracks, function( index, track_obj ) {
-            if (track_obj.can_play !== false){ 
-                first = track_obj;
-                return false;//break
-            }
-        });
-        
-        return first;
-        
-    }
 
     get_track_obj(track_idx){
         var self = this;
@@ -470,11 +440,12 @@ class WpsstmTracklist {
             tracks_after = tracks.slice(current_track_idx+1).reverse(); 
         }
 
+        //which one should we play?
         var tracks_reordered = tracks_before.concat(tracks_after);
-        
-        
-        //which is the first track of tracklist ?
-        var track_obj = self.get_first_available(tracks_reordered);
+        var tracks_playable = tracks_reordered.filter(function (track_obj) {
+            return (track_obj.can_play !== false);
+        });
+        var track_obj = tracks_playable[0];
         
         if (!track_obj){
             console.log("previous_track_jump: unable to identify first track for tracklist #" + self.index);
@@ -515,10 +486,12 @@ class WpsstmTracklist {
             tracks_before = tracks.slice(0,current_track_idx);
         }
 
+        //which one should we play?
         var tracks_reordered = tracks_after.concat(tracks_before);
-        
-        //which is the first track of tracklist ?
-        var track_obj = self.get_first_available(tracks_reordered);
+        var tracks_playable = tracks_reordered.filter(function (track_obj) {
+            return (track_obj.can_play !== false);
+        });
+        var track_obj = tracks_playable[0];
 
         if (!track_obj){
             console.log("next_track_jump: unable to identify next track in tracklist #" + self.index);

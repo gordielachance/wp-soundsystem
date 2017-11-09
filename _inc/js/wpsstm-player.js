@@ -230,9 +230,12 @@ class WpsstmPagePlayer {
             tracklists_after = tracklists.slice(current_tracklist_idx+1).reverse(); 
         }
 
-        //which should we play ?
+        //which one should we play?
         var tracklists_reordered = tracklists_before.concat(tracklists_after);
-        var tracklist_obj = self.get_first_availablelist(tracklists_reordered);
+        var tracklists_playable = tracklists_reordered.filter(function (tracklist_obj) {
+            return (tracklist_obj.can_play !== false);
+        });
+        var tracklist_obj = tracklists_playable[0];
         
         if (!tracklist_obj){
             console.log("next_track_jump: unable to identify next tracklist in page");
@@ -273,10 +276,12 @@ class WpsstmPagePlayer {
             tracklists_before = tracklists.slice(0,current_tracklist_idx);
         }
 
+        //which one should we play?
         var tracklists_reordered = tracklists_after.concat(tracklists_before);
-        
-        //which is the first tracklist of tracklistlist ?
-        var tracklist_obj = self.get_first_availablelist(tracklists_reordered);
+        var tracklists_playable = tracklists_reordered.filter(function (tracklist_obj) {
+            return (tracklist_obj.can_play !== false);
+        });
+        var tracklist_obj = tracklists_playable[0];
         
         if (!tracklist_obj){
             console.log("next_tracklist_jump: unable to identify next tracklist in tracklistlist #" + self.index);
@@ -296,36 +301,6 @@ class WpsstmPagePlayer {
             }
         }
 
-    }
-    
-    /*
-    Get the first playable track from an array - which is useful if we reverse; slice, etc. tracks.
-    */
-    
-    get_first_availablelist(tracklists){
-        
-        var self = this;
-        var first = undefined;
-
-        if (typeof tracklists === 'undefined'){
-            tracklists = self.tracklists;
-        }
-        
-        if (tracklists.length === 0){
-            self.debug('get_first_availablelist - empty tracklists input');
-            return;
-        }
-
-        //reject only if we CANNOT play this track. If we don't know yet or that we can, return track.
-        $.each(tracklist_obj, function( index, tracklist_obj ) {
-            if (tracklist_obj.can_play !== false){ 
-                first = tracklist_obj;
-                return false; //break
-            }
-        });
-        
-        return first;
-        
     }
     
     end_current_tracklist(){
