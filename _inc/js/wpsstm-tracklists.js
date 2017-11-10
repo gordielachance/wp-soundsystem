@@ -198,6 +198,7 @@ class WpsstmTracklist {
         if (typeof self.can_play !== 'undefined'){ //we already did it.
             initCheck.resolve();
         }else{
+            
             var upToDateTracklist = $.Deferred();
 
             if ( self.tracklist_el.hasClass('tracklist-ajaxed') ){ //load tracks if tracklist is ajaxed
@@ -212,7 +213,6 @@ class WpsstmTracklist {
                     self.debug("init refresh did NOT succeed");
                     initCheck.reject();
                 });
- 
                 
             }else{
                 self.debug("init refresh not needed");
@@ -309,14 +309,6 @@ class WpsstmTracklist {
                 data:ajax_data,
                 dataType: 'json'
             });
-            
-
-
-            //bottom notice
-            var notice_slug = 'refresh-' + self.index;
-            var tracklist_title = self.tracklist_el.find('[itemprop="name"]').first().text();
-            var refresh_notice_bottom = $('<i class="fa fa-circle-o-notch fa-fw fa-spin"></i> '+wpsstmPlayer.refreshing_text+' <em>'+tracklist_title+'</em>');
-            wpsstm_bottom_notice(notice_slug,refresh_notice_bottom,false);
 
         }else{ 
             //already requesting
@@ -347,10 +339,6 @@ class WpsstmTracklist {
         });  
 
         self.tracklist_request.always(function() {
-
-            //remove notice
-            var notice_slug = 'refresh-' + self.index;
-            $('#wpsstm-bottom-notice-' + notice_slug).remove();
 
             tracklist_instances.removeClass('tracklist-loading');
             self.tracklist_request = undefined;
@@ -559,6 +547,7 @@ class WpsstmTracklist {
             }
             
             wpsstm_page_player.current_tracklist_idx = self.index;
+            
 
             self.debug("play_subtrack - track #" + track_idx + ", source#" + source_idx );
 
@@ -575,6 +564,9 @@ class WpsstmTracklist {
                         success.reject(error);
                         return;
                     }
+                    
+                    track_instances = track.get_track_instances();
+                    track_instances.addClass('track-loading');
 
                     track.playback_start = 0; //reset playback start
 
@@ -623,6 +615,7 @@ class WpsstmTracklist {
             });
 
             success.always(function(reason) {
+                
                 if ( track ){
                     track_instances = track.get_track_instances();
                     track_instances.removeClass('track-loading');
