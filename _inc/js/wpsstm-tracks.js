@@ -328,9 +328,7 @@ class WpsstmTrack {
                         wpsstm_page_player.current_tracklist_idx = source_obj.track.tracklist.index;
                         source_obj.track.tracklist.current_track_idx = source_obj.track.index;
                         source_obj.track.current_source_idx = source_obj.index;
-                        
-                        console.log(wpsstm_page_player);
-                        
+
                         success.resolve(source_obj);
                     });
 
