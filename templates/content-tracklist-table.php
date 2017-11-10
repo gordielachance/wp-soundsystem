@@ -56,7 +56,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     
     //not logged notice
     //TO FIX TO MOVE
-    if ( $tracklist->tracks && !get_current_user_id() ){
+    if ( $tracklist->post_id && $tracklist->tracks && !get_current_user_id() ){
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
         $wp_auth_text = sprintf(__('You could save this playlist if you were logged.  Login or subscribe %s.','wpsstm'),$wp_auth_link);

@@ -19,11 +19,6 @@ $(document).ready(function(){
     bt_prev_track =             $('#wpsstm-player-extra-previous-track');
     bt_next_track =             $('#wpsstm-player-extra-next-track');
 
-    //init tracklists
-    var all_tracklists = $( ".wpsstm-tracklist" );
-
-    wpsstm_page_player.populate_tracklists(all_tracklists);
-
     /*
     Player : previous / next
     */
@@ -149,6 +144,7 @@ class WpsstmPagePlayer {
         self.tracklists_shuffle_order   = [];
         self.is_shuffle                 = ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         self.can_repeat                    = ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
+ 
     }
 
     debug(msg){
@@ -156,25 +152,32 @@ class WpsstmPagePlayer {
         wpsstm_debug(msg,prefix);
     }
 
-    populate_tracklists(all_tracklists){
+    init_page_tracklists(){
         
         var self = this;
+        
+        var all_tracklists = $( ".wpsstm-tracklist" );
 
         if ( $(all_tracklists).length <= 0 ) return;
         
-        self.debug("populate_tracklists()");
+        self.debug("init_page_tracklists()");
 
-        $(all_tracklists).each(function( i, tracklist_el ) {
 
-            var tracklist = new WpsstmTracklist(tracklist_el,i);
-
+        $(all_tracklists).each(function( tracklist_idx, tracklist_el ) {
+            var tracklist = new WpsstmTracklist(tracklist_el,tracklist_idx);
+            tracklist.maybe_refresh();
+            wpsstm_page_player.tracklists.push(tracklist);
+            wpsstm_page_player.tracklists_shuffle_order.push(tracklist_idx);
         });
         
-        $(document).trigger( "wpsstmPageDomReady"); //custom event
-
+        
+        
+        /*
         //shuffle
         self.tracklists_shuffle_order = wpsstm_shuffle(self.tracklists_shuffle_order);
         
+        $(document).trigger( "PageTracklistsInit"); //custom event
+        */
     }
 
     get_page_tracklist(tracklist_idx){
@@ -186,7 +189,8 @@ class WpsstmPagePlayer {
         }
 
         tracklist_idx = Number(tracklist_idx);
-        var tracklist_obj = this.tracklists[tracklist_idx];
+
+        var tracklist_obj = self.tracklists[tracklist_idx];
         if(typeof tracklist_obj === 'undefined') return false;
         return tracklist_obj;
     }
@@ -211,7 +215,7 @@ class WpsstmPagePlayer {
     }
 
     previous_tracklist_jump(){
-        
+
         var self = this;
         var current_tracklist_idx = self.current_tracklist_idx;
         current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(current_tracklist_idx);
@@ -293,16 +297,14 @@ class WpsstmPagePlayer {
             return;
         }
         
-        if ( tracklist_obj.index === last_tracklist_idx ){ //is last tracklist
+        if ( tracklist_obj.index === last_tracklist_idx ){ //is last tracklist  
             if ( wpsstm_page_player.can_repeat ){
-                self.tracklists[0].play_subtrack();//play first one
+                tracklist_obj = self.tracklists[0];//play first one
             }else{
                 self.debug("next_tracklist_jump: is the last tracklist, and can_repeat is disabled.");
+                return;
             }
-            return;
             
-        }else{ 
-            tracklist_obj.play_subtrack();
         }
 
         console.log("TITI");
@@ -321,6 +323,27 @@ class WpsstmPagePlayer {
         }
     }
     
+    autoplay(){
+        var self = this;
+        
+        //there is already something playing
+        if (self.current_tracklist_idx !== undefined) return;
+        
+        var autoplay_tracklists = self.tracklists;
+        var autoplay_tracklists = autoplay_tracklists.filter(function (tracklist_obj) {
+            return ( tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
+        });
+
+        var tracklist = autoplay_tracklists[0];
+        if (tracklist){
+            tracklist.debug("autoplay");
+            tracklist.play_subtrack();
+        }
+
+    }
+    
 }
 
 wpsstm_page_player = new WpsstmPagePlayer();
+wpsstm_page_player.init_page_tracklists();
+wpsstm_page_player.autoplay();

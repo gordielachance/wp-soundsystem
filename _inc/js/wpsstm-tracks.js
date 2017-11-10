@@ -192,25 +192,24 @@
 class WpsstmTrack {
     constructor(track_html,tracklist,track_idx) {
 
-        var self =                  this;
-        self.tracklist =            tracklist;
-        self.track_el =             $(track_html);
+        this.tracklist =            tracklist;
+        this.track_el =             $(track_html);
         
-        self.index =                Number(self.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
-        self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
-        self.title =                self.track_el.find('[itemprop="name"]').text();
-        self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
-        self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
-        self.sources_request =      null;
-        self.did_sources_request =  false;
-        self.sources =              [];
-        self.current_source_idx =   undefined;
-        self.playback_start =       null; //seconds - used by lastFM
+        this.index =                Number(this.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
+        this.artist =               this.track_el.find('[itemprop="byArtist"]').text();
+        this.title =                this.track_el.find('[itemprop="name"]').text();
+        this.album =                this.track_el.find('[itemprop="inAlbum"]').text();
+        this.post_id =              Number(this.track_el.attr('data-wpsstm-track-id'));
+        this.sources_request =      null;
+        this.did_sources_request =  false;
+        this.sources =              [];
+        this.current_source_idx =   undefined;
+        this.playback_start =       null; //seconds - used by lastFM
 
         //populate existing sources
-        self.populate_html_sources();
+        this.populate_html_sources();
         
-        $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
+        $(document).trigger("wpsstmTrackDomReady",[this]); //custom event
 
     }
 

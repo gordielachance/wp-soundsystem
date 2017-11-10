@@ -972,9 +972,9 @@ class WP_SoundSystem_Tracklist{
         $classes = array(
             'wpsstm-tracklist',
         );
-        
+        $classes[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
         $classes[] = ( $this->get_options('hide_empty_columns') == "on" ) ? 'wpsstm-hide-empty-columns' : null;
-        $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'wpsstm-autoplay' : null;
+        $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'tracklist-autoplay' : null;
         $classes[] = ( $this->get_options('autosource') == "on" ) ? 'tracklist-autosource' : null;
         $classes[] = ( $this->get_options('wpsstm-can-play') == "on" ) ? 'wpsstm-can-play' : null;
 

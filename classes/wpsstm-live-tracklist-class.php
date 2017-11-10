@@ -996,8 +996,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $defaults = array(
             'wpsstm-live-tracklist',
         );
-        
-        $defaults[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
+
         $defaults[] = ( $this->is_expired ) ? 'tracklist-expired' : null;
 
         $classes = array_merge($defaults,(array)$extra_classes);

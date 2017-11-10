@@ -177,18 +177,17 @@ jQuery(document).ready(function($){
 class WpsstmTrackSource {
     constructor(source_html,track) {
 
-        var self =              this;
-        self.track =            track;
-        self.source_el =        $(source_html);
+        this.track =            track;
+        this.source_el =        $(source_html);
         
-        self.index =            Number(self.source_el.attr('data-wpsstm-source-idx'));
-        self.post_id =          Number(self.source_el.attr('data-wpsstm-source-id'));
-        self.src =              self.source_el.attr('data-wpsstm-source-src');
-        self.type =             self.source_el.attr('data-wpsstm-source-type');
-        self.source_can_play =  true;
-        self.media =            undefined;
+        this.index =            Number(this.source_el.attr('data-wpsstm-source-idx'));
+        this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
+        this.src =              this.source_el.attr('data-wpsstm-source-src');
+        this.type =             this.source_el.attr('data-wpsstm-source-type');
+        this.source_can_play =  true;
+        this.media =            undefined;
         
-        //self.debug("new WpsstmTrackSource");
+        //this.debug("new WpsstmTrackSource");
 
     }
     

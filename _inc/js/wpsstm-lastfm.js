@@ -201,7 +201,7 @@ class WpsstmLastFM {
 
 (function($){
     
-    $(document).on( "wpsstmPageDomReady", function( event ) {
+    $(document).on( "PageTracklistsInit", function( event ) {
         wpsstm_lastfm.init();
     });
     
