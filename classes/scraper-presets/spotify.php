@@ -57,7 +57,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         return parent::get_all_raw_tracks();
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
         if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
         

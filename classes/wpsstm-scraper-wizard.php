@@ -233,7 +233,7 @@ class WP_SoundSystem_Core_Wizard{
         if( $post->ID != $this->frontend_wizard_page_id ) return $title;
    
         $wpsstm_tracklist = $this->get_wizard_tracklist();
-        if ( $tracklist_title = $wpsstm_tracklist->get_tracklist_title() ){
+        if ( $tracklist_title = $wpsstm_tracklist->get_remote_title() ){
             $title['title'] = sprintf('%s - %s',$title['title'],$tracklist_title);
         }
 
@@ -346,6 +346,7 @@ class WP_SoundSystem_Core_Wizard{
             //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
 
             $post_args = array(
+                'post_title'    => $tracklist->title,
                 'post_type'     => wpsstm()->post_type_live_playlist,
                 'post_status'   => 'publish',
                 'post_author'   => wpsstm()->get_options('community_user_id'),

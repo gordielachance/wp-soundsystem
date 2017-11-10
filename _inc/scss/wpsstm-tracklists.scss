@@ -35,7 +35,7 @@
         visibility:hidden;
     }
     
-    &.loading{
+    &.tracklist-loading{
         @extend .wpsstm-loading-el;
         .wpsstm-tracklist-loading-icon{
             visibility:visible;
@@ -50,7 +50,7 @@
         }
     }
     
-    &:not(.wpsstm-is-expired){
+    &:not(.tracklist-expired){
         .tracklist-nav{
             ul#wpsstm-tracklist-actions{
                 li#wpsstm-tracklist-action-refresh{
@@ -71,29 +71,25 @@
                     @include opacity(.25);
                 } 
 
-                &:not(.active){
+                &:not(.track-active){
                     td{
                         @include opacity(.5);
                     }
                 }
-                
-                &.buffering{
-                    pointer-events: none;
-                }
-                
-                &.has-played,&:hover{
+
+                &.track-has-played,&:hover{
                     td{
                         @include opacity(.75);
                     }
                 }
 
-                &.active{
+                &.track-active{
                     td{
                         @include opacity(1);
                     }
                 }
 
-                .wpsstm-play-track{
+                .track-play-bt{
                     .wpsstm-player-icon{
                         display:none;
                         &.wpsstm-player-icon-play{
@@ -102,7 +98,8 @@
                     }
                 }
 
-                &.buffering,&.loading-sources{
+                &.track-loading{
+                    pointer-events: none;
                     .wpsstm-track-position{
                         .wpsstm-player-icon-loading{
                             display:inline-block;
@@ -112,7 +109,7 @@
                         }
                     }
                 }
-                &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
+                &.track-playing .track-play-bt{
                     .wpsstm-player-icon{
                         display:none;
                     }
@@ -121,7 +118,7 @@
                     }
                 }
 
-                &.error .wpsstm-play-track{
+                &.track-error .track-play-bt{
                     .wpsstm-player-icon{
                         display:none;
                     }

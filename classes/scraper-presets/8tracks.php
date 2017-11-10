@@ -68,7 +68,7 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
         
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         $mix_data = $this->get_mix_data();
         if ( is_wp_error($mix_data) ) return $mix_data;
         return wpsstm_get_array_value('name', $mix_data);

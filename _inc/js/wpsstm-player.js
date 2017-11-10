@@ -215,7 +215,7 @@ class WpsstmPagePlayer {
         var self = this;
         var current_tracklist_idx = self.current_tracklist_idx;
         current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(current_tracklist_idx);
-        var first_track_idx = self.get_maybe_unshuffle_tracklist_idx(0);
+        var first_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(0);
         
         if ( self.current_tracklist_idx === 'undefined'){
             self.debug('next_track_jump failed: no current tracklist');
@@ -238,42 +238,42 @@ class WpsstmPagePlayer {
         var tracklist_obj = tracklists_playable[0];
         
         if (!tracklist_obj){
-            console.log("next_track_jump: unable to identify next tracklist in page");
+            self.debug("next_track_jump: unable to identify next tracklist in page");
             return;
         }
 
-        if ( tracklist_obj.index !== first_track_idx ){
-            tracklist_obj.play_subtrack();
-        }else{ //current tracklist is first tracklist
+        if ( current_tracklist_idx === first_tracklist_idx ){
             if ( wpsstm_page_player.can_repeat ){
                 tracklist_obj.play_subtrack();
-                return;
             }else{
                 self.debug("previous_tracklist_jump is the first tracklist, and can_repeat is disabled.");
-                return;
             }
+            
+            return;
+            
+        }else{  //current tracklist is first tracklist
+            tracklist_obj.play_subtrack();
         }
 
     }
     
     next_tracklist_jump(){
-        
+
         var self = this;
-        var current_tracklist_idx = self.current_tracklist_idx;
-        current_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(current_tracklist_idx);
-        var last_tracklist = self.tracklists[self.tracklists.length-1];
+        var current_tracklist = self.get_page_tracklist();
+        var tracklist_idx = current_tracklist.index;
+        tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(tracklist_idx);
         
-        if ( self.current_tracklist_idx === 'undefined'){
-            self.debug('next_tracklist_jump failed: no current tracklist');
-            return;
-        }
+        var last_tracklist = self.tracklists[self.tracklists.length-1];
+        var last_tracklist_idx = last_tracklist.index;
+        last_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(last_tracklist_idx);
 
         var tracklists = $(self.tracklists).get();
-        var tracklists_after = tracklists.slice(current_tracklist_idx+1); 
+        var tracklists_after = tracklists.slice(tracklist_idx+1); 
         var tracklists_before = [];
 
         if ( wpsstm_page_player.can_repeat ){
-            tracklists_before = tracklists.slice(0,current_tracklist_idx);
+            tracklists_before = tracklists.slice(0,tracklist_idx);
         }
 
         //which one should we play?
@@ -284,22 +284,29 @@ class WpsstmPagePlayer {
         var tracklist_obj = tracklists_playable[0];
         
         if (!tracklist_obj){
-            console.log("next_tracklist_jump: unable to identify next tracklist in tracklistlist #" + self.index);
+            self.debug("next_tracklist_jump: unable to identify next tracklist in tracklist #" + self.index);
             return;
         }
-       
-        //current tracklist is last tracklist
-        if ( tracklist_obj.index !== last_tracklist.index ){
-            self.play_subtracklist();
-        }else{ //current tracklist is last tracklist
-            if ( wpsstm_page_player.can_repeat ){
-                wpsstm_page_player.next_tracklistlist_jump();
-                return;
-            }else{
-                self.debug("next_tracklist_jump for tracklistlist #"+self.index+" is the last tracklist, and can_repeat is disabled.");
-                return;
-            }
+        
+        if ( tracklist_obj.index === tracklist_idx ){
+            self.debug("we are already playing that tracklist#" + tracklist_idx);
+            return;
         }
+        
+        if ( tracklist_obj.index === last_tracklist_idx ){ //is last tracklist
+            if ( wpsstm_page_player.can_repeat ){
+                self.tracklists[0].play_subtrack();//play first one
+            }else{
+                self.debug("next_tracklist_jump: is the last tracklist, and can_repeat is disabled.");
+            }
+            return;
+            
+        }else{ 
+            tracklist_obj.play_subtrack();
+        }
+
+        console.log("TITI");
+        tracklist_obj.play_subtrack();
 
     }
     

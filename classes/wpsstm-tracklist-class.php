@@ -27,6 +27,8 @@ class WP_SoundSystem_Tracklist{
     );
     
     var $tracks_strict = true; //requires a title AND an artist
+    
+    public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     var $paged_var = 'tracklist_page';
     
@@ -973,7 +975,7 @@ class WP_SoundSystem_Tracklist{
         
         $classes[] = ( $this->get_options('hide_empty_columns') == "on" ) ? 'wpsstm-hide-empty-columns' : null;
         $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'wpsstm-autoplay' : null;
-        $classes[] = ( $this->get_options('autosource') == "on" ) ? 'wpsstm-autosource' : null;
+        $classes[] = ( $this->get_options('autosource') == "on" ) ? 'tracklist-autosource' : null;
         $classes[] = ( $this->get_options('wpsstm-can-play') == "on" ) ? 'wpsstm-can-play' : null;
 
         if ($extra_classes){
@@ -997,10 +999,22 @@ class WP_SoundSystem_Tracklist{
 
         return array_filter(array_unique($classes));
     }
+    
+    //if the tracklist is ajaxed and that this is not an ajax request, 
+    //pretend did_query_tracks is true so we don't try to populate them
+    //do not move under __construct since ->ajax_refresh value might have changed when we call this.
+    function wait_for_ajax(){
+        return ($this->ajax_refresh && !wpsstm_is_ajax());
+    }
+
 
     function populate_tracks($args = null){
-        
+
         if ( $this->did_query_tracks ) return;
+        
+        if ( $this->wait_for_ajax() ){
+            return new WP_Error( 'wpsstm_missing_javascript', __('Please enable javascript to refresh.','wpsstm') );
+        }
 
         $required = array(
             'post_type'         => wpsstm()->post_type_track,

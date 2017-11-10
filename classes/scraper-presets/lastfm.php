@@ -74,7 +74,7 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
         $this->preset_name = __('Last.FM stations (similar artist)','wpsstm');
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         $artist = $this->get_variable_value('lastfm-artist-slug');
         return sprintf( __('Last.FM stations (similar artist): %s','wpsstm'), $artist );
     }
@@ -105,7 +105,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
         $this->preset_name = __('Last.FM stations (user recommandations)','wpsstm');
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         $artist = $this->get_variable_value('lastfm-user-slug');
         return sprintf( __('Last.FM stations (user recommandations): %s','wpsstm'), $artist );
     }

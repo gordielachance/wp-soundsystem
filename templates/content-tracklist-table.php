@@ -13,13 +13,13 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
 ?>
 
-<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('wpsstm-tracklist-table')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
+<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('tracklist-table')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
         <div>
             <strong class="wpsstm-tracklist-title" itemprop="name">
                 <i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>
-                <a href="<?php the_permalink();?>"><?php echo $tracklist->title;?></a>
+                <a href="<?php echo $tracklist->get_tracklist_permalink();?>"><?php echo $tracklist->title;?></a>
             </strong>
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
@@ -56,7 +56,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     
     //not logged notice
     //TO FIX TO MOVE
-    if ( !get_current_user_id() ){
+    if ( $tracklist->tracks && !get_current_user_id() ){
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
         $wp_auth_text = sprintf(__('You could save this playlist if you were logged.  Login or subscribe %s.','wpsstm'),$wp_auth_link);

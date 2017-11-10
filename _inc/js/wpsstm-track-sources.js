@@ -42,7 +42,7 @@ jQuery(document).ready(function($){
                 var source_instances = source_obj.get_source_instances();
                 source_instances.remove();
                 
-                if ( source_el.hasClass('wpsstm-active-source') ){
+                if ( source_el.hasClass('source-active') ){
                     //TO FIX TO DO skip to next source ? what if it is the last one ?
                 }
                 
@@ -110,8 +110,8 @@ jQuery(document).ready(function($){
         
         var row = $(this).closest('.wpsstm-source');
         //auto source
-        if ( Number(row.attr('data-wpsstm-autosource')) == 1 ){
-            row.attr('data-wpsstm-autosource', '0');
+        if ( Number(row.attr('data-wpsstm-community-source')) == 1 ){
+            row.attr('data-wpsstm-community-source', '0');
             row.find('input').prop("disabled", false);
             row.removeClass('wpsstm-source-auto');
             return;
@@ -137,7 +137,7 @@ jQuery(document).ready(function($){
             var new_row = row_blank.clone();
             new_row.insertAfter( row_blank );
             var row_blank_input = row_blank.find('input.wpsstm-editable-source-url');
-            row_blank.attr('data-wpsstm-autosource', '0');
+            row_blank.attr('data-wpsstm-community-source', '0');
             row_blank_input.prop("disabled", false);
             row_blank_input.val(''); //clear form
             row_blank_input.focus();
@@ -224,7 +224,7 @@ class WpsstmTrackSource {
             post_id:        self.post_id
         };
         
-        source_instances.addClass('loading');
+        source_instances.addClass('source-loading');
 
         var ajax_request = $.ajax({
 
@@ -248,7 +248,7 @@ class WpsstmTrackSource {
         })
 
         ajax_request.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('loading');
+            source_instances.removeClass('source-loading');
         })
         
         return deferredObject.promise();
@@ -309,7 +309,7 @@ class WpsstmTrackSource {
                     self.can_play_source = false;
                     self.debug('media - error');
 
-                    source_instances.addClass('wpsstm-bad-source');
+                    source_instances.addClass('source-error');
 
                     success.reject(error);
                 });
@@ -325,9 +325,9 @@ class WpsstmTrackSource {
                 $(self.media).on('play', function() {
                     var track_instances = self.track.get_track_instances();
                     var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
-                    $(trackinfo_sources).removeClass('wpsstm-active-source');
+                    $(trackinfo_sources).removeClass('source-active');
                     
-                    source_instances.addClass('wpsstm-active-source');
+                    source_instances.addClass('source-active');
                 });
                 
                 
@@ -337,7 +337,7 @@ class WpsstmTrackSource {
                 //TO FIX is this required ?
                 console.log("mediaElement error");
                 var source_instances = self.get_source_instances();
-                source_instances.addClass('wpsstm-bad-source');
+                source_instances.addClass('source-error');
                 success.reject();
             }
         });

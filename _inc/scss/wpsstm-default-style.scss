@@ -49,7 +49,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                 display:none;
             }
         }
-        &:hover,&.active{
+        &:hover,&.track-active{
             .wpsstm-track-actions ul{
                 display:inherit;
             }
@@ -66,7 +66,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                 @extend .wpsstm-no-underline;
             }
             [data-wpsstm-source-idx]{
-                &:not(.wpsstm-active-source){
+                &:not(.source-active){
                     @include opacity(.25);
                     &:hover{
                         @include opacity(.5);
@@ -128,10 +128,10 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                             label{
                                 @extend .wpsstm-can-click;
                             }
-                            &.wpsstm-bad-source{
+                            &.source-error{
                                 text-decoration: line-through;
                             }
-                            &.wpsstm-active-source{
+                            &.source-active{
                                 font-weight: bold;
                             }
                         }
@@ -245,7 +245,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     
                     &:not(:hover){
                         [data-wpsstm-source-idx]{
-                            &:not(.wpsstm-active-source){
+                            &:not(.source-active){
                                 display:none;
                             }
                         }

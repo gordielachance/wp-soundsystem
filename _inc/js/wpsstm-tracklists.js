@@ -199,39 +199,34 @@ class WpsstmTracklist {
     
     init(){
         
+        self.debug("init");
+        
         var initCheck = $.Deferred();
         
         if (typeof self.is_init !== 'undefined'){ //we already did it.
             initCheck.resolve();
         }else{
-            
-            //classes
-            var tracklist_instances = self.get_tracklist_instances();
-            tracklist_instances.addClass('buffering');
-            
+
             var upToDateTracklist = $.Deferred();
 
-            if ( self.tracklist_el.hasClass('wpsstm-ajax-refresh') ){ //load tracks if tracklist is ajaxed
+            if ( self.tracklist_el.hasClass('tracklist-ajaxed') ){ //load tracks if tracklist is ajaxed
                 
                 upToDateTracklist = self.get_tracklist_request();
                 upToDateTracklist.done(function() {
                     self.is_init = true;
-                    self.debug("init() refresh did succeed");
+                    self.debug("init refresh did succeed");
                     initCheck.resolve();
                 });
                 
                 upToDateTracklist.fail(function(jqXHR, textStatus, errorThrown) {
                     self.is_init = false;
-                    self.debug("init() refresh did NOT succeed");
+                    self.debug("init refresh did NOT succeed");
                     initCheck.reject();
                 });
-                
-                upToDateTracklist.always(function(jqXHR, textStatus, errorThrown) {
-                    tracklist_instances.removeClass('buffering');
-                });
+ 
                 
             }else{
-                self.debug("init() refresh not needed");
+                self.debug("init refresh not needed");
                 self.is_init = true;
                 initCheck.resolve();
             }
@@ -303,10 +298,14 @@ class WpsstmTracklist {
         
         var self = this;
         var deferredTracklist = $.Deferred();
+        var tracklist_instances = self.get_tracklist_instances();
  
         if (!self.tracklist_request){
 
             self.debug("get_tracklist_request");
+            
+            
+            tracklist_instances.addClass('tracklist-loading');
 
             var ajax_data = {
                 'action':           'wpsstm_refresh_tracklist',
@@ -321,8 +320,8 @@ class WpsstmTracklist {
                 data:ajax_data,
                 dataType: 'json'
             });
+            
 
-            self.tracklist_el.addClass('loading');
 
             //bottom notice
             var notice_slug = 'refresh-' + self.index;
@@ -336,21 +335,22 @@ class WpsstmTracklist {
 
         self.tracklist_request.done(function(data) {
             if (data.success === false) {
+                self.tracklist_el.addClass('tracklist-error');
                 deferredTracklist.reject();
-                self.debug("get_tracklist_request() did NOT succeed for tracklist#");
+                self.debug("get_tracklist_request did NOT succeed for tracklist#");
             }else{
                 var new_tracklist_el = $(data.new_html);
                 self.tracklist_el.replaceWith(new_tracklist_el);
                 self.populate_tracklist( new_tracklist_el );
                 deferredTracklist.resolve();
-                self.debug("get_tracklist_request() did succeed");
+                self.debug("get_tracklist_request did succeed");
             }
 
 
         });
 
         self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
-            deferredTracklist.reject("get_tracklist_request() FAILED for tracklist#" + self.index);
+            deferredTracklist.reject("get_tracklist_request FAILED for tracklist#" + self.index);
         });  
 
         self.tracklist_request.always(function() {
@@ -359,14 +359,14 @@ class WpsstmTracklist {
             var notice_slug = 'refresh-' + self.index;
             $('#wpsstm-bottom-notice-' + notice_slug).remove();
 
-            self.tracklist_el.removeClass('loading');
+            tracklist_instances.removeClass('tracklist-loading');
             self.tracklist_request = undefined;
         });
 
         ////
 
         deferredTracklist.fail(function(jqXHR, textStatus, errorThrown) {
-            self.tracklist_el.addClass('refresh-error');
+            self.tracklist_el.addClass('tracklist-error');
             self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
             console.log("get_tracklist_request failed for tracklist #" + self.index);
         });
@@ -446,23 +446,23 @@ class WpsstmTracklist {
             return (track_obj.can_play !== false);
         });
         var track_obj = tracks_playable[0];
-        
+
         if (!track_obj){
-            console.log("previous_track_jump: unable to identify first track for tracklist #" + self.index);
+            self.debug("previous_track_jump: no previous track found, jumping to previous tracklist");
+            wpsstm_page_player.previous_tracklist_jump();
             return;
         }
        
-        if ( current_track_idx !== first_track_idx ){
-            self.play_subtrack(track_obj.index);
-        }else{ //current track is last track
+        if ( current_track_idx === first_track_idx ){ //we are at the tracklist beginning
             if ( wpsstm_page_player.can_repeat ){
                 wpsstm_page_player.previous_tracklist_jump();
-                return;
             }else{
                 self.debug("previous_track_jump for tracklist #"+self.index+" is the first track, and can_repeat is disabled.");
-                return;
             }
+            return;
         }
+        
+        self.play_subtrack(track_obj.index);
         
     }
     
@@ -494,7 +494,8 @@ class WpsstmTracklist {
         var track_obj = tracks_playable[0];
 
         if (!track_obj){
-            console.log("next_track_jump: unable to identify next track in tracklist #" + self.index);
+            self.debug("next_track_jump: no next track found, jumping to next tracklist");
+            wpsstm_page_player.next_tracklist_jump();
             return;
         }
 
@@ -530,7 +531,7 @@ class WpsstmTracklist {
 
         setTimeout(function(){
             self.is_expired = true;
-            self.tracklist_el.addClass('wpsstm-is-expired');
+            self.tracklist_el.addClass('tracklist-expired');
             self.debug("tracklist has expired");
             
         }, remaining_ms );
@@ -542,72 +543,69 @@ class WpsstmTracklist {
     }
 
     play_subtrack(track_idx,source_idx){
-
+        
         var self = this;
 
         var current_track = self.get_track_obj();
         var success = $.Deferred();
         var track = undefined;
-
-        if (track_idx === 2){
-            success.reject("AFAC"); //TO FIXreturn success.promise();
-        }else{
         
-            //is a playlist init!
-            if ( track_idx === undefined ){
-                track_idx = 0;
-                self.debug("start");
-                $(document).trigger( "wpsstmTracklistStart",[self] ); //custom event
-            }
-
-            //maybe stop current tracklist / track
-            if ( wpsstm_page_player.current_tracklist_idx !== undefined ){
-                    if ( wpsstm_page_player.current_tracklist_idx !== self.index ){ //stop current tracklist
-                        wpsstm_page_player.end_current_tracklist();
-                    }else{ //stop current track
-                        self.end_current_track();
-                    }
-            }
-            
-            
-            var track = self.get_track_obj(track_idx);
-            var track_instances = track.get_track_instances();
-            track_instances.addClass('buffering');
-
-            self.init().then(
-                function(success_msg){
-
-                    wpsstm_page_player.current_tracklist_idx = self.index; //set this tracklist as the active one
-
-                    var track = self.get_track_obj(track_idx);
-
-                    if (!track){
-                        var error = "Track does not exists";
-                        success.reject(error);
-                        return;
-                    }
-
-                    track.playback_start = 0; //reset playback start
-
-                    self.current_track_idx = track.index; //set this track as the active one
-
-
-
-
-                    track.set_bottom_trackinfo(); //bottom track info
-
-
-
-                    $(document).trigger( "wpsstmRequestTrack",[track] ); //custom event
-
-                    track.play_track_source(source_idx);
-
-                },
-                function(error_msg){
-                    success.reject(error_msg);
-                }
-            );
+        //is a playlist init!
+        if ( track_idx === undefined ){
+            track_idx = 0;
+            self.debug("start");
+            $(document).trigger( "wpsstmTracklistStart",[self] ); //custom event
         }
+
+        self.debug("play_subtrack - track #" + track_idx + ", source#" + source_idx );
+        
+        var track = self.get_track_obj(track_idx);
+        var track_instances = track.get_track_instances();
+
+        track_instances.addClass('track-loading track-active');
+
+        //maybe stop current tracklist / track
+
+        if ( wpsstm_page_player.current_tracklist_idx !== undefined ){
+                if ( wpsstm_page_player.current_tracklist_idx !== self.index ){ //stop current tracklist
+                    wpsstm_page_player.end_current_tracklist();
+                }else{ //stop current track
+                    self.end_current_track();
+                }
+        }
+
+        self.debug("YO");
+
+        self.init().then(
+            function(success_msg){
+
+                wpsstm_page_player.current_tracklist_idx = self.index; //set this tracklist as the active one
+
+                var track = self.get_track_obj(track_idx);
+
+                if (!track){
+                    var error = "Track does not exists";
+                    success.reject(error);
+                    return;
+                }
+
+                track.playback_start = 0; //reset playback start
+
+                self.current_track_idx = track.index; //set this track as the active one
+
+                track.set_bottom_trackinfo(); //bottom track info
+
+
+
+                $(document).trigger( "wpsstmRequestTrack",[track] ); //custom event
+
+                track.play_track_source(source_idx);
+
+            },
+            function(error_msg){
+                success.reject(error_msg);
+            }
+        );
         
         success.done(function(source_obj) {
             var track_obj = source_obj.track;
@@ -616,7 +614,7 @@ class WpsstmTracklist {
             track_obj.current_source_idx = source_obj.index;
 
             //fetch sources for next tracks
-            if ( self.tracklist_el.hasClass('wpsstm-autosource') ) {
+            if ( self.tracklist_el.hasClass('tracklist-autosource') ) {
                 self.get_next_tracks_sources_auto();
             }
         });
@@ -627,8 +625,7 @@ class WpsstmTracklist {
 
             if ( track ){
                 track.can_play = false;
-                var track_instances = track.get_track_instances();
-                track_instances.addClass('error');
+                track_instances.addClass('track-error');
             }
 
             self.debug("unable to play track #" + self.current_track_idx +": " + reason);
@@ -638,7 +635,7 @@ class WpsstmTracklist {
         });
         
         success.always(function(reason) {
-            track_instances.removeClass('buffering');
+            track_instances.removeClass('track-loading');
         });
         
         
@@ -676,7 +673,7 @@ class WpsstmTracklist {
             current_track.end_current_source();
             
             var track_instances = current_track.get_track_instances();
-            track_instances.removeClass('active playing');
+            track_instances.removeClass('track-active track-playing');
             current_track.current_source_idx = undefined;
         }
         
@@ -711,7 +708,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                self.tracklist_el.addClass('loading');
+                self.tracklist_el.addClass('tracklist-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -725,7 +722,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
-                self.tracklist_el.removeClass('loading');
+                self.tracklist_el.removeClass('tracklist-loading');
             }
         })
 
@@ -748,7 +745,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                track_el.addClass('loading');
+                track_el.addClass('track-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -763,7 +760,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
-                track_el.removeClass('loading');
+                track_el.removeClass('track-loading');
             }
         })
 
@@ -785,7 +782,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                track_el.addClass('loading');
+                track_el.addClass('track-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -800,7 +797,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
-                track_el.removeClass('loading');
+                track_el.removeClass('track-loading');
             }
         })
 
@@ -890,7 +887,7 @@ class WpsstmTracklist {
         if (wpsstm_page_player.current_tracklist_idx !== undefined) return;
         
         //get tracklists before & include the current one
-        var tracklists = wpsstm_page_player.tracklists.slice(0,self.index + 1);
+        var tracklists_before = wpsstm_page_player.tracklists.slice(0,self.index + 1);
         
         /*
         This function will loop until a promise is resolved
@@ -898,16 +895,17 @@ class WpsstmTracklist {
 
         (function iterateTrackLists(index) {
 
-            if (index >= tracklists.length) {
+            if (index >= tracklists_before.length) {
                 return;
             }
             
-            var tracklist_obj = tracklists[index];
+            var tracklist_obj = tracklists_before[index];
             
             tracklist_obj.init().then(
                 function(success_msg){
                     tracklist_obj.debug("autostart");
                     tracklist_obj.play_subtrack();
+                    return;
                 },
                 function(error_msg){
                     iterateTrackLists(index + 1);

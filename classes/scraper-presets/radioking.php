@@ -62,7 +62,7 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
 
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         return wpsstm_get_array_value(array('name'), $this->station_data);
     }
     

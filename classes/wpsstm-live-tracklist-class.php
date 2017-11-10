@@ -18,7 +18,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public $feed_url = null;
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
-    public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     //response
     var $request_pagination = array(
@@ -66,11 +65,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $this->location = $this->feed_url;
             }
 
-            //set remote title if no title already set
-            if ( !$this->title && ($meta_title = $this->get_cached_remote_title() ) ){
-                $this->title = $meta_title;
-            }
-            
             //author
             /*
             if ($meta_author = $this->get_cached_remote_author() ){
@@ -128,8 +122,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     function populate_remote_tracklist(){
-        
-        if ($this->did_query_tracks) return; //we already did it
 
         $now = current_time( 'timestamp', true );
         $this->updated_time = $now;
@@ -155,12 +147,16 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->add_tracks($raw_tracks);
 
         //set tracklist title
-        $remote_title = $this->get_tracklist_title(); //TO FIX force bad encoding (eg. last.fm)
-        $this->title = ($remote_title) ? $remote_title : __('Tracklist Wizard','wpsstm');
+        //TO FIX force bad encoding (eg. last.fm)
+        if (!$this->title){
+            $this->title = $this->get_remote_title();
+        }
 
         //set tracklist author
-        $remote_author = $this->get_tracklist_author(); //TO FIX force bad encoding (eg. last.fm)
-        $this->author = ($remote_author) ? $remote_author : __('Wizard','wpsstm'); //TO FIX community user name ?
+        //TO FIX force bad encoding (eg. last.fm)
+        if (!$this->author){
+            $this->author = $this->get_tracklist_author();
+        }
 
         $this->expired = $this->check_has_expired(); //set expiration bool & time
         
@@ -507,7 +503,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */
     
-    public function get_tracklist_title(){
+    public function get_remote_title(){
 
         if ( !$selector_title = $this->get_options( array('selectors','tracklist_title', 'path') ) ) return;
         
@@ -938,50 +934,46 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function get_cached_remote_author(){
         return get_post_meta($this->post_id,wpsstm_live_playlists()->remote_author_meta_name,true);
     }
-    
-    /*
-    Populate remote tracklist tracks
-    Fallback on WP tracks if post is not expired.
-    */
+
     
     function populate_tracks($args = null){
         
         if ( $this->did_query_tracks ) return; //we already did it
+        
+        if ( $this->wait_for_ajax() ){
+            return parent::populate_tracks($args); //shortcut for error output
+        }
         
         $cache_duration = $this->get_options('datas_cache_min');
         $has_cache = (bool)$cache_duration;
 
         //check we should request remote tracks
         if ( $this->is_expired ){
-            
-             $can_remote_request = ( ( $this->ajax_refresh && wpsstm_is_ajax() ) || !$this->ajax_refresh );
-            
-            if ( $can_remote_request ){
-                /*
-                fetch remote tracks
-                */
 
-                $populated = $this->populate_remote_tracklist();
-                if ( is_wp_error($populated) ){
-                    $this->add_notice( 'tracklist-header', 'populate-tracks', $populated->get_error_message());
-                    wpsstm()->debug_log($populated->get_error_message(),'WP_SoundSystem_Remote_Tracklist::populate_tracks()' );
-                }
+            /*
+            fetch remote tracks
+            */
 
-                /*
-                update playlist (only if cache is enabled)
-                */
-                
-                if ($has_cache){ //populate & save tracks
-                    $updated = $this->populate_and_save_tracks();
-                    if ( is_wp_error($updated) ){
-                        $this->add_notice( 'tracklist-header', 'populate-tracks', $updated->get_error_message(),true );
-                        wpsstm()->debug_log($updated->get_error_message(),'WP_SoundSystem_Remote_Tracklist::populate_tracks()' );
-                    }
+            $populated = $this->populate_remote_tracklist();
+            if ( is_wp_error($populated) ){
+                $this->add_notice( 'tracklist-header', 'populate-tracks', $populated->get_error_message());
+                wpsstm()->debug_log($populated->get_error_message(),'WP_SoundSystem_Remote_Tracklist::populate_tracks' );
+            }
+
+            /*
+            update playlist (only if cache is enabled)
+            */
+
+            if ($has_cache){ //populate & save tracks
+                $updated = $this->populate_and_save_tracks();
+                if ( is_wp_error($updated) ){
+                    $this->add_notice( 'tracklist-header', 'populate-tracks', $updated->get_error_message(),true );
+                    wpsstm()->debug_log($updated->get_error_message(),'WP_SoundSystem_Remote_Tracklist::populate_tracks' );
                 }
             }
             
         }else{
-            parent::populate_tracks($args);
+            return parent::populate_tracks($args);
         }
 
     }
@@ -1005,8 +997,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'wpsstm-live-tracklist',
         );
         
-        $defaults[] = ( $this->ajax_refresh ) ? 'wpsstm-ajax-refresh' : null;
-        $defaults[] = ( $this->is_expired ) ? 'wpsstm-is-expired' : null;
+        $defaults[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
+        $defaults[] = ( $this->is_expired ) ? 'tracklist-expired' : null;
 
         $classes = array_merge($defaults,(array)$extra_classes);
 

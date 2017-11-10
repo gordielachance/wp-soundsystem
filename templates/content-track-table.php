@@ -21,7 +21,7 @@ $track->populate_sources();
     </td>
     <?php if ( $wpsstm_tracklist->get_options('can_play') ){ ?>
         <td class="wpsstm-track-play-bt">
-            <a class="wpsstm-play-track wpsstm-icon-link" href="#">
+            <a class="track-play-bt wpsstm-icon-link" href="#">
             <i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i>
             <i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i>
             <i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i>
