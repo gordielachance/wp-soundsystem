@@ -236,8 +236,7 @@ class WpsstmTrack {
 
         var promise = self.maybe_load_sources();
         
-        var track_instances = self.get_track_instances(); //repopulate instances - they might have changed since
-        track_instances.addClass('track-loading');
+
 
         promise.fail(function() {
             deferredObject.reject();
@@ -247,10 +246,6 @@ class WpsstmTrack {
             deferredObject.resolve();
         })
 
-        promise.always(function(data, textStatus, jqXHR) {
-            track_instances = self.get_track_instances(); //repopulate instances - they might have changed since
-            track_instances.removeClass('track-loading');
-        })
 
         return deferredObject.promise();
     }
@@ -312,10 +307,7 @@ class WpsstmTrack {
         if (!sources_playable.length){
             success.reject("no playable sources to iterate");
         }
-        
-        console.log("SOURCE IDX:" + source_idx);
-        console.log(sources_playable);
-        
+
         (function iterateSources(index) {
 
             if (index >= sources_playable.length) {
@@ -392,17 +384,20 @@ class WpsstmTrack {
         var self = this;
         var deferredObject = $.Deferred();
         
-        self.debug("get_track_sources_request");
-        
+        var track_el    = self.track_el;
+        var track_instances = self.get_track_instances();
+
         if ( self.did_sources_request ) {
             
             deferredObject.resolve("already did sources auto request for track #" + self.index);
             
         } else{
+            
+            self.debug("get_track_sources_request");
         
-            var track_el    = self.track_el;
-            var track_instances = self.get_track_instances();
+
             $(track_el).find('.wpsstm-track-sources').html('');
+            track_instances.addClass('track-loading');
 
             var ajax_data = {
                 action:     'wpsstm_autosources_list',
@@ -441,6 +436,10 @@ class WpsstmTrack {
             
             self.sources_request.fail(function() {
                 track_instances.addClass('track-error');
+            })
+            
+            self.sources_request.always(function() {
+                track_instances.removeClass('track-loading');
             })
             
         }

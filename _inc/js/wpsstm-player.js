@@ -309,10 +309,6 @@ class WpsstmPagePlayer {
                 tracklist_obj = self.tracklists[0];
             }
         }
-
-         tracklist_obj.play_subtrack();
-
-        console.log("TITI");
         tracklist_obj.play_subtrack();
 
     }
