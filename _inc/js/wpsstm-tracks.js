@@ -213,71 +213,6 @@ class WpsstmTrack {
 
     }
 
-    init_track(){
-        
-        var self = this;
-        var success = $.Deferred();
-
-        if (self.can_play !== undefined){
-            if (self.can_play){
-                success.reject("Track has already been checked and is playable");
-            }else{
-                success.reject("Track has already been checked and is NOT playable");
-            }
-            
-        }else{
-
-            self.maybe_load_sources().then(
-                function(success_msg){
-
-                    var source_idx = Number(self.current_source_idx);
-
-                    //make a reordered array of sources
-                    var sources_before = self.sources.slice(0,source_idx);
-                    var sources_after = self.sources.slice(source_idx+1); //do not including this one
-                    var sources_reordered = sources_after.concat(sources_before);
-
-                    /*
-                    This function will loop until a promise is resolved
-                    */
-
-                    (function iterateSources(index) {
-
-                        if (index >= sources_reordered.length) {
-                            track_instances.addClass('track-error');
-                            success.reject("cannot play any of the track sources");
-                            return;
-                        }
-
-                        var source_obj = sources_reordered[index];
-
-                        source_obj.init_source().then(
-                            function(source_obj){
-                                self.can_play = true;
-                                success.resolve(source_obj);
-                            },
-                            function(error){
-                                self.can_play = false;
-                                iterateSources(index + 1);
-                            }
-                        );
-
-                    })(0);
-                },
-
-                function(error_msg){
-                    self.can_play = false;
-                    success.reject("unable to fetch track sources");
-                }
-
-            )
-            
-        }
-
-        return success.promise();
-
-    }
-
     debug(msg){
         var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.index + ": ";
         wpsstm_debug(msg,prefix);
@@ -359,17 +294,22 @@ class WpsstmTrack {
             source_idx = 0;
         }
         
+         self.debug("play_track_source");
+        
         var source_obj = self.get_source_obj(source_idx);
         self.set_bottom_audio_el(); //build <audio/> el
         var track_instances = self.get_track_instances();
         
         if(!source_obj){
+            self.debug("source does not exists");
             success.reject("source does not exists");
         }else{
             
             //TO FIX check if same source playing already ?
             //if (self.current_source_idx === source_obj.index){
             //}
+            
+           
             
             source_obj.init_source().then(
                 function(success_msg){
@@ -506,6 +446,7 @@ class WpsstmTrack {
 
                 if (data.success === true){
                     if ( data.new_html ){
+                        self.can_play = true;
                         $(track_instances).find('.wpsstm-track-sources').html(data.new_html); //append new sources
                         self.populate_html_sources();
                     }
@@ -513,6 +454,7 @@ class WpsstmTrack {
                     deferredObject.resolve();
 
                 }else{
+                    self.can_play = false;
                     track_instances.addClass('track-error');
                     deferredObject.reject(data.message);
                 }

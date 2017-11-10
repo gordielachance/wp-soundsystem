@@ -331,7 +331,6 @@ class WpsstmTracklist {
                 self.tracklist_el.addClass('tracklist-error');
                 self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
                 self.debug("get_tracklist_request did NOT succeed");
-                self.can_play = false;
             });  
 
             self.tracklist_request.always(function() {
@@ -553,25 +552,30 @@ class WpsstmTracklist {
                     track = self.get_track_obj(track_idx);
 
                     if (!track){
-                        var error = "Track does not exists";
-                        success.reject(error);
-                        return;
+                        success.reject("Track does not exists");
+                    }else{
+                        track_instances = track.get_track_instances();
+                        track_instances.addClass('track-loading');
+
+                        track.playback_start = 0; //reset playback start
+
+                        self.current_track_idx = track.index; //set this track as the active one
+
+                        track.set_bottom_trackinfo(); //bottom track info
+
+                        $(document).trigger( "wpsstmRequestTrack",[track] ); //custom event
+
+                        track.maybe_load_sources().then(
+                            function(success_msg){
+
+                                success = track.play_track_source(source_idx);
+                            },
+                            function(error_msg){
+
+                                success.reject(error_msg);
+                            }
+                        );
                     }
-                    
-                    track_instances = track.get_track_instances();
-                    track_instances.addClass('track-loading');
-
-                    track.playback_start = 0; //reset playback start
-
-                    self.current_track_idx = track.index; //set this track as the active one
-
-                    track.set_bottom_trackinfo(); //bottom track info
-
-
-
-                    $(document).trigger( "wpsstmRequestTrack",[track] ); //custom event
-
-                    track.play_track_source(source_idx);
 
                 },
                 function(error_msg){
