@@ -205,9 +205,9 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $(document).on( "wpsstmSourceMediaReady", function( event, media, track ) {
+    $(document).on( "wpsstmSourceMediaLoaded", function( event, media, track ) {
 
-        $(media).on('loadeddata', function() {
+        $(media).on('play', function() {
             if (wpsstm_lastfm.has_user_scrobbler){
                 wpsstm_lastfm.updateNowPlaying(track);
             }

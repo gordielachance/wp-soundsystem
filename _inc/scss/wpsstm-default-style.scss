@@ -123,19 +123,16 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     }
                 }
                 &.wpsstm-track-sources{
-                    ul{
-                        a{
-                            label{
-                                @extend .wpsstm-can-click;
-                            }
-                            &.source-error{
-                                text-decoration: line-through;
-                            }
-                            &.source-active{
-                                font-weight: bold;
-                            }
+                    [data-wpsstm-source-idx]{
+                        label{
+                            @extend .wpsstm-can-click;
                         }
-
+                        &.source-error{
+                            text-decoration: line-through;
+                        }
+                        &.source-active{
+                            font-weight: bold;
+                        }
                     }
                 }
             }

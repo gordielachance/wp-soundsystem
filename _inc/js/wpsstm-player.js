@@ -323,7 +323,7 @@ class WpsstmPagePlayer {
         if (current_tracklist !== false){
             self.debug("end_current_tracklist() #" + current_tracklist.index);
             current_tracklist.abord_tracks_sources_request(); //abord current requests
-            current_tracklist.end_current_track();
+            current_tracklist.end_track();
             self.current_tracklist_idx = undefined;
         }
     }

@@ -283,88 +283,70 @@ class WpsstmTrack {
         
         $(bottom_el).show();//show in not done yet
     }
-
-    play_track_source(source_idx){
-
+    
+    play_first_available_source(source_idx){
+        
         var self = this;
-        var success = $.Deferred();
         
         //is a track init!
         if ( source_idx === undefined ){
             source_idx = 0;
         }
+
+        var success = $.Deferred();
         
-         self.debug("play_track_source");
         
-        var source_obj = self.get_source_obj(source_idx);
-        self.set_bottom_audio_el(); //build <audio/> el
-        var track_instances = self.get_track_instances();
+        /*
+        This function will loop until a promise is resolved
+        */
         
-        if(!source_obj){
-            self.debug("source does not exists");
-            success.reject("source does not exists");
-        }else{
-            
-            //TO FIX check if same source playing already ?
-            //if (self.current_source_idx === source_obj.index){
-            //}
-            
-           
-            
-            source_obj.init_source().then(
-                function(success_msg){
+        var sources_after = self.sources.slice(source_idx); //including this one
+        var sources_before = self.sources.slice(0,source_idx - 1);
 
-                    $(source_obj.media).on('play', function() {
+        //which one should we play?
+        var sources_reordered = sources_after.concat(sources_before);
+        var sources_playable = sources_reordered.filter(function (source_obj) {
+            return (source_obj.can_play !== false);
+        });
 
-                        source_obj.debug('media - play');
-
-                        if (!self.playback_start){
-                            self.playback_start = Math.round( $.now() /1000);
-                        }
-
-                        track_instances.addClass('track-playing track-has-played');
-                        track_instances.removeClass('track-error track-loading');
-                        
-                        wpsstm_page_player.current_tracklist_idx = source_obj.track.tracklist.index;
-                        source_obj.track.tracklist.current_track_idx = source_obj.track.index;
-                        source_obj.track.current_source_idx = source_obj.index;
-
-                        success.resolve(source_obj);
-                    });
-
-                    $(source_obj.media).on('pause', function() {
-                        source_obj.debug('player - pause');
-                        track_instances.removeClass('track-playing');
-                    });
-
-                    $(source_obj.media).on('ended', function() {
-                        source_obj.debug('MediaElement.js event - ended');
-                        
-                        track_instances.removeClass('track-playing track-active');
-
-                        //Play next song if any
-                        self.tracklist.next_track_jump();
-                    });
-                    
-                    source_obj.media.play();
-                    
-                },
-
-                function(error_msg){
-                    success.reject("unable to fetch track sources");
-                }
-
-            )
-            
-            
-
-            
+        if (!sources_playable.length){
+            success.reject("no playable sources to iterate");
         }
+        
+        console.log("SOURCE IDX:" + source_idx);
+        console.log(sources_playable);
+        
+        (function iterateSources(index) {
 
+            if (index >= sources_playable.length) {
+                
+                success.reject();
+                return;
+            }
+            
+            var source_obj = sources_playable[index];
+            var source_success = source_obj.play_source();
+            
+            source_success.done(function(v) {
+                success.resolve();
+            })
+            source_success.fail(function() {
+                iterateSources(index + 1);
+            })
+
+
+        })(0);
+        
+        success.fail(function() {
+            self.can_play = false;
+            var track_instances = self.get_track_instances();
+            track_instances.addClass('track-error');
+        })
+        
         return success.promise();
-
+        
     }
-    
+
     set_bottom_audio_el(){
         
         var self = this;
@@ -396,19 +378,13 @@ class WpsstmTrack {
     
     maybe_load_sources(){
         var self = this;
-        var deferredObject = $.Deferred();
+        var success = $.Deferred();
         if (self.sources.length > 0){
-            deferredObject.resolve();
+            success.resolve();
         }else{
-            var promise = self.get_track_sources_request();
-            promise.fail(function() {
-                deferredObject.reject();
-            })
-            promise.done(function(v) {
-                deferredObject.resolve(v);
-            })
+            success = self.get_track_sources_request();
         }
-        return deferredObject.promise();
+        return success.promise();
     }
 
     get_track_sources_request() {
