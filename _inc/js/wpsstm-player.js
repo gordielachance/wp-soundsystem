@@ -165,7 +165,7 @@ class WpsstmPagePlayer {
 
         $(all_tracklists).each(function( tracklist_idx, tracklist_el ) {
             var tracklist = new WpsstmTracklist(tracklist_el,tracklist_idx);
-            tracklist.maybe_refresh();
+            tracklist.maybe_refresh(); //preload tracklist on startup
             wpsstm_page_player.tracklists.push(tracklist);
             wpsstm_page_player.tracklists_shuffle_order.push(tracklist_idx);
         });

@@ -198,7 +198,7 @@ class WpsstmTracklist {
         if (typeof self.can_play !== 'undefined'){ //we already did it.
             initCheck.resolve();
         }else{
-            
+
             var upToDateTracklist = $.Deferred();
 
             if ( self.tracklist_el.hasClass('tracklist-ajaxed') ){ //load tracks if tracklist is ajaxed
@@ -285,15 +285,14 @@ class WpsstmTracklist {
     }
 
     get_tracklist_request(){
-        
+
         var self = this;
-        var tracklist_instances = self.get_tracklist_instances();
- 
-        if (!self.tracklist_request){
+  
+        if (!self.tracklist_request){ //we are already requesting it
 
             self.debug("get_tracklist_request");
-            
-            
+
+            var tracklist_instances = self.get_tracklist_instances();
             tracklist_instances.addClass('tracklist-loading');
 
             var ajax_data = {
@@ -301,7 +300,7 @@ class WpsstmTracklist {
                 'post_id':          self.post_id,
                 'options':          self.options,
             };
-            
+
             self.tracklist_request = $.ajax({
 
                 type: "post",
@@ -310,42 +309,39 @@ class WpsstmTracklist {
                 dataType: 'json'
             });
 
-        }else{ 
-            //already requesting
-        }
 
-        self.tracklist_request.done(function(data) {
-            if (data.success === false) {
-                self.tracklist_el.addClass('tracklist-error');
-                self.debug("get_tracklist_request did NOT succeed: no data");
+            self.tracklist_request.done(function(data) {
+                if (data.success === false) {
+                    self.tracklist_el.addClass('tracklist-error');
+                    self.debug("get_tracklist_request did NOT succeed: no data");
+                    self.can_play = false;
+                }else{
+                    var new_tracklist_el = $(data.new_html);
+                    self.tracklist_el.replaceWith(new_tracklist_el);
+                    self.populate_tracklist( new_tracklist_el );
+                    self.can_play = true;
+                    self.debug("get_tracklist_request did succeed");
+                }
+
+
+            });
+
+            self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
                 self.can_play = false;
-            }else{
-                var new_tracklist_el = $(data.new_html);
-                self.tracklist_el.replaceWith(new_tracklist_el);
-                self.populate_tracklist( new_tracklist_el );
-                self.can_play = true;
-                self.debug("get_tracklist_request did succeed");
-            }
+                self.tracklist_el.addClass('tracklist-error');
+                self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
+                self.debug("get_tracklist_request did NOT succeed");
+                self.can_play = false;
+            });  
 
+            self.tracklist_request.always(function() {
+                tracklist_instances.removeClass('tracklist-loading');
+                self.tracklist_request = undefined;
+            });
 
-        });
-
-        self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
-            self.can_play = false;
-            self.tracklist_el.addClass('tracklist-error');
-            self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
-            self.debug("get_tracklist_request did NOT succeed");
-            self.can_play = false;
-        });  
-
-        self.tracklist_request.always(function() {
-
-            tracklist_instances.removeClass('tracklist-loading');
-            self.tracklist_request = undefined;
-        });
-
-        ////
-
+            ////
+        }
+        
         return self.tracklist_request.promise();
 
     }
@@ -553,9 +549,6 @@ class WpsstmTracklist {
 
             self.maybe_refresh().then(
                 function(success_msg){
-
-                    self.debug("LOADED, waitint to play track#" + track_idx);
-                    console.log(self);
 
                     track = self.get_track_obj(track_idx);
 
