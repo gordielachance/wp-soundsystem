@@ -246,9 +246,9 @@ class WpsstmTrack {
         //copy attributes from the original playlist 
         var attributes = $(tracklist_el).prop("attributes");
         $.each(attributes, function() {
-            $(bottom_trackinfo_el).attr(this.name, this.value);
+            wpsstm_page_player.bottom_trackinfo_el.attr(this.name, this.value);
         });
-        $(bottom_trackinfo_el).removeClass('tracklist-table');
+        wpsstm_page_player.bottom_trackinfo_el.removeClass('tracklist-table');
         
         var list = $('<table class="wpsstm-tracklist-entries"></table>');
 
@@ -257,9 +257,9 @@ class WpsstmTrack {
         
         $(list).append(row);
 
-        $(bottom_trackinfo_el).html(list);
+        wpsstm_page_player.bottom_trackinfo_el.html(list);
         
-        $(bottom_el).show();//show in not done yet
+        wpsstm_page_player.bottom_el.show();//show in not done yet
     }
     
     play_first_available_source(source_idx){

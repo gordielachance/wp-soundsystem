@@ -20,8 +20,8 @@ class WpsstmLastFM {
         
         var self = this;
         
-        self.icon_scrobble_el =     $(bottom_el).find('#wpsstm-player-toggle-scrobble')
-        self.auth_notice_el =       $(bottom_wrapper_el).find('#wpsstm-bottom-notice-lastfm-auth');
+        self.icon_scrobble_el =     wpsstm_page_player.bottom_el.find('#wpsstm-player-toggle-scrobble')
+        self.auth_notice_el =       wpsstm_page_player.bottom_wrapper_el.find('#wpsstm-bottom-notice-lastfm-auth');
 
         if (self.has_user_scrobbler){
             $(self.icon_scrobble_el).addClass('active');
