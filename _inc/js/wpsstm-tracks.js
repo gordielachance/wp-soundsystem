@@ -571,45 +571,33 @@ class WpsstmTrack {
         if (isDuplicatePlay){
             success.resolve("we've already queued this track"); 
         }else{
-            
-
 
             wpsstm_page_player.current_track = self;
 
+            $(document).trigger( "wpsstmQueueTrack",[self] ); //custom event
 
-            self.tracklist.maybe_refresh().then(
+            var track_instances = self.get_track_instances();
+            track_instances.addClass('track-loading track-active');
+
+            self.playback_start = 0; //reset playback start
+
+            self.set_bottom_trackinfo(); //bottom track info
+
+            self.maybe_load_sources().then(
                 function(success_msg){
- 
-                    $(document).trigger( "wpsstmQueueTrack",[self] ); //custom event
 
-                    var track_instances = self.get_track_instances();
-                    track_instances.addClass('track-loading track-active');
+                    var source_play = self.play_first_available_source(source_idx);
 
-                    self.playback_start = 0; //reset playback start
-
-                    self.set_bottom_trackinfo(); //bottom track info
-
-                    self.maybe_load_sources().then(
-                        function(success_msg){
-
-                            var source_play = self.play_first_available_source(source_idx);
-
-                            source_play.done(function(v) {
-                                //fetch sources for next tracks
-                                if ( self.tracklist.tracklist_el.hasClass('tracklist-autosource') ) {
-                                    self.tracklist.get_next_tracks_sources_auto();
-                                }
-                                success.resolve();
-                            })
-                            source_play.fail(function(reason) {
-                                success.reject(reason);
-                            })
-
-                        },
-                        function(error_msg){
-                            success.reject(error_msg);
+                    source_play.done(function(v) {
+                        //fetch sources for next tracks
+                        if ( self.tracklist.tracklist_el.hasClass('tracklist-autosource') ) {
+                            self.tracklist.get_next_tracks_sources_auto();
                         }
-                    );
+                        success.resolve();
+                    })
+                    source_play.fail(function(reason) {
+                        success.reject(reason);
+                    })
 
                 },
                 function(error_msg){
