@@ -1008,6 +1008,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         $values_default = array(
         );
+        
+        if ( $time = $this->get_expiration_time() ){
+            $values_default['data-wpsstm-expire-time'] = $this->get_expiration_time();
+        }
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 

@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
         //click on source trigger
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
             e.preventDefault();
-            source_obj.track.tracklist.play_subtrack(source_obj.track.index,source_obj.index);
+            source_obj.track.tracklist.play_track(source_obj.track.index,source_obj.index);
         });
         
         //delete source
@@ -192,7 +192,7 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = " WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index + ": ";
+        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index + ": ";
         wpsstm_debug(msg,prefix);
     }
 
@@ -374,9 +374,7 @@ class WpsstmTrackSource {
 
                     track_instances.addClass('track-playing track-has-played');
                     track_instances.removeClass('track-error track-loading');
-
-                    wpsstm_page_player.current_tracklist_idx = self.track.tracklist.index;
-                    self.track.tracklist.current_track_idx = self.track.index;
+                    
                     self.track.current_source_idx = self.index;
 
                     success.resolve(self);
@@ -388,7 +386,7 @@ class WpsstmTrackSource {
                 });
 
                 $(self.media).on('ended', function() {
-                    self.debug('MediaElement.js event - ended');
+                    self.debug('media - ended');
 
                     track_instances.removeClass('track-playing track-active');
 

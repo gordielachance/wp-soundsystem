@@ -233,7 +233,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * track sources are now saved as regular posts (with the community user as author if they are auto-populated)
 * new RadioKing preset
 * better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
-* new JS events: wpsstmTracklistDomReady,wpsstmTrackDomReady - wpsstmTrackSingleSourceDomReady
+* new JS events: wpsstmTracklistRefreshed,wpsstmTrackDomReady - wpsstmTrackSingleSourceDomReady
 * Improved wizard backend & frontend
 * Removed class 'WP_SoundSystem_Subtrack': cleaner to handle everything with WP_SoundSystem_Track
 * removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
