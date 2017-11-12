@@ -59,6 +59,22 @@
             }
         }
     }
+    
+    &.tracklist-ajaxed{
+        
+        #wpsstm-notice-ajax-refresh{
+            display:none;
+        }
+        
+        &.tracklist-refresh{
+            > * {
+                display:none;
+                &#wpsstm-notice-ajax-refresh,&.tracklist-nav{
+                    display:inherit;
+                }
+            }
+        }
+    }
 
     &.wpsstm-playable-tracklist{
         

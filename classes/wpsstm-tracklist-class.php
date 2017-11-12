@@ -1024,7 +1024,7 @@ class WP_SoundSystem_Tracklist{
             
             if ( $this->wait_for_ajax() ){
                 $error = new WP_Error( 'missing-javascript', __('Javascript is required to fetch tracks.','wpsstm') );
-                //$this->tracks_error = $error;
+                $this->tracks_error = $error;
                 return $error;
             }
         }

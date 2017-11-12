@@ -169,12 +169,7 @@
                 childrenMax:showSubtracksCount
             });
         }
-        
-        //refresh notice - hidden by default at init
-        var tracklist_instances = tracklist_obj.get_tracklist_instances()
-        var refresh_notice = tracklist_instances.find('#wpsstm-notice-ajax-refresh');
-        refresh_notice.hide();
-        
+
     });
 
     
@@ -299,10 +294,6 @@ class WpsstmTracklist {
 
             var tracklist_instances = self.get_tracklist_instances();
             tracklist_instances.addClass('tracklist-loading tracklist-refresh');
-            
-            //refresh notice
-            var refresh_notice = tracklist_instances.find('#wpsstm-notice-ajax-refresh');
-            refresh_notice.show();
 
             var ajax_data = {
                 'action':           'wpsstm_refresh_tracklist',
@@ -345,7 +336,6 @@ class WpsstmTracklist {
             self.tracklist_request.always(function() {
                 tracklist_instances.removeClass('tracklist-loading tracklist-refresh');
                 self.tracklist_request = undefined;
-                refresh_notice.hide();
             });
 
             ////
@@ -681,7 +671,7 @@ class WpsstmTracklist {
         var options =  $.extend(defaults, options);
 
         if ( Number($(this.tracklist_el).attr("data-tracks-count")) > 0 ) {
-            return $(this.tracklist_el).toggleChildren(options);
+            return $(this.tracklist_el).find('.wpsstm-tracks-list').toggleChildren(options);
         }
 
 
