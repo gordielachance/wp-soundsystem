@@ -1,6 +1,7 @@
 (function($){
     
     $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
+        
         if ( tracklist_obj.is_expired ){
             tracklist_obj.debug("cache expired, refresh tracklist");
             var promise = tracklist_obj.get_tracklist_request();
@@ -10,7 +11,7 @@
     $(document).on( "wpsstmTracklistRefreshed", function( event, tracklist_obj ) {
 
         // sort tracks
-        tracklist_obj.tracklist_el.find( '.wpsstm-tracklist-entries' ).sortable({
+        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
             handle: '.wpsstm-reposition-track',
             update: function(event, ui) {
                 console.log('update: '+ui.item.index())
@@ -169,6 +170,11 @@
             });
         }
         
+        //refresh notice - hidden by default at init
+        var tracklist_instances = tracklist_obj.get_tracklist_instances()
+        var refresh_notice = tracklist_instances.find('#wpsstm-notice-ajax-refresh');
+        refresh_notice.hide();
+        
     });
 
     
@@ -187,6 +193,8 @@ class WpsstmTracklist {
         this.tracks_shuffle_order =     [];
         this.populate_tracklist(tracklist_el);
         this.can_play =                 undefined;
+        
+
 
     }
     
@@ -291,6 +299,10 @@ class WpsstmTracklist {
 
             var tracklist_instances = self.get_tracklist_instances();
             tracklist_instances.addClass('tracklist-loading tracklist-refresh');
+            
+            //refresh notice
+            var refresh_notice = tracklist_instances.find('#wpsstm-notice-ajax-refresh');
+            refresh_notice.show();
 
             var ajax_data = {
                 'action':           'wpsstm_refresh_tracklist',
@@ -333,6 +345,7 @@ class WpsstmTracklist {
             self.tracklist_request.always(function() {
                 tracklist_instances.removeClass('tracklist-loading tracklist-refresh');
                 self.tracklist_request = undefined;
+                refresh_notice.hide();
             });
 
             ////
@@ -682,7 +695,7 @@ class WpsstmTracklist {
         per column, make an array of every cell value
         */
         var all_rows = $(self.tracklist_el).find('tr');
-        var header_row = all_rows.filter('.wpsstm-tracklist-entries-header');
+        var header_row = all_rows.filter('.wpsstm-tracks-list-header');
         
         //get the IDX of the columns we should check
         var toggable_header_cells = $(header_row).find('th.wpsstm-toggle-same-value');

@@ -16,6 +16,7 @@ class WP_SoundSystem_Tracklist{
     
     //datas
     var $tracks = array();
+    var $tracks_error = null;
     var $notices = array();
     
     var $updated_time = null;
@@ -281,8 +282,6 @@ class WP_SoundSystem_Tracklist{
         //allow users to alter the input tracks.
         $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         $add_tracks = $this->validate_tracks($add_tracks);
-        $this->tracks = $add_tracks;
-        $this->track_count = count($this->tracks);
         
         return $add_tracks;
     }
@@ -1010,12 +1009,40 @@ class WP_SoundSystem_Tracklist{
 
     function populate_tracks($args = null){
 
-        if ( $this->did_query_tracks ) return;
-        
-        if ( $this->wait_for_ajax() ){
-            return new WP_Error( 'wpsstm_missing_javascript', __('Please enable javascript to refresh.','wpsstm') );
+        if ( $this->did_query_tracks ) return true;
+
+        if ( $this->ajax_refresh ){
+            
+            /*
+            REFRESH notice
+            will be toggled using CSS
+            */
+            $icon = '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>';
+            $message = sprintf(__('Refreshing %s...','wpsstm'),'<em>'.$this->title.'</em>');
+            $this->add_notice( 'tracklist-header', 'ajax-refresh', $icon.$message );
+            
+            
+            if ( $this->wait_for_ajax() ){
+                $error = new WP_Error( 'missing-javascript', __('Javascript is required to fetch tracks.','wpsstm') );
+                //$this->tracks_error = $error;
+                return $error;
+            }
         }
 
+        $tracks = $this->get_tracks($args);
+        $this->did_query_tracks = true;
+        
+        if ( is_wp_error($tracks) ){
+            $this->tracks_error = $tracks;
+            return $tracks;
+        }
+        
+        $this->tracks = $this->get_tracks($args);
+        $this->track_count = count($this->tracks);
+        return true;
+    }
+    
+    private function get_tracks($args = null){
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
             'tracklist_id'      => $this->post_id,
@@ -1026,9 +1053,8 @@ class WP_SoundSystem_Tracklist{
         $args = wp_parse_args($required,(array)$args);
         
         $subtrack_ids = $this->get_subtrack_ids();
-        $this->add_tracks($subtrack_ids);
-        
-        $this->did_query_tracks = true;
+        $tracks = $this->add_tracks($subtrack_ids);
+        return $tracks;
     }
 
     /**
@@ -1118,8 +1144,8 @@ class WP_SoundSystem_Tracklist{
         }
     }
     
-    function empty_tracks_msg(){
-        return __( 'No tracks found.','wpsstm');
+    function empty_tracks_error(){
+        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("No tracks found.",'wpsstm') );
     }
     
     function get_tracklist_permalink($args = array()){

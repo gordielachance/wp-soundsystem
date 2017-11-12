@@ -56,6 +56,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     
     //not logged notice
     //TO FIX TO MOVE
+    //TO FIX should not be displayed for every playlist but only once for the page
     if ( $tracklist->post_id && $tracklist->tracks && !get_current_user_id() ){
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
@@ -71,8 +72,8 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     <?php
     if ( $tracklist->have_tracks() ) {
     ?>
-        <table class="wpsstm-tracklist-entries">
-            <tr class="wpsstm-tracklist-entries-header">
+        <table class="wpsstm-tracks-list">
+            <tr class="wpsstm-tracks-list-header">
                 <th class="wpsstm-track-image wpsstm-toggle-same-value" itemprop="image"></th>
                 <th class="wpsstm-track-play-bt"></th>
                 <th class="wpsstm-track-position">#</th>
@@ -90,10 +91,10 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             ?>
        </table>
     <?php 
-    }else{
+    }elseif( $error = $tracklist->empty_tracks_error() ){
         ?>
-        <p id="wpsstm-notice-empty-tracklist" class="wpsstm-notice">
-            <?php echo $tracklist->empty_tracks_msg();?>
+        <p class="wpsstm-tracks-list wpsstm-empty-tracks-list wpsstm-notice wpsstm-notice-<?php echo $error->get_error_code();?>">
+            <?php echo $error->get_error_message();?>
         </p>
         <?php
     }

@@ -250,7 +250,7 @@ class WpsstmTrack {
         });
         wpsstm.bottom_trackinfo_el.removeClass('tracklist-table');
         
-        var list = $('<table class="wpsstm-tracklist-entries"></table>');
+        var list = $('<table class="wpsstm-tracks-list"></table>');
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed

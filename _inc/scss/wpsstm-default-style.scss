@@ -77,7 +77,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         }
     }
 
-    table.wpsstm-tracklist-entries{
+    table.wpsstm-tracks-list{
         margin:0;
         padding:0;
         th,tr,td{
@@ -94,7 +94,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         }
         
         //hide header
-        .wpsstm-tracklist-entries-header{
+        .wpsstm-tracks-list-header{
             display:none;
         }
         

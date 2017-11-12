@@ -36,6 +36,13 @@ $player-text-color:#FFF;
     &.active {
         display: block;
     }
+    &#wpsstm-notice-ajax-refresh{
+        background:none;
+        height: 100px;
+        @include align-items(center);
+        @include display-flex();
+        @include justify-content(center);
+    }
     .wpsstm-close-notice{
         position:absolute;
         right:1em;

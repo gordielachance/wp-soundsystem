@@ -10,7 +10,7 @@ $tracklist = $wpsstm_tracklist;
     <?php 
     if ( $tracklist->have_tracks() ) { 
     ?>
-        <ol class="wpsstm-tracklist-entries">
+        <ol class="wpsstm-tracks-list">
             <?php
             $track_position = 0;
             while ( $tracklist->have_tracks() ) {
@@ -27,11 +27,9 @@ $tracklist = $wpsstm_tracklist;
             ?>
        </ol>
     <?php 
-    }else{
+    }elseif( $error = $tracklist->empty_tracks_error() ){
         ?>
-        <p id="wpsstm-notice-empty-tracklist" class="wpsstm-notice">
-            <?php echo $tracklist->empty_tracks_msg();?>
-        </p>
+            <?php echo $error->get_error_message();?>
         <?php
     }
     ?>

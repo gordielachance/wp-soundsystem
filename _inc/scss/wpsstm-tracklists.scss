@@ -36,7 +36,6 @@
     }
     
     &.tracklist-loading{
-        @extend .wpsstm-loading-el;
         .wpsstm-tracklist-loading-icon{
             visibility:visible;
         }
@@ -63,7 +62,7 @@
 
     &.wpsstm-playable-tracklist{
         
-        .wpsstm-tracklist-entries{
+        .wpsstm-tracks-list{
         
             [itemprop="track"]{
                 
@@ -129,7 +128,7 @@
         }
     }
     
-    .wpsstm-tracklist-entries{
+    .wpsstm-tracks-list{
 
         [itemprop="track"]{
 
@@ -188,7 +187,7 @@
         
     }
 
-    table.wpsstm-tracklist-entries{
+    table.wpsstm-tracks-list{
         table-layout:fixed;
         width:100%;
         tr{
