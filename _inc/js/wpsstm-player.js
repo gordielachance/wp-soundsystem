@@ -3,7 +3,7 @@
     $(document).ready(function(){
 
         //scroll to playlist track when clicking the player's track number
-        wpsstm_page_player.bottom_el.on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
+        wpsstm.bottom_el.on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
             e.preventDefault();
             var player_track_el = $(this).parents('[itemprop="track"]');
             var track_idx = Number(player_track_el.attr('data-wpsstm-track-idx'));
@@ -12,7 +12,7 @@
             var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
             var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
 
-            var track_obj = wpsstm_page_player.current_track;
+            var track_obj = wpsstm.current_track;
 
             var track_el = track_obj.track_el;
             var newTracksCount = track_obj.index + 1;
@@ -44,22 +44,22 @@
         Player : shuffle
         */
 
-        if ( wpsstm_page_player.is_shuffle ){
-            wpsstm_page_player.wpsstm_player_shuffle_el.addClass('active');
+        if ( wpsstm.is_shuffle ){
+            wpsstm.wpsstm_player_shuffle_el.addClass('active');
         }
 
-        wpsstm_page_player.wpsstm_player_shuffle_el.find('a').click(function(e) {
+        wpsstm.wpsstm_player_shuffle_el.find('a').click(function(e) {
             e.preventDefault();
 
-            var is_active = !wpsstm_page_player.is_shuffle;
-            wpsstm_page_player.is_shuffle = is_active;
+            var is_active = !wpsstm.is_shuffle;
+            wpsstm.is_shuffle = is_active;
 
             if (is_active){
                 localStorage.setItem("wpsstm-player-shuffle", true);
-                wpsstm_page_player.wpsstm_player_shuffle_el.addClass('active');
+                wpsstm.wpsstm_player_shuffle_el.addClass('active');
             }else{
                 localStorage.removeItem("wpsstm-player-shuffle");
-                wpsstm_page_player.wpsstm_player_shuffle_el.removeClass('active');
+                wpsstm.wpsstm_player_shuffle_el.removeClass('active');
             }
 
         });
@@ -68,22 +68,22 @@
         Player : loop
         */
 
-        if ( wpsstm_page_player.can_repeat ){
-            wpsstm_page_player.wpsstm_player_loop_el.addClass('active');
+        if ( wpsstm.can_repeat ){
+            wpsstm.wpsstm_player_loop_el.addClass('active');
         }
 
-        wpsstm_page_player.wpsstm_player_loop_el.find('a').click(function(e) {
+        wpsstm.wpsstm_player_loop_el.find('a').click(function(e) {
             e.preventDefault();
 
-            var is_active = !wpsstm_page_player.can_repeat;
-            wpsstm_page_player.can_repeat = is_active;
+            var is_active = !wpsstm.can_repeat;
+            wpsstm.can_repeat = is_active;
 
             if (is_active){
                 localStorage.setItem("wpsstm-player-loop", true);
-                wpsstm_page_player.wpsstm_player_loop_el.addClass('active');
+                wpsstm.wpsstm_player_loop_el.addClass('active');
             }else{
                 localStorage.setItem("wpsstm-player-loop", false);
-                wpsstm_page_player.wpsstm_player_loop_el.removeClass('active');
+                wpsstm.wpsstm_player_loop_el.removeClass('active');
             }
 
         });
@@ -101,12 +101,12 @@
 
         $('#wpsstm-player-extra-previous-track').click(function(e) {
             e.preventDefault();
-            wpsstm_page_player.current_track.tracklist.previous_track_jump();
+            wpsstm.current_track.tracklist.previous_track_jump();
         });
 
         $('#wpsstm-player-extra-next-track').click(function(e) {
             e.preventDefault();
-            wpsstm_page_player.current_track.tracklist.next_track_jump();
+            wpsstm.current_track.tracklist.next_track_jump();
         });
         
     });
@@ -117,7 +117,7 @@
     $(document).on( "PageTracklistsInit", function( event, tracklist_obj ) {
 
         //which one should we autoplay play?
-        var tracklists_autoplay = wpsstm_page_player.tracklists.filter(function (tracklist_obj) {
+        var tracklists_autoplay = wpsstm.tracklists.filter(function (tracklist_obj) {
             return (tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
         });
         
@@ -137,7 +137,7 @@
 
     $(window).bind('beforeunload', function(){
 
-        if (wpsstm_page_player.current_media && !wpsstm_page_player.current_media.paused){
+        if (wpsstm.current_media && !wpsstm.current_media.paused){
             return wpsstmPlayer.leave_page_text;
         }
 
@@ -248,7 +248,7 @@ class WpsstmPagePlayer {
         
         if (!tracklist_obj){
             self.debug("previous_tracklist_jump: is first tracklist");
-            if ( !wpsstm_page_player.can_repeat ){
+            if ( !wpsstm.can_repeat ){
                 self.debug("previous_tracklist_jump: can_repeat is disabled.");
             }else{
                 var last_tracklist = self.tracklists[self.tracklists.length - 1];
@@ -277,7 +277,7 @@ class WpsstmPagePlayer {
         var tracklists_after = tracklists.slice(tracklist_idx+1); 
         var tracklists_before = [];
 
-        if ( wpsstm_page_player.can_repeat ){
+        if ( wpsstm.can_repeat ){
             tracklists_before = tracklists.slice(0,tracklist_idx);
         }
 
@@ -290,7 +290,7 @@ class WpsstmPagePlayer {
 
         if (!tracklist_obj){
             self.debug("next_tracklist_jump: is last tracklist");
-            if ( !wpsstm_page_player.can_repeat ){
+            if ( !wpsstm.can_repeat ){
                 self.debug("next_tracklist_jump: can_repeat is disabled.");
                 return;
             }else{
@@ -304,5 +304,5 @@ class WpsstmPagePlayer {
 
 }
 
-var wpsstm_page_player = new WpsstmPagePlayer();
-wpsstm_page_player.init_page_tracklists();
+var wpsstm = new WpsstmPagePlayer();
+wpsstm.init_page_tracklists();

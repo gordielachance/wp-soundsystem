@@ -296,7 +296,7 @@ class WpsstmTrackSource {
             success: function(mediaElement, originalNode, player) {
 
                 self.media = mediaElement;
-                wpsstm_page_player.current_media = self.media;
+                wpsstm.current_media = self.media;
 
                 $(self.media).on('loadeddata', function() {
                     $(document).trigger( "wpsstmSourceMediaLoaded",[self.media,self] ); //custom event

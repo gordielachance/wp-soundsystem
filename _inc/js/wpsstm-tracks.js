@@ -38,11 +38,11 @@
         $(track_el).find('.track-play-bt').click(function(e) {
             e.preventDefault();
 
-            if ( wpsstm_page_player.current_media && $(track_el).hasClass('track-active') ){
+            if ( wpsstm.current_media && $(track_el).hasClass('track-active') ){
                 if ( $(track_el).hasClass('track-playing') ){
-                    wpsstm_page_player.current_media.pause();
+                    wpsstm.current_media.pause();
                 }else{
-                    wpsstm_page_player.current_media.play();
+                    wpsstm.current_media.play();
                 }
                 $(track_el).toggleClass('track-playing');
             }else{
@@ -246,9 +246,9 @@ class WpsstmTrack {
         //copy attributes from the original playlist 
         var attributes = $(tracklist_el).prop("attributes");
         $.each(attributes, function() {
-            wpsstm_page_player.bottom_trackinfo_el.attr(this.name, this.value);
+            wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
-        wpsstm_page_player.bottom_trackinfo_el.removeClass('tracklist-table');
+        wpsstm.bottom_trackinfo_el.removeClass('tracklist-table');
         
         var list = $('<table class="wpsstm-tracklist-entries"></table>');
 
@@ -257,9 +257,9 @@ class WpsstmTrack {
         
         $(list).append(row);
 
-        wpsstm_page_player.bottom_trackinfo_el.html(list);
+        wpsstm.bottom_trackinfo_el.html(list);
         
-        wpsstm_page_player.bottom_el.show();//show in not done yet
+        wpsstm.bottom_el.show();//show in not done yet
     }
     
     play_first_available_source(source_idx){
@@ -538,7 +538,7 @@ class WpsstmTrack {
             self.media.currentTime = 0;
         }
         
-        wpsstm_page_player.current_media = self.media; //TO FIX why for?
+        wpsstm.current_media = self.media; //TO FIX why for?
         self.current_source_idx = undefined;
 
     }
@@ -548,7 +548,7 @@ class WpsstmTrack {
         var self = this;
         var success = $.Deferred();
         
-        var track_previous = wpsstm_page_player.current_track;
+        var track_previous = wpsstm.current_track;
         var isDuplicatePlay = ( $(self).is($(track_previous))); //if we're trying to play the same track again
 
         var isTracklistSwitch = true;
@@ -572,7 +572,7 @@ class WpsstmTrack {
             success.resolve("we've already queued this track"); 
         }else{
 
-            wpsstm_page_player.current_track = self;
+            wpsstm.current_track = self;
 
             $(document).trigger( "wpsstmQueueTrack",[self] ); //custom event
 

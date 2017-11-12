@@ -1,27 +1,25 @@
 class WpsstmLastFM {
     constructor(){
-        var self = this;
-        self.icon_scrobble_el; //player scrobble icon
-        self.auth_notice_el;
-        self.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        self.is_user_api_logged =       parseInt(wpsstmLastFM.is_user_api_logged);
-        self.has_user_scrobbler =   (    ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (self.is_user_api_logged) ); //localStorage stores strings
+        this.icon_scrobble_el =         undefined;
+        this.auth_notice_el =           undefined;
+        this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
+        this.is_user_api_logged =       parseInt(wpsstmLastFM.is_user_api_logged);
+        this.has_user_scrobbler =   (    ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (this.is_user_api_logged) ); //localStorage stores strings
         
 
-        self.auth_notice_el =       null;
+        this.auth_notice_el =       null;
         
-        if ( ( self.has_user_scrobbler === null ) && (self.is_user_api_logged) ){  //default
-            self.has_user_scrobbler = true;
+        if ( ( this.has_user_scrobbler === null ) && (this.is_user_api_logged) ){  //default
+            this.has_user_scrobbler = true;
         }
-
     }
     
     init(){
         
         var self = this;
         
-        self.icon_scrobble_el =     wpsstm_page_player.bottom_el.find('#wpsstm-player-toggle-scrobble')
-        self.auth_notice_el =       wpsstm_page_player.bottom_wrapper_el.find('#wpsstm-bottom-notice-lastfm-auth');
+        self.icon_scrobble_el =     wpsstm.bottom_el.find('#wpsstm-player-toggle-scrobble')
+        self.auth_notice_el =       wpsstm.bottom_wrapper_el.find('#wpsstm-bottom-notice-lastfm-auth');
 
         if (self.has_user_scrobbler){
             $(self.icon_scrobble_el).addClass('active');

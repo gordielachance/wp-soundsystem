@@ -346,8 +346,8 @@ class WpsstmTracklist {
         var self = this;
         
         if(typeof track_idx === undefined){
-            if (wpsstm_page_player.current_track){
-                return wpsstm_page_player.current_track;
+            if (wpsstm.current_track){
+                return wpsstm.current_track;
             }
         }else{
             track_idx = Number(track_idx);
@@ -366,7 +366,7 @@ class WpsstmTracklist {
 
     get_maybe_shuffle_track_idx(idx){
         var self = this;
-        if ( !wpsstm_page_player.is_shuffle ) return idx;
+        if ( !wpsstm.is_shuffle ) return idx;
         var new_idx = self.tracks_shuffle_order[idx];
         
         self.debug("get_maybe_shuffle_track_idx() : " + idx + "-->" + new_idx);
@@ -375,7 +375,7 @@ class WpsstmTracklist {
     
     get_maybe_unshuffle_track_idx(idx){
         var self = this;
-        if ( !wpsstm_page_player.is_shuffle ) return idx;
+        if ( !wpsstm.is_shuffle ) return idx;
         var shuffle_order = self.tracks_shuffle_order;
         var new_idx = shuffle_order.indexOf(idx);
         
@@ -399,7 +399,7 @@ class WpsstmTracklist {
 
         var self = this;
         
-        var track_idx = ( wpsstm_page_player.current_track ) ? wpsstm_page_player.current_track.index : 0;
+        var track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
         track_idx = self.get_maybe_unshuffle_track_idx(track_idx);
         var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
 
@@ -414,13 +414,13 @@ class WpsstmTracklist {
 
         if (!track_obj){
             self.debug("previous_track_jump: no previous track found, jumping to previous tracklist");
-            wpsstm_page_player.previous_tracklist_jump();
+            wpsstm.previous_tracklist_jump();
             return;
         }
        
         if ( track_obj.index === track_idx ){ //is loop
             self.debug("next_track_jump: is looping");
-            if ( !wpsstm_page_player.can_repeat ){
+            if ( !wpsstm.can_repeat ){
                 self.debug("next_track_jump: can_repeat is disabled.");
                 return;
             }
@@ -434,7 +434,7 @@ class WpsstmTracklist {
 
         var self = this;
 
-        var track_idx = ( wpsstm_page_player.current_track ) ? wpsstm_page_player.current_track.index : 0;
+        var track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
         track_idx = self.get_maybe_unshuffle_track_idx(track_idx);
         var last_track = self.tracks[self.tracks.length-1];
 
@@ -451,7 +451,7 @@ class WpsstmTracklist {
         if (!track_obj){
             self.debug("stop tracklist");
             $(document).trigger("wpsstmStopTracklist",[self]); //custom event
-            wpsstm_page_player.next_tracklist_jump();
+            wpsstm.next_tracklist_jump();
         }else{
             track_obj.play_track();
         }
@@ -487,7 +487,7 @@ class WpsstmTracklist {
     start_tracklist(){
         var self = this;
         
-        var current_track = wpsstm_page_player.current_track;
+        var current_track = wpsstm.current_track;
         if (current_track){
             if ( self.index === current_track.tracklist.index ){
                 self.debug("loop tracklist");
@@ -521,8 +521,8 @@ class WpsstmTracklist {
         var self = this;
 
         var max_items = 4; //number of following tracks to preload
-        var rtrack_in = wpsstm_page_player.current_track.index + 1;
-        var rtrack_out = wpsstm_page_player.current_track.index + max_items + 1;
+        var rtrack_in = wpsstm.current_track.index + 1;
+        var rtrack_out = wpsstm.current_track.index + max_items + 1;
 
         var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
 
