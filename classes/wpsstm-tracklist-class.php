@@ -997,9 +997,7 @@ class WP_SoundSystem_Tracklist{
 
 
     function populate_tracks($args = null){
-
-        if ( $this->did_query_tracks ) return true;
-
+        
         if ( $this->ajax_refresh ){
             
             /*
@@ -1015,6 +1013,8 @@ class WP_SoundSystem_Tracklist{
                 return $error;
             }
         }
+        
+        if ( $this->did_query_tracks ) return true;
 
         $tracks_ids = $this->get_tracks($args);
         
