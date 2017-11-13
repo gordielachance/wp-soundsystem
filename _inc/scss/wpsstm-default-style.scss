@@ -29,26 +29,43 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
         }
  
     }
+    
+    #wpsstm-tracklist-actions{
+        display:block;
+        margin: 1em;
+        list-style: none;
+    }
 
     .wpsstm-tracklist-action{
+        
+        border: 1px solid #F7F7F7;
+        background:#F7F7F7;
+        padding: .25em .5em;
+        line-height: 2em;
+        &:hover{
+            border-color:#F7F7F7;
+            background:white;
+        }
+        
         a:before{
             @extend .fa;
             margin-right:.5em;
-        }
-        &#wpsstm-tracklist-action-refresh a:before{
-            @extend .fa-refresh;
-        }
-        &#wpsstm-tracklist-action-share a:before{
-            @extend .fa-share-alt-square;
-        }
-        &#wpsstm-tracklist-action-export a:before{
-            @extend .fa-download;
         }
         
         &.wpsstm-loading a:before{
             @extend .fa-circle-o-notch;
             @extend .fa-spin;
             @extend .fa-fw;
+        }
+        
+        &#wpsstm-tracklist-action-refresh a:before{
+            @extend .fa-refresh;
+        }
+        &#wpsstm-tracklist-action-share a:before{
+            @extend .fa-share-alt;
+        }
+        &#wpsstm-tracklist-action-export a:before{
+            @extend .fa-download;
         }
         
         &:not(.wpsstm-loading){
@@ -59,10 +76,30 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                 @extend .fa-heart;
             }
         }
-
-        &#wpsstm-tracklist-action-status-switch a:before{
-            @extend .fa-calendar-check-o;
+        
+        &#wpsstm-tracklist-action-status-switch{
+            a:before{
+                @extend .fa-calendar-check-o;
+            }
+            form{
+                display:none;
+                select{
+                    font-size:1em;
+                }
+                em{
+                    @include opacity(.5);
+                }
+            }
+            &.expanded{
+                em{
+                    display:none;
+                }
+                form{
+                   display:inline-block; 
+                }
+            }
         }
+
         &#wpsstm-tracklist-action-lock-tracklist a:before{
             @extend .fa-lock;
         }
@@ -265,7 +302,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                                 @include flex(0 0 auto);
                                 padding-right: .5em;
                                 
-                                > * {
+                                .wpsstm-source-action{
                                     text-align:center;
                                     width:2em;
                                 }
@@ -299,6 +336,9 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                                 line-height:2.5em;
                             }
                         }
+                        .wpsstm-source-action{
+                            display:initial;
+                        }
                     }
                     
                     &:not(:hover){
@@ -306,6 +346,9 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                             &:not(.source-playing){
                                 display:none;
                             }
+                        }
+                        .wpsstm-source-action{
+                            display:none;
                         }
                     }
                     

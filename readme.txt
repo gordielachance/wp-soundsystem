@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 4.8
+Tested up to: 4.9
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -30,12 +30,6 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 
 **Supported sources**: Youtube, Soundcloud, regular audio files.
 
-**Attention:** The audio player uses the native [MediaElement.js](http://www.mediaelementjs.com/) media framework.
-The current version that is shipped with Wordpress is obsolete; so you'll need to upgrade it manually (see [ticket#39686](https://core.trac.wordpress.org/ticket/39686)) until it is merged in Wordpress (planned for 4.9).
-
-Once you patched Wordpress, add this line to your config.php file to ignore Wordpress auto-updates (or your patch will be erased) :
-`define( 'WP_AUTO_UPDATE_CORE', false );`
-
 = Track Sources =
 
 If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
@@ -61,9 +55,7 @@ Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 = Live Playlists =
 
 Live Playlists lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
-For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically !
-
-**How does it work ?**  Each time the tracklist refreshes; old tracks are flushed and the new ones are inserted.  If one of the old tracks appears in other playlists or is liked by some users; it will not be trashed.
+For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically; and eventually temporary store the tracks if tracklist cache is enabled.
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 
@@ -135,9 +127,13 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_html();
 ?>`
 
-= How does live playlists handle tracks ? =
+= How does the (live) tracklists cache works ? =
 
-Each time the tracklist refreshes, old tracks are flushed and replaced by the new ones.
+Each time a live tracklist is requested, we check if it has a cache enabled.
+If it is disabled; tracks are not cached to the database and we just request the remote tracklist.
+If it is enabled and that the tracklist has not expired, tracks are populated from the database without requesting the remote page.
+If it is enabled and that the tracklist has expired, we request the remote tracklist; old tracks are flushed and new ones are inserted.
+
 A track that belongs to another playlist or that has been favorited by a user will only be removed from the live playlist without being trashed.
 
 == Screenshots ==
@@ -154,7 +150,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 == Changelog ==
 
 = 1.8.0 =
-* better Last.FM presets; including last.fm stations
+* better Last.FM presets (including last.fm stations)
 * improved JS player
 * improved caching stuff
 * improved CSS

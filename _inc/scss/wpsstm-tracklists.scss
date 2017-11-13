@@ -1,38 +1,6 @@
 @import "compass";
 @import "wpsstm-shared";
 
-#wpsstm-tracklist-actions{
-    .wpsstm-tracklist-action{
-        border: 1px solid #F7F7F7;
-        background:#F7F7F7;
-        padding: .25em .5em;
-        line-height: 2em;
-        &:hover{
-            border-color:#F7F7F7;
-            background:white;
-        }
-        &#wpsstm-tracklist-action-status-switch{
-            form{
-                display:none;
-                select{
-                    font-size:1em;
-                }
-                em{
-                    @include opacity(.5);
-                }
-            }
-            &.expanded{
-                em{
-                    display:none;
-                }
-                form{
-                   display:inline-block; 
-                }
-            }
-        }
-    }
-}
-
 #wpsstm-track-actions{
     .wpsstm-track-action{
         display:inline;
@@ -188,24 +156,7 @@
             }
         }
     }
-    
-    #wpsstm-tracklist-actions{
-        display:block;
-        margin: 1em;
-        list-style: none;
-        li{
-            &#wpsstm-tracklist-action-refresh .wpsstsm-icon{
-                @extend .fa-rss;
-            }
-            &#wpsstm-tracklist-action-share .wpsstsm-icon{
-                @extend .fa-share-alt;
-            }
-            &#wpsstm-tracklist-action-export .wpsstsm-icon{
-                @extend .fa-download;
-            }
-        }
-    }
-    
+
     .wpsstm-tracks-list{
 
         [itemprop="track"]{
