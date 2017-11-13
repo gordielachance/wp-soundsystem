@@ -444,7 +444,9 @@ class WpsstmTrack {
             $(document).trigger("wpsstmTrackSingleSourceDomReady",[source_obj]); //custom event for single source
         });
 
-        $(track_el).attr('data-wpsstm-sources-count',self.sources.length);
+                
+        var track_instances = self.get_track_instances();
+        track_instances.attr('data-wpsstm-sources-count',self.sources.length);
         
         $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event for all sources
 
