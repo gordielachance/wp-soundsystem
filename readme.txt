@@ -153,6 +153,13 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.8.0 =
+* better Last.FM presets; including last.fm stations
+* improved JS player
+* improved caching stuff
+* improved CSS
+* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
+
 = 1.7.5 =
 * live tracklists : rewritten some code, improved caching stuff
 * frontend wizard: if a tracklist is successfully loaded; add the tracklist title to the page title
@@ -161,7 +168,6 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * tracklist/track/source 'position' property renamed to 'index'
 * JS: don't use tracklist_idx/track_idx/source_idx but reference original object (tracklist/track/source)
 * JS: removed a lot of references to get_tracklist_obj() and renamed to get_page_tracklist(), removed function get_tracklist_track_obj()
-* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
 
 = 1.7.4 =
 * new preset for 8tracks.com
