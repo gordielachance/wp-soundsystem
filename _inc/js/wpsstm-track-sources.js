@@ -13,7 +13,6 @@ jQuery(document).ready(function($){
                 var source_el = $(ui.item);
                 var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
                 var source_obj = track_obj.get_source_obj(source_idx);
-                console.log(source_obj);
 
                 //new position
                 source_obj.index = ui.item.index();
@@ -299,7 +298,7 @@ class WpsstmTrackSource {
                 wpsstm.current_media = self.media;
 
                 $(self.media).on('loadeddata', function() {
-                    $(document).trigger( "wpsstmSourceMediaLoaded",[self.media,self] ); //custom event
+                    $(document).trigger( "wpsstmMediaLoaded",[self.media,self] ); //custom event
                     self.can_play = true;
 
                     self.debug('media - loadeddata');
@@ -372,9 +371,7 @@ class WpsstmTrackSource {
 
                     self.debug('media - play');
 
-                    if (self.track.playback_start === undefined){
-                        self.track.playback_start = Math.round( $.now() /1000);
-                    }
+
 
                     self.track.current_source_idx = self.index;
 

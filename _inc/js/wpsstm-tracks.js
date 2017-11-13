@@ -82,7 +82,6 @@
                     el.addClass('wpsstm-loading');
                 },
                 success: function(data){
-                    console.log(data);
                     if (data.success === false) {
                         console.log(data);
                     }else{
@@ -134,7 +133,6 @@
                     action.addClass('wpsstm-loading');
                 },
                 success: function(data){
-                    console.log(data);
                     if (data.success === false) {
                         console.log(data);
                     }else{
@@ -189,7 +187,6 @@ class WpsstmTrack {
         this.did_sources_request =  false;
         this.sources =              [];
         this.current_source_idx =   undefined;
-        this.playback_start =       null; //seconds - used by lastFM
 
         //populate existing sources
         this.populate_html_sources();
@@ -580,7 +577,7 @@ class WpsstmTrack {
             var track_instances = self.get_track_instances();
             track_instances.addClass('track-loading track-active');
 
-            self.playback_start = undefined; //reset playback start
+            
 
             self.set_bottom_trackinfo(); //bottom track info
 

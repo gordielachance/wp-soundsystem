@@ -61,7 +61,7 @@ class WpsstmLastFM {
         var ajax_data = {
             action:             'wpsstm_user_update_now_playing_lastfm_track',
             track:              track_obj.to_ajax(),
-            playback_start:     track_obj.playback_start
+            playback_start:     Math.round( $.now() /1000), //time in sec
         };
 
         return $.ajax({
@@ -95,7 +95,7 @@ class WpsstmLastFM {
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_user_track',
             track:              track_obj.to_ajax(),
-            playback_start:     track_obj.playback_start
+            playback_start:     Math.round( $.now() /1000), //time in sec
         };
 
         self.debug(ajax_data);
@@ -130,7 +130,7 @@ class WpsstmLastFM {
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_community_track',
             track:              track_obj.to_ajax(),
-            playback_start:     track_obj.playback_start
+            playback_start:     Math.round( $.now() /1000), //time in sec
         };
 
         self.debug(ajax_data);
@@ -202,22 +202,22 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $(document).on( "wpsstmSourceMediaLoaded", function( event, media, track ) {
+    $(document).on( "wpsstmMediaLoaded", function( event, media,source_obj ) {
 
         $(media).on('play', function() {
             if (wpsstm_lastfm.has_user_scrobbler){
-                wpsstm_lastfm.updateNowPlaying(track);
+                wpsstm_lastfm.updateNowPlaying(source_obj.track);
             }
         });
         
         $(media).on('ended', function() {
             if ( media.duration > 30) { //scrobble
                 if (wpsstm_lastfm.has_user_scrobbler){
-                    wpsstm_lastfm.user_scrobble(track);
+                    wpsstm_lastfm.user_scrobble(source_obj.track);
                 }
                 //bot scrobble
                 if (wpsstm_lastfm.lastfm_scrobble_along){
-                    wpsstm_lastfm.community_scrobble(track);
+                    wpsstm_lastfm.community_scrobble(source_obj.track);
                 }
             }
         });
