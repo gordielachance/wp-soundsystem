@@ -692,6 +692,10 @@ class WP_SoundSystem_Core_Tracklists{
         $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
         
         $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+        
+        //ignore ajax refresh here
+        //so tracks can be populated through PHP for actions that requires them
+        $tracklist->ajax_refresh = false;
 
         switch($admin_action){
             case 'switch-status':
