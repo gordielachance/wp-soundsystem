@@ -713,6 +713,20 @@ class WP_SoundSystem_Core_Tracklists{
                 exit();
                 
             break;
+            case 'get-autorship':
+                
+                if ( !$tracklist->user_can_get_autorship() ) break;
+
+                $updated = $tracklist->get_autorship();
+
+                if ( is_wp_error($updated) ){
+                    $redirect_url = add_query_arg( array('tracklist_error'=>$updated->get_error_code()),$redirect_url );
+                }
+                
+                wp_redirect($redirect_url);
+                exit();
+                
+            break;
             case 'lock-tracklist':
                 
                 if ( !$tracklist->user_can_lock_tracklist() ) break;

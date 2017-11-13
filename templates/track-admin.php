@@ -68,7 +68,7 @@
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
                         if ( $actions = $track->get_track_actions($tracklist,'admin') ){
-                            $list = wpsstm_get_actions_list($actions,'track');
+                            $list = output_tracklist_actions($actions,'track');
                             echo $list;
                         }
                 

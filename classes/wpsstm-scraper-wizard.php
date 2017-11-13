@@ -9,8 +9,8 @@ class WP_SoundSystem_Core_Wizard{
     
     public $frontend_wizard_page_id = null;
     public $qvar_wizard_posts = 'wpsstm_wizard_posts';
-    public $wizard_search;
     public $wizard_disabled_metakey = '_wpsstm_wizard_disabled';
+    public $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
     
     public $tracklist;
 
@@ -36,22 +36,21 @@ class WP_SoundSystem_Core_Wizard{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        $this->wizard_search = isset($_REQUEST['wizard_s']) ? trim($_REQUEST['wizard_s']) : null;
+        
     }
 
     function setup_actions(){
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
-        
-        add_action( 'the_post',array($this,'the_frontend_wizard_tracklist'),10,2 );
 
         //frontend
-        add_action( 'wp', array($this,'do_frontend_wizard_form' ) );
-        add_action( 'wp',  array($this, 'frontend_wizard_add_tracklist'));
-        add_filter('document_title_parts',  array($this, 'frontend_wizard_title_parts'));
+        add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
+        add_action( 'wp', array($this,'frontend_wizard_populate_tracklist' ) );
+        add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
+        add_filter( 'template_include', array($this,'frontend_wizard_template'));
         
-        add_filter( 'page_template', array($this,'wizard_page_template'));
+        add_filter('document_title_parts',  array($this, 'frontend_wizard_title_parts'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
@@ -138,14 +137,46 @@ class WP_SoundSystem_Core_Wizard{
         wpsstm_locate_template( 'wizard-form.php', true );
     }
     
-    function wizard_page_template($template){
+    /*
+    For wizard tracklists (created with the community user); 
+    Redirect to wizard and pass tracklist ID as parameter
+    
+    If user try to hacks this (by passing a tracklist ID that is not a community post); redirect to regular tracklist.
+    */
+    
+    function community_tracklist_redirect(){
+        global $post;
+        
+        if (!$post) return;
+
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $is_community_tracklist = ( ($post->post_type == wpsstm()->post_type_live_playlist) && ($post->post_author == $community_user_id) );
+
+        if ($is_community_tracklist){
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('tracklist_id'=>$post->ID),$link);
+            wp_redirect($link);
+            exit();
+        }
+
+    }
+
+    /*
+    We're requesting the frontend wizard page:
+    load the wizard template
+    eventually populate wizard tracklist
+    */
+    
+    function frontend_wizard_template($template){
+        global $post;
+        global $wpsstm_tracklist;
+        
         if ( !is_page($this->frontend_wizard_page_id) ) return $template;
-        if ( !$this->can_frontend_wizard() ) return $template;
 
         return wpsstm_locate_template( 'frontend-wizard.php' );
     }
 
-    function get_wizard_tracklist($post_id=null){
+    function get_wizard_tracklist($post_id=null,$input=null){
         
         //not yet populated
         if (!$this->tracklist){
@@ -154,14 +185,11 @@ class WP_SoundSystem_Core_Wizard{
             if ($post_id){
                 $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
             }else{
-                $feed_url = wpsstm_wizard()->wizard_search;
-                $this->tracklist = wpsstm_get_live_tracklist_preset($feed_url);
+                $input = trim($input);
+                $this->tracklist = wpsstm_get_live_tracklist_preset($input);
                 $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
             }
 
-            $this->tracklist->ajax_refresh = false; //TO FIX we should use ajax here too
-            $this->tracklist->is_expired = !$this->tracklist->is_wizard_disabled(); //force tracklist refresh
-            
             $this->tracklist->tracks_strict = false;
 
             if (wpsstm_is_backend() ){
@@ -194,52 +222,16 @@ class WP_SoundSystem_Core_Wizard{
 
     }
     
-    /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
-    */
-    
-    function the_frontend_wizard_tracklist($post,$query){
-        global $wpsstm_tracklist;
-        global $post;
-        
-        if (!$post) return;
-        if( $post->ID != $this->frontend_wizard_page_id ) return;
-        $wpsstm_tracklist = $this->get_wizard_tracklist();
-
-    }
-    
-    function frontend_wizard_add_tracklist(){
-        global $post;
-        global $wpsstm_tracklist;
-        if (!$post) return;
-        
-        $wizard_data = ( isset($_POST[ 'wpsstm_wizard' ]) ) ? $_POST[ 'wpsstm_wizard' ] : null;
-        if ( !isset($wizard_data['save-wizard']) ) return;
-
-        $tracklist = wpsstm_get_post_live_tracklist($post->ID);
-        
-        $saved = $tracklist->save_wizard($wizard_data);
-        
-        if ( is_wp_error($saved) ){
-            //TO FIX debug log
-        }elseif($saved){
-            //redirect so we repopulate everything
-            $wizard_permalink = $wpsstm_tracklist->get_wizard_permalink();
-            wp_redirect($wizard_permalink);
-            exit();
-        }
-
-    }
-    
     function frontend_wizard_title_parts($title){
         global $wpsstm_tracklist;
         global $post;
         
         if( is_admin() ) return $title;
+        if ( !$post ) return $title;
         if( $post->ID != $this->frontend_wizard_page_id ) return $title;
    
         $wpsstm_tracklist = $this->get_wizard_tracklist();
-        if ( $tracklist_title = $wpsstm_tracklist->get_tracklist_title() ){
+        if ( $tracklist_title = $wpsstm_tracklist->get_remote_title() ){
             $title['title'] = sprintf('%s - %s',$title['title'],$tracklist_title);
         }
 
@@ -273,8 +265,6 @@ class WP_SoundSystem_Core_Wizard{
 
         if ( isset($wizard_data['save-wizard']) ){
             $success = $wpsstm_tracklist->save_wizard($wizard_data);
-        }elseif ( isset($wizard_data['save-playlist']['type']['static']) ){
-            $success = $wpsstm_tracklist->convert_to_static_playlist();
         }elseif ( isset($wizard_data['import-tracks']) ){
             $wpsstm_tracklist->append_wizard_tracks();
         }elseif( isset($wizard_data['toggle-wizard']) ){
@@ -293,68 +283,113 @@ class WP_SoundSystem_Core_Wizard{
         }
 
     }
+    
+    /*
+    Create a tracklist from the frontend wizard search input and redirect to it.
+    Set the community user as post author so we can detect it as a wizard tracklist.
+    */
 
-    function do_frontend_wizard_form(){
+    function frontend_wizard_create_from_search(){
+
+        if ( is_admin() ) return;
+        if ( !is_page($this->frontend_wizard_page_id) ) return;
+        if ( !$this->can_frontend_wizard() ) return;
+
+        //wizard action
+        $wizard_data = isset($_REQUEST[ 'wpsstm_wizard' ]) ? $_REQUEST[ 'wpsstm_wizard' ] : array();
+        $tracklist_id = isset( $wizard_data['post_id'] ) ? $wizard_data['post_id'] : null;
+        
+        $is_load_url = isset($wizard_data['action']['load-url']);
+        if ( !$is_load_url ) return;
+            
+        $wizard_search = isset($wizard_data['search']) ? $wizard_data['search'] : null;
+        $tracklist = $this->get_wizard_tracklist(null,$wizard_search);
+        
+        //check we're able to query a tracklist with this wizard search
+        if ( !$tracklist->feed_url ){
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('wizard_error'=>'no-feed-url'),$link);
+            wp_redirect($link);
+            exit();
+        }
+
+        /*
+        Check that there is already a wizard tracklist existing for that same search and redirect to it.
+        */
+
+        $duplicate_args = array(
+            'post_type'         => wpsstm()->post_type_live_playlist,
+            'fields'            => 'ids',
+            'post_author'       => wpsstm()->get_options('community_user_id'),
+            'meta_query' => array(
+                array(
+                    'key' => wpsstm_live_playlists()->feed_url_meta_name,
+                    'value' => $tracklist->feed_url
+                )
+            )
+        );
+
+        $duplicate_query = new WP_Query( $duplicate_args );
+        if ( $duplicate_query->have_posts() ){
+            $existing_id = $duplicate_query->posts[0];
+            $link = get_permalink($existing_id);
+            wp_redirect($link);
+            exit();
+        }else{
+
+            /*
+            Create a new live tracklist for this search and redirect to it
+            */
+
+            //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
+
+            $post_args = array(
+                'post_title'    => $tracklist->title,
+                'post_type'     => wpsstm()->post_type_live_playlist,
+                'post_status'   => 'publish',
+                'post_author'   => wpsstm()->get_options('community_user_id'),
+                'meta_input'   => array(
+                    wpsstm_live_playlists()->feed_url_meta_name => $tracklist->feed_url,
+                    $this->is_wizard_tracklist_metakey  => true,
+                )
+            );
+
+            $new_tracklist_id = wp_insert_post( $post_args );
+
+            if ( is_wp_error($new_tracklist_id) ){
+                $link = get_permalink($this->frontend_wizard_page_id);
+                $link = add_query_arg(array('wizard_error'=>$new_tracklist_id->get_error_code()),$link);
+                wp_redirect($link);
+                exit();
+            }else{
+                $link = get_permalink($new_tracklist_id);
+                wp_redirect($link);
+                exit();
+            }
+        }
+    }
+    
+    function frontend_wizard_populate_tracklist(){
+        global $wpsstm_tracklist;
 
         if ( !is_page($this->frontend_wizard_page_id) ) return;
         if ( !$this->can_frontend_wizard() ) return;
         
-        $wizard_data = isset($_POST[ 'wpsstm_wizard' ]) ? $_POST[ 'wpsstm_wizard' ] : array();
+        //check if we have a tracklist to load
+        $tracklist_id = isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
+        $tracklist = $this->get_wizard_tracklist($tracklist_id);
         
-        $save_live_playlist = ( isset($wizard_data['save-playlist']['type']['live']) );
-        $save_static_playlist = ( isset($wizard_data['save-playlist']['type']['static']) );
-        
-        if ( !$save_live_playlist && !$save_static_playlist ) return;
-
-        $is_static = ($save_static_playlist);
-        $saved = $this->insert_frontend_wizard_tracklist($is_static);
-
-    }
-    
-    function insert_frontend_wizard_tracklist($static=false){
-        
-        if ( !wpsstm_wizard()->can_frontend_wizard() ) return;
-
-        if ( !$user_id = get_current_user_id() ){
-            $user_id = wpsstm()->get_options('community_user_id');
-        }
-        
-        if (!$user_id) return;
-
-        //create tracklist
-        //TO FIX check if tracklist has tracks and abord if not
-        //TO FIX check for duplicate using author + scraper url ?
-        
-        $post_args = array(
-            'post_type'     => wpsstm()->post_type_live_playlist,
-            'post_status'   => 'publish',
-            'post_author'   => $user_id,
-            'meta_input'   => array(
-                wpsstm_live_playlists()->feed_url_meta_name => $this->wizard_search,
-            )
-        );
-
-        $new_post_id = wp_insert_post( $post_args );
-        if ( is_wp_error($new_post_id) ) return $new_post_id;
-        
-        $tracklist = wpsstm_get_post_live_tracklist($new_post_id);  
-        $tracklist->populate_and_save_tracks();
-        
-        if($static){
-            $converted = $tracklist->convert_to_static_playlist();
-
-            if ( is_wp_error($converted) ){
-                $link = get_permalink($this->frontend_wizard_page_id);
-                $link = add_query_arg(array('wizard_error'=>$converted->get_error_code()),$link);
-                wp_redirect($link);
-                exit();
-            }
+        //this is not a community tracklist, abord wizard
+        if ($tracklist->is_community){ 
+            $link = get_permalink($tracklist_id);
+            wp_redirect($link);
+            exit();
             
         }
-
-        $link = get_permalink($new_post_id);
-        wp_redirect($link);
-        exit();
+        
+        //do populate.
+        $wpsstm_tracklist = $tracklist;
+        
     }
 
     function wizard_settings_init(){
@@ -715,7 +750,8 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         printf(
-            '<input type="text" name="wizard_s" value="%s" class="fullwidth" placeholder="%s" />',
+            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+            'wpsstm_wizard',
             $option,
             __('URL of the tracklist you would like to get','wpsstm')
         );
@@ -888,11 +924,17 @@ class WP_SoundSystem_Core_Wizard{
         
         $option = $wpsstm_tracklist->get_options('datas_cache_min');
 
+        $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
+        $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
+        $desc[] = __("This can be useful if you have a lot of traffic - there will be less remote requests ans track sources will be searched only once.",'wpsstm');
+        $desc = implode("<br/>",$desc);
+
         printf(
-            '<input type="number" name="%1$s[datas_cache_min]" size="4" min="0" value="%2$s" /><span class="wizard-field-desc">%3$s</span>',
+            '<input type="number" name="%s[datas_cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
             'wpsstm_wizard',
             $option,
-            __('(in minutes) — If set, a track post will be created for each track found then deleted when we request the page again.','spiff')
+            __('minutes','spiff'),
+            $desc
         );
 
         
@@ -1133,16 +1175,17 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function can_frontend_wizard(){
-        
+
         if ( !$user_id = get_current_user_id() ){
             $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') == 'on' );
             if (!$can_wizard_unlogged) return false;
-            $user_id = wpsstm()->get_options('community_user_id');
         }
 
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
-        return user_can($user_id,$required_cap);
+        return user_can($community_user_id,$required_cap);
     }
 
 }

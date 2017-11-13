@@ -39,8 +39,6 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-        
-        add_filter( 'the_title', array($this,'filter_live_playlist_title' ), 10, 2);
 
         //listing
         add_action( 'pre_get_posts', array($this, 'sort_live_playlists'));
@@ -291,23 +289,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         return $query;
         
     }
-    
-    //TO FIX or only wizard posts ?
-    function filter_live_playlist_title($title, $post_id = null){
-        
-        if ($title) return $title;
-        
-        if ( get_post_type($post_id) != wpsstm()->post_type_live_playlist ) return $title;
 
-        $tracklist = wpsstm_get_post_tracklist($post_id);
-
-        if ( $remote_title = $tracklist->get_cached_remote_title() ){
-            $title = $remote_title;
-        }
-        
-        return $title;
-    }
-    
     function can_live_playlists(){
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');

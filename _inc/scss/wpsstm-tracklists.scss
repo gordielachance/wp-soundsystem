@@ -1,10 +1,15 @@
 @import "compass";
 @import "wpsstm-shared";
 
-.wpsstm-actions-list{
-    li{
-        &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
-            display:none;
+#wpsstm-tracklist-actions{
+    .wpsstm-tracklist-action{
+        border: 1px solid #F7F7F7;
+        background:#F7F7F7;
+        padding: .25em .5em;
+        line-height: 2em;
+        &:hover{
+            border-color:#F7F7F7;
+            background:white;
         }
         &#wpsstm-tracklist-action-status-switch{
             form{
@@ -28,42 +33,98 @@
     }
 }
 
+#wpsstm-track-actions{
+    .wpsstm-track-action{
+        display:inline;
+        @include opacity(.5);
+        &:hover{
+            @include opacity(1);
+        }
+    }
+}
+
 .wpsstm-tracklist{
     position:relative;
     
-    .wpsstm-tracklist-loading-icon{
-        visibility:hidden;
+    .wpsstm-tracklist-icon{
+        @extend .fa;
+        @include opacity (.15);
+    }
+
+    &.tracklist-loading{
+        .wpsstm-tracklist-icon{
+            @extend .fa-circle-o-notch;
+            @extend .fa-spin;
+            @extend .fa-fw;
+        }
+        #wpsstm-tracklist-actions{
+            pointer-events:none;
+            @include opacity(.5);
+        }
+    }
+
+    &:not(.tracklist-playing) .wpsstm-tracklist-icon{
+        @extend .fa-play;
+    }
+
+    &.tracklist-playing .wpsstm-tracklist-icon{
+        @extend .fa-pause;
     }
     
-    &.loading{
-        @extend .wpsstm-loading-el;
-        .wpsstm-tracklist-loading-icon{
-            visibility:visible;
+    &.tracklist-error .wpsstm-tracklist-icon{
+        @extend .fa-exclamation-triangle;
+    }
+    
+    &.tracklist-pause .wpsstm-tracklist-icon{
+        @extend .fa-play;
+    }
+    
+    &:not(.wpsstm-loved-tracklist) #wpsstm-tracklist-action-unfavorite{
+        display:none;
+    }
+    
+    &.wpsstm-loved-tracklist{
+        #wpsstm-tracklist-action-favorite{
+            display:none;
+        }
+    } 
+
+    &:not(.tracklist-expired){
+        #wpsstm-tracklist-action-refresh{
+            pointer-events:none;
+            @include opacity(.5);
         }
     }
     
-    .tracklist-nav{
-        ul#wpsstm-tracklist-actions{
-            display:block;
-            margin: 1em;
-            list-style: none;
+    &.tracklist-ajaxed{
+        
+        &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
+            display:none;
         }
-    }
-    
-    &:not(.wpsstm-expired-tracklist){
-        .tracklist-nav{
-            ul#wpsstm-tracklist-actions{
-                li#wpsstm-tracklist-action-refresh{
-                    pointer-events:none;
-                    @include opacity(.5);
+        
+        &.tracklist-refresh{
+            > * {
+                display:none;
+                &.tracklist-header,&.wpsstm-tracklist-notices{
+                    display:inherit;
                 }
+                &.wpsstm-tracklist-notices > *{
+                    display:none;
+                    &#wpsstm-notice-ajax-refresh{
+                        display:inherit;
+                    }
+                }
+                .wpsstm-tracklist-time{
+                    display:none;
+                }
+
             }
         }
     }
 
     &.wpsstm-playable-tracklist{
         
-        .wpsstm-tracklist-entries{
+        .wpsstm-tracks-list{
         
             [itemprop="track"]{
                 
@@ -71,69 +132,81 @@
                     @include opacity(.25);
                 } 
 
-                &:not(.active){
+                &:not(.track-active){
                     td{
                         @include opacity(.5);
                     }
                 }
-                
-                &.buffering{
-                    pointer-events: none;
-                }
-                
-                &.has-played,&:hover{
+
+                &.track-has-played,&:hover{
                     td{
                         @include opacity(.75);
                     }
                 }
 
-                &.active{
+                &.track-active{
                     td{
                         @include opacity(1);
                     }
                 }
-
-                .wpsstm-play-track{
-                    .wpsstm-player-icon{
-                        display:none;
-                        &.wpsstm-player-icon-play{
-                            display:inline-block;
-                        }
-                    }
+                
+                .wpsstm-track-icon{
+                    @extend .fa;
+                }
+                
+                &.track-loading .wpsstm-track-icon{
+                    @extend .fa-circle-o-notch;
+                    @extend .fa-spin;
+                    @extend .fa-fw;
+                }
+                &:not(.track-playing) .wpsstm-track-icon{
+                    @extend .fa-play;
+                }
+                
+                &.track-playing .wpsstm-track-icon{
+                    @extend .fa-pause;
                 }
 
-                &.buffering,&.loading-sources{
-                    .wpsstm-track-position{
-                        .wpsstm-player-icon-loading{
-                            display:inline-block;
-                        }
-                        span{
-                            display:none;
-                        }
-                    }
+                &.track-error .wpsstm-track-icon{
+                    @extend .fa-exclamation-triangle;
                 }
-                &.playing .wpsstm-play-track, &.active.buffering .wpsstm-play-track{
-                    .wpsstm-player-icon{
-                        display:none;
-                    }
-                    .wpsstm-player-icon-pause{
-                        display:inline-block;
-                    }
+                
+                &.track-pause .wpsstm-track-icon{
+                    @extend .fa-pause;
+                }
+                
+                &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
+                    display:none;
                 }
 
-                &.error .wpsstm-play-track{
-                    .wpsstm-player-icon{
+                &.wpsstm-loved-track{
+                    #wpsstm-track-action-favorite{
                         display:none;
                     }
-                    .wpsstm-player-icon-error{
-                        display:inline-block;
-                    }
-                }
+                } 
+
             }
         }
     }
     
-    .wpsstm-tracklist-entries{
+    #wpsstm-tracklist-actions{
+        display:block;
+        margin: 1em;
+        list-style: none;
+        li{
+            &#wpsstm-tracklist-action-refresh .wpsstsm-icon{
+                @extend .fa-rss;
+            }
+            &#wpsstm-tracklist-action-share .wpsstsm-icon{
+                @extend .fa-share-alt;
+            }
+            &#wpsstm-tracklist-action-export .wpsstsm-icon{
+                @extend .fa-download;
+            }
+        }
+    }
+    
+    .wpsstm-tracks-list{
 
         [itemprop="track"]{
 
@@ -173,15 +246,24 @@
                     label{
                         display:none;
                     }
-                    &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
-                        display:none;
-                    }
                 }
             }
             .wpsstm-track-sources-list{
                 position:relative;
+                
+                //single source
                 [data-wpsstm-source-idx]{
                     position:relative;
+                
+                    label{
+                        @extend .wpsstm-can-click;
+                    }
+                    &.source-error .wpsstm-source-icon{
+                        @extend .fa-exclamation-triangle;
+                    }
+                    &.source-playing{
+                        font-weight: bold;
+                    }
                 }
             }
             
@@ -192,7 +274,7 @@
         
     }
 
-    table.wpsstm-tracklist-entries{
+    table.wpsstm-tracks-list{
         table-layout:fixed;
         width:100%;
         tr{

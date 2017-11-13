@@ -5,12 +5,12 @@ $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
 $tracklist = $wpsstm_tracklist;
 ?>
 
-<div <?php echo $tracklist->get_tracklist_attr(array('extra_classes'=>array('wpsstm-tracklist-list')));?>>
+<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('wpsstm-tracklist-list')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <?php 
     if ( $tracklist->have_tracks() ) { 
     ?>
-        <ol class="wpsstm-tracklist-entries">
+        <ol class="wpsstm-tracks-list">
             <?php
             $track_position = 0;
             while ( $tracklist->have_tracks() ) {
@@ -27,11 +27,9 @@ $tracklist = $wpsstm_tracklist;
             ?>
        </ol>
     <?php 
-    }else{
+    }elseif( $error = $tracklist->empty_tracks_error() ){
         ?>
-        <p id="wpsstm-notice-empty-tracklist" class="wpsstm-notice">
-            <?php echo $tracklist->empty_tracks_msg();?>
-        </p>
+            <?php echo $error->get_error_message();?>
         <?php
     }
     ?>

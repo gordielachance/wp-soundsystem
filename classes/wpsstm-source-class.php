@@ -392,7 +392,7 @@ class WP_SoundSystem_Source{
             'data-wpsstm-source-idx' =>     $wpsstm_track->current_source,
             'data-wpsstm-source-type' =>    $this->type,
             'data-wpsstm-source-src' =>     $this->stream_url,
-            'data-wpsstm-autosource' =>     (int)$this->is_community,
+            'data-wpsstm-community-source' =>     (int)$this->is_community,
             'class'                 =>      implode( ' ',$this->get_source_class() ),
         );
         return $attr;
@@ -413,7 +413,7 @@ class WP_SoundSystem_Source{
             $classes[] = 'wpsstm-can-manage-source';
         }
         if ($wpsstm_track->current_source == 0){
-            $classes[] = 'wpsstm-active-source';
+            $classes[] = 'source-playing';
         }
 
         return $classes;
