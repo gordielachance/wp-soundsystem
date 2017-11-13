@@ -95,7 +95,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                 @extend .wpsstm-no-underline;
             }
             [data-wpsstm-source-idx]{
-                &:not(.source-play){
+                &:not(.source-playing){
                     @include opacity(.25);
                     &:hover{
                         @include opacity(.5);
@@ -303,7 +303,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     
                     &:not(:hover){
                         [data-wpsstm-source-idx]{
-                            &:not(.source-play){
+                            &:not(.source-playing){
                                 display:none;
                             }
                         }

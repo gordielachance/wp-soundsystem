@@ -1,8 +1,16 @@
 @import "compass";
 @import "wpsstm-shared";
 
-.wpsstm-actions-list{
-    li{
+#wpsstm-tracklist-actions{
+    .wpsstm-tracklist-action{
+        border: 1px solid #F7F7F7;
+        background:#F7F7F7;
+        padding: .25em .5em;
+        line-height: 2em;
+        &:hover{
+            border-color:#F7F7F7;
+            background:white;
+        }
         &#wpsstm-tracklist-action-status-switch{
             form{
                 display:none;
@@ -25,11 +33,22 @@
     }
 }
 
+#wpsstm-track-actions{
+    .wpsstm-track-action{
+        display:inline;
+        @include opacity(.5);
+        &:hover{
+            @include opacity(1);
+        }
+    }
+}
+
 .wpsstm-tracklist{
     position:relative;
     
     .wpsstm-tracklist-icon{
         @extend .fa;
+        @include opacity (.15);
     }
 
     &.tracklist-loading .wpsstm-tracklist-icon{
@@ -236,7 +255,7 @@
                     &.source-error .wpsstm-source-icon{
                         @extend .fa-exclamation-triangle;
                     }
-                    &.source-play{
+                    &.source-playing{
                         font-weight: bold;
                     }
                 }

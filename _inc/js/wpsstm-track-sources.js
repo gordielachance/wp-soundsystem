@@ -42,7 +42,7 @@ jQuery(document).ready(function($){
                 var source_instances = source_obj.get_source_instances();
                 source_instances.remove();
                 
-                if ( source_el.hasClass('source-play') ){
+                if ( source_el.hasClass('source-playing') ){
                     //TO FIX TO DO skip to next source ? what if it is the last one ?
                 }
                 
@@ -331,7 +331,9 @@ class WpsstmTrackSource {
         var success = $.Deferred();
 
         self.track.set_bottom_audio_el(); //build <audio/> el
+        var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
+        var source_instances = self.get_source_instances();
 
         //TO FIX check if same source playing already ?
         //if (self.track.current_source_idx === self.index){
@@ -357,14 +359,18 @@ class WpsstmTrackSource {
                 });
 
                 $(self.media).on('play', function() {
-                    var track_instances = self.track.get_track_instances();
-                    var source_instances = self.get_source_instances();
+
 
                     var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
-                    $(trackinfo_sources).removeClass('source-play');
+                    $(trackinfo_sources).removeClass('source-playing');
+                    
+                    track_instances.removeClass('track-error track-loading');
 
-
-                    source_instances.addClass('source-play');
+                    tracklist_instances.addClass('tracklist-playing tracklist-has-played');
+                    track_instances.addClass('track-playing track-has-played');
+                    source_instances.addClass('source-playing source-has-played');
+                    
+                    
 
                     self.debug('media - play');
 
@@ -372,9 +378,6 @@ class WpsstmTrackSource {
                         self.track.playback_start = Math.round( $.now() /1000);
                     }
 
-                    track_instances.addClass('track-playing track-has-played');
-                    track_instances.removeClass('track-error track-loading');
-                    
                     self.track.current_source_idx = self.index;
 
                     success.resolve(self);
@@ -382,13 +385,16 @@ class WpsstmTrackSource {
 
                 $(self.media).on('pause', function() {
                     self.debug('player - pause');
+                    tracklist_instances.removeClass('tracklist-playing');
                     track_instances.removeClass('track-playing');
+                    source_instances.removeClass('source-playing');
                 });
 
                 $(self.media).on('ended', function() {
                     self.debug('media - ended');
-
+                    tracklist_instances.removeClass('tracklist-playing');
                     track_instances.removeClass('track-playing track-active');
+                    source_instances.removeClass('source-playing track-active');
 
                     //Play next song if any
                     self.track.tracklist.next_track_jump();
