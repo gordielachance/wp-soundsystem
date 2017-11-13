@@ -23,14 +23,23 @@ $player-text-color:#FFF;
     @include opacity(.5);
 }
 
+@include keyframes(opacityPulse){
+    0% {opacity: 1;}
+    50% {opacity: 0.5; }
+    100% {opacity: 1;}
+}
+
 .wpsstm-tracklist-notices{
     @include align-items(center);
     @include display-flex();
     @include justify-content(center);
+    padding: .5em 0;
 
     #wpsstm-notice-ajax-refresh{
         background:none;
-        font-size: 1.25em;
+        @include animation(opacityPulse 2s infinite ease-out);
+        opacity: 1;
+        font-size:1em;
         &:before{
             margin-right:.25em;
             @extend .fa-circle-o-notch;
