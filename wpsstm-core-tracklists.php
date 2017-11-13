@@ -690,8 +690,8 @@ class WP_SoundSystem_Core_Tracklists{
 
         //TO FIX validate status regarding user's caps
         $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
-        
-        $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+
+        $redirect_url = null; //we'll define it at the end of the function because permalink could change during an action (eg. change post type)
         
         //ignore ajax refresh here
         //so tracks can be populated through PHP for actions that requires them
@@ -713,9 +713,6 @@ class WP_SoundSystem_Core_Tracklists{
                     $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
                 }
                 
-                wp_redirect($redirect_url);
-                exit();
-                
             break;
             case 'get-autorship':
                 
@@ -726,9 +723,6 @@ class WP_SoundSystem_Core_Tracklists{
                 if ( is_wp_error($updated) ){
                     $redirect_url = add_query_arg( array('tracklist_error'=>$updated->get_error_code()),$redirect_url );
                 }
-                
-                wp_redirect($redirect_url);
-                exit();
                 
             break;
             case 'lock-tracklist':
@@ -741,9 +735,6 @@ class WP_SoundSystem_Core_Tracklists{
                     $redirect_url = add_query_arg( array('tracklist_error'=>$converted->get_error_code()),$redirect_url );
                 }
                 
-                wp_redirect($redirect_url);
-                exit();
-                
             break;
             case 'unlock-tracklist':
                 
@@ -754,9 +745,6 @@ class WP_SoundSystem_Core_Tracklists{
                 if ( is_wp_error($converted) ){
                     $redirect_url = add_query_arg( array('tracklist_error'=>$converted->get_error_code()),$redirect_url );
                 }
-                
-                wp_redirect($redirect_url);
-                exit();
 
             break;
                 
@@ -777,11 +765,15 @@ class WP_SoundSystem_Core_Tracklists{
                     $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
                 }
                 
-                wp_redirect($redirect_url);
-                exit();
-                
             break;
         }
+        
+        if (!$redirect_url){
+            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+        }
+        wp_redirect($redirect_url);
+        exit();
+        
     }
     
     function trash_tracklist_orphans($post_id){
