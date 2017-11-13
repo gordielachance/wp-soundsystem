@@ -571,7 +571,7 @@ class WP_SoundSystem_Track{
     function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
 
         $url = get_permalink($this->post_id);
-        $url = add_query_arg(array(wpsstm_tracklists()->qvar_tracklist_admin=>$track_action),$url);
+        $url = add_query_arg(array(wpsstm_tracks()->qvar_track_admin=>$track_action),$url);
 
         return $url;
     }
