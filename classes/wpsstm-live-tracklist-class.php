@@ -906,8 +906,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     //UTC
     function get_expiration_time(){
         if ( !$cache_duration_min = $this->get_options('datas_cache_min') ) return false;
-        
-        $now = current_time( 'timestamp', true );
         $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
         return $this->updated_time + $cache_duration_s;
     }
@@ -959,8 +957,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'wpsstm-live-tracklist',
         );
 
-        $defaults[] = ( $this->is_expired ) ? 'tracklist-expired' : null;
-
         $classes = array_merge($defaults,(array)$extra_classes);
 
         return parent::get_tracklist_class($classes);
@@ -968,11 +964,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     function get_tracklist_attr($values_attr=null){
         
-        $values_default = array(
-        );
+        $values_default = array();
         
-        if ( $time = $this->get_expiration_time() ){
-            $values_default['data-wpsstm-expire-time'] = $time;
+        $expiration_time = $this->get_expiration_time();
+        
+        if (!$expiration_time){ 
+            //no real cache is set; so let's say tracklist is already expired at load!
+            $expiration_time = current_time( 'timestamp', true );
+        }
+        
+        if ( $expiration_time ){
+            $values_default['data-wpsstm-expire-time'] = $expiration_time;
         }
 
         $values_attr = array_merge($values_default,(array)$values_attr);

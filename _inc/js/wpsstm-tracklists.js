@@ -282,7 +282,7 @@ class WpsstmTracklist {
 
         //already requested
         if (self.tracklist_request) return self.tracklist_request.promise();
-
+        
         self.tracklist_request = $.Deferred();
         
         //not ajaxed
@@ -448,7 +448,14 @@ class WpsstmTracklist {
         var track_obj = tracks_playable[0];
 
         if (!track_obj){
-            self.debug("stop tracklist");
+            self.debug("next_track_jump: is last track");
+            
+            if (self.is_expired){
+                self.debug("(tracklist will refresh if it is started again)");
+                self.can_play = undefined; //will force to refresh tracklist
+            }
+            
+            
             $(document).trigger("wpsstmStopTracklist",[self]); //custom event
             wpsstm.next_tracklist_jump();
         }else{
