@@ -50,6 +50,8 @@ class WP_SoundSystem_Core_LastFM{
         add_action('wp_ajax_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         
+        add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
+        
     }
     
     function setup_globals(){
@@ -386,16 +388,16 @@ class WP_SoundSystem_Core_LastFM{
         
     }
     
-    function get_scrobbler_icons(){
-        $scrobbling_classes = array();
-
-        $scrobbling_classes_str = wpsstm_get_classes_attr($scrobbling_classes);
-
-        $loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-        $icon_scrobbler =  '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-        $enabled_link = sprintf('<a id="wpsstm-enable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-enable-scrobbling">%s</a>',__('Enable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
-        $disabled_link = sprintf('<a id="wpsstm-disable-scrobbling" href="#" title="%s" class="wpsstm-requires-auth wpsstm-requires-lastfm-auth wpsstm-player-action wpsstm-player-disable-scrobbling">%s</a>',__('Disable Last.fm scrobbling','wpsstm'),$icon_scrobbler);
-        return sprintf('<span id="wpsstm-player-toggle-scrobble" %s>%s%s%s</span>',$scrobbling_classes_str,$loading,$disabled_link,$enabled_link);
+    function get_lastfm_actions($actions = null){
+        
+        //enable scrobbler
+        if ( wpsstm()->get_options('lastfm_scrobbling') ){
+            $actions['scrobbler'] = array(
+                'text' =>       __('Last.FM scrobble', 'wpsstm'),
+            );
+        }
+        
+        return $actions;
     }
     
     function can_community_scrobble(){

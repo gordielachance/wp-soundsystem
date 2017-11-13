@@ -29,7 +29,7 @@ class WP_SoundSystem_Tracklist{
     
     var $tracks_strict = true; //requires a title AND an artist
     
-    public $ajax_refresh = true; //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
+    public $ajax_refresh = true;//TOFIXBBB //by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     var $paged_var = 'tracklist_page';
     
@@ -190,10 +190,7 @@ class WP_SoundSystem_Tracklist{
         
         if ( is_wp_error($success) ) return $success;
         
-        //update subtracks time
-        $now = current_time( 'timestamp', true );
-        $this->updated_time = $now;
-        return update_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name,$this->updated_time);
+        return true;
 
     }
     
@@ -558,7 +555,6 @@ class WP_SoundSystem_Tracklist{
         //refresh
         if ($can_refresh){
             $actions['refresh'] = array(
-                'icon' =>       '<i class="fa fa-rss" aria-hidden="true"></i>',
                 'text' =>      __('Refresh', 'wpsstm'),
                 'href' =>      $permalink,
             );
@@ -567,7 +563,6 @@ class WP_SoundSystem_Tracklist{
         //share
         if ($share_url){
             $actions['share'] = array(
-                'icon' =>       '<i class="fa fa-share-alt" aria-hidden="true"></i>',
                 'text' =>       __('Share', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('share'),
             );
@@ -576,7 +571,6 @@ class WP_SoundSystem_Tracklist{
         //XSPF
         if ($export_url){
             $actions['export'] = array(
-                'icon' =>       '<i class="fa fa-download" aria-hidden="true"></i>',
                 'text' =>       __('Export', 'wpsstm'),
                 'desc' =>       __('Export to XSPF', 'wpsstm'),
                 'href' =>       $export_url,
@@ -586,23 +580,19 @@ class WP_SoundSystem_Tracklist{
         //favorite
         if ($can_favorite){
             $actions['favorite'] = array(
-                'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-action-toggle-favorite'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-favorite'),
             );
-            if ( !$this->is_tracklist_loved_by() ) $actions['favorite']['classes'][] = 'wpsstm-toggle-favorite-active';
         }
 
         //unfavorite
         if ($can_favorite){
             $actions['unfavorite'] = array(
-                'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-action-toggle-favorite'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unfavorite'),
             );
-            if ( $this->is_tracklist_loved_by() ) $actions['unfavorite']['classes'][] = 'wpsstm-toggle-favorite-active';
         }
         
         //add track
@@ -612,10 +602,9 @@ class WP_SoundSystem_Tracklist{
             $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
             
             $actions['new-subtrack'] = array(
-                'icon'      =>  '<i class="fa fa-plus" aria-hidden="true"></i>',
                 'text'     =>   $track_obj->labels->add_new_item,
                 'href'      =>  $new_subtrack_url,
-                'classes'   =>  array('wpsstm-requires-auth'),
+                'classes'   =>  array('wpsstm-requires-auth','wpsstm-icon-add'),
             );
         }
         
@@ -638,32 +627,29 @@ class WP_SoundSystem_Tracklist{
             $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="%s" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str,wpsstm_tracklists()->qvar_tracklist_admin);
 
             $actions['status-switch'] = array(
-                'icon' =>       '<i class="fa fa-calendar-check-o" aria-hidden="true"></i>',
                 'text' =>      __('Status'),
                 'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
-                'classes' =>    array('wpsstm-requires-auth'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-status'),
             );
         }
 
         //lock
         if ( $this->user_can_lock_tracklist() ){
             $actions['lock-tracklist'] = array(
-                'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Lock', 'wpsstm'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('lock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-lock'),
             );
         }
 
         //unlock
         if ( $this->user_can_unlock_tracklist() ){
             $actions['unlock-tracklist'] = array(
-                'icon' =>       '<i class="fa fa-lock" aria-hidden="true"></i>',
                 'text' =>      __('Unlock', 'wpsstm'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_admin_gui_url('unlock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unlock'),
 
             );
         }
@@ -699,7 +685,6 @@ class WP_SoundSystem_Tracklist{
         $actions = apply_filters('wpsstm_tracklist_actions',$actions,$context);
         
         $default_action = wpsstm_get_blank_action();
-        $default_action['classes'][] = 'wpsstm-tracklist-action';
         
         foreach((array)$actions as $slug=>$action){
             $action = wp_parse_args($action,$default_action);
@@ -976,6 +961,10 @@ class WP_SoundSystem_Tracklist{
         $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'tracklist-autoplay' : null;
         $classes[] = ( $this->get_options('autosource') == "on" ) ? 'tracklist-autosource' : null;
         $classes[] = ( $this->get_options('wpsstm-can-play') == "on" ) ? 'wpsstm-can-play' : null;
+        
+        if ( $this->is_tracklist_loved_by() ){
+            $classes[] = 'wpsstm-loved-tracklist';
+        }
 
         if ($extra_classes){
             if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
@@ -1017,9 +1006,7 @@ class WP_SoundSystem_Tracklist{
             REFRESH notice
             will be toggled using CSS
             */
-            $icon = '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>';
-            $message = sprintf(__('Refreshing %s...','wpsstm'),'<em>'.$this->title.'</em>');
-            $this->add_notice( 'tracklist-header', 'ajax-refresh', $icon.$message );
+            $this->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
             
             
             if ( $this->wait_for_ajax() ){
@@ -1029,20 +1016,21 @@ class WP_SoundSystem_Tracklist{
             }
         }
 
-        $tracks = $this->get_tracks($args);
-        $this->did_query_tracks = true;
+        $tracks_ids = $this->get_tracks($args);
         
-        if ( is_wp_error($tracks) ){
-            $this->tracks_error = $tracks;
+        $this->did_query_tracks = true;
+
+        if ( is_wp_error($tracks_ids) ){
+            $this->tracks_error = $tracks_ids;
             return $tracks;
         }
-        
-        $this->tracks = $this->get_tracks($args);
+
+        $this->tracks = $this->add_tracks($tracks_ids);
         $this->track_count = count($this->tracks);
         return true;
     }
     
-    private function get_tracks($args = null){
+    protected function get_tracks($args = null){
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
             'tracklist_id'      => $this->post_id,
@@ -1053,8 +1041,7 @@ class WP_SoundSystem_Tracklist{
         $args = wp_parse_args($required,(array)$args);
         
         $subtrack_ids = $this->get_subtrack_ids();
-        $tracks = $this->add_tracks($subtrack_ids);
-        return $tracks;
+        return $subtrack_ids;
     }
 
     /**

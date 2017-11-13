@@ -28,7 +28,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                     <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
                         if ( $actions = $tracklist->get_tracklist_actions('admin') ){
-                            $list = wpsstm_get_actions_list($actions,'tracklist');
+                            $list = output_tracklist_actions($actions,'tracklist');
                             echo $list;
                         }
                 

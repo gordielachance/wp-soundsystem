@@ -14,34 +14,63 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
     }
 }
 
-.wpsstm-actions-list:not(#wpsstm-track-actions){
-    text-align: center;
-    font-size:.8em;
-    line-height: 3em;
-    li{
-        background: #EEE;
-        padding: 0 .5em;
-        line-height: 2.5em;
-        a{
-            i{
-                padding-right:.25em;
-            }
-        }
-    }
-}
-
 .wpsstm-tracklist{
         
     font-family: sans-serif;
     font-size:0.8em;
 
-    .tracklist-nav{
+
+    .tracklist-header{
+        border-bottom:1px solid #F7F7F7;
+        padding:.25em;
         ul#wpsstm-tracklist-actions{
             text-align: center;
             font-size:.8em;
         }
+ 
     }
-    
+
+    .wpsstm-tracklist-action{
+        a:before{
+            @extend .fa;
+            margin-right:.5em;
+        }
+        &#wpsstm-tracklist-action-refresh a:before{
+            @extend .fa-refresh;
+        }
+        &#wpsstm-tracklist-action-share a:before{
+            @extend .fa-share-alt-square;
+        }
+        &#wpsstm-tracklist-action-export a:before{
+            @extend .fa-download;
+        }
+        
+        &.wpsstm-loading a:before{
+            @extend .fa-circle-o-notch;
+            @extend .fa-spin;
+            @extend .fa-fw;
+        }
+        
+        &:not(.wpsstm-loading){
+            &#wpsstm-tracklist-action-favorite a:before{
+                @extend .fa-heart-o;
+            }
+            &#wpsstm-tracklist-action-unfavorite a:before{
+                @extend .fa-heart;
+            }
+        }
+
+        &#wpsstm-tracklist-action-status-switch a:before{
+            @extend .fa-calendar-check-o;
+        }
+        &#wpsstm-tracklist-action-lock-tracklist a:before{
+            @extend .fa-lock;
+        }
+        &#wpsstm-tracklist-action-unlock-tracklist a:before{
+            @extend .fa-lock;
+        }
+    }
+
     [itemprop="track"]{
         .wpsstm-track-actions{
             width:6em;
@@ -66,7 +95,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                 @extend .wpsstm-no-underline;
             }
             [data-wpsstm-source-idx]{
-                &:not(.source-active){
+                &:not(.source-play){
                     @include opacity(.25);
                     &:hover{
                         @include opacity(.5);
@@ -75,9 +104,43 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
             }
 
         }
+        
+        .wpsstm-track-action{
+            a > span{
+                display:none;
+            }
+            a:before{
+                @extend .fa;
+            }
+            &#wpsstm-track-action-about a:before{
+                @extend .fa-info-circle;
+            }
+            &#wpsstm-track-action-advanced a:before{
+                @extend .fa-cog;
+            }
+            &.wpsstm-loading a:before{
+                @extend .fa-circle-o-notch;
+                @extend .fa-spin;
+                @extend .fa-fw;
+            }
+            &:not(.wpsstm-loading){
+                &#wpsstm-track-action-favorite a:before{
+                    @extend .fa-heart-o;
+                }
+                &#wpsstm-track-action-unfavorite a:before{
+                    @extend .fa-heart;
+                }
+            }
+        }
+
     }
+    
+    
 
     table.wpsstm-tracks-list{
+        
+        
+        
         margin:0;
         padding:0;
         th,tr,td{
@@ -127,12 +190,6 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                         label{
                             @extend .wpsstm-can-click;
                         }
-                        &.source-error{
-                            text-decoration: line-through;
-                        }
-                        &.source-active{
-                            font-weight: bold;
-                        }
                     }
                 }
             }
@@ -156,6 +213,10 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
     
     //tracklists inside posts
     .hentry &{
+        
+        border:1px solid #F7F7F7;
+        padding:.5em 1em;
+        
         [itemprop="track"]{
             .wpsstm-track-sources{
                 display:none;
@@ -242,7 +303,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
                     
                     &:not(:hover){
                         [data-wpsstm-source-idx]{
-                            &:not(.source-active){
+                            &:not(.source-play){
                                 display:none;
                             }
                         }

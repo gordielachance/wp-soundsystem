@@ -71,12 +71,13 @@ class WP_SoundSystem_Core_Player{
                 <table id="wpsstm-bottom-track-wrapper">
                     <tr>
                         <td id="wpsstm-bottom-track-info"></td>
-                        <td id="wpsstm-bottom-track-actions">
+                        <td id="wpsstm-player-actions-wrapper">
                             <?php 
-                            //scrobbling
-                            if ( wpsstm()->get_options('lastfm_scrobbling') ){
-                                echo wpsstm_lastfm()->get_scrobbler_icons();
-                            }
+        
+                                //tracklist actions
+                                if ( $actions = $this->output_player_actions() ){
+                                    echo $actions;
+                                }                        
                             ?>
                         </td>
                     </tr>
@@ -107,7 +108,6 @@ class WP_SoundSystem_Core_Player{
         //localize vars
         $localize_vars=array(
             'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
-            'refreshing_text'       => __('Refreshing','wpsstm')
         );
 
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);
@@ -116,11 +116,58 @@ class WP_SoundSystem_Core_Player{
 
     function get_track_button(){
         //https://wordpress.stackexchange.com/a/162945/70449
-        $link = '<a class="track-play-bt wpsstm-icon-link" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
+        $link = '<a class="wpsstm-icon wpsstm-icon-link" href="#"><i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i><i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i></a>';
 
         return $link;
 
     }
+    
+    function get_player_actions(){
+        $actions = array();
+        $actions = apply_filters('wpsstm_get_player_actions',$actions);
+        
+        $default_action = wpsstm_get_blank_action();
+        
+        foreach((array)$actions as $slug=>$action){
+            $action = wp_parse_args($action,$default_action);
+            $action['classes'][] = 'wpsstm-action';
+            $action['classes'][] = 'wpsstm-player-action';
+            $actions[$slug] = $action;
+        }
+        return $actions;
+        
+    }
+    
+    function output_player_actions(){
+        
+        if ( !$actions = $this->get_player_actions() ) return;
+        
+        $track_actions_lis = array();
+
+        foreach($actions as $slug => $action){
+
+            $action_attr = array(
+                'id'        => sprintf('wpsstm-player-action-%s',$slug),
+                'class'     => implode(" ",$action['classes'])
+            );
+
+            $link_attr = array(
+                'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
+                'href'      => $action['href'],
+                'class'     => implode(" ",$action['link_classes'])
+            );
+            $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
+            $link = $action['link_before'].$link.$action['link_after'];
+
+            $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
+        }
+
+        if ( !empty($track_actions_lis) ){
+            return sprintf('<ul id="wpsstm-player-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_lis));
+        }
+    }
+    
+    
 }
 
 class WP_SoundSystem_Player_Provider{
@@ -418,8 +465,6 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     function sources_lookup($track){
         return $this->get_soundsgood_sources($track,'soundcloud');
     }
-    
-    
 }
 
 class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Provider{

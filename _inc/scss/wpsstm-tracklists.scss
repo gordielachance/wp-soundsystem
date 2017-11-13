@@ -3,9 +3,6 @@
 
 .wpsstm-actions-list{
     li{
-        &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
-            display:none;
-        }
         &#wpsstm-tracklist-action-status-switch{
             form{
                 display:none;
@@ -31,26 +28,60 @@
 .wpsstm-tracklist{
     position:relative;
     
-    .wpsstm-tracklist-loading-icon{
-        visibility:hidden;
+    .wpsstm-tracklist-icon{
+        @extend .fa;
+    }
+
+    &.tracklist-loading .wpsstm-tracklist-icon{
+        @extend .fa-circle-o-notch;
+        @extend .fa-spin;
+        @extend .fa-fw;
+    }
+    &:not(.tracklist-playing) .wpsstm-tracklist-icon{
+        @extend .fa-play;
+    }
+
+    &.tracklist-playing .wpsstm-tracklist-icon{
+        @extend .fa-pause;
     }
     
-    &.tracklist-loading{
-        .wpsstm-tracklist-loading-icon{
-            visibility:visible;
+    &.tracklist-error .wpsstm-tracklist-icon{
+        @extend .fa-exclamation-triangle;
+    }
+    
+    &.tracklist-pause .wpsstm-tracklist-icon{
+        @extend .fa-play;
+    }
+    
+    &:not(.wpsstm-loved-tracklist) #wpsstm-tracklist-action-unfavorite{
+        display:none;
+    }
+    
+    &.wpsstm-loved-tracklist{
+        #wpsstm-tracklist-action-favorite{
+            display:none;
         }
-    }
+    } 
     
-    .tracklist-nav{
-        ul#wpsstm-tracklist-actions{
-            display:block;
-            margin: 1em;
-            list-style: none;
+    #wpsstm-tracklist-actions{
+        display:block;
+        margin: 1em;
+        list-style: none;
+        li{
+            &#wpsstm-tracklist-action-refresh .wpsstsm-icon{
+                @extend .fa-rss;
+            }
+            &#wpsstm-tracklist-action-share .wpsstsm-icon{
+                @extend .fa-share-alt;
+            }
+            &#wpsstm-tracklist-action-export .wpsstsm-icon{
+                @extend .fa-download;
+            }
         }
     }
     
     &:not(.tracklist-expired){
-        .tracklist-nav{
+        .tracklist-header{
             ul#wpsstm-tracklist-actions{
                 li#wpsstm-tracklist-action-refresh{
                     pointer-events:none;
@@ -62,16 +93,23 @@
     
     &.tracklist-ajaxed{
         
-        #wpsstm-notice-ajax-refresh{
+        &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
             display:none;
         }
         
         &.tracklist-refresh{
             > * {
                 display:none;
-                &#wpsstm-notice-ajax-refresh,&.tracklist-nav{
+                &.tracklist-header,&.wpsstm-tracklist-notices{
                     display:inherit;
                 }
+                &.wpsstm-tracklist-notices > *{
+                    display:none;
+                    &#wpsstm-notice-ajax-refresh{
+                        display:inherit;
+                    }
+                }
+
             }
         }
     }
@@ -103,43 +141,42 @@
                         @include opacity(1);
                     }
                 }
-
-                .track-play-bt{
-                    .wpsstm-player-icon{
-                        display:none;
-                        &.wpsstm-player-icon-play{
-                            display:inline-block;
-                        }
-                    }
+                
+                .wpsstm-track-icon{
+                    @extend .fa;
+                }
+                
+                &.track-loading .wpsstm-track-icon{
+                    @extend .fa-circle-o-notch;
+                    @extend .fa-spin;
+                    @extend .fa-fw;
+                }
+                &:not(.track-playing) .wpsstm-track-icon{
+                    @extend .fa-play;
+                }
+                
+                &.track-playing .wpsstm-track-icon{
+                    @extend .fa-pause;
                 }
 
-                &.track-loading{
-                    .wpsstm-track-position{
-                        .wpsstm-player-icon-loading{
-                            display:inline-block;
-                        }
-                        span{
-                            display:none;
-                        }
-                    }
+                &.track-error .wpsstm-track-icon{
+                    @extend .fa-exclamation-triangle;
                 }
-                &.track-playing .track-play-bt{
-                    .wpsstm-player-icon{
-                        display:none;
-                    }
-                    .wpsstm-player-icon-pause{
-                        display:inline-block;
-                    }
+                
+                &.track-pause .wpsstm-track-icon{
+                    @extend .fa-pause;
+                }
+                
+                &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
+                    display:none;
                 }
 
-                &.track-error .track-play-bt{
-                    .wpsstm-player-icon{
+                &.wpsstm-loved-track{
+                    #wpsstm-track-action-favorite{
                         display:none;
                     }
-                    .wpsstm-player-icon-error{
-                        display:inline-block;
-                    }
-                }
+                } 
+
             }
         }
     }
@@ -184,15 +221,24 @@
                     label{
                         display:none;
                     }
-                    &.wpsstm-action-toggle-favorite:not(.wpsstm-toggle-favorite-active){
-                        display:none;
-                    }
                 }
             }
             .wpsstm-track-sources-list{
                 position:relative;
+                
+                //single source
                 [data-wpsstm-source-idx]{
                     position:relative;
+                
+                    label{
+                        @extend .wpsstm-can-click;
+                    }
+                    &.source-error .wpsstm-source-icon{
+                        @extend .fa-exclamation-triangle;
+                    }
+                    &.source-play{
+                        font-weight: bold;
+                    }
                 }
             }
             

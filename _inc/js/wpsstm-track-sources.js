@@ -42,7 +42,7 @@ jQuery(document).ready(function($){
                 var source_instances = source_obj.get_source_instances();
                 source_instances.remove();
                 
-                if ( source_el.hasClass('source-active') ){
+                if ( source_el.hasClass('source-play') ){
                     //TO FIX TO DO skip to next source ? what if it is the last one ?
                 }
                 
@@ -361,10 +361,10 @@ class WpsstmTrackSource {
                     var source_instances = self.get_source_instances();
 
                     var trackinfo_sources = track_instances.find('[data-wpsstm-source-idx]');
-                    $(trackinfo_sources).removeClass('source-active');
+                    $(trackinfo_sources).removeClass('source-play');
 
 
-                    source_instances.addClass('source-active');
+                    source_instances.addClass('source-play');
 
                     self.debug('media - play');
 

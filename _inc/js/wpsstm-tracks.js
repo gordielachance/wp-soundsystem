@@ -35,7 +35,7 @@
         var track_el = track_obj.track_el;
 
         //play button
-        $(track_el).find('.track-play-bt').click(function(e) {
+        $(track_el).find('.wpsstm-track-icon').click(function(e) {
             e.preventDefault();
 
             if ( wpsstm.current_media && $(track_el).hasClass('track-active') ){
@@ -58,6 +58,8 @@
             if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
+            var el = $(this).parents('.wpsstm-track-action');
+            
 
             var track_ajax = track_obj.to_ajax();
 
@@ -77,7 +79,7 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    link.addClass('loading');
+                    el.addClass('wpsstm-loading');
                 },
                 success: function(data){
                     console.log(data);
@@ -91,12 +93,11 @@
                             track_instances.attr("data-wpsstm-track-id", data.track.post_id);
                         }
                         
-                        track_instances.find('#wpsstm-track-action-favorite').removeClass('wpsstm-toggle-favorite-active');
-                        track_instances.find('#wpsstm-track-action-unfavorite').addClass('wpsstm-toggle-favorite-active');
+                        track_instances.addClass('wpsstm-loved-track');
                     }
                 },
                 complete: function() {
-                    link.removeClass('loading');
+                    el.removeClass('wpsstm-loading');
                     $(document).trigger("wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
@@ -110,6 +111,8 @@
             if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
+            var action = $(this).parents('.wpsstm-track-action');
+            
             var track_ajax = track_obj.to_ajax();
 
             var ajax_data = {
@@ -128,7 +131,7 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    link.addClass('loading');
+                    action.addClass('wpsstm-loading');
                 },
                 success: function(data){
                     console.log(data);
@@ -136,12 +139,11 @@
                         console.log(data);
                     }else{
                         var track_instances = track_obj.get_track_instances();
-                        track_instances.find('#wpsstm-track-action-favorite').addClass('wpsstm-toggle-favorite-active');
-                        track_instances.find('#wpsstm-track-action-unfavorite').removeClass('wpsstm-toggle-favorite-active');
+                        track_instances.removeClass('wpsstm-loved-track');
                     }
                 },
                 complete: function() {
-                    link.removeClass('loading');
+                    action.removeClass('wpsstm-loading');
                     $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
@@ -248,8 +250,7 @@ class WpsstmTrack {
         $.each(attributes, function() {
             wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
-        wpsstm.bottom_trackinfo_el.removeClass('tracklist-table');
-        
+
         var list = $('<table class="wpsstm-tracks-list"></table>');
 
         var row = self.track_el.clone(true,true);
