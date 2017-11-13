@@ -25,7 +25,7 @@
 /* makes the font 33% larger relative to the icon container */
 /* line 5, ../scss/Font-Awesome/_larger.scss */
 .fa-lg {
-  font-size: 1.3333333333em;
+  font-size: 1.33333em;
   line-height: 0.75em;
   vertical-align: -15%;
 }
@@ -52,14 +52,14 @@
 
 /* line 3, ../scss/Font-Awesome/_fixed-width.scss */
 .fa-fw, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, #wpsstm-player-actions .wpsstm-player-action.wpsstm-loading a:before {
-  width: 1.2857142857em;
+  width: 1.28571em;
   text-align: center;
 }
 
 /* line 4, ../scss/Font-Awesome/_list.scss */
 .fa-ul {
   padding-left: 0;
-  margin-left: 2.1428571429em;
+  margin-left: 2.14286em;
   list-style-type: none;
 }
 /* line 8, ../scss/Font-Awesome/_list.scss */
@@ -70,14 +70,14 @@
 /* line 10, ../scss/Font-Awesome/_list.scss */
 .fa-li {
   position: absolute;
-  left: -2.1428571429em;
-  width: 2.1428571429em;
-  top: 0.1428571429em;
+  left: -2.14286em;
+  width: 2.14286em;
+  top: 0.14286em;
   text-align: center;
 }
 /* line 16, ../scss/Font-Awesome/_list.scss */
 .fa-li.fa-lg {
-  left: -1.8571428571em;
+  left: -1.85714em;
 }
 
 /* line 4, ../scss/Font-Awesome/_bordered-pulled.scss */
@@ -3919,26 +3919,32 @@ ul.comma-list li:not(:last-child):after {
   text-align: right;
 }
 
-/* line 8, ../scss/wpsstm-player.scss */
+/* line 4, ../scss/wpsstm-player.scss */
+#wpsstm-player-actions {
+  padding: 0;
+  margin: 0;
+  margin-right: .5em;
+}
+/* line 11, ../scss/wpsstm-player.scss */
 #wpsstm-player-actions .wpsstm-player-action a:before {
   display: inline;
 }
-/* line 12, ../scss/wpsstm-player.scss */
+/* line 15, ../scss/wpsstm-player.scss */
 #wpsstm-player-actions .wpsstm-player-action a span {
   display: none;
 }
-/* line 25, ../scss/wpsstm-player.scss */
+/* line 26, ../scss/wpsstm-player.scss */
 #wpsstm-player-actions .wpsstm-player-action:not(.wpsstm-loading)#wpsstm-player-action-scrobbler {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
-/* line 30, ../scss/wpsstm-player.scss */
+/* line 31, ../scss/wpsstm-player.scss */
 #wpsstm-player-actions .wpsstm-player-action:not(.wpsstm-loading)#wpsstm-player-action-scrobbler.wpsstm-enabled {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
 }
 
-/* line 39, ../scss/wpsstm-player.scss */
+/* line 40, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper {
   position: fixed;
   width: 100%;
@@ -3947,73 +3953,69 @@ ul.comma-list li:not(:last-child):after {
   min-height: 0em;
   z-index: 50;
 }
-/* line 49, ../scss/wpsstm-player.scss */
+/* line 50, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom {
   display: none;
   background: #222;
   color: #FFF;
 }
-/* line 53, ../scss/wpsstm-player.scss */
+/* line 54, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom a {
   color: #FFF;
 }
-/* line 56, ../scss/wpsstm-player.scss */
+/* line 57, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper {
   width: 100%;
   table-layout: auto;
   padding: 0;
   margin: 0;
 }
-/* line 62, ../scss/wpsstm-player.scss */
+/* line 63, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td {
   padding: 0;
   margin: 0;
 }
-/* line 65, ../scss/wpsstm-player.scss */
+/* line 66, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td#wpsstm-bottom-track-info {
   vertical-align: top;
 }
-/* line 68, ../scss/wpsstm-player.scss */
+/* line 69, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td#wpsstm-bottom-track-info table td {
   display: inline-block;
   padding: 0 .75em;
   box-sizing: content-box;
 }
-/* line 75, ../scss/wpsstm-player.scss */
+/* line 76, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td#wpsstm-bottom-track-info table td.wpsstm-track-play-bt {
   display: none;
 }
-/* line 79, ../scss/wpsstm-player.scss */
+/* line 80, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td#wpsstm-bottom-track-info table td.wpsstm-track-title:before {
   content: "—";
   margin-right: 1.5em;
 }
-/* line 88, ../scss/wpsstm-player.scss */
-#wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper td #wpsstm-player-actions {
-  margin-right: .5em;
-}
-/* line 95, ../scss/wpsstm-player.scss */
+/* line 91, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper {
   width: 100%;
   padding: 0;
   margin: 0;
 }
-/* line 99, ../scss/wpsstm-player.scss */
+/* line 95, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper td {
   text-align: center;
   vertical-align: middle;
 }
-/* line 103, ../scss/wpsstm-player.scss */
+/* line 99, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper #wpsstm-player {
   width: 80%;
   margin: auto;
 }
-/* line 108, ../scss/wpsstm-player.scss */
+/* line 104, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper .wpsstm-player-extra#wpsstm-player-shuffle:not(.active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
   opacity: 0.3;
 }
-/* line 111, ../scss/wpsstm-player.scss */
+/* line 107, ../scss/wpsstm-player.scss */
 #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-player-wrapper .wpsstm-player-extra#wpsstm-player-loop:not(.active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
   opacity: 0.3;

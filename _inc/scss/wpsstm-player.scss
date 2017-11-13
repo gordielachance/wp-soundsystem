@@ -2,6 +2,9 @@
 @import "wpsstm-shared";
 
 #wpsstm-player-actions{
+    padding:0;
+    margin:0;
+    margin-right:.5em;
     .wpsstm-player-action{
 
         a{
@@ -82,11 +85,6 @@
                         }
                     }
                 }
-                
-                #wpsstm-player-actions{
-                    margin-right:.5em;
-                }
-
             }
         }
 
