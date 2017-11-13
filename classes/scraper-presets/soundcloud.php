@@ -91,7 +91,7 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
 
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         
         $page = $this->get_variable_value('soundcloud-page');
         $username = $this->get_variable_value('soundcloud-username');

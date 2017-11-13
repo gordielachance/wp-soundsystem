@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.7.5
+Version: 1.8.0
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.7.5';
+    public $version = '1.8.0';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '151';
+    public $db_version = '152';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -80,7 +80,6 @@ class WP_SoundSystem {
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'community_user_id'                 => null,
-            'live_playlists_cache_min'          => 0,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'lastfm_client_id'                  => null,
             'lastfm_client_secret'              => null,

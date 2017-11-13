@@ -9,7 +9,7 @@ $track->populate_sources();
 
 
 ?>
-<tr <?php echo $track->get_track_attr();?>>
+<tr class="<?php echo implode(' ',$track->get_track_class());?>" <?php echo $track->get_track_attr();?>>
     <td class="wpsstm-track-image" itemprop="image">
         <?php 
         if ($track->image_url){
@@ -21,11 +21,7 @@ $track->populate_sources();
     </td>
     <?php if ( $wpsstm_tracklist->get_options('can_play') ){ ?>
         <td class="wpsstm-track-play-bt">
-            <a class="wpsstm-play-track wpsstm-icon-link" href="#">
-            <i class="wpsstm-player-icon wpsstm-player-icon-error fa fa-exclamation-triangle" aria-hidden="true"></i>
-            <i class="wpsstm-player-icon wpsstm-player-icon-pause fa fa-pause" aria-hidden="true"></i>
-            <i class="wpsstm-player-icon wpsstm-player-icon-play fa fa-play" aria-hidden="true"></i>
-            </a>
+            <a class="wpsstm-track-icon wpsstm-icon" href="#"></a>
         </td>
     <?php } ?>
     <td class="wpsstm-track-position">
@@ -39,7 +35,7 @@ $track->populate_sources();
     <td class="wpsstm-track-actions">
         <?php
         if ( $actions = $track->get_track_actions($tracklist,'page') ){
-            echo wpsstm_get_actions_list($actions,'track');
+            echo output_tracklist_actions($actions,'track');
         }
         ?>
     </td>

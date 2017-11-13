@@ -49,7 +49,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     */
     
     /*
-    function get_all_raw_tracks(){
+    function get_remote_tracks($args = null){
         //init pagination before request
         $pagination_args = array(
             'page_items_limit'  => 50
@@ -57,7 +57,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
 
         $this->set_request_pagination( $pagination_args );
         
-        return parent::get_all_raw_tracks();
+        return parent::get_remote_tracks($args);
     }
 
     

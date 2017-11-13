@@ -12,7 +12,8 @@
  */
 
 global $wpsstm_tracklist;
-get_header(); 
+get_header();
+
 ?>
 
 	<div id="primary" class="content-area">
@@ -46,7 +47,7 @@ get_header();
 
                     }else{
                         ?>
-                        <form action="<?php the_permalink();?>" method="GET">
+                        <form action="<?php the_permalink();?>" method="POST">
                             <?php
                             wpsstm_locate_template( 'wizard-form.php', true );
                         

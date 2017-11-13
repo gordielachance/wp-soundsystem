@@ -41,7 +41,7 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
         return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         $slug = $this->get_variable_value('soundsgood-playlist-slug');
         return sprintf(__('%s on Soundsgood','wpsstm'),$slug);
     }

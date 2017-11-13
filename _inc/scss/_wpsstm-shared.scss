@@ -1,5 +1,6 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
+@import "Font-Awesome/font-awesome";
 
 $player-bg-color:#222;
 $player-text-color:#FFF;
@@ -22,12 +23,32 @@ $player-text-color:#FFF;
     @include opacity(.5);
 }
 
+.wpsstm-tracklist-notices{
+    @include align-items(center);
+    @include display-flex();
+    @include justify-content(center);
+
+    #wpsstm-notice-ajax-refresh{
+        background:none;
+        font-size: 1.25em;
+        &:before{
+            margin-right:.25em;
+            @extend .fa-circle-o-notch;
+             @extend .fa;
+            @extend .fa-spin;
+            @extend .fa-fw;
+        }
+    }
+
+}
+
 .wpsstm-notice {
     font-size: 0.8em;
     padding: .5em;
     background-color: #fcf8e3;
     color: #222;
     text-align:center;
+    margin: .5em 0;
     a {
         color: #222;
         text-decoration: underline;
@@ -36,6 +57,10 @@ $player-text-color:#FFF;
     &.active {
         display: block;
     }
+    
+
+    
+
     .wpsstm-close-notice{
         position:absolute;
         right:1em;

@@ -25,7 +25,7 @@ class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist
 
     }
     
-    function get_tracklist_title(){
+    function get_remote_title(){
         if ( !$slug = $this->get_variable_value('somafm-slug') ) return;
         return sprintf(__('Somafm : %s','wppstm'),$slug);
     }
