@@ -634,9 +634,8 @@ class WP_SoundSystem_Track{
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-action-toggle-favorite'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
             );
-            if ( !$this->is_track_loved_by() ) $actions['favorite']['classes'][] = 'wpsstm-toggle-favorite-active';
         }
 
         //unfavorite
@@ -645,9 +644,8 @@ class WP_SoundSystem_Track{
                 'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-action-toggle-favorite'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );
-            if ( $this->is_track_loved_by() ) $actions['unfavorite']['classes'][] = 'wpsstm-toggle-favorite-active';
         }
         
         //(playlist) track move
@@ -755,6 +753,10 @@ class WP_SoundSystem_Track{
         $classes = array(
             'wpsstm-track',
         );
+        
+        if ( $this->is_track_loved_by() ){
+            $classes[] = 'wpsstm-loved-track';
+        }
         
         if ($extra_classes){
             if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);

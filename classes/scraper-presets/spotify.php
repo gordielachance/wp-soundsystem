@@ -37,7 +37,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         }
     }
     
-    function get_all_raw_tracks(){
+    function get_remote_tracks($args = null){
         
         $track_count = $this->get_spotify_playlist_track_count();
         
@@ -54,7 +54,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
 
         $this->set_request_pagination( $pagination_args );
         
-        return parent::get_all_raw_tracks();
+        return parent::get_remote_tracks($args);
     }
     
     function get_remote_title(){

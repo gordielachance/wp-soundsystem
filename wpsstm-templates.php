@@ -239,7 +239,7 @@ function wpsstm_get_blank_action(){
     );
 }
 
-function wpsstm_get_actions_list($actions,$prefix){
+function output_tracklist_actions($actions,$prefix){
     $track_actions_lis = array();
 
     foreach($actions as $slug => $action){
@@ -262,7 +262,7 @@ function wpsstm_get_actions_list($actions,$prefix){
             'href'      => $action['href'],
             'class'     => implode(" ",$action['link_classes'])
         );
-        $link = sprintf('<a %s>%s<label>%s</label></a>',wpsstm_get_html_attr($link_attr),$action['icon'],$action['text']);
+        $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
 
         $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);

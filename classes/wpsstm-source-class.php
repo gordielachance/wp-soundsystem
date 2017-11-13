@@ -413,7 +413,7 @@ class WP_SoundSystem_Source{
             $classes[] = 'wpsstm-can-manage-source';
         }
         if ($wpsstm_track->current_source == 0){
-            $classes[] = 'source-active';
+            $classes[] = 'source-play';
         }
 
         return $classes;

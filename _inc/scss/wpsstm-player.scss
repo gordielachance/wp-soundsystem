@@ -1,6 +1,41 @@
 @import "compass/css3";
 @import "wpsstm-shared";
 
+#wpsstm-player-actions{
+    .wpsstm-player-action{
+
+        a{
+            &:before{
+                @extend .fa;
+                display:inline;
+            }
+            span{
+                display:none;
+            }
+        }
+
+
+
+        &.wpsstm-loading a:before{
+            @extend .fa-circle-o-notch;
+            @extend .fa-spin;
+            @extend .fa-fw;
+        }
+        &:not(.wpsstm-loading){
+            &#wpsstm-player-action-scrobbler{
+                @include opacity(.25);
+                a:before{
+                    @extend .fa-lastfm;
+                }
+                &.wpsstm-enabled{
+                    @include opacity(1);
+                }
+
+            }
+        }
+    }
+}
+
 #wpsstm-bottom-wrapper{
     
     position:fixed;
@@ -49,44 +84,9 @@
                         }
                     }
                 }
-                &#wpsstm-bottom-track-actions{
-
-                    #wpsstm-player-toggle-scrobble{
-                        > :nth-child(1){ //loading
-                            display:none;
-                        }
-                        > :nth-child(2){ //disable
-                            display:none;
-
-                        }
-                        > :nth-child(3){ //enable
-                            display:inline-block;
-                            i{
-                                @include opacity(.25);
-                            }
-                        }
-
-                        &.active{
-                            > :nth-child(2){ //disable
-                                display:inline-block;
-                            }
-                            > :nth-child(3){ //enable
-                                display:none;
-                            }
-                        }
-                        &.loading{
-                            pointer-events: none;
-                            > :nth-child(1){ //loading
-                                display:inline-block;
-                            }
-                            > :nth-child(2){ //disable
-                                display:none;
-                            }
-                            > :nth-child(3){ //enable
-                                display:none;
-                            }
-                        }
-                    }
+                
+                #wpsstm-player-actions{
+                    margin-right:.5em;
                 }
 
             }

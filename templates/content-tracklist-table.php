@@ -1,4 +1,5 @@
 <?php
+
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
 
@@ -15,16 +16,16 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
 <div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('tracklist-table')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
-    <div class="tracklist-nav tracklist-wpsstm_live_playlist top">
+    <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <div>
+            <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
             <strong class="wpsstm-tracklist-title" itemprop="name">
-                <i class="wpsstm-tracklist-loading-icon fa fa-circle-o-notch fa-spin fa-fw"></i>
                 <a href="<?php echo $tracklist->get_tracklist_permalink();?>"><?php echo $tracklist->title;?></a>
             </strong>
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
                 <?php 
-                if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_refresh_rate() ) ){
+                if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_time_before_refresh() ) ){
                     ?>
                     <time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i> <?php printf(__('cached for %s','wpsstm'),$rate);?></time>
                     <?php
@@ -34,15 +35,18 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             <?php 
                 //tracklist actions
                 if ( $actions = $tracklist->get_tracklist_actions('page') ){
-                    echo wpsstm_get_actions_list($actions,'tracklist');
+                    echo output_tracklist_actions($actions,'tracklist');
                 }
             ?>
         </div>
+        
+
+        
+        
     </div>
-            
     <?php
     //tracklist notices
-    
+
     //wizard temporary tracklist notice
     //TO FIX should be in get_wizard_tracklist() ?
     if ( !wpsstm_is_backend() && $tracklist->user_can_get_autorship() ){
@@ -51,9 +55,9 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         $message = __("This is a temporary playlist.","wpsstm");
         $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
         $tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
-        
+
     }
-    
+
     //not logged notice
     //TO FIX TO MOVE
     //TO FIX should not be displayed for every playlist but only once for the page
@@ -66,7 +70,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
 
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
-        echo $notices_el;
+        echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
     }
     ?>
     <?php

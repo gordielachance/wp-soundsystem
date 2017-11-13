@@ -22,6 +22,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             }
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
+                <a class="wpsstm-source-icon wpsstm-icon" href="#"></a>
                 <span class="wpsstm-source-links">
                     <a class="wpsstm-source-provider" href="<?php echo $wpsstm_source->url;?>" target="_blank" title="<?php echo $wpsstm_source->title;?>">
                         <?php echo $wpsstm_source->provider->icon;?>
