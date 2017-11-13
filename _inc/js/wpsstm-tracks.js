@@ -469,7 +469,7 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['index','artist', 'title','album','post_id'];
+        var allowed = ['index','artist', 'title','album','post_id','duration'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
@@ -580,7 +580,7 @@ class WpsstmTrack {
             var track_instances = self.get_track_instances();
             track_instances.addClass('track-loading track-active');
 
-            self.playback_start = 0; //reset playback start
+            self.playback_start = undefined; //reset playback start
 
             self.set_bottom_trackinfo(); //bottom track info
 

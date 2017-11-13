@@ -249,9 +249,7 @@ class WpsstmTracklist {
             self.expire_time = Number(expire_time_attr);
             var now = Math.round( $.now() /1000);
             self.is_expired = now > self.expire_time;
-            if (self.is_expired){
-                self.tracklist_el.addClass('tracklist-expired');
-            }
+            self.tracklist_el.toggleClass('tracklist-expired',self.is_expired);
         }
 
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');

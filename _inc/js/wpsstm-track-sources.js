@@ -369,12 +369,10 @@ class WpsstmTrackSource {
                     tracklist_instances.addClass('tracklist-playing tracklist-has-played');
                     track_instances.addClass('track-playing track-has-played');
                     source_instances.addClass('source-playing source-has-played');
-                    
-                    
 
                     self.debug('media - play');
 
-                    if (!self.track.playback_start){
+                    if (self.track.playback_start === undefined){
                         self.track.playback_start = Math.round( $.now() /1000);
                     }
 

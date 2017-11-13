@@ -281,7 +281,8 @@ class WP_SoundSystem_Core_LastFM{
         $track->from_array($ajax_data['track']);
         
         
-        $success = $this->lastfm_user->now_playing_lastfm_track($track);
+        $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+        $success = $this->lastfm_user->now_playing_lastfm_track($track,$start_timestamp);
         $result['track'] = $track;
 
         if ( $success ){
@@ -304,10 +305,10 @@ class WP_SoundSystem_Core_LastFM{
         $result = array(
             'input'     => $ajax_data,
             'message'   => null,
-            'success'   => false
+            'success'   => false,
         );
         
-        $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+        $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
         $track = new WP_SoundSystem_Track();
         $track->from_array($ajax_data['track']);
@@ -346,7 +347,7 @@ class WP_SoundSystem_Core_LastFM{
         
         if ( $community_user_id && $enabled ){
 
-            $start_timestamp = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+            $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
             
             $track = new WP_SoundSystem_Track();
             $track->from_array($ajax_data['track']);

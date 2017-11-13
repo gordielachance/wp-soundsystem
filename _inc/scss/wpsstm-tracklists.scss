@@ -51,11 +51,18 @@
         @include opacity (.15);
     }
 
-    &.tracklist-loading .wpsstm-tracklist-icon{
-        @extend .fa-circle-o-notch;
-        @extend .fa-spin;
-        @extend .fa-fw;
+    &.tracklist-loading{
+        .wpsstm-tracklist-icon{
+            @extend .fa-circle-o-notch;
+            @extend .fa-spin;
+            @extend .fa-fw;
+        }
+        #wpsstm-tracklist-actions{
+            pointer-events:none;
+            @include opacity(.5);
+        }
     }
+
     &:not(.tracklist-playing) .wpsstm-tracklist-icon{
         @extend .fa-play;
     }
@@ -81,32 +88,11 @@
             display:none;
         }
     } 
-    
-    #wpsstm-tracklist-actions{
-        display:block;
-        margin: 1em;
-        list-style: none;
-        li{
-            &#wpsstm-tracklist-action-refresh .wpsstsm-icon{
-                @extend .fa-rss;
-            }
-            &#wpsstm-tracklist-action-share .wpsstsm-icon{
-                @extend .fa-share-alt;
-            }
-            &#wpsstm-tracklist-action-export .wpsstsm-icon{
-                @extend .fa-download;
-            }
-        }
-    }
-    
+
     &:not(.tracklist-expired){
-        .tracklist-header{
-            ul#wpsstm-tracklist-actions{
-                li#wpsstm-tracklist-action-refresh{
-                    pointer-events:none;
-                    @include opacity(.5);
-                }
-            }
+        #wpsstm-tracklist-action-refresh{
+            pointer-events:none;
+            @include opacity(.5);
         }
     }
     
@@ -196,6 +182,23 @@
                     }
                 } 
 
+            }
+        }
+    }
+    
+    #wpsstm-tracklist-actions{
+        display:block;
+        margin: 1em;
+        list-style: none;
+        li{
+            &#wpsstm-tracklist-action-refresh .wpsstsm-icon{
+                @extend .fa-rss;
+            }
+            &#wpsstm-tracklist-action-share .wpsstsm-icon{
+                @extend .fa-share-alt;
+            }
+            &#wpsstm-tracklist-action-export .wpsstsm-icon{
+                @extend .fa-download;
             }
         }
     }

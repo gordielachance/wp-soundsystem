@@ -41,9 +41,7 @@ class WpsstmLastFM {
             }else{            
                 self.has_user_scrobbler = !self.has_user_scrobbler;
             }
-            
-            console.log(self.scrobble_icon);
-            
+
             $(self.scrobble_icon).toggleClass('wpsstm-enabled',self.has_user_scrobbler);
 
             localStorage.setItem("wpsstm-scrobble", self.has_user_scrobbler);
@@ -61,11 +59,10 @@ class WpsstmLastFM {
         var self = this;
 
         var ajax_data = {
-            action:     'wpsstm_user_update_now_playing_lastfm_track',
-            track:      track_obj.to_ajax()
+            action:             'wpsstm_user_update_now_playing_lastfm_track',
+            track:              track_obj.to_ajax(),
+            playback_start:     track_obj.playback_start
         };
-
-        self.debug(ajax_data);
 
         return $.ajax({
 
