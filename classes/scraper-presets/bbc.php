@@ -3,24 +3,34 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
     
     var $preset_slug =      'bbc-station';
     var $preset_url =       'http://www.bbc.co.uk/radio';
-    var $pattern =          '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)/?~i';
-    var $redirect_url =     'http://www.bbc.co.uk/%bbc-slug%/playlist';
-    var $variables =        array(
-        'bbc-slug' => null
-    );
 
     var $preset_options =  array(
         'selectors' => array(
-            'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
-            'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
-            'track_title'       => array('path'=>'.pll-playlist-item-details .pll-playlist-item-title'),
-            'track_image'       => array('path'=>'img.pll-playlist-item-image','attr'=>'src')
+            'tracks'            => array('path'=>'.music-track'),
+            'track_artist'      => array('path'=>'.music-track__artist'),
+            'track_title'       => array('path'=>'.music-track__title'),
+            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
         )
     );
 
     function __construct($post_id = null){
         parent::__construct($post_id);
         $this->preset_name =    __('BBC stations','wpsstm');
+    }
+    
+    function can_load_preset(){
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->get_station_slug() );
+    }
+
+    function get_station_slug(){
+        $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
 
 }
@@ -44,7 +54,19 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
     function __construct($post_id = null){
         parent::__construct($post_id);
         $this->preset_name =    __('BBC playlists','wpsstm');
-    } 
+    }
+    
+    function can_load_preset(){
+        if ( !$playlist_id = $this->get_playlist_id() ) return;
+        return true;
+    }
+
+    function get_playlist_id(){
+        $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
 
 }
 

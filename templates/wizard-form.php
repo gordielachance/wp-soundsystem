@@ -24,12 +24,12 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         }
 
         ?>
-        <div id="wpsstm-wizard-tabs">
+        <div id="wpsstm-advanced-wizard-sections">
 
             <?php 
             if ( wpsstm_wizard()->is_advanced ){ 
                 ?>
-                <ul id="wpsstm-wizard-tabs-header">
+                <ul id="wpsstm-advanced-wizard-sections-header">
                     <?php wpsstm_wizard()->wizard_tabs(); ?>
                 </ul>
                 <?php

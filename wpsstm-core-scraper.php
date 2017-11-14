@@ -37,7 +37,7 @@ class WP_SoundSystem_Core_Wizard{
     
     function setup_globals(){
         $this->frontend_wizard_page_id = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        
+        $this->tracklist = new WP_SoundSystem_Remote_Tracklist();
     }
 
     function setup_actions(){
@@ -46,11 +46,10 @@ class WP_SoundSystem_Core_Wizard{
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
 
         //frontend
+        add_action( 'wp', array($this,'populate_frontend_wizard_tracklist'));
         add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
-        add_action( 'wp', array($this,'community_tracklist_redirect'));
+        add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
         add_filter( 'template_include', array($this,'frontend_wizard_template'));
-        
-        add_filter('document_title_parts',  array($this, 'frontend_wizard_title_parts'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
@@ -90,11 +89,11 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function wizard_register_scripts_style_shared(){
-        // CSS
-        wp_register_style( 'wpsstm-scraper',  wpsstm()->plugin_url . '_inc/css/wpsstm-scraper.css',array('wpsstm-tracklists'),wpsstm()->version );
-        
+
+        wp_register_style( 'wpsstm-wizard',  wpsstm()->plugin_url . '_inc/css/wpsstm-wizard.css',array('wpsstm-tracklists'),wpsstm()->version );
+
         // JS
-        wp_register_script( 'wpsstm-scraper', wpsstm()->plugin_url . '_inc/js/wpsstm-scraper.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
+        wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
     }
     
     function wizard_scripts_styles_frontend(){
@@ -112,8 +111,8 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_enqueue_script_styles(){
-        wp_enqueue_style('wpsstm-scraper');
-        wp_enqueue_script('wpsstm-scraper');
+        wp_enqueue_style('wpsstm-wizard');
+        wp_enqueue_script('wpsstm-wizard');
     }
 
     function metabox_scraper_wizard_register(){
@@ -132,7 +131,7 @@ class WP_SoundSystem_Core_Wizard{
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
         global $post;
-                
+
         $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
         wpsstm_locate_template( 'wizard-form.php', true );
     }
@@ -144,24 +143,39 @@ class WP_SoundSystem_Core_Wizard{
     If user try to hacks this (by passing a tracklist ID that is not a community post); redirect to regular tracklist.
     */
     
-    function community_tracklist_redirect(){
+    function populate_frontend_wizard_tracklist(){
         global $post;
         global $wpsstm_tracklist;
         
         if ( !$this->can_frontend_wizard() ) return;
+        if ( !is_page($this->frontend_wizard_page_id) ) return;
         
+        //wizard search
+        $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;
+        $input = isset($wizard_data['search']) ? trim($wizard_data['search']) : null;
+        $this->tracklist = $this->get_wizard_tracklist(null,$input);
+
+        if ($input && !$this->tracklist->feed_url){
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('wizard_error'=>'no-feed-url'),$link);
+            wp_redirect($link);
+            exit();
+        }
+        
+        $wpsstm_tracklist = $this->tracklist;
+
+    }
+    
+    function community_tracklist_redirect(){
+        if ( !is_page($this->frontend_wizard_page_id) ) return;
         
         //wizard called on a tracklist that is not a community one.  Redirect to regular tracklist.
         if ( ( $wztr = get_query_var($this->qvar_tracklist_wizard,null) ) && ( $wpsstm_tracklist = $this->get_wizard_tracklist($wztr) ) ){
-            
-            if ( is_page($this->frontend_wizard_page_id) ){
-                //this is not a community tracklist, abord wizard
-                if (!$wpsstm_tracklist->is_community){
-                    $link = get_permalink($wpsstm_tracklist->post_id);
-                    wp_redirect($link);
-                    exit();
-                }
-
+            //this is not a community tracklist, abord wizard
+            if (!$wpsstm_tracklist->is_community){
+                $link = get_permalink($wpsstm_tracklist->post_id);
+                wp_redirect($link);
+                exit();
             }
         }
         
@@ -176,6 +190,7 @@ class WP_SoundSystem_Core_Wizard{
             }
         }
         */
+        
         
     }
 
@@ -195,25 +210,22 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function get_wizard_tracklist($post_id=null,$input=null){
-        
-        //not yet populated
-        if (!$this->tracklist){
-            $this->tracklist = new WP_SoundSystem_Tracklist();
 
-            if ($post_id){
-                $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
-            }else{
-                $input = trim($input);
-                $this->tracklist = wpsstm_get_live_tracklist_preset($input);
-                $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
+        if ($post_id){
+            $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
+            
+        }elseif($input){
+            if ( $preset = wpsstm_get_live_tracklist_preset($input) ){
+                $this->tracklist = $preset;
             }
+            $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
+        }
 
-            $this->tracklist->tracks_strict = false;
+        $this->tracklist->tracks_strict = false;
 
-            if (wpsstm_is_backend() ){
-                $this->tracklist->options['autoplay'] = false;
-                $this->tracklist->options['can_play'] = false;
-            }
+        if (wpsstm_is_backend() ){
+            $this->tracklist->options['autoplay'] = false;
+            $this->tracklist->options['can_play'] = false;
         }
 
         return $this->tracklist;
@@ -238,22 +250,6 @@ class WP_SoundSystem_Core_Wizard{
             
         }
 
-    }
-    
-    function frontend_wizard_title_parts($title){
-        global $wpsstm_tracklist;
-        global $post;
-        
-        if( is_admin() ) return $title;
-        if ( !$post ) return $title;
-        if( $post->ID != $this->frontend_wizard_page_id ) return $title;
-   
-        $wpsstm_tracklist = $this->get_wizard_tracklist();
-        if ( $tracklist_title = $wpsstm_tracklist->get_remote_title() ){
-            $title['title'] = sprintf('%s - %s',$title['title'],$tracklist_title);
-        }
-
-        return $title;
     }
 
     function backend_wizard_save($post_id){
@@ -308,6 +304,8 @@ class WP_SoundSystem_Core_Wizard{
     */
 
     function frontend_wizard_create_from_search(){
+        
+        global $wpsstm_tracklist;
 
         if ( is_admin() ) return;
         if ( !is_page($this->frontend_wizard_page_id) ) return;
@@ -315,26 +313,15 @@ class WP_SoundSystem_Core_Wizard{
 
         //wizard action
         $wizard_data = isset($_REQUEST[ 'wpsstm_wizard' ]) ? $_REQUEST[ 'wpsstm_wizard' ] : array();
-        $tracklist_id = isset( $wizard_data['post_id'] ) ? $wizard_data['post_id'] : null;
-        
         $is_load_url = isset($wizard_data['action']['load-url']);
         if ( !$is_load_url ) return;
-            
-        $wizard_search = isset($wizard_data['search']) ? $wizard_data['search'] : null;
-        $tracklist = $this->get_wizard_tracklist(null,$wizard_search);
-        
-        //check we're able to query a tracklist with this wizard search
-        if ( !$tracklist->feed_url ){
-            $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('wizard_error'=>'no-feed-url'),$link);
-            wp_redirect($link);
-            exit();
-        }
+
 
         /*
         Check that there is already a wizard tracklist existing for that same search and redirect to it.
         */
 
+        /* TOFIXCCC
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
@@ -342,7 +329,7 @@ class WP_SoundSystem_Core_Wizard{
             'meta_query' => array(
                 array(
                     'key' => wpsstm_live_playlists()->feed_url_meta_name,
-                    'value' => $tracklist->feed_url
+                    'value' => $wpsstm_tracklist->feed_url
                 )
             )
         );
@@ -353,37 +340,37 @@ class WP_SoundSystem_Core_Wizard{
             $link = get_permalink($existing_id);
             wp_redirect($link);
             exit();
+        }
+        */
+        
+        /*
+        Create a new live tracklist for this search and redirect to it
+        */
+
+        //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
+
+        $post_args = array(
+            'post_title'    => $wpsstm_tracklist->title,
+            'post_type'     => wpsstm()->post_type_live_playlist,
+            'post_status'   => 'publish',
+            'post_author'   => wpsstm()->get_options('community_user_id'),
+            'meta_input'   => array(
+                wpsstm_live_playlists()->feed_url_meta_name => $wpsstm_tracklist->feed_url,
+                $this->is_wizard_tracklist_metakey  => true,
+            )
+        );
+
+        $new_tracklist_id = wp_insert_post( $post_args );
+
+        if ( is_wp_error($new_tracklist_id) ){
+            $link = get_permalink($this->frontend_wizard_page_id);
+            $link = add_query_arg(array('wizard_error'=>$new_tracklist_id->get_error_code()),$link);
+            wp_redirect($link);
+            exit();
         }else{
-
-            /*
-            Create a new live tracklist for this search and redirect to it
-            */
-
-            //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
-
-            $post_args = array(
-                'post_title'    => $tracklist->title,
-                'post_type'     => wpsstm()->post_type_live_playlist,
-                'post_status'   => 'publish',
-                'post_author'   => wpsstm()->get_options('community_user_id'),
-                'meta_input'   => array(
-                    wpsstm_live_playlists()->feed_url_meta_name => $tracklist->feed_url,
-                    $this->is_wizard_tracklist_metakey  => true,
-                )
-            );
-
-            $new_tracklist_id = wp_insert_post( $post_args );
-
-            if ( is_wp_error($new_tracklist_id) ){
-                $link = get_permalink($this->frontend_wizard_page_id);
-                $link = add_query_arg(array('wizard_error'=>$new_tracklist_id->get_error_code()),$link);
-                wp_redirect($link);
-                exit();
-            }else{
-                $link = get_permalink($new_tracklist_id);
-                wp_redirect($link);
-                exit();
-            }
+            $link = get_permalink($new_tracklist_id);
+            wp_redirect($link);
+            exit();
         }
     }
 
@@ -391,7 +378,10 @@ class WP_SoundSystem_Core_Wizard{
         global $post;
         global $wpsstm_tracklist;
 
-        wpsstm_wizard()->is_advanced = ( $wpsstm_tracklist->feed_url && wpsstm_is_backend() );
+        wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
+        if ( wpsstm_wizard()->is_advanced ){
+            $wpsstm_tracklist->ajax_refresh = false;
+        }
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));

@@ -3,11 +3,6 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
     
     var $preset_slug =      'onlineradiobox';
     var $preset_url =       'http://onlineradiobox.com/';
-    var $pattern =          '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)/?~i';
-    var $variables =        array(
-        'station-slug' => null
-    );
-    var $redirect_url =     'http://onlineradiobox.com/ma/%station-slug%/playlist';
 
     var $preset_options =  array(
         'selectors' => array(
@@ -22,13 +17,21 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
         $this->preset_name =    'Online Radio Box';
     }
     
-    function validate_tracks($tracks){
-        //limit to 30 tracks to avoid creating too much posts
-        //TO FIX this should be in wpsstm core.
-        $tracks = array_slice($tracks,0,30);
-        return parent::validate_tracks($tracks);
+    function can_load_preset(){
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        return true;
     }
- 
+    
+    function get_remote_url(){
+        return sprintf('http://onlineradiobox.com/ma/%s/playlist',$this->get_station_slug());
+    }
+
+    function get_station_slug(){
+        $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)/~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
 }
 
 //register preset

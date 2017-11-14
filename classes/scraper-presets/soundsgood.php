@@ -3,12 +3,6 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
     
     var $preset_slug =      'soundsgood';
     var $preset_url =       'https://soundsgood.co/';
-    
-    var $pattern =          '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
-    var $redirect_url=      'https://api.soundsgood.co/playlists/%soundsgood-playlist-slug%/tracks';
-    var $variables =        array(
-        'soundsgood-playlist-slug' => null,
-    );
 
     var $preset_options =  array(
         'selectors' => array(
@@ -24,14 +18,31 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
 
         $this->preset_name = __('Soundsgood playlists','wpsstm');
 
-    } 
+    }
+    
+    function can_load_preset(){
+        if ( !$client_id = $this->get_client_id() ) return;
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        
+        return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$this->get_station_slug());
+    }
+    
+    function get_station_slug(){
+        $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
 
     function get_request_args(){
         $args = parent::get_request_args();
 
         if ( $client_id = $this->get_client_id() ){
             $args['headers']['client'] = $client_id;
-            $this->set_variable_value('soundsgood-client-id',$client_id);
         }
 
         return $args;
@@ -42,8 +53,8 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
     }
     
     function get_remote_title(){
-        $slug = $this->get_variable_value('soundsgood-playlist-slug');
-        return sprintf(__('%s on Soundsgood','wpsstm'),$slug);
+        $station_slug = $this->get_station_slug();
+        return sprintf(__('%s on Soundsgood','wpsstm'),$station_slug);
     }
     
 }

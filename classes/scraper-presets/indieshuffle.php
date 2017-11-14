@@ -10,13 +10,8 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
 
     var $preset_slug =      'indie-shuffle';
     var $preset_url =       'https://www.indieshuffle.com';
-    var $pattern =          '~http(?:s)?://(?:www\.)?indieshuffle.com/(.+)~';
-    var $variables =        array(
-        'uri' => null
-    );
 
     var $preset_options =  array(
-        'datas_cache_min'   => 1440,
         'selectors' => array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
             'track_artist'     => array('attr'=>'data-track-artist'),
@@ -29,6 +24,12 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
     function __construct($post_id = null){
         parent::__construct($post_id);
         $this->preset_name = 'Indie Shuffle';
+    }
+    
+    function can_load_preset(){
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $domain != 'indieshuffle') return;
+        return true;
     }
 
 }

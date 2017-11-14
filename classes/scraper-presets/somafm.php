@@ -2,12 +2,6 @@
 class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'somafm';
     var $preset_url =       'http://somafm.com/';
-    
-    var $pattern =          '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
-    var $redirect_url =     'http://somafm.com/songs/%somafm-slug%.xml';
-    var $variables =        array(
-        'somafm-slug' => null
-    );
 
     var $preset_options =  array(
         'selectors' => array(
@@ -25,9 +19,23 @@ class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist
 
     }
     
+    function can_load_preset(){
+        if (!$station_slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf('http://somafm.com/songs/%s.xml',$this->get_station_slug());
+    }
+    
+    function get_station_slug(){
+        $pattern = '~^https?://(?:www.)?somafm.com/([^/]+)/?$~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
     function get_remote_title(){
-        if ( !$slug = $this->get_variable_value('somafm-slug') ) return;
-        return sprintf(__('Somafm : %s','wppstm'),$slug);
+        return sprintf( __('%s on SomaFM','wppstm'),$this->get_station_slug() );
     }
 
 }

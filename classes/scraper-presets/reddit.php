@@ -6,14 +6,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     var $preset_slug =      'reddit';
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
-    var $pattern =          '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-    var $redirect_url=      'https://www.reddit.com/r/%subredit-slug%.json?limit=100';
-    var $variables =        array(
-        'subredit-slug' => null
-    );
-
     var $preset_options =  array(
-        'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),
             'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
@@ -27,6 +20,21 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         parent::__construct($post_id);
 
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
+    }
+    
+    function can_load_preset(){
+        if (!$subreddit_slug = $this->get_subreddit_slug() ) return;
+        return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->get_subreddit_slug() );
+    }
+    
+    function get_subreddit_slug(){
+        $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
     
     /*
@@ -60,20 +68,6 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         return parent::get_remote_tracks($args);
     }
 
-    
-    protected function get_request_url(){
-        
-        $url = parent::get_request_url();
-        
-        //handle pagination
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['page_items_limit']
-        );
-        
-        $url = add_query_arg($pagination_args,$url);
-        return $url;
-
-    }
     */
     
     protected function filter_string($str){

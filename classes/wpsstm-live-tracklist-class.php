@@ -11,10 +11,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     var $preset_name = null;
 
     //url stuff
-    var $pattern = null; //pattern used to check if the scraper URL matches the preset.
     var $variables = array(); //list of variables that matches the regex groups from $pattern
-    var $redirect_url = null; //if needed, a redirect URL.  Can use variables extracted from the pattern using the %variable% format.
-    
     public $feed_url = null;
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
@@ -275,12 +272,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
-        //url
-        $url = $this->redirect_url = $this->get_request_url();
-
-        if ( is_wp_error($url) ) return $url;
+        //the URL to reach can be overriden in your preset class or with this filter
+        $url = $this->get_remote_url();
+        $url = apply_filters('wpsstm_get_remote_url',$url);
         
         wpsstm()->debug_log($url,'get_remote_page_tracks request_url' );
+        
+        if ( is_wp_error($url) ) return $url;
 
         //response
         $response = $this->get_remote_response($url);
@@ -313,23 +311,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         return $tracks;
     }
-
-    protected function get_request_url(){
-        
-        $domain = wpsstm_get_url_domain($this->feed_url);
-
-        //dropbox : convert to raw link
-        if ($domain=='dropbox'){
-            $url_no_args = strtok($this->feed_url, '?');
-            $this->redirect_url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
-        }
-
-        if ($this->redirect_url){
-            return $this->redirect_url;
-        }else{
-            return $this->feed_url;
-        }
-
+    
+    //if your preset needs a redirection; override this function in your preset
+    function get_remote_url(){
+        return $this->feed_url;
     }
     
     /*

@@ -1,6 +1,7 @@
 jQuery(document).ready(function($){
+    
     //tabs
-    $("#wizard-wrapper.wizard-wrapper-advanced #wpsstm-wizard-tabs").tabs();
+    $("#wizard-wrapper #wpsstm-advanced-wizard-sections").tabs();
 
     /*
     advanced selectors

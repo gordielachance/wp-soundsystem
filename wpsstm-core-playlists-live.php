@@ -47,6 +47,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
+        
+        add_filter('wpsstm_get_remote_url',array($this,'filter_dropbox_url'));
+        
     }
 
     function register_post_type_live_playlist() {
@@ -192,10 +195,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
-            $preset = new $class_name();
-            if ( !$preset->can_use_preset ) continue;
-            $presets[] = $preset;
+            $presets[] = new $class_name();
         }
+        
         return $presets;
     }
 
@@ -294,6 +296,19 @@ class WP_SoundSystem_Core_Live_Playlists{
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
         return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+    }
+    
+    function filter_dropbox_url($url){
+
+        $domain = wpsstm_get_url_domain($url );
+
+        //dropbox : convert to raw link
+        if ($domain=='dropbox'){
+            $url_no_args = strtok($url, '?');
+            $url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
+        }
+        
+        return $url;
     }
 
 }
