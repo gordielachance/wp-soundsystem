@@ -4071,15 +4071,15 @@ body.post-type-wpsstm_artist #titlewrap label[for=title], body.post-type-wpsstm_
   text-align: center;
 }
 /* line 54, ../scss/wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper-wizard {
+.postbox#wpsstm-metabox-scraper {
   position: relative;
 }
 /* line 56, ../scss/wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper-wizard .inside {
+.postbox#wpsstm-metabox-scraper .inside {
   overflow: auto;
 }
 /* line 60, ../scss/wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper-wizard .inside .wpsstm-tracklist #wpsstm-tracklist-actions #wpsstm-tracklist-action-status-switch {
+.postbox#wpsstm-metabox-scraper .inside .wpsstm-tracklist #wpsstm-tracklist-actions #wpsstm-tracklist-action-status-switch {
   display: none;
 }
 /* line 68, ../scss/wpsstm-backend.scss */

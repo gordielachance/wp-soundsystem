@@ -91,10 +91,10 @@ class WP_SoundSystem_Core_Wizard{
 
     function wizard_register_scripts_style_shared(){
         // CSS
-        wp_register_style( 'wpsstm-scraper-wizard',  wpsstm()->plugin_url . '_inc/css/wpsstm-scraper-wizard.css',array('wpsstm-tracklists'),wpsstm()->version );
+        wp_register_style( 'wpsstm-scraper',  wpsstm()->plugin_url . '_inc/css/wpsstm-scraper.css',array('wpsstm-tracklists'),wpsstm()->version );
         
         // JS
-        wp_register_script( 'wpsstm-scraper-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-scraper-wizard.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
+        wp_register_script( 'wpsstm-scraper', wpsstm()->plugin_url . '_inc/js/wpsstm-scraper.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
     }
     
     function wizard_scripts_styles_frontend(){
@@ -112,14 +112,14 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_enqueue_script_styles(){
-        wp_enqueue_style('wpsstm-scraper-wizard');
-        wp_enqueue_script('wpsstm-scraper-wizard');
+        wp_enqueue_style('wpsstm-scraper');
+        wp_enqueue_script('wpsstm-scraper');
     }
 
     function metabox_scraper_wizard_register(){
 
         add_meta_box( 
-            'wpsstm-metabox-scraper-wizard', 
+            'wpsstm-metabox-scraper', 
             __('Remote Tracklist Manager','wpsstm'),
             array($this,'metabox_wizard_display'),
             wpsstm_tracklists()->tracklist_post_types, 
@@ -748,7 +748,7 @@ class WP_SoundSystem_Core_Wizard{
             '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
-            __('URL of the tracklist you would like to get','wpsstm')
+            __('Enter a tracklist URL','wpsstm')
         );
         
         //presets
