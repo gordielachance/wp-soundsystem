@@ -174,6 +174,26 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 
 }
 
+function lastfm_stations_bang($bangs){
+    $user = new WP_SoundSystem_LastFM_User();
+
+    if ( $user->is_user_api_logged() ){
+
+        $widget_link = sprintf('lastfm:user:%s:library',$user->user_api_metas['username'] );
+        $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My library','wpsstm') );
+
+        $widget_link = sprintf('lastfm:user:%s:mix',$user->user_api_metas['username'] );
+        $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My mix','wpsstm') );
+
+        $widget_link = sprintf('lastfm:user:%s:recommended',$user->user_api_metas['username'] );
+        $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My recommendations','wpsstm') );
+    }
+    
+    return $bangs;
+}
+
+add_filter('wpsstm_get_wizard_bangs','lastfm_stations_bang');
+
 
 //register preset
 

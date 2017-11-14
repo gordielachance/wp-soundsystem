@@ -735,7 +735,7 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         printf(
-            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+            '<input id="wpsstm-wizard-input" type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')
@@ -1171,6 +1171,15 @@ class WP_SoundSystem_Core_Wizard{
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
         return user_can($community_user_id,$required_cap);
+    }
+    
+    function wizard_bangs(){
+        $bangs = array();
+        $bangs = apply_filters('wpsstm_get_wizard_bangs',$bangs);
+        
+        foreach ($bangs as $bang){
+            print_r($bang);
+        }
     }
 
 }

@@ -14,6 +14,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
 ?>
 
 <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
+    <?php wpsstm_wizard()->wizard_bangs();?>
     <?php
 
     if(!$is_wizard_disabled){

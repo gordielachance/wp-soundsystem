@@ -1,4 +1,17 @@
 jQuery(document).ready(function($){
+
+    //wizard URL fill
+    $('[data-wpsstm-wizard-preview]').click(function(e) {
+        e.preventDefault();
+        var input_el = $('#wpsstm-wizard-input');
+        var new_value = $(this).attr('data-wpsstm-wizard-preview');
+        input_el.val(new_value);
+        
+        $('html, body').animate({
+            scrollTop: input_el.offset().top - ( $(window).height() / 3) //not at the very top
+        }, 500);
+
+    });
     
     //tabs
     $("#wizard-wrapper #wpsstm-advanced-wizard-sections").tabs();
