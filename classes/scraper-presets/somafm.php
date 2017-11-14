@@ -35,7 +35,7 @@ class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist
     }
     
     function get_remote_title(){
-        return sprintf( __('Somafm : %s','wppstm'),$this->get_station_slug() );
+        return sprintf( __('%s on SomaFM','wppstm'),$this->get_station_slug() );
     }
 
 }

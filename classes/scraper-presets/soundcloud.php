@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_Preset{
+class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Playlist_Preset{
     
     var $preset_slug =      'soundcloud';
     var $preset_url =       'https://soundcloud.com';
@@ -39,9 +39,18 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
         }
         
         $page = $this->get_user_page();
-        $page = ($page) ? $page : 'tracks'; //default subpage
+        $api_page = null;
 
-        return sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$page,$client_id);
+        switch($page){
+            case 'likes':
+                $api_page = 'favorites';
+            break;
+            default:
+                $api_page = 'tracks';
+            break;
+        }
+
+        return sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$api_page,$client_id);
 
     }
 
@@ -102,10 +111,10 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
         $subtitle = null;
         
         switch($page){
-            case 'favorites':
+            case 'likes':
                 $subtitle = __('Favorite tracks','wpsstm');
             break;
-            case 'tracks':
+            default: //tracks
                 $subtitle = __('Tracks','wpsstm');
             break;
         }
@@ -122,7 +131,7 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
 //register preset
 
 function register_soundcloud_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_Soundcloud_Api';
+    $presets[] = 'WP_SoundSystem_Preset_Soundcloud_User_Api';
     return $presets;
 }
 

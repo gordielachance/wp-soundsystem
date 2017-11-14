@@ -74,13 +74,6 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Live_
 
             //QueryPath
             try{
-                $title = htmlqp( $content, 'head meta[property="og:title"]', WP_SoundSystem_Remote_Tracklist::$querypath_options )->attr('content');
-                if ($title) $this->radionomy_title = $title;
-            }catch(Exception $e){
-            }
-
-            //QueryPath
-            try{
                 $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSystem_Remote_Tracklist::$querypath_options )->attr('content');
             }catch(Exception $e){
                 return false;
@@ -104,6 +97,10 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Live_
         
         return $station_id;
 
+    }
+    
+    function get_remote_title(){
+        return sprintf('Radionomy: %s',$this->get_station_slug());
     }
 
 }

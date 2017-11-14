@@ -46,7 +46,7 @@ class WP_SoundSystem_Core_Wizard{
         add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
 
         //frontend
-        add_action( 'wp', array($this,'populate_wizard_tracklist'));
+        add_action( 'wp', array($this,'populate_frontend_wizard_tracklist'));
         add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
         add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
         add_filter( 'template_include', array($this,'frontend_wizard_template'));
@@ -131,7 +131,7 @@ class WP_SoundSystem_Core_Wizard{
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
         global $post;
-                
+
         $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
         wpsstm_locate_template( 'wizard-form.php', true );
     }
@@ -143,7 +143,7 @@ class WP_SoundSystem_Core_Wizard{
     If user try to hacks this (by passing a tracklist ID that is not a community post); redirect to regular tracklist.
     */
     
-    function populate_wizard_tracklist(){
+    function populate_frontend_wizard_tracklist(){
         global $post;
         global $wpsstm_tracklist;
         
@@ -155,7 +155,7 @@ class WP_SoundSystem_Core_Wizard{
         $input = isset($wizard_data['search']) ? trim($wizard_data['search']) : null;
         $this->tracklist = $this->get_wizard_tracklist(null,$input);
 
-        if (!$this->tracklist->feed_url){
+        if ($input && !$this->tracklist->feed_url){
             $link = get_permalink($this->frontend_wizard_page_id);
             $link = add_query_arg(array('wizard_error'=>'no-feed-url'),$link);
             wp_redirect($link);
@@ -213,6 +213,7 @@ class WP_SoundSystem_Core_Wizard{
 
         if ($post_id){
             $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
+            
         }elseif($input){
             if ( $preset = wpsstm_get_live_tracklist_preset($input) ){
                 $this->tracklist = $preset;
@@ -378,6 +379,9 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
 
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
+        if ( wpsstm_wizard()->is_advanced ){
+            $wpsstm_tracklist->ajax_refresh = false;
+        }
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));

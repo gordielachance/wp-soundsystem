@@ -7,7 +7,6 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
     var $preset_options =  array(
-        'datas_cache_min'   => 30,
         'selectors' => array(
             'tracks'            => array('path'=>'>data >children'),
             'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),

@@ -39,4 +39,5 @@ function register_slacker_preset($presets){
     return $presets;
 }
 
-add_filter('wpsstm_get_scraper_presets','register_slacker_preset');
+//TO FIX broken
+//add_filter('wpsstm_get_scraper_presets','register_slacker_preset');

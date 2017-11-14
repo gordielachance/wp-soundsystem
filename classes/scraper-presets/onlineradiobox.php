@@ -23,7 +23,7 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
     }
     
     function get_remote_url(){
-        return sprintf('http://onlineradiobox.com/ma/%s/playlist',$station_slug);
+        return sprintf('http://onlineradiobox.com/ma/%s/playlist',$this->get_station_slug());
     }
 
     function get_station_slug(){

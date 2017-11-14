@@ -6,10 +6,10 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
 
     var $preset_options =  array(
         'selectors' => array(
-            'tracks'            => array('path'=>'.pll-playlist-item-wrapper'),
-            'track_artist'      => array('path'=>'.pll-playlist-item-details .pll-playlist-item-artist'),
-            'track_title'       => array('path'=>'.pll-playlist-item-details .pll-playlist-item-title'),
-            'track_image'       => array('path'=>'img.pll-playlist-item-image','attr'=>'src')
+            'tracks'            => array('path'=>'.music-track'),
+            'track_artist'      => array('path'=>'.music-track__artist'),
+            'track_title'       => array('path'=>'.music-track__title'),
+            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
         )
     );
 
@@ -21,6 +21,10 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
     function can_load_preset(){
         if ( !$station_slug = $this->get_station_slug() ) return;
         return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->get_station_slug() );
     }
 
     function get_station_slug(){

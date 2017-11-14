@@ -5,7 +5,6 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
     var $preset_url =       'https://www.radioking.com';
 
     var $preset_options =  array(
-        'datas_cache_min'   => 15,
         'selectors' => array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
@@ -49,10 +48,10 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
             return new WP_Error( 'wpsstm_radioking_missing_station_slug', __('Required station slug missing.','wpsstm') );
         }
         
-        $transient_name = 'wpsstm-radioking-' . $slug . '-data';
+        $transient_name = 'wpsstm-radioking-' . $station_slug . '-data';
 
         if ( false === ( $station_data = get_transient($transient_name ) ) ) {
-            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$slug) );
+            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$station_slug) );
             $json = wp_remote_retrieve_body($response);
             if ( is_wp_error($json) ) return $json;
             $api = json_decode($json,true);

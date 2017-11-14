@@ -16,9 +16,7 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
 
     function __construct($post_id = null){
         parent::__construct($post_id);
-
         $this->preset_name = __('RTBF stations','wpsstm');
-
     }
     
     function can_load_preset(){

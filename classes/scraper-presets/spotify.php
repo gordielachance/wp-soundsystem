@@ -6,7 +6,6 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     var $preset_url =       'https://open.spotify.com';
 
     var $preset_options =  array(
-        'datas_cache_min'   => 15,
         'selectors' => array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),
@@ -33,16 +32,17 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     function can_load_preset(){
         if ( !$client_id = wpsstm()->get_options('spotify_client_id') ) return;
         if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ) return;
-        
+
         if ( !$user_slug = $this->get_user_slug() ) return;
         if ( !$playlist_slug = $this->get_playlist_slug() ) return;
-        
+
         return true;
     }
     
     function get_remote_url(){
+
         $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$this->get_user_slug(),$this->get_playlist_slug());
-        
+
         //handle pagination
         $pagination_args = array(
             'limit'     => $this->request_pagination['page_items_limit'],
@@ -58,6 +58,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     function get_user_slug(){
         $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
+
         return isset($matches[1]) ? $matches[1] : null;
     }
     
@@ -67,7 +68,6 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    
     function get_remote_tracks($args = null){
         
         $track_count = $this->get_spotify_playlist_track_count();
@@ -87,7 +87,6 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         
         return parent::get_remote_tracks($args);
     }
-    
     function get_remote_title(){
         if ( !$user_id = $this->get_user_slug() ) return;
         if ( !$playlist_id = $this->get_playlist_slug() ) return;
@@ -172,7 +171,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         return $this->token;
 
     }
-    
+
 }
 
 //Spotify Playlists URIs

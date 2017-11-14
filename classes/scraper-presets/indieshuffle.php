@@ -12,7 +12,6 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
     var $preset_url =       'https://www.indieshuffle.com';
 
     var $preset_options =  array(
-        'datas_cache_min'   => 1440,
         'selectors' => array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
             'track_artist'     => array('attr'=>'data-track-artist'),

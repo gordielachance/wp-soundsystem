@@ -36,13 +36,19 @@ class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_
         return isset($matches[1]) ? $matches[1] : null;
     }
     function get_artist_slug(){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)music/([^/]+)~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_page(){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/).*/[^/]+/([^/]+)~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?.*/[^/]+/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    function get_user_page(){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/.*/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
@@ -69,7 +75,7 @@ class WP_SoundSystem_Preset_LastFM_User_Scraper extends WP_SoundSystem_Preset_La
         if ( !$page ) $page = 'library';
         if ( $page != 'library' ) return;
 
-        return sprintf('https://www.last.fm/fr/user/%s/library',$user_slug);
+        return sprintf('https://www.last.fm/fr/user/%s/library',$this->get_user_slug());
     }
 }
 
@@ -91,7 +97,7 @@ class WP_SoundSystem_Preset_LastFM_User_Loved_Scraper extends WP_SoundSystem_Pre
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Station extends WP_SoundSystem_Preset_LastFM_Scraper{
+abstract class WP_SoundSystem_Preset_LastFM_Station extends WP_SoundSystem_Preset_LastFM_Scraper{
 
     var $preset_options =  array(
         'selectors' => array(
@@ -104,7 +110,7 @@ class WP_SoundSystem_Preset_LastFM_Station extends WP_SoundSystem_Preset_LastFM_
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Station_Artist_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
+class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
 
     var $preset_slug =      'last-fm-station-artist';
     var $preset_url =       'https://www.last.fm/music/XXX/+similar';
@@ -160,7 +166,9 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
     
     function can_load_preset(){
         if ( !$user_slug = $this->get_user_slug() ) return;
-        if ( $page = $this->get_page() ) return;
+        
+        $userpage = $this->get_user_page();
+        if ( $userpage != 'recommended' ) return;
         return true;
     }
     
@@ -180,7 +188,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Artist_Scraper';
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
     return $presets;
 }

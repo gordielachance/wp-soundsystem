@@ -274,7 +274,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         //the URL to reach can be overriden in your preset class or with this filter
         $url = $this->get_remote_url();
-        print_r($url);die("NANA");
         $url = apply_filters('wpsstm_get_remote_url',$url);
         
         wpsstm()->debug_log($url,'get_remote_page_tracks request_url' );
@@ -316,19 +315,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     //if your preset needs a redirection; override this function in your preset
     function get_remote_url(){
         return $this->feed_url;
-    }
-
-    function filter_dropbox_url($url){
-
-        $domain = wpsstm_get_url_domain($url );
-
-        //dropbox : convert to raw link
-        if ($domain=='dropbox'){
-            $url_no_args = strtok($url, '?');
-            $url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
-        }
-        
-        return $url;
     }
     
     /*
