@@ -20,20 +20,15 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
 
     }
     
+    function can_load_preset(){
+        if ( !$client_id = $this->get_client_id() ) return;
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'soundsgood') return;
-        
-        if ( !$client_id = $this->get_client_id() ){
-            return new WP_Error( 'wpsstm_soundsgood_missing_client_id', __('Required client ID missing.','wpsstm') );
-        }
-        
-        $station_slug = $this->get_station_slug();
-        if ( is_wp_error($station_slug) ) return $station_slug;
-
-        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$station_slug);
-
+        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$this->get_station_slug());
     }
     
     function get_station_slug(){

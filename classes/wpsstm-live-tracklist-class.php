@@ -274,6 +274,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         //the URL to reach can be overriden in your preset class or with this filter
         $url = $this->get_remote_url();
+        print_r($url);die("NANA");
         $url = apply_filters('wpsstm_get_remote_url',$url);
         
         wpsstm()->debug_log($url,'get_remote_page_tracks request_url' );

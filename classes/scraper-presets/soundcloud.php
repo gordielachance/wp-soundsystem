@@ -22,17 +22,20 @@ class WP_SoundSystem_Preset_Soundcloud_Api extends WP_SoundSystem_Live_Playlist_
 
     }
     
+    function can_load_preset(){
+        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
+        if ( !$user_slug = $this->get_user_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'soundcloud') return;
-
-        if ( !$user_id = $this->get_user_id() ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_user_id', __('Required user ID missing.','wpsstm') );
-        }
         
         if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ){
             return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required client ID missing.','wpsstm') );
+        }
+
+        if ( !$user_id = $this->get_user_id() ){
+            return new WP_Error( 'wpsstm_soundcloud_missing_user_id', __('Required user ID missing.','wpsstm') );
         }
         
         $page = $this->get_user_page();

@@ -23,12 +23,12 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name = __('Radioking Stations','wpsstm');
     }
     
+    function can_load_preset(){
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'radioking') return;
-        
-        //can request ?
 
         $station_id = $this->get_station_id();
         if ( is_wp_error($station_id) ) return $station_id;

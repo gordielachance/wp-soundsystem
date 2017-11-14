@@ -30,29 +30,18 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         }
     }
     
+    function can_load_preset(){
+        if ( !$client_id = wpsstm()->get_options('spotify_client_id') ) return;
+        if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ) return;
+        
+        if ( !$user_slug = $this->get_user_slug() ) return;
+        if ( !$playlist_slug = $this->get_playlist_slug() ) return;
+        
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'spotify') return;
-        
-        if ( !$client_id = wpsstm()->get_options('spotify_client_id') ){
-            return new WP_Error( 'wpsstm_spotify_missing_client_id', __('Required client ID missing.','wpsstm') );
-        }
-        if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ){
-            return new WP_Error( 'wpsstm_spotify_missing_client_secret', __('Required client secret missing.','wpsstm') );
-        }
-        
-        $user_slug = $this->get_user_slug();
-        if ( is_wp_error($user_slug) ){
-            return new WP_Error( 'wpsstm_spotify_missing_user_slug', __('Required user slug missing.','wpsstm') );
-        }
-        
-        $playlist_slug = $this->get_playlist_slug();
-        if ( is_wp_error($playlist_slug) ){
-            return new WP_Error( 'wpsstm_spotify_missing_playlist_slug', __('Required playlist slug missing.','wpsstm') );
-        }
-
-        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$user_slug,$playlist_slug);
+        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$this->get_user_slug(),$this->get_playlist_slug());
         
         //handle pagination
         $pagination_args = array(

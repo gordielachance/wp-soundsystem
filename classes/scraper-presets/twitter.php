@@ -18,18 +18,13 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
 
     }
     
+    function can_load_preset(){
+        if ( !$user_slug = $this->get_user_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'twitter') return;
-        
-        $user_slug = $this->get_user_slug();
-        if ( !$user_slug = $this->get_user_slug() ){
-            return new WP_Error( 'wpsstm_twitter_missing_user_slug', __('Required user slug missing.','wpsstm') );
-        }
-
-        return sprintf('https://mobile.twitter.com/%s',$user_slug);
-
+        return sprintf('https://mobile.twitter.com/%s',$this->get_user_slug());
     }
     
     function get_user_slug(){

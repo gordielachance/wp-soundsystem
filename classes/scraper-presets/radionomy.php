@@ -30,15 +30,13 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Live_
         $this->preset_name = __('Radionomy Stations','wpsstm');
     }
     
+    function can_load_preset(){
+        if ( !$slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'radionomy') return;
-        
-        $station_id = $this->get_station_id();
-        if ( is_wp_error($station_id) ) return $station_id;
 
-        //set station ID
         $station_id = $this->get_station_id();
         if ( is_wp_error($station_id) ) return $station_id;
         
@@ -96,7 +94,7 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Live_
             preg_match($pattern, $image_file, $matches);
             
             if ( !isset($matches[1]) ){
-r               return new WP_Error( 'wpsstm_radionomy_missing_station_id', __('Required station ID missing.','wpsstm') );
+                return new WP_Error( 'wpsstm_radionomy_missing_station_id', __('Required station ID missing.','wpsstm') );
             }
             
             $station_id = $matches[1];

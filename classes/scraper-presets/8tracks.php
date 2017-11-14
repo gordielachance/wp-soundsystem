@@ -20,10 +20,14 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
 
     }
     
+    function can_load_preset(){
+        if ( !$user_slug = $this->get_user_slug() ) return;
+        if ( !$playlist_slug = $this->get_tracklist_slug() ) return;
+    
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != '8tracks') return;
 
         $mix_data = $this->get_mix_data();
 

@@ -23,16 +23,13 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
     }
     
+    function can_load_preset(){
+        if (!$subreddit_slug = $this->get_subreddit_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'reddit') return;
-        
-        $subreddit_slug = $this->get_subreddit_slug();
-        if ( is_wp_error($subreddit_slug) ) return $subreddit_slug;
-
-        return sprintf('https://www.reddit.com/r/%s.json?limit=100',$subreddit_slug);
-
+        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->get_subreddit_slug() );
     }
     
     function get_subreddit_slug(){

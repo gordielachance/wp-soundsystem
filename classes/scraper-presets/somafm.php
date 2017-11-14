@@ -19,17 +19,13 @@ class WP_SoundSystem_Preset_SomaFM_Stations extends WP_SoundSystem_Live_Playlist
 
     }
     
+    function can_load_preset(){
+        if (!$station_slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'somafm') return;
-        
-        if ( !$station_slug = $this->get_station_slug() ){
-            return new WP_Error( 'wpsstm_somafm_missing_station_slug', __('Required station slug missing.','wpsstm') );
-        }
-
-        return sprintf('http://somafm.com/songs/%s.xml',$station_slug);
-
+        return sprintf('http://somafm.com/songs/%s.xml',$this->get_station_slug());
     }
     
     function get_station_slug(){

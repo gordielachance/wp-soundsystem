@@ -21,15 +21,13 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
 
     }
     
+    function can_load_preset(){
+        if (!$this->get_station_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'rtbf') return;
-        
-        $station_slug = $this->get_station_slug();
-        if ( is_wp_error($station_slug) ) return $station_slug;
-
-        return sprintf('https://www.rtbf.be/%s/conducteur',$station_slug);
+        return sprintf('https://www.rtbf.be/%s/conducteur',$this->get_station_slug());
 
     }
     

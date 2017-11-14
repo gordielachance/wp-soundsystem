@@ -18,18 +18,11 @@ class WP_SoundSystem_Preset_Slacker_Stations extends WP_SoundSystem_Live_Playlis
 
     }
     
-    function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'slacker') return;
-        
-        $station_slug = $this->get_station_slug();
-        if ( is_wp_error($station_slug) ) return $station_slug;
-
-        return $this->feed_url;
-
+    function can_load_preset(){
+        if (!$station_slug = $this->get_station_slug() ) return;
+        return true;
     }
-    
+
     function get_station_slug(){
         $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
         preg_match($pattern, $this->feed_url, $matches);

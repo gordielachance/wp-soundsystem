@@ -17,18 +17,13 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
         $this->preset_name =    'Online Radio Box';
     }
     
+    function can_load_preset(){
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        return true;
+    }
+    
     function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'onlineradiobox') return;
-        
-        //can request ?
-        if ( !$station_slug = $this->get_station_slug() ){
-            return new WP_Error( 'wpsstm_onlineradiobox_missing_station_slug', __('Required station slug missing.','wpsstm') );
-        }
-
         return sprintf('http://onlineradiobox.com/ma/%s/playlist',$station_slug);
-
     }
 
     function get_station_slug(){

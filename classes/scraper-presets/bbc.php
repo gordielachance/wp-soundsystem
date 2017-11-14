@@ -18,18 +18,11 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         $this->preset_name =    __('BBC stations','wpsstm');
     }
     
-    function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'bbc') return;
-        
-        if ( !$station_slug = $this->get_station_slug() ){
-            return new WP_Error( 'wpsstm_bbc_missing_station_slug', __('Required station slug missing.','wpsstm') );
-        }
-        
-        return $this->feed_url;
+    function can_load_preset(){
+        if ( !$station_slug = $this->get_station_slug() ) return;
+        return true;
     }
-    
+
     function get_station_slug(){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
@@ -59,17 +52,11 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name =    __('BBC playlists','wpsstm');
     }
     
-    function get_remote_url(){
-        
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $this->domain != 'bbc') return;
-        
-        if ( !$playlist_id = $this->get_playlist_id() ){
-            return new WP_Error( 'wpsstm_bbc_missing_playlist_id', __('Required playlist ID missing.','wpsstm') );
-        }
-        
-        return sprintf('http://www.bbc.co.uk/music/playlists/%s',$playlist_id);
+    function can_load_preset(){
+        if ( !$playlist_id = $this->get_playlist_id() ) return;
+        return true;
     }
+
     function get_playlist_id(){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
