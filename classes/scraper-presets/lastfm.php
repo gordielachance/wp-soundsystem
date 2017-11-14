@@ -41,12 +41,6 @@ class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_page(){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?.*/[^/]+/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
     function get_user_page(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/.*/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
@@ -71,11 +65,9 @@ class WP_SoundSystem_Preset_LastFM_User_Scraper extends WP_SoundSystem_Preset_La
     
     function get_remote_url(){
 
-        $page = $this->get_page();
-        if ( !$page ) $page = 'library';
-        if ( $page != 'library' ) return;
+        $page = $this->get_user_page();
 
-        return sprintf('https://www.last.fm/fr/user/%s/library',$this->get_user_slug());
+        return sprintf('https://www.last.fm/fr/user/%s/%s',$this->get_user_slug(),$page);
     }
 }
 
@@ -91,7 +83,7 @@ class WP_SoundSystem_Preset_LastFM_User_Loved_Scraper extends WP_SoundSystem_Pre
     
     function can_load_preset(){
         if ( !$user_slug = $this->get_user_slug() ) return;
-        if ( $this->get_page() != 'loved' ) return;
+        if ( $this->get_user_page() != 'loved' ) return;
         return true;
     }
 
