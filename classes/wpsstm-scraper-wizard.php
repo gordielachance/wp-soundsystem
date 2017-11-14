@@ -8,9 +8,10 @@ class WP_SoundSystem_Core_Wizard{
     var $wizard_fields = array();
     
     public $frontend_wizard_page_id = null;
-    public $qvar_wizard_posts = 'wpsstm_wizard_posts';
+    public $qvar_tracklist_wizard = 'wztr';
     public $wizard_disabled_metakey = '_wpsstm_wizard_disabled';
     public $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
+    
     
     public $tracklist;
 
@@ -46,8 +47,7 @@ class WP_SoundSystem_Core_Wizard{
 
         //frontend
         add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
-        add_action( 'wp', array($this,'frontend_wizard_populate_tracklist' ) );
-        add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
+        add_action( 'wp', array($this,'community_tracklist_redirect'));
         add_filter( 'template_include', array($this,'frontend_wizard_template'));
         
         add_filter('document_title_parts',  array($this, 'frontend_wizard_title_parts'));
@@ -68,7 +68,7 @@ class WP_SoundSystem_Core_Wizard{
     *   Add the query variables for the Wizard
     */
     function add_wizard_query_vars($vars){
-        $vars[] = $this->qvar_wizard_posts;
+        $vars[] = $this->qvar_tracklist_wizard;
         return $vars;
     }
     
@@ -146,19 +146,37 @@ class WP_SoundSystem_Core_Wizard{
     
     function community_tracklist_redirect(){
         global $post;
+        global $wpsstm_tracklist;
         
-        if (!$post) return;
+        if ( !$this->can_frontend_wizard() ) return;
+        
+        
+        //wizard called on a tracklist that is not a community one.  Redirect to regular tracklist.
+        if ( ( $wztr = get_query_var($this->qvar_tracklist_wizard,null) ) && ( $wpsstm_tracklist = $this->get_wizard_tracklist($wztr) ) ){
+            
+            if ( is_page($this->frontend_wizard_page_id) ){
+                //this is not a community tracklist, abord wizard
+                if (!$wpsstm_tracklist->is_community){
+                    $link = get_permalink($wpsstm_tracklist->post_id);
+                    wp_redirect($link);
+                    exit();
+                }
 
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $is_community_tracklist = ( ($post->post_type == wpsstm()->post_type_live_playlist) && ($post->post_author == $community_user_id) );
-
-        if ($is_community_tracklist){
-            $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('tracklist_id'=>$post->ID),$link);
-            wp_redirect($link);
-            exit();
+            }
         }
-
+        
+        /*
+        //live playlist page but this is a community tracklist ! Redirect to wizard.
+        if( is_singular( wpsstm()->post_type_live_playlist )  && ( $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID) ) ){
+            if ($wpsstm_tracklist && $wpsstm_tracklist->is_community){
+                $link = get_permalink($this->frontend_wizard_page_id);
+                $link = add_query_arg(array($this->qvar_tracklist_wizard=>$wpsstm_tracklist->post_id),$link);
+                wp_redirect($link);
+                exit();
+            }
+        }
+        */
+        
     }
 
     /*
@@ -367,29 +385,6 @@ class WP_SoundSystem_Core_Wizard{
                 exit();
             }
         }
-    }
-    
-    function frontend_wizard_populate_tracklist(){
-        global $wpsstm_tracklist;
-
-        if ( !is_page($this->frontend_wizard_page_id) ) return;
-        if ( !$this->can_frontend_wizard() ) return;
-        
-        //check if we have a tracklist to load
-        $tracklist_id = isset($_REQUEST['tracklist_id']) ? $_REQUEST['tracklist_id'] : null;
-        $tracklist = $this->get_wizard_tracklist($tracklist_id);
-        
-        //this is not a community tracklist, abord wizard
-        if ($tracklist->is_community){ 
-            $link = get_permalink($tracklist_id);
-            wp_redirect($link);
-            exit();
-            
-        }
-        
-        //do populate.
-        $wpsstm_tracklist = $tracklist;
-        
     }
 
     function wizard_settings_init(){
