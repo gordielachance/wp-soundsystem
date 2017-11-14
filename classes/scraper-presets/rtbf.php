@@ -2,12 +2,7 @@
 class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'rtbf';
     var $preset_url =       'https://www.rtbf.be/';
-    
-    var $pattern =          '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i'; //ignore la premiere which has different selectors.
-    var $redirect_url=      'https://www.rtbf.be/%rtbf-slug%/conducteur';
-    var $variables = array(
-        'rtbf-slug' => null
-    );
+
     var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
@@ -24,7 +19,26 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
 
         $this->preset_name = __('RTBF stations','wpsstm');
 
-    } 
+    }
+    
+    function get_remote_url(){
+        
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'rtbf') return;
+        
+        $station_slug = $this->get_station_slug();
+        if ( is_wp_error($station_slug) ) return $station_slug;
+
+        return sprintf('https://www.rtbf.be/%s/conducteur',$station_slug);
+
+    }
+    
+    function get_station_slug(){
+        $pattern = '~^https?://(?:www.)?rtbf.be/(?!lapremiere)([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
 }
 
 //register preset

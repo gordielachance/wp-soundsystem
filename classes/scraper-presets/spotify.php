@@ -4,13 +4,6 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
 
     var $preset_slug =      'spotify-playlist-url';
     var $preset_url =       'https://open.spotify.com';
-    
-    var $pattern =          '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([\w\d]+)~i';
-    var $redirect_url =     'https://api.spotify.com/v1/users/%spotify-user%/playlists/%spotify-playlist%/tracks';
-    var $variables =        array(
-        'spotify-user' => null,
-        'spotify-playlist' => null
-    );
 
     var $preset_options =  array(
         'datas_cache_min'   => 15,
@@ -37,6 +30,55 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         }
     }
     
+    function get_remote_url(){
+        
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'spotify') return;
+        
+        if ( !$client_id = wpsstm()->get_options('spotify_client_id') ){
+            return new WP_Error( 'wpsstm_spotify_missing_client_id', __('Required client ID missing.','wpsstm') );
+        }
+        if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ){
+            return new WP_Error( 'wpsstm_spotify_missing_client_secret', __('Required client secret missing.','wpsstm') );
+        }
+        
+        $user_slug = $this->get_user_slug();
+        if ( is_wp_error($user_slug) ){
+            return new WP_Error( 'wpsstm_spotify_missing_user_slug', __('Required user slug missing.','wpsstm') );
+        }
+        
+        $playlist_slug = $this->get_playlist_slug();
+        if ( is_wp_error($playlist_slug) ){
+            return new WP_Error( 'wpsstm_spotify_missing_playlist_slug', __('Required playlist slug missing.','wpsstm') );
+        }
+
+        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$user_slug,$playlist_slug);
+        
+        //handle pagination
+        $pagination_args = array(
+            'limit'     => $this->request_pagination['page_items_limit'],
+            'offset'    => ($this->request_pagination['current_page'] - 1) * $this->request_pagination['page_items_limit']
+        );
+        
+        $url = add_query_arg($pagination_args,$url);
+        return $url;
+        
+
+    }
+    
+    function get_user_slug(){
+        $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    function get_playlist_slug(){
+        $pattern = '~^https?://(?:open|play).spotify.com/user/[^/]+/playlist/([\w\d]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    
     function get_remote_tracks($args = null){
         
         $track_count = $this->get_spotify_playlist_track_count();
@@ -58,8 +100,8 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     }
     
     function get_remote_title(){
-        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
-        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
+        if ( !$user_id = $this->get_user_slug() ) return;
+        if ( !$playlist_id = $this->get_playlist_slug() ) return;
         
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
@@ -73,13 +115,14 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     }
     
     function get_tracklist_author(){
-        return $this->get_variable_value('spotify-user');
+        return $this->get_user_slug();
     }
     
+    //TO FIX TO IMPROVE just get playlist data ?
     protected function get_spotify_playlist_track_count(){
 
-        if ( !$user_id = $this->get_variable_value('spotify-user') ) return;
-        if ( !$playlist_id = $this->get_variable_value('spotify-playlist') ) return;
+        if ( !$user_id = $this->get_user_slug() ) return;
+        if ( !$playlist_id = $this->get_playlist_slug() ) return;
 
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
@@ -94,28 +137,12 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         
     }
     
-    protected function get_request_url(){
-        
-        $url = parent::get_request_url();
-        
-        //handle pagination
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['page_items_limit'],
-            'offset'    => ($this->request_pagination['current_page'] - 1) * $this->request_pagination['page_items_limit']
-        );
-        
-        $url = add_query_arg($pagination_args,$url);
-        return $url;
-
-    }
-    
     function get_request_args(){
         $args = parent::get_request_args();
 
         if ( $token = $this->get_access_token() ){
 
-            $args['headers']['Authorization'] = 'Bearer ' . $token;
-            $this->set_variable_value('spotify-token',$token);            
+            $args['headers']['Authorization'] = 'Bearer ' . $token;           
         }
         
         $args['headers']['Accept'] = 'application/json';
@@ -163,6 +190,19 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
 class WP_SoundSystem_Preset_Spotify_URI_Playlists_Api extends WP_SoundSystem_Preset_Spotify_URL_Playlists_Api{
     var $preset_slug =      'spotify-playlist-uri';
     var $pattern = '~^spotify:user:([^/]+):playlist:([\w\d]+)~i';
+    
+    function get_user_slug(){
+        $pattern = '~^spotify:user:([^:]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    function get_playlist_slug(){
+        $pattern = '~^spotify:user:.*:playlist:([\w\d]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
 }
 
 //register presets

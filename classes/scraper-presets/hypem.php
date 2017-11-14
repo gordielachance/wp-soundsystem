@@ -3,7 +3,6 @@ class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_P
     
     var $preset_slug =      'hypem';
     var $preset_url =       'http://hypem.com/';
-    var $pattern =          '~^https?://(?:www.)?hypem.com/~i';
 
     var $preset_options =  array(
         'selectors' => array(
@@ -18,7 +17,13 @@ class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_P
         parent::__construct($post_id);
         $this->preset_name = 'Hype Machine';
     }
- 
+    
+    function get_remote_url(){
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'hypem') return;
+        return $this->feed_url;
+    }
+
 }
 
 //register preset

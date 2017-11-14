@@ -6,12 +6,6 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     var $preset_slug =      'reddit';
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
-    var $pattern =          '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-    var $redirect_url=      'https://www.reddit.com/r/%subredit-slug%.json?limit=100';
-    var $variables =        array(
-        'subredit-slug' => null
-    );
-
     var $preset_options =  array(
         'datas_cache_min'   => 30,
         'selectors' => array(
@@ -27,6 +21,24 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         parent::__construct($post_id);
 
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
+    }
+    
+    function get_remote_url(){
+        
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'reddit') return;
+        
+        $subreddit_slug = $this->get_subreddit_slug();
+        if ( is_wp_error($subreddit_slug) ) return $subreddit_slug;
+
+        return sprintf('https://www.reddit.com/r/%s.json?limit=100',$subreddit_slug);
+
+    }
+    
+    function get_subreddit_slug(){
+        $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
     
     /*
@@ -60,20 +72,6 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         return parent::get_remote_tracks($args);
     }
 
-    
-    protected function get_request_url(){
-        
-        $url = parent::get_request_url();
-        
-        //handle pagination
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['page_items_limit']
-        );
-        
-        $url = add_query_arg($pagination_args,$url);
-        return $url;
-
-    }
     */
     
     protected function filter_string($str){

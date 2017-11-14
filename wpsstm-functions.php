@@ -281,14 +281,14 @@ If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist
 */
 function wpsstm_get_live_tracklist_preset($feed_url){
     $tracklist = new WP_SoundSystem_Remote_Tracklist();
+    $feed_url = trim($feed_url);
     foreach((array)wpsstm_live_playlists()->get_available_presets() as $preset){
-        if ( $preset->can_load_tracklist_url($feed_url) ){
-            $tracklist = $preset;
-            $tracklist->feed_url = $feed_url;
-            $tracklist->populate_url_variables();
-            wpsstm()->debug_log( json_encode(array('feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_live_tracklist_preset()");
-            break;
-        }
+        $preset->feed_url = $feed_url;
+        if ( !$preset->get_remote_url() ) continue;
+
+        wpsstm()->debug_log( json_encode(array('feed_url'=>$feed_url,'preset_name'=>$tracklist->preset_name)), "wpsstm_get_live_tracklist_preset()");
+        break;
+        
     }
     return $tracklist;
 }

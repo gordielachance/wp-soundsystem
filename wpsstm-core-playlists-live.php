@@ -47,6 +47,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
+        
+        add_filter('wpsstm_get_remote_url',array(wpsstm_wizard(),'filter_dropbox_url')); //TO FIX TO MOVE ELSEWHERE ?
+        
     }
 
     function register_post_type_live_playlist() {
@@ -192,9 +195,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
-            $preset = new $class_name();
-            if ( !$preset->can_use_preset ) continue;
-            $presets[] = $preset;
+            $presets[] = new $class_name();
         }
         return $presets;
     }

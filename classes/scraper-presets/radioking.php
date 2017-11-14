@@ -3,13 +3,6 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
 
     var $preset_slug =      'radioking';
     var $preset_url =       'https://www.radioking.com';
-    
-    var $pattern =          '~^https?://(?:.*\.)?radioking.com/radio/([^/]+).*?$~i';
-    var $redirect_url =     'https://www.radioking.com/api/radio/%radioking-id%/track/ckoi?limit=20';
-    var $variables =        array(
-        'radioking-slug'        => null,
-        'radioking-id'          => null
-    );
 
     var $preset_options =  array(
         'datas_cache_min'   => 15,
@@ -30,8 +23,31 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name = __('Radioking Stations','wpsstm');
     }
     
+    function get_remote_url(){
+        
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'radioking') return;
+        
+        //can request ?
+
+        $station_id = $this->get_station_id();
+        if ( is_wp_error($station_id) ) return $station_id;
+
+        return sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
+
+    }
+
+    function get_station_slug(){
+        $pattern = '~^https?://(?:.*\.)?radioking.com/radio/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
     function get_station_data(){
-        if ( !$slug = $this->get_variable_value('radioking-slug') ) return;
+        
+        if ( !$station_slug = $this->get_station_slug() ){
+            return new WP_Error( 'wpsstm_radioking_missing_station_slug', __('Required station slug missing.','wpsstm') );
+        }
         
         $transient_name = 'wpsstm-radioking-' . $slug . '-data';
 
@@ -49,21 +65,16 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
         
     }
     
-    protected function get_request_url(){
+    function get_station_id(){
+        $station_data = $this->get_station_data();
+        if ( is_wp_error($station_data) ) return $station_data;
         
-        $this->station_data = $this->get_station_data();
-
-        //set station ID
-        if ( $station_id = wpsstm_get_array_value(array('idradio'), $this->station_data) ){
-            $this->set_variable_value('radioking-id',$station_id);
-        }
-        
-        return parent::get_request_url();
-
+        return wpsstm_get_array_value(array('idradio'),$station_data);
     }
-    
+
     function get_remote_title(){
-        return wpsstm_get_array_value(array('name'), $this->station_data);
+        $station_data = $this->get_station_data();
+        return wpsstm_get_array_value(array('name'), $station_data);
     }
     
     protected function get_track_image($track_node){

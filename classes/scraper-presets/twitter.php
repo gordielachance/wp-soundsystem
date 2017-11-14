@@ -2,12 +2,7 @@
 class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      'twitter';
     var $preset_url =       'https://www.twitter.com/';
-    
-    var $pattern =          '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)/?$~i';
-    var $redirect_url=      'https://mobile.twitter.com/%twitter-username%';
-    var $variables =        array(
-        'twitter-username' => null
-    );
+
     var $preset_options =  array(
         'selectors' => array(
             'tracks'        => array('path'=>'#main_content .timeline .tweet .tweet-text div')
@@ -21,6 +16,26 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
 
         $this->preset_name = 'Twitter';
 
+    }
+    
+    function get_remote_url(){
+        
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != 'twitter') return;
+        
+        $user_slug = $this->get_user_slug();
+        if ( !$user_slug = $this->get_user_slug() ){
+            return new WP_Error( 'wpsstm_twitter_missing_user_slug', __('Required user slug missing.','wpsstm') );
+        }
+
+        return sprintf('https://mobile.twitter.com/%s',$user_slug);
+
+    }
+    
+    function get_user_slug(){
+        $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_request_args(){

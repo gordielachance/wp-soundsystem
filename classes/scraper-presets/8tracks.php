@@ -2,14 +2,7 @@
 class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playlist_Preset{
     var $preset_slug =      '8tracks-mixes';
     var $preset_url =       'https://8tracks.com';
-    
-    var $pattern =          '~^https?://(?:www.)?8tracks.com/([^/]+)/([[\w\d-]+)~i';
-    var $redirect_url =     'https://8tracks.com/mixes/%8tracks-id%/tracks_for_international.jsonh';
-    var $variables =        array(
-        '8tracks-user-slug' => null,
-        '8tracks-playlist-slug' => null,
-        '8tracks-id' => null
-    );
+
     var $preset_options =  array(
         'selectors' => array(
             'tracks'            => array('path'=>'>tracks'),
@@ -27,28 +20,48 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
 
     }
     
-    protected function get_request_url(){
+    function get_remote_url(){
         
+        $domain = wpsstm_get_url_domain( $this->feed_url );
+        if ( $this->domain != '8tracks') return;
+
         $mix_data = $this->get_mix_data();
+
         if ( is_wp_error($mix_data) ) return $mix_data;
 
         //populate mix ID
-        if ( $mix_id = wpsstm_get_array_value(array('id'), $mix_data) ){
-            $this->set_variable_value('8tracks-id',$mix_id);
+        if ( !$mix_id = wpsstm_get_array_value(array('id'), $mix_data) ) {
+            return new WP_Error( 'wpsstm_8tracks_missing_mix_id', __('Required mix ID missing.','wpsstm') );
         }
 
-        return parent::get_request_url();
+        return sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
 
     }
     
+    function get_user_slug(){
+        $pattern = '~^https?://(?:www.)?8tracks.com/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    function get_tracklist_slug(){
+        $pattern = '~^https?://(?:www.)?8tracks.com/[^/]+/([[\w\d-]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
     function get_mix_data(){
-        
+
         //already populated
         if ( $this->mix_data ) return $this->mix_data;
         
         //can request ?
-        if ( !$user_slug = $this->get_variable_value('8tracks-user-slug') ) return;
-        if ( !$playlist_slug = $this->get_variable_value('8tracks-playlist-slug') ) return;
+        if ( !$user_slug = $this->get_user_slug() ){
+            return new WP_Error( 'wpsstm_8tracks_missing_user_slug', __('Required user slug missing.','wpsstm') );
+        }
+        if ( !$playlist_slug = $this->get_tracklist_slug() ){
+            return new WP_Error( 'wpsstm_8tracks_missing_tracklist_slug', __('Required tracklist slug missing.','wpsstm') );
+        }
         
         $transient_name = 'wpsstm-8tracks-' . $playlist_slug . '-data';
 
@@ -58,6 +71,7 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
             $response = wp_remote_get($mix_data_url);
             $json = wp_remote_retrieve_body($response);
             if ( is_wp_error($json) ) return $json;
+            
             $api = json_decode($json,true);
             if ( $data = wpsstm_get_array_value(array('mix'), $api) ){
                 set_transient( $transient_name, $data, 1 * DAY_IN_SECONDS );

@@ -29,7 +29,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     function init(){
         
-        require_once(wpsstm()->plugin_dir . 'wpsstm-scraper.php');
+        require_once(wpsstm()->plugin_dir . 'wpsstm-core-scraper.php');
         
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
