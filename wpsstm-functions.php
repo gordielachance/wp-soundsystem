@@ -280,7 +280,7 @@ Check if one of the available presets (which are extending WP_SoundSystem_Remote
 If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist
 */
 function wpsstm_get_live_tracklist_preset($feed_url){
-    $presets = (array)wpsstm_live_playlists()->get_available_presets();
+    $presets = (array)wpsstm_live_playlists()->presets;
     $presets = array_reverse($presets); //reverse so we break at the preset that has the higher priority
     foreach($presets as $preset){
         $preset->feed_url = trim($feed_url);

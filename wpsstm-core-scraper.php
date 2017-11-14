@@ -744,7 +744,7 @@ class WP_SoundSystem_Core_Wizard{
         //presets
         $presets_list = array();
         $presets_list_str = null;
-        foreach ((array)wpsstm_live_playlists()->get_available_presets() as $preset){
+        foreach ((array)wpsstm_live_playlists()->presets as $preset){
             if ( !$preset->wizard_suggest ) continue;
             $preset_str = $preset->preset_name;
             if ($preset->preset_url){

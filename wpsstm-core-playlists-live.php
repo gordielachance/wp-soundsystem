@@ -6,6 +6,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';
     public $remote_title_meta_name = 'wpsstm_remote_title';
     public $remote_author_meta_name = 'wpsstm_remote_author_name';
+    public $presets;
     
     /**
     * @var The one true Instance
@@ -30,7 +31,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     }
     
     function setup_globals(){
-        
+        $this->presets = (array)$this->get_available_presets();
     }
 
     function setup_actions(){
@@ -177,7 +178,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     /*
     Register scraper presets.
     */
-    function get_available_presets(){
+    private function get_available_presets(){
         
         //default class
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-preset.php');
