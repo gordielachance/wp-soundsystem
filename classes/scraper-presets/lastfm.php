@@ -106,11 +106,6 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
 
     var $preset_slug =      'last-fm-station-artist';
     var $preset_url =       'https://www.last.fm/music/XXX/+similar';
-    var $pattern =          '~^https?://(?:www.)?last.fm/music/([^/]+)/\+similar~';
-    var $remote_url =     'https://www.last.fm/player/station/music/%lastfm-artist-slug%?ajax=1';
-    var $variables =        array(
-        'lastfm-artist-slug' => null,
-    );
 
     var $preset_options =  array(
         'selectors' => array(
@@ -145,11 +140,6 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 
     var $preset_slug =      'last-fm-station-user';
     var $preset_url =       'https://www.last.fm/user/XXX/recommended';
-    var $pattern =          '~http(?:s)?://(?:www\.)?last.fm/(?:[a-zA-Z]{2}/)?(?:user/([^/]+))/recommended~'; //TO FIX this is not a valid LAST.FM URL
-    var $remote_url =     'https://www.last.fm/player/station/user/%lastfm-user-slug%/recommended?ajax=1';
-    var $variables =        array(
-        'lastfm-user-slug' => null,
-    );
 
     function __construct($post_id = null){
         parent::__construct($post_id);
