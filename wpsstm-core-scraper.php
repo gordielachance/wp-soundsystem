@@ -157,7 +157,7 @@ class WP_SoundSystem_Core_Wizard{
 
         if ($input && !$this->tracklist->feed_url){
             $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('wizard_error'=>'no-feed-url'),$link);
+            $link = add_query_arg(array('wizard_error'=>'no-matching-preset'),$link);
             wp_redirect($link);
             exit();
         }
