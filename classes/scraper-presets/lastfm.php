@@ -161,17 +161,16 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 
     var $preset_slug =      'last-fm-station-user';
     var $preset_url =       'https://www.last.fm/user/XXX/recommended';
+    var $station_slug;
 
     function __construct($post_id = null){
         parent::__construct($post_id);
-        $this->preset_name = __('Last.FM stations (user recommandations)','wpsstm');
+        $this->preset_name = __('Last.FM user stations','wpsstm');
     }
 
     function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
-        
-        $station = $this->get_station_page();
-        if ( $station != 'recommended' ) return;
+        if ( !$this->get_station_page() ) return;
         return true;
     }
     
@@ -188,13 +187,15 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
     }
     
     function get_remote_url(){
-        return sprintf('https://www.last.fm/player/station/user/%s/recommended?ajax=1',$this->get_user_slug());
+        return sprintf('https://www.last.fm/player/station/user/%s/%s?ajax=1',$this->get_user_slug(),$this->get_station_page());
     }
     
     function get_remote_title(){
-        return sprintf( __('Last.FM stations (user recommandations): %s','wpsstm'), $this->get_user_slug() );
+        return sprintf( __('Last.FM station for %s - %s','wpsstm'), $this->get_user_slug(),$this->get_station_page() );
     }
 }
+
+
 
 
 //register preset
