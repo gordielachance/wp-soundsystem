@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
+abstract class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
 
     var $preset_slug =      'last-fm';
     var $preset_url =       'https://www.last.fm';

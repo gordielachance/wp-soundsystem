@@ -196,6 +196,8 @@ class WP_SoundSystem_Core_Live_Playlists{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
+            $can_use_preset = $class_name::can_use_preset();
+            if ( $can_use_preset !== true ) continue;
             $presets[] = new $class_name();
         }
         

@@ -6,11 +6,7 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     var $preset_name =      null;
     var $preset_desc =      null;
     var $preset_options =   array();
-    var $pattern =          null; //regex pattern that would match an URL
-    var $remote_url =     null; //real URL of the tracklist; can use the values from the regex groups captured with the pattern above.
-    var $variables =        array(); //list of slugs that would match the regex groups captured with the pattern above - eg. array('username','playlist-id')
-    
-    var $can_use_preset =   true;
+
     var $wizard_suggest =   true; //suggest or not this preset in the wizard
 
     public function __construct($post_id = null){
@@ -31,6 +27,20 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     
     protected function validate_tracks($tracks){
         return parent::validate_tracks($tracks);
+    }
+    
+    /*
+    Checks that the preset can be used (eg. check for an API client ID)
+    */
+    static function can_use_preset(){
+        return true;
+    }
+    
+    /*
+    Checks that the preset can handle $this->feed_url
+    */
+    function can_load_feed(){
+        return true;
     }
 
 }

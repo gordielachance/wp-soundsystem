@@ -15,23 +15,30 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     );
     
     var $token = null;
+    var $client_id;
+    var $client_secret;
 
     function __construct($post_id = null){
         parent::__construct($post_id);
 
         $this->preset_name = __('Spotify Playlists','wpsstm');
 
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        
-        if ( !$client_id || !$client_secret ){
-            $this->can_use_preset = false;
+        $this->client_id = wpsstm()->get_options('spotify_client_id');
+        $this->client_secret = wpsstm()->get_options('spotify_client_secret');
+
+    }
+    
+    static function can_use_preset(){
+        if ( !wpsstm()->get_options('spotify_client_id') ){
+            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Spotify client ID missing.','wpsstm') );
         }
+        if ( !wpsstm()->get_options('spotify_client_secret') ){
+            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Spotify client secret missing.','wpsstm') );
+        }
+        return true;
     }
     
     function can_load_feed(){
-        if ( !$client_id = wpsstm()->get_options('spotify_client_id') ) return;
-        if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ) return;
 
         if ( !$user_slug = $this->get_user_slug() ) return;
         if ( !$playlist_slug = $this->get_playlist_slug() ) return;
@@ -143,13 +150,10 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         if ($this->token === null){
             
             $this->token = false;
-            
-            $client_id = wpsstm()->get_options('spotify_client_id');
-            $client_secret = wpsstm()->get_options('spotify_client_secret');
 
             $args = array(
                 'headers'   => array(
-                    'Authorization' => 'Basic '.base64_encode($client_id.':'.$client_secret)
+                    'Authorization' => 'Basic '.base64_encode($this->client_id.':'.$this->client_secret)
                 ),
                 'body'      => array(
                     'grant_type'    => 'client_credentials'
