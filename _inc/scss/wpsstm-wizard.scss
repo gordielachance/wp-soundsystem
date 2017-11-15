@@ -1,5 +1,9 @@
 @import "compass/css3";
 
+#wpsstm-wizard-input{
+    margin:1em 0;
+}
+
 #wizard-wrapper{
     position:relative;
 
@@ -179,6 +183,7 @@
     position: relative;
     @include display-flex();
     @include flex-wrap(wrap);
+    text-align:center;
     .wpsstm-wizard-helper{
         margin:.5em;
         width:calc(33% - 1em);

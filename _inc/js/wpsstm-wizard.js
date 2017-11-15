@@ -22,7 +22,7 @@ jQuery(document).ready(function($){
         
         if (artist){
             var artist_url = 'https://www.last.fm/music/'+lastfm_artist;
-            top_tracks_el.attr('data-wpsstm-wizard-preview',artist_url);
+            top_tracks_el.attr('data-wpsstm-wizard-preview',artist_url+'/+tracks');
             similar_el.attr('data-wpsstm-wizard-preview',artist_url + '/+similar');
         }else{
             top_tracks_el.removeAttr( "data-wpsstm-wizard-preview" );
