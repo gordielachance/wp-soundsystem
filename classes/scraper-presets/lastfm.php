@@ -136,7 +136,7 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
+class WP_SoundSystem_Preset_LastFM_Helper_Station_User_Recommandations extends WP_SoundSystem_Preset_LastFM_Station{
 
     var $preset_slug =      'last-fm-station-user';
     var $preset_url =       'https://www.last.fm/user/XXX/recommended';
@@ -150,9 +150,21 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
     function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         
-        $userpage = $this->get_user_page();
-        if ( $userpage != 'recommended' ) return;
+        $station = $this->get_station_page();
+        if ( $station    != 'recommended' ) return;
         return true;
+    }
+    
+    function get_user_slug(){
+        $pattern = '~^lastfm:user:([^:]+):station~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    function get_station_page(){
+        $pattern = '~^lastfm:user:[^:]+:station:([^:]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_remote_url(){
@@ -168,13 +180,13 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 
         if ( $user->is_user_api_logged() ){
 
-            $widget_link = sprintf('lastfm:user:%s:library',$user->user_api_metas['username'] );
+            $widget_link = sprintf('lastfm:user:%s:station:library',$user->user_api_metas['username'] );
             $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My library','wpsstm') );
 
-            $widget_link = sprintf('lastfm:user:%s:mix',$user->user_api_metas['username'] );
+            $widget_link = sprintf('lastfm:user:%s:station:mix',$user->user_api_metas['username'] );
             $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My mix','wpsstm') );
 
-            $widget_link = sprintf('lastfm:user:%s:recommended',$user->user_api_metas['username'] );
+            $widget_link = sprintf('lastfm:user:%s:station:recommended',$user->user_api_metas['username'] );
             $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My recommendations','wpsstm') );
         }
 
@@ -190,7 +202,7 @@ function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Helper_Station_User_Recommandations';
     return $presets;
 }
 
