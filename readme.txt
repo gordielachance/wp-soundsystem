@@ -149,6 +149,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.8.3 =
+* improved wizard (presets + helpers)
+
 = 1.8.2 =
 * improved presets code
 
