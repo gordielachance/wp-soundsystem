@@ -16,19 +16,15 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
             
             $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.FM username','wpsstm'));
 
-            if ( $this->user->is_user_api_logged() ){
-               
-                $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
-                $links['recommendations'] = sprintf('<a href="#">%s</a>',__('Recommendations station','wpsstm') );
+            $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
+            $links['recommendations'] = sprintf('<a href="#">%s</a>',__('Recommendations station','wpsstm') );
 
-                $widget_link = sprintf('lastfm:user:%s:station:library', $username);
-                $links['library'] = sprintf('<a href="#">%s</a>',__('Library station','wpsstm') );
+            $widget_link = sprintf('lastfm:user:%s:station:library', $username);
+            $links['library'] = sprintf('<a href="#">%s</a>',__('Library station','wpsstm') );
 
-                $widget_link = sprintf('lastfm:user:%s:station:mix',$username );
-                $links['mix'] = sprintf('<a href="#">%s</a>',__('Mix station','wpsstm') );
+            $widget_link = sprintf('lastfm:user:%s:station:mix',$username );
+            $links['mix'] = sprintf('<a href="#">%s</a>',__('Mix station','wpsstm') );
 
-
-            }
         }
 
         //check and run
