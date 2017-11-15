@@ -319,13 +319,13 @@ class WP_SoundSystem_Core_Wizard{
 
 
         /*
-        Check that there is already a wizard tracklist existing for that same search and redirect to it.
+        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
         */
 
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
-            'post_author'       => wpsstm()->get_options('community_user_id'),
+            'post_author'       => wpsstm()->get_options('community_user_id'), //temporary wizard tracklist
             'meta_query' => array(
                 array(
                     'key' => wpsstm_live_playlists()->feed_url_meta_name,

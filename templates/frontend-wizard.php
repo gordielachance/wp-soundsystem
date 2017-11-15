@@ -60,8 +60,15 @@ get_header();
                         <?php
                         
                     }
-                    
                     ?>
+                    <?php
+                    //recent
+                    $has_wizard_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard);
+                    if ( !$has_wizard_id ) {
+                        wpsstm_locate_template( 'recent-wizard-entries.php', true );
+                    }
+                    ?>
+
                     
                 </div><!-- .entry-content -->
 

@@ -179,16 +179,17 @@ class WP_SoundSystem_Core_Live_Playlists{
     Register scraper presets.
     */
     private function get_available_presets(){
+
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
         
         //default class
-        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-preset.php');
-
+        require_once($presets_path . 'default.php');
+        
         //get all files in /presets directory
-        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
-        $preset_files = glob( $presets_path . '*.php' );
+        $preset_files = glob( $presets_path . '*.php' ); 
 
         foreach ($preset_files as $file) {
-            require_once($file);   
+            require_once($file);
         }
 
         $class_names = apply_filters( 'wpsstm_get_scraper_presets',array() );

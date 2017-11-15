@@ -423,6 +423,7 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         global $wpsstm_tracklist;
         
+        if( !is_single() ) return $content;
         if (!$wpsstm_tracklist) return $content;
         
         //check post type
