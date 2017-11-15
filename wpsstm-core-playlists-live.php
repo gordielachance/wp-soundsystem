@@ -204,6 +204,13 @@ class WP_SoundSystem_Core_Live_Playlists{
         
         return $presets;
     }
+    
+    function is_preset_loaded($slug){
+        foreach ($this->presets as $preset){
+            if ( $slug == $preset->preset_slug ) return true;
+        }
+        return false;
+    }
 
     function post_column_register($columns){
         

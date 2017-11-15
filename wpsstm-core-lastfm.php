@@ -190,11 +190,28 @@ class WP_SoundSystem_Core_LastFM{
         return $this->basic_auth;
 
     }
-    
-
 
     public function handle_api_exception($e){
-        return new WP_Error( 'lastfm_php_api', sprintf(__('Last.FM PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage()),$e->getCode() );
+        $message = sprintf(__('Last.FM PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage());
+        wpsstm()->debug_log($message);
+        return new WP_Error( 'lastfm_php_api', new WP_Error( 'lastfm_php_api',$message,$e->getCode() ) );
+    }
+    
+    public function search_artists($input){
+        $auth = $this->get_basic_api_auth();
+
+        if ( !$auth || is_wp_error($auth) ) return $auth;
+        
+        $results = null;
+
+        try {
+            $artist_api = new ArtistApi($auth);
+            $results = $artist_api->search(array("artist" => $input));
+        }catch(Exception $e){
+            return $this->handle_api_exception($e);
+        }
+        
+        return $results;
     }
 
     public function get_artist_bio($artist){

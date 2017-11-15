@@ -734,27 +734,36 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         printf(
-            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+            '<input id="wpsstm-wizard-input" type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')
         );
         
-        //presets
-        $presets_list = array();
-        $presets_list_str = null;
-        foreach ((array)wpsstm_live_playlists()->presets as $preset){
-            if ( !$preset->wizard_suggest ) continue;
-            $preset_str = $preset->preset_name;
-            if ($preset->preset_url){
-                $preset_str = sprintf('<a href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_desc,$preset_str);
+        if ( !$wpsstm_tracklist->feed_url ){
+            
+            //wizard helpers
+            if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
+                echo $helpers;
             }
-            $presets_list[] = $preset_str;
-        }
+        
+            //supported URLs
+            $presets_list = array();
+            $presets_list_str = null;
+            foreach ((array)wpsstm_live_playlists()->presets as $preset){
+                if ( !$preset->wizard_suggest ) continue;
+                $preset_str = $preset->preset_name;
+                if ($preset->preset_url){
+                    $preset_str = sprintf('<a href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_desc,$preset_str);
+                }
+                $presets_list[] = $preset_str;
+            }
 
-        if ( !empty($presets_list) ){
-            $presets_list_str = implode(', ',$presets_list);
-            printf('<p id="wpsstm-available-presets"><small><strong>%s</strong> %s</small></p>',__('Available presets:','wpsstm'),$presets_list_str);
+            if ( !empty($presets_list) ){
+                $presets_list_str = implode(', ',$presets_list);
+                printf('<p id="wpsstm-available-presets"><small><strong>%s</strong> %s</small></p>',__('Or any of those supported URLs:','wpsstm'),$presets_list_str);
+            }
+            
         }
 
     }
@@ -1170,6 +1179,41 @@ class WP_SoundSystem_Core_Wizard{
         $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
         return user_can($community_user_id,$required_cap);
+    }
+    
+    function get_available_helpers(){
+        $class_names = array();
+        $helpers = array();
+        $helpers_output = array();
+        
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-helpers' );
+        require_once($presets_path . 'default.php'); //default class
+        
+        //get all files in /presets directory
+        $preset_files = glob( $presets_path . '*.php' ); 
+
+        foreach ($preset_files as $file) {
+            require_once($file);
+        }
+        $class_names = apply_filters('wpsstm_get_wizard_helpers',$class_names);
+
+        //check and run
+        foreach((array)$class_names as $class_name){
+            if ( !class_exists($class_name) ) continue;
+            $helpers[] = new $class_name();
+            
+        }
+        
+        foreach((array)$helpers as $helper){
+            $helper_title = ($helper->name) ? sprintf('<h3>%s</h3>',$helper->name) : null;
+            $helper_desc = ($helper->desc) ? sprintf('<p>%s</p>',$helper->desc) : null;
+            $helper_content = ($content = $helper->get_output()) ? sprintf('<div>%s</div>',$content) : null;
+            
+            $helpers_output[] = sprintf('<li class="wpsstm-wizard-helper" id="wpsstm-wizard-helper-%s">%s%s%s</li>',$helper->slug,$helper_title,$helper_desc,$helper_content);
+        }
+
+        if ($helpers_output) return sprintf('<ul id="wpsstm-wizard-helpers">%s</ul>',implode("\n",$helpers_output));
+
     }
 
 }
