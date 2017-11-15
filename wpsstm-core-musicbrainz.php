@@ -754,7 +754,7 @@ class WP_SoundSystem_Core_MusicBrainz {
         return $location;
     }
 
-    function get_musicbrainz_api_entry($type,$mbid = null,$query = null,$limit = null,$offset = null){
+    function get_musicbrainz_api_entry($type,$mbid = null,$query = null,$offset = null){
         global $post;
 
         $api_results = null;
@@ -930,7 +930,6 @@ class WP_SoundSystem_Core_MusicBrainz {
         return $mbtype;
         
     }
-    
 
 }
 
