@@ -14,11 +14,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
 ?>
 
 <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
-    <?php 
-    if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
-        echo $helpers;
-    }
-    ?>
+
     <?php
     if(!$is_wizard_disabled){
 
@@ -59,6 +55,7 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
                 </div>
             <?php } ?>
         </div>
+    
         <?php
         
     }else{
