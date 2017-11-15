@@ -1175,13 +1175,31 @@ class WP_SoundSystem_Core_Wizard{
     function get_available_helpers(){
         $helpers = array();
         $class_names = array();
+        
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-helpers' );
+        require_once($presets_path . 'default.php'); //default class
+        
+        //get all files in /presets directory
+        $preset_files = glob( $presets_path . '*.php' ); 
+
+        foreach ($preset_files as $file) {
+            require_once($file);
+        }
         $class_names = apply_filters('wpsstm_get_wizard_helpers',$class_names);
 
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
-            $helper = new $class_name();
-            $helpers_output[] = sprintf('<li id="wpsstm-helper-%s">%s</li>',$helper->slug,$helper->get_output());
+            $helpers[] = new $class_name();
+            
+        }
+        
+        foreach((array)$helpers as $helper){
+            $helper_title = ($helper->name) ? sprintf('<h3>%s</h3>',$helper->name) : null;
+            $helper_desc = ($helper->desc) ? sprintf('<p>%s</p>',$helper->desc) : null;
+            $helper_content = ($content = $helper->get_output()) ? sprintf('<div>%s</div>',$content) : null;
+            
+            $helpers_output[] = sprintf('<li class="wpsstm-helper" id="wpsstm-helper-%s">%s%s%s</li>',$helper->slug,$helper_title,$helper_desc,$helper_content);
         }
 
         if ($helpers_output) return sprintf('<ul id="wpsstm-helpers">%s</ul>',implode("\n",$helpers_output));

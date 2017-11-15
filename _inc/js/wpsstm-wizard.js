@@ -1,4 +1,29 @@
 jQuery(document).ready(function($){
+    
+    /*
+    helpers
+    */
+    
+    //user stations
+    var user_stations_input = $('#wpsstm-helper-lastfm-user-stations').find('input');
+
+    user_stations_input.change(function() {
+        
+        var username = $(this).val();
+        var wrapper = $(this).parents('.wpsstm-helper');
+
+        wrapper.toggleClass('wpsstm-helper-ready',username);
+        
+        var recommandations_el = $('#wpsstm-helper-lastfm-user-stations-recommendations a');
+        var library_el = $('#wpsstm-helper-lastfm-user-stations-library a');
+        var mix_el = $('#wpsstm-helper-lastfm-user-stations-mix a');
+        
+        recommandations_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:recommended');
+        library_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:library');
+        mix_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:mix');
+    });
+    user_stations_input.trigger('change');// at init
+    
 
     //wizard URL fill
     $('[data-wpsstm-wizard-preview]').click(function(e) {
