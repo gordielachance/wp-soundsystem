@@ -26,7 +26,7 @@ class WP_SoundSystem_Preset_IndieShuffle_Scraper extends WP_SoundSystem_Live_Pla
         $this->preset_name = 'Indie Shuffle';
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         $domain = wpsstm_get_url_domain( $this->feed_url );
         if ( $domain != 'indieshuffle') return;
         return true;

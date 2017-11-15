@@ -17,7 +17,7 @@ class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_P
         $this->preset_name =    'Online Radio Box';
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$station_slug = $this->get_station_slug() ) return;
         return true;
     }

@@ -14,25 +14,29 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
     );
     
     var $page_api = null;
+    var $client_id;
     
     function __construct($post_id = null){
         parent::__construct($post_id);
 
         $this->preset_name = __('Soundcloud user tracks or likes','wpsstm');
+        $this->client_id = wpsstm()->get_options('soundcloud_client_id');
 
     }
     
-    function can_load_preset(){
-        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
+    static function can_use_preset(){
+        if ( !wpsstm()->get_options('soundcloud_client_id') ){
+            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Soundcloud client ID missing.','wpsstm') );
+        }
+        return true;
+    }
+    
+    function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         return true;
     }
     
     function get_remote_url(){
-        
-        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required client ID missing.','wpsstm') );
-        }
 
         if ( !$user_id = $this->get_user_id() ){
             return new WP_Error( 'wpsstm_soundcloud_missing_user_id', __('Required user ID missing.','wpsstm') );
@@ -50,7 +54,7 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
             break;
         }
 
-        return sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$api_page,$client_id);
+        return sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$api_page,$this->client_id);
 
     }
 
@@ -67,10 +71,6 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
     }
     
     function get_user_id(){
-        
-        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required client ID missing.','wpsstm') );
-        }
 
         if ( !$user_slug = $this->get_user_slug() ){
             return new WP_Error( 'wpsstm_soundcloud_missing_user_slug', __('Required user slug missing.','wpsstm') );
@@ -80,7 +80,7 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
 
         if ( false === ( $user_id = get_transient($transient_name ) ) ) {
 
-            $api_url = sprintf('http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/%s&client_id=%s',$user_slug,$client_id);
+            $api_url = sprintf('http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/%s&client_id=%s',$user_slug,$this->client_id);
             $response = wp_remote_get( $api_url );
 
             if ( is_wp_error($response) ) return;

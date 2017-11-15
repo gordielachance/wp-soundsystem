@@ -18,7 +18,7 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
 
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         return true;
     }

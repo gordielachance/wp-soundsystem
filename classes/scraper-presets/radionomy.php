@@ -30,7 +30,7 @@ class WP_SoundSystem_Preset_Radionomy_Playlists_API extends WP_SoundSystem_Live_
         $this->preset_name = __('Radionomy Stations','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$slug = $this->get_station_slug() ) return;
         return true;
     }

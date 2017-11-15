@@ -19,7 +19,7 @@ class WP_SoundSystem_Preset_RTBF_Stations extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name = __('RTBF stations','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if (!$this->get_station_slug() ) return;
         return true;
     }

@@ -22,7 +22,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if (!$subreddit_slug = $this->get_subreddit_slug() ) return;
         return true;
     }
