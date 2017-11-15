@@ -167,21 +167,23 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function community_tracklist_redirect(){
-        if ( !is_page($this->frontend_wizard_page_id) ) return;
-        
-        //wizard called on a tracklist that is not a community one.  Redirect to regular tracklist.
-        if ( ( $wztr = get_query_var($this->qvar_tracklist_wizard,null) ) && ( $wpsstm_tracklist = $this->get_wizard_tracklist($wztr) ) ){
-            //this is not a community tracklist, abord wizard
-            if (!$wpsstm_tracklist->is_community){
-                $link = get_permalink($wpsstm_tracklist->post_id);
-                wp_redirect($link);
-                exit();
+        global $post;
+        global $wpsstm_tracklist;
+        if ( is_page($this->frontend_wizard_page_id) ){
+            //wizard called on a tracklist that is not a community one.  Redirect to regular tracklist.
+            if ( ( $wztr = get_query_var($this->qvar_tracklist_wizard,null) ) && ( $wpsstm_tracklist = $this->get_wizard_tracklist($wztr) ) ){
+                //this is not a community tracklist, abord wizard
+                if (!$wpsstm_tracklist->is_community){
+                    $link = get_permalink($wpsstm_tracklist->post_id);
+                    wp_redirect($link);
+                    exit();
+                }
             }
         }
-        
-        /*
+
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist )  && ( $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID) ) ){
+            
             if ($wpsstm_tracklist && $wpsstm_tracklist->is_community){
                 $link = get_permalink($this->frontend_wizard_page_id);
                 $link = add_query_arg(array($this->qvar_tracklist_wizard=>$wpsstm_tracklist->post_id),$link);
@@ -189,7 +191,6 @@ class WP_SoundSystem_Core_Wizard{
                 exit();
             }
         }
-        */
         
         
     }
@@ -321,7 +322,6 @@ class WP_SoundSystem_Core_Wizard{
         Check that there is already a wizard tracklist existing for that same search and redirect to it.
         */
 
-        /* TOFIXCCC
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
@@ -341,8 +341,7 @@ class WP_SoundSystem_Core_Wizard{
             wp_redirect($link);
             exit();
         }
-        */
-        
+
         /*
         Create a new live tracklist for this search and redirect to it
         */
