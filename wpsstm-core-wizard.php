@@ -1172,19 +1172,19 @@ class WP_SoundSystem_Core_Wizard{
         return user_can($community_user_id,$required_cap);
     }
     
-    function wizard_get_helpers(){
+    function get_available_helpers(){
         $helpers = array();
-        $helpers = apply_filters('wpsstm_get_wizard_helpers',$helpers);
-        
-        //wrap
-        $helpers = array_map(
-           function ($el) {
-              return "<li>{$el}</li>";
-           },
-           $helpers
-        );
+        $class_names = array();
+        $class_names = apply_filters('wpsstm_get_wizard_helpers',$class_names);
 
-        if ($helpers) return sprintf('<ul>%s</ul>',implode("\n",$helpers));
+        //check and run
+        foreach((array)$class_names as $class_name){
+            if ( !class_exists($class_name) ) continue;
+            $helper = new $class_name();
+            $helpers_output[] = sprintf('<li id="wpsstm-helper-%s">%s</li>',$helper->slug,$helper->get_output());
+        }
+
+        if ($helpers_output) return sprintf('<ul id="wpsstm-helpers">%s</ul>',implode("\n",$helpers_output));
 
     }
 
