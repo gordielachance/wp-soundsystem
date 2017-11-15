@@ -14,7 +14,7 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
             $this->user = new WP_SoundSystem_LastFM_User();
             $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
             
-            $form = sprintf('<input name="%s-input" value="%s" />',$this->slug,$username);
+            $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.FM username','wpsstm'));
 
             if ( $this->user->is_user_api_logged() ){
                
@@ -33,7 +33,7 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
 
         //check and run
         foreach((array)$links as $key=>$link){
-            $links_str[] = sprintf('<li id="wpsstm-helper-%s-%s">%s</li>',$this->slug,$key,$link);
+            $links_str[] = sprintf('<li id="wpsstm-wizard-helper-%s-%s">%s</li>',$this->slug,$key,$link);
         }
         
         return sprintf('<p>%s</p><ul>%s</ul>',$form,implode("\n",$links_str));
