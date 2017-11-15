@@ -154,7 +154,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
     function __construct($post_id = null){
         parent::__construct($post_id);
         $this->preset_name = __('Last.FM stations (user recommandations)','wpsstm');
-        add_filter('wpsstm_get_wizard_bangs',array($this,'lastfm_stations_bang'));
+        add_filter('wpsstm_get_wizard_helpers',array($this,'lastfm_stations_helper'));
     }
 
     function can_load_feed(){
@@ -173,22 +173,22 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
         return sprintf( __('Last.FM stations (user recommandations): %s','wpsstm'), $this->get_user_slug() );
     }
     
-    function lastfm_stations_bang($bangs){
+    function lastfm_stations_helper($helpers){
         $user = new WP_SoundSystem_LastFM_User();
 
         if ( $user->is_user_api_logged() ){
 
             $widget_link = sprintf('lastfm:user:%s:library',$user->user_api_metas['username'] );
-            $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My library','wpsstm') );
+            $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My library','wpsstm') );
 
             $widget_link = sprintf('lastfm:user:%s:mix',$user->user_api_metas['username'] );
-            $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My mix','wpsstm') );
+            $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My mix','wpsstm') );
 
             $widget_link = sprintf('lastfm:user:%s:recommended',$user->user_api_metas['username'] );
-            $bangs[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My recommendations','wpsstm') );
+            $helpers[] = sprintf('<a data-wpsstm-wizard-preview="%s">%s</a>',$widget_link,__('My recommendations','wpsstm') );
         }
 
-        return $bangs;
+        return $helpers;
     }
 
 }

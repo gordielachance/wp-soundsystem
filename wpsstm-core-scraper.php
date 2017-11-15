@@ -1173,13 +1173,20 @@ class WP_SoundSystem_Core_Wizard{
         return user_can($community_user_id,$required_cap);
     }
     
-    function wizard_bangs(){
-        $bangs = array();
-        $bangs = apply_filters('wpsstm_get_wizard_bangs',$bangs);
+    function wizard_get_helpers(){
+        $helpers = array();
+        $helpers = apply_filters('wpsstm_get_wizard_helpers',$helpers);
         
-        foreach ($bangs as $bang){
-            print_r($bang);
-        }
+        //wrap
+        $helpers = array_map(
+           function ($el) {
+              return "<li>{$el}</li>";
+           },
+           $helpers
+        );
+
+        if ($helpers) return sprintf('<ul>%s</ul>',implode("\n",$helpers));
+
     }
 
 }
