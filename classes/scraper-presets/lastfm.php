@@ -46,6 +46,12 @@ abstract class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_
         preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
+    
+    function get_artist_page(){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/.*/([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
 
 }
 
@@ -89,6 +95,27 @@ class WP_SoundSystem_Preset_LastFM_User_Loved_Scraper extends WP_SoundSystem_Pre
 
 }
 
+class WP_SoundSystem_Preset_LastFM_Artist_Scraper extends WP_SoundSystem_Preset_LastFM_Scraper{
+
+    var $preset_slug =      'last-fm-artist';
+    var $preset_url =       'https://www.last.fm/music/XXX';
+
+    function __construct($post_id = null){
+        parent::__construct($post_id);
+        $this->preset_name = __('Last.FM artist (top tracks)','wpsstm');
+    }
+    
+    function can_load_feed(){
+        if ( !$artist_slug = $this->get_artist_slug() ) return;
+        return true;
+    }
+    
+    function get_remote_url(){
+        return sprintf('https://www.last.fm/music/%s/+tracks',$this->get_artist_slug());
+    }
+
+}
+
 abstract class WP_SoundSystem_Preset_LastFM_Station extends WP_SoundSystem_Preset_LastFM_Scraper{
 
     var $preset_options =  array(
@@ -114,6 +141,7 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
     
     function can_load_feed(){
         if ( !$artist_slug = $this->get_artist_slug() ) return;
+        if ( $this->get_artist_page() != '+similar' ) return;
         return true;
     }
     
@@ -126,6 +154,8 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
     }
 
 }
+
+
 
 class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
 
@@ -141,7 +171,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
         if ( !$user_slug = $this->get_user_slug() ) return;
         
         $station = $this->get_station_page();
-        if ( $station    != 'recommended' ) return;
+        if ( $station != 'recommended' ) return;
         return true;
     }
     
@@ -172,6 +202,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
     return $presets;
