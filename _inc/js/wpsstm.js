@@ -8,7 +8,49 @@
                 wpsstm_wp_auth_notice();
             }
         });
+        
+        //artist autocomplete
+        
+        $('.wpsstm-artist-autocomplete').each(function() {
+            var input = $(this);
+            input.autocomplete({
+                source: function( request, response ) {
+                    $.ajax({
+                        type: "post",
+                        dataType: "json",
+                        url: wpsstmL10n.ajaxurl,
+                        data: {
+                            action:             'wpsstm_search_artists',
+                            search:              request.term,
+                        },
+                        beforeSend: function() {
+                            input.addClass('wpsstm-loading');
+                        },
+                        success: function( data ) {
+                            if(data.success){
+                                console.log("YO");
+                                console.log(data);
+                                console.log(data.count);
+                                console.log(data.artists);
+                                response($.map(data.artists, function(artist){
+                                    return artist.name; // on retourne cette forme de suggestion
+                                }));
+                            }else{
+                                console.log(data);
+                            }
 
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                            console.log("status: " + textStatus + ", error: " + errorThrown); 
+                        },
+                        complete: function() {
+                            input.removeClass('wpsstm-loading');
+                        }
+                    });
+                },
+                minLength: 1
+            });
+        });
     });  
 
 
