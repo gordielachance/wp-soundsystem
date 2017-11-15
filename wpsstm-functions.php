@@ -284,7 +284,7 @@ function wpsstm_get_live_tracklist_preset($feed_url){
     $presets = array_reverse($presets); //reverse so we break at the preset that has the higher priority
     foreach($presets as $preset){
         $preset->feed_url = trim($feed_url);
-        if ( !$preset->can_load_preset() ) continue;
+        if ( !$preset->can_load_feed() ) continue;
         $preset->feed_url = $feed_url;
         return $preset;
     }

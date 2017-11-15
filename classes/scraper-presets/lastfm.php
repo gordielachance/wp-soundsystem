@@ -58,7 +58,7 @@ class WP_SoundSystem_Preset_LastFM_User_Scraper extends WP_SoundSystem_Preset_La
         $this->preset_name = __('Last.FM user','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         return true;
     }
@@ -81,7 +81,7 @@ class WP_SoundSystem_Preset_LastFM_User_Loved_Scraper extends WP_SoundSystem_Pre
         $this->preset_name = __('Last.FM user favorites','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         if ( $this->get_user_page() != 'loved' ) return;
         return true;
@@ -126,7 +126,7 @@ class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_Sou
         $this->preset_name = __('Last.FM stations (similar artist)','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$artist_slug = $this->get_artist_slug() ) return;
         return true;
     }
@@ -156,7 +156,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
         $this->preset_name = __('Last.FM stations (user recommandations)','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$user_slug = $this->get_user_slug() ) return;
         
         $userpage = $this->get_user_page();

@@ -18,7 +18,7 @@ class WP_SoundSystem_Preset_Slacker_Stations extends WP_SoundSystem_Live_Playlis
 
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if (!$station_slug = $this->get_station_slug() ) return;
         return true;
     }

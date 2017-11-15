@@ -20,7 +20,7 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
 
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$client_id = $this->get_client_id() ) return;
         if ( !$station_slug = $this->get_station_slug() ) return;
         

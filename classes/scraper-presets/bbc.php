@@ -18,7 +18,7 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         $this->preset_name =    __('BBC stations','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$station_slug = $this->get_station_slug() ) return;
         return true;
     }
@@ -56,7 +56,7 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name =    __('BBC playlists','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$playlist_id = $this->get_playlist_id() ) return;
         return true;
     }

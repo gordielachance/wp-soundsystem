@@ -22,7 +22,7 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
 
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ) return;
         if ( !$user_slug = $this->get_user_slug() ) return;
         return true;

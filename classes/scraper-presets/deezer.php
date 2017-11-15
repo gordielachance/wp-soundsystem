@@ -18,7 +18,7 @@ class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlis
         $this->preset_name =    __('Deezer Playlists','wpsstm');
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$playlist_id = $this->get_playlist_id() ) return;
         return true;
     }

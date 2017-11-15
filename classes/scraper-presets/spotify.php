@@ -29,7 +29,7 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         }
     }
     
-    function can_load_preset(){
+    function can_load_feed(){
         if ( !$client_id = wpsstm()->get_options('spotify_client_id') ) return;
         if ( !$client_secret = wpsstm()->get_options('spotify_client_secret') ) return;
 
