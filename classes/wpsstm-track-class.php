@@ -27,7 +27,7 @@ class WP_SoundSystem_Track{
     function __construct( $post_id = null ){
 
         //has track ID
-        if ( $post_id && ($post = get_post($post_id) ) ){
+        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_track ) ){
 
             $this->post_id = (int)$post_id;
 
