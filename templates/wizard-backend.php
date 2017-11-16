@@ -4,7 +4,6 @@ global $post;
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1)); //we must have the tracks populated before we output the notices
 
-wpsstm_wizard()->wizard_settings_init();
 $is_wizard_disabled = $wpsstm_tracklist->is_wizard_disabled();
 $post_type = get_post_type();
 ?>
@@ -33,21 +32,21 @@ $post_type = get_post_type();
             ?>
 
             <div id="wpsstm-wizard-step-source-content" class="wpsstm-wizard-step-content">
-                <?php wpsstm_wizard()->do_wizard_sections( 'wpsstm-wizard-step-source' );?>
+                <?php do_settings_sections( 'wpsstm-wizard-step-source' );?>
             </div>
 
             <?php if ( wpsstm_wizard()->is_advanced ){ ?>
 
                 <div id="wpsstm-wizard-step-tracks-content" class="wpsstm-wizard-step-content">
-                    <?php wpsstm_wizard()->do_wizard_sections( 'wpsstm-wizard-step-tracks' );?>
+                    <?php do_settings_sections( 'wpsstm-wizard-step-tracks' );?>
                 </div>
 
                 <div id="wpsstm-wizard-step-single-track-content" class="wpsstm-wizard-step-content">
-                    <?php wpsstm_wizard()->do_wizard_sections( 'wpsstm-wizard-step-single-track' );?>
+                    <?php do_settings_sections( 'wpsstm-wizard-step-single-track' );?>
                 </div>
 
                 <div id="wpsstm-wizard-step-options" class="wpsstm-wizard-step-content">
-                    <?php wpsstm_wizard()->do_wizard_sections( 'wpsstm-wizard-step-options' );?>
+                    <?php do_settings_sections( 'wpsstm-wizard-step-options' );?>
                 </div>
             <?php } ?>
         </div>

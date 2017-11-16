@@ -34,27 +34,6 @@
         text-align:center;
         font-size:1.25em;
     }
-    
-    &.wizard-wrapper-frontend{
-        text-align:center;
-        h2{
-            display:none;
-        }
-        p.submit{
-            margin:auto;
-            max-width:40%;
-        }
-        table.wizard-section-table{
-            margin:auto;
-            border:none;
-            th{
-                display:none;
-            }
-            th,td{
-                border:none;
-            }
-        }
-    }
 
     table#wizard-regexes{
         width:100%;

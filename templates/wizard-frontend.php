@@ -4,8 +4,6 @@ global $post;
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1)); //we must have the tracks populated before we output the notices
 
-wpsstm_wizard()->wizard_settings_init();
-
 ?>
 
 <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr('wizard-wrapper-frontend');?>>
@@ -21,7 +19,7 @@ wpsstm_wizard()->wizard_settings_init();
 
     <div id="wpsstm-wizard-step-source-content" class="wpsstm-wizard-step-content">
         <?php 
-        wpsstm_wizard()->do_wizard_sections( 'wpsstm-wizard-step-source' );
+        wpsstm_wizard()->feed_url_callback();
         ?>
     </div>
 

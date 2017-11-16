@@ -129,10 +129,9 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function metabox_wizard_display(){
-        global $wpsstm_tracklist;
         global $post;
 
-        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
+        wpsstm_wizard()->wizard_settings_init();
         wpsstm_locate_template( 'wizard-backend.php', true );
     }
     
@@ -376,6 +375,9 @@ class WP_SoundSystem_Core_Wizard{
     function wizard_settings_init(){
         global $post;
         global $wpsstm_tracklist;
+        
+        //populate backend tracklist
+        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID); 
 
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
         if ( wpsstm_wizard()->is_advanced ){
@@ -393,14 +395,14 @@ class WP_SoundSystem_Core_Wizard{
         Source
         */
 
-        $this->add_wizard_section(
+        add_settings_section(
              'wizard_section_source', //id
              __('Source','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
              'wpsstm-wizard-step-source' //page
         );
 
-        $this->add_wizard_field(
+        add_settings_field(
             'wpsstm_wizard', //id
             __('URL','wpsstm'), //title
             array( $this, 'feed_url_callback' ), //callback
@@ -413,7 +415,7 @@ class WP_SoundSystem_Core_Wizard{
         Source feedback
         */
 
-        $this->add_wizard_section(
+        add_settings_section(
              'wizard_section_source_feedback', //id
              __('Feedback','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
@@ -427,7 +429,7 @@ class WP_SoundSystem_Core_Wizard{
             */
 
             if ( $wpsstm_tracklist->variables ){
-                $this->add_wizard_field(
+                add_settings_field(
                     'variables', 
                     __('Variables','wpsstm'), 
                     array( $this, 'feedback_variables_callback' ), 
@@ -440,14 +442,14 @@ class WP_SoundSystem_Core_Wizard{
             Tracks
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard_section_tracks', //id
                 __('Tracks','wpsstm'), //title
                 array( $this, 'section_tracks_desc' ), //callback
                 'wpsstm-wizard-step-tracks' //page
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_data_type', 
                 __('Input type','wpsstm'), 
                 array( $this, 'feedback_data_type_callback' ), 
@@ -455,7 +457,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_source_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_source_content_callback' ), 
@@ -463,7 +465,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'tracks_selector', 
                 __('Tracks Selector','wpsstm'), 
                 array( $this, 'selector_tracks_callback' ), 
@@ -471,7 +473,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'tracks_order', 
                 __('Tracks Order','wpsstm'), 
                 array( $this, 'tracks_order_callback' ), 
@@ -483,7 +485,7 @@ class WP_SoundSystem_Core_Wizard{
             Tracks feedback
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                  'wizard_section_tracks_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -494,14 +496,14 @@ class WP_SoundSystem_Core_Wizard{
             Single track
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard-section-single-track', //id
                 __('Track Details','wpsstm'),
                 array( $this, 'section_single_track_desc' ),
                 'wpsstm-wizard-step-single-track' //page
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_tracklist_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_tracks_callback' ), 
@@ -509,7 +511,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_artist_selector', 
                 __('Artist Selector','wpsstm').'* '.$this->regex_link(),
                 array( $this, 'track_artist_selector_callback' ), 
@@ -517,7 +519,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_title_selector', 
                 __('Title Selector','wpsstm').'* '.$this->regex_link(), 
                 array( $this, 'track_title_selector_callback' ), 
@@ -525,7 +527,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_album_selector', 
                 __('Album Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_album_selector_callback' ), 
@@ -533,7 +535,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_image_selector', 
                 __('Image Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_image_selector_callback' ), 
@@ -541,7 +543,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_source_urls', 
                 __('Source URL','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_sources_selector_callback' ), 
@@ -553,7 +555,7 @@ class WP_SoundSystem_Core_Wizard{
             Single track feedback
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                  'wizard_section_single_track_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -564,14 +566,14 @@ class WP_SoundSystem_Core_Wizard{
             Options
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard-section-options', //id
                 __('Options','wpsstm'),
                 array( $this, 'section_desc_empty' ),
                 'wpsstm-wizard-step-options' //page
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'datas_cache_min', 
                 __('Cache duration','wpsstm'), 
                 array( $this, 'cache_callback' ), 
@@ -586,7 +588,7 @@ class WP_SoundSystem_Core_Wizard{
         Not shown this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
         if ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url ){
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
                 array( $this, 'feedback_tracklist_callback' ), 
@@ -1022,77 +1024,6 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         echo $tabs_html;
-    }
-
-    /*
-    Inspired by WP function add_settings_section()
-    */
-    
-    function add_wizard_section($id, $title, $callback, $page) {
-        $this->wizard_sections[$page][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback);
-    }
-    
-    /*
-    Inspired by WP function add_settings_field()
-    */
-    
-    function add_wizard_field($id, $title, $callback, $page, $section = 'default', $args = array()) {
-        $this->wizard_fields[$page][$section][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback, 'args' => $args);
-    }
-    
-    /*
-    Inspired by WP function do_settings_sections()
-    */
-    
-    function do_wizard_sections( $page ) {
-
-        if ( ! isset( $this->wizard_sections[$page] ) )
-            return;
-
-        foreach ( (array) $this->wizard_sections[$page] as $section ) {
-            if ( $section['title'] )
-                echo "<h2>{$section['title']}</h2>\n";
-
-            if ( $section['callback'] )
-                call_user_func( $section['callback'], $section );
-
-            if ( ! isset( $this->wizard_fields ) || !isset( $this->wizard_fields[$page] ) || !isset( $this->wizard_fields[$page][$section['id']] ) )
-                continue;
-            echo '<table class="form-table wizard-section-table">';
-            $this->do_wizard_fields( $page, $section['id'] );
-            echo '</table>';
-        }
-    }
-    
-    /*
-    Inspired by WP function do_settings_fields()
-    */
-    
-    function do_wizard_fields($page, $section) {
-
-        if ( ! isset( $this->wizard_fields[$page][$section] ) )
-            return;
-
-        foreach ( (array) $this->wizard_fields[$page][$section] as $field ) {
-            $class = '';
-
-            if ( ! empty( $field['args']['class'] ) ) {
-                $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
-            }
-
-            echo "<tr{$class}>";
-
-            if ( ! empty( $field['args']['label_for'] ) ) {
-                echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
-            } else {
-                echo '<th scope="row">' . $field['title'] . '</th>';
-            }
-
-            echo '<td>';
-            call_user_func($field['callback'], $field['args']);
-            echo '</td>';
-            echo '</tr>';
-        }
     }
 
     function can_frontend_wizard(){
