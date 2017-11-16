@@ -591,26 +591,40 @@ class WP_SoundSystem_Track{
 
     }
     
-    function new_track_link(){
+    private function get_new_track_url(){
+        global $wp;
+
+        $args = array(
+            wpsstm_tracks()->qvar_track_action =>   'new-track',
+            'track' =>                              urlencode( json_encode($this->to_ajax()) ),
+        );
+        
         $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
-        $json = urlencode( json_encode($this->to_ajax()) );
-        return add_query_arg(array(wpsstm_tracks()->qvar_new_track=>$json),$url);
+        $url = add_query_arg($args,$url);
+        return $url;
     }
 
-    function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
+    function get_track_action_url($track_action = null){
+        
+        $args = array(wpsstm_tracks()->qvar_track_action=>$track_action);
 
-        $url = null;
         if ($this->post_id){
             $url = get_permalink($this->post_id);
+            $url = add_query_arg($args,$url);
         }else{
-            $url = $this->new_track_link();
+            $url = $this->get_new_track_url();
+            $url = add_query_arg(array('wpsstm-redirect'=>add_query_arg($args)),$url);
         }
-        $url = add_query_arg(array(wpsstm_tracks()->qvar_track_admin=>$track_action),$url);
 
         return $url;
     }
     
-    function get_track_actions($tracklist,$context = null){
+    function get_track_admin_url($section){
+        $url = $this->get_track_action_url('admin');
+        return add_query_arg(array('section'=>$section),$url);
+    }
+    
+    function get_track_links($tracklist,$context = null){
         
         $tracklist_id = $tracklist->post_id;
 
@@ -639,7 +653,7 @@ class WP_SoundSystem_Track{
             $actions['about'] = array(
                 'icon' =>       '<i class="fa fa-info-circle" aria-hidden="true"></i>',
                 'text' =>      __('About', 'wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('about',$tracklist_id),
+                'href' =>       $this->get_track_admin_url('about'),
             );
         }
 
@@ -648,7 +662,7 @@ class WP_SoundSystem_Track{
             $actions['edit'] = array(
                 'icon' =>       '<i class="fa fa-pencil" aria-hidden="true"></i>',
                 'text' =>      __('Track Details', 'wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('edit',$tracklist_id),
+                'href' =>       $this->get_track_admin_url('edit'),
             );
         }
 
@@ -657,7 +671,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'icon' =>       '<i class="fa fa-list" aria-hidden="true"></i>',
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('playlists',$tracklist_id),
+                'href' =>       $this->get_track_admin_url('playlists'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
             );
         }
@@ -667,7 +681,7 @@ class WP_SoundSystem_Track{
             $actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('favorite',$tracklist_id),
+                'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
             );
@@ -678,7 +692,7 @@ class WP_SoundSystem_Track{
             $actions['unfavorite'] = array(
                 'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('unfavorite',$tracklist_id),
+                'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );
@@ -710,7 +724,7 @@ class WP_SoundSystem_Track{
                 'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
                 'text' =>      __('Sources','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('sources',$tracklist_id),
+                'href' =>       $this->get_track_admin_url('sources'),
             );
         }
 
@@ -720,7 +734,7 @@ class WP_SoundSystem_Track{
                 'icon' =>       '<i class="fa fa-trash" aria-hidden="true"></i>',
                 'text' =>      __('Trash'),
                 'desc' =>       __('trash track','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('trash',$tracklist_id),
+                'href' =>       $this->get_track_action_url('trash'),
             );
         }
         
@@ -734,7 +748,7 @@ class WP_SoundSystem_Track{
                     $actions['advanced'] = array(
                         'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
                         'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_track_admin_gui_url('about',$tracklist->post_id),
+                        'href' =>       $this->get_track_admin_url('about'),
                     );
                 }
                 

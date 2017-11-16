@@ -15,7 +15,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 			while ( have_posts() ) { 
                 the_post();
                 
-                $admin_action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_admin);
+                $action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_action);
                 
                 ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class('wpsstm-tracklist-admin'); ?>>
@@ -27,14 +27,14 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
                     <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
-                        if ( $actions = $tracklist->get_tracklist_actions('admin') ){
+                        if ( $actions = $tracklist->get_tracklist_links('admin') ){
                             $list = output_tracklist_actions($actions,'tracklist');
                             echo $list;
                         }
                 
                         $tab_content = null;
                 
-                        switch($admin_action){
+                        switch($action){
                             case 'share':
 
                                 $text = __("Use this link to share this playlist:","wpsstm");
@@ -45,7 +45,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
                         }
                 
                         if ($tab_content){
-                            printf('<div id="wpsstm-tracklist-admin-%s" class="wpsstm-tracklist-admin">%s</div>',$admin_action,$tab_content);
+                            printf('<div id="wpsstm-tracklist-admin-%s" class="wpsstm-tracklist-admin">%s</div>',$action,$tab_content);
                         }
                 
                         ?>

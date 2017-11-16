@@ -4,8 +4,7 @@ class WP_SoundSystem_Core_Tracks{
 
     public $title_metakey = '_wpsstm_track';
     public $image_url_metakey = '_wpsstm_track_image_url';
-    public $qvar_track_admin = 'track-admin';
-    public $qvar_new_track = 'new-track';
+    public $qvar_track_action = 'track-action';
     public $qvar_track_lookup = 'lookup_track';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
@@ -118,18 +117,18 @@ class WP_SoundSystem_Core_Tracks{
         
     }
 
-    function register_track_endpoints(){
+    function register_track_endpoints(){ //TOFIXDDD
         // (existing track) admin
-        add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK );
+        add_rewrite_endpoint($this->qvar_track_action, EP_PERMALINK );
         
         //add post type archive endpoints
         //TOFIXDDD
         /*
         //https://wordpress.stackexchange.com/a/133698/70449
         
-        //new track
+        //track action
         $post_type = wpsstm()->post_type_track;
-        $var = $this->qvar_new_track;
+        $var = $this->qvar_track_action;
         $regex = sprintf('%s/%s$',$post_type,$var);
         
         $redirect = sprintf('index.php?post_type=%s',$post_type);
@@ -170,13 +169,9 @@ class WP_SoundSystem_Core_Tracks{
         global $post;
 
         $post_type = get_post_type($post);
-        $track_admin_action =  get_query_var( $this->qvar_track_admin );
-        $tracklist_admin_action =  get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
-
-        $is_track_edit = ( $track_admin_action && ($post_type == wpsstm()->post_type_track) );
-        $is_tracklist_new_track = ( ($tracklist_admin_action == 'new-subtrack') && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) );
-
-        if ( !$is_track_edit && !$is_tracklist_new_track ) return $template;
+        if ( 'track-admin' != get_query_var( $this->qvar_track_action ) ) return $template;
+        
+        //TOFIDDD caps ?
 
         if ( $template = wpsstm_locate_template( 'track-admin.php' ) ){
 
@@ -194,17 +189,19 @@ class WP_SoundSystem_Core_Tracks{
     */
     
     function new_track_redirect($template){
-
-        $new_track =  get_query_var( $this->qvar_new_track );
-        if ( !$new_track ) return $template;
-        if ( isset($_REQUEST['track-error']) ) return $template; //TOFIXDDD TO CHECK
         
+        $track_action =  get_query_var( $this->qvar_track_action );
+        
+        if ( $track_action != 'new-track' ) return $template;
+        if ( isset($_REQUEST['track-error']) ) return $template; //TOFIXDDD TO CHECK
+
         //get current query
         $query_str = $_SERVER['QUERY_STRING']; 
-        $query_str = remove_query_arg( array($this->qvar_new_track), $query_str ); //remove new track args from parameters
         parse_str($query_str,$query); //make an array of it
+        $redirect_url = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
 
-        $track_args = wp_unslash($new_track);
+        $track_args = isset($query['track']) ? $query['track'] : null;
+        $track_args = wp_unslash($track_args);
         $track_args = json_decode($track_args);
         
         $track = new WP_SoundSystem_Track();
@@ -218,14 +215,26 @@ class WP_SoundSystem_Core_Tracks{
             }else{
                 $track_url = get_permalink($track->post_id);
                 //remove 'new-track' arg from parameters
-                unset($query[$this->qvar_new_track]);
+                unset($query[$this->qvar_track_action]);
             }
         }else{
             $track_url = get_permalink($track->post_id);
         }
+        
+        //we just handled those, remove them for redirecton
+        unset($query['track']);
+        unset($query['track-action']);
+        unset($query['wpsstm-redirect']);
 
-        $redirect_url = add_query_arg($query,$track_url); //inject current args
-        wp_redirect($redirect_url);
+        //inject current params
+        if ($redirect_url){
+            $redirect_url = add_query_arg($query,$redirect_url);
+            wp_redirect($redirect_url);
+        }else{
+            $track_url = add_query_arg($query,$track_url);
+            wp_redirect($track_url);
+        }
+
         exit();
     }
     
@@ -572,8 +581,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
-        $qvars[] = $this->qvar_track_admin;
-        $qvars[] = $this->qvar_new_track;
+        $qvars[] = $this->qvar_track_action;
         return $qvars;
     }
     

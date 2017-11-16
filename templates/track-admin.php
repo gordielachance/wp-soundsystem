@@ -14,7 +14,7 @@
                 $post_type = get_post_type();
                 $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
-                $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_admin );
+                $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_action );
 
                 /*
                 Capability check
@@ -67,7 +67,7 @@
 
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
-                        if ( $actions = $track->get_track_actions($tracklist,'admin') ){
+                        if ( $actions = $track->get_track_links($tracklist,'admin') ){
                             $list = output_tracklist_actions($actions,'track');
                             echo $list;
                         }
@@ -79,7 +79,7 @@
                             case 'edit':
                                 ?>
                                 <div id="wpsstm-track-admin-edit" class="wpsstm-track-admin">
-                                    <form action="<?php echo esc_url($track->get_track_admin_gui_url($track_admin_action));?>" method="POST">
+                                    <form action="<?php echo esc_url($track->get_track_admin_url('edit'));?>" method="POST">
 
                                         <div id="track-admin-artist">
                                             <h3><?php _e('Artist','wpsstm');?></h3>
@@ -160,7 +160,7 @@
                                     <p>
                                         <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
                                     </p>
-                                    <form action="<?php echo esc_url($track->get_track_admin_gui_url('sources'));?>" method="post">
+                                    <form action="<?php echo esc_url($track->get_track_admin_url('sources'));?>" method="POST">
                                         <div class="wpsstm-sources-edit-list-user wpsstm-sources-edit-list">
                                             <?php
                                             $track_source_ids = array();

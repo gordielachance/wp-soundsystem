@@ -7,7 +7,7 @@ Handle posts that have a tracklist, like albums and playlists.
 class WP_SoundSystem_Core_Tracklists{
     
     public $qvar_xspf = 'xspf';
-    public $qvar_tracklist_admin = 'tracklist-admin';
+    public $qvar_tracklist_action = 'tracklist-action';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     public $time_updated_subtracks_meta_name = 'wpsstm_remote_query_time';
     public $tracklist_post_types = array();
@@ -109,7 +109,7 @@ class WP_SoundSystem_Core_Tracklists{
     *   won't mangle it.
     */
     function add_tracklist_query_vars($vars){
-        $vars[] = $this->qvar_tracklist_admin;
+        $vars[] = $this->qvar_tracklist_action;
         $vars[] = $this->qvar_xspf;
         return $vars;
     }
@@ -119,7 +119,6 @@ class WP_SoundSystem_Core_Tracklists{
      */
 
     function register_tracklist_endpoints(){
-        add_rewrite_endpoint($this->qvar_tracklist_admin, EP_PERMALINK ); // /admin
         add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK ); // /xspf
     }
     
@@ -153,11 +152,6 @@ class WP_SoundSystem_Core_Tracklists{
         $wpsstm_tracklist->index = $query->current_post + 1;
         
     }
-    
-    function get_tracklist_action(){
-        global $wp_query;
-        return $wp_query->get($this->qvar_tracklist_admin);
-    }
 
     function enqueue_tracklists_scripts_styles_frontend(){
         //TO FIX load only when tracklist is displayed
@@ -182,10 +176,10 @@ class WP_SoundSystem_Core_Tracklists{
     function tracklist_admin_template_filter($template){
         global $post;
         
-        if( !$admin_action = $this->get_tracklist_action() ) return $template;
+        if( 'admin' != get_query_var( $this->qvar_tracklist_action ) ) return $template;
 
-        if ( $admin_action == 'new-subtrack' ){ //this will be handled by track_admin_endpoint() //TOFIXDDD
-            set_query_var( wpsstm_tracks()->qvar_track_admin, 'new-subtrack' );
+        if ( action == 'new-subtrack' ){ //this will be handled by track_admin_endpoint() //TOFIXDDD
+            set_query_var( wpsstm_tracks()->qvar_track_action, 'new-subtrack' );
             return $template;
         }
         
@@ -663,7 +657,7 @@ class WP_SoundSystem_Core_Tracklists{
         }elseif($new_track_id){
             
             $tracklist->append_subtrack_ids($new_track_id);
-            $track_admin_url = $new_track->get_track_admin_gui_url('edit',$tracklist->post_id);
+            $track_admin_url = $new_track->get_track_admin_url('edit');
             wp_redirect($track_admin_url);
             exit();
             
@@ -678,7 +672,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
 
-        if( !$admin_action = $this->get_tracklist_action() ) return;
+        if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return;
         if (!$tracklist->post_id) return;
         
         //capability check
