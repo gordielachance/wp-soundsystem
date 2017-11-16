@@ -422,20 +422,6 @@ class WP_SoundSystem_Core_Wizard{
         );
 
         if ( $this->is_advanced ){
-            
-            /*
-            Variables
-            */
-
-            if ( $wpsstm_tracklist->variables ){
-                add_settings_field(
-                    'variables', 
-                    __('Variables','wpsstm'), 
-                    array( $this, 'feedback_variables_callback' ), 
-                    'wpsstm-wizard-step-source', 
-                    'wizard_section_source_feedback'
-                );
-            }
 
             /*
             Tracks
@@ -773,15 +759,6 @@ class WP_SoundSystem_Core_Wizard{
         echo $output;
 
     }
-    
-    function feedback_variables_callback(){
-        global $wpsstm_tracklist;
-        
-        foreach($wpsstm_tracklist->variables as $variable_slug => $variable){
-            $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
-            printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
-        }
-    }   
 
     function feedback_source_content_callback(){
         global $wpsstm_tracklist;
