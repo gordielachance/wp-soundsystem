@@ -1059,6 +1059,8 @@ class WP_SoundSystem_Core_Wizard{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
+            $can_show_helper = $class_name::can_show_helper();
+            if ( $can_show_helper !== true ) continue;
             $helpers[] = new $class_name();
             
         }
