@@ -129,11 +129,10 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function metabox_wizard_display(){
-        global $wpsstm_tracklist;
         global $post;
 
-        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
-        wpsstm_locate_template( 'wizard-form.php', true );
+        wpsstm_wizard()->wizard_settings_init();
+        wpsstm_locate_template( 'wizard-backend.php', true );
     }
     
     /*
@@ -226,7 +225,6 @@ class WP_SoundSystem_Core_Wizard{
 
         if (wpsstm_is_backend() ){
             $this->tracklist->options['autoplay'] = false;
-            $this->tracklist->options['can_play'] = false;
         }
 
         return $this->tracklist;
@@ -316,16 +314,10 @@ class WP_SoundSystem_Core_Wizard{
         $wizard_data = isset($_REQUEST[ 'wpsstm_wizard' ]) ? $_REQUEST[ 'wpsstm_wizard' ] : array();
         $is_load_url = isset($wizard_data['action']['load-url']);
         if ( !$is_load_url ) return;
-
-
-        /*
-        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
-        */
-
+        
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
-            'post_author'       => wpsstm()->get_options('community_user_id'), //temporary wizard tracklist
             'meta_query' => array(
                 array(
                     'key' => wpsstm_live_playlists()->feed_url_meta_name,
@@ -333,8 +325,33 @@ class WP_SoundSystem_Core_Wizard{
                 )
             )
         );
+        
+        /*
+        Check that this user already created a tracklist for that same search and redirect to it.
+        */
+        if ( $user_id = get_current_user_id() ){
+            
+            $author_duplicate_args = $duplicate_args;
+            $author_duplicate_args['post_author'] = $user_id;
 
-        $duplicate_query = new WP_Query( $duplicate_args );
+            $duplicate_query = new WP_Query( $author_duplicate_args );
+            if ( $duplicate_query->have_posts() ){
+                $existing_id = $duplicate_query->posts[0];
+                $link = get_permalink($existing_id);
+                wp_redirect($link);
+                exit();
+            }
+        }
+
+
+        /*
+        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
+        */
+        
+        $community_duplicate_args = $duplicate_args;
+        $community_duplicate_args['post_author'] = wpsstm()->get_options('community_user_id');
+
+        $duplicate_query = new WP_Query( $community_duplicate_args );
         if ( $duplicate_query->have_posts() ){
             $existing_id = $duplicate_query->posts[0];
             $link = get_permalink($existing_id);
@@ -376,15 +393,18 @@ class WP_SoundSystem_Core_Wizard{
     function wizard_settings_init(){
         global $post;
         global $wpsstm_tracklist;
+        
+        //populate backend tracklist
+        $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID); 
 
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
         if ( wpsstm_wizard()->is_advanced ){
-            $wpsstm_tracklist->ajax_refresh = false;
+            $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
         }
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
-            $restore_link = wpsstm_wizard()->get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
+            $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
             $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
             $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
         }
@@ -393,14 +413,14 @@ class WP_SoundSystem_Core_Wizard{
         Source
         */
 
-        $this->add_wizard_section(
+        add_settings_section(
              'wizard_section_source', //id
              __('Source','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
              'wpsstm-wizard-step-source' //page
         );
 
-        $this->add_wizard_field(
+        add_settings_field(
             'wpsstm_wizard', //id
             __('URL','wpsstm'), //title
             array( $this, 'feed_url_callback' ), //callback
@@ -413,7 +433,7 @@ class WP_SoundSystem_Core_Wizard{
         Source feedback
         */
 
-        $this->add_wizard_section(
+        add_settings_section(
              'wizard_section_source_feedback', //id
              __('Feedback','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
@@ -421,33 +441,19 @@ class WP_SoundSystem_Core_Wizard{
         );
 
         if ( $this->is_advanced ){
-            
-            /*
-            Variables
-            */
-
-            if ( $wpsstm_tracklist->variables ){
-                $this->add_wizard_field(
-                    'variables', 
-                    __('Variables','wpsstm'), 
-                    array( $this, 'feedback_variables_callback' ), 
-                    'wpsstm-wizard-step-source', 
-                    'wizard_section_source_feedback'
-                );
-            }
 
             /*
             Tracks
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard_section_tracks', //id
                 __('Tracks','wpsstm'), //title
                 array( $this, 'section_tracks_desc' ), //callback
                 'wpsstm-wizard-step-tracks' //page
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_data_type', 
                 __('Input type','wpsstm'), 
                 array( $this, 'feedback_data_type_callback' ), 
@@ -455,7 +461,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_source_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_source_content_callback' ), 
@@ -463,7 +469,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'tracks_selector', 
                 __('Tracks Selector','wpsstm'), 
                 array( $this, 'selector_tracks_callback' ), 
@@ -471,7 +477,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard_section_tracks'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'tracks_order', 
                 __('Tracks Order','wpsstm'), 
                 array( $this, 'tracks_order_callback' ), 
@@ -483,7 +489,7 @@ class WP_SoundSystem_Core_Wizard{
             Tracks feedback
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                  'wizard_section_tracks_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -494,14 +500,14 @@ class WP_SoundSystem_Core_Wizard{
             Single track
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard-section-single-track', //id
                 __('Track Details','wpsstm'),
                 array( $this, 'section_single_track_desc' ),
                 'wpsstm-wizard-step-single-track' //page
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_tracklist_content', 
                 __('Input','wpsstm'), 
                 array( $this, 'feedback_tracks_callback' ), 
@@ -509,7 +515,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_artist_selector', 
                 __('Artist Selector','wpsstm').'* '.$this->regex_link(),
                 array( $this, 'track_artist_selector_callback' ), 
@@ -517,7 +523,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_title_selector', 
                 __('Title Selector','wpsstm').'* '.$this->regex_link(), 
                 array( $this, 'track_title_selector_callback' ), 
@@ -525,7 +531,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_album_selector', 
                 __('Album Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_album_selector_callback' ), 
@@ -533,7 +539,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
             
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_image_selector', 
                 __('Image Selector','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_image_selector_callback' ), 
@@ -541,7 +547,7 @@ class WP_SoundSystem_Core_Wizard{
                 'wizard-section-single-track'
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'track_source_urls', 
                 __('Source URL','wpsstm').' '.$this->regex_link(), 
                 array( $this, 'track_sources_selector_callback' ), 
@@ -553,7 +559,7 @@ class WP_SoundSystem_Core_Wizard{
             Single track feedback
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                  'wizard_section_single_track_feedback', //id
                  __('Feedback','wpsstm'), //title
                  array( $this, 'section_desc_empty' ), //callback
@@ -564,14 +570,14 @@ class WP_SoundSystem_Core_Wizard{
             Options
             */
 
-            $this->add_wizard_section(
+            add_settings_section(
                 'wizard-section-options', //id
                 __('Options','wpsstm'),
                 array( $this, 'section_desc_empty' ),
                 'wpsstm-wizard-step-options' //page
             );
 
-            $this->add_wizard_field(
+            add_settings_field(
                 'datas_cache_min', 
                 __('Cache duration','wpsstm'), 
                 array( $this, 'cache_callback' ), 
@@ -586,7 +592,7 @@ class WP_SoundSystem_Core_Wizard{
         Not shown this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
         if ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url ){
-            $this->add_wizard_field(
+            add_settings_field(
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
                 array( $this, 'feedback_tracklist_callback' ), 
@@ -733,12 +739,20 @@ class WP_SoundSystem_Core_Wizard{
         
         $option = $wpsstm_tracklist->feed_url;
 
-        printf(
-            '<input id="wpsstm-wizard-input" type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+        $text_input = sprintf(
+            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')
         );
+        
+        $submit_input = null;
+        if ( !wpsstm_is_backend() ){
+            $submit_input = sprintf('<input type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary" value="">');
+        }
+
+        
+        printf('<p id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
 
         //wizard helpers
         if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
@@ -764,15 +778,6 @@ class WP_SoundSystem_Core_Wizard{
         echo $output;
 
     }
-    
-    function feedback_variables_callback(){
-        global $wpsstm_tracklist;
-        
-        foreach($wpsstm_tracklist->variables as $variable_slug => $variable){
-            $value_str = ( $variable ) ? sprintf('<code>%s</code>',$variable) : '—';
-            printf('<p><strong>%s :</strong> %s',$variable_slug,$value_str);
-        }
-    }   
 
     function feedback_source_content_callback(){
         global $wpsstm_tracklist;
@@ -1016,136 +1021,6 @@ class WP_SoundSystem_Core_Wizard{
         echo $tabs_html;
     }
 
-    /*
-    Inspired by WP function add_settings_section()
-    */
-    
-    function add_wizard_section($id, $title, $callback, $page) {
-        $this->wizard_sections[$page][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback);
-    }
-    
-    /*
-    Inspired by WP function add_settings_field()
-    */
-    
-    function add_wizard_field($id, $title, $callback, $page, $section = 'default', $args = array()) {
-        $this->wizard_fields[$page][$section][$id] = array('id' => $id, 'title' => $title, 'callback' => $callback, 'args' => $args);
-    }
-    
-    /*
-    Inspired by WP function do_settings_sections()
-    */
-    
-    function do_wizard_sections( $page ) {
-
-        if ( ! isset( $this->wizard_sections[$page] ) )
-            return;
-
-        foreach ( (array) $this->wizard_sections[$page] as $section ) {
-            if ( $section['title'] )
-                echo "<h2>{$section['title']}</h2>\n";
-
-            if ( $section['callback'] )
-                call_user_func( $section['callback'], $section );
-
-            if ( ! isset( $this->wizard_fields ) || !isset( $this->wizard_fields[$page] ) || !isset( $this->wizard_fields[$page][$section['id']] ) )
-                continue;
-            echo '<table class="form-table wizard-section-table">';
-            $this->do_wizard_fields( $page, $section['id'] );
-            echo '</table>';
-        }
-    }
-    
-    /*
-    Inspired by WP function do_settings_fields()
-    */
-    
-    function do_wizard_fields($page, $section) {
-
-        if ( ! isset( $this->wizard_fields[$page][$section] ) )
-            return;
-
-        foreach ( (array) $this->wizard_fields[$page][$section] as $field ) {
-            $class = '';
-
-            if ( ! empty( $field['args']['class'] ) ) {
-                $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
-            }
-
-            echo "<tr{$class}>";
-
-            if ( ! empty( $field['args']['label_for'] ) ) {
-                echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
-            } else {
-                echo '<th scope="row">' . $field['title'] . '</th>';
-            }
-
-            echo '<td>';
-            call_user_func($field['callback'], $field['args']);
-            echo '</td>';
-            echo '</tr>';
-        }
-    }
-    
-
-    /*
-    Inspired by WP function submit_button(); which is not available frontend
-    */
-    
-    function submit_button( $text = null, $type = 'primary', $name = 'submit', $wrap = true, $other_attributes = null ) {
-        echo $this->get_submit_button( $text, $type, $name, $wrap, $other_attributes );
-    }
-    
-    /*
-    Inspired by WP function get_submit_button(); which is not available frontend
-    */
-    
-    function get_submit_button( $text = '', $type = 'primary large', $name = 'submit', $wrap = true, $other_attributes = '' ) {
-        if ( ! is_array( $type ) )
-            $type = explode( ' ', $type );
-
-        $button_shorthand = array( 'primary', 'small', 'large' );
-        $classes = array( 'button' );
-        foreach ( $type as $t ) {
-            if ( 'secondary' === $t || 'button-secondary' === $t )
-                continue;
-            $classes[] = in_array( $t, $button_shorthand ) ? 'button-' . $t : $t;
-        }
-        // Remove empty items, remove duplicate items, and finally build a string.
-        $class = implode( ' ', array_unique( array_filter( $classes ) ) );
-
-        $text = $text ? $text : __( 'Save Changes' );
-
-        // Default the id attribute to $name unless an id was specifically provided in $other_attributes
-        $id = $name;
-        if ( is_array( $other_attributes ) && isset( $other_attributes['id'] ) ) {
-            $id = $other_attributes['id'];
-            unset( $other_attributes['id'] );
-        }
-
-        $attributes = '';
-        if ( is_array( $other_attributes ) ) {
-            foreach ( $other_attributes as $attribute => $value ) {
-                $attributes .= $attribute . '="' . esc_attr( $value ) . '" '; // Trailing space is important
-            }
-        } elseif ( ! empty( $other_attributes ) ) { // Attributes provided as a string
-            $attributes = $other_attributes;
-        }
-
-        // Don't output empty name and id attributes.
-        $name_attr = $name ? ' name="' . esc_attr( $name ) . '"' : '';
-        $id_attr = $id ? ' id="' . esc_attr( $id ) . '"' : '';
-
-        $button = '<input type="submit"' . $name_attr . $id_attr . ' class="' . esc_attr( $class );
-        $button .= '" value="' . esc_attr( $text ) . '" ' . $attributes . ' />';
-
-        if ( $wrap ) {
-            $button = '<p class="submit">' . $button . '</p>';
-        }
-
-        return $button;
-    }
-    
     function can_frontend_wizard(){
 
         if ( !$user_id = get_current_user_id() ){
@@ -1179,6 +1054,8 @@ class WP_SoundSystem_Core_Wizard{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
+            $can_show_helper = $class_name::can_show_helper();
+            if ( $can_show_helper !== true ) continue;
             $helpers[] = new $class_name();
             
         }

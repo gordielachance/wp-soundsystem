@@ -14,7 +14,7 @@ class WP_Soundsystem_Wizard_Tracklist_Url_Helper extends WP_Soundsystem_Wizard_H
             if ( !$preset->wizard_suggest ) continue;
             $preset_str = $preset->preset_name;
             if ($preset->preset_url){
-                $preset_str = sprintf('<a href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_desc,$preset_str);
+                $preset_str = sprintf('<a data-wpsstm-wizard-hover="%s" href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_url,$preset->preset_desc,$preset_str);
             }
             $presets_list[] = $preset_str;
         }

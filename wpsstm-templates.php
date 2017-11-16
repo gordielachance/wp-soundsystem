@@ -6,7 +6,7 @@ function wpsstm_classes($classes){
 
 function wpsstm_get_classes_attr($classes){
     if (empty($classes)) return;
-    return' class="'.implode(' ',$classes).'"';
+    return' class="'.implode(' ',(array)$classes).'"';
 }
 
 //https://stackoverflow.com/questions/18081625/how-do-i-map-an-associative-array-to-html-element-attributes

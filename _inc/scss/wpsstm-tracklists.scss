@@ -90,69 +90,39 @@
         }
     }
 
-    &.wpsstm-playable-tracklist{
+    &.tracklist-playable{
         
-        .wpsstm-tracks-list{
-        
-            [itemprop="track"]{
-                
-                &[data-wpsstm-sources-count="0"]{
-                    @include opacity(.25);
-                } 
+        [itemprop="track"]{
 
-                &:not(.track-active){
-                    td{
-                        @include opacity(.5);
-                    }
-                }
+            &[data-wpsstm-sources-count="0"]{
+                @include opacity(.25);
+            } 
 
-                &.track-has-played,&:hover{
-                    td{
-                        @include opacity(.75);
-                    }
+            &:not(.track-active){
+                td{
+                    @include opacity(.5);
                 }
+            }
 
-                &.track-active{
-                    td{
-                        @include opacity(1);
-                    }
+            &.track-has-played,&:hover{
+                td{
+                    @include opacity(.75);
                 }
-                
-                .wpsstm-track-icon{
-                    @extend .fa;
-                }
-                
-                &.track-loading .wpsstm-track-icon{
-                    @extend .fa-circle-o-notch;
-                    @extend .fa-spin;
-                    @extend .fa-fw;
-                }
-                &:not(.track-playing) .wpsstm-track-icon{
-                    @extend .fa-play;
-                }
-                
-                &.track-playing .wpsstm-track-icon{
-                    @extend .fa-pause;
-                }
+            }
 
-                &.track-error .wpsstm-track-icon{
-                    @extend .fa-exclamation-triangle;
+            &.track-active{
+                td{
+                    @include opacity(1);
                 }
-                
-                &.track-pause .wpsstm-track-icon{
-                    @extend .fa-pause;
-                }
-                
-                &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
-                    display:none;
-                }
+            }
 
-                &.wpsstm-loved-track{
-                    #wpsstm-track-action-favorite{
-                        display:none;
-                    }
-                } 
-
+        }
+    }
+    
+    &:not(.tracklist-playable){
+        [itemprop="track"]{
+            .wpsstm-track-play-bt{
+                display:none;
             }
         }
     }
@@ -160,6 +130,45 @@
     .wpsstm-tracks-list{
 
         [itemprop="track"]{
+
+            .wpsstm-track-icon{
+                @extend .fa;
+            }
+
+            &.track-loading .wpsstm-track-icon{
+                @extend .fa-circle-o-notch;
+                @extend .fa-spin;
+                @extend .fa-fw;
+            }
+            &:not(.track-playing) .wpsstm-track-icon{
+                @extend .fa-play;
+            }
+
+            &.track-playing .wpsstm-track-icon{
+                @extend .fa-pause;
+            }
+
+            &.track-error .wpsstm-track-icon{
+                @extend .fa-exclamation-triangle;
+            }
+
+            &.track-pause .wpsstm-track-icon{
+                @extend .fa-pause;
+            }
+
+            &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
+                display:none;
+            }
+            
+            &.track-invalid{
+                color:red;
+            }
+
+            &.wpsstm-loved-track{
+                #wpsstm-track-action-favorite{
+                    display:none;
+                }
+            }
 
             .wpsstm-track-image{
                 img{

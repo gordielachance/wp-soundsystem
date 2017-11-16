@@ -67,26 +67,39 @@ jQuery(document).ready(function($){
     
     //init helper
     user_helper_input.trigger('change');
+    
+    
+    /*
+    WIZARD INPUT hover & fill
+    */
+    var wizard_input_el = $('#wpsstm-wizard-search input[type=text]');
+    var wizard_input_placeholder_default = wizard_input_el.attr('placeholder');
+    
+    //hover
+    $('#wizard-wrapper [data-wpsstm-wizard-hover]').hover(function(e){
+        e.preventDefault();
+        var new_value = $(this).attr('data-wpsstm-wizard-hover');
+        wizard_input_el.attr('placeholder',new_value);
 
-    //wizard URL fill
+    }, function(){
+        wizard_input_el.attr('placeholder',wizard_input_placeholder_default);         
+    });
+
+    //click
     $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-click]', function(e) {
         e.preventDefault();
-        var input_el = $('#wpsstm-wizard-input');
         var new_value = $(this).attr('data-wpsstm-wizard-click');
-        input_el.val(new_value);
+        wizard_input_el.val(new_value);
         
         if (new_value){
             $('html, body').animate({
-                scrollTop: input_el.offset().top - ( $(window).height() / 3) //not at the very top
+                scrollTop: wizard_input_el.offset().top - ( $(window).height() / 3) //not at the very top
             }, 500);
         }
-        
-
-
     });
     
     //tabs
-    $("#wizard-wrapper #wpsstm-advanced-wizard-sections").tabs();
+    $("#wizard-wrapper #wpsstm-wizard-sections").tabs();
 
     /*
     advanced selectors

@@ -203,7 +203,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper';
+    //$presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper'; //TO FIX : NOT WORKING BECAUSE WE CANNOT GET ARTIST WHEN PARSING TRACKS ON /+tracks
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
     return $presets;

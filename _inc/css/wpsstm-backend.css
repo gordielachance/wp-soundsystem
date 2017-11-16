@@ -25,7 +25,7 @@
 /* makes the font 33% larger relative to the icon container */
 /* line 5, ../scss/Font-Awesome/_larger.scss */
 .fa-lg {
-  font-size: 1.33333em;
+  font-size: 1.3333333333em;
   line-height: 0.75em;
   vertical-align: -15%;
 }
@@ -52,14 +52,14 @@
 
 /* line 3, ../scss/Font-Awesome/_fixed-width.scss */
 .fa-fw, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before {
-  width: 1.28571em;
+  width: 1.2857142857em;
   text-align: center;
 }
 
 /* line 4, ../scss/Font-Awesome/_list.scss */
 .fa-ul {
   padding-left: 0;
-  margin-left: 2.14286em;
+  margin-left: 2.1428571429em;
   list-style-type: none;
 }
 /* line 8, ../scss/Font-Awesome/_list.scss */
@@ -70,14 +70,14 @@
 /* line 10, ../scss/Font-Awesome/_list.scss */
 .fa-li {
   position: absolute;
-  left: -2.14286em;
-  width: 2.14286em;
-  top: 0.14286em;
+  left: -2.1428571429em;
+  width: 2.1428571429em;
+  top: 0.1428571429em;
   text-align: center;
 }
 /* line 16, ../scss/Font-Awesome/_list.scss */
 .fa-li.fa-lg {
-  left: -1.85714em;
+  left: -1.8571428571em;
 }
 
 /* line 4, ../scss/Font-Awesome/_bordered-pulled.scss */
@@ -4141,4 +4141,76 @@ body.post-type-wpsstm_artist #titlewrap label[for=title], body.post-type-wpsstm_
 /* line 150, ../scss/wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
+}
+
+/* line 160, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1em;
+}
+/* line 163, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections #wpsstm-wizard-sections-header {
+  clear: both;
+  overflow: auto;
+}
+/* line 166, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections #wpsstm-wizard-sections-header li {
+  display: inline-block;
+}
+/* line 168, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections #wpsstm-wizard-sections-header li.ui-tabs-active a {
+  background: white;
+  border-bottom: 0;
+}
+/* line 177, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-source-content table.form-table > tbody th {
+  display: none;
+}
+/* line 182, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector input[type="text"] {
+  min-width: 50%;
+}
+/* line 185, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced {
+  display: none;
+}
+/* line 187, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced.active {
+  display: block;
+}
+/* line 190, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc {
+  padding: 1em;
+  font-style: italic;
+}
+/* line 193, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc code {
+  font-style: normal;
+}
+/* line 198, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table td {
+  color: #999;
+  padding: 5px;
+  font-family: Consolas, Monaco, monospace;
+}
+/* line 204, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:before {
+  text-align: center;
+  width: 20px;
+  content: '~';
+}
+/* line 209, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:after {
+  text-align: center;
+  width: 20px;
+  content: '~m';
+}
+/* line 214, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex input {
+  width: 90%;
+  color: #999;
+}
+/* line 224, ../scss/wpsstm-backend.scss */
+#wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-tracks-content .wpsstm-wizard-selector input[type="text"] {
+  min-width: 100%;
 }

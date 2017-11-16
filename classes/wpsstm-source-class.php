@@ -15,7 +15,7 @@ class WP_SoundSystem_Source{
         
         $this->provider = new WP_SoundSystem_Player_Provider(); //default
 
-        if ($post_id){
+        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
             $this->post_id = (int)$post_id;
             $this->title = get_the_title($post_id);
             $this->track_id = wp_get_post_parent_id( $post_id );

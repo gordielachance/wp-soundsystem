@@ -27,7 +27,7 @@ class WP_SoundSystem_Track{
     function __construct( $post_id = null ){
 
         //has track ID
-        if ( $post_id && ($post = get_post($post_id) ) ){
+        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_track ) ){
 
             $this->post_id = (int)$post_id;
 
@@ -334,10 +334,10 @@ class WP_SoundSystem_Track{
 
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = $post_type_obj->cap->delete_posts;
+        $can_delete_track = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
-        if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete tracks.",'wpsstm') );
+        if ( !$can_delete_track ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this track.",'wpsstm') );
         }
         
         $success = wp_trash_post($this->post_id);
@@ -753,6 +753,8 @@ class WP_SoundSystem_Track{
         $classes = array(
             'wpsstm-track',
         );
+        
+        $classes[] = ( !$this->validate_track() ) ? 'track-invalid' : null;
         
         if ( $this->is_track_loved_by() ){
             $classes[] = 'wpsstm-loved-track';
