@@ -97,10 +97,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_scripts_styles_frontend(){
-        
-        $tracklist_admin_action = wpsstm_tracklists()->get_tracklist_action();
         if ( !is_page($this->frontend_wizard_page_id ) ) return;
-        
         $this->wizard_enqueue_script_styles();
     }
     
