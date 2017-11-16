@@ -159,6 +159,10 @@
             &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
                 display:none;
             }
+            
+            &.track-invalid{
+                color:red;
+            }
 
             &.wpsstm-loved-track{
                 #wpsstm-track-action-favorite{

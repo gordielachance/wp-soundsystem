@@ -399,7 +399,7 @@ class WP_SoundSystem_Core_Wizard{
 
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
         if ( wpsstm_wizard()->is_advanced ){
-            $wpsstm_tracklist->ajax_refresh = false;
+            $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
         }
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
