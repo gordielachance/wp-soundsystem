@@ -615,6 +615,8 @@ class WP_SoundSystem_Core_Sources{
         $track = new WP_SoundSystem_Track();
         $track->from_array($ajax_data['track']);
 
+        //TOFIXDDD
+        
         if ($track->post_id){
             $success = $track->save_auto_sources();
         }else{

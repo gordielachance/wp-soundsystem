@@ -217,8 +217,6 @@ class WpsstmTrack {
         var deferredObject = $.Deferred();
 
         var promise = self.maybe_load_sources();
-        
-
 
         promise.fail(function() {
             deferredObject.reject();
@@ -228,14 +226,9 @@ class WpsstmTrack {
             deferredObject.resolve();
         })
 
-
         return deferredObject.promise();
     }
-    
 
-    
-
-    
     set_bottom_trackinfo(){
         var self = this;
         //track infos
