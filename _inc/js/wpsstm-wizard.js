@@ -22,11 +22,11 @@ jQuery(document).ready(function($){
         
         if (artist){
             var artist_url = 'https://www.last.fm/music/'+lastfm_artist;
-            top_tracks_el.attr('data-wpsstm-wizard-preview',artist_url+'/+tracks');
-            similar_el.attr('data-wpsstm-wizard-preview',artist_url + '/+similar');
+            top_tracks_el.attr('data-wpsstm-wizard-click',artist_url+'/+tracks');
+            similar_el.attr('data-wpsstm-wizard-click',artist_url + '/+similar');
         }else{
-            top_tracks_el.removeAttr( "data-wpsstm-wizard-preview" );
-            similar_el.removeAttr( "data-wpsstm-wizard-preview" );
+            top_tracks_el.removeAttr( "data-wpsstm-wizard-click" );
+            similar_el.removeAttr( "data-wpsstm-wizard-click" );
         }
 
         wrapper.toggleClass('wpsstm-wizard-helper-success',(artist.length !== 0));
@@ -57,9 +57,9 @@ jQuery(document).ready(function($){
         var library_el = $('#wpsstm-wizard-helper-lastfm-user-stations-library a');
         var mix_el = $('#wpsstm-wizard-helper-lastfm-user-stations-mix a');
         
-        recommandations_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:recommended');
-        library_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:library');
-        mix_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:mix');
+        recommandations_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:recommended');
+        library_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:library');
+        mix_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:mix');
         
         wrapper.toggleClass('wpsstm-wizard-helper-success',(username.length !== 0));
         
@@ -69,10 +69,10 @@ jQuery(document).ready(function($){
     user_helper_input.trigger('change');
 
     //wizard URL fill
-    $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-preview]', function(e) {
+    $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-click]', function(e) {
         e.preventDefault();
         var input_el = $('#wpsstm-wizard-input');
-        var new_value = $(this).attr('data-wpsstm-wizard-preview');
+        var new_value = $(this).attr('data-wpsstm-wizard-click');
         input_el.val(new_value);
         
         if (new_value){
