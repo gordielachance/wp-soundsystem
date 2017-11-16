@@ -314,16 +314,10 @@ class WP_SoundSystem_Core_Wizard{
         $wizard_data = isset($_REQUEST[ 'wpsstm_wizard' ]) ? $_REQUEST[ 'wpsstm_wizard' ] : array();
         $is_load_url = isset($wizard_data['action']['load-url']);
         if ( !$is_load_url ) return;
-
-
-        /*
-        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
-        */
-
+        
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
-            'post_author'       => wpsstm()->get_options('community_user_id'), //temporary wizard tracklist
             'meta_query' => array(
                 array(
                     'key' => wpsstm_live_playlists()->feed_url_meta_name,
@@ -331,8 +325,33 @@ class WP_SoundSystem_Core_Wizard{
                 )
             )
         );
+        
+        /*
+        Check that this user already created a tracklist for that same search and redirect to it.
+        */
+        if ( $user_id = get_current_user_id() ){
+            
+            $author_duplicate_args = $duplicate_args;
+            $author_duplicate_args['post_author'] = $user_id;
 
-        $duplicate_query = new WP_Query( $duplicate_args );
+            $duplicate_query = new WP_Query( $author_duplicate_args );
+            if ( $duplicate_query->have_posts() ){
+                $existing_id = $duplicate_query->posts[0];
+                $link = get_permalink($existing_id);
+                wp_redirect($link);
+                exit();
+            }
+        }
+
+
+        /*
+        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
+        */
+        
+        $community_duplicate_args = $duplicate_args;
+        $community_duplicate_args['post_author'] = wpsstm()->get_options('community_user_id');
+
+        $duplicate_query = new WP_Query( $community_duplicate_args );
         if ( $duplicate_query->have_posts() ){
             $existing_id = $duplicate_query->posts[0];
             $link = get_permalink($existing_id);
