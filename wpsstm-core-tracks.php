@@ -5,6 +5,7 @@ class WP_SoundSystem_Core_Tracks{
     public $title_metakey = '_wpsstm_track';
     public $image_url_metakey = '_wpsstm_track_image_url';
     public $qvar_track_admin = 'track-admin';
+    public $qvar_new_track = 'new-track';
     public $qvar_track_lookup = 'lookup_track';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
@@ -48,7 +49,8 @@ class WP_SoundSystem_Core_Tracks{
         
         add_action( 'init', array($this,'register_track_endpoints' ));
         
-        add_filter( 'template_include', array($this,'track_admin_template_filter'));
+        add_filter( 'template_include', array($this,'track_admin_endpoint'));
+        add_filter( 'template_include', array($this,'new_track_redirect'));
         add_action( 'wp', array($this,'track_save_admin_gui'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -88,6 +90,9 @@ class WP_SoundSystem_Core_Tracks{
         ajax
         */
         
+        //new track
+        add_action('wp_ajax_wpsstm_new_track', array($this,'ajax_new_track'));
+        
         //toggle love track
         add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
         
@@ -115,7 +120,23 @@ class WP_SoundSystem_Core_Tracks{
 
     function register_track_endpoints(){
         // (existing track) admin
-        add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK ); 
+        add_rewrite_endpoint($this->qvar_track_admin, EP_PERMALINK );
+        
+        //add post type archive endpoints
+        //TOFIXDDD
+        /*
+        //https://wordpress.stackexchange.com/a/133698/70449
+        
+        //new track
+        $post_type = wpsstm()->post_type_track;
+        $var = $this->qvar_new_track;
+        $regex = sprintf('%s/%s$',$post_type,$var);
+        
+        $redirect = sprintf('index.php?post_type=%s',$post_type);
+        $redirect = add_query_arg(array($var => 1),$redirect);
+
+        add_rewrite_rule( $regex, $redirect, 'top' );
+        */
     }
     
     function register_tracks_scripts_styles_shared(){
@@ -144,7 +165,7 @@ class WP_SoundSystem_Core_Tracks{
     *    Adds a custom template to the query queue.
     */
     
-    function track_admin_template_filter($template){
+    function track_admin_endpoint($template){
         global $wp_query;
         global $post;
 
@@ -165,6 +186,47 @@ class WP_SoundSystem_Core_Tracks{
         }
         
         return $template;
+    }
+    
+    /*
+    when requesting wpsstm_track/?new-track=...&QUERYSTR=
+    create the track and redirect to wpsstm_track/XXX/?QUERYSTR=
+    */
+    
+    function new_track_redirect($template){
+
+        $new_track =  get_query_var( $this->qvar_new_track );
+        if ( !$new_track ) return $template;
+        if ( isset($_REQUEST['track-error']) ) return $template; //TOFIXDDD TO CHECK
+        
+        //get current query
+        $query_str = $_SERVER['QUERY_STRING']; 
+        $query_str = remove_query_arg( array($this->qvar_new_track), $query_str ); //remove new track args from parameters
+        parse_str($query_str,$query); //make an array of it
+
+        $track_args = wp_unslash($new_track);
+        $track_args = json_decode($track_args);
+        
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($track_args);
+
+        if ( !$track->post_id ){ //track does not exists yet, create it
+            $success = $track->save_track();
+            if ( is_wp_error($success) ){
+                $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TOFIXDDD or current URL ? more logical.
+                $track_url = add_query_arg(array('track-error'=>$success->get_error_code()),$track_url);
+            }else{
+                $track_url = get_permalink($track->post_id);
+                //remove 'new-track' arg from parameters
+                unset($query[$this->qvar_new_track]);
+            }
+        }else{
+            $track_url = get_permalink($track->post_id);
+        }
+
+        $redirect_url = add_query_arg($query,$track_url); //inject current args
+        wp_redirect($redirect_url);
+        exit();
     }
     
     function track_popup_body_classes($classes){
@@ -511,6 +573,7 @@ class WP_SoundSystem_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_track_admin;
+        $qvars[] = $this->qvar_new_track;
         return $qvars;
     }
     
@@ -621,7 +684,21 @@ class WP_SoundSystem_Core_Tracks{
 
     }
     
+    function ajax_new_track(){//TOFIXDDD used?
+        $ajax_data = wp_unslash($_REQUEST);
 
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        
+        print_r($result);die();
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
     
     function ajax_love_unlove_track(){
 

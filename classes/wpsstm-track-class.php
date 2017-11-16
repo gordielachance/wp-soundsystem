@@ -207,7 +207,6 @@ class WP_SoundSystem_Track{
         }
     }
 
-    //TO FIX do we need this ?
     function to_array(){
         $defaults = $this->get_default();
         $export = array();
@@ -215,6 +214,30 @@ class WP_SoundSystem_Track{
             $export[$param] = $this->$param;
         }
         return array_filter($export);
+    }
+    
+    /*
+    Reduce track to the minimum; used to send data through URLs or ajax.
+    */
+    function to_ajax(){
+        
+        $allowed  = ['post_id','title','artist','album','mbid'];
+        
+        if ($this->post_id){
+            $allowed  = ['post_id'];
+        }
+        
+        $arr = $this->to_array();
+
+        $filtered = array_filter(
+            $arr,
+            function ($key) use ($allowed) {
+                return in_array($key, $allowed);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        
+        return $filtered;
     }
     
     /**
@@ -567,14 +590,20 @@ class WP_SoundSystem_Track{
         return $new_source_ids;
 
     }
+    
+    function new_track_link(){
+        $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
+        $json = urlencode( json_encode($this->to_ajax()) );
+        return add_query_arg(array(wpsstm_tracks()->qvar_new_track=>$json),$url);
+    }
 
     function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
 
         $url = null;
         if ($this->post_id){
             $url = get_permalink($this->post_id);
-        }else{ //TO FIX! URL to create a track THEN redirect to action
-            
+        }else{
+            $url = $this->new_track_link();
         }
         $url = add_query_arg(array(wpsstm_tracks()->qvar_track_admin=>$track_action),$url);
 
@@ -638,6 +667,7 @@ class WP_SoundSystem_Track{
             $actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_track_admin_gui_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
             );
@@ -648,6 +678,7 @@ class WP_SoundSystem_Track{
             $actions['unfavorite'] = array(
                 'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
+                'href' =>       $this->get_track_admin_gui_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );

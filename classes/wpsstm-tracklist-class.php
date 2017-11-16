@@ -579,6 +579,7 @@ class WP_SoundSystem_Tracklist{
         if ($can_favorite){
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_tracklist_admin_gui_url('favorite'),
                 'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-favorite'),
             );
@@ -588,6 +589,7 @@ class WP_SoundSystem_Tracklist{
         if ($can_favorite){
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
+                'href' =>       $this->get_tracklist_admin_gui_url('unfavorite'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unfavorite'),
             );
@@ -596,7 +598,7 @@ class WP_SoundSystem_Tracklist{
         //add track
         if ( $this->user_can_reorder_tracks() ){
             
-            $new_subtrack_url = $this->get_tracklist_admin_gui_url('new-subtrack');
+            $new_subtrack_url = $this->get_tracklist_admin_gui_url('new-subtrack'); //TOFIXDDD
             $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
             
             $actions['new-subtrack'] = array(

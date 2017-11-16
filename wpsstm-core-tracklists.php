@@ -96,11 +96,11 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_wpsstm_playlist_trash_track', array($this,'ajax_trash_tracklist_track'));
         
         //ajax : add new tracklist
-        add_action('wp_ajax_wpsstm_append_to_new_tracklist', array($this,'ajax_append_track_to_new_tracklist'));
+        add_action('wp_ajax_wpsstm_append_to_new_tracklist', array($this,'ajax_append_track_to_new_tracklist')); //TOFIXDDD
         
         //ajax : add/remove tracklist track
-        add_action('wp_ajax_wpsstm_add_tracklist_track', array($this,'ajax_add_tracklist_track'));
-        add_action('wp_ajax_wpsstm_remove_tracklist_track', array($this,'ajax_remove_tracklist_track'));
+        add_action('wp_ajax_wpsstm_add_tracklist_track', array($this,'ajax_add_tracklist_track')); //TOFIXDDD
+        add_action('wp_ajax_wpsstm_remove_tracklist_track', array($this,'ajax_remove_tracklist_track'));//TOFIXDDD
 
     }
     
@@ -184,7 +184,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         if( !$admin_action = $this->get_tracklist_action() ) return $template;
 
-        if ( $admin_action == 'new-subtrack' ){ //this will be handled by track_admin_template_filter()
+        if ( $admin_action == 'new-subtrack' ){ //this will be handled by track_admin_endpoint() //TOFIXDDD
             set_query_var( wpsstm_tracks()->qvar_track_admin, 'new-subtrack' );
             return $template;
         }
