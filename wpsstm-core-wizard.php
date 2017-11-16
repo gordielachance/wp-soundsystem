@@ -133,7 +133,7 @@ class WP_SoundSystem_Core_Wizard{
         global $post;
 
         $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID);
-        wpsstm_locate_template( 'wizard-form.php', true );
+        wpsstm_locate_template( 'wizard-backend.php', true );
     }
     
     /*
@@ -384,7 +384,7 @@ class WP_SoundSystem_Core_Wizard{
         
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
-            $restore_link = wpsstm_wizard()->get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
+            $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
             $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
             $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
         }
@@ -733,12 +733,20 @@ class WP_SoundSystem_Core_Wizard{
         
         $option = $wpsstm_tracklist->feed_url;
 
-        printf(
-            '<input id="wpsstm-wizard-input" type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+        $text_input = sprintf(
+            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')
         );
+        
+        $submit_input = null;
+        if ( !wpsstm_is_backend() ){
+            $submit_input = sprintf('<input type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary" value="">');
+        }
+
+        
+        printf('<p id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
 
         //wizard helpers
         if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
@@ -1086,66 +1094,7 @@ class WP_SoundSystem_Core_Wizard{
             echo '</tr>';
         }
     }
-    
 
-    /*
-    Inspired by WP function submit_button(); which is not available frontend
-    */
-    
-    function submit_button( $text = null, $type = 'primary', $name = 'submit', $wrap = true, $other_attributes = null ) {
-        echo $this->get_submit_button( $text, $type, $name, $wrap, $other_attributes );
-    }
-    
-    /*
-    Inspired by WP function get_submit_button(); which is not available frontend
-    */
-    
-    function get_submit_button( $text = '', $type = 'primary large', $name = 'submit', $wrap = true, $other_attributes = '' ) {
-        if ( ! is_array( $type ) )
-            $type = explode( ' ', $type );
-
-        $button_shorthand = array( 'primary', 'small', 'large' );
-        $classes = array( 'button' );
-        foreach ( $type as $t ) {
-            if ( 'secondary' === $t || 'button-secondary' === $t )
-                continue;
-            $classes[] = in_array( $t, $button_shorthand ) ? 'button-' . $t : $t;
-        }
-        // Remove empty items, remove duplicate items, and finally build a string.
-        $class = implode( ' ', array_unique( array_filter( $classes ) ) );
-
-        $text = $text ? $text : __( 'Save Changes' );
-
-        // Default the id attribute to $name unless an id was specifically provided in $other_attributes
-        $id = $name;
-        if ( is_array( $other_attributes ) && isset( $other_attributes['id'] ) ) {
-            $id = $other_attributes['id'];
-            unset( $other_attributes['id'] );
-        }
-
-        $attributes = '';
-        if ( is_array( $other_attributes ) ) {
-            foreach ( $other_attributes as $attribute => $value ) {
-                $attributes .= $attribute . '="' . esc_attr( $value ) . '" '; // Trailing space is important
-            }
-        } elseif ( ! empty( $other_attributes ) ) { // Attributes provided as a string
-            $attributes = $other_attributes;
-        }
-
-        // Don't output empty name and id attributes.
-        $name_attr = $name ? ' name="' . esc_attr( $name ) . '"' : '';
-        $id_attr = $id ? ' id="' . esc_attr( $id ) . '"' : '';
-
-        $button = '<input type="submit"' . $name_attr . $id_attr . ' class="' . esc_attr( $class );
-        $button .= '" value="' . esc_attr( $text ) . '" ' . $attributes . ' />';
-
-        if ( $wrap ) {
-            $button = '<p class="submit">' . $button . '</p>';
-        }
-
-        return $button;
-    }
-    
     function can_frontend_wizard(){
 
         if ( !$user_id = get_current_user_id() ){

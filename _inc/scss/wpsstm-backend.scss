@@ -156,3 +156,75 @@ body{
     }
     
 }
+
+#wpsstm-wizard-sections{
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1em;
+    #wpsstm-wizard-sections-header{
+        clear:both;
+        overflow:auto;
+        li {
+                display: inline-block;
+                &.ui-tabs-active a {
+                        background: white;
+                        border-bottom: 0;
+                }
+        }
+    }
+
+    .wpsstm-wizard-step-content{
+        &#wpsstm-wizard-step-source-content{
+            .wizard-section-table > tbody th{
+                display:none;
+            }
+        }
+        .wpsstm-wizard-selector{
+            input[type="text"]{
+                min-width:50%;
+            }
+            .wpsstm-wizard-selector-advanced{
+                display: none;
+                &.active{
+                    display: block;
+                }
+                .wpsstm-wizard-track-selector-desc{
+                    padding: 1em;
+                    font-style:italic;
+                    code{
+                        font-style:normal;
+                    }
+                }
+                table{
+                    td {
+                        color: #999;
+                        padding: 5px;
+                        font-family: Consolas, Monaco, monospace;
+                    }
+                    .wpsstm-wizard-selector-regex {
+                        &:before {
+                                text-align: center;
+                                width: 20px;
+                                content: '~';
+                        }
+                        &:after {
+                                text-align: center;
+                                width: 20px;
+                                content: '~m';
+                        }
+                        input {
+                                width: 90%;
+                                color: #999;
+                        }
+                    }
+                }
+            }
+        }
+        &#wpsstm-wizard-step-tracks-content{
+            .wpsstm-wizard-selector{
+                input[type="text"]{
+                    min-width:100%;
+                }
+            }
+        }
+    }
+}

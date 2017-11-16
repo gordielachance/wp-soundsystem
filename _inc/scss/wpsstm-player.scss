@@ -65,6 +65,7 @@
                 margin:0;
                 &#wpsstm-bottom-track-info{
                     vertical-align: top;
+                    border:none;
                     table{
                         td{
                             display:inline-block;
@@ -111,4 +112,97 @@
         }
     }
 
+}
+
+//tracklist from bottom player
+#wpsstm-bottom-track-wrapper .wpsstm-tracklist{
+
+    text-transform: uppercase;
+    font-size: .75em;
+    letter-spacing: .05em;
+
+    table{
+        td{
+            &.wpsstm-track-image{
+                padding-left:0!important;
+            }
+            &.wpsstm-track-album{
+                display:none!important;
+            }
+            &.wpsstm-track-sources{
+                position:relative;
+                width: 20%;
+                @include opacity(.25);
+                .wpsstm-track-sources-list{
+
+                    padding:0;
+                    line-height: 2em;
+                    [data-wpsstm-source-idx]{
+
+                        display:block;
+                        padding: 0 .75em;
+                        width:100%;
+                        box-sizing: border-box;
+
+                        @include display-flex();
+
+                        .wpsstm-source-links{
+
+                            @include order(1);
+                            @include flex(0 0 auto);
+                            padding-right: .5em;
+
+                            .wpsstm-source-action{
+                                text-align:center;
+                                width:2em;
+                            }
+                        }
+
+                        .wpsstm-source-title{ //source text
+                            @include order(2);
+                            @include flex(0 1 auto); /*important*/
+                            min-width:0;
+
+                            @extend .wpsstm-ellipsis;
+                            overflow:hidden;
+
+
+                        }
+
+
+                    }
+                }
+
+                &:hover{
+                    width: 30%;
+                    @include opacity(1);
+                    .wpsstm-track-sources-list{
+                        background: $player-bg-color;
+                        text-align: left;
+                        position: absolute;
+                        bottom: -1em;
+                        padding-bottom:1em;
+                        [data-wpsstm-source-idx]{
+                            line-height:2.5em;
+                        }
+                    }
+                    .wpsstm-source-action{
+                        display:initial;
+                    }
+                }
+
+                &:not(:hover){
+                    [data-wpsstm-source-idx]{
+                        &:not(.source-playing){
+                            display:none;
+                        }
+                    }
+                    .wpsstm-source-action{
+                        display:none;
+                    }
+                }
+
+            }
+        }
+    }
 }

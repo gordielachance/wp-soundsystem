@@ -71,7 +71,7 @@ jQuery(document).ready(function($){
     //wizard URL fill
     $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-click]', function(e) {
         e.preventDefault();
-        var input_el = $('#wpsstm-wizard-input');
+        var input_el = $('#wpsstm-wizard-search input[type=text]');
         var new_value = $(this).attr('data-wpsstm-wizard-click');
         input_el.val(new_value);
         
@@ -86,7 +86,7 @@ jQuery(document).ready(function($){
     });
     
     //tabs
-    $("#wizard-wrapper #wpsstm-advanced-wizard-sections").tabs();
+    $("#wizard-wrapper #wpsstm-wizard-sections").tabs();
 
     /*
     advanced selectors

@@ -7,13 +7,9 @@ $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1)); //we must have 
 wpsstm_wizard()->wizard_settings_init();
 $is_wizard_disabled = $wpsstm_tracklist->is_wizard_disabled();
 $post_type = get_post_type();
-
-$classes = array();
-$classes[]  = ( wpsstm_wizard()->is_advanced ) ? 'wizard-wrapper-advanced' : 'wizard-wrapper-simple';
-$classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-frontend';
 ?>
 
-<div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr($classes);?>>
+<div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr('wizard-wrapper-backend');?>>
 
     <?php
     if(!$is_wizard_disabled){
@@ -24,12 +20,12 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         }
 
         ?>
-        <div id="wpsstm-advanced-wizard-sections">
+        <div id="wpsstm-wizard-sections">
 
             <?php 
             if ( wpsstm_wizard()->is_advanced ){ 
                 ?>
-                <ul id="wpsstm-advanced-wizard-sections-header">
+                <ul id="wpsstm-wizard-sections-header">
                     <?php wpsstm_wizard()->wizard_tabs(); ?>
                 </ul>
                 <?php
@@ -66,35 +62,28 @@ $classes[]  = ( is_admin() ) ? 'wizard-wrapper-backend' : 'wizard-wrapper-fronte
         <?php
         
     }
-    
-    //load URL (frontend)
-    if ( !wpsstm_is_backend() ){
-        wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[action][load-url]');
+
+    //import tracks
+    if ( !$is_wizard_disabled && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
+        submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
     }
 
-    if ( wpsstm_is_backend() ){
-        //import tracks
-        if ( !$is_wizard_disabled && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
-            wpsstm_wizard()->submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
+    //toggle wizard
+    if ( get_post_status() != 'auto-draft' ){
+        if( $is_wizard_disabled ){
+            submit_button(__('Open Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][enable]');
+        }else{
+            submit_button(__('Close Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][disable]');
         }
+    }
 
-        //toggle wizard
-        if ( get_post_status() != 'auto-draft' ){
-            if( $is_wizard_disabled ){
-                wpsstm_wizard()->submit_button(__('Open Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][enable]');
-            }else{
-                wpsstm_wizard()->submit_button(__('Close Wizard','wpsstm'),'primary','wpsstm_wizard[toggle-wizard][disable]');
-            }
+    //save wizard
+    if( !$is_wizard_disabled ){
+        if ($wpsstm_tracklist->feed_url){
+            submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
+        }else{
+            submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[save-wizard]');
         }
-        
-        //save wizard
-        if( !$is_wizard_disabled ){
-            if ($wpsstm_tracklist->feed_url){
-                wpsstm_wizard()->submit_button(__('Save Changes'),'primary','wpsstm_wizard[save-wizard]');
-            }else{
-                wpsstm_wizard()->submit_button(__('Load URL','wpsstm'),'primary','wpsstm_wizard[save-wizard]');
-            }
-        }        
     }
 
     //save settings

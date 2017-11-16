@@ -49,7 +49,7 @@ get_header();
                         ?>
                         <form action="<?php the_permalink();?>" method="POST">
                             <?php
-                            wpsstm_locate_template( 'wizard-form.php', true );
+                            wpsstm_locate_template( 'wizard-frontend.php', true );
                         
                             if ($wpsstm_tracklist->feed_url){
                                 echo $wpsstm_tracklist->get_tracklist_html();
