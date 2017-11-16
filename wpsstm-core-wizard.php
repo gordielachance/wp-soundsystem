@@ -221,7 +221,7 @@ class WP_SoundSystem_Core_Wizard{
             $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
         }
 
-        $this->tracklist->tracks_strict = false;
+        if ( $this->is_advanced ) $this->tracklist->tracks_strict = false;
 
         if (wpsstm_is_backend() ){
             $this->tracklist->options['autoplay'] = false;
