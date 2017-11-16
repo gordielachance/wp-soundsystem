@@ -396,7 +396,6 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 
             &:not(.wpsstm-wizard-helper-success){
                 a{
-                    pointer-events:none;
                     @include opacity(.5);
                 }
             }
