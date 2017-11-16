@@ -739,31 +739,10 @@ class WP_SoundSystem_Core_Wizard{
             $option,
             __('Enter a tracklist URL','wpsstm')
         );
-        
-        if ( !$wpsstm_tracklist->feed_url ){
-            
-            //wizard helpers
-            if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
-                echo $helpers;
-            }
-        
-            //supported URLs
-            $presets_list = array();
-            $presets_list_str = null;
-            foreach ((array)wpsstm_live_playlists()->presets as $preset){
-                if ( !$preset->wizard_suggest ) continue;
-                $preset_str = $preset->preset_name;
-                if ($preset->preset_url){
-                    $preset_str = sprintf('<a href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_desc,$preset_str);
-                }
-                $presets_list[] = $preset_str;
-            }
 
-            if ( !empty($presets_list) ){
-                $presets_list_str = implode(', ',$presets_list);
-                printf('<p id="wpsstm-available-presets"><small><strong>%s</strong> %s</small></p>',__('Or any of those supported URLs:','wpsstm'),$presets_list_str);
-            }
-            
+        //wizard helpers
+        if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
+            echo $helpers;
         }
 
     }
