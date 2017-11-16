@@ -58,17 +58,6 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
     }
 
-    //not logged notice
-    //TO FIX TO MOVE
-    //TO FIX should not be displayed for every playlist but only once for the page
-    if ( $tracklist->post_id && $tracklist->tracks && !get_current_user_id() ){
-        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-        $wp_auth_text = sprintf(__('You could save this playlist if you were logged.  Login or subscribe %s.','wpsstm'),$wp_auth_link);
-        $tracklist->add_notice( 'tracklist-header', 'user-not-logged', $wp_auth_icon . '  ' . $wp_auth_text );
-    }
-
-
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
         echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
     }
