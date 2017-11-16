@@ -14,7 +14,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
 ?>
 
-<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('tracklist-table')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
+<div class="<?php echo implode(' ',$tracklist->get_tracklist_class());?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <div>

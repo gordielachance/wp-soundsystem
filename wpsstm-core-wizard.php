@@ -225,7 +225,6 @@ class WP_SoundSystem_Core_Wizard{
 
         if (wpsstm_is_backend() ){
             $this->tracklist->options['autoplay'] = false;
-            $this->tracklist->options['can_play'] = false;
         }
 
         return $this->tracklist;

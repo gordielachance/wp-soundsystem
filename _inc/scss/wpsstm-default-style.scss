@@ -251,7 +251,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 //tracklists inside posts
-:not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist{
+:not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.tracklist-template-table{
 
     border:1px solid #F7F7F7;
     padding:.5em 1em;

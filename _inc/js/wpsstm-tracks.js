@@ -156,13 +156,13 @@
         var track_el = track_obj.track_el;
         if ( track_el.is(":visible") ) return;
 
-        var tracklist_el = track_obj.tracklist.tracklist_el;
-        var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
+        var tracklist_obj = track_obj.tracklist;
+        var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
         var newTracksCount = track_obj.index + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        if ( tracklist_el.is('[wpsstm-toggle-tracklist]') ){
+        if ( tracklist_obj.options.toggle_tracklist ){
             track_obj.tracklist.toggleTracklist({
                 childrenMax:newTracksCount
             });

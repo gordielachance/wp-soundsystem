@@ -935,6 +935,10 @@ class WP_SoundSystem_Tracklist{
         //TO FIX weird code, not effiscient
         $extra_classes = ( isset($values_attr['extra_classes']) ) ? $values_attr['extra_classes'] : null;
         unset($values_attr['extra_classes']);
+        
+        //for data attribute
+        $options = $this->get_options();
+        unset($options['selectors'],$options['tracks_order'],$options['datas_cache_min']);
 
         $values_defaults = array(
             'itemscope' =>                      true,
@@ -942,10 +946,10 @@ class WP_SoundSystem_Tracklist{
             'data-wpsstm-tracklist-id' =>       $this->post_id,
             'data-wpsstm-tracklist-idx' =>      $this->index,
             'data-tracks-count' =>              $this->track_count,
-            'wpsstm-toggle-tracklist' =>        wpsstm()->get_options('toggle_tracklist'), 
-            'wpsstm-template' =>                wpsstm()->get_options('template'), 
+            'data-wpsstm-tracklist-options' =>  htmlspecialchars(json_encode($options)), 
+            'data-wpsstm-toggle-tracklist' =>   $this->get_options('toggle_tracklist'),
         );
-        
+
         $values_attr = array_merge($values_defaults,(array)$values_attr);
         
         return wpsstm_get_html_attr($values_attr);
@@ -957,11 +961,12 @@ class WP_SoundSystem_Tracklist{
             'wpsstm-tracklist',
         );
         $classes[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
-        $classes[] = ( $this->get_options('hide_empty_columns') == "on" ) ? 'wpsstm-hide-empty-columns' : null;
-        $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'tracklist-autoplay' : null;
-        $classes[] = ( $this->get_options('autosource') == "on" ) ? 'tracklist-autosource' : null;
-        $classes[] = ( $this->get_options('wpsstm-can-play') == "on" ) ? 'wpsstm-can-play' : null;
-        
+        $classes[] = $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null;
+        $classes[] = $this->get_options('autoplay') ? 'tracklist-autoplay' : null;
+        $classes[] = $this->get_options('autosource') ? 'tracklist-autosource' : null;
+        $classes[] = $this->get_options('can_play') ? 'tracklist-playable' : null;
+        $classes[] = 'tracklist-template-' . $this->get_options('template');
+
         if ( $this->is_tracklist_loved_by() ){
             $classes[] = 'wpsstm-loved-tracklist';
         }
@@ -971,10 +976,6 @@ class WP_SoundSystem_Tracklist{
         }
         
         $classes = array_merge($classes,(array)$extra_classes);
-
-        if ( $this->get_options('can_play') ){
-            $classes[] = 'wpsstm-playable-tracklist';
-        }
 
         //capabilities
         $tracklist_type = get_post_type($this->post_id);
