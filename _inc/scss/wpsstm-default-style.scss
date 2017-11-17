@@ -40,9 +40,8 @@ ul.ui-autocomplete {
     margin: 0 0 10px 25px;
     list-style: none;
     background-color: #ffffff;
-    border : 1px solid #ccc;
+    border: 1px solid #ccc;
     border-color: rgba(0, 0, 0, 0.2);
-
     //@include border-radius(5px);
     @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
     @include background-clip(padding-box);
