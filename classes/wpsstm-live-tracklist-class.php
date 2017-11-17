@@ -515,19 +515,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public function get_remote_title(){
 
-        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title', 'path') ) ) return;
-        
-        $title = null;
-
-        //QueryPath
-        try{
-            $title_node = qp( $this->body_node, null, self::$querypath_options )->find($selector_title);
-            $title = $title_node->innerHTML();
-        }catch(Exception $e){
-            return;
-        }
-        
-        return $title;
+        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title') ) ) return;
+        return $this->parse_node($this->body_node,$selector_title);
     }
     
     /*
