@@ -27,7 +27,38 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 
 input[type="text"].wpsstm-loading{
     @include striped-bg();
-} 
+}
+
+ul.ui-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    float: left;
+    display: none;
+    min-width: 160px;
+    margin: 0 0 10px 25px;
+    list-style: none;
+    background-color: #ffffff;
+    border : 1px solid #ccc;
+    border-color: rgba(0, 0, 0, 0.2);
+
+    //@include border-radius(5px);
+    @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
+    @include background-clip(padding-box);
+    *border-right-width: 2px;
+    *border-bottom-width: 2px;
+    
+    li.ui-menu-item{
+        padding:0 .5em;
+        line-height:2em;
+        font-size:.8em;
+        &.ui-state-focus{
+            background: #F7F7F7;
+        }
+    }
+
+}
 
 .wpsstm-actions-list{
     li{

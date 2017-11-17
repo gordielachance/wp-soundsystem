@@ -223,19 +223,13 @@ class WP_SoundSystem {
     }
 
     function register_scripts_styles_shared(){
-        global $wp_scripts;
-        
+
         //TO FIX conditional / move code ?
         
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
 
-        //TO FIX TO CHECK BACK LATER : v1.4.1 (as of WP 4.9) does not exists yet on google ? So use 1.12.1.
-        $jquery_ui_version = $wp_scripts->registered['jquery-ui-core']->ver;
-        $jquery_ui_version = '1.12.1'; 
-
-        wp_register_style( 'wpsstm-jqueri-ui','http://ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_ui_version. '/themes/base/jquery-ui.css',false,$this->version,false); //for autocomplete
-        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome','wpsstm-jqueri-ui'),wpsstm()->version );
+        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome'),wpsstm()->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
@@ -267,7 +261,10 @@ class WP_SoundSystem {
             wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
             wp_enqueue_style( 'wpsstm-admin' );
 
-            
+            //default styling
+            if ( wpsstm()->get_options('minimal_css') == 'off'){
+                wp_enqueue_style( 'wpsstm-default-style' );
+            }
             
         //}
         
