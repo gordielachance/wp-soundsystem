@@ -156,13 +156,13 @@
         var track_el = track_obj.track_el;
         if ( track_el.is(":visible") ) return;
 
-        var tracklist_el = track_obj.tracklist.tracklist_el;
-        var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
+        var tracklist_obj = track_obj.tracklist;
+        var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
         var newTracksCount = track_obj.index + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
-        if ( tracklist_el.is('[wpsstm-toggle-tracklist]') ){
+        if ( tracklist_obj.options.toggle_tracklist ){
             track_obj.tracklist.toggleTracklist({
                 childrenMax:newTracksCount
             });
@@ -217,8 +217,6 @@ class WpsstmTrack {
         var deferredObject = $.Deferred();
 
         var promise = self.maybe_load_sources();
-        
-
 
         promise.fail(function() {
             deferredObject.reject();
@@ -228,14 +226,9 @@ class WpsstmTrack {
             deferredObject.resolve();
         })
 
-
         return deferredObject.promise();
     }
-    
 
-    
-
-    
     set_bottom_trackinfo(){
         var self = this;
         //track infos

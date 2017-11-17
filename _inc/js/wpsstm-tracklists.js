@@ -164,7 +164,7 @@
         });
         
         //toggle expand tracks at init
-        if ( showSubtracksCount = tracklist_obj.tracklist_el.attr('wpsstm-toggle-tracklist') ){
+        if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
             tracklist_obj.toggleTracklist({
                 childrenMax:showSubtracksCount
             });
@@ -188,9 +188,6 @@ class WpsstmTracklist {
         this.tracks_shuffle_order =     [];
         this.populate_tracklist(tracklist_el);
         this.can_play =                 undefined;
-        
-
-
     }
     
     debug(msg){

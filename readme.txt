@@ -149,8 +149,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= 1.8.2 =
-* improved presets code
+= 1.8.4 =
+* welcome Wordpress 4.9! Finally!
+* improved wizard (GUI, presets, helpers), etc.
 
 = 1.8.0 =
 * better Last.FM presets (including last.fm stations)

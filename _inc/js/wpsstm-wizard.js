@@ -22,11 +22,11 @@ jQuery(document).ready(function($){
         
         if (artist){
             var artist_url = 'https://www.last.fm/music/'+lastfm_artist;
-            top_tracks_el.attr('data-wpsstm-wizard-preview',artist_url);
-            similar_el.attr('data-wpsstm-wizard-preview',artist_url + '/+similar');
+            top_tracks_el.attr('data-wpsstm-wizard-click',artist_url+'/+tracks');
+            similar_el.attr('data-wpsstm-wizard-click',artist_url + '/+similar');
         }else{
-            top_tracks_el.removeAttr( "data-wpsstm-wizard-preview" );
-            similar_el.removeAttr( "data-wpsstm-wizard-preview" );
+            top_tracks_el.removeAttr( "data-wpsstm-wizard-click" );
+            similar_el.removeAttr( "data-wpsstm-wizard-click" );
         }
 
         wrapper.toggleClass('wpsstm-wizard-helper-success',(artist.length !== 0));
@@ -57,9 +57,9 @@ jQuery(document).ready(function($){
         var library_el = $('#wpsstm-wizard-helper-lastfm-user-stations-library a');
         var mix_el = $('#wpsstm-wizard-helper-lastfm-user-stations-mix a');
         
-        recommandations_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:recommended');
-        library_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:library');
-        mix_el.attr('data-wpsstm-wizard-preview','lastfm:user:'+username+':station:mix');
+        recommandations_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:recommended');
+        library_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:library');
+        mix_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:mix');
         
         wrapper.toggleClass('wpsstm-wizard-helper-success',(username.length !== 0));
         
@@ -67,26 +67,39 @@ jQuery(document).ready(function($){
     
     //init helper
     user_helper_input.trigger('change');
-
-    //wizard URL fill
-    $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-preview]', function(e) {
+    
+    
+    /*
+    WIZARD INPUT hover & fill
+    */
+    var wizard_input_el = $('#wpsstm-wizard-search input[type=text]');
+    var wizard_input_placeholder_default = wizard_input_el.attr('placeholder');
+    
+    //hover
+    $('#wizard-wrapper [data-wpsstm-wizard-hover]').hover(function(e){
         e.preventDefault();
-        var input_el = $('#wpsstm-wizard-input');
-        var new_value = $(this).attr('data-wpsstm-wizard-preview');
-        input_el.val(new_value);
+        var new_value = $(this).attr('data-wpsstm-wizard-hover');
+        wizard_input_el.attr('placeholder',new_value);
+
+    }, function(){
+        wizard_input_el.attr('placeholder',wizard_input_placeholder_default);         
+    });
+
+    //click
+    $('#wizard-wrapper').on( "click",'[data-wpsstm-wizard-click]', function(e) {
+        e.preventDefault();
+        var new_value = $(this).attr('data-wpsstm-wizard-click');
+        wizard_input_el.val(new_value);
         
         if (new_value){
             $('html, body').animate({
-                scrollTop: input_el.offset().top - ( $(window).height() / 3) //not at the very top
+                scrollTop: wizard_input_el.offset().top - ( $(window).height() / 3) //not at the very top
             }, 500);
         }
-        
-
-
     });
     
     //tabs
-    $("#wizard-wrapper #wpsstm-advanced-wizard-sections").tabs();
+    $("#wizard-wrapper #wpsstm-wizard-sections").tabs();
 
     /*
     advanced selectors

@@ -249,14 +249,19 @@ class WP_SoundSystem_Core_Tracklists{
         wpsstm()->debug_log($ajax_data,"ajax_refresh_tracklist()");
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
+        
+        $ajax_options = (array)$ajax_data['options'];
+        foreach($ajax_options as $key=>$option){
+            //convert AJAX strings to bool
+            if ($option === 'true') $ajax_options[$key] = true;
+            if ($option === 'false') $ajax_options[$key] = false;
+        }
 
         if ($tracklist_id){
             
             setup_postdata($tracklist_id); //this will populate the $wpsstm_tracklist
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
-            
-            $wpsstm_tracklist->options = wp_parse_args((array)$ajax_data['options'],$wpsstm_tracklist->options);
-
+            $wpsstm_tracklist->options = wp_parse_args($ajax_options,$wpsstm_tracklist->options);
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
         }
@@ -303,10 +308,10 @@ class WP_SoundSystem_Core_Tracklists{
         global $wpsstm_tracklist;
         $wpsstm_tracklist = wpsstm_get_post_tracklist($post_id);
         
-        $wpsstm_tracklist->options['autoplay'] = false;
-        $wpsstm_tracklist->options['autosource'] = false;
-        $wpsstm_tracklist->options['can_play'] = false;
-        $wpsstm_tracklist->options['template'] = 'list';
+        $wpsstm_tracklist->options['autoplay'] =    false;
+        $wpsstm_tracklist->options['autosource'] =  false;
+        $wpsstm_tracklist->options['can_play'] =    false;
+        $wpsstm_tracklist->options['template'] =    'list';
 
         if ( !$output = $wpsstm_tracklist->get_tracklist_html() ){
             $output = '—';
@@ -411,7 +416,6 @@ class WP_SoundSystem_Core_Tracklists{
         setup_postdata($post->ID); //this will populate the $wpsstm_tracklist
         
         $wpsstm_tracklist->options['autoplay'] = false;
-        $wpsstm_tracklist->options['can_play'] = false;
         $output = $wpsstm_tracklist->get_tracklist_html();
 
         wp_reset_postdata();

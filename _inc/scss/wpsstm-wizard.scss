@@ -1,163 +1,82 @@
 @import "compass/css3";
 
+#wpsstm-wizard-search{
+    position:relative;
+    margin: 0.5em;
+    input{
+        padding: 0.5em;
+        line-height: 1em;
+        height:100%;
+    }
+    input[type="text"]{
+        padding-right:4em;
+    }
+    input[type="submit"]{
+        width:4em;
+        font-family: 'FontAwesome';
+        position: absolute;
+        top:0;
+        right: 0;
+        border: none;
+        cursor: hand; cursor: pointer;
+    }
+}
+
+
 #wizard-wrapper{
     position:relative;
 
     input.fullwidth{
         width:100%;
     }
-    
-    #wpsstm-available-presets{
-        margin: 1em 0;
-    }
-    
-    .wpsstm-tracklist{
 
-    }
-    
     #wpsstm-wizard-preview-feed-url{
         text-align:center;
         font-size:1.25em;
     }
-    
-    &.wizard-wrapper-frontend{
-        text-align:center;
-        h2{
-            display:none;
-        }
-        p.submit{
-            margin:auto;
-            max-width:40%;
-        }
-        table.wizard-section-table{
-            margin:auto;
-            border:none;
-            th{
-                display:none;
-            }
-            th,td{
-                border:none;
-            }
+
+    table#wizard-regexes{
+        width:100%;
+        tr:first-child,td:first-child{
+            width:70%;
         }
     }
 
-    &.wizard-wrapper-advanced{
+    pre.spiff-raw, pre.spiff-raw code {
+        //Instead of the line below you could use @includebox-sizing($bs)
+        box-sizing: border-box;
+        webkit-box-sizing: border-box;
+        display: block;
+        white-space: pre-wrap;
+        white-space: -pre-wrap;
+        word-wrap: break-word;
+        width: 100%;
+        overflow: auto;
+    }
 
-        table#wizard-regexes{
-            width:100%;
-            tr:first-child,td:first-child{
-                width:70%;
+    .tracks-selector-prefix {
+            color: lightgrey;
+            padding-right: 0.5em;
+    }
+    .wpsstm-wizard-selector-toggle-advanced {
+            text-decoration: none;
+    }
+
+    #spiff-station-tracks-raw{
+        max-height: calc(3 * 211px);
+        overflow-y: auto;
+    }
+
+    pre.spiff-raw {
+            max-height: 200px;
+            border: 1px solid lightgrey;
+            padding: 10px;
+            code {
+                    background: none;
             }
-        }
-
-        pre.spiff-raw, pre.spiff-raw code {
-            //Instead of the line below you could use @includebox-sizing($bs)
-            box-sizing: border-box;
-            webkit-box-sizing: border-box;
-            display: block;
-            white-space: pre-wrap;
-            white-space: -pre-wrap;
-            word-wrap: break-word;
-            width: 100%;
-            overflow: auto;
-        }
-
-        .tracks-selector-prefix {
-                color: lightgrey;
-                padding-right: 0.5em;
-        }
-        #wpsstm-advanced-wizard-sections{
-            border-bottom: 1px solid #eee;
-            margin-bottom: 1em;
-            #wpsstm-advanced-wizard-sections-header{
-                clear:both;
-                overflow:auto;
-                li {
-                        display: inline-block;
-                        &.ui-tabs-active a {
-                                background: white;
-                                border-bottom: 0;
-                        }
-                }
-            }
-
-            .wpsstm-wizard-step-content{
-                .wpsstm-wizard-selector{
-                    input[type="text"]{
-                        min-width:50%;
-                    }
-                    .wpsstm-wizard-selector-advanced{
-                        display: none;
-                        &.active{
-                            display: block;
-                        }
-                        .wpsstm-wizard-track-selector-desc{
-                            padding: 1em;
-                            font-style:italic;
-                            code{
-                                font-style:normal;
-                            }
-                        }
-                        table{
-                            td {
-                                color: #999;
-                                padding: 5px;
-                                font-family: Consolas, Monaco, monospace;
-                            }
-                            .wpsstm-wizard-selector-regex {
-                                &:before {
-                                        text-align: center;
-                                        width: 20px;
-                                        content: '~';
-                                }
-                                &:after {
-                                        text-align: center;
-                                        width: 20px;
-                                        content: '~m';
-                                }
-                                input {
-                                        width: 90%;
-                                        color: #999;
-                                }
-                            }
-                        }
-                    }
-                }
-                &#wpsstm-wizard-step-tracks-content{
-                    .wpsstm-wizard-selector{
-                        input[type="text"]{
-                            min-width:100%;
-                        }
-                    }
-                }
-            }
-        }
-        .wpsstm-wizard-selector-toggle-advanced {
-                text-decoration: none;
-        }
-
-        #spiff-station-tracks-raw{
-            max-height: calc(3 * 211px);
-            overflow-y: auto;
-        }
-
-        pre.spiff-raw {
-                max-height: 200px;
-                border: 1px solid lightgrey;
-                padding: 10px;
-                code {
-                        background: none;
-                }
-        }
-        .ui-tabs-panel > h3:first-of-type {
-                display: none;
-        }
-        .js &{
-            
-        }
-        .no-js &{
-            
-        }
+    }
+    .ui-tabs-panel > h3:first-of-type {
+            display: none;
     }
 
 }
@@ -169,42 +88,6 @@
     #wpsstm-wizard-convert-tracklist{
         p.submit{
             display:inline-block;
-        }
-    }
-}
-
-#wpsstm-wizard-helpers{
-    list-style: none;
-    font-size:.75em;
-    position: relative;
-    @include display-flex();
-    @include flex-wrap(wrap);
-    .wpsstm-wizard-helper{
-        margin:.5em;
-        width:calc(33% - 1em);
-        box-sizing: border-box;
-        padding:1em;        
-        
-        @include flex-grow(1);
-        background-color:#f7f7f7;
-        border: 1px solid #eaeaea;
-        h3{
-            margin-top:0;
-        }
-        ul{
-            list-style: none;
-        }
-        input[type=text]{
-            font-size:1em;
-            text-align:center;
-            background-color:white;
-        }
-
-        &:not(.wpsstm-wizard-helper-success){
-            a{
-                pointer-events:none;
-                @include opacity(.5);
-            }
         }
     }
 }

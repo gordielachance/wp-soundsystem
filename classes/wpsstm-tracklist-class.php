@@ -424,8 +424,6 @@ class WP_SoundSystem_Tracklist{
         wpsstm_locate_template( $template_file, true, false );
         $output = ob_get_clean();
 
-        wp_reset_postdata();
-        
         return $output;
         
     }
@@ -825,10 +823,9 @@ class WP_SoundSystem_Tracklist{
     function flush_subtracks($keep_ids = null){
         
         $flush_ids = array();
-        $orphan_ids = array();
+        $orphan_tracks = array();
         $flushed_ids = array();
-        
-        
+
         $subtrack_ids = wpsstm_get_raw_subtrack_ids($this->tracklist_type,$this->post_id);
         if ( !$subtrack_ids ) return;
 
@@ -849,15 +846,15 @@ class WP_SoundSystem_Tracklist{
             if ( $tracklist_parent_key !== false ) unset($parent_ids[$tracklist_parent_key]);
 
             //is an orphan
-            if ( empty($parent_ids) && empty($loved_by) ) $orphan_ids[] = $track_id;
+            if ( empty($parent_ids) && empty($loved_by) ) $orphan_tracks[] = $track;
 
         }
 
-        if ( !$orphan_ids ) return;
+        if ( !$orphan_tracks ) return;
 
-        foreach( (array)$orphan_ids as $track_id ){
-            $success = wp_trash_post($track_id);
-            if ( $success ) $flushed_ids[] = $track_id;
+        foreach( (array)$orphan_tracks as $track ){
+            $success = $track->trash_track();
+            if ( $success ) $flushed_ids[] = $track->post_id;
         }
 
         wpsstm()->debug_log(json_encode(array('subtrack_ids'=>implode(',',(array)$subtrack_ids),'keep_ids'=>implode(',',(array)$keep_ids),'flush_ids'=>implode(',',(array)$flush_ids),'flushed'=>implode(',',(array)$flushed_ids))),"WP_SoundSystem_Tracklist::flush_subtracks()");
@@ -935,6 +932,10 @@ class WP_SoundSystem_Tracklist{
         //TO FIX weird code, not effiscient
         $extra_classes = ( isset($values_attr['extra_classes']) ) ? $values_attr['extra_classes'] : null;
         unset($values_attr['extra_classes']);
+        
+        //for data attribute
+        $options = $this->get_options();
+        unset($options['selectors'],$options['tracks_order'],$options['datas_cache_min']);
 
         $values_defaults = array(
             'itemscope' =>                      true,
@@ -942,10 +943,10 @@ class WP_SoundSystem_Tracklist{
             'data-wpsstm-tracklist-id' =>       $this->post_id,
             'data-wpsstm-tracklist-idx' =>      $this->index,
             'data-tracks-count' =>              $this->track_count,
-            'wpsstm-toggle-tracklist' =>        wpsstm()->get_options('toggle_tracklist'), 
-            'wpsstm-template' =>                wpsstm()->get_options('template'), 
+            'data-wpsstm-tracklist-options' =>  htmlspecialchars(json_encode($options)), 
+            'data-wpsstm-toggle-tracklist' =>   $this->get_options('toggle_tracklist'),
         );
-        
+
         $values_attr = array_merge($values_defaults,(array)$values_attr);
         
         return wpsstm_get_html_attr($values_attr);
@@ -957,11 +958,12 @@ class WP_SoundSystem_Tracklist{
             'wpsstm-tracklist',
         );
         $classes[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
-        $classes[] = ( $this->get_options('hide_empty_columns') == "on" ) ? 'wpsstm-hide-empty-columns' : null;
-        $classes[] = ( $this->get_options('autoplay') == "on" ) ? 'tracklist-autoplay' : null;
-        $classes[] = ( $this->get_options('autosource') == "on" ) ? 'tracklist-autosource' : null;
-        $classes[] = ( $this->get_options('wpsstm-can-play') == "on" ) ? 'wpsstm-can-play' : null;
-        
+        $classes[] = $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null;
+        $classes[] = $this->get_options('autoplay') ? 'tracklist-autoplay' : null;
+        $classes[] = $this->get_options('autosource') ? 'tracklist-autosource' : null;
+        $classes[] = $this->get_options('can_play') ? 'tracklist-playable' : null;
+        $classes[] = 'tracklist-template-' . $this->get_options('template');
+
         if ( $this->is_tracklist_loved_by() ){
             $classes[] = 'wpsstm-loved-tracklist';
         }
@@ -971,10 +973,6 @@ class WP_SoundSystem_Tracklist{
         }
         
         $classes = array_merge($classes,(array)$extra_classes);
-
-        if ( $this->get_options('can_play') ){
-            $classes[] = 'wpsstm-playable-tracklist';
-        }
 
         //capabilities
         $tracklist_type = get_post_type($this->post_id);

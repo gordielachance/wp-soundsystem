@@ -14,7 +14,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
 ?>
 
-<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('tracklist-table')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
+<div class="<?php echo implode(' ',$tracklist->get_tracklist_class());?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <div>
@@ -57,17 +57,6 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         $tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
 
     }
-
-    //not logged notice
-    //TO FIX TO MOVE
-    //TO FIX should not be displayed for every playlist but only once for the page
-    if ( $tracklist->post_id && $tracklist->tracks && !get_current_user_id() ){
-        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-        $wp_auth_text = sprintf(__('You could save this playlist if you were logged.  Login or subscribe %s.','wpsstm'),$wp_auth_link);
-        $tracklist->add_notice( 'tracklist-header', 'user-not-logged', $wp_auth_icon . '  ' . $wp_auth_text );
-    }
-
 
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
         echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);

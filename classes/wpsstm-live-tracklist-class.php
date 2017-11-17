@@ -158,9 +158,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         /*
-        SAVE TRACKS
+        SAVE TRACKS 
+        if cache is enabled
         */
-        $this->save_live_tracklist();
+        if ( $cache_duration_min = $this->get_options('datas_cache_min') ){
+            $this->save_live_tracklist();
+        }
 
         return true;
     }
@@ -308,6 +311,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
+        
+        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found nodes' );
 
         return $tracks;
     }

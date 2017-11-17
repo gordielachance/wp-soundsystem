@@ -3,9 +3,10 @@ global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
 
 $tracklist = $wpsstm_tracklist;
+
 ?>
 
-<div class="<?php echo implode(' ',$tracklist->get_tracklist_class(array('wpsstm-tracklist-list')));?>" <?php echo $tracklist->get_tracklist_attr();?>>
+<div class="<?php echo implode(' ',$tracklist->get_tracklist_class());?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <?php 
     if ( $tracklist->have_tracks() ) { 
