@@ -57,10 +57,6 @@ class WP_SoundSystem_Core_MusicBrainz {
         add_filter('wpsstm_column_album',array($this,'column_mb_album'),10,4);
         
         add_filter( 'redirect_post_location', array($this,'redirect_to_switch_entries') );
-        
-        //ajax : load tracklist
-        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists'));
-        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists'));
 
     }
 
@@ -786,7 +782,6 @@ class WP_SoundSystem_Core_MusicBrainz {
                 $inc[] = 'recordings';
                 $inc[] = 'release-groups';
 
-                
             break;
         }
         
@@ -934,37 +929,6 @@ class WP_SoundSystem_Core_MusicBrainz {
         return $mbtype;
         
     }
-    
-    function ajax_search_artists(){
-        
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input' =>              $ajax_data,
-            'message' =>            null,
-            'success' =>            false
-        );
-        
-        $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
-        if ($search){
-            $results = wpsstm_mb()->get_musicbrainz_api_entry('artist',null,$search,10);
-            if ( is_wp_error($results) ){
-                $result['message'] = $results->get_error_message();
-            }else{
-                $result['data'] = $results;
-                $result['success'] = true;
-            }
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-        
-        //
-        
-        
-        
-    }
-
 }
 
 function wpsstm_mb() {

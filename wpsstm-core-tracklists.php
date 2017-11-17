@@ -125,13 +125,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function register_tracklists_scripts_styles_shared(){
         wp_register_style( 'wpsstm-frontend', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome'),wpsstm()->version );
-        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome'),wpsstm()->version );
-        
-        $tracklist_dependencies = array('font-awesome','wpsstm-frontend','thickbox');
-        $minimal_css = ( wpsstm()->get_options('minimal_css') == 'off');
-        if ($minimal_css) $tracklist_dependencies[] = 'wpsstm-default-style';
 
-        wp_register_style( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/css/wpsstm-tracklists.css',$tracklist_dependencies,wpsstm()->version );
+        wp_register_style( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/css/wpsstm-tracklists.css',array('font-awesome','wpsstm-frontend','thickbox'),wpsstm()->version );
         //JS
         
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','thickbox','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );

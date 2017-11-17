@@ -21,22 +21,19 @@
                         url: wpsstmL10n.ajaxurl,
                         data: {
                             action:             'wpsstm_search_artists',
-                            search:              request.term,
+                            search:              request.term + '*', //wildcard!
                         },
                         beforeSend: function() {
                             input.addClass('wpsstm-loading');
                         },
-                        success: function( data ) {
-                            if(data.success){
-                                console.log("YO");
-                                console.log(data);
-                                console.log(data.count);
-                                console.log(data.artists);
-                                response($.map(data.artists, function(artist){
-                                    return artist.name; // on retourne cette forme de suggestion
+                        success: function( ajax ) {
+                            if(ajax.success){
+                                var artists = ajax.data.artists;
+                                response($.map(artists, function(artist){
+                                    return artist.name;
                                 }));
                             }else{
-                                console.log(data);
+                                console.log(ajax);
                             }
 
                         },
@@ -48,7 +45,8 @@
                         }
                     });
                 },
-                minLength: 1
+                delay: 500,
+                minLength: 2,
             });
         });
     });  

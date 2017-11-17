@@ -41,6 +41,10 @@ class WP_SoundSystem_Core_Artists{
         
         //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
         //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
+        
+        //ajax
+        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists'));
+        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists'));
 
     }
     
@@ -276,7 +280,7 @@ class WP_SoundSystem_Core_Artists{
         $artist_name = get_post_meta( $post->ID, $this->artist_metakey, true );
         
         ?>
-        <input type="text" name="wpsstm_artist" class="wpsstm-fullwidth wpsstm-lookup-artist" value="<?php echo $artist_name;?>" placeholder="<?php printf("Enter artist here",'wpsstm');?>"/>
+        <input type="text" name="wpsstm_artist" class="wpsstm-fullwidth wpsstm-artist-autocomplete" value="<?php echo $artist_name;?>" placeholder="<?php printf("Enter artist here",'wpsstm');?>"/>
         <?php
         wp_nonce_field( 'wpsstm_artist_meta_box', 'wpsstm_artist_meta_box_nonce' );
 
@@ -314,6 +318,37 @@ class WP_SoundSystem_Core_Artists{
         }else{
             update_post_meta( $post_id, $this->artist_metakey, $artist );
         }
+
+    }
+    
+    /*
+    Use Musicbrainz API to search artists
+    WARNING for partial search, you'll need a wildcard * !
+    */
+    
+    function ajax_search_artists(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'input' =>              $ajax_data,
+            'message' =>            null,
+            'success' =>            false
+        );
+        
+        $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
+        if ($search){
+            $results = wpsstm_mb()->get_musicbrainz_api_entry('artist',null,$search);
+            if ( is_wp_error($results) ){
+                $result['message'] = $results->get_error_message();
+            }else{
+                $result['data'] = $results;
+                $result['success'] = true;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
 
     }
 

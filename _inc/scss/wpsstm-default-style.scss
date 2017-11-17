@@ -5,6 +5,30 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 @import "compass";
 @import "wpsstm-shared";
 
+@keyframes barberpole {
+    from { background-position: 0 0; }
+    to   { background-position: 60px 30px; }
+}
+
+@mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
+    background-size: 30px 30px;
+    background-image: linear-gradient(
+        $direction, 
+        $color-a    25%, 
+        $color-b    25%, 
+        $color-b    50%, 
+        $color-a    50%, 
+        $color-a    75%, 
+        $color-b    75%, 
+        $color-b
+    );
+    animation: barberpole 0.5s linear infinite;
+}
+
+input[type="text"].wpsstm-loading{
+    @include striped-bg();
+} 
+
 .wpsstm-actions-list{
     li{
         display:inline-block;
