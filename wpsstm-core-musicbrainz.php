@@ -782,7 +782,6 @@ class WP_SoundSystem_Core_MusicBrainz {
                 $inc[] = 'recordings';
                 $inc[] = 'release-groups';
 
-                
             break;
         }
         
@@ -930,7 +929,6 @@ class WP_SoundSystem_Core_MusicBrainz {
         return $mbtype;
         
     }
-
 }
 
 function wpsstm_mb() {
