@@ -149,9 +149,13 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= 1.8.4 =
+= 1.8.5 =
 * welcome Wordpress 4.9! Finally!
 * improved wizard (GUI, presets, helpers), etc.
+* ajax artist autocomplete
+* fixed WP_SoundSystem_Preset_LastFM_Artist_Scraper
+* strict validate tracks on the frontend wizard
+* fix shortcode fatal error when post requested does not exists
 
 = 1.8.0 =
 * better Last.FM presets (including last.fm stations)
