@@ -658,7 +658,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         //QueryPath
-        
         try{
 
             if ($selector_css){
@@ -709,14 +708,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
             }
-            
-            //sanitize result
-            $string = strip_tags($string);
-            $string = urldecode($string);
-            $string = htmlspecialchars_decode($string);
-            $string = trim($string);
-            
-            $result[] = $string;
+
+            $result[] = $this->sanitize_remote_string($string);
             
         }
         
@@ -739,6 +732,15 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $string = str_replace("]]>","",$string);
 
         return trim($string);
+    }
+    
+    function sanitize_remote_string($string){
+        //sanitize result
+        $string = strip_tags($string);
+        $string = urldecode($string);
+        $string = htmlspecialchars_decode($string);
+        $string = trim($string);
+        return $string;
     }
 
     public function set_request_pagination( $args ) {
