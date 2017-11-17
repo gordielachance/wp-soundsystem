@@ -99,6 +99,7 @@ class WP_SoundSystem_Preset_LastFM_Artist_Scraper extends WP_SoundSystem_Preset_
 
     var $preset_slug =      'last-fm-artist';
     var $preset_url =       'https://www.last.fm/music/XXX';
+    var $artist;
 
     function __construct($post_id = null){
         parent::__construct($post_id);
@@ -112,6 +113,17 @@ class WP_SoundSystem_Preset_LastFM_Artist_Scraper extends WP_SoundSystem_Preset_
     
     function get_remote_url(){
         return sprintf('https://www.last.fm/music/%s/+tracks',$this->get_artist_slug());
+    }
+    
+    //On an artist page, artist is displayed only on the header page; not on each track.
+    //So use body_node as input here.
+
+    protected function get_track_artist($track_node){
+        if (!$this->artist){
+            $selector = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
+            $this->artist = $this->parse_node($this->body_node,$selector);
+        }
+        return $this->artist;
     }
 
 }
@@ -203,7 +215,7 @@ class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends 
 function register_lastfm_preset($presets){
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
-    //$presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper'; //TO FIX : NOT WORKING BECAUSE WE CANNOT GET ARTIST WHEN PARSING TRACKS ON /+tracks
+    $presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
     $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
     return $presets;
