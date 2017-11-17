@@ -605,18 +605,22 @@ class WP_SoundSystem_Core_Tracks{
     function shortcode_track( $atts ) {
         global $post;
         global $wpsstm_tracklist;
+        
+        $output = null;
 
         // Attributes
         $default = array(
             'post_id'       => $post->ID 
         );
+        
         $atts = shortcode_atts($default,$atts);
+        
+        if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
+            setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
+            $output = $wpsstm_tracklist->get_tracklist_html();
+            wp_reset_postdata();
+        }
 
-        setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
-        $output = $wpsstm_tracklist->get_tracklist_html();
-        
-        wp_reset_postdata();
-        
         return $output;
 
     }
