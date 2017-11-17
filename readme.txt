@@ -361,7 +361,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = 0.9.8.9 =
 
 * scraper now able to get an array of sources urls for each track.
-* get_track_node_content(): new argument '$single_value' (default to TRUE)
+* parse_node(): new argument '$single_value' (default to TRUE)
 
 = 0.9.8.8 =
 
@@ -385,7 +385,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 * scraper: set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSystem_Remote_Tracklist::get_track_node_content()
+* sanitize string at the end of WP_SoundSystem_Remote_Tracklist::parse_node()
 * new Hype Machine preset
 
 = 0.9.8.4 =

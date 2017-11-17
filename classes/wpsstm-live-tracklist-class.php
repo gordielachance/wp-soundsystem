@@ -312,7 +312,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
         
-        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found nodes' );
+        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
 
         return $tracks;
     }
@@ -515,19 +515,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     public function get_remote_title(){
 
-        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title', 'path') ) ) return;
-        
-        $title = null;
-
-        //QueryPath
-        try{
-            $title_node = qp( $this->body_node, null, self::$querypath_options )->find($selector_title);
-            $title = $title_node->innerHTML();
-        }catch(Exception $e){
-            return;
-        }
-        
-        return $title;
+        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title') ) ) return;
+        return $this->parse_node($this->body_node,$selector_title);
     }
     
     /*
@@ -593,22 +582,22 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     protected function get_track_artist($track_node){
         $selectors = $this->get_options(array('selectors','track_artist'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_title($track_node){
         $selectors = $this->get_options(array('selectors','track_title'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_album($track_node){
         $selectors = $this->get_options(array('selectors','track_album'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_image($track_node){
         $selectors = $this->get_options(array('selectors','track_image'));
-        $image = $this->get_track_node_content($track_node,$selectors);
+        $image = $this->parse_node($track_node,$selectors);
         
         if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
         
@@ -631,7 +620,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_options(array('selectors','track_source_urls'));
-        $source_urls = $this->get_track_node_content($track_node,$selectors,false);
+        $source_urls = $this->parse_node($track_node,$selectors,false);
 
         foreach ((array)$source_urls as $key=>$url){
             if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
@@ -643,7 +632,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
     }
 
-    protected function get_track_node_content($track_node,$selectors,$single_value=true){
+    protected function parse_node($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
@@ -658,7 +647,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
 
         //QueryPath
-        
         try{
 
             if ($selector_css){
@@ -709,14 +697,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
 
             }
-            
-            //sanitize result
-            $string = strip_tags($string);
-            $string = urldecode($string);
-            $string = htmlspecialchars_decode($string);
-            $string = trim($string);
-            
-            $result[] = $string;
+
+            $result[] = $this->sanitize_remote_string($string);
             
         }
         
@@ -739,6 +721,15 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $string = str_replace("]]>","",$string);
 
         return trim($string);
+    }
+    
+    function sanitize_remote_string($string){
+        //sanitize result
+        $string = strip_tags($string);
+        $string = urldecode($string);
+        $string = htmlspecialchars_decode($string);
+        $string = trim($string);
+        return $string;
     }
 
     public function set_request_pagination( $args ) {
