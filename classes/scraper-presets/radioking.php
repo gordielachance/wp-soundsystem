@@ -79,7 +79,7 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
     protected function get_track_image($track_node){
         $selectors = $this->get_options(array('selectors','track_image'));
         
-        if ( $image_id = $this->get_track_node_content($track_node,$selectors) ){
+        if ( $image_id = $this->parse_node($track_node,$selectors) ){
            $image = sprintf('https://www.radioking.com/api/track/cover/%s?width=55&height=55',$image_id);
         }
 

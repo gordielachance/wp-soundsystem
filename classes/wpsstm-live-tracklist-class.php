@@ -312,7 +312,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
         
-        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found nodes' );
+        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
 
         return $tracks;
     }
@@ -593,22 +593,22 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     protected function get_track_artist($track_node){
         $selectors = $this->get_options(array('selectors','track_artist'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_title($track_node){
         $selectors = $this->get_options(array('selectors','track_title'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_album($track_node){
         $selectors = $this->get_options(array('selectors','track_album'));
-        return $this->get_track_node_content($track_node,$selectors);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_image($track_node){
         $selectors = $this->get_options(array('selectors','track_image'));
-        $image = $this->get_track_node_content($track_node,$selectors);
+        $image = $this->parse_node($track_node,$selectors);
         
         if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
         
@@ -631,7 +631,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_options(array('selectors','track_source_urls'));
-        $source_urls = $this->get_track_node_content($track_node,$selectors,false);
+        $source_urls = $this->parse_node($track_node,$selectors,false);
 
         foreach ((array)$source_urls as $key=>$url){
             if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
@@ -643,7 +643,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
     }
 
-    protected function get_track_node_content($track_node,$selectors,$single_value=true){
+    protected function parse_node($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();

@@ -290,10 +290,19 @@ class WP_SoundSystem_Tracklist{
         $valid_tracks = array();
         
         foreach($pending_tracks as $track){
-            if ( !$track->validate_track($this->tracks_strict) ) continue;
+            if ( !$track->validate_track($this->tracks_strict) ){
+                /*
+                wpsstm()->debug_log(json_encode(sprintf('artist:%s - title:%s - album:%s',$this->artist,$this->title,$this->album),JSON_UNESCAPED_UNICODE), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
+                */
+                continue;
+            }
             $valid_tracks[] = $track;
         }
         
+        if ( $removed = (count($pending_tracks) - count($valid_tracks)) ){
+            wpsstm()->debug_log(sprintf('%s/%s tracks have been rejected',$removed,count($pending_tracks)), "WP_SoundSystem_Tracklist::validate_tracks");
+        }
+
         return $valid_tracks;
     }
 
