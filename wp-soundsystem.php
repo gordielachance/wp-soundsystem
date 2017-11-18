@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.8.4
+Version: 1.8.5
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.8.4';
+    public $version = '1.8.5';
     /**
     * @public string plugin DB version
     */
@@ -223,17 +223,19 @@ class WP_SoundSystem {
     }
 
     function register_scripts_styles_shared(){
-        
+
         //TO FIX conditional / move code ?
         
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
 
+        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome'),wpsstm()->version );
+
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         
         //js
-        wp_register_script( 'wpsstm-shared', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-tracklists'),$this->version);
+        wp_register_script( 'wpsstm-shared', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','wpsstm-tracklists'),$this->version);
         
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
@@ -259,7 +261,10 @@ class WP_SoundSystem {
             wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
             wp_enqueue_style( 'wpsstm-admin' );
 
-            
+            //default styling
+            if ( wpsstm()->get_options('minimal_css') == 'off'){
+                wp_enqueue_style( 'wpsstm-default-style' );
+            }
             
         //}
         
@@ -269,7 +274,12 @@ class WP_SoundSystem {
         
         //TO FIX TO CHECK embed only for music post types ?
         wp_enqueue_script( 'wpsstm-shared' );
-        
+
+        //default styling
+        if ( wpsstm()->get_options('minimal_css') == 'off'){
+            wp_enqueue_style( 'wpsstm-default-style' );
+        }
+
     }
 
     /*

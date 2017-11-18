@@ -83,7 +83,7 @@
 
                                         <div id="track-admin-artist">
                                             <h3><?php _e('Artist','wpsstm');?></h3>
-                                            <input name="wpsstm_track_artist" value="<?php echo $track->artist;?>" class="wpsstm-fullwidth" />
+                                            <input name="wpsstm_track_artist" value="<?php echo $track->artist;?>" class="wpsstm_search_artists wpsstm-fullwidth" />
                                         </div>
 
                                         <div id="track-admin-title">

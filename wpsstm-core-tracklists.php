@@ -124,13 +124,8 @@ class WP_SoundSystem_Core_Tracklists{
     
     function register_tracklists_scripts_styles_shared(){
         wp_register_style( 'wpsstm-frontend', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome'),wpsstm()->version );
-        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome'),wpsstm()->version );
-        
-        $tracklist_dependencies = array('font-awesome','wpsstm-frontend','thickbox');
-        $minimal_css = ( wpsstm()->get_options('minimal_css') == 'off');
-        if ($minimal_css) $tracklist_dependencies[] = 'wpsstm-default-style';
 
-        wp_register_style( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/css/wpsstm-tracklists.css',$tracklist_dependencies,wpsstm()->version );
+        wp_register_style( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/css/wpsstm-tracklists.css',array('font-awesome','wpsstm-frontend','thickbox'),wpsstm()->version );
         //JS
         
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','thickbox','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
@@ -145,12 +140,12 @@ class WP_SoundSystem_Core_Tracklists{
         
         $allowed_post_types = $this->tracklist_post_types;
         $allowed_post_types[] = wpsstm()->post_type_track;
-        
-        if ( !in_array(get_post_type($post),$allowed_post_types) ) return;
-        
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
-        $wpsstm_tracklist->index = $query->current_post + 1;
-        
+
+        if ( in_array(get_post_type($post),$allowed_post_types) ){
+            $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
+            $wpsstm_tracklist->index = $query->current_post + 1;
+        }
+
     }
 
     function enqueue_tracklists_scripts_styles_frontend(){
@@ -438,6 +433,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         global $post;
         global $wpsstm_tracklist;
+        $output = null;
 
         // Attributes
         $default = array(
@@ -445,15 +441,13 @@ class WP_SoundSystem_Core_Tracklists{
             'max_rows'      => -1    
         );
         $atts = shortcode_atts($default,$atts);
-        
-        //check post type
-        $post_type = get_post_type($atts['post_id']);
-        if ( !in_array($post_type,$this->tracklist_post_types) ) return;
-        
-        setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
-        $output = $wpsstm_tracklist->get_tracklist_html();
-        wp_reset_postdata();
-        
+
+        if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,$this->tracklist_post_types) ){ //check that the post exists
+            setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
+            $output = $wpsstm_tracklist->get_tracklist_html();
+            wp_reset_postdata();
+        }
+
         return $output;
 
     }
