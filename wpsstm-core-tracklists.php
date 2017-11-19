@@ -5,8 +5,6 @@ Handle posts that have a tracklist, like albums and playlists.
 **/
 
 class WP_SoundSystem_Core_Tracklists{
-    
-    public $qvar_xspf = 'xspf';
     public $qvar_tracklist_action = 'tracklist-action';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     public $time_updated_subtracks_meta_name = 'wpsstm_remote_query_time';
@@ -53,12 +51,12 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
-        add_action( 'init', array($this,'register_tracklist_endpoints' ));
-        add_filter( 'template_include', array($this,'xspf_template_filter'));
         
         
-        add_action( 'wp', array($this,'tracklist_save_admin_gui'));
-        add_action( 'wp', array($this,'tracklist_append_new_track'));
+        add_action( 'template_redirect', array($this,'handle_tracklist_action'));
+        add_filter( 'template_include', array($this,'tracklist_export_redirect'));
+        
+        add_action( 'wp', array($this,'tracklist_append_new_track')); //TOFIXDDD
         add_filter( 'template_include', array($this,'tracklist_admin_template_filter'));
         
 
@@ -108,18 +106,9 @@ class WP_SoundSystem_Core_Tracklists{
     */
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_action;
-        $vars[] = $this->qvar_xspf;
         return $vars;
     }
 
-    /**
-     * Add endpoint for the "/xspf" posts links 
-     */
-
-    function register_tracklist_endpoints(){
-        add_rewrite_endpoint($this->qvar_xspf, EP_PERMALINK ); // /xspf
-    }
-    
     function register_tracklists_scripts_styles_shared(){
         wp_register_style( 'wpsstm-frontend', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome'),wpsstm()->version );
 
@@ -257,23 +246,6 @@ class WP_SoundSystem_Core_Tracklists{
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
-    }
-
-    /**
-    *    From http://codex.wordpress.org/Template_Hierarchy
-    *
-    *    Adds a custom template to the query queue.
-    */
-    function xspf_template_filter($template){
-        global $wp_query;
-        global $post;
-        global $wpsstm_tracklist;
-
-        if( !isset( $wp_query->query_vars[$this->qvar_xspf] ) ) return $template; //don't use $wp_query->get() here
-        
-        the_post();
-
-        return wpsstm_locate_template( 'tracklist-xspf.php' );
     }
     
     function column_tracklist_register($defaults) {
@@ -535,115 +507,49 @@ class WP_SoundSystem_Core_Tracklists{
         }
         
     }
+
+    function tracklist_export_redirect($template){
+        if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return $template;
+        if ( $admin_action != 'export' ) return $template;
+        the_post();
+        return wpsstm_locate_template( 'tracklist-xspf.php' );
+    }
     
-    function tracklist_save_admin_gui(){
+    function handle_tracklist_action(){
         global $post;
-        
         if (!$post) return;
         
-        $tracklist = wpsstm_get_post_tracklist($post->ID);
-
         if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return;
-        if (!$tracklist->post_id) return;
         
-        //capability check
-
-        $static_post_obj =  get_post_type_object(wpsstm()->post_type_playlist);
-        $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
-
-        $post_type =        get_post_type($tracklist->post_id);
-        $post_type_obj =    get_post_type_object($post_type);
-
-        $can_edit_cap =     $post_type_obj->cap->edit_post;
-        $can_edit_post =    current_user_can($can_edit_cap,$tracklist->post_id);
-
-
-        //TO FIX validate status regarding user's caps
-        $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
-
-        $redirect_url = null; //we'll define it at the end of the function because permalink could change during an action (eg. change post type)
-        
-        //ignore ajax refresh here
-        //so tracks can be populated through PHP for actions that requires them
-        $tracklist->ajax_refresh = false;
+        $tracklist = wpsstm_get_post_tracklist($post->ID);
+        $success = null;
 
         switch($admin_action){
+            case 'export':
+                //see tracklist_export_redirect
+            break;
             case 'switch-status':
-                
-                if (!$can_edit_post) break;
-
-                $updated_post = array(
-                    'ID'            => $tracklist->post_id,
-                    'post_status'   => $new_status
-                );
-                
-                $success = wp_update_post( $updated_post );
-
-                if ( is_wp_error($success) ){
-                    $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
-                }
-                
+                $success = $tracklist->switch_status();
             break;
             case 'get-autorship':
-                
-                if ( !$tracklist->user_can_get_autorship() ) break;
-
-                $updated = $tracklist->get_autorship();
-
-                if ( is_wp_error($updated) ){
-                    $redirect_url = add_query_arg( array('tracklist_error'=>$updated->get_error_code()),$redirect_url );
-                }
-                
+                $success = $tracklist->get_autorship();
             break;
             case 'lock-tracklist':
-                
-                if ( !$tracklist->user_can_lock_tracklist() ) break;
-
-                $converted = $tracklist->convert_to_static_playlist();
-
-                if ( is_wp_error($converted) ){
-                    $redirect_url = add_query_arg( array('tracklist_error'=>$converted->get_error_code()),$redirect_url );
-                }
-                
+                $success = $tracklist->convert_to_static_playlist();
             break;
             case 'unlock-tracklist':
-                
-                if ( !$tracklist->user_can_unlock_tracklist() ) break;
-
-                $converted = $tracklist->convert_to_live_playlist($tracklist->post_id);
-
-                if ( is_wp_error($converted) ){
-                    $redirect_url = add_query_arg( array('tracklist_error'=>$converted->get_error_code()),$redirect_url );
-                }
-
-            break;
-                
-            case 'store':
-                
-                $can_store = $tracklist->user_can_store_tracklist();
-
-                if ($can_store){
-                    $args = array(
-                        'ID' =>             $tracklist->post_id,
-                        'post_author' =>    get_current_user_id(),
-                    );
-
-                    $success = wp_update_post( $args );
-                }
-
-                if ( is_wp_error($success) ){
-                    $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
-                }
-                
+                $success = $tracklist->convert_to_live_playlist($tracklist->post_id);
             break;
         }
         
-        if (!$redirect_url){
+        if ( is_wp_error($success) ){
             $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+            wp_redirect($redirect_url);
+            exit();
         }
-        wp_redirect($redirect_url);
-        exit();
         
+        //TO FIX add notice in case of success ?
+
     }
     
     function trash_tracklist_orphans($post_id){

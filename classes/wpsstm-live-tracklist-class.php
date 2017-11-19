@@ -745,11 +745,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function convert_to_static_playlist(){
         
+        //capability check
+        if ( !$this->user_can_lock_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
         //get autorship if this is a community tracklist
         if ($this->is_community){
             $got_autorship = $this->get_autorship();
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
+        
+        //ignore ajax refresh so tracks can be populated
+        $tracklist->ajax_refresh = false;
         
         $updated = $this->save_live_tracklist();
 

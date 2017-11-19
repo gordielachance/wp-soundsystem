@@ -20,7 +20,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         <div>
             <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
             <strong class="wpsstm-tracklist-title" itemprop="name">
-                <a href="<?php echo $tracklist->get_tracklist_permalink();?>"><?php echo $tracklist->title;?></a>
+                <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->title;?></a>
             </strong>
             <small class="wpsstm-tracklist-time">
                 <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>

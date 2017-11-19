@@ -43,7 +43,6 @@ class WP_SoundSystem_Core_Wizard{
     function setup_actions(){
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
-        add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
 
         //frontend
         add_action( 'wp', array($this,'populate_frontend_wizard_tracklist'));
@@ -69,23 +68,6 @@ class WP_SoundSystem_Core_Wizard{
     function add_wizard_query_vars($vars){
         $vars[] = $this->qvar_tracklist_wizard;
         return $vars;
-    }
-    
-    /*
-    Handle the XSPF endpoint for the frontend wizard page
-    */
-    
-    function frontend_wizard_rewrite($rules){
-        global $wp_rewrite;
-        if ( !$this->frontend_wizard_page_id ) return $rules;
-        
-        $page_slug = get_post_field( 'post_name', $this->frontend_wizard_page_id );
-
-        $wizard_rule = array(
-            $page_slug . '/xspf/?' => sprintf('index.php?pagename=%s&%s=true',$page_slug,wpsstm_tracklists()->qvar_xspf)
-        );
-
-        return array_merge($wizard_rule, $rules);
     }
 
     function wizard_register_scripts_style_shared(){
