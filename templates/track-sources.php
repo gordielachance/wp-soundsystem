@@ -14,7 +14,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
             
             $wpsstm_source->populate_source_provider();
-            if ( ($wpsstm_source->provider->slug == 'default') ) continue;//we cannot play this source
+            $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
 
             //TO FIX TO CHECK required ?  Does a source not always have a track ?
             if(!$wpsstm_track){
@@ -46,7 +46,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
 
                     ?>
                 </span>
-                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->title;?></label>
+                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $title;?></label>
             </li>
             <?php
 
