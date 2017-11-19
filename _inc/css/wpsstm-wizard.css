@@ -30,23 +30,19 @@
   position: relative;
 }
 /* line 29, ../scss/wpsstm-wizard.scss */
-#wizard-wrapper input.fullwidth {
-  width: 100%;
-}
-/* line 33, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper #wpsstm-wizard-preview-feed-url {
   text-align: center;
   font-size: 1.25em;
 }
-/* line 38, ../scss/wpsstm-wizard.scss */
+/* line 34, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper table#wizard-regexes {
   width: 100%;
 }
-/* line 40, ../scss/wpsstm-wizard.scss */
+/* line 36, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper table#wizard-regexes tr:first-child, #wizard-wrapper table#wizard-regexes td:first-child {
   width: 70%;
 }
-/* line 45, ../scss/wpsstm-wizard.scss */
+/* line 41, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw, #wizard-wrapper pre.spiff-raw code {
   box-sizing: border-box;
   webkit-box-sizing: border-box;
@@ -57,40 +53,40 @@
   width: 100%;
   overflow: auto;
 }
-/* line 57, ../scss/wpsstm-wizard.scss */
+/* line 53, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .tracks-selector-prefix {
   color: lightgrey;
   padding-right: 0.5em;
 }
-/* line 61, ../scss/wpsstm-wizard.scss */
+/* line 57, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-selector-toggle-advanced {
   text-decoration: none;
 }
-/* line 65, ../scss/wpsstm-wizard.scss */
+/* line 61, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper #spiff-station-tracks-raw {
   max-height: calc(3 * 211px);
   overflow-y: auto;
 }
-/* line 70, ../scss/wpsstm-wizard.scss */
+/* line 66, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw {
   max-height: 200px;
   border: 1px solid lightgrey;
   padding: 10px;
 }
-/* line 74, ../scss/wpsstm-wizard.scss */
+/* line 70, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw code {
   background: none;
 }
-/* line 78, ../scss/wpsstm-wizard.scss */
+/* line 74, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .ui-tabs-panel > h3:first-of-type {
   display: none;
 }
 
-/* line 85, ../scss/wpsstm-wizard.scss */
+/* line 81, ../scss/wpsstm-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;
 }
-/* line 89, ../scss/wpsstm-wizard.scss */
+/* line 85, ../scss/wpsstm-wizard.scss */
 #wpsstm-frontend-wizard #wpsstm-wizard-convert-tracklist p.submit {
   display: inline-block;
 }

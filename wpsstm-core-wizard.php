@@ -721,7 +721,7 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         $text_input = sprintf(
-            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+            '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')

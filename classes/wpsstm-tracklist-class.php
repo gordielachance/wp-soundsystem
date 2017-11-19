@@ -29,7 +29,7 @@ class WP_SoundSystem_Tracklist{
     
     var $tracks_strict = true; //requires a title AND an artist
     
-    public $ajax_refresh = false;//by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
+    public $ajax_refresh = true;//by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     var $paged_var = 'tracklist_page';
     
