@@ -84,23 +84,21 @@ class WP_SoundSystem_Core_Tracklists{
 
         add_action( 'wp_trash_post', array($this,'trash_tracklist_orphans') );
         
-        //ajax : toggle love tracklist
-        add_action('wp_ajax_wpsstm_love_unlove_tracklist', array($this,'ajax_love_unlove_tracklist'));
+        /*
+        AJAX
+        */
         
-        //ajax : load tracklist
-        add_action('wp_ajax_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
-        add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
-
-        //ajax : row actions
-        add_action('wp_ajax_wpsstm_playlist_update_track_index', array($this,'ajax_update_track_index'));
-        add_action('wp_ajax_wpsstm_playlist_trash_track', array($this,'ajax_trash_tracklist_track'));
-        
-        //ajax : add new tracklist
+        //new tracklist
         add_action('wp_ajax_wpsstm_append_to_new_tracklist', array($this,'ajax_append_track_to_new_tracklist')); //TOFIXDDD
         
-        //ajax : add/remove tracklist track
-        add_action('wp_ajax_wpsstm_add_tracklist_track', array($this,'ajax_add_tracklist_track')); //TOFIXDDD
-        add_action('wp_ajax_wpsstm_remove_tracklist_track', array($this,'ajax_remove_tracklist_track'));//TOFIXDDD
+        //refresh tracklist
+        add_action('wp_ajax_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
+        add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
+        
+        //toggle favorite tracklist
+        add_action('wp_ajax_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist'));
+        
+
 
     }
     
@@ -195,7 +193,7 @@ class WP_SoundSystem_Core_Tracklists{
         return $classes;
     }
     
-    function ajax_love_unlove_tracklist(){
+    function ajax_toggle_favorite_tracklist(){
         
         $ajax_data = wp_unslash($_POST);
         
@@ -451,36 +449,6 @@ class WP_SoundSystem_Core_Tracklists{
         return $output;
 
     }
-
-    function ajax_update_track_index(){
-        $ajax_data = $_POST;
-        
-        $result = array(
-            'message'   => null,
-            'success'   => false,
-            'input'     => $ajax_data
-        );
-        
-        $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-        
-        $track = new WP_SoundSystem_Track();
-        $track->from_array($ajax_data['track']);
-        $result['track'] = $track;
-
-        if ( $tracklist->post_id && $track->post_id && ($track->index != -1) ){
-            $success = $tracklist->save_track_position($track->post_id,$track->index);
-            
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
     
     function ajax_append_track_to_new_tracklist(){
         $ajax_data = wp_unslash($_POST);
@@ -530,97 +498,6 @@ class WP_SoundSystem_Core_Tracklists{
         header('Content-type: application/json');
         wp_send_json( $result ); 
         
-    }
-
-    function ajax_add_tracklist_track(){
-        $ajax_data = wp_unslash($_POST);
-        
-        wpsstm()->debug_log($ajax_data,"ajax_add_tracklist_track()"); 
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
-        );
-        
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        
-        if ($track_id && $tracklist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
-
-            //wpsstm()->debug_log($track,"ajax_add_tracklist_track()");
-
-            $success = $tracklist->append_subtrack_ids($track_id);
-
-            if ( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code);
-            }else{
-                $result['success'] = $success;
-            }
-            
-        }
-   
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
-    function ajax_remove_tracklist_track(){
-        $ajax_data = wp_unslash($_POST);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
-        );
-        
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        
-        if ($track_id && $tracklist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
-
-            //wpsstm()->debug_log($track,"ajax_remove_tracklist_track()"); 
-
-            $success = $tracklist->remove_subtrack_ids($track_id);
-
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
-    function ajax_trash_tracklist_track(){
-        $ajax_data = $_POST;
-        
-        $result = array(
-            'message'   => null,
-            'success'   => false,
-            'input'     => $ajax_data
-        );
-
-        $track = new WP_SoundSystem_Track();
-        $track->from_array($ajax_data['track']);
-
-        $success = $track->trash_track();
-        $result['track'] = $track;
-
-        if ( is_wp_error($success) ){
-            $result['message'] = $success->get_error_message();
-        }else{
-            $result['success'] = $success;
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
     }
     
     function tracklist_append_new_track(){

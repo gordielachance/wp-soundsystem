@@ -951,49 +951,4 @@ class WP_SoundSystem_Track{
         return ($can_edit_track && $can_edit_sources);
     }
     
-    function save_source_position($source_id,$index){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
-        }
-        
-        $source = new WP_SoundSystem_Source($source_id);
-        
-        if (!$source->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
-        }
-        
-        if ($index < 0){
-            return new WP_Error( 'wpsstm_invalid_menu_order', __("Invalid source order.",'wpsstm') );
-        }
-
-        if ( !$this->user_can_reorder_sources() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
-        }
-
-        $post = array(
-            'ID' =>         $source_id,
-            'menu_order' => $index, 
-        );
-        
-        //TO FIX should we update the other sources position too ?
-
-        return wp_update_post( $post, true );
-
-        /*
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
-
-        //delete current
-        if(($key = array_search($track_id, $ordered_ids)) !== false) {
-            unset($ordered_ids[$key]);
-        }
-
-        //insert at position
-        array_splice( $ordered_ids, $index, 0, $track_id );
-
-        //save
-        return $this->set_subtrack_ids($ordered_ids);
-        */
-    }
-    
 }

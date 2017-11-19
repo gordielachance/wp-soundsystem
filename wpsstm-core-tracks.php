@@ -86,17 +86,17 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         
         /*
-        ajax
+        AJAX
         */
-        
-        //new track
+
         add_action('wp_ajax_wpsstm_new_track', array($this,'ajax_new_track'));
-        
-        //toggle love track
-        add_action('wp_ajax_wpsstm_love_unlove_track', array($this,'ajax_love_unlove_track'));
-        
-        //update source index
-         add_action('wp_ajax_wpsstm_track_update_source_index', array($this,'ajax_update_source_index'));
+        add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
+        add_action('wp_ajax_wpsstm_set_track_position', array($this,'ajax_set_track_position'));
+        add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
+
+        //add/remove tracklist track
+        add_action('wp_ajax_wpsstm_append_to_tracklist', array($this,'ajax_append_to_tracklist')); //TOFIXDDD
+        add_action('wp_ajax_wpsstm_remove_from_tracklist', array($this,'ajax_remove_from_tracklist'));//TOFIXDDD
 
     }
     
@@ -711,8 +711,74 @@ class WP_SoundSystem_Core_Tracks{
         wp_send_json( $result ); 
     }
     
+    function ajax_append_to_tracklist(){
+        $ajax_data = wp_unslash($_POST);
+        
+        wpsstm()->debug_log($ajax_data,"ajax_append_to_tracklist"); 
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
+        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        
+        if ($track_id && $tracklist_id){
+            
+            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+
+            //wpsstm()->debug_log($track,"ajax_append_to_tracklist");
+
+            $success = $tracklist->append_subtrack_ids($track_id);
+
+            if ( is_wp_error($success) ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code);
+            }else{
+                $result['success'] = $success;
+            }
+            
+        }
+   
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
     
-    function ajax_love_unlove_track(){
+    function ajax_remove_from_tracklist(){
+        $ajax_data = wp_unslash($_POST);
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
+        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        
+        if ($track_id && $tracklist_id){
+            
+            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+
+            //wpsstm()->debug_log($track,"ajax_remove_from_tracklist()"); 
+
+            $success = $tracklist->remove_subtrack_ids($track_id);
+
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    
+    function ajax_toggle_favorite_track(){
 
         $ajax_data = wp_unslash($_POST);
 
@@ -731,7 +797,7 @@ class WP_SoundSystem_Core_Tracks{
             
             $success = $track->love_track($do_love);
             $result['track'] = $track;
-            wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_love_unlove_track()"); 
+            wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
 
             if( is_wp_error($success) ){
                 $code = $success->get_error_code();
@@ -745,8 +811,38 @@ class WP_SoundSystem_Core_Tracks{
         wp_send_json( $result ); 
     }
     
-    function ajax_update_source_index(){
-        $ajax_data = $_POST;
+    function ajax_set_track_position(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+        
+        $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
+        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
+        
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+        $result['track'] = $track;
+
+        if ( $tracklist->post_id && $track->post_id && ($track->index != -1) ){
+            $success = $tracklist->save_track_position($track->post_id,$track->index);
+            
+            if ( is_wp_error($success) ){
+                $result['message'] = $success->get_error_message();
+            }else{
+                $result['success'] = $success;
+            }
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_trash_track(){
+        $ajax_data = wp_unslash($_POST);
         
         $result = array(
             'message'   => null,
@@ -754,13 +850,11 @@ class WP_SoundSystem_Core_Tracks{
             'input'     => $ajax_data
         );
 
-        $source = new WP_SoundSystem_Source();
-        $source->from_array($ajax_data['source']);
-        
-        $track = $result['track'] = new WP_SoundSystem_Track($source->track_id);
-        
-        $success = $track->save_source_position($source->post_id,$source->index);
-        $result['source'] = $source;
+        $track = new WP_SoundSystem_Track();
+        $track->from_array($ajax_data['track']);
+
+        $success = $track->trash_track();
+        $result['track'] = $track;
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();
