@@ -613,7 +613,7 @@ class WP_SoundSystem_Track{
             $url = add_query_arg($args,$url);
         }else{
             $url = $this->get_new_track_url();
-            $url = add_query_arg(array('wpsstm-redirect'=>add_query_arg($args)),$url);
+            $url = add_query_arg(array('wpsstm-redirect'=>$args),$url);
         }
 
         return $url;

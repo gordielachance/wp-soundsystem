@@ -531,16 +531,14 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         if (!$post) return;
         
-        if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return;
+        if( !$action = get_query_var( $this->qvar_tracklist_action ) ) return;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
         $success = null;
 
-        switch($admin_action){
+        switch($action){
             case 'popup':
-                
                 //see tracklist_popup_template
-
             break;
             case 'refresh':
                 $tracklist->is_expired = true; //will force tracklist refresh
@@ -569,15 +567,18 @@ class WP_SoundSystem_Core_Tracklists{
             break;
         }
         
-        if ( is_wp_error($success) ){
+        if ($success){ //redirect with a success / error code
             $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
-            $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
-            
+
+            if ( is_wp_error($success) ){
+                $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
+            }else{
+                $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
+            }
+
             wp_redirect($redirect_url);
             exit();
         }
-        
-        //TO FIX add success notice?
 
     }
     

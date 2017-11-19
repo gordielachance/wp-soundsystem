@@ -87,7 +87,6 @@ class WP_SoundSystem_Core_Tracks{
         AJAX
         */
 
-        add_action('wp_ajax_wpsstm_new_track', array($this,'ajax_new_track'));
         add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
         add_action('wp_ajax_wpsstm_set_track_position', array($this,'ajax_set_track_position'));
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
@@ -170,15 +169,15 @@ class WP_SoundSystem_Core_Tracks{
     
     function new_track_redirect($template){
         
-        $track_action =  get_query_var( $this->qvar_track_action );
+        $redirect_url = null;
         
+        $track_action =  get_query_var( $this->qvar_track_action );
         if ( $track_action != 'new-track' ) return $template;
-        if ( isset($_REQUEST['track-error']) ) return $template; //TOFIXDDD TO CHECK
 
         //get current query
         $query_str = $_SERVER['QUERY_STRING']; 
         parse_str($query_str,$query); //make an array of it
-        $redirect_url = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
+        $redirect_args = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
 
         $track_args = isset($query['track']) ? $query['track'] : null;
         $track_args = wp_unslash($track_args);
@@ -187,35 +186,25 @@ class WP_SoundSystem_Core_Tracks{
         $track = new WP_SoundSystem_Track();
         $track->from_array($track_args);
 
-        if ( !$track->post_id ){ //track does not exists yet, create it
+        if ( $track->post_id ){
+            $track_url = get_permalink($track->post_id);
+            $track_url = add_query_arg( array('wpsstm_success_code'=>'track-exists'),$track_url );
+        }else{
             $success = $track->save_track();
             if ( is_wp_error($success) ){
-                $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TOFIXDDD or current URL ? more logical.
-                $track_url = add_query_arg(array('track-error'=>$success->get_error_code()),$track_url);
+                $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TO FIX TO CHECK or current URL ? more logical.
+                $track_url = add_query_arg(array('wpsstm_error_code'=>$success->get_error_code()),$track_url);
             }else{
                 $track_url = get_permalink($track->post_id);
-                //remove 'new-track' arg from parameters
-                unset($query[$this->qvar_track_action]);
+                $track_url = add_query_arg( array('wpsstm_success_code'=>'new-track'),$track_url );
             }
-        }else{
-            $track_url = get_permalink($track->post_id);
-        }
-        
-        //we just handled those, remove them for redirecton
-        unset($query['track']);
-        unset($query['track-action']);
-        unset($query['wpsstm-redirect']);
-
-        //inject current params
-        if ($redirect_url){
-            $redirect_url = add_query_arg($query,$redirect_url);
-            wp_redirect($redirect_url);
-        }else{
-            $track_url = add_query_arg($query,$track_url);
-            wp_redirect($track_url);
         }
 
-        exit();
+        //pass the redirect args now
+        $track_url = add_query_arg($redirect_args,$track_url);
+
+        wp_redirect($track_url);
+        exit;
     }
     
     function track_popup_body_classes($classes){
@@ -227,12 +216,12 @@ class WP_SoundSystem_Core_Tracks{
         global $post;
         if (!$post) return;
         
-        if( !$admin_action = get_query_var( $this->qvar_track_action ) ) return;
+        if( !$action = get_query_var( $this->qvar_track_action ) ) return;
         
         $track = new WP_SoundSystem_Track($post->ID);
         $success = null;
 
-        switch($admin_action){
+        switch($action){
             case 'popup':
                 //see track_popup_template
             break;
@@ -244,15 +233,18 @@ class WP_SoundSystem_Core_Tracks{
             break;
         }
         
-        if ( is_wp_error($success) ){
-            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
-            $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
-            
+        if ($success){ //redirect with a success / error code
+            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $track->post_id ) : get_permalink($track->post_id);
+
+            if ( is_wp_error($success) ){
+                $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
+            }else{
+                $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
+            }
+
             wp_redirect($redirect_url);
             exit();
         }
-        
-        //TO FIX add success notice?
 
     }
     
@@ -708,21 +700,7 @@ class WP_SoundSystem_Core_Tracks{
         return $output;
 
     }
-    
-    function ajax_new_track(){//TOFIXDDD used?
-        $ajax_data = wp_unslash($_REQUEST);
 
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
-        );
-        
-        
-        print_r($result);die();
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
     
     function ajax_append_to_tracklist(){
         $ajax_data = wp_unslash($_POST);
