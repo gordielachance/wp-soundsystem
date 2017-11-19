@@ -43,14 +43,12 @@ class WP_SoundSystem_Core_Tracks{
     function setup_actions(){
 
         add_action( 'init', array($this,'register_post_type_track' ));
-        
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
-        
-        add_action( 'init', array($this,'register_track_endpoints' ));
-        
-        add_filter( 'template_include', array($this,'track_admin_endpoint'));
+
+        add_action( 'template_redirect', array($this,'handle_track_action'));
+        add_action( 'template_redirect', array($this,'handle_track_popup_form'));
         add_filter( 'template_include', array($this,'new_track_redirect'));
-        add_action( 'wp', array($this,'track_save_admin_gui'));
+        add_filter( 'template_include', array($this,'track_popup_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -117,26 +115,6 @@ class WP_SoundSystem_Core_Tracks{
         
     }
 
-    function register_track_endpoints(){ //TOFIXDDD
-        // (existing track) admin
-        add_rewrite_endpoint($this->qvar_track_action, EP_PERMALINK );
-        
-        //add post type archive endpoints
-        //TOFIXDDD
-        /*
-        //https://wordpress.stackexchange.com/a/133698/70449
-        
-        //track action
-        $post_type = wpsstm()->post_type_track;
-        $var = $this->qvar_track_action;
-        $regex = sprintf('%s/%s$',$post_type,$var);
-        
-        $redirect = sprintf('index.php?post_type=%s',$post_type);
-        $redirect = add_query_arg(array($var => 1),$redirect);
-
-        add_rewrite_rule( $regex, $redirect, 'top' );
-        */
-    }
     
     function register_tracks_scripts_styles_shared(){
         //JS
@@ -164,14 +142,13 @@ class WP_SoundSystem_Core_Tracks{
     *    Adds a custom template to the query queue.
     */
     
-    function track_admin_endpoint($template){
+    function track_popup_template($template){
         global $wp_query;
         global $post;
 
         $post_type = get_post_type($post);
-        if ( 'track-admin' != get_query_var( $this->qvar_track_action ) ) return $template;
-        
-        //TOFIDDD caps ?
+        $track_action = get_query_var( $this->qvar_track_action );
+        if ( $track_action != 'popup' ) return $template;
 
         if ( $template = wpsstm_locate_template( 'track-admin.php' ) ){
 
@@ -243,7 +220,46 @@ class WP_SoundSystem_Core_Tracks{
         return $classes;
     }
     
-    function track_save_admin_gui(){
+    function handle_track_action(){
+        global $post;
+        if (!$post) return;
+        
+        if( !$admin_action = get_query_var( $this->qvar_track_action ) ) return;
+        
+        $track = new WP_SoundSystem_Track($post->ID);
+        $success = null;
+
+        switch($admin_action){
+            case 'popup':
+                //see track_popup_template
+            break;
+            case 'switch-status':
+                $success = $tracklist->switch_status();
+            break;
+            case 'get-autorship':
+                $success = $tracklist->get_autorship();
+            break;
+            case 'lock-tracklist':
+                $success = $tracklist->convert_to_static_playlist();
+            break;
+            case 'unlock-tracklist':
+                $success = $tracklist->convert_to_live_playlist($tracklist->post_id);
+            break;
+        }
+        
+        if ( is_wp_error($success) ){
+            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+            $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
+            
+            wp_redirect($redirect_url);
+            exit();
+        }
+        
+        //TO FIX add success notice?
+
+    }
+    
+    function handle_track_popup_form(){
         global $post;
         global $wp_query;
 
@@ -251,7 +267,7 @@ class WP_SoundSystem_Core_Tracks{
         if ( $post_type != wpsstm()->post_type_track ) return;
         
         $track = new WP_SoundSystem_Track($post->ID);
-        $popup_action = ( isset($_POST['wpsstm-admin-track-action']) ) ? $_POST['wpsstm-admin-track-action'] : null;
+        $popup_action = ( isset($_POST['wpsstm-track-popup-action']) ) ? $_POST['wpsstm-track-popup-action'] : null;
         if ( !$popup_action ) return;
 
         switch($popup_action){

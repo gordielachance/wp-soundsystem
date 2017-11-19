@@ -619,9 +619,14 @@ class WP_SoundSystem_Track{
         return $url;
     }
     
-    function get_track_admin_url($section){
-        $url = $this->get_track_action_url('admin');
-        return add_query_arg(array('section'=>$section),$url);
+    function get_track_admin_url($section = null){
+        $url = $this->get_track_action_url('popup');
+        
+        if($section){
+            $url .= '#' . $section;
+        }
+        
+        return $url;
     }
     
     function get_track_links($tracklist,$context = null){

@@ -166,7 +166,7 @@ class WP_SoundSystem_Core_Tracklists{
         if ( !$is_tracklist_post ) return $template;
 
         /*
-        if ( action == 'new-subtrack' ){ //this will be handled by track_admin_endpoint() //TOFIXDDD
+        if ( action == 'new-subtrack' ){ //this will be handled by track_popup_template() //TOFIXDDD
             set_query_var( wpsstm_tracks()->qvar_track_action, 'new-subtrack' );
             return $template;
         }
@@ -527,6 +527,9 @@ class WP_SoundSystem_Core_Tracklists{
         $success = null;
 
         switch($admin_action){
+            case 'popup':
+                //see tracklist_popup_template
+            break;
             case 'export':
                 //see tracklist_xspf_template
             break;
@@ -546,11 +549,13 @@ class WP_SoundSystem_Core_Tracklists{
         
         if ( is_wp_error($success) ){
             $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+            $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
+            
             wp_redirect($redirect_url);
             exit();
         }
         
-        //TO FIX add notice in case of success ?
+        //TO FIX add success notice?
 
     }
     
