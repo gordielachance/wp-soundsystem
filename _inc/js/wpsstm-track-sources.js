@@ -5,6 +5,7 @@ jQuery(document).ready(function($){
 
         // sort track sources
         track_obj.track_el.find('.wpsstm-track-sources-list').sortable({
+            axis: "y",
             handle: '.wpsstm-source-reorder-action',
             update: function(event, ui) {
                 console.log('update: '+ui.item.index())

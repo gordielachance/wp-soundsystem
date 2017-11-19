@@ -656,7 +656,6 @@ class WP_SoundSystem_Track{
         //track details
         if ($can_track_details){
             $actions['about'] = array(
-                'icon' =>       '<i class="fa fa-info-circle" aria-hidden="true"></i>',
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('about'),
             );
@@ -665,7 +664,6 @@ class WP_SoundSystem_Track{
         //track edit
         if ($can_edit_track){
             $actions['edit'] = array(
-                'icon' =>       '<i class="fa fa-pencil" aria-hidden="true"></i>',
                 'text' =>      __('Track Details', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('edit'),
             );
@@ -674,7 +672,6 @@ class WP_SoundSystem_Track{
         //playlists manager
         if ($can_playlists_manager){
             $actions['playlists'] = array(
-                'icon' =>       '<i class="fa fa-list" aria-hidden="true"></i>',
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('playlists'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
@@ -684,7 +681,6 @@ class WP_SoundSystem_Track{
         //favorite
         if ($can_favorite_track){
             $actions['favorite'] = array(
-                'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
@@ -695,29 +691,23 @@ class WP_SoundSystem_Track{
         //unfavorite
         if ($can_favorite_track){
             $actions['unfavorite'] = array(
-                'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );
         }
-        
-        //(playlist) track move
-        /*
+
         if ($can_move_track){
             $actions['move'] = array(
-                'icon' =>       '<i class="fa fa-arrows-v" aria-hidden="true"></i>',
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
             );
         }
-        */
 
         //sources manager
         if ($can_edit_track){
             $actions['sources'] = array(
-                'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
                 'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources'),
@@ -727,7 +717,6 @@ class WP_SoundSystem_Track{
         //delete track
         if ($can_delete_tracks){
             $actions['trash'] = array(
-                'icon' =>       '<i class="fa fa-trash" aria-hidden="true"></i>',
                 'text' =>      __('Trash'),
                 'desc' =>       __('trash track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),

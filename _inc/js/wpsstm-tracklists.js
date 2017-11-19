@@ -11,8 +11,9 @@
     $(document).on( "wpsstmTracklistRefreshed", function( event, tracklist_obj ) {
 
         // sort tracks
-        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
-            handle: '.wpsstm-reposition-track',
+        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list tbody' ).sortable({
+            axis: "y",
+            handle: '#wpsstm-track-action-move',
             update: function(event, ui) {
                 console.log('update: '+ui.item.index())
                 //get track
@@ -546,6 +547,7 @@ class WpsstmTracklist {
 
     update_track_index(track_obj){
         var self = this;
+        var handle_el = track_obj.track_el.find('#wpsstm-track-action-move');
 
         //ajax update order
         var ajax_data = {
@@ -560,7 +562,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                self.tracklist_el.addClass('tracklist-loading');
+                handle_el.addClass('wpsstm-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -574,7 +576,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
-                self.tracklist_el.removeClass('tracklist-loading');
+                handle_el.removeClass('wpsstm-loading');
             }
         })
 

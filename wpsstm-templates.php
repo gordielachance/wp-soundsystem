@@ -229,7 +229,6 @@ function wpsstm_get_blank_action(){
         'text' =>           null,
         'desc' =>           null,
         'href' =>           '#',
-        'icon' =>           null,
         'classes' =>        array(),
         'link_classes' =>   array(),
         'link_before' =>    null,
