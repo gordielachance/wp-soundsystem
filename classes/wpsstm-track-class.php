@@ -739,16 +739,8 @@ class WP_SoundSystem_Track{
             case 'page':
                 
                 unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
-                
-                if ($can_edit_tracklist){
-                    $actions['advanced'] = array(
-                        'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
-                        'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_track_popup_url('about'),
-                    );
-                }
-                
-                $popup_action_slugs = array('about','details','edit','playlists','sources','trash','advanced');
+
+                $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){

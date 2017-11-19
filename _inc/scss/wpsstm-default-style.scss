@@ -321,6 +321,12 @@ ul.wpsstm-actions-list{
                 @extend .fa-heart;
             }
         //}
+        
+        &#wpsstm-tracklist-action-new-subtrack{
+             a:before{
+                 @extend .fa-plus-circle;
+            }
+        }
 
         &#wpsstm-tracklist-action-status-switch{
             a:before{

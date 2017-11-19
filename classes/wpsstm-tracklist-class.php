@@ -659,18 +659,8 @@ class WP_SoundSystem_Tracklist{
         //context
         switch($context){
             case 'page':
-                
-                /*
-                if ($can_edit_tracklist){
-                    $actions['advanced'] = array(
-                        'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
-                        'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_tracklist_popup_url('about'),
-                    );
-                }
-                */
 
-                $popup_action_slugs = array('share','new-subtrack','advanced');
+                $popup_action_slugs = array('share','new-subtrack');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){
