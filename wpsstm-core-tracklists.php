@@ -174,7 +174,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function tracklist_popup_body_classes($classes){
-        $classes[] = 'wpsstm_tracklist-template-admin';
+        $classes[] = 'wpsstm-tracklist-popup wpsstm-popup';
         return $classes;
     }
     
@@ -541,6 +541,16 @@ class WP_SoundSystem_Core_Tracklists{
                 
                 //see tracklist_popup_template
 
+            break;
+            case 'refresh':
+                $tracklist->is_expired = true; //will force tracklist refresh
+                $success = $tracklist->populate_tracks(); //TO FIX query args ?
+            break;
+            case 'favorite':
+                $success = $tracklist->love_tracklist(true);
+            break;
+            case 'unfavorite':
+                $success = $tracklist->love_tracklist(false);
             break;
             case 'export':
                 //see tracklist_xspf_template

@@ -160,14 +160,14 @@
                 display:none;
             }
             
-            &.track-invalid{
-                color:red;
-            }
-
             &.wpsstm-loved-track{
                 #wpsstm-track-action-favorite{
                     display:none;
                 }
+            }
+            
+            &.track-invalid{
+                color:red;
             }
 
             .wpsstm-track-image{

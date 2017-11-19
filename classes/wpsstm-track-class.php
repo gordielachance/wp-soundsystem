@@ -714,20 +714,11 @@ class WP_SoundSystem_Track{
         }
         */
 
-        //(playlist) track remove
-        if ($can_remove_track){
-            $actions['remove'] = array(
-                'icon' =>       '<i class="fa fa-chain-broken" aria-hidden="true"></i>',
-                'text' =>      __('Remove', 'wpsstm'),
-                'desc' =>       __('Remove from tracklist', 'wpsstm'),
-            );
-        }
-        
         //sources manager
         if ($can_edit_track){
             $actions['sources'] = array(
                 'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
-                'text' =>      __('Sources','wpsstm'),
+                'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources'),
             );
@@ -766,7 +757,7 @@ class WP_SoundSystem_Track{
                 }
 
             break;
-            case 'admin':
+            case 'popup':
                 
             break;
         }

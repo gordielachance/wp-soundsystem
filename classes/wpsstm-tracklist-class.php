@@ -29,7 +29,7 @@ class WP_SoundSystem_Tracklist{
     
     var $tracks_strict = true; //requires a title AND an artist
     
-    public $ajax_refresh = false;//by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
+    public $ajax_refresh = true;//by default, only ajax requests will fetch remote tracks. Set to false to request remote tracks through PHP.
 
     var $paged_var = 'tracklist_page';
     
@@ -562,7 +562,7 @@ class WP_SoundSystem_Tracklist{
         if ($can_refresh){
             $actions['refresh'] = array(
                 'text' =>      __('Refresh', 'wpsstm'),
-                'href' =>      $permalink,
+                'href' =>      $this->get_tracklist_action_link('refresh'),
             );
         }
         
@@ -679,7 +679,7 @@ class WP_SoundSystem_Tracklist{
                 }
                 
             break;
-            case 'admin':
+            case 'popup':
                 unset($actions['refresh']);
             break;
         }

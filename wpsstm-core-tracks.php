@@ -219,7 +219,7 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function track_popup_body_classes($classes){
-        $classes[] = 'wpsstm_track-template-admin';
+        $classes[] = 'wpsstm-track-popup wpsstm-popup';
         return $classes;
     }
     
@@ -236,17 +236,11 @@ class WP_SoundSystem_Core_Tracks{
             case 'popup':
                 //see track_popup_template
             break;
-            case 'switch-status':
-                $success = $tracklist->switch_status();
+            case 'favorite':
+                $success = $track->love_track(true);
             break;
-            case 'get-autorship':
-                $success = $tracklist->get_autorship();
-            break;
-            case 'lock-tracklist':
-                $success = $tracklist->convert_to_static_playlist();
-            break;
-            case 'unlock-tracklist':
-                $success = $tracklist->convert_to_live_playlist($tracklist->post_id);
+            case 'unfavorite':
+                $success = $track->love_track(false);
             break;
         }
         

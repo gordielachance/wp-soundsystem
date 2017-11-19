@@ -1,6 +1,8 @@
 <?php 
 get_header();
 global $wpsstm_track;
+
+$popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : null;
 ?>
 
 	<div id="primary" class="content-area">
@@ -17,8 +19,6 @@ global $wpsstm_track;
                 $post_type = get_post_type();
                 $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
-                $track_admin_action =  get_query_var( wpsstm_tracks()->qvar_track_action );
-
                 /*
                 Capability check
                 */
@@ -33,7 +33,7 @@ global $wpsstm_track;
 
                     <header class="entry-header">
                         <h1 class="entry-title"><?php echo $wpsstm_track->title;?></h1>
-                        <?php if ($track_admin_action == 'new-subtrack'){ //TO FIX NOT WORKING
+                        <?php if ($popup_action == 'new-subtrack'){ //TO FIX NOT WORKING
                             printf('<h2>%s</h2>',$track_type_obj->labels->add_new_item);
                         }
 
@@ -63,14 +63,14 @@ global $wpsstm_track;
 
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
-                        if ( $actions = $wpsstm_track->get_track_links($tracklist,'admin') ){
+                        if ( $actions = $wpsstm_track->get_track_links($tracklist,'popup') ){
                             $list = output_tracklist_actions($actions,'track');
                             echo $list;
                         }
                 
                         $tab_content = null;
                 
-                        switch ($track_admin_action){
+                        switch ($popup_action){
                             case 'edit':
                                 ?>
                                 <form action="<?php echo esc_url($wpsstm_track->get_track_popup_url('edit'));?>" method="POST">

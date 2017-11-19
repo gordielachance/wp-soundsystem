@@ -757,7 +757,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         //ignore ajax refresh so tracks can be populated
-        $tracklist->ajax_refresh = false;
+        $this->ajax_refresh = false;
         
         $updated = $this->save_live_tracklist();
 
