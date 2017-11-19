@@ -162,7 +162,9 @@ class WP_SoundSystem_Core_Wizard{
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist )  && ( $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID) ) ){
             
-            if ($wpsstm_tracklist && $wpsstm_tracklist->is_community){
+            $tracklist_action = get_query_var( wpsstm_tracklists()->qvar_tracklist_action );
+            
+            if (!$tracklist_action && $wpsstm_tracklist && $wpsstm_tracklist->is_community){
                 $link = get_permalink($this->frontend_wizard_page_id);
                 $link = add_query_arg(array($this->qvar_tracklist_wizard=>$wpsstm_tracklist->post_id),$link);
                 wp_redirect($link);
