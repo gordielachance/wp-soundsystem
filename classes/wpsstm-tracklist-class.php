@@ -567,9 +567,10 @@ class WP_SoundSystem_Tracklist{
         }
         
         //share
+        $share_url = 
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
-            'href' =>       add_query_arg( array('popup-section'=>'share'),$this->get_tracklist_action_link('popup') ),
+            'href' =>       $this->get_tracklist_popup_link('share'),
         );
         
         //XSPF
@@ -667,7 +668,7 @@ class WP_SoundSystem_Tracklist{
                     $actions['advanced'] = array(
                         'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
                         'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_tracklist_admin_link('about'),
+                        'href' =>       $this->get_tracklist_popup_link('about'),
                     );
                 }
                 */
@@ -700,14 +701,12 @@ class WP_SoundSystem_Tracklist{
         
     }
     
-    function get_tracklist_admin_link($section =  null){
-        $url = $this->get_tracklist_action_link('admin');
-        $url = add_query_arg(
-            array(
-                'section' =>    $section
-            ),
-            $url
-        );
+    function get_tracklist_popup_link($section =  null){
+        $url = $this->get_tracklist_action_link('popup');
+        
+        if ($section){
+            $url.='#' . $section;
+        }
 
         return $url;
     }
