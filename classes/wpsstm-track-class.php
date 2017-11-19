@@ -207,7 +207,6 @@ class WP_SoundSystem_Track{
         }
     }
 
-    //TO FIX do we need this ?
     function to_array(){
         $defaults = $this->get_default();
         $export = array();
@@ -215,6 +214,30 @@ class WP_SoundSystem_Track{
             $export[$param] = $this->$param;
         }
         return array_filter($export);
+    }
+    
+    /*
+    Reduce track to the minimum; used to send data through URLs or ajax.
+    */
+    function to_ajax(){
+        
+        $allowed  = ['post_id','title','artist','album','mbid'];
+        
+        if ($this->post_id){
+            $allowed  = ['post_id'];
+        }
+        
+        $arr = $this->to_array();
+
+        $filtered = array_filter(
+            $arr,
+            function ($key) use ($allowed) {
+                return in_array($key, $allowed);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        
+        return $filtered;
     }
     
     /**
@@ -567,21 +590,46 @@ class WP_SoundSystem_Track{
         return $new_source_ids;
 
     }
+    
+    private function get_new_track_url(){
+        global $wp;
 
-    function get_track_admin_gui_url($track_action = null,$tracklist_id = null){
+        $args = array(
+            wpsstm_tracks()->qvar_track_action =>   'new-track',
+            'track' =>                              urlencode( json_encode($this->to_ajax()) ),
+        );
+        
+        $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
+        $url = add_query_arg($args,$url);
+        return $url;
+    }
 
-        $url = null;
+    function get_track_action_url($track_action = null){
+        
+        $args = array(wpsstm_tracks()->qvar_track_action=>$track_action);
+
         if ($this->post_id){
             $url = get_permalink($this->post_id);
-        }else{ //TO FIX! URL to create a track THEN redirect to action
-            
+            $url = add_query_arg($args,$url);
+        }else{
+            $url = $this->get_new_track_url();
+            $url = add_query_arg(array('wpsstm-redirect'=>$args),$url);
         }
-        $url = add_query_arg(array(wpsstm_tracks()->qvar_track_admin=>$track_action),$url);
 
         return $url;
     }
     
-    function get_track_actions($tracklist,$context = null){
+    function get_track_popup_url($action = null){
+        $url = $this->get_track_action_url('popup');
+        
+        if ($action){
+            $url = add_query_arg(array('popup-action'=>$action),$url);
+        }
+        
+        return $url;
+    }
+    
+    function get_track_links($tracklist,$context = null){
         
         $tracklist_id = $tracklist->post_id;
 
@@ -610,7 +658,7 @@ class WP_SoundSystem_Track{
             $actions['about'] = array(
                 'icon' =>       '<i class="fa fa-info-circle" aria-hidden="true"></i>',
                 'text' =>      __('About', 'wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('about',$tracklist_id),
+                'href' =>       $this->get_track_popup_url('about'),
             );
         }
 
@@ -619,7 +667,7 @@ class WP_SoundSystem_Track{
             $actions['edit'] = array(
                 'icon' =>       '<i class="fa fa-pencil" aria-hidden="true"></i>',
                 'text' =>      __('Track Details', 'wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('edit',$tracklist_id),
+                'href' =>       $this->get_track_popup_url('edit'),
             );
         }
 
@@ -628,7 +676,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'icon' =>       '<i class="fa fa-list" aria-hidden="true"></i>',
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('playlists',$tracklist_id),
+                'href' =>       $this->get_track_popup_url('playlists'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
             );
         }
@@ -638,6 +686,7 @@ class WP_SoundSystem_Track{
             $actions['favorite'] = array(
                 'icon'=>        '<i class="fa fa-heart-o" aria-hidden="true"></i>',
                 'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
             );
@@ -648,6 +697,7 @@ class WP_SoundSystem_Track{
             $actions['unfavorite'] = array(
                 'icon'=>        '<i class="fa fa-heart" aria-hidden="true"></i>',
                 'text' =>      __('Unfavorite','wpsstm'),
+                'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );
@@ -664,22 +714,13 @@ class WP_SoundSystem_Track{
         }
         */
 
-        //(playlist) track remove
-        if ($can_remove_track){
-            $actions['remove'] = array(
-                'icon' =>       '<i class="fa fa-chain-broken" aria-hidden="true"></i>',
-                'text' =>      __('Remove', 'wpsstm'),
-                'desc' =>       __('Remove from tracklist', 'wpsstm'),
-            );
-        }
-        
         //sources manager
         if ($can_edit_track){
             $actions['sources'] = array(
                 'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
-                'text' =>      __('Sources','wpsstm'),
+                'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('sources',$tracklist_id),
+                'href' =>       $this->get_track_popup_url('sources'),
             );
         }
 
@@ -689,7 +730,7 @@ class WP_SoundSystem_Track{
                 'icon' =>       '<i class="fa fa-trash" aria-hidden="true"></i>',
                 'text' =>      __('Trash'),
                 'desc' =>       __('trash track','wpsstm'),
-                'href' =>       $this->get_track_admin_gui_url('trash',$tracklist_id),
+                'href' =>       $this->get_track_action_url('trash'),
             );
         }
         
@@ -698,16 +739,8 @@ class WP_SoundSystem_Track{
             case 'page':
                 
                 unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
-                
-                if ($can_edit_tracklist){
-                    $actions['advanced'] = array(
-                        'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
-                        'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_track_admin_gui_url('about',$tracklist->post_id),
-                    );
-                }
-                
-                $popup_action_slugs = array('about','details','edit','playlists','sources','trash','advanced');
+
+                $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
                 
                 //set popup
                 foreach ($actions as $slug=>$action){
@@ -716,7 +749,7 @@ class WP_SoundSystem_Track{
                 }
 
             break;
-            case 'admin':
+            case 'popup':
                 
             break;
         }
@@ -904,51 +937,6 @@ class WP_SoundSystem_Track{
         $can_edit_sources = current_user_can($source_type_obj->cap->edit_posts);
         
         return ($can_edit_track && $can_edit_sources);
-    }
-    
-    function save_source_position($source_id,$index){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
-        }
-        
-        $source = new WP_SoundSystem_Source($source_id);
-        
-        if (!$source->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
-        }
-        
-        if ($index < 0){
-            return new WP_Error( 'wpsstm_invalid_menu_order', __("Invalid source order.",'wpsstm') );
-        }
-
-        if ( !$this->user_can_reorder_sources() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
-        }
-
-        $post = array(
-            'ID' =>         $source_id,
-            'menu_order' => $index, 
-        );
-        
-        //TO FIX should we update the other sources position too ?
-
-        return wp_update_post( $post, true );
-
-        /*
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
-
-        //delete current
-        if(($key = array_search($track_id, $ordered_ids)) !== false) {
-            unset($ordered_ids[$key]);
-        }
-
-        //insert at position
-        array_splice( $ordered_ids, $index, 0, $track_id );
-
-        //save
-        return $this->set_subtrack_ids($ordered_ids);
-        */
     }
     
 }

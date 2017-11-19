@@ -2,6 +2,7 @@
 global $post;
 get_header();
 $tracklist = wpsstm_get_post_tracklist(get_the_ID());
+$popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : null;
 
 ?>
 
@@ -15,7 +16,7 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 			while ( have_posts() ) { 
                 the_post();
                 
-                $admin_action = $wp_query->get(wpsstm_tracklists()->qvar_tracklist_admin);
+
                 
                 ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class('wpsstm-tracklist-admin'); ?>>
@@ -27,25 +28,37 @@ $tracklist = wpsstm_get_post_tracklist(get_the_ID());
 
                     <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
-                        if ( $actions = $tracklist->get_tracklist_actions('admin') ){
+                        if ( $actions = $tracklist->get_tracklist_links('popup') ){
                             $list = output_tracklist_actions($actions,'tracklist');
                             echo $list;
                         }
                 
                         $tab_content = null;
                 
-                        switch($admin_action){
+                        switch($popup_action){
                             case 'share':
 
                                 $text = __("Use this link to share this playlist:","wpsstm");
-                                $link = $tracklist->get_tracklist_permalink();
+                                $link = get_permalink($tracklist->post_id);
                                 $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                                 
+                            break;
+                            case 'new-subtrack':
+                            default:
+                                global $wpsstm_track;
+                                $wpsstm_track = new WP_SoundSystem_Track();
+                                ?>
+                                <form action="<?php echo esc_url($tracklist->get_tracklist_popup_url($popup_action));?>" method="POST">
+                                    <?php wpsstm_locate_template( 'track-popup-edit.php',true );?>
+                                    <input type="hidden" name="wpsstm-tracklist-popup-action" value="<?php echo $popup_action;?>" />
+                                    <input type="hidden" name="wpsstm-tracklist-id" value="<?php echo $tracklist->post_id;?>" />
+                                </form>
+                                <?php
                             break;
                         }
                 
                         if ($tab_content){
-                            printf('<div id="wpsstm-tracklist-admin-%s" class="wpsstm-tracklist-admin">%s</div>',$admin_action,$tab_content);
+                            printf('<div id="wpsstm-tracklist-admin-%s" class="wpsstm-tracklist-admin">%s</div>',$popup_action,$tab_content);
                         }
                 
                         ?>

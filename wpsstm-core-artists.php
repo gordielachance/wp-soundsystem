@@ -42,9 +42,11 @@ class WP_SoundSystem_Core_Artists{
         //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
         //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
         
-        //ajax
-        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists'));
-        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists'));
+        /*
+        AJAX
+        */
+        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
+        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
 
     }
     

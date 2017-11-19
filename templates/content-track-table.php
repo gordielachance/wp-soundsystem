@@ -34,7 +34,7 @@ $track->populate_sources();
     <td class="wpsstm-track-info wpsstm-track-album"><span itemprop="inAlbum"><?php echo $track->album;?></span></td>
     <td class="wpsstm-track-actions">
         <?php
-        if ( $actions = $track->get_track_actions($tracklist,'page') ){
+        if ( $actions = $track->get_track_links($tracklist,'page') ){
             echo output_tracklist_actions($actions,'track');
         }
         ?>

@@ -60,7 +60,7 @@
             if (!tracklist_id) return;
 
             var ajax_data = {
-                action:         'wpsstm_love_unlove_tracklist',
+                action:         'wpsstm_toggle_favorite_tracklist',
                 post_id:        tracklist_id,
                 do_love:        true,
             };
@@ -103,7 +103,7 @@
             if (!tracklist_id) return;
 
             var ajax_data = {
-                action:         'wpsstm_love_unlove_tracklist',
+                action:         'wpsstm_toggle_favorite_tracklist',
                 post_id:        tracklist_id,
                 do_love:        false,
             };
@@ -549,7 +549,7 @@ class WpsstmTracklist {
 
         //ajax update order
         var ajax_data = {
-            action            : 'wpsstm_playlist_update_track_index',
+            action            : 'wpsstm_set_track_position',
             tracklist_id      : self.post_id,
             track:              track_obj.to_ajax()
         };
@@ -586,7 +586,7 @@ class WpsstmTracklist {
         var track_el = track_obj.track_el;
 
         var ajax_data = {
-            action            : 'wpsstm_remove_tracklist_track',
+            action            : 'wpsstm_remove_from_tracklist',
             tracklist_id      : self.post_id,
             track_id          : track_obj.post_id
         };
@@ -624,7 +624,7 @@ class WpsstmTracklist {
         var track_el = track_obj.track_el;
 
         var ajax_data = {
-            action:     'wpsstm_playlist_trash_track',
+            action:     'wpsstm_trash_track',
             track:      track_obj.to_ajax(),
         };
 

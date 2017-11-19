@@ -37,20 +37,27 @@ class WP_SoundSystem_Core_LastFM{
         
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
         add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
+        
+        add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
+        
+        /*
+        AJAX
+        */
 
-        //ajax : love & unlove
+        //love & unlove
         add_action('wp_ajax_wpsstm_lastfm_user_toggle_love_track',array($this,'ajax_lastm_toggle_love_track') );
         
-        //ajax : updateNowPlaying
+        //updateNowPlaying
         add_action('wp_ajax_wpsstm_user_update_now_playing_lastfm_track', array($this,'ajax_lastfm_now_playing_track'));
         
-        //ajax : scrobble
+        //scrobble user
         add_action('wp_ajax_wpsstm_lastfm_scrobble_user_track', array($this,'ajax_lastfm_scrobble_track'));
         
+        //scrobble community
         add_action('wp_ajax_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         
-        add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
+        
         
     }
     
@@ -372,7 +379,7 @@ class WP_SoundSystem_Core_LastFM{
 
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';
-            $track_arr = $track->to_array();
+            $track_arr = $track->to_ajax();
             $last_scrobble = get_user_meta($community_user_id, $last_scrobble_meta_key, true);
             
             if ( $last_scrobble == $track_arr ){

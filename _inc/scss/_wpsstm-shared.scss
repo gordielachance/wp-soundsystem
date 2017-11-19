@@ -10,6 +10,10 @@ $player-text-color:#FFF;
     border-bottom:none!important; //fix for twentyfifteen
 }
 
+input.wpsstm-fullwidth{
+    width:100%;
+}
+
 .wpsstm-ellipsis{
     @include ellipsis($no-wrap: true);
 }

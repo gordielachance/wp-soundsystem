@@ -149,6 +149,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* track created on the fly when it don't exist in the DB and that a track action is fired - see get_track_action_url()
+
 = 1.8.5 =
 * welcome Wordpress 4.9! Finally!
 * improved wizard (GUI, presets, helpers), etc.

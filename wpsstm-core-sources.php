@@ -59,12 +59,16 @@ class WP_SoundSystem_Core_Sources{
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        /* AJAX */
+        /*
+        AJAX
+        */
         
         //get track autosources
         add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
         add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
-        add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));
+        add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));//TOFIXDDD
+        
+        add_action('wp_ajax_wpsstm_set_source_position', array($this,'ajax_set_source_position'));
         
         //delete source
         add_action('wp_ajax_wpsstm_delete_source', array($this,'ajax_delete_source'));
@@ -350,7 +354,7 @@ class WP_SoundSystem_Core_Sources{
         wpsstm_locate_template( 'track-sources.php', true, false );
         $sources_list = ob_get_clean();
 
-        $sources_url = $wpsstm_track->get_track_admin_gui_url('sources');
+        $sources_url = $wpsstm_track->get_track_popup_url('sources');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
@@ -676,6 +680,30 @@ class WP_SoundSystem_Core_Sources{
         header('Content-type: application/json');
         wp_send_json( $result ); 
 
+    }
+    
+    function ajax_set_source_position(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+
+        $source = new WP_SoundSystem_Source();
+        $source->from_array($ajax_data['source']);
+        $success = $source->save_source_position();
+        $result['source'] = $source;
+
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
     function ajax_delete_source(){

@@ -43,7 +43,6 @@ class WP_SoundSystem_Core_Wizard{
     function setup_actions(){
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
-        add_filter( 'page_rewrite_rules', array($this,'frontend_wizard_rewrite') );
 
         //frontend
         add_action( 'wp', array($this,'populate_frontend_wizard_tracklist'));
@@ -70,23 +69,6 @@ class WP_SoundSystem_Core_Wizard{
         $vars[] = $this->qvar_tracklist_wizard;
         return $vars;
     }
-    
-    /*
-    Handle the XSPF endpoint for the frontend wizard page
-    */
-    
-    function frontend_wizard_rewrite($rules){
-        global $wp_rewrite;
-        if ( !$this->frontend_wizard_page_id ) return $rules;
-        
-        $page_slug = get_post_field( 'post_name', $this->frontend_wizard_page_id );
-
-        $wizard_rule = array(
-            $page_slug . '/xspf/?' => sprintf('index.php?pagename=%s&%s=true',$page_slug,wpsstm_tracklists()->qvar_xspf)
-        );
-
-        return array_merge($wizard_rule, $rules);
-    }
 
     function wizard_register_scripts_style_shared(){
 
@@ -97,10 +79,7 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_scripts_styles_frontend(){
-        
-        $tracklist_admin_action = wpsstm_tracklists()->get_tracklist_action();
         if ( !is_page($this->frontend_wizard_page_id ) ) return;
-        
         $this->wizard_enqueue_script_styles();
     }
     
@@ -183,7 +162,9 @@ class WP_SoundSystem_Core_Wizard{
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist )  && ( $wpsstm_tracklist = $this->get_wizard_tracklist($post->ID) ) ){
             
-            if ($wpsstm_tracklist && $wpsstm_tracklist->is_community){
+            $tracklist_action = get_query_var( wpsstm_tracklists()->qvar_tracklist_action );
+            
+            if (!$tracklist_action && $wpsstm_tracklist && $wpsstm_tracklist->is_community){
                 $link = get_permalink($this->frontend_wizard_page_id);
                 $link = add_query_arg(array($this->qvar_tracklist_wizard=>$wpsstm_tracklist->post_id),$link);
                 wp_redirect($link);
@@ -740,7 +721,7 @@ class WP_SoundSystem_Core_Wizard{
         $option = $wpsstm_tracklist->feed_url;
 
         $text_input = sprintf(
-            '<input type="text" name="%s[search]" value="%s" class="fullwidth" placeholder="%s" />',
+            '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
             __('Enter a tracklist URL','wpsstm')

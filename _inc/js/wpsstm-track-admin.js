@@ -15,7 +15,7 @@
         var li_el =                 $(checkbox).closest('li');
 
         var ajax_data = {
-            action:         (is_checked ? 'wpsstm_add_tracklist_track' : 'wpsstm_remove_tracklist_track'),
+            action:         (is_checked ? 'wpsstm_append_to_tracklist' : 'wpsstm_remove_from_tracklist'),
             track_id:       track_id,
             tracklist_id:   tracklist_id,
         };

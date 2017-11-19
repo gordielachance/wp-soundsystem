@@ -64,7 +64,7 @@
             var track_ajax = track_obj.to_ajax();
 
             var ajax_data = {
-                action:     'wpsstm_love_unlove_track',
+                action:     'wpsstm_toggle_favorite_track',
                 do_love:    true,
                 track:      track_ajax
             };
@@ -115,7 +115,7 @@
             var track_ajax = track_obj.to_ajax();
 
             var ajax_data = {
-                action:     'wpsstm_love_unlove_track',
+                action:     'wpsstm_toggle_favorite_track',
                 do_love:    false,
                 track:      track_ajax
             };
@@ -476,7 +476,7 @@ class WpsstmTrack {
 
         //ajax update order
         var ajax_data = {
-            action:     'wpsstm_track_update_source_index',
+            action:     'wpsstm_set_source_position',
             source:     source_obj.to_ajax()
         };
 
