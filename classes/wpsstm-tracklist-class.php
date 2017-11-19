@@ -570,7 +570,7 @@ class WP_SoundSystem_Tracklist{
         $share_url = 
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
-            'href' =>       $this->get_tracklist_popup_link('share'),
+            'href' =>       $this->get_tracklist_popup_url('share'),
         );
         
         //XSPF
@@ -602,13 +602,10 @@ class WP_SoundSystem_Tracklist{
         
         //add track
         if ( $this->user_can_reorder_tracks() ){
-            
-            $new_subtrack_url = $this->get_tracklist_action_link('new-subtrack'); //TOFIXDDD
-            $new_subtrack_url = add_query_arg(array('tracklist_id'=>$this->post_id),$new_subtrack_url);
-            
+
             $actions['new-subtrack'] = array(
                 'text'     =>   $track_obj->labels->add_new_item,
-                'href'      =>  $new_subtrack_url,
+                'href'      =>  $this->get_tracklist_popup_url('new-subtrack'),
                 'classes'   =>  array('wpsstm-requires-auth','wpsstm-icon-add'),
             );
         }
@@ -668,7 +665,7 @@ class WP_SoundSystem_Tracklist{
                     $actions['advanced'] = array(
                         'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
                         'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_tracklist_popup_link('about'),
+                        'href' =>       $this->get_tracklist_popup_url('about'),
                     );
                 }
                 */
@@ -701,11 +698,11 @@ class WP_SoundSystem_Tracklist{
         
     }
     
-    function get_tracklist_popup_link($section =  null){
+    function get_tracklist_popup_url($action =  null){
         $url = $this->get_tracklist_action_link('popup');
         
-        if ($section){
-            $url.='#' . $section;
+        if ($action){
+            $url = add_query_arg(array('popup-action'=>$action),$url);
         }
 
         return $url;

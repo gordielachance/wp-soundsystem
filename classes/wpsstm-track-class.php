@@ -619,11 +619,11 @@ class WP_SoundSystem_Track{
         return $url;
     }
     
-    function get_track_admin_url($section = null){
+    function get_track_popup_url($action = null){
         $url = $this->get_track_action_url('popup');
         
-        if($section){
-            $url .= '#' . $section;
+        if ($action){
+            $url = add_query_arg(array('popup-action'=>$action),$url);
         }
         
         return $url;
@@ -658,7 +658,7 @@ class WP_SoundSystem_Track{
             $actions['about'] = array(
                 'icon' =>       '<i class="fa fa-info-circle" aria-hidden="true"></i>',
                 'text' =>      __('About', 'wpsstm'),
-                'href' =>       $this->get_track_admin_url('about'),
+                'href' =>       $this->get_track_popup_url('about'),
             );
         }
 
@@ -667,7 +667,7 @@ class WP_SoundSystem_Track{
             $actions['edit'] = array(
                 'icon' =>       '<i class="fa fa-pencil" aria-hidden="true"></i>',
                 'text' =>      __('Track Details', 'wpsstm'),
-                'href' =>       $this->get_track_admin_url('edit'),
+                'href' =>       $this->get_track_popup_url('edit'),
             );
         }
 
@@ -676,7 +676,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'icon' =>       '<i class="fa fa-list" aria-hidden="true"></i>',
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_admin_url('playlists'),
+                'href' =>       $this->get_track_popup_url('playlists'),
                 'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
             );
         }
@@ -729,7 +729,7 @@ class WP_SoundSystem_Track{
                 'icon' =>       '<i class="fa fa-cloud" aria-hidden="true"></i>',
                 'text' =>      __('Sources','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       $this->get_track_admin_url('sources'),
+                'href' =>       $this->get_track_popup_url('sources'),
             );
         }
 
@@ -753,7 +753,7 @@ class WP_SoundSystem_Track{
                     $actions['advanced'] = array(
                         'icon' =>       '<i class="fa fa-cog" aria-hidden="true"></i>',
                         'text' =>      __('Advanced', 'wpsstm'),
-                        'href' =>       $this->get_track_admin_url('about'),
+                        'href' =>       $this->get_track_popup_url('about'),
                     );
                 }
                 

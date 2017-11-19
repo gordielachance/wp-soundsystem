@@ -145,12 +145,15 @@ class WP_SoundSystem_Core_Tracks{
     function track_popup_template($template){
         global $wp_query;
         global $post;
+        global $wpsstm_track;
 
         $post_type = get_post_type($post);
         $track_action = get_query_var( $this->qvar_track_action );
         if ( $track_action != 'popup' ) return $template;
+        
+        $wpsstm_track = new WP_SoundSystem_Track( get_the_ID() );
 
-        if ( $template = wpsstm_locate_template( 'track-admin.php' ) ){
+        if ( $template = wpsstm_locate_template( 'track-popup.php' ) ){
 
             //TO FIX should be registered in register_tracks_scripts_styles_shared() then enqueued here, but it is not working
             wp_enqueue_script( 'wpsstm-track-admin', wpsstm()->plugin_url . '_inc/js/wpsstm-track-admin.js', array('jquery','jquery-ui-tabs'),wpsstm()->version, true );
