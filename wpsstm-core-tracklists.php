@@ -54,10 +54,11 @@ class WP_SoundSystem_Core_Tracklists{
         
         
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
-        add_filter( 'template_include', array($this,'tracklist_export_redirect'));
+        add_filter( 'template_include', array($this,'tracklist_xspf_template'));
+        add_filter( 'template_include', array($this,'tracklist_popup_template'));
         
         add_action( 'wp', array($this,'tracklist_append_new_track')); //TOFIXDDD
-        add_filter( 'template_include', array($this,'tracklist_admin_template_filter'));
+        
         
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
@@ -155,20 +156,21 @@ class WP_SoundSystem_Core_Tracklists{
     *
     *    Adds a custom template to the query queue.
     */
-    function tracklist_admin_template_filter($template){
+    function tracklist_popup_template($template){
         global $post;
         
-        if( 'admin' != get_query_var( $this->qvar_tracklist_action ) ) return $template;
+        $tracklist_action = get_query_var( $this->qvar_tracklist_action );
+        if( $tracklist_action != 'popup' ) return $template;
+        
+        $is_tracklist_post = in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types );
+        if ( !$is_tracklist_post ) return $template;
 
+        /*
         if ( action == 'new-subtrack' ){ //this will be handled by track_admin_endpoint() //TOFIXDDD
             set_query_var( wpsstm_tracks()->qvar_track_action, 'new-subtrack' );
             return $template;
         }
-        
-        $is_tracklist_post = in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types );
-        $is_wizard = ( $post->ID == wpsstm_wizard()->frontend_wizard_page_id );
-
-        if ( !$is_tracklist_post && !$is_wizard ) return $template;
+        */
 
         if ( $template = wpsstm_locate_template( 'tracklist-admin.php' ) ) {
             add_filter( 'body_class', array($this,'tracklist_popup_body_classes'));
@@ -508,7 +510,7 @@ class WP_SoundSystem_Core_Tracklists{
         
     }
 
-    function tracklist_export_redirect($template){
+    function tracklist_xspf_template($template){
         if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return $template;
         if ( $admin_action != 'export' ) return $template;
         the_post();
@@ -526,7 +528,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         switch($admin_action){
             case 'export':
-                //see tracklist_export_redirect
+                //see tracklist_xspf_template
             break;
             case 'switch-status':
                 $success = $tracklist->switch_status();
