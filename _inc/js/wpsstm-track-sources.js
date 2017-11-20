@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
         //click on source trigger
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
             e.preventDefault();
-            source_obj.track.tracklist.play_track(source_obj.track.index,source_obj.index);
+            source_obj.track.play_track(source_obj.index);
         });
         
         //delete source
