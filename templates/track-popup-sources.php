@@ -11,7 +11,7 @@ wpsstm_locate_template( 'track-sources.php', true, false );
 </p>
 <p class="wpsstm-icon-input" id="wpsstm-new-source">
     <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="Enter a tracklist URL">
-    <input type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary" value="+">
+    <input type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary wpsstm-icon-button" value="+">
 </p>
 <input type="hidden" name="wpsstm-track-popup-action" value="sources-manager" />
 <input type="hidden" name="wpsstm-track-id" value="<?php echo $wpsstm_track->post_id;?>" />

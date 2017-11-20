@@ -48,6 +48,7 @@ MINIMAL STYLES
 .wpsstm-loading-el{
     pointer-events: none;
 }
+
 .wpsstm-icon{
     &:before{
         font-weight: normal;
@@ -56,6 +57,12 @@ MINIMAL STYLES
         display: inline-block;
     }
 }
+.wpsstm-icon-button{
+    font-weight: normal;
+    font-style: normal;
+    font-family: 'FontAwesome';
+}
+
 .wpsstm-loading-icon{
     @extend .wpsstm-icon;
     &:before{
