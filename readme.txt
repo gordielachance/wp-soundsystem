@@ -152,6 +152,8 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = XXX =
 * see get_track_action_url() and get_new_track_url()
 * better code for tracklists and tracks actions
+* better sources manager
+* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
 
 = 1.8.5 =
 * welcome Wordpress 4.9! Finally!
@@ -166,7 +168,6 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * improved JS player
 * improved caching stuff
 * improved CSS
-* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
 
 = 1.7.5 =
 * live tracklists : rewritten some code, improved caching stuff

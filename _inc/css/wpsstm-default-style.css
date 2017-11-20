@@ -54,7 +54,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 3, ../scss/Font-Awesome/_fixed-width.scss */
-.fa-fw, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before, .wpsstm-track-action.wpsstm-loading a:before {
+.fa-fw, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before {
   width: 1.2857142857em;
   text-align: center;
 }
@@ -130,7 +130,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 4, ../scss/Font-Awesome/_animated.scss */
-.fa-spin, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before, .wpsstm-track-action.wpsstm-loading a:before {
+.fa-spin, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before {
   -webkit-animation: fa-spin 2s infinite linear;
   animation: fa-spin 2s infinite linear;
 }
@@ -266,7 +266,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 8, ../scss/Font-Awesome/_icons.scss */
-.fa-heart:before, #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite a:before, .wpsstm-track-action:not(.wpsstm-loading)#wpsstm-track-action-unfavorite a:before {
+.fa-heart:before, #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, .wpsstm-track-action#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -339,8 +339,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 
 /* line 24, ../scss/Font-Awesome/_icons.scss */
 .fa-gear:before,
-.fa-cog:before,
-.wpsstm-track-action#wpsstm-track-action-advanced a:before {
+.fa-cog:before {
   content: "";
 }
 
@@ -526,7 +525,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 63, ../scss/Font-Awesome/_icons.scss */
-.fa-list:before {
+.fa-list:before, .wpsstm-track-action#wpsstm-track-action-playlists a:before {
   content: "";
 }
 
@@ -554,7 +553,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 71, ../scss/Font-Awesome/_icons.scss */
-.fa-pencil:before {
+.fa-pencil:before, .wpsstm-track-action#wpsstm-track-action-edit a:before {
   content: "";
 }
 
@@ -847,7 +846,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 132, ../scss/Font-Awesome/_icons.scss */
-.fa-arrows-v:before {
+.fa-arrows-v:before, .wpsstm-track-action#wpsstm-track-action-move:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -909,7 +908,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 146, ../scss/Font-Awesome/_icons.scss */
-.fa-heart-o:before, #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite a:before, .wpsstm-track-action:not(.wpsstm-loading)#wpsstm-track-action-favorite a:before {
+.fa-heart-o:before, #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, .wpsstm-track-action#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -1113,7 +1112,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 190, ../scss/Font-Awesome/_icons.scss */
-.fa-cloud:before {
+.fa-cloud:before, .wpsstm-track-action#wpsstm-track-action-sources a:before {
   content: "";
 }
 
@@ -2412,7 +2411,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 489, ../scss/Font-Awesome/_icons.scss */
-.fa-circle-o-notch:before, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before, .wpsstm-track-action.wpsstm-loading a:before {
+.fa-circle-o-notch:before, .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, ul.wpsstm-actions-list li.wpsstm-action.wpsstm-loading a:before {
   content: "";
 }
 
@@ -2616,7 +2615,7 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
 }
 
 /* line 537, ../scss/Font-Awesome/_icons.scss */
-.fa-trash:before {
+.fa-trash:before, .wpsstm-track-action#wpsstm-track-action-delete a:before {
   content: "";
 }
 
@@ -3766,6 +3765,33 @@ input.wpsstm-fullwidth {
 }
 
 /* line 17, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input {
+  position: relative;
+  margin: 0.5em;
+}
+/* line 20, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input {
+  padding: 0.5em;
+  line-height: 1em;
+  height: 100%;
+}
+/* line 25, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input[type="text"] {
+  padding-right: 4em;
+}
+/* line 28, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input[type="submit"] {
+  width: 4em;
+  font-family: 'FontAwesome';
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  cursor: hand;
+  cursor: pointer;
+}
+
+/* line 39, ../scss/_wpsstm-shared.scss */
 .wpsstm-ellipsis, .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info {
   white-space: nowrap;
   overflow: hidden;
@@ -3774,13 +3800,13 @@ input.wpsstm-fullwidth {
   text-overflow: ellipsis;
 }
 
-/* line 21, ../scss/_wpsstm-shared.scss */
+/* line 43, ../scss/_wpsstm-shared.scss */
 .wpsstm-can-click, .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-sources [data-wpsstm-source-idx] label, .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-sources [data-wpsstm-source-idx] label {
   cursor: pointer;
   cursor: hand;
 }
 
-/* line 25, ../scss/_wpsstm-shared.scss */
+/* line 47, ../scss/_wpsstm-shared.scss */
 .wpsstm-loading-el {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
@@ -3820,7 +3846,7 @@ input.wpsstm-fullwidth {
     opacity: 1;
   }
 }
-/* line 36, ../scss/_wpsstm-shared.scss */
+/* line 58, ../scss/_wpsstm-shared.scss */
 .wpsstm-tracklist-notices {
   -webkit-align-items: center;
   align-items: center;
@@ -3830,7 +3856,7 @@ input.wpsstm-fullwidth {
   justify-content: center;
   padding: .5em 0;
 }
-/* line 42, ../scss/_wpsstm-shared.scss */
+/* line 64, ../scss/_wpsstm-shared.scss */
 .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh {
   background: none;
   -moz-animation: opacityPulse 2s infinite ease-out;
@@ -3839,12 +3865,12 @@ input.wpsstm-fullwidth {
   opacity: 1;
   font-size: 1em;
 }
-/* line 47, ../scss/_wpsstm-shared.scss */
+/* line 69, ../scss/_wpsstm-shared.scss */
 .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before {
   margin-right: .25em;
 }
 
-/* line 58, ../scss/_wpsstm-shared.scss */
+/* line 80, ../scss/_wpsstm-shared.scss */
 .wpsstm-notice {
   font-size: 0.8em;
   padding: .5em;
@@ -3853,26 +3879,26 @@ input.wpsstm-fullwidth {
   text-align: center;
   margin: .5em 0;
 }
-/* line 65, ../scss/_wpsstm-shared.scss */
+/* line 87, ../scss/_wpsstm-shared.scss */
 .wpsstm-notice a {
   color: #222;
   text-decoration: underline;
 }
-/* line 70, ../scss/_wpsstm-shared.scss */
+/* line 92, ../scss/_wpsstm-shared.scss */
 .wpsstm-notice.active {
   display: block;
 }
-/* line 77, ../scss/_wpsstm-shared.scss */
+/* line 99, ../scss/_wpsstm-shared.scss */
 .wpsstm-notice .wpsstm-close-notice {
   position: absolute;
   right: 1em;
 }
 
-/* line 85, ../scss/_wpsstm-shared.scss */
+/* line 107, ../scss/_wpsstm-shared.scss */
 .toggle-children-container .wpsstm-tracklist {
   margin: 0;
 }
-/* line 89, ../scss/_wpsstm-shared.scss */
+/* line 111, ../scss/_wpsstm-shared.scss */
 .toggle-children-container .toggle-children-link {
   display: block;
   width: 100%;
@@ -3882,28 +3908,28 @@ input.wpsstm-fullwidth {
   font-weight: bold;
   font-size: 1.5em;
 }
-/* line 97, ../scss/_wpsstm-shared.scss */
+/* line 119, ../scss/_wpsstm-shared.scss */
 .toggle-children-container .toggle-children-link small {
   font-size: .5em;
   line-height: 1em;
   vertical-align: middle;
 }
 
-/* line 105, ../scss/_wpsstm-shared.scss */
+/* line 127, ../scss/_wpsstm-shared.scss */
 ul.comma-list, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul {
   list-style: none;
   display: inline;
 }
-/* line 108, ../scss/_wpsstm-shared.scss */
+/* line 130, ../scss/_wpsstm-shared.scss */
 ul.comma-list li, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li {
   display: inline;
 }
-/* line 110, ../scss/_wpsstm-shared.scss */
+/* line 132, ../scss/_wpsstm-shared.scss */
 ul.comma-list li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li:not(:last-child):after {
   content: ", ";
 }
 
-/* line 116, ../scss/_wpsstm-shared.scss */
+/* line 138, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar {
   position: relative;
   display: block;
@@ -3913,55 +3939,55 @@ ul.comma-list li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-helpers 
   height: 1.3em;
   line-height: 1.3em;
 }
-/* line 125, ../scss/_wpsstm-shared.scss */
+/* line 147, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill {
   display: block;
   height: 100%;
   text-align: left;
   position: relative;
 }
-/* line 130, ../scss/_wpsstm-shared.scss */
+/* line 152, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color {
   width: 100%;
   height: 100%;
   position: absolute;
 }
-/* line 134, ../scss/_wpsstm-shared.scss */
+/* line 156, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color.wpsstm-pc-bar-fill-yellow {
   background-color: #FFE000;
 }
-/* line 137, ../scss/_wpsstm-shared.scss */
+/* line 159, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-fill-color.wpsstm-pc-bar-fill-red {
   background-color: red;
 }
-/* line 142, ../scss/_wpsstm-shared.scss */
+/* line 164, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text {
   margin: auto;
   display: block;
   text-align: center;
 }
-/* line 146, ../scss/_wpsstm-shared.scss */
+/* line 168, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text i.fa, .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text .wpsstm-tracklist-notices i#wpsstm-notice-ajax-refresh:before, .wpsstm-tracklist-notices .wpsstm-pc-bar .wpsstm-pc-bar-fill .wpsstm-pc-bar-text i#wpsstm-notice-ajax-refresh:before {
   padding: 0 0.5em;
 }
-/* line 153, ../scss/_wpsstm-shared.scss */
+/* line 175, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar.color-light .wpsstm-pc-bar-text {
   color: white;
 }
-/* line 158, ../scss/_wpsstm-shared.scss */
+/* line 180, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-fill, .wpsstm-pc-bar.empty .wpsstm-pc-bar-fill {
   width: 100% !important;
 }
-/* line 162, ../scss/_wpsstm-shared.scss */
+/* line 184, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-fill-color, .wpsstm-pc-bar.empty .wpsstm-pc-bar-fill-color {
   display: none;
 }
-/* line 165, ../scss/_wpsstm-shared.scss */
+/* line 187, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar.offline .wpsstm-pc-bar-text, .wpsstm-pc-bar.empty .wpsstm-pc-bar-text {
   color: inherit;
   font-size: 0.8em;
 }
-/* line 175, ../scss/_wpsstm-shared.scss */
+/* line 197, ../scss/_wpsstm-shared.scss */
 .wpsstm-pc-bar.incomplete .wpsstm-pc-bar-text {
   text-align: right;
 }
@@ -4141,12 +4167,8 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
 :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.tracklist-template-table [itemprop="track"] .wpsstm-track-sources {
   display: none;
 }
-/* line 212, ../scss/wpsstm-default-style.scss */
-:not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.tracklist-template-table [itemprop="track"] [data-wpsstm-source-idx] {
-  display: inline;
-}
 
-/* line 219, ../scss/wpsstm-default-style.scss */
+/* line 216, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers {
   list-style: none;
   font-size: .75em;
@@ -4157,7 +4179,7 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   flex-wrap: wrap;
   text-align: center;
 }
-/* line 226, ../scss/wpsstm-default-style.scss */
+/* line 223, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper {
   width: calc(33% - 1em);
   margin: .5em;
@@ -4168,35 +4190,35 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   background-color: #f7f7f7;
   border: 1px solid #eaeaea;
 }
-/* line 234, ../scss/wpsstm-default-style.scss */
+/* line 231, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url {
   width: calc(100% - 1em);
 }
-/* line 240, ../scss/wpsstm-default-style.scss */
+/* line 237, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper h3 {
   margin-top: 0;
 }
-/* line 243, ../scss/wpsstm-default-style.scss */
+/* line 240, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper ul {
   list-style: none;
 }
-/* line 246, ../scss/wpsstm-default-style.scss */
+/* line 243, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper input[type=text] {
   font-size: 1em;
   text-align: center;
   background-color: white;
 }
-/* line 253, ../scss/wpsstm-default-style.scss */
+/* line 250, ../scss/wpsstm-default-style.scss */
 #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper:not(.wpsstm-wizard-helper-success) a {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
 
-/* line 261, ../scss/wpsstm-default-style.scss */
+/* line 258, ../scss/wpsstm-default-style.scss */
 ul#wpsstm-tracklist-actions, .wpsstm-popup .wpsstm-actions-list {
   line-height: 2.8em;
 }
-/* line 263, ../scss/wpsstm-default-style.scss */
+/* line 260, ../scss/wpsstm-default-style.scss */
 ul#wpsstm-tracklist-actions li.wpsstm-action, .wpsstm-popup .wpsstm-actions-list li.wpsstm-action {
   border: 1px solid #F7F7F7;
   background: #F7F7F7;
@@ -4204,45 +4226,45 @@ ul#wpsstm-tracklist-actions li.wpsstm-action, .wpsstm-popup .wpsstm-actions-list
   display: inline-block;
   line-height: 1.8em;
 }
-/* line 269, ../scss/wpsstm-default-style.scss */
+/* line 266, ../scss/wpsstm-default-style.scss */
 ul#wpsstm-tracklist-actions li.wpsstm-action:hover, .wpsstm-popup .wpsstm-actions-list li.wpsstm-action:hover {
   border-color: #F7F7F7;
   background: white;
 }
-/* line 273, ../scss/wpsstm-default-style.scss */
+/* line 270, ../scss/wpsstm-default-style.scss */
 ul#wpsstm-tracklist-actions li.wpsstm-action a:before, .wpsstm-popup .wpsstm-actions-list li.wpsstm-action a:before {
   margin-right: .5em;
 }
 
-/* line 280, ../scss/wpsstm-default-style.scss */
+/* line 277, ../scss/wpsstm-default-style.scss */
 ul.wpsstm-actions-list {
   list-style: none;
 }
 
-/* line 299, ../scss/wpsstm-default-style.scss */
+/* line 296, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions {
   display: block;
   margin: 1em;
   list-style: none;
 }
-/* line 335, ../scss/wpsstm-default-style.scss */
+/* line 332, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form {
   display: none;
 }
-/* line 337, ../scss/wpsstm-default-style.scss */
+/* line 334, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form select {
   font-size: 1em;
 }
-/* line 340, ../scss/wpsstm-default-style.scss */
+/* line 337, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form em {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
-/* line 345, ../scss/wpsstm-default-style.scss */
+/* line 342, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded em {
   display: none;
 }
-/* line 348, ../scss/wpsstm-default-style.scss */
+/* line 345, ../scss/wpsstm-default-style.scss */
 #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded form {
   display: inline-block;
 }

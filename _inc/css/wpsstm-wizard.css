@@ -1,48 +1,21 @@
 /* line 3, ../scss/wpsstm-wizard.scss */
-#wpsstm-wizard-search {
-  position: relative;
-  margin: 0.5em;
-}
-/* line 6, ../scss/wpsstm-wizard.scss */
-#wpsstm-wizard-search input {
-  padding: 0.5em;
-  line-height: 1em;
-  height: 100%;
-}
-/* line 11, ../scss/wpsstm-wizard.scss */
-#wpsstm-wizard-search input[type="text"] {
-  padding-right: 4em;
-}
-/* line 14, ../scss/wpsstm-wizard.scss */
-#wpsstm-wizard-search input[type="submit"] {
-  width: 4em;
-  font-family: 'FontAwesome';
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: none;
-  cursor: hand;
-  cursor: pointer;
-}
-
-/* line 26, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper {
   position: relative;
 }
-/* line 29, ../scss/wpsstm-wizard.scss */
+/* line 6, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper #wpsstm-wizard-preview-feed-url {
   text-align: center;
   font-size: 1.25em;
 }
-/* line 34, ../scss/wpsstm-wizard.scss */
+/* line 11, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper table#wizard-regexes {
   width: 100%;
 }
-/* line 36, ../scss/wpsstm-wizard.scss */
+/* line 13, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper table#wizard-regexes tr:first-child, #wizard-wrapper table#wizard-regexes td:first-child {
   width: 70%;
 }
-/* line 41, ../scss/wpsstm-wizard.scss */
+/* line 18, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw, #wizard-wrapper pre.spiff-raw code {
   box-sizing: border-box;
   webkit-box-sizing: border-box;
@@ -53,40 +26,40 @@
   width: 100%;
   overflow: auto;
 }
-/* line 53, ../scss/wpsstm-wizard.scss */
+/* line 30, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .tracks-selector-prefix {
   color: lightgrey;
   padding-right: 0.5em;
 }
-/* line 57, ../scss/wpsstm-wizard.scss */
+/* line 34, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-selector-toggle-advanced {
   text-decoration: none;
 }
-/* line 61, ../scss/wpsstm-wizard.scss */
+/* line 38, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper #spiff-station-tracks-raw {
   max-height: calc(3 * 211px);
   overflow-y: auto;
 }
-/* line 66, ../scss/wpsstm-wizard.scss */
+/* line 43, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw {
   max-height: 200px;
   border: 1px solid lightgrey;
   padding: 10px;
 }
-/* line 70, ../scss/wpsstm-wizard.scss */
+/* line 47, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper pre.spiff-raw code {
   background: none;
 }
-/* line 74, ../scss/wpsstm-wizard.scss */
+/* line 51, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .ui-tabs-panel > h3:first-of-type {
   display: none;
 }
 
-/* line 81, ../scss/wpsstm-wizard.scss */
+/* line 58, ../scss/wpsstm-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;
 }
-/* line 85, ../scss/wpsstm-wizard.scss */
+/* line 62, ../scss/wpsstm-wizard.scss */
 #wpsstm-frontend-wizard #wpsstm-wizard-convert-tracklist p.submit {
   display: inline-block;
 }
