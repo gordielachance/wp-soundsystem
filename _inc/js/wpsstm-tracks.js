@@ -542,7 +542,7 @@ class WpsstmTrack {
         var success = $.Deferred();
         
         var track_previous = wpsstm.current_track;
-        var isDuplicatePlay = ( $(self).is($(track_previous))); //if we're trying to play the same track again
+        var isDuplicatePlay = ( ( $(self).is($(track_previous))) && (track_previous.current_source_idx == source_idx) ); //if we're trying to play the same track again
 
         var isTracklistSwitch = true;
         
