@@ -83,7 +83,6 @@ body.wpsstm-default{
                                 width: 20%;
                                 @include opacity(.25);
                                 .wpsstm-track-sources-list{
-
                                     padding:0;
                                     line-height: 2em;
                                 }
@@ -101,9 +100,6 @@ body.wpsstm-default{
                                             line-height:2.5em;
                                         }
                                     }
-                                    .wpsstm-source-action{
-                                        display:initial;
-                                    }
                                 }
 
                                 &:not(:hover){
@@ -111,9 +107,6 @@ body.wpsstm-default{
                                         &:not(.source-playing){
                                             display:none;
                                         }
-                                    }
-                                    .wpsstm-source-action{
-                                        display:none;
                                     }
                                 }
 

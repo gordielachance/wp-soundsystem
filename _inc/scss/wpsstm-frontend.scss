@@ -47,13 +47,16 @@ body.wpsstm-popup{
         margin: .5em 0;
     }
     
-    ul.wpsstm-actions-list{
-        @extend #wpsstm-tracklist-actions;
+    .entry-content > ul.wpsstm-actions-list{
         border-bottom: 1px solid #F7F7F7;
         padding-bottom: 1em;
         text-align: center;
+        display:block;
+        margin: 1em;
+        list-style: none;
+        line-height: 2.8em;
         li{
-            @extend .wpsstm-tracklist-action;
+            @extend .wpsstm-action-bt;
         }
     }
     

@@ -238,7 +238,7 @@ function wpsstm_get_blank_action(){
     );
 }
 
-function output_tracklist_actions($actions,$prefix){
+function get_actions_list($actions,$prefix){
     $track_actions_lis = array();
 
     foreach($actions as $slug => $action){

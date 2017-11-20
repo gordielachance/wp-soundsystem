@@ -11,7 +11,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             
             $wpsstm_track->the_source();
             global $wpsstm_source;
-            $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
+            
             
             $wpsstm_source->populate_source_provider();
             $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
@@ -22,30 +22,12 @@ if ( $wpsstm_track->have_sources() ) { ?>
             }
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
-                <a class="wpsstm-source-icon wpsstm-icon" href="#"></a>
-                <span class="wpsstm-source-links">
-                    <a class="wpsstm-source-provider" href="<?php echo $wpsstm_source->url;?>" target="_blank" title="<?php echo $wpsstm_source->title;?>">
-                        <?php echo $wpsstm_source->provider->icon;?>
-                    </a>
-                    <?php
-
-                    //delete source
-                    $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$wpsstm_source->post_id);
-
-                    if ($can_delete_source){
-                        ?>
-                        <a class="wpsstm-source-action wpsstm-source-delete-action" href="#" title="<?php _e('Delete this source','wpsstm');?>"><i class="fa fa-trash" aria-hidden="true"></i></a>
-                        <?php
-                    }
-
-                    if ( $wpsstm_track->user_can_reorder_sources() ){
-                        ?>
-                        <a class="wpsstm-source-action wpsstm-source-reorder-action" href="#" title="<?php _e('Reorder track','wpsstm');?>"><i class="fa fa-arrows-v" aria-hidden="true"></i></a>
-                        <?php
-                    }
-
-                    ?>
-                </span>
+                <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>
+                <?php
+                if ( $actions = $wpsstm_source->get_source_links('page') ){
+                    echo get_actions_list($actions,'source');
+                }
+                ?>
                 <label class="wpsstm-source-title wpsstm-can-click"><?php echo $title;?></label>
             </li>
             <?php

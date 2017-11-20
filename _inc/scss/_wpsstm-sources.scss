@@ -20,17 +20,15 @@ body.wpsstm-default{
             box-sizing: border-box;
 
             @include display-flex();
+            
+            .wpsstm-source-icon{
+                width:2em;
+            }
 
-            .wpsstm-source-links{
-
+            ul#wpsstm-source-actions{
                 @include order(1);
                 @include flex(0 0 auto);
                 padding-right: .5em;
-
-                .wpsstm-source-action{
-                    text-align:center;
-                    width:2em;
-                }
             }
 
             .wpsstm-source-title{ //source text
@@ -57,8 +55,40 @@ body.wpsstm-default{
             &.source-playing{
                 font-weight: bold;
             }
+            
+            &[data-wpsstm-source-provider="soundcloud"] #wpsstm-source-action-provider a:before{
+                content:"\f1be";//fa-soundcloud
+            }
+            &[data-wpsstm-source-provider="youtube"] #wpsstm-source-action-provider a:before{
+                content:"\f167";//fa-youtube
+            }
+            &[data-wpsstm-source-provider="mixcloud"] #wpsstm-source-action-provider a:before{
+                content:"\f289";//fa-mixcloud
+            }
         }
     }
+    
+    #wpsstm-source-actions{
+        .wpsstm-source-action{
+            display:inline;
+            a{
+                &:before{
+                    margin-right:0;
+                }
+                > span{
+                    display:none;
+                }
+            }
+            &#wpsstm-source-action-delete a:before{
+                content: "\f1f8";//.fa-trash;
+            }
+            &#wpsstm-source-action-move a:before{
+                content: "\f07d";//.fa-arrows-v;
+            }
+        }
+    }
+    
+    
     
     #wpsstm-track-admin-sources{
         form{

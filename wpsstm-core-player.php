@@ -171,7 +171,6 @@ class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug = 'default';
-    var $icon;
     
     function __construct(){
     }
@@ -193,14 +192,7 @@ class WP_SoundSystem_Player_Provider{
     public function get_source_type($url){
         
     }
-    
-    function format_source_icon(){
-        if ( !$prefix = $this->icon ){
-            $prefix = sprintf('[%s]',$this->name);
-        }
-        return $prefix;
-    }
-    
+
     function format_source_title($title){
         return $title;
     }
@@ -298,7 +290,6 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
     
     var $name = 'Youtube';
     var $slug = 'youtube';
-    var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
     function get_youtube_id($url){
         //youtube
@@ -334,7 +325,6 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
-    var $icon = '<i class="fa fa-soundcloud" aria-hidden="true"></i>';
     var $client_id;
     
     function __construct(){

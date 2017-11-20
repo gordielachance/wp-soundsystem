@@ -35,7 +35,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             <?php 
                 //tracklist actions
                 if ( $actions = $tracklist->get_tracklist_links('page') ){
-                    echo output_tracklist_actions($actions,'tracklist');
+                    echo get_actions_list($actions,'tracklist');
                 }
             ?>
         </div>

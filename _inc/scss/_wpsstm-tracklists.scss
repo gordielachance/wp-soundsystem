@@ -219,19 +219,8 @@ body.wpsstm-default{
         line-height: 2.8em;
 
         .wpsstm-tracklist-action{
-            
-            border: 1px solid #F7F7F7;
-            background:#F7F7F7;
-            padding: .25em .5em;
-            display:inline-block;
-            line-height: 1.8em;
-            &:hover{
-                border-color:#F7F7F7;
-                background:white;
-            }
-            a:before{
-                margin-right:.5em;
-            }
+            @extend .wpsstm-action-bt;
+
 
             &#wpsstm-tracklist-action-refresh a:before{
                 content:"\f021";//.fa-refresh;

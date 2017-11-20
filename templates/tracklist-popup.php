@@ -29,7 +29,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                     <div id="tracklist-popup-tabs" class="entry-content">
                         <?php 
                         if ( $actions = $tracklist->get_tracklist_links('popup') ){
-                            $list = output_tracklist_actions($actions,'tracklist');
+                            $list = get_actions_list($actions,'tracklist');
                             echo $list;
                         }
                 

@@ -64,7 +64,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
                         if ( $actions = $wpsstm_track->get_track_links($tracklist,'popup') ){
-                            $list = output_tracklist_actions($actions,'track');
+                            $list = get_actions_list($actions,'track');
                             echo $list;
                         }
                 
