@@ -10,31 +10,7 @@ $player-text-color:#FFF;
     border-bottom:none!important; //fix for twentyfifteen
 }
 
-input.wpsstm-fullwidth{
-    width:100%;
-}
 
-.wpsstm-icon-input{
-    position:relative;
-    margin: 0.5em;
-    input{
-        padding: 0.5em;
-        line-height: 1em;
-        height:100%;
-    }
-    input[type="text"]{
-        padding-right:4em;
-    }
-    input[type="submit"]{
-        width:4em;
-        font-family: 'FontAwesome';
-        position: absolute;
-        top:0;
-        right: 0;
-        border: none;
-        cursor: hand; cursor: pointer;
-    }
-}
 
 .wpsstm-ellipsis{
     @include ellipsis($no-wrap: true);
