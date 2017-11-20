@@ -46,19 +46,7 @@ get_header();
                         printf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
 
                     }else{
-                        ?>
-                        <form action="<?php the_permalink();?>" method="POST">
-                            <?php
-                            wpsstm_locate_template( 'wizard-frontend.php', true );
-                        
-                            if ($wpsstm_tracklist->feed_url){
-                                echo $wpsstm_tracklist->get_tracklist_html();
-                            }
-                        
-                            ?>
-                        </form>
-                        <?php
-                        
+                        wpsstm_locate_template( 'wizard-frontend.php', true );
                     }
                     ?>
                     <?php
