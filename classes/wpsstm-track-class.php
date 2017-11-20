@@ -229,6 +229,9 @@ class WP_SoundSystem_Track{
         
         $arr = $this->to_array();
 
+        /*
+        //requires PHP 5.6.0
+        
         $filtered = array_filter(
             $arr,
             function ($key) use ($allowed) {
@@ -236,6 +239,9 @@ class WP_SoundSystem_Track{
             },
             ARRAY_FILTER_USE_KEY
         );
+        */
+        
+        $filtered = array_intersect_key($arr, array_flip($allowed));
         
         return $filtered;
     }
