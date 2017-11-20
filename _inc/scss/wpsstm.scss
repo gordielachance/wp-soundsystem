@@ -49,18 +49,22 @@ MINIMAL STYLES
     pointer-events: none;
 }
 .wpsstm-icon{
-    font-weight: normal;
-    font-style: normal;
-    font-family: 'FontAwesome';
-    display: inline-block;
+    &:before{
+        font-weight: normal;
+        font-style: normal;
+        font-family: 'FontAwesome';
+        display: inline-block;
+    }
 }
 .wpsstm-loading-icon{
     @extend .wpsstm-icon;
-    animation: spin 2s linear infinite;
-    margin-right:.25em;
-    content: "\f1ce"; //.fa-circle-o-notch;
-    width: 1.28571429em;
-    text-align: center;
+    &:before{
+        animation: spin 2s linear infinite;
+        margin-right:.25em;
+        content: "\f1ce"; //.fa-circle-o-notch;
+        width: 1.28571429em;
+        text-align: center;
+    }
 }
 
 .toggle-children-container{
@@ -215,9 +219,7 @@ body.wpsstm-default{
             @include animation(opacityPulse 2s infinite ease-out);
             opacity: 1;
             font-size:1em;
-            &:before{
-                @extend .wpsstm-loading-icon;
-            }
+            @extend .wpsstm-loading-icon;
         }
 
     }
@@ -263,14 +265,12 @@ body.wpsstm-default{
         &.wpsstm-actions-list{
             list-style: none;
             li.wpsstm-action{
-                &.wpsstm-loading a:before{
+                &.wpsstm-loading a{
                     @extend .wpsstm-loading-icon;
                 }
                 a{
                     @extend .wpsstm-no-underline;
-                    &:before{
-                        @extend .wpsstm-icon;
-                    }
+                    @extend .wpsstm-icon;
                 }
             }
         }

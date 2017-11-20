@@ -11,12 +11,12 @@ MINIMAL STYLES
         }
     }
     &:not(.wpsstm-loved-tracklist) #wpsstm-tracklist-action-unfavorite{
-        display:none;
+        display:none!important;
     }
     
     &.wpsstm-loved-tracklist{
         #wpsstm-tracklist-action-favorite{
-            display:none;
+            display:none!important;
         }
     }
     &:not(.tracklist-expired){
@@ -73,7 +73,7 @@ body.wpsstm-default{
         }
 
         &.tracklist-loading{
-            .wpsstm-tracklist-icon:before{
+            .wpsstm-tracklist-icon{
                 @extend .wpsstm-loading-icon;
             }
             #wpsstm-tracklist-actions{

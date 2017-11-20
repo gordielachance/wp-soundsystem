@@ -33,7 +33,6 @@ body.wpsstm-default{
 
     #wpsstm-track-actions{
         .wpsstm-track-action{
-            display:inline;
             @include opacity(.5);
             &:hover{
                 @include opacity(1);
@@ -112,7 +111,7 @@ body.wpsstm-default{
 
             }
 
-            &.track-loading .wpsstm-track-icon:before{
+            &.track-loading .wpsstm-track-icon{
                 @extend .wpsstm-loading-icon;
             }
             &:not(.track-playing) .wpsstm-track-icon:before{
