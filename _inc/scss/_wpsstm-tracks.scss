@@ -68,7 +68,7 @@ body.wpsstm-default{
 
         [itemprop="track"]{
             
-            ul.wpsstm-actions-list{
+            ul#wpsstm-track-actions{
                 width: 100%;
                 display:none;
                 li.wpsstm-track-action{
@@ -85,7 +85,7 @@ body.wpsstm-default{
             }
 
             &:hover,&.track-active{
-                .wpsstm-track-actions ul{
+                ul#wpsstm-track-actions{
                     display:inherit;
                 }
             }

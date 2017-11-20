@@ -20,10 +20,6 @@ body.wpsstm-default{
             box-sizing: border-box;
 
             @include display-flex();
-            
-            .wpsstm-source-icon{
-                width:2em;
-            }
 
             ul#wpsstm-source-actions{
                 @include order(1);
@@ -70,7 +66,7 @@ body.wpsstm-default{
     
     #wpsstm-source-actions{
         .wpsstm-source-action{
-            display:inline;
+            display:inline-block;
             a{
                 &:before{
                     margin-right:0;

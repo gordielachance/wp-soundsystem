@@ -69,6 +69,12 @@ body.wpsstm-default{
                     text-transform: uppercase;
                     font-size: .75em;
                     letter-spacing: .05em;
+                    
+                    [itemprop="track"]{
+                        ul.wpsstm-actions-list{
+                            display:initial;
+                        }
+                    }
 
                     table{
                         td{
@@ -85,6 +91,7 @@ body.wpsstm-default{
                                 .wpsstm-track-sources-list{
                                     padding:0;
                                     line-height: 2em;
+
                                 }
 
                                 &:hover{
@@ -105,6 +112,9 @@ body.wpsstm-default{
                                 &:not(:hover){
                                     [data-wpsstm-source-idx]{
                                         &:not(.source-playing){
+                                            display:none;
+                                        }
+                                        .wpsstm-source-action:not(#wpsstm-source-action-provider){
                                             display:none;
                                         }
                                     }
