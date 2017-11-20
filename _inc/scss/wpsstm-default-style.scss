@@ -25,8 +25,41 @@ Default styles to improve the GUI, can be disabled in the plugin's settings
     animation: barberpole 0.5s linear infinite;
 }
 
-input[type="text"].wpsstm-loading{
-    @include striped-bg();
+input{
+    &.wpsstm-fullwidth{
+        width:100%;
+    }
+    &[type="text"].wpsstm-loading{
+        @include striped-bg();
+    }
+}
+
+.wpsstm-icon-input{
+    position:relative;
+    margin: 0.5em;
+    input{
+        padding: 0.5em;
+        line-height: 1em;
+        height:100%;
+        &[type="text"]{
+            padding-right:4em;
+        }
+        &[type="submit"]{
+            width:4em;
+            font-family: 'FontAwesome';
+            position: absolute;
+            top:0;
+            right: 0;
+            border: none;
+            cursor: hand; cursor: pointer;
+        }
+        
+    }
+    &.wpsstm-loading{
+        input[type="text"]{
+            @include striped-bg();
+        }
+    }
 }
 
 ul.ui-autocomplete {
