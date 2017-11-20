@@ -94,6 +94,14 @@ body.wpsstm-popup{
     }
 }
 
+.wpsstm-popup{
+    .wpsstm-actions-list{
+        border-bottom: 1px solid #F7F7F7;
+        padding-bottom: 1em;
+        text-align: center;
+    }
+}
+
 #wpsstm-track-admin-edit{
     
 }
@@ -107,66 +115,5 @@ ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
         &.loading{
             @extend .wpsstm-loading-el;
         }
-    }
-    .wpsstm-sources-edit-list{
-
-        .wpsstm-source{
-
-            position:relative;
-            margin:0;
-
-            .wpsstm-source-icon{
-                text-align:center;
-                display:inline;
-            }
-
-            .wpsstm-source-fields{
-                display:inline-block;
-                width: calc(100% - 6em)!important; //.wpsstm-source-icon + .wpsstm-source-action
-                position:relative;
-
-                .wpsstm-editable-source-url{
-                    width:100%;
-                }
-            }
-
-            .wpsstm-source-action{
-                width:2em;
-                text-align:center;
-                display:inline-block;
-                padding-right:2em;
-                .wpsstm-source-icon{
-                    width:1em;
-                    display:inline-block;
-                    @extend .wpsstm-can-click;
-                    &.wpsstm-source-icon-add{
-                        display:none;
-                    }
-                }
-            }
-            &:first-of-type{ //blank row
-                margin-bottom:2em;
-                .wpsstm-source-icon{
-                    &.wpsstm-source-icon-delete{
-                        display:none;
-                    }
-                    &.wpsstm-source-icon-add{
-                        display:initial;
-                    }
-                }
-            }
-            &[data-wpsstm-community-source="1"]{
-                @include opacity(.5);
-                .wpsstm-source-icon{
-                    &.wpsstm-source-icon-delete{
-                        display:none;
-                    }
-                    &.wpsstm-source-icon-add{
-                        display:initial;
-                    }
-                }
-            }
-        }
-
     }
 }

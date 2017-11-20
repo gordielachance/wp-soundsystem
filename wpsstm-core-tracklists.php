@@ -475,17 +475,16 @@ class WP_SoundSystem_Core_Tracklists{
         switch($popup_action){
                 
             case 'new-subtrack':
-                //TO FIX NONCE CHECK
-                /*
-                if ( !isset($_POST['wpsstm_admin_new_tracklist_subtrack_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_new_tracklist_subtrack_nonce'], 'wpsstm_admin_new_tracklist_subtrack_'.$tracklist_id ) ) {
-                    wpsstm()->debug_log($tracklist_id,"handle_tracklist_popup_form():invalid nonce"); 
-                    return;
-                }
-                */
-
+                
                 $tracklist_id = isset($_POST['wpsstm-tracklist-id']) ? $_POST['wpsstm-tracklist-id'] : null;
                 $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-                
+
+                //nonce check
+                if ( !isset($_POST['wpsstm_tracklist_new_track_nonce']) || !wp_verify_nonce($_POST['wpsstm_tracklist_new_track_nonce'], sprintf('wpsstm_tracklist_%s_new_track_nonce',$wpsstm_track->post_id) ) ) {
+                    wpsstm()->debug_log(array('track_id'=>$tracklist->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
+                    break;
+                }
+
                 $track = new WP_SoundSystem_Track();
 
                 $track->artist = ( isset($_POST[ 'wpsstm_track_artist' ]) ) ? $_POST[ 'wpsstm_track_artist' ] : null;
@@ -511,7 +510,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         if ( is_wp_error($success) ){
             $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
-            $redirect_url = add_query_arg( array('tracklist_error'=>$success->get_error_code()),$redirect_url );
+            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
             
             wp_redirect($redirect_url);
             exit();

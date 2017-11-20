@@ -710,7 +710,7 @@ class WP_SoundSystem_Track{
             $actions['sources'] = array(
                 'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       $this->get_track_popup_url('sources'),
+                'href' =>       $this->get_track_popup_url('sources-manager'),
             );
         }
 
@@ -927,5 +927,18 @@ class WP_SoundSystem_Track{
         
         return ($can_edit_track && $can_edit_sources);
     }
+    
+    function get_backend_sources_url(){
+        $sources_url = admin_url('edit.php');
+        $sources_url = add_query_arg( 
+            array(
+                'post_type'     => wpsstm()->post_type_source,
+                'post_parent'   => $this->post_id,
+                //'post_status' => 'publish'
+            ),$sources_url 
+        );
+        return $sources_url;
+    }
+    
     
 }

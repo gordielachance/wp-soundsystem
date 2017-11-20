@@ -64,9 +64,8 @@ class WP_SoundSystem_Core_Sources{
         */
         
         //get track autosources
-        add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
-        add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_autosources_list'));
-        add_action('wp_ajax_wpsstm_autosources_form', array($this,'ajax_autosources_form'));//TOFIXDDD
+        add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
+        add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
         
         add_action('wp_ajax_wpsstm_set_source_position', array($this,'ajax_set_source_position'));
         
@@ -348,86 +347,15 @@ class WP_SoundSystem_Core_Sources{
         global $wpsstm_track;
 
         $wpsstm_track = new WP_SoundSystem_Track($post->ID);
-        $wpsstm_track->populate_sources();
-        
-        ob_start();
-        wpsstm_locate_template( 'track-sources.php', true, false );
-        $sources_list = ob_get_clean();
 
-        $sources_url = $wpsstm_track->get_track_popup_url('sources');
+        $sources_url = $wpsstm_track->get_track_popup_url('sources-manager');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
+        $backend_link = sprintf('<a class="button" href="%s">%s</a>',$wpsstm_track->get_backend_sources_url(),__('Listing','wpsstm'));
         
-        printf('<p>%s</p><p>%s</p>',$sources_list,$manager_link);
+        printf('<p>%s%s</p>',$manager_link,$backend_link);
         
-    }
-    
-    function get_sources_form($source_ids = null,$blank_row = false){
-        global $post;
-        
-        $source_ids = (array)$source_ids;
-        $field_name = 'wpsstm_track_sources';
-        $rows = array();
-
-        //add blank row
-        if ($blank_row){
-            array_unshift($source_ids,null); 
-        }
-
-        foreach ( $source_ids as $key=>$source_id ){
-            
-            $key++;
-
-            $source = new WP_SoundSystem_Source($source_id);
-            $source->populate_source_provider();
-
-            $disabled = $readonly = false;
-            $source_title_el = $source_url_el = null;
-
-            $source_classes = array('wpsstm-source');
-
-            //origin
-            if ( $source->is_community ){
-                $disabled = $readonly = true;
-                $source_classes[] = 'wpsstm-source-auto';
-            }
-            
-            ob_start();
-            
-            ?>
-            <div class="<?php echo implode(' ',$source_classes);?>" data-wpsstm-community-source="<?php echo (int)$source->is_community;?>" data-wpsstm-source-id="<?php echo $source->post_id;?>">
-                <span class="wpsstm-source-action">
-                    <i class="fa fa-plus-circle wpsstm-source-icon-add wpsstm-source-icon" aria-hidden="true"></i>
-                    <i class="fa fa-minus-circle wpsstm-source-icon-delete wpsstm-source-icon" aria-hidden="true"></i>
-                </span>
-                <span class="wpsstm-source-icon">
-                    <a class="wpsstm-source-provider" href="<?php echo $source->url;?>" target="_blank" title="<?php echo $source->title;?>">
-                        <?php echo $source->provider->icon;?>
-                        <small><?php echo $source->url;?></small>
-                    </a>
-                </span>
-                <span class="wpsstm-source-fields">
-                    <?php 
-                    if ($source->post_id){
-                        ?>
-                        <input type="hidden" name="<?php printf('%s[%s][post_id]',$field_name,$key);?>" value="<?php echo $source->post_id;?>" <?php disabled( $disabled, true );?> />
-                        <?php
-                    }else{ //blank row
-                        ?>
-                        <input type="text" name="<?php printf('%s[%s][url]',$field_name,$key);?>" placeholder="<?php _e('Source URL','wpsstm');?>" />
-                        <?php
-                    }
-                    ?>
-                </span>
-
-            </div>
-            <?php
-            
-            $row = ob_get_clean();
-            $rows[] = $row;
-        }
-        return implode("\n",$rows);
     }
 
     function column_sources_register($defaults) {
@@ -562,14 +490,7 @@ class WP_SoundSystem_Core_Sources{
                     $track = new WP_SoundSystem_Track($post->post_parent);
                     if ($track->artist && $track->artist){
                         
-                        $sources_url = admin_url('edit.php');
-                        $sources_url = add_query_arg( 
-                            array(
-                                'post_type'     => wpsstm()->post_type_source,
-                                'post_parent'   => $track->post_id,
-                                //'post_status' => 'publish'
-                            ),$sources_url 
-                        );
+                        $sources_url = $track->get_backend_sources_url();
                         
                         $track_label = sprintf('<strong>%s</strong> — %s',$track->artist,$track->title);
                         
@@ -604,7 +525,7 @@ class WP_SoundSystem_Core_Sources{
         
     }
     
-    function ajax_autosources_list(){
+    function ajax_track_autosource(){
         global $wpsstm_track;
         
         $ajax_data = wp_unslash($_POST);
@@ -648,40 +569,7 @@ class WP_SoundSystem_Core_Sources{
         wp_send_json( $result ); 
 
     }
-    
-    function ajax_autosources_form(){
-        
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'new_html'  => null,
-            'success'   => false
-        );
 
-        $track = $result['track'] = new WP_SoundSystem_Track($ajax_data['post_id']);
-        $new_source_ids = $track->save_auto_sources();
-        
-        if ( is_wp_error($new_source_ids) ){
-            
-            $result['message'] = $new_source_ids->get_error_message();
-            
-        }else{
-            
-            $result['success'] = true;
-
-            if ( $new_source_ids ){
-                $result['new_html'] = wpsstm_sources()->get_sources_form($new_source_ids);
-            }
-            
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-
-    }
-    
     function ajax_set_source_position(){
         $ajax_data = wp_unslash($_POST);
         

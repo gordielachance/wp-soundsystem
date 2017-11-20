@@ -733,7 +733,7 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         
-        printf('<p id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
+        printf('<p class="wpsstm-icon-input" id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
 
         //wizard helpers
         if ( $helpers = wpsstm_wizard()->get_available_helpers() ){

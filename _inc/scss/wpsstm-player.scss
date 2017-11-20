@@ -137,40 +137,6 @@
 
                     padding:0;
                     line-height: 2em;
-                    [data-wpsstm-source-idx]{
-
-                        display:block;
-                        padding: 0 .75em;
-                        width:100%;
-                        box-sizing: border-box;
-
-                        @include display-flex();
-
-                        .wpsstm-source-links{
-
-                            @include order(1);
-                            @include flex(0 0 auto);
-                            padding-right: .5em;
-
-                            .wpsstm-source-action{
-                                text-align:center;
-                                width:2em;
-                            }
-                        }
-
-                        .wpsstm-source-title{ //source text
-                            @include order(2);
-                            @include flex(0 1 auto); /*important*/
-                            min-width:0;
-
-                            @extend .wpsstm-ellipsis;
-                            overflow:hidden;
-
-
-                        }
-
-
-                    }
                 }
 
                 &:hover{

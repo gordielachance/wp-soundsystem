@@ -52,6 +52,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                     <?php wpsstm_locate_template( 'track-popup-edit.php',true );?>
                                     <input type="hidden" name="wpsstm-tracklist-popup-action" value="<?php echo $popup_action;?>" />
                                     <input type="hidden" name="wpsstm-tracklist-id" value="<?php echo $tracklist->post_id;?>" />
+                                    <?php wp_nonce_field( sprintf('wpsstm_tracklist_%s_new_track_nonce',$tracklist->post_id), 'wpsstm_tracklist_new_track_nonce', true );?>
                                 </form>
                                 <?php
                             break;

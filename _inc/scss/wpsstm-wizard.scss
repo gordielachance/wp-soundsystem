@@ -1,28 +1,5 @@
 @import "compass/css3";
 
-#wpsstm-wizard-search{
-    position:relative;
-    margin: 0.5em;
-    input{
-        padding: 0.5em;
-        line-height: 1em;
-        height:100%;
-    }
-    input[type="text"]{
-        padding-right:4em;
-    }
-    input[type="submit"]{
-        width:4em;
-        font-family: 'FontAwesome';
-        position: absolute;
-        top:0;
-        right: 0;
-        border: none;
-        cursor: hand; cursor: pointer;
-    }
-}
-
-
 #wizard-wrapper{
     position:relative;
 

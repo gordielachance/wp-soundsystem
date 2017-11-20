@@ -101,7 +101,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                 <?php
                                 
                             break;
-                            case 'sources':
+                            case 'sources-manager':
                                 
                                 $wpsstm_track->populate_sources();
                                 
@@ -113,27 +113,10 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                     <p>
                                         <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
                                     </p>
-                                    <form action="<?php echo esc_url($wpsstm_track->get_track_popup_url('sources'));?>" method="POST">
-                                        <div class="wpsstm-sources-edit-list-user wpsstm-sources-edit-list">
-                                            <?php
-                                            $track_source_ids = array();
-                                            foreach((array)$wpsstm_track->sources as $source){
-                                                $track_source_ids[] = $source->post_id;
-                                            }
-                                            echo wpsstm_sources()->get_sources_form($track_source_ids,true);
-                                            ?>
-                                        </div>
-                                        <p class="wpsstm-submit-wrapper">
-                                            <input id="wpsstm-suggest-sources-bt" type="submit" value="<?php _e('Suggest sources','wpsstm');?>" />
-                                        </p>
-                                        <p class="wpsstm-submit-wrapper">
-                                            <input id="wpsstm-update-sources-bt" type="submit" value="<?php _e('Save');?>" />
-                                            <input type="hidden" name="wpsstm-track-popup-action" value="sources">
-                                            <input type="hidden" name="wpsstm-admin-track-id" value="<?php echo $wpsstm_track->post_id;?>">
-                                            <?php wp_nonce_field( 'wpsstm_admin_track_gui_sources_'.$wpsstm_track->post_id, 'wpsstm_admin_track_gui_sources_nonce', true );?>
-                                        </p>
+                                    <form action="<?php echo esc_url($wpsstm_track->get_track_popup_url('sources-manager'));?>" method="POST">
+                                        <?php wpsstm_locate_template( 'track-popup-sources.php',true );?>
                                     </form>
-                                </div>
+                            </div>
                                 <?php
                                 
                             break;

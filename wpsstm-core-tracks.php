@@ -59,6 +59,8 @@ class WP_SoundSystem_Core_Tracks{
         
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
         add_action( 'save_post', array($this,'update_title_track'), 99);
+        
+        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_title_save'), 5);
@@ -258,13 +260,15 @@ class WP_SoundSystem_Core_Tracks{
         $track = new WP_SoundSystem_Track($post->ID);
         $popup_action = ( isset($_POST['wpsstm-track-popup-action']) ) ? $_POST['wpsstm-track-popup-action'] : null;
         if ( !$popup_action ) return;
+        
+        $redirect_url = $track->get_track_popup_url($popup_action);
 
         switch($popup_action){
 
             case 'edit':
                 
                 //nonce check
-                if ( !isset($_POST['wpsstm_admin_track_gui_edit_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_edit_nonce'], 'wpsstm_admin_track_gui_edit_'.$track->post_id ) ) {
+                if ( !isset($_POST['wpsstm_track_edit_nonce']) || !wp_verify_nonce($_POST['wpsstm_track_edit_nonce'], sprintf('wpsstm_track_edit_nonce',$wpsstm_track->post_id) ) ) {
                     wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
                     break;
                 }
@@ -277,42 +281,61 @@ class WP_SoundSystem_Core_Tracks{
                 $track->save_track();
                 
             break;
-            case 'sources':
+            case 'sources-manager':
 
                 //nonce check
-                if ( !isset($_POST['wpsstm_admin_track_gui_sources_nonce']) || !wp_verify_nonce($_POST['wpsstm_admin_track_gui_sources_nonce'], 'wpsstm_admin_track_gui_sources_'.$track->post_id ) ) {
+                if ( !isset($_POST['wpsstm_track_new_source_nonce']) || !wp_verify_nonce($_POST['wpsstm_track_new_source_nonce'], sprintf('wpsstm_track_%s_new_source_nonce',$track->post_id) ) ) {
                     wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
                     break;
                 }
                 
-                $sources_raw = ( isset($_POST[ 'wpsstm_track_sources' ]) ) ? $_POST[ 'wpsstm_track_sources' ] : array();
+                $data = isset($_POST['wpsstm_sources']) ? $_POST['wpsstm_sources'] : null;
+                $track_id = isset($_POST['wpsstm-track-id']) ? $_POST['wpsstm-track-id'] : null;
+                $track = new WP_SoundSystem_Track($track_id);
+                $source_action = isset($data['action']) ? $data['action'] : null;
+                
+                //new source
+                if ( isset($source_action['new-source']) ){
+                    $source = new WP_SoundSystem_Source();
+                    $source_args = array(
+                        'url'   =>      isset($data['source-url']) ? $data['source-url'] : null,
+                        'track_id' =>   $track_id,
+                    );
+                    $source->from_array( $source_args );
+                    $source_id = $source->add_source();
 
-                foreach((array)$sources_raw as $source_raw){
-                    
-                    if ( isset($source_raw['post_id']) ){
-                        $source = new WP_SoundSystem_Source($source_raw['post_id']);
+                    if ( is_wp_error($source_id) ){
+                        $redirect_url = add_query_arg( array('wpsstm_error_code'=>$source_id->get_error_code()),$redirect_url );
                     }else{
-                        $source = new WP_SoundSystem_Source();
-                        
-                        $source_raw['track_id'] = $track->post_id;
-                        $source->from_array( $source_raw );
-                        if (!$source->url) continue;
+                        $redirect_url = add_query_arg( array('wpsstm_success_code'=>'new-source'),$redirect_url );
                     }
 
-                    if ($source->post_id){ //confirm a source by updating its author
-                        
-                        wp_update_post(array(
-                            'ID' =>             $source->post_id,
-                            'post_author' =>    get_current_user_id()
-                        ));
-                        
-                    }else{ //add source
-                        
-                        $source->add_source();
-                        
-                    }
-                    
+                    wp_redirect($redirect_url);
+                    exit();
                 }
+                
+                //suggest sources
+                if ( isset($source_action['autosource']) ){
+                    
+                    $success = $track->save_auto_sources();
+
+                    if ( is_wp_error($success) ){
+                        $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
+                    }else{
+                        $redirect_url = add_query_arg( array('wpsstm_success_code'=>'autosource'),$redirect_url );
+                    }
+
+                    wp_redirect($redirect_url);
+                    exit();
+                }
+                
+                //view backend
+                if ( isset($source_action['backend']) ){
+                    $redirect_url = $track->get_backend_sources_url();
+                    wp_redirect($redirect_url);
+                    exit();
+                }
+                
                 
             break;
         }

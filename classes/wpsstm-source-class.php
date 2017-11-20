@@ -127,14 +127,14 @@ class WP_SoundSystem_Source{
         
         $this->url = trim($this->url);
         
-        if ( !filter_var($this->url, FILTER_VALIDATE_URL) ){
-            $this->url = null;
-        }
-        
         if (!$this->url){
-            return new WP_Error( 'no_source_url', __('Unable to save source : missing URL','wpsstm') );
+            return new WP_Error( 'no_url', __('Unable to save source : missing URL','wpsstm') );
         }
         
+        if ( !filter_var($this->url, FILTER_VALIDATE_URL) ){
+            return new WP_Error( 'no_valid_url', __('Unable to save source : bad URL','wpsstm') );
+        }
+
         $this->title = trim($this->title);
     }
     

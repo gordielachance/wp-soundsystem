@@ -51,124 +51,7 @@ jQuery(document).ready(function($){
         });
 
     });
-    
-    //suggest sources
-    $(document).on("click", 'input#wpsstm-suggest-sources-bt', function(e){
-        e.preventDefault();
 
-        var bt = $(this);
-        var track = bt.closest('[data-wpsstm-track-id]');
-        var track_id = track.attr('data-wpsstm-track-id');
-        var form = bt.closest('form');
-        var sources_wrapper = $(form).find('.wpsstm-sources-edit-list-user');
-
-        var ajax_data = {
-            action:     'wpsstm_autosources_form',
-            post_id:    track_id //TO FIX we should send a track_obj here (see track_obj.to_ajax())
-        };
-
-        var existing_rows_count = $(form).find('.wpsstm-source').length;
-
-        return $.ajax({
-
-            type: "post",
-            url: wpsstmL10n.ajaxurl,
-            data:ajax_data,
-            dataType: 'json',
-            beforeSend: function() {
-                $(form).addClass('loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                }else{
-                    
-                    bt.remove();
-                    
-                    if (data.new_html){
-                        var $rows = $(data.new_html);
-                        $(sources_wrapper).append($rows);
-                        $(sources_wrapper).toggleChildren({
-                            childrenShowCount:  true,
-                            childrenMax:        4,
-                            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-                            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
-                        });
-                    }
-
-                }
-            },
-            complete: function() {
-                $(form).removeClass('loading');
-            }
-        });
-    });
-
-    //add source
-    $(document).on("click", '.wpsstm-source-icon-add', function(){
-        event.preventDefault();
-        
-        var row = $(this).closest('.wpsstm-source');
-        //auto source
-        if ( Number(row.attr('data-wpsstm-community-source')) == 1 ){
-            row.attr('data-wpsstm-community-source', '0');
-            row.find('input').prop("disabled", false);
-            row.removeClass('wpsstm-source-auto');
-            return;
-        }
-        
-        var wrapper = row.parent();
-        var rows_list = wrapper.find('.wpsstm-source');
-        var row_blank = rows_list.first();
-        
-        var empty_row = null;
-
-        rows_list.each(function() {
-            var input_url = $(this).find('input.wpsstm-editable-source-url');
-            if ( !input_url.val() ){
-                empty_row = $(this);
-                return;
-            }
-        });
-
-        if ( empty_row !== null ){
-            empty_row.find('input.wpsstm-editable-source-url').focus();
-        }else{
-            var new_row = row_blank.clone();
-            new_row.insertAfter( row_blank );
-            var row_blank_input = row_blank.find('input.wpsstm-editable-source-url');
-            row_blank.attr('data-wpsstm-community-source', '0');
-            row_blank_input.prop("disabled", false);
-            row_blank_input.val(''); //clear form
-            row_blank_input.focus();
-        }
-
-    });
-    
-    //delete source
-    $(document).on("click", '.wpsstm-source-icon-delete', function(){
-        var wrapper = $(this).closest('.wpsstm-manage-sources-wrapper');
-        var first_row = wrapper.find('.wpsstm-source').first();
-        var row = $(this).closest('.wpsstm-source');
-        
-        if ( row.is(first_row) ){
-            row.find('input.wpsstm-editable-source-url').val('');
-        }else{
-            row.remove();
-        }
-        
-        
-    });
-    
-    //submit
-    /*
-    $(document).on("click", 'input#wpsstm-update-sources-bt', function(e){
-        e.preventDefault();
-        var bt = $(this);
-        console.log(bt);
-    });
-    */
-    
     //toggle expand
     $('.wpsstm-sources-edit-list').toggleChildren();
 
@@ -184,10 +67,15 @@ class WpsstmTrackSource {
         this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
         this.src =              this.source_el.attr('data-wpsstm-source-src');
         this.type =             this.source_el.attr('data-wpsstm-source-type');
-        this.can_play =         undefined;
+        this.can_play =         Boolean(this.type);
         this.media =            undefined;
         
         //this.debug("new WpsstmTrackSource");
+        
+        if (!this.can_play){
+            this.source_el.addClass('source-error');
+        }
+        
 
     }
     
