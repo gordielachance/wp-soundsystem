@@ -47,7 +47,9 @@ body.wpsstm-default{
                 @extend .wpsstm-can-click;
             }
             &.source-error .wpsstm-source-icon{
-                @extend .fa-exclamation-triangle;
+                &:before{
+                    content:"\f071"; //.fa-exclamation-triangle
+                }
                 label{
                     text-decoration: line-through;
                 }

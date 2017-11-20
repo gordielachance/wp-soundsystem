@@ -130,7 +130,6 @@ body.wpsstm-default{
 
                         a{
                             &:before{
-                                @extend .fa;
                                 display:inline;
                             }
                             span{
@@ -138,16 +137,11 @@ body.wpsstm-default{
                             }
                         }
 
-                        &.wpsstm-loading a:before{
-                            @extend .fa-circle-o-notch;
-                            @extend .fa-spin;
-                            @extend .fa-fw;
-                        }
                         &:not(.wpsstm-loading){
                             &#wpsstm-player-action-scrobbler{
                                 @include opacity(.25);
                                 a:before{
-                                    @extend .fa-lastfm;
+                                    content:"\f202"; //.fa-lastfm
                                 }
                                 &.wpsstm-enabled{
                                     @include opacity(1);

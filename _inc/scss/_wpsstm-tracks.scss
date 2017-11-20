@@ -1,6 +1,5 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
-@import "Font-Awesome/font-awesome";
 
 /*
 MINIMAL STYLES
@@ -40,28 +39,28 @@ body.wpsstm-default{
                 @include opacity(1);
             }
             &#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before{
-                @extend .fa-heart-o;
+                content: "\f08a";//.fa-heart-o;
             }
             &#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before{
-                @extend .fa-heart;
+                content: "\f004";//.fa-heart;
             }
             &#wpsstm-track-action-delete a:before{
-                @extend .fa-trash;
+                content: "\f1f8";//.fa-trash;
             }
             &#wpsstm-track-action-sources a:before{
-                @extend .fa-cloud;
+                content: "\f0c2";//.fa-cloud;
             }
             &#wpsstm-track-action-move:not(.wpsstm-loading) a:before{
-                @extend .fa-arrows-v;
+                content: "\f07d";//.fa-arrows-v;
             }
             &#wpsstm-track-action-playlists a:before{
-                @extend .fa-list;
+                content: "\f03a";//.fa-list;
             }
             &#wpsstm-track-action-edit a:before{
-                @extend .fa-pencil;
+                content: "\f040";//.fa-pencil;
             }
             &#wpsstm-track-action-about a:before{
-                @extend .fa-info-circle;
+                content: "\f05a";//.fa-info-circle;
             }
         }
     }
@@ -77,7 +76,6 @@ body.wpsstm-default{
                     display:inline;
                     a{
                         &:before{
-                            @extend .fa;
                             margin-right:0;
                         }
                         > span{
@@ -114,25 +112,19 @@ body.wpsstm-default{
 
             }
 
-            &.track-loading .wpsstm-track-icon{
-                @extend .fa-circle-o-notch;
-                @extend .fa-spin;
-                @extend .fa-fw;
+            &.track-loading .wpsstm-track-icon:before{
+                @extend .wpsstm-loading-icon;
             }
-            &:not(.track-playing) .wpsstm-track-icon{
-                @extend .fa-play;
+            &:not(.track-playing) .wpsstm-track-icon:before{
+                content:"\f04b"; //.fa-play
             }
 
-            &.track-playing .wpsstm-track-icon{
-                @extend .fa-pause;
+            &.track-playing .wpsstm-track-icon:before,.track-pause .wpsstm-track-icon:before{
+                content:"\f04c"; //.fa-pause;
             }
 
-            &.track-error .wpsstm-track-icon{
-                @extend .fa-exclamation-triangle;
-            }
-
-            &.track-pause .wpsstm-track-icon{
-                @extend .fa-pause;
+            &.track-error .wpsstm-track-icon:before{
+                content:"\f071"; //.fa-exclamation-triangle;
             }
 
             &.track-invalid{

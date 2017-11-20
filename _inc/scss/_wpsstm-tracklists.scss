@@ -73,30 +73,24 @@ body.wpsstm-default{
         }
 
         &.tracklist-loading{
-            .wpsstm-tracklist-icon{
-                @extend .fa-circle-o-notch;
-                @extend .fa-spin;
-                @extend .fa-fw;
+            .wpsstm-tracklist-icon:before{
+                @extend .wpsstm-loading-icon;
             }
             #wpsstm-tracklist-actions{
                 @include opacity(.5);
             }
         }
 
-        &:not(.tracklist-playing) .wpsstm-tracklist-icon{
-            @extend .fa-play;
+        &:not(.tracklist-playing) .wpsstm-tracklist-icon:before,&.tracklist-pause .wpsstm-tracklist-icon:before{
+            content:"\f04b"; //.fa-play
         }
 
-        &.tracklist-playing .wpsstm-tracklist-icon{
-            @extend .fa-pause;
+        &.tracklist-playing .wpsstm-tracklist-icon:before{
+            content:"\f04c"; //.fa-pause;
         }
 
-        &.tracklist-error .wpsstm-tracklist-icon{
-            @extend .fa-exclamation-triangle;
-        }
-
-        &.tracklist-pause .wpsstm-tracklist-icon{
-            @extend .fa-play;
+        &.tracklist-error .wpsstm-tracklist-icon:before{
+            content:"\f071"; //.fa-exclamation-triangle;
         }
 
         &:not(.tracklist-expired){
@@ -240,34 +234,34 @@ body.wpsstm-default{
             }
 
             &#wpsstm-tracklist-action-refresh a:before{
-                @extend .fa-refresh;
+                content:"\f021";//.fa-refresh;
             }
             &#wpsstm-tracklist-action-share a:before{
-                @extend .fa-share-alt;
+                content:"\f1e0";//.fa-share-alt;
             }
             &#wpsstm-tracklist-action-export a:before{
-                @extend .fa-download;
+                content:"\f019";//.fa-download;
             }
 
             //&:not(.wpsstm-loading){
                 &#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before{
-                    @extend .fa-heart-o;
+                    content:"\f08a";//.fa-heart-o;
                 }
                 &#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before{
-                    @extend .fa-heart;
+                    content:"\f004";//.fa-heart;
                 }
             //}
 
             &#wpsstm-tracklist-action-new-subtrack{
                  a:before{
-                     @extend .fa-plus-circle;
+                     content:"\f055";//.fa-plus-circle;
                 }
             }
 
             &#wpsstm-tracklist-action-status-switch{
                 
                 a:before{
-                    @extend .fa-calendar-check-o;
+                    content:"\f274";//.fa-calendar-check-o;
                 }
                 form{
                     select{
@@ -280,10 +274,10 @@ body.wpsstm-default{
             }
 
             &#wpsstm-tracklist-action-lock-tracklist a:before{
-                @extend .fa-lock;
+                content:"\f023";//.fa-lock;
             }
             &#wpsstm-tracklist-action-unlock-tracklist a:before{
-                @extend .fa-lock;
+                content:"\f023";//.fa-lock;
             }
             
         }
