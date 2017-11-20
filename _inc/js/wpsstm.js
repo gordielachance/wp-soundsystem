@@ -9,8 +9,17 @@
             }
         });
         
-        //artist autocomplete
+        //modals
+        $('a.thickbox').on("click", function (e) {
+            alert("titi");
+            $("#dialog").load(this.href, function () {
+                
+                $(this).dialog("option", "title", $(this).find("h1").text());
+                $(this).find("h1").remove();
+            });
+        });
         
+        //artist autocomplete
         $('.wpsstm-artist-autocomplete').each(function() {
             var input = $(this);
             input.autocomplete({
