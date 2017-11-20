@@ -1,5 +1,5 @@
 @import "compass";
-@import "wpsstm-shared";
+@import "wpsstm";
 
 /*
 Thickbox popups
@@ -47,7 +47,18 @@ body.wpsstm-popup{
         margin: .5em 0;
     }
     
+    ul.wpsstm-actions-list{
+        @extend #wpsstm-tracklist-actions;
+        border-bottom: 1px solid #F7F7F7;
+        padding-bottom: 1em;
+        text-align: center;
+        li{
+            @extend .wpsstm-tracklist-action;
+        }
+    }
+    
 }
+
 
 //tracklists chooser
 #wpsstm-tracklist-chooser-list{
@@ -91,29 +102,5 @@ body.wpsstm-popup{
     #TB_ajaxContent{
         margin: 0;
         padding: 1em;
-    }
-}
-
-.wpsstm-popup{
-    .wpsstm-actions-list{
-        border-bottom: 1px solid #F7F7F7;
-        padding-bottom: 1em;
-        text-align: center;
-    }
-}
-
-#wpsstm-track-admin-edit{
-    
-}
-
-ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
-    @extend .comma-list;
-}
-
-#wpsstm-track-admin-sources{
-    form{
-        &.loading{
-            @extend .wpsstm-loading-el;
-        }
     }
 }

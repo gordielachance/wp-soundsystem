@@ -1,0 +1,293 @@
+@import "compass";
+
+/*
+MINIMAL STYLES
+*/
+
+.wpsstm-tracklist{
+    &.tracklist-loading{
+        #wpsstm-tracklist-actions{
+            pointer-events:none;
+        }
+    }
+    &:not(.wpsstm-loved-tracklist) #wpsstm-tracklist-action-unfavorite{
+        display:none;
+    }
+    
+    &.wpsstm-loved-tracklist{
+        #wpsstm-tracklist-action-favorite{
+            display:none;
+        }
+    }
+    &:not(.tracklist-expired){
+        #wpsstm-tracklist-action-refresh{
+            pointer-events:none;
+        }
+    }
+}
+
+ul#wpsstm-tracklist-actions{
+
+    li.wpsstm-tracklist-action{
+        &#wpsstm-tracklist-action-status-switch{
+            form{
+                display:none;
+            }
+            &.expanded{
+                em{
+                    display:none;
+                }
+                form{
+                   display:inline-block; 
+                }
+            }
+        }
+    }
+
+}
+
+/*
+DEFAULT STYLES
+*/
+
+body.wpsstm-default{
+
+    .wpsstm-tracklist{
+        position:relative;
+        
+        font-family: sans-serif;
+        font-size:0.8em;
+
+        .tracklist-header{
+            border-bottom:1px solid #F7F7F7;
+            padding:.25em;
+            ul#wpsstm-tracklist-actions{
+                text-align: center;
+                font-size:.8em;
+            }
+
+        }
+
+        .wpsstm-tracklist-icon{
+            @include opacity (.15);
+        }
+
+        &.tracklist-loading{
+            .wpsstm-tracklist-icon{
+                @extend .fa-circle-o-notch;
+                @extend .fa-spin;
+                @extend .fa-fw;
+            }
+            #wpsstm-tracklist-actions{
+                @include opacity(.5);
+            }
+        }
+
+        &:not(.tracklist-playing) .wpsstm-tracklist-icon{
+            @extend .fa-play;
+        }
+
+        &.tracklist-playing .wpsstm-tracklist-icon{
+            @extend .fa-pause;
+        }
+
+        &.tracklist-error .wpsstm-tracklist-icon{
+            @extend .fa-exclamation-triangle;
+        }
+
+        &.tracklist-pause .wpsstm-tracklist-icon{
+            @extend .fa-play;
+        }
+
+        &:not(.tracklist-expired){
+            #wpsstm-tracklist-action-refresh{
+                @include opacity(.5);
+            }
+        }
+
+        &.tracklist-ajaxed{
+
+            &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
+                display:none;
+            }
+
+            &.tracklist-refresh{
+                > * {
+                    display:none;
+                    &.tracklist-header,&.wpsstm-tracklist-notices{
+                        display:inherit;
+                    }
+                    &.wpsstm-tracklist-notices > *{
+                        display:none;
+                        &#wpsstm-notice-ajax-refresh{
+                            display:inherit;
+                        }
+                    }
+                    .wpsstm-tracklist-time{
+                        display:none;
+                    }
+
+                }
+            }
+        }
+
+        table.wpsstm-tracks-list{
+            table-layout:fixed;
+            width:100%;
+            margin:0;
+            padding:0;
+            th,tr,td{
+                padding:0;
+                margin:0;
+            }
+
+            //no borders
+            border-collapse: collapse;
+            border:none;
+            td,th{
+                border:none;
+                outline:none;
+            }
+
+            //hide header
+            .wpsstm-tracks-list-header{
+                display:none;
+            }
+            tr{ //[itemprop="track"]
+                th,td{
+                    padding:.5em 0;
+
+                    &.wpsstm-track-image{
+                        width:2em;
+                        box-sizing: content-box;
+                    }
+                    &.wpsstm-track-position{
+                        width:2em;
+                    }
+                    &.wpsstm-track-play-bt{
+                        width:2em;
+                    }
+                    &.wpsstm-track-info{
+                        @extend .wpsstm-ellipsis;
+                        [itemprop="byArtist"]{
+                            font-weight: bold;
+                        }
+                        [itemprop="inAlbum"]{
+                            font-size:.8em;
+                        }
+                    }
+                    &.wpsstm-track-sources{
+                        [data-wpsstm-source-idx]{
+                            label{
+                                @extend .wpsstm-can-click;
+                            }
+                        }
+                    }
+                }
+                th{
+                    text-align:center;
+                }
+                td{
+                    &.wpsstm-column-identical-value{
+                        display:none;
+                    }
+                }
+
+                @include transition-property(background);
+                @include transition-duration(.4s);
+
+                &:hover{
+                    background: rgba(0,0,0,0.02);
+                }
+
+                &:not(:last-child){
+                    border-bottom: 1px solid #eee;
+                }
+                > * {
+                    vertical-align: middle;
+                }
+                .wpsstm-track-image,.wpsstm-track-position,.wpsstm-track-play-bt,.wpsstm-track-actions,.wpsstm-track-sources{
+                    text-align:center;
+                }
+                .wpsstm-track-image{
+                    box-sizing: content-box;
+                }
+            }
+
+        }
+
+    }
+
+    #wpsstm-tracklist-actions{
+        display:block;
+        margin: 1em;
+        list-style: none;
+        line-height: 2.8em;
+
+        .wpsstm-tracklist-action{
+            
+            border: 1px solid #F7F7F7;
+            background:#F7F7F7;
+            padding: .25em .5em;
+            display:inline-block;
+            line-height: 1.8em;
+            &:hover{
+                border-color:#F7F7F7;
+                background:white;
+            }
+            a:before{
+                margin-right:.5em;
+            }
+
+            &#wpsstm-tracklist-action-refresh a:before{
+                @extend .fa-refresh;
+            }
+            &#wpsstm-tracklist-action-share a:before{
+                @extend .fa-share-alt;
+            }
+            &#wpsstm-tracklist-action-export a:before{
+                @extend .fa-download;
+            }
+
+            //&:not(.wpsstm-loading){
+                &#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before{
+                    @extend .fa-heart-o;
+                }
+                &#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before{
+                    @extend .fa-heart;
+                }
+            //}
+
+            &#wpsstm-tracklist-action-new-subtrack{
+                 a:before{
+                     @extend .fa-plus-circle;
+                }
+            }
+
+            &#wpsstm-tracklist-action-status-switch{
+                
+                a:before{
+                    @extend .fa-calendar-check-o;
+                }
+                form{
+                    select{
+                        font-size:1em;
+                    }
+                    em{
+                        @include opacity(.5);
+                    }
+                }
+            }
+
+            &#wpsstm-tracklist-action-lock-tracklist a:before{
+                @extend .fa-lock;
+            }
+            &#wpsstm-tracklist-action-unlock-tracklist a:before{
+                @extend .fa-lock;
+            }
+            
+        }
+
+    }
+    
+}

@@ -1,0 +1,215 @@
+@import "compass/css3";
+@import "compass/typography/text/ellipsis";
+@import "Font-Awesome/font-awesome";
+
+/*
+MINIMAL STYLES
+*/
+
+.wpsstm-tracklist:not(.tracklist-playable){
+    [itemprop="track"]{
+        .wpsstm-track-play-bt{
+            display:none;
+        }
+    }
+}
+
+[itemprop="track"]{
+    &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
+        display:none;
+    }
+
+    &.wpsstm-loved-track{
+        #wpsstm-track-action-favorite{
+            display:none;
+        }
+    }
+}
+
+/*
+DEFAULT STYLES
+*/
+
+body.wpsstm-default{
+
+    #wpsstm-track-actions{
+        .wpsstm-track-action{
+            display:inline;
+            @include opacity(.5);
+            &:hover{
+                @include opacity(1);
+            }
+            &#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before{
+                @extend .fa-heart-o;
+            }
+            &#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before{
+                @extend .fa-heart;
+            }
+            &#wpsstm-track-action-delete a:before{
+                @extend .fa-trash;
+            }
+            &#wpsstm-track-action-sources a:before{
+                @extend .fa-cloud;
+            }
+            &#wpsstm-track-action-move:not(.wpsstm-loading) a:before{
+                @extend .fa-arrows-v;
+            }
+            &#wpsstm-track-action-playlists a:before{
+                @extend .fa-list;
+            }
+            &#wpsstm-track-action-edit a:before{
+                @extend .fa-pencil;
+            }
+            &#wpsstm-track-action-about a:before{
+                @extend .fa-info-circle;
+            }
+        }
+    }
+
+    .wpsstm-tracks-list{
+
+        [itemprop="track"]{
+            
+            ul.wpsstm-actions-list{
+                width: 100%;
+                display:none;
+                li.wpsstm-track-action{
+                    display:inline;
+                    a{
+                        &:before{
+                            @extend .fa;
+                            margin-right:0;
+                        }
+                        > span{
+                            display:none;
+                        }
+                    }
+                }
+            }
+
+            &:hover,&.track-active{
+                .wpsstm-track-actions ul{
+                    display:inherit;
+                }
+            }
+
+            .wpsstm-track-play-bt{
+                a{
+                    @extend .wpsstm-no-underline;
+                }
+            }
+
+            .wpsstm-track-sources{
+                a{
+                    @extend .wpsstm-no-underline;
+                }
+                [data-wpsstm-source-idx]{
+                    &:not(.source-playing){
+                        @include opacity(.25);
+                        &:hover{
+                            @include opacity(.5);
+                        }
+                    }
+                }
+
+            }
+
+            &.track-loading .wpsstm-track-icon{
+                @extend .fa-circle-o-notch;
+                @extend .fa-spin;
+                @extend .fa-fw;
+            }
+            &:not(.track-playing) .wpsstm-track-icon{
+                @extend .fa-play;
+            }
+
+            &.track-playing .wpsstm-track-icon{
+                @extend .fa-pause;
+            }
+
+            &.track-error .wpsstm-track-icon{
+                @extend .fa-exclamation-triangle;
+            }
+
+            &.track-pause .wpsstm-track-icon{
+                @extend .fa-pause;
+            }
+
+            &.track-invalid{
+                color:red;
+            }
+
+            .wpsstm-track-image{
+                img{
+                    height:2em;
+                    width: auto;
+                    vertical-align: middle;
+                }
+
+            }
+
+           .wpsstm-track-position{
+
+                .wpsstm-player-icon-loading{
+                    display:none;
+                }
+                span{
+                    display:initial;
+                }
+            }
+
+            .wpsstm-track-actions,.wpsstm-track-sources{
+                ul{
+                    list-style: none;
+                    padding:0;
+                    margin:0;
+                }
+            }
+            .wpsstm-track-actions{
+                ul li {
+                    label{
+                        display:none;
+                    }
+                }
+            }
+
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
+            }
+        }
+
+        &.tracklist-playable [itemprop="track"]{
+
+            &[data-wpsstm-sources-count="0"]{
+                @include opacity(.25);
+            } 
+
+            &:not(.track-active){
+                td{
+                    @include opacity(.5);
+                }
+            }
+
+            &.track-has-played,&:hover{
+                td{
+                    @include opacity(.75);
+                }
+            }
+
+            &.track-active{
+                td{
+                    @include opacity(1);
+                }
+            }
+        }
+
+
+    }
+    
+    ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
+        @extend .comma-list;
+    }
+
+    
+}
+

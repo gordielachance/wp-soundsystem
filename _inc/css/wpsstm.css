@@ -263,7 +263,7 @@
 }
 
 /* line 8, ../scss/Font-Awesome/_icons.scss */
-.fa-heart:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before {
+.fa-heart:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -366,7 +366,7 @@
 }
 
 /* line 31, ../scss/Font-Awesome/_icons.scss */
-.fa-download:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-export a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before {
+.fa-download:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before {
   content: "";
 }
 
@@ -397,7 +397,7 @@
 }
 
 /* line 38, ../scss/Font-Awesome/_icons.scss */
-.fa-refresh:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before {
+.fa-refresh:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before {
   content: "";
 }
 
@@ -407,7 +407,7 @@
 }
 
 /* line 40, ../scss/Font-Awesome/_icons.scss */
-.fa-lock:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before {
+.fa-lock:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before {
   content: "";
 }
 
@@ -651,7 +651,7 @@
 }
 
 /* line 92, ../scss/Font-Awesome/_icons.scss */
-.fa-plus-circle:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before {
+.fa-plus-circle:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before {
   content: "";
 }
 
@@ -908,7 +908,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 146, ../scss/Font-Awesome/_icons.scss */
-.fa-heart-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before {
+.fa-heart-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -2499,7 +2499,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 513, ../scss/Font-Awesome/_icons.scss */
-.fa-share-alt:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-share a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before {
+.fa-share-alt:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before {
   content: "";
 }
 
@@ -3202,7 +3202,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 668, ../scss/Font-Awesome/_icons.scss */
-.fa-calendar-check-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before {
+.fa-calendar-check-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before {
   content: "";
 }
 
@@ -3757,7 +3757,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 MINIMAL STYLES
 */
 /* line 9, ../scss/_wpsstm-tracklists.scss */
-.wpsstm-tracklist.tracklist-loading #wpsstm-tracklist-actions, .wpsstm-tracklist.tracklist-loading body.wpsstm-popup ul.wpsstm-actions-list, body.wpsstm-popup .wpsstm-tracklist.tracklist-loading ul.wpsstm-actions-list {
+.wpsstm-tracklist.tracklist-loading #wpsstm-tracklist-actions {
   pointer-events: none;
 }
 /* line 13, ../scss/_wpsstm-tracklists.scss */
@@ -3774,15 +3774,15 @@ MINIMAL STYLES
 }
 
 /* line 33, ../scss/_wpsstm-tracklists.scss */
-ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form, body.wpsstm-popup ul.wpsstm-actions-list li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form, ul#wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form, body.wpsstm-popup ul.wpsstm-actions-list ul#wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch form, body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form {
+ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form {
   display: none;
 }
 /* line 37, ../scss/_wpsstm-tracklists.scss */
-ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded em, body.wpsstm-popup ul.wpsstm-actions-list li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded em, ul#wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch.expanded em, body.wpsstm-popup ul.wpsstm-actions-list ul#wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch.expanded em, body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch.expanded em {
+ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded em {
   display: none;
 }
 /* line 40, ../scss/_wpsstm-tracklists.scss */
-ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded form, body.wpsstm-popup ul.wpsstm-actions-list li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded form, ul#wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch.expanded form, body.wpsstm-popup ul.wpsstm-actions-list ul#wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch.expanded form, body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch.expanded form {
+ul#wpsstm-tracklist-actions li.wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch.expanded form {
   display: inline-block;
 }
 
@@ -3801,7 +3801,7 @@ body.wpsstm-default .wpsstm-tracklist .tracklist-header {
   padding: .25em;
 }
 /* line 64, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default .wpsstm-tracklist .tracklist-header ul#wpsstm-tracklist-actions, body.wpsstm-default .wpsstm-tracklist .tracklist-header body.wpsstm-popup ul.wpsstm-actions-list, body.wpsstm-popup body.wpsstm-default .wpsstm-tracklist .tracklist-header ul.wpsstm-actions-list {
+body.wpsstm-default .wpsstm-tracklist .tracklist-header ul#wpsstm-tracklist-actions {
   text-align: center;
   font-size: .8em;
 }
@@ -3811,7 +3811,7 @@ body.wpsstm-default .wpsstm-tracklist .wpsstm-tracklist-icon {
   opacity: 0.15;
 }
 /* line 81, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default .wpsstm-tracklist.tracklist-loading #wpsstm-tracklist-actions, body.wpsstm-default .wpsstm-tracklist.tracklist-loading body.wpsstm-popup ul.wpsstm-actions-list, body.wpsstm-popup body.wpsstm-default .wpsstm-tracklist.tracklist-loading ul.wpsstm-actions-list {
+body.wpsstm-default .wpsstm-tracklist.tracklist-loading #wpsstm-tracklist-actions {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
@@ -3932,14 +3932,14 @@ body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr .wpsstm-track-
   box-sizing: content-box;
 }
 /* line 221, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list {
+body.wpsstm-default #wpsstm-tracklist-actions {
   display: block;
   margin: 1em;
   list-style: none;
   line-height: 2.8em;
 }
 /* line 227, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li {
+body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action {
   border: 1px solid #F7F7F7;
   background: #F7F7F7;
   padding: .25em .5em;
@@ -3947,20 +3947,20 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action, body.wps
   line-height: 1.8em;
 }
 /* line 234, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action:hover, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action:hover, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action:hover, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li:hover, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li:hover, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li:hover, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li:hover {
+body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action:hover {
   border-color: #F7F7F7;
   background: white;
 }
 /* line 238, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li a:before {
+body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action a:before {
   margin-right: .5em;
 }
 /* line 273, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form select, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form select, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form select, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form select, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch form select, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form select, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form select {
+body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form select {
   font-size: 1em;
 }
 /* line 276, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form em, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form em, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form em, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form em, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch form em, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form em, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch form em {
+body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch form em {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
@@ -4229,7 +4229,7 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
 }
 
 /* line 8, ../scss/Font-Awesome/_icons.scss */
-.fa-heart:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before {
+.fa-heart:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unfavorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -4332,7 +4332,7 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
 }
 
 /* line 31, ../scss/Font-Awesome/_icons.scss */
-.fa-download:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-export a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-export a:before {
+.fa-download:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-export a:before {
   content: "";
 }
 
@@ -4363,7 +4363,7 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
 }
 
 /* line 38, ../scss/Font-Awesome/_icons.scss */
-.fa-refresh:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-refresh a:before {
+.fa-refresh:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-refresh a:before {
   content: "";
 }
 
@@ -4373,7 +4373,7 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
 }
 
 /* line 40, ../scss/Font-Awesome/_icons.scss */
-.fa-lock:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-unlock-tracklist a:before {
+.fa-lock:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-lock-tracklist a:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-unlock-tracklist a:before {
   content: "";
 }
 
@@ -4617,7 +4617,7 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
 }
 
 /* line 92, ../scss/Font-Awesome/_icons.scss */
-.fa-plus-circle:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-new-subtrack a:before {
+.fa-plus-circle:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-new-subtrack a:before {
   content: "";
 }
 
@@ -4874,7 +4874,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 146, ../scss/Font-Awesome/_icons.scss */
-.fa-heart-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before {
+.fa-heart-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before, body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-favorite:not(.wpsstm-loading) a:before {
   content: "";
 }
 
@@ -6465,7 +6465,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 513, ../scss/Font-Awesome/_icons.scss */
-.fa-share-alt:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-share a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-share a:before {
+.fa-share-alt:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-share a:before {
   content: "";
 }
 
@@ -7168,7 +7168,7 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 }
 
 /* line 668, ../scss/Font-Awesome/_icons.scss */
-.fa-calendar-check-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default #wpsstm-tracklist-actions body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup ul.wpsstm-actions-list body.wpsstm-default #wpsstm-tracklist-actions li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-default body.wpsstm-popup ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before, body.wpsstm-popup body.wpsstm-default ul.wpsstm-actions-list li#wpsstm-tracklist-action-status-switch a:before {
+.fa-calendar-check-o:before, body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tracklist-action-status-switch a:before {
   content: "";
 }
 
@@ -8281,7 +8281,7 @@ MINIMAL STYLES
 }
 
 /* line 45, ../scss/wpsstm.scss */
-.wpsstm-loading-el, body.wpsstm-default #wpsstm-track-admin-sources form.loading, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li.loading, #wpsstm-tracklist-chooser-list.loading {
+.wpsstm-loading-el, body.wpsstm-default #wpsstm-track-admin-sources form.loading {
   pointer-events: none;
 }
 
@@ -8378,7 +8378,7 @@ body.wpsstm-default .wpsstm-no-underline, body.wpsstm-default .wpsstm-tracks-lis
   border-bottom: none !important;
 }
 /* line 146, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title, body.wpsstm-default #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wpsstm-default li {
+body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;
@@ -8386,7 +8386,7 @@ body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist tabl
   text-overflow: ellipsis;
 }
 /* line 152, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-loading-el, body.wpsstm-default #wpsstm-track-admin-sources form.loading, body.wpsstm-default #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li.loading, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wpsstm-default li.loading, body.wpsstm-default #wpsstm-tracklist-chooser-list.loading {
+body.wpsstm-default .wpsstm-loading-el, body.wpsstm-default #wpsstm-track-admin-sources form.loading {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
@@ -8528,86 +8528,4 @@ body.wpsstm-default ul.ui-autocomplete li.ui-menu-item {
 /* line 292, ../scss/wpsstm.scss */
 body.wpsstm-default ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   background: #F7F7F7;
-}
-
-/*
-Thickbox popups
-*/
-/* line 9, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup header {
-  margin: 2em 0;
-}
-/* line 13, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup #sidebar, body.wpsstm-popup #colophon {
-  display: none;
-}
-/* line 16, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup #content {
-  width: 100%;
-  margin: 0;
-}
-/* line 20, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup #main {
-  margin: 0;
-  padding: 0;
-}
-/* line 24, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup #wpadminbar {
-  display: none;
-}
-/* line 29, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup .hentry {
-  margin: 0;
-  padding: 0;
-}
-/* line 33, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup .hentry #track-popup-tabs > ul {
-  list-style: none;
-}
-/* line 36, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup .hentry #track-popup-tabs > ul li:not(.ui-state-active) {
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
-  opacity: 0.8;
-}
-/* line 45, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup .wpsstm-submit-wrapper {
-  text-align: center;
-  margin: .5em 0;
-}
-/* line 50, ../scss/wpsstm-frontend.scss */
-body.wpsstm-popup ul.wpsstm-actions-list {
-  border-bottom: 1px solid #F7F7F7;
-  padding-bottom: 1em;
-  text-align: center;
-}
-
-/* line 65, ../scss/wpsstm-frontend.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists {
-  position: relative;
-}
-/* line 67, ../scss/wpsstm-frontend.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul {
-  font-size: .8em;
-  list-style: none;
-}
-/* line 71, ../scss/wpsstm-frontend.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li {
-  padding: 1em;
-  border-bottom: 1px solid rgba(51, 51, 51, 0.1);
-}
-/* line 83, ../scss/wpsstm-frontend.scss */
-#wpsstm-tracklist-chooser-list #wpsstm-new-playlist-add {
-  display: none;
-  margin: 1em;
-  text-align: center;
-}
-
-/* line 97, ../scss/wpsstm-frontend.scss */
-#TB_window {
-  font-family: sans-serif;
-}
-/* line 102, ../scss/wpsstm-frontend.scss */
-#TB_window #TB_ajaxContent {
-  margin: 0;
-  padding: 1em;
 }

@@ -1,0 +1,299 @@
+@import "compass/css3";
+@import "compass/typography/text/ellipsis";
+@import "Font-Awesome/font-awesome";
+
+@import "wpsstm-tracklists";
+@import "wpsstm-tracks";
+@import "wpsstm-sources";
+@import "wpsstm-player";
+@import "wpsstm-wizard";
+
+@include keyframes(opacityPulse){
+    0% {opacity: 1;}
+    50% {opacity: 0.5; }
+    100% {opacity: 1;}
+}
+
+@keyframes barberpole {
+    from { background-position: 0 0; }
+    to   { background-position: 60px 30px; }
+}
+
+@mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
+    background-size: 30px 30px;
+    background-image: linear-gradient(
+        $direction, 
+        $color-a    25%, 
+        $color-b    25%, 
+        $color-b    50%, 
+        $color-a    50%, 
+        $color-a    75%, 
+        $color-b    75%, 
+        $color-b
+    );
+    animation: barberpole 0.5s linear infinite;
+}
+
+/*
+MINIMAL STYLES
+*/
+
+.wpsstm-can-click{
+    cursor: pointer;
+    cursor: hand;
+}
+.wpsstm-loading-el{
+    pointer-events: none;
+}
+
+.toggle-children-container{
+    .wpsstm-tracklist{
+        margin:0;
+    }
+    //more - less
+    .toggle-children-link{
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        border-bottom: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        small{
+            font-size: .5em;
+            line-height: 1em;
+            vertical-align: middle;
+        }
+    }
+}
+
+.wpsstm-pc-bar{
+    position: relative;
+    display:block;
+    background-color:rgba(#CCC, 0.4);
+    clear:both;
+    width:100%;
+    height:1.3em;
+    line-height:1.3em;
+
+    .wpsstm-pc-bar-fill{
+        display:block;
+        height:100%;
+        text-align:left;
+        position:relative;
+        .wpsstm-pc-bar-fill-color{
+            width:100%;
+            height:100%;
+            position: absolute;
+            &.wpsstm-pc-bar-fill-yellow{
+                background-color:#FFE000;
+            }
+            &.wpsstm-pc-bar-fill-red{
+                background-color:red;
+            }
+        }
+
+        .wpsstm-pc-bar-text{
+            margin:auto;
+            display:block;
+            text-align:center;
+            i.fa{
+                padding:0 0.5em;
+            }
+        }
+
+    }
+
+    &.color-light .wpsstm-pc-bar-text{
+        color:white;
+    }
+
+    &.offline,&.empty{
+        .wpsstm-pc-bar-fill{
+            width:100%!important;
+        }
+
+        .wpsstm-pc-bar-fill-color{
+            display:none;
+        }
+        .wpsstm-pc-bar-text{
+            color:inherit;
+            font-size:0.8em;
+        }
+    }
+
+    &.complete{
+
+    }
+    &.incomplete{
+        .wpsstm-pc-bar-text{
+            text-align:right;
+        }
+    }
+
+}
+
+/*
+DEFAULT STYLES
+*/
+
+
+body.wpsstm-default{
+    .wpsstm-no-underline{
+        text-decoration:none;
+        border-bottom:none!important; //fix for twentyfifteen
+    }
+    .wpsstm-ellipsis{
+        @include ellipsis($no-wrap: true);
+    }
+    .wpsstm-icon{
+        @extend .fa;
+    }
+    .wpsstm-loading-el{
+        @include opacity(.5);
+    }
+    
+    input{
+        &.wpsstm-fullwidth{
+            width:100%;
+        }
+        &[type="text"].wpsstm-loading{
+            @include striped-bg();
+        }
+    }
+    
+    .wpsstm-icon-input{
+        position:relative;
+        margin: 0.5em;
+        input{
+            padding: 0.5em;
+            line-height: 1em;
+            height:100%;
+            &[type="text"]{
+                padding-right:4em;
+            }
+            &[type="submit"]{
+                width:4em;
+                font-family: 'FontAwesome';
+                position: absolute;
+                top:0;
+                right: 0;
+                border: none;
+                cursor: hand; cursor: pointer;
+            }
+
+        }
+        &.wpsstm-loading{
+            input[type="text"]{
+                @include striped-bg();
+            }
+        }
+    }
+
+    .wpsstm-tracklist-notices{
+        @include align-items(center);
+        @include display-flex();
+        @include justify-content(center);
+        padding: .5em 0;
+
+        #wpsstm-notice-ajax-refresh{
+            background:none;
+            @include animation(opacityPulse 2s infinite ease-out);
+            opacity: 1;
+            font-size:1em;
+            &:before{
+                margin-right:.25em;
+                @extend .fa-circle-o-notch;
+                 @extend .fa;
+                @extend .fa-spin;
+                @extend .fa-fw;
+            }
+        }
+
+    }
+
+    .wpsstm-notice {
+        font-size: 0.8em;
+        padding: .5em;
+        background-color: #fcf8e3;
+        color: #222;
+        text-align:center;
+        margin: .5em 0;
+        a {
+            color: #222;
+            text-decoration: underline;
+        }
+
+        &.active {
+            display: block;
+        }
+
+
+
+
+        .wpsstm-close-notice{
+            position:absolute;
+            right:1em;
+        }
+
+    }
+
+    ul{
+        &.comma-list{
+            list-style: none;
+            display:inline;
+            li{
+                display:inline;
+                &:not(:last-child):after {
+                  content: ", ";
+                }
+            }
+        }
+
+        &.wpsstm-actions-list{
+            list-style: none;
+            li.wpsstm-action{
+                a:before{
+                    @extend .fa;
+                }
+                &.wpsstm-loading a:before{
+                    @extend .fa-circle-o-notch;
+                    @extend .fa-spin;
+                    @extend .fa-fw;
+                }
+                a{
+                    @extend .wpsstm-no-underline;
+                }
+            }
+        }
+        &.ui-autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            float: left;
+            display: none;
+            min-width: 160px;
+            margin: 0 0 10px 25px;
+            list-style: none;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-color: rgba(0, 0, 0, 0.2);
+            //@include border-radius(5px);
+            @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
+            @include background-clip(padding-box);
+            *border-right-width: 2px;
+            *border-bottom-width: 2px;
+
+            li.ui-menu-item{
+                padding:0 .5em;
+                line-height:2em;
+                font-size:.8em;
+                &.ui-state-focus{
+                    background: #F7F7F7;
+                }
+            }
+
+        }
+    }
+}

@@ -1,0 +1,201 @@
+@import "compass/css3";
+
+$player-bg-color:#222;
+$player-text-color:#FFF;
+
+/*
+MINIMAL STYLES
+*/
+
+/*
+DEFAULT STYLES
+*/
+
+body.wpsstm-default{
+
+    #wpsstm-bottom-wrapper{
+
+        position:fixed;
+        width:100%;
+        padding:0;
+        bottom: 0;
+        min-height:0em;
+        z-index: 50;
+
+
+        #wpsstm-bottom{
+            display:none;
+            background:$player-bg-color;
+            color:$player-text-color;
+            a{
+                color:$player-text-color;
+            }
+            #wpsstm-bottom-track-wrapper{
+
+                width:100%;
+                table-layout:auto;
+                padding:0;
+                margin:0;
+                td{
+                    padding:0;
+                    margin:0;
+                    &#wpsstm-bottom-track-info{
+                        vertical-align: top;
+                        border:none;
+                        table{
+                            td{
+                                display:inline-block;
+                                padding: 0 .75em;
+                                box-sizing: content-box;
+                                &.wpsstm-track-position{
+                                    @extend .wpsstm-can-click;
+                                }
+                                &.wpsstm-track-play-bt{
+                                    display:none;
+                                }
+                                &.wpsstm-track-title{
+                                    &:before{
+                                        content: "—";
+                                        margin-right:1.5em;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .wpsstm-tracklist{
+
+                    text-transform: uppercase;
+                    font-size: .75em;
+                    letter-spacing: .05em;
+
+                    table{
+                        td{
+                            &.wpsstm-track-image{
+                                padding-left:0!important;
+                            }
+                            &.wpsstm-track-album{
+                                display:none!important;
+                            }
+                            &.wpsstm-track-sources{
+                                position:relative;
+                                width: 20%;
+                                @include opacity(.25);
+                                .wpsstm-track-sources-list{
+
+                                    padding:0;
+                                    line-height: 2em;
+                                }
+
+                                &:hover{
+                                    width: 30%;
+                                    @include opacity(1);
+                                    .wpsstm-track-sources-list{
+                                        background: $player-bg-color;
+                                        text-align: left;
+                                        position: absolute;
+                                        bottom: -1em;
+                                        padding-bottom:1em;
+                                        [data-wpsstm-source-idx]{
+                                            line-height:2.5em;
+                                        }
+                                    }
+                                    .wpsstm-source-action{
+                                        display:initial;
+                                    }
+                                }
+
+                                &:not(:hover){
+                                    [data-wpsstm-source-idx]{
+                                        &:not(.source-playing){
+                                            display:none;
+                                        }
+                                    }
+                                    .wpsstm-source-action{
+                                        display:none;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+                #wpsstm-player-actions{
+                    padding:0;
+                    margin:0;
+                    margin-right:.5em;
+                    .wpsstm-player-action{
+
+                        a{
+                            &:before{
+                                @extend .fa;
+                                display:inline;
+                            }
+                            span{
+                                display:none;
+                            }
+                        }
+
+                        &.wpsstm-loading a:before{
+                            @extend .fa-circle-o-notch;
+                            @extend .fa-spin;
+                            @extend .fa-fw;
+                        }
+                        &:not(.wpsstm-loading){
+                            &#wpsstm-player-action-scrobbler{
+                                @include opacity(.25);
+                                a:before{
+                                    @extend .fa-lastfm;
+                                }
+                                &.wpsstm-enabled{
+                                    @include opacity(1);
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            #wpsstm-bottom-player-wrapper{
+                width:100%;
+                padding:0;
+                margin:0;
+                td{
+                    text-align:center;
+                    vertical-align:middle;
+                }
+                #wpsstm-player{
+                    width:80%;
+                    margin:auto;
+                }
+                .wpsstm-player-extra{
+                    &#wpsstm-player-shuffle:not(.active){
+                        @include opacity(.3);
+                    }
+                    &#wpsstm-player-loop:not(.active){
+                        @include opacity(.3);
+                    }
+                }
+            }
+        }
+
+    }
+    
+    //tracklists inside posts //TOFIXDDD
+    :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.tracklist-template-table{
+
+        border:1px solid #F7F7F7;
+        padding:.5em 1em;
+
+        [itemprop="track"]{
+            .wpsstm-track-sources{
+                display:none;
+            }
+        }
+    }
+    
+}
+

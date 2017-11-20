@@ -98,12 +98,9 @@ class WP_SoundSystem_Core_Player{
     
     function enqueue_player_scripts_styles_shared(){
         //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
-        
-        //CSS
-        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
-        
+
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wpsstm-shared','wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wpsstm'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
