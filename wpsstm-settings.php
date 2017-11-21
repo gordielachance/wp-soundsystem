@@ -525,10 +525,7 @@ class WP_SoundSystem_Settings {
     
     function player_enabled_callback(){
         $option = wpsstm()->get_options('player_enabled');
-        
-        $buglink = sprintf('<a target="_blank" href="%s">%s</a>','https://core.trac.wordpress.org/ticket/39686',__('this bug','wpsstm'));
-        $desc = sprintf( __('Requires Wordpress 4.9 or needs patch - see %s.','wppsm'),$buglink);
-        $desc = sprintf('<small>%s</small>',$desc);
+        $desc = '';
         
         printf(
             '<input type="checkbox" name="%s[player_enabled]" value="on" %s /> %s',
