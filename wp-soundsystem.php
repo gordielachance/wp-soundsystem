@@ -176,9 +176,9 @@ class WP_SoundSystem {
     }
     
     function default_style_class($classes){
-        //if ( wpsstm()->get_options('minimal_css') !== 'off'){
+        if ( wpsstm()->get_options('minimal_css') !== 'on'){
             $classes[] = 'wpsstm-default';
-        //}
+        }
         return $classes;
     }
 
