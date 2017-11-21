@@ -733,7 +733,7 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
+                unset($actions['edit'],$actions['sources'],$actions['trash']);
 
                 $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
 
