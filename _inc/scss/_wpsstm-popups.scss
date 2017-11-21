@@ -8,6 +8,10 @@ Popup, modals, etc.
 MINIMAL STYLES
 */
 
+html.wpsstm-is-dialog{
+    overflow:hidden;
+}
+
 .wpsstm-dialog{
     position:relative;
 
