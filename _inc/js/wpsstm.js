@@ -1,32 +1,25 @@
 (function($){
 
     $(document).ready(function(){
-        //user is not logged for action
-        $(document).on( "click",'.wpsstm-requires-auth', function(e) {
-            if ( !wpsstm_get_current_user_id() ){
-                e.preventDefault();
-                wpsstm_wp_auth_notice();
-            }
-        });
-        
+
         //modals
         $(document).on('click', 'body:not(.wpsstm-popup) a.wpsstm-link-popup,body:not(.wpsstm-popup) li.wpsstm-link-popup>a', function(e) {
             e.preventDefault();
             
             var content_url = this.href;
-            var loader_el = $('<p id="wpsstm-popup-loader" class="wpsstm-loading-icon"></p>');
+            var loader_el = $('<p id="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
             var popup = $('<div></div>').append(loader_el);
             
             popup.dialog({
                 width:800,
                 height:500,
                 modal: true,
-                dialogClass: 'wpsstm-modal wpsstm-loading',
+                dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog wpsstm-loading',
 
                 open: function(ev, ui){
                     var dialog = $(this).closest('.ui-dialog');
                     var dialog_content = dialog.find('.ui-dialog-content');
-                    var iframe = $('<iframe id="wpsstm-iframe-popup" src="'+content_url+'"></iframe>');
+                    var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
                     dialog_content.append(iframe);
                     iframe.load(function(){
                         dialog.removeClass('wpsstm-loading');
@@ -111,39 +104,17 @@ function wpsstm_shuffle(array) {
   return array;
 }
 
-function wpsstm_get_current_user_id(){
-    return parseInt(wpsstmL10n.logged_user_id);
-}
-
-function wpsstm_bottom_notice(slug,msg,can_close = true){
-    var notice_id =  'wpsstm-bottom-notice-' + slug;
-        
-    var existing_notice_el = $('#' + notice_id);
-    if (existing_notice_el.length > 0) return;
-   
-    var notice = $('<div class="wpsstm-notice wpsstm-bottom-notice"></div>');
-    var notice_msg = $('<p></p>');
-    notice_msg.html(msg);
-    notice.attr({
-        id:     notice_id
-    })
-
-    if(can_close){
-        var close_bt = $('<i class="wpsstm-close-notice fa fa-times" aria-hidden="true"></i>');
-        notice.append(close_bt);
-        
-        close_bt.click(function(event){
-            event.preventDefault();
-            notice.remove();
-        });
-        
-    }
+function wpsstm_dialog_notice(notice){
     
-    notice.append(notice_msg);
-    $( "#wpsstm-bottom-wrapper" ).prepend( notice );
-}
+    var popup = $('<div></div>').append(notice);
 
-function wpsstm_wp_auth_notice(){
-    var self = this;
-    wpsstm_bottom_notice('wp-auth',wpsstmL10n.wp_auth_notice);
+    popup.dialog({
+        autoOpen: true,
+        width:800,
+        height:500,
+        modal: true,
+        dialogClass: 'wpsstm-dialog'
+
+    });
+ 
 }

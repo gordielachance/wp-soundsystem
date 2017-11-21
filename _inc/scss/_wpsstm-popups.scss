@@ -8,35 +8,43 @@ Popup, modals, etc.
 MINIMAL STYLES
 */
 
-.wpsstm-modal{
+.wpsstm-dialog{
     position:relative;
 
     .ui-dialog-content{
-        #wpsstm-iframe-popup{
+        @include flexbox((
+            display: flex!important,
+        ));
+        > * {
+            margin: auto;
+        }
+        #wpsstm-dialog-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f19a";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
+        #wpsstm-dialog-loader{
+            display:none;
+        }
+        #wpsstm-dialog-iframe{
             width: 100%;
             height: 100%;
         }
-        #wpsstm-popup-loader{
-            display:none;
-            margin: auto;
-        }
+
     }
 
     &.wpsstm-loading{
 
         .ui-dialog-content{
-            @include flexbox((
-                display: flex!important,
-            ));
-
-            #wpsstm-popup-loader{
+            #wpsstm-dialog-loader{
                 display:inherit;
             }
-
-            #wpsstm-iframe-popup{
+            #wpsstm-dialog-iframe{
                 display:none;
             }
-
         }
 
     }
@@ -59,7 +67,7 @@ body.wpsstm-default{
         z-index:10;
     }
 
-    .wpsstm-modal{
+    .wpsstm-dialog{
         z-index:11;
 
         background:white;
@@ -83,10 +91,10 @@ body.wpsstm-default{
         }
 
         .ui-dialog-content{
-            #wpsstm-iframe-popup{
+            #wpsstm-dialog-iframe{
                 background-color: white;
             }
-            #wpsstm-popup-loader{
+            #wpsstm-dialog-loader{
                 font-size:3em;
             }
         }

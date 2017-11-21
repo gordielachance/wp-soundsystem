@@ -90,6 +90,8 @@ class WP_SoundSystem_Core_Tracks{
         */
 
         add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
+        add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
+        
         add_action('wp_ajax_wpsstm_set_track_position', array($this,'ajax_set_track_position'));
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
 
@@ -801,24 +803,42 @@ class WP_SoundSystem_Core_Tracks{
             'message'   => null,
             'success'   => false
         );
-
+        
+        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         $track = new WP_SoundSystem_Track();
         $track->from_array($ajax_data['track']);
         
-        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
-
-        if ( ($do_love!==null) ){
+        if ( !get_current_user_id() ){
             
-            $success = $track->love_track($do_love);
-            $result['track'] = $track;
-            wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
-
-            if( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code); 
+            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+            if ($do_love){
+                $action_link = $track->get_track_action_url('favorite');
             }else{
-                $result['success'] = $success; 
+                $action_link = $track->get_track_action_url('unfavorite');
             }
+            
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
+            
+        }else{
+
+
+
+            if ( ($do_love!==null) ){
+
+                $success = $track->love_track($do_love);
+                $result['track'] = $track;
+                wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
+
+                if( is_wp_error($success) ){
+                    $code = $success->get_error_code();
+                    $result['message'] = $success->get_error_message($code); 
+                }else{
+                    $result['success'] = $success; 
+                }
+            }
+            
         }
 
         header('Content-type: application/json');

@@ -25,22 +25,6 @@
         });
 
         /*
-        //TO FIX
-        instead of the default thickbox popup (link has the 'thickbox' class), we should call it 'manually' so we can check user is logged before displaying it.
-        //tracklist selector popup.
-        $(document).on( "click",'[itemprop="track"] #wpsstm-track-action-playlists a', function(e){
-
-            e.preventDefault();
-            if ( !wpsstm_get_current_user_id() ) return;
-
-            var popup_title = $(this).attr('title');
-            var popup_url = $(this).attr('href');
-            tb_show(popup_title, popup_url + '&TB_iframe=true');
-
-        });
-        */
-
-        /*
         Player : shuffle
         */
 

@@ -682,7 +682,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('playlists'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -692,7 +692,6 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -702,7 +701,6 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -719,7 +717,6 @@ class WP_SoundSystem_Track{
                 'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources-manager'),
-                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 

@@ -245,17 +245,10 @@ class WP_SoundSystem {
         
         //js
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version);
-        
-        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-        $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-        $wp_auth_notice = $wp_auth_icon.' '.$wp_auth_text;
 
         $datas = array(
             'debug'             => (WP_DEBUG),
             'ajaxurl'           => admin_url( 'admin-ajax.php' ),
-            'logged_user_id'    => get_current_user_id(),
-            'wp_auth_notice'    => $wp_auth_notice
         );
 
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
