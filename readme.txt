@@ -149,11 +149,13 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.8.7 =
 * removed FontAwesome from SCSS
 * use jQuery UI Dialog instead of Thickbox
 * improved tracklists/tracks/sources actions
+* improved notices
 * cleaned SCSS/CSS
+* embed player backend
 
 = 1.8.6 =
 * better code for tracklists and tracks actions
