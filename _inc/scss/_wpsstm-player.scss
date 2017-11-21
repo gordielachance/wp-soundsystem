@@ -136,17 +136,17 @@ body.wpsstm-default{
                                 display:none;
                             }
                         }
-
-                        &:not(.lastfm-loading){
-                            &#wpsstm-player-action-scrobbler{
-                                @include opacity(.25);
-                                a:before{
-                                    content:"\f202"; //.fa-lastfm
-                                }
-                                &.scrobbler-enabled{
-                                    @include opacity(1);
-                                }
-
+                        
+                        &#wpsstm-player-action-scrobbler{
+                            @include opacity(.25);
+                            a:before{
+                                content:"\f202"; //.fa-lastfm
+                            }
+                            &.lastfm-loading a{
+                                @extend .wpsstm-loading-icon;
+                            }
+                            &.scrobbler-enabled{
+                                @include opacity(1);
                             }
                         }
                     }

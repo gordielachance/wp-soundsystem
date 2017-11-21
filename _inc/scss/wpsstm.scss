@@ -58,6 +58,8 @@
         font-weight: normal;
         font-style: normal;
         font-family: 'FontAwesome';
+        width: 1.28571429em;
+        text-align: center;
         display: inline-block;
     }
 }
@@ -66,10 +68,7 @@
     @extend .wpsstm-icon;
     &:before{
         animation: spin 2s linear infinite;
-        margin-right:.25em;
-        content: "\f1ce"; //.fa-circle-o-notch;
-        width: 1.28571429em;
-        text-align: center;
+        content: "\f1ce"!important; //.fa-circle-o-notch;
     }
 }
 

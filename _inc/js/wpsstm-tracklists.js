@@ -260,6 +260,7 @@ class WpsstmTracklist {
     get_tracklist_request(){
 
         var self = this;
+        var link = self.tracklist_el.find("#wpsstm-tracklist-action-refresh a");
 
         //already requested
         if (self.tracklist_request) return self.tracklist_request.promise();
@@ -276,6 +277,7 @@ class WpsstmTracklist {
 
         var tracklist_instances = self.get_tracklist_instances();
         tracklist_instances.addClass('tracklist-loading tracklist-refresh');
+        link.addClass('action-loading');
 
         var ajax_data = {
             'action':           'wpsstm_refresh_tracklist',
@@ -315,6 +317,7 @@ class WpsstmTracklist {
 
         self.tracklist_request.always(function() {
             tracklist_instances.removeClass('tracklist-loading tracklist-refresh');
+            link.removeClass('action-loading');
             self.tracklist_request = undefined;
         });
 
@@ -530,7 +533,7 @@ class WpsstmTracklist {
 
     update_track_index(track_obj){
         var self = this;
-        var link = track_obj.track_el.find('#wpsstm-track-action-move');
+        var link = track_obj.track_el.find('#wpsstm-track-action-move a');
 
         //ajax update order
         var ajax_data = {

@@ -537,7 +537,7 @@ class WpsstmTrack {
     
     update_source_index(source_obj){
         var self = this;
-        var link = source_obj.source_el.find('#wpsstm-source-action-move');
+        var link = source_obj.source_el.find('#wpsstm-source-action-move a');
 
         //ajax update order
         var ajax_data = {
