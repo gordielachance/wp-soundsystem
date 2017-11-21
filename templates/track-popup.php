@@ -87,9 +87,6 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                 
                             break;
                             case 'sources-manager':
-                                
-                                $wpsstm_track->populate_sources();
-                                
                                 ?>
                                 <div id="wpsstm-track-admin-sources" class="wpsstm-track-admin">
                                     <p>
@@ -98,10 +95,8 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                     <p>
                                         <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
                                     </p>
-                                    <form action="<?php echo esc_url($wpsstm_track->get_track_popup_url('sources-manager'));?>" method="POST">
-                                        <?php wpsstm_locate_template( 'track-popup-sources.php',true );?>
-                                    </form>
-                            </div>
+                                    <?php echo $wpsstm_track->get_sources_manager();?>
+                                </div>
                                 <?php
                                 
                             break;

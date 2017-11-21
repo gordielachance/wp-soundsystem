@@ -977,5 +977,47 @@ class WP_SoundSystem_Track{
         
     }
     
+    function get_sources_manager(){
+        
+        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$this->post_id);
+
+        ob_start();
+        if ( !$can_edit_track ){
+            $action_link = $this->get_track_popup_url('playlists');
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
+        }else{
+            ?>
+            <form action="<?php echo esc_url($this->get_track_popup_url('sources-manager'));?>" method="POST">
+                <?php
+                
+                //track sources
+                $this->populate_sources();
+                wpsstm_locate_template( 'track-sources.php', true, false );
+            
+                ?>
+                <p class="wpsstm-submit-wrapper">
+                    <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
+                    <input class="wpsstm-backend-toggle" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
+                </p>
+                <p class="wpsstm-icon-input" id="wpsstm-new-source">
+                    <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="Enter a tracklist URL">
+                    <input type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary wpsstm-icon-button" value="+">
+                </p>
+                <input type="hidden" name="wpsstm-track-popup-action" value="sources-manager" />
+                <input type="hidden" name="wpsstm-track-id" value="<?php echo $this->post_id;?>" />
+
+                <?php wp_nonce_field( sprintf('wpsstm_track_%s_new_source_nonce',$this->post_id), 'wpsstm_track_new_source_nonce', true );?>
+            </form>
+            <?php
+        }
+        
+        $output = ob_get_clean();
+        return $output;
+        
+    }
+    
     
 }
