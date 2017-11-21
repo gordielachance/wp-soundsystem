@@ -2,12 +2,7 @@ class WpsstmLastFM {
     constructor(){
         this.scrobble_icon =            undefined;
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        this.is_user_api_logged =       parseInt(wpsstmLastFM.is_user_api_logged);
-        this.has_user_scrobbler =   (    ( localStorage.getItem("wpsstm-scrobble") == 'true' ) && (this.is_user_api_logged) ); //localStorage stores strings
-
-        if ( ( this.has_user_scrobbler === null ) && (this.is_user_api_logged) ){  //default
-            this.has_user_scrobbler = true;
-        }
+        this.user_scrobble =            ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings
     }
     
     init(){
@@ -16,27 +11,66 @@ class WpsstmLastFM {
         
         self.scrobble_icon =     $('#wpsstm-player-action-scrobbler');
 
-        if (self.has_user_scrobbler){
-            $(self.scrobble_icon).addClass('wpsstm-enabled');
+        //enable scrobbler at init
+        if (self.user_scrobble){
+            self.enable_scrobbler(true);
         }
 
         //click toggle scrobbling
         $('#wpsstm-player-action-scrobbler').find('a').click(function(e) {
             e.preventDefault();
-
-            if( !self.is_user_api_logged ){
-                self.has_user_scrobbler = false;
-                wpsstm_dialog_notice(wpsstmLastFM.lastfm_auth_notice);
-            }else{            
-                self.has_user_scrobbler = !self.has_user_scrobbler;
-            }
-
-            $(self.scrobble_icon).toggleClass('wpsstm-enabled',self.has_user_scrobbler);
-
-            localStorage.setItem("wpsstm-scrobble", self.has_user_scrobbler);
-
+            self.enable_scrobbler(!self.user_scrobble,true);
         });
 
+    }
+
+    enable_scrobbler(do_enable,show_notice){
+        
+        var self = this;
+
+        if (do_enable){
+            
+            var ajax_data = {
+                action: 'wpsstm_lastfm_enable_scrobbler',
+            };
+
+            return $.ajax({
+
+                type: "post",
+                url: wpsstmL10n.ajaxurl,
+                data:ajax_data,
+                dataType: 'json',
+                beforeSend: function() {
+                    $(self.scrobble_icon).addClass('wpsstm-loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                        self.user_scrobble = false;
+                        $(self.scrobble_icon).addClass('scrobbler-error');
+                        if (data.notice && show_notice){
+                            wpsstm_dialog_notice(data.notice);
+                        }
+                    }else{
+                        self.user_scrobble = true;
+                        localStorage.setItem("wpsstm-scrobble", true);
+                        $(self.scrobble_icon).addClass('scrobbler-enabled');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                    self.user_scrobble = false;
+                    $(self.scrobble_icon).addClass('scrobbler-error');
+                },
+                complete: function() {
+                    $(self.scrobble_icon).removeClass('wpsstm-loading');
+                }
+            })
+        }else{
+            $(self.scrobble_icon).removeClass('scrobbler-enabled');
+            localStorage.setItem("wpsstm-scrobble", false);
+        }
     }
  
     /*
@@ -65,7 +99,13 @@ class WpsstmLastFM {
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
+                    $(self.scrobble_icon).addClass('scrobbler-error');
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+                $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
                 $(self.scrobble_icon).removeClass('wpsstm-loading');
@@ -87,8 +127,6 @@ class WpsstmLastFM {
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
 
-        self.debug(ajax_data);
-
         return $.ajax({
 
             type: "post",
@@ -101,10 +139,13 @@ class WpsstmLastFM {
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
+                    $(self.scrobble_icon).addClass('scrobbler-error');
                 }
             },
-            error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                console.log("status: " + textStatus + ", error: " + errorThrown); 
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+                $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
                 $(self.scrobble_icon).removeClass('wpsstm-loading');
@@ -135,8 +176,9 @@ class WpsstmLastFM {
                     console.log(data);
                 }
             },
-            error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                console.log("status: " + textStatus + ", error: " + errorThrown); 
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
             },
         })
     }
@@ -170,11 +212,13 @@ class WpsstmLastFM {
                 if (data.success === true) {
                 }else{
                     console.log(data);
+                    $(self.scrobble_icon).addClass('scrobbler-error');
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
+                $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
                 $(self.scrobble_icon).removeClass('wpsstm-loading');
@@ -198,14 +242,14 @@ class WpsstmLastFM {
     $(document).on( "wpsstmMediaLoaded", function( event, media,source_obj ) {
 
         $(media).on('play', function() {
-            if (wpsstm_lastfm.has_user_scrobbler){
+            if (wpsstm_lastfm.user_scrobble){
                 wpsstm_lastfm.updateNowPlaying(source_obj.track);
             }
         });
         
         $(media).on('ended', function() {
             if ( media.duration > 30) { //scrobble
-                if (wpsstm_lastfm.has_user_scrobbler){
+                if (wpsstm_lastfm.user_scrobble){
                     wpsstm_lastfm.user_scrobble(source_obj.track);
                 }
                 //bot scrobble

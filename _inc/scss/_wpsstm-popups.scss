@@ -26,6 +26,14 @@ MINIMAL STYLES
                 margin-right: .25em;
             }
         }
+        #wpsstm-dialog-lastfm-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f202";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
         #wpsstm-dialog-loader{
             display:none;
         }

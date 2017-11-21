@@ -43,6 +43,10 @@ class WP_SoundSystem_Core_LastFM{
         /*
         AJAX
         */
+        
+        //enable scrobbler
+        add_action('wp_ajax_wpsstm_lastfm_enable_scrobbler',array($this,'ajax_lastm_enable_scrobbler') );
+        add_action('wp_ajax_nopriv_wpsstm_lastfm_enable_scrobbler', array($this,'ajax_lastm_enable_scrobbler')); //so we can output the non-logged user notice
 
         //love & unlove
         add_action('wp_ajax_wpsstm_lastfm_user_toggle_love_track',array($this,'ajax_lastm_toggle_love_track') );
@@ -89,17 +93,9 @@ class WP_SoundSystem_Core_LastFM{
         //JS
         wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
         
-        $lastfm_auth_icon = '<i class="fa fa-lastfm" aria-hidden="true"></i>';
-        $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
-        $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-        $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm to enable its features: click %s.','wpsstm'),$lastfm_auth_link);
-        $lastfm_auth_notice = $lastfm_auth_icon . ' ' . $lastfm_auth_text;
-        
         //localize vars
         $localize_vars=array(
             'lastfm_scrobble_along'     => ( $this->can_community_scrobble() && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
-            'is_user_api_logged'        => (int)$this->lastfm_user->is_user_api_logged(),
-            'lastfm_auth_notice'        => $lastfm_auth_notice
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -259,6 +255,36 @@ class WP_SoundSystem_Core_LastFM{
         }
         
         return $results;
+    }
+    
+    function ajax_lastm_enable_scrobbler(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'input'     => $ajax_data,
+            'success'   => false,
+            'message'   => null
+        );
+        
+        if ( !get_current_user_id() ){
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
+        }else{
+            $is_lastfm_auth = (int)$this->lastfm_user->is_user_api_logged();
+            
+            if (!$is_lastfm_auth){
+                $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+                $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+                $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
+                $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
+            }else{
+                $result['success'] = true;
+            }
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
     function ajax_lastm_toggle_love_track(){
