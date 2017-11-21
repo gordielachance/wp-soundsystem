@@ -509,7 +509,7 @@ class WP_SoundSystem_Source{
         if ( $can_reorder_sources ){
             $actions['move'] = array(
                 'text' =>       __('Move', 'wpsstm'),
-                'desc' =>       __('Change track position','wpsstm'),
+                'desc' =>       __('Change source position','wpsstm'),
             );
         }
         
