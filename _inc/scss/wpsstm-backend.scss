@@ -16,6 +16,72 @@ body{
     }
 }
 
+.wpsstm-pc-bar{
+    position: relative;
+    display:block;
+    background-color:rgba(#CCC, 0.4);
+    clear:both;
+    width:100%;
+    height:1.3em;
+    line-height:1.3em;
+
+    .wpsstm-pc-bar-fill{
+        display:block;
+        height:100%;
+        text-align:left;
+        position:relative;
+        .wpsstm-pc-bar-fill-color{
+            width:100%;
+            height:100%;
+            position: absolute;
+            &.wpsstm-pc-bar-fill-yellow{
+                background-color:#FFE000;
+            }
+            &.wpsstm-pc-bar-fill-red{
+                background-color:red;
+            }
+        }
+
+        .wpsstm-pc-bar-text{
+            margin:auto;
+            display:block;
+            text-align:center;
+            i.fa{
+                padding:0 0.5em;
+            }
+        }
+
+    }
+
+    &.color-light .wpsstm-pc-bar-text{
+        color:white;
+    }
+
+    &.offline,&.empty{
+        .wpsstm-pc-bar-fill{
+            width:100%!important;
+        }
+
+        .wpsstm-pc-bar-fill-color{
+            display:none;
+        }
+        .wpsstm-pc-bar-text{
+            color:inherit;
+            font-size:0.8em;
+        }
+    }
+
+    &.complete{
+
+    }
+    &.incomplete{
+        .wpsstm-pc-bar-text{
+            text-align:right;
+        }
+    }
+
+}
+
 .wp-list-table{
     .mbz-id{
         color:silver;

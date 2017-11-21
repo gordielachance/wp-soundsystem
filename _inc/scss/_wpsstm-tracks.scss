@@ -15,12 +15,12 @@ MINIMAL STYLES
 
 [itemprop="track"]{
     &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
-        display:none;
+        display:none!important;
     }
 
     &.wpsstm-loved-track{
         #wpsstm-track-action-favorite{
-            display:none;
+            display:none!important;
         }
     }
 }

@@ -6,6 +6,7 @@
 @import "wpsstm-sources";
 @import "wpsstm-player";
 @import "wpsstm-wizard";
+@import "wpsstm-popups";
 
 @include keyframes(opacityPulse){
     0% {opacity: 1;}
@@ -17,6 +18,7 @@
     from { background-position: 0 0; }
     to   { background-position: 60px 30px; }
 }
+
 @keyframes spin {
     from {transform:rotate(0deg);}
     to {transform:rotate(360deg);}
@@ -37,85 +39,16 @@
     animation: barberpole 0.5s linear infinite;
 }
 
-/*
-MINIMAL STYLES
-*/
-
-.ui-widget-overlay{
-    opacity: .5;
-    background: black;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom:0;
-    right:0;
-    z-index:10;
-}
-
-.wpsstm-modal{
-    position:relative;
-    z-index:11;
-    
-    background:white;
-    border:1px solid #F7F7F7;
-    @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
-    
-    .ui-dialog-titlebar-close{
-        position: absolute;
-        right: 0;
-        top: 0;
-        .ui-icon-closethick{
-            @extend .wpsstm-icon;
-            &:before{
-                content:"\f00d";//.fa-times
-            }
-        }
-        .ui-button-text{
-            display:none;
-        }
-
-    }
-    
-    .ui-dialog-content{
-        #wpsstm-iframe-popup{
-            background-color: white;
-            box-sizing: border-box;
-            width: 100%;
-            height: 100%;
-        }
-        #wpsstm-popup-loader{
-            display:none;
-            font-size:3em;
-            margin: auto;
-        }
-    }
-
-    &.wpsstm-loading{
-        
-        .ui-dialog-content{
-            @include flexbox((
-                display: flex!important,
-            ));
-            
-            #wpsstm-popup-loader{
-                display:inherit;
-            }
-            
-            #wpsstm-iframe-popup{
-                display:none;
-            }
-            
-        }
-
-
-    }
-
+.wpsstm-no-underline{
+    text-decoration:none;
+    border-bottom:none!important; //fix for twentyfifteen
 }
 
 .wpsstm-can-click{
     cursor: pointer;
     cursor: hand;
 }
+
 .wpsstm-loading-el{
     pointer-events: none;
 }
@@ -176,71 +109,9 @@ MINIMAL STYLES
     }
 }
 
-.wpsstm-pc-bar{
-    position: relative;
-    display:block;
-    background-color:rgba(#CCC, 0.4);
-    clear:both;
-    width:100%;
-    height:1.3em;
-    line-height:1.3em;
-
-    .wpsstm-pc-bar-fill{
-        display:block;
-        height:100%;
-        text-align:left;
-        position:relative;
-        .wpsstm-pc-bar-fill-color{
-            width:100%;
-            height:100%;
-            position: absolute;
-            &.wpsstm-pc-bar-fill-yellow{
-                background-color:#FFE000;
-            }
-            &.wpsstm-pc-bar-fill-red{
-                background-color:red;
-            }
-        }
-
-        .wpsstm-pc-bar-text{
-            margin:auto;
-            display:block;
-            text-align:center;
-            i.fa{
-                padding:0 0.5em;
-            }
-        }
-
-    }
-
-    &.color-light .wpsstm-pc-bar-text{
-        color:white;
-    }
-
-    &.offline,&.empty{
-        .wpsstm-pc-bar-fill{
-            width:100%!important;
-        }
-
-        .wpsstm-pc-bar-fill-color{
-            display:none;
-        }
-        .wpsstm-pc-bar-text{
-            color:inherit;
-            font-size:0.8em;
-        }
-    }
-
-    &.complete{
-
-    }
-    &.incomplete{
-        .wpsstm-pc-bar-text{
-            text-align:right;
-        }
-    }
-
-}
+/*
+MINIMAL STYLES
+*/
 
 /*
 DEFAULT STYLES
@@ -248,10 +119,7 @@ DEFAULT STYLES
 
 
 body.wpsstm-default{
-    .wpsstm-no-underline{
-        text-decoration:none;
-        border-bottom:none!important; //fix for twentyfifteen
-    }
+
     .wpsstm-ellipsis{
         @include ellipsis($no-wrap: true);
     }
@@ -283,8 +151,7 @@ body.wpsstm-default{
                 top:0;
                 right: 0;
                 border: none;
-                cursor: hand; 
-                cursor: pointer;
+                @extend .wpsstm-can-click;
                 &.wpsstm-icon-button{
                     width:4em;
                     font-weight: normal;

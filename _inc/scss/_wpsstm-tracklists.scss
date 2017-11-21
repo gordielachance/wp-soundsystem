@@ -274,3 +274,34 @@ body.wpsstm-default{
     }
     
 }
+
+//tracklists chooser
+#wpsstm-tracklist-chooser-list{
+    #wpsstm-filter-playlists{
+        position:relative;
+        ul{
+            font-size:.8em;
+            list-style: none;
+            //@include column-count(2);
+            li{
+                @extend .wpsstm-ellipsis;
+                padding: 1em;
+                border-bottom: 1px solid rgba(51, 51, 51, 0.1);
+                &.loading{
+                    @extend .wpsstm-loading-el;
+                }
+
+            }
+        }
+    }
+
+    #wpsstm-new-playlist-add{
+        display:none;
+        margin: 1em;
+        text-align: center;
+    }
+
+    &.loading{
+        @extend .wpsstm-loading-el;
+    }
+}

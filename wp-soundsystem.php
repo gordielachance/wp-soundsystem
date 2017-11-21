@@ -238,14 +238,13 @@ class WP_SoundSystem {
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
         wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
-        wp_register_style( 'wpsstm-frontend', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend.css',array('wpsstm'),wpsstm()->version );
         wp_register_style( 'wpsstm-backend',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('wpsstm'),$this->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         
         //js
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','wp-mediaelement','wpsstm-tracklists'),$this->version);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version);
         
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
@@ -266,11 +265,12 @@ class WP_SoundSystem {
     function enqueue_scripts_styles_frontend(){
         
         //TO FIX TO CHECK embed only for music post types ?
-        
+
         //JS
-        
         wp_enqueue_script( 'wpsstm' );
-        wp_enqueue_style( 'wpsstm-frontend' );
+        
+        //CSS
+        wp_enqueue_style( 'wpsstm' );
 
     }
     
