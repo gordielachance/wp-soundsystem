@@ -14,8 +14,8 @@
             e.preventDefault();
             
             var content_url = this.href;
-            
-            var popup = $('<div></div>');
+            var loader_el = $('<p id="wpsstm-popup-loader" class="wpsstm-loading-icon"></p>');
+            var popup = $('<div></div>').append(loader_el);
             
             popup.dialog({
                 width:800,
@@ -26,8 +26,8 @@
                 open: function(ev, ui){
                     var dialog = $(this).closest('.ui-dialog');
                     var dialog_content = dialog.find('.ui-dialog-content');
-                    var iframe = $('<iframe id="myIframe" src="'+content_url+'"></iframe>');
-                    dialog_content.html(iframe);
+                    var iframe = $('<iframe id="wpsstm-iframe-popup" src="'+content_url+'"></iframe>');
+                    dialog_content.append(iframe);
                     iframe.load(function(){
                         dialog.removeClass('wpsstm-loading');
                     });

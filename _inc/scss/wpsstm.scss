@@ -76,18 +76,40 @@ MINIMAL STYLES
 
     }
     
-    &.wpsstm-loading{
-        background:red;
-        #myIframe{
+    .ui-dialog-content{
+        #wpsstm-iframe-popup{
+            background-color: white;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+        }
+        #wpsstm-popup-loader{
             display:none;
+            font-size:3em;
+            margin: auto;
         }
     }
-    #myIframe{
-        background-color: white;
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
+
+    &.wpsstm-loading{
+        
+        .ui-dialog-content{
+            @include flexbox((
+                display: flex!important,
+            ));
+            
+            #wpsstm-popup-loader{
+                display:inherit;
+            }
+            
+            #wpsstm-iframe-popup{
+                display:none;
+            }
+            
+        }
+
+
     }
+
 }
 
 .wpsstm-can-click{
