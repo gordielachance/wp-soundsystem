@@ -34,9 +34,9 @@ class WP_SoundSystem_Core_Player{
         
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-        
-        
+
         add_action( 'wp_footer', array($this,'player_html'));
+        add_action( 'admin_footer', array($this,'player_html'));
 
     }
     
