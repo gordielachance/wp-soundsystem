@@ -2,7 +2,7 @@ class WpsstmLastFM {
     constructor(){
         this.scrobble_icon =            undefined;
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        this.user_scrobble =            ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings
+        this.scrobbler_enabled =        ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings
     }
     
     init(){
@@ -12,14 +12,14 @@ class WpsstmLastFM {
         self.scrobble_icon =     $('#wpsstm-player-action-scrobbler');
 
         //enable scrobbler at init
-        if (self.user_scrobble){
+        if (self.scrobbler_enabled){
             self.enable_scrobbler(true);
         }
 
         //click toggle scrobbling
         $('#wpsstm-player-action-scrobbler').find('a').click(function(e) {
             e.preventDefault();
-            self.enable_scrobbler(!self.user_scrobble,true);
+            self.enable_scrobbler(!self.scrobbler_enabled,true);
         });
 
     }
@@ -46,13 +46,13 @@ class WpsstmLastFM {
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
-                        self.user_scrobble = false;
+                        self.scrobbler_enabled = false;
                         $(self.scrobble_icon).addClass('scrobbler-error');
                         if (data.notice && show_notice){
                             wpsstm_dialog_notice(data.notice);
                         }
                     }else{
-                        self.user_scrobble = true;
+                        self.scrobbler_enabled = true;
                         localStorage.setItem("wpsstm-scrobble", true);
                         $(self.scrobble_icon).addClass('scrobbler-enabled');
                     }
@@ -60,7 +60,7 @@ class WpsstmLastFM {
                 error: function (xhr, ajaxOptions, thrownError) {
                     console.log(xhr.status);
                     console.log(thrownError);
-                    self.user_scrobble = false;
+                    self.scrobbler_enabled = false;
                     $(self.scrobble_icon).addClass('scrobbler-error');
                 },
                 complete: function() {
@@ -242,14 +242,14 @@ class WpsstmLastFM {
     $(document).on( "wpsstmMediaLoaded", function( event, media,source_obj ) {
 
         $(media).on('play', function() {
-            if (wpsstm_lastfm.user_scrobble){
+            if (wpsstm_lastfm.scrobbler_enabled){
                 wpsstm_lastfm.updateNowPlaying(source_obj.track);
             }
         });
         
         $(media).on('ended', function() {
             if ( media.duration > 30) { //scrobble
-                if (wpsstm_lastfm.user_scrobble){
+                if (wpsstm_lastfm.scrobbler_enabled){
                     wpsstm_lastfm.user_scrobble(source_obj.track);
                 }
                 //bot scrobble
