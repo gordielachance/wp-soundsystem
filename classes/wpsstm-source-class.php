@@ -470,14 +470,13 @@ class WP_SoundSystem_Source{
     
     function get_source_action_url($action = null){
         
+        $url = null;
+        
         $args = array(wpsstm_sources()->qvar_source_action=>$action);
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);
             $url = add_query_arg($args,$url);
-        }else{
-            $url = $this->get_new_track_url();
-            $url = add_query_arg(array('wpsstm-redirect'=>$args),$url);
         }
 
         return $url;
