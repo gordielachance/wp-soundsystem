@@ -562,7 +562,7 @@ class WP_SoundSystem_Tracklist{
         if ($can_refresh){
             $actions['refresh'] = array(
                 'text' =>      __('Refresh', 'wpsstm'),
-                'href' =>      $this->get_tracklist_action_link('refresh'),
+                'href' =>      $this->get_tracklist_action_url('refresh'),
             );
         }
         
@@ -571,22 +571,22 @@ class WP_SoundSystem_Tracklist{
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
             'href' =>       $this->get_tracklist_popup_url('share'),
+            'classes' =>    array('wpsstm-link-popup'),
         );
         
         //XSPF
         $actions['export'] = array(
             'text' =>       __('Export', 'wpsstm'),
             'desc' =>       __('Export to XSPF', 'wpsstm'),
-            'href' =>       $this->get_tracklist_action_link('export'),
+            'href' =>       $this->get_tracklist_action_url('export'),
         );
         
         //favorite
         if ($can_favorite){
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_link('favorite'),
+                'href' =>       $this->get_tracklist_action_url('favorite'),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-favorite'),
             );
         }
 
@@ -594,9 +594,8 @@ class WP_SoundSystem_Tracklist{
         if ($can_favorite){
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_link('unfavorite'),
+                'href' =>       $this->get_tracklist_action_url('unfavorite'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unfavorite'),
             );
         }
         
@@ -606,7 +605,7 @@ class WP_SoundSystem_Tracklist{
             $actions['new-subtrack'] = array(
                 'text'     =>   $track_obj->labels->add_new_item,
                 'href'      =>  $this->get_tracklist_popup_url('new-subtrack'),
-                'classes'   =>  array('wpsstm-requires-auth','wpsstm-icon-add'),
+                'classes'   =>  array('wpsstm-link-popup'),
             );
         }
         
@@ -631,7 +630,6 @@ class WP_SoundSystem_Tracklist{
             $actions['status-switch'] = array(
                 'text' =>      __('Status'),
                 'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-status'),
             );
         }
 
@@ -640,8 +638,7 @@ class WP_SoundSystem_Tracklist{
             $actions['lock-tracklist'] = array(
                 'text' =>      __('Lock', 'wpsstm'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
-                'href' =>       $this->get_tracklist_action_link('lock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-lock'),
+                'href' =>       $this->get_tracklist_action_url('lock-tracklist'),
             );
         }
 
@@ -650,9 +647,7 @@ class WP_SoundSystem_Tracklist{
             $actions['unlock-tracklist'] = array(
                 'text' =>      __('Unlock', 'wpsstm'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
-                'href' =>       $this->get_tracklist_action_link('unlock-tracklist'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unlock'),
-
+                'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
             );
         }
 
@@ -661,13 +656,7 @@ class WP_SoundSystem_Tracklist{
             case 'page':
 
                 $popup_action_slugs = array('share','new-subtrack');
-                
-                //set popup
-                foreach ($actions as $slug=>$action){
-                    if ( !in_array($slug,$popup_action_slugs) ) continue;
-                    $actions[$slug]['popup'] = true;
-                }
-                
+
             break;
             case 'popup':
                 unset($actions['refresh']);
@@ -689,7 +678,7 @@ class WP_SoundSystem_Tracklist{
     }
     
     function get_tracklist_popup_url($action =  null){
-        $url = $this->get_tracklist_action_link('popup');
+        $url = $this->get_tracklist_action_url('popup');
         
         if ($action){
             $url = add_query_arg(array('popup-action'=>$action),$url);
@@ -698,7 +687,7 @@ class WP_SoundSystem_Tracklist{
         return $url;
     }
 
-    function get_tracklist_action_link($action = null){
+    function get_tracklist_action_url($action = null){
         if ( !$this->post_id ) return;
 
         $url = add_query_arg(

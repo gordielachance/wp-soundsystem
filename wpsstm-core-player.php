@@ -34,9 +34,9 @@ class WP_SoundSystem_Core_Player{
         
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-        
-        
+
         add_action( 'wp_footer', array($this,'player_html'));
+        add_action( 'admin_footer', array($this,'player_html'));
 
     }
     
@@ -72,12 +72,12 @@ class WP_SoundSystem_Core_Player{
                     <tr>
                         <td id="wpsstm-bottom-track-info"></td>
                         <td id="wpsstm-player-actions-wrapper">
-                            <?php 
-        
-                                //tracklist actions
-                                if ( $actions = $this->output_player_actions() ){
-                                    echo $actions;
-                                }                        
+                            <?php
+                            //player actions
+                            if ( $actions = $this->get_player_actions() ){
+                                $list = get_actions_list($actions,'player');
+                                echo $list;
+                            }                       
                             ?>
                         </td>
                     </tr>
@@ -98,12 +98,9 @@ class WP_SoundSystem_Core_Player{
     
     function enqueue_player_scripts_styles_shared(){
         //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
-        
-        //CSS
-        wp_enqueue_style( 'wpsstm-player',  wpsstm()->plugin_url . '_inc/css/wpsstm-player.css', array('wp-mediaelement'), wpsstm()->version );
-        
+
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('jquery','wpsstm-shared','wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wpsstm'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
@@ -138,43 +135,12 @@ class WP_SoundSystem_Core_Player{
         
     }
     
-    function output_player_actions(){
-        
-        if ( !$actions = $this->get_player_actions() ) return;
-        
-        $track_actions_lis = array();
-
-        foreach($actions as $slug => $action){
-
-            $action_attr = array(
-                'id'        => sprintf('wpsstm-player-action-%s',$slug),
-                'class'     => implode(" ",$action['classes'])
-            );
-
-            $link_attr = array(
-                'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
-                'href'      => $action['href'],
-                'class'     => implode(" ",$action['link_classes'])
-            );
-            $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
-            $link = $action['link_before'].$link.$action['link_after'];
-
-            $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
-        }
-
-        if ( !empty($track_actions_lis) ){
-            return sprintf('<ul id="wpsstm-player-actions" class="wpsstm-actions-list">%s</ul>',implode("\n",$track_actions_lis));
-        }
-    }
-    
-    
 }
 
 class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug = 'default';
-    var $icon;
     
     function __construct(){
     }
@@ -196,14 +162,7 @@ class WP_SoundSystem_Player_Provider{
     public function get_source_type($url){
         
     }
-    
-    function format_source_icon(){
-        if ( !$prefix = $this->icon ){
-            $prefix = sprintf('[%s]',$this->name);
-        }
-        return $prefix;
-    }
-    
+
     function format_source_title($title){
         return $title;
     }
@@ -301,7 +260,6 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
     
     var $name = 'Youtube';
     var $slug = 'youtube';
-    var $icon = '<i class="fa fa-youtube" aria-hidden="true"></i>';
     
     function get_youtube_id($url){
         //youtube
@@ -337,7 +295,6 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
-    var $icon = '<i class="fa fa-soundcloud" aria-hidden="true"></i>';
     var $client_id;
     
     function __construct(){

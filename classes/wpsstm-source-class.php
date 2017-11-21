@@ -436,12 +436,13 @@ class WP_SoundSystem_Source{
         global $wpsstm_track;
         
         $attr = array(
-            'data-wpsstm-source-id' =>      $this->post_id,
-            'data-wpsstm-source-idx' =>     $wpsstm_track->current_source,
-            'data-wpsstm-source-type' =>    $this->type,
-            'data-wpsstm-source-src' =>     $this->stream_url,
-            'data-wpsstm-community-source' =>     (int)$this->is_community,
-            'class'                 =>      implode( ' ',$this->get_source_class() ),
+            'data-wpsstm-source-id' =>              $this->post_id,
+            'data-wpsstm-source-provider' =>        $this->provider->slug,
+            'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
+            'data-wpsstm-source-type' =>            $this->type,
+            'data-wpsstm-source-src' =>             $this->stream_url,
+            'data-wpsstm-community-source' =>       (int)$this->is_community,
+            'class'                 =>              implode( ' ',$this->get_source_class() ),
         );
         return $attr;
     }
@@ -465,6 +466,74 @@ class WP_SoundSystem_Source{
         }
 
         return $classes;
+    }
+    
+    function get_source_action_url($action = null){
+        
+        $url = null;
+        
+        $args = array(wpsstm_sources()->qvar_source_action=>$action);
+
+        if ($this->post_id){
+            $url = get_permalink($this->post_id);
+            $url = add_query_arg($args,$url);
+        }
+
+        return $url;
+    }
+    
+    function get_source_links($context = null){
+        global $wpsstm_track;
+        $actions = array();
+        
+        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
+
+        //caps
+        $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$this->post_id);
+        $can_reorder_sources = $wpsstm_track->user_can_reorder_sources();
+        
+        $actions['provider'] = array(
+            'text' =>       $this->provider->name,
+            'href' =>       $this->url,
+        );
+
+        if ($can_delete_source){
+            $actions['delete'] = array(
+                'text' =>       __('Delete', 'wpsstm'),
+                'desc' =>       __('Delete this source','wpsstm'),
+                'href' =>       $this->get_source_action_url('delete'),
+            );
+        }
+
+        if ( $can_reorder_sources ){
+            $actions['move'] = array(
+                'text' =>       __('Move', 'wpsstm'),
+                'desc' =>       __('Change track position','wpsstm'),
+            );
+        }
+        
+        
+        //context
+        switch($context){
+            case 'page':
+
+            break;
+            case 'popup':
+                
+            break;
+        }
+        
+        $actions = apply_filters('wpsstm_source_actions',$actions,$context);
+        
+        $default_action = wpsstm_get_blank_action();
+        
+        foreach((array)$actions as $slug=>$action){
+            $action = wp_parse_args($action,$default_action);
+            $action['classes'][] = 'wpsstm-action';
+            $action['classes'][] = 'wpsstm-source-action';
+            $actions[$slug] = $action;
+        }
+        return $actions;
     }
     
     

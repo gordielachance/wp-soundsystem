@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.8.5
+Version: 1.8.6
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.8.5';
+    public $version = '1.8.6';
     /**
     * @public string plugin DB version
     */
@@ -170,7 +170,16 @@ class WP_SoundSystem {
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
+        
+        add_filter( 'body_class', array($this,'default_style_class'));
 
+    }
+    
+    function default_style_class($classes){
+        if ( wpsstm()->get_options('minimal_css') !== 'on'){
+            $classes[] = 'wpsstm-default';
+        }
+        return $classes;
     }
 
     // Move all "after_title" metaboxes above the default editor
@@ -228,58 +237,48 @@ class WP_SoundSystem {
         
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-
-        wp_register_style( 'wpsstm-default-style', wpsstm()->plugin_url . '_inc/css/wpsstm-default-style.css',array('font-awesome'),wpsstm()->version );
+        wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
+        wp_register_style( 'wpsstm-backend',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('wpsstm'),$this->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         
         //js
-        wp_register_script( 'wpsstm-shared', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','wpsstm-tracklists'),$this->version);
-        
-        $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-        $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-        $wp_auth_notice = $wp_auth_icon.' '.$wp_auth_text;
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version);
 
         $datas = array(
             'debug'             => (WP_DEBUG),
             'ajaxurl'           => admin_url( 'admin-ajax.php' ),
-            'logged_user_id'    => get_current_user_id(),
-            'wp_auth_notice'    => $wp_auth_notice
         );
 
-        wp_localize_script( 'wpsstm-shared', 'wpsstmL10n', $datas );
-        
-    }
-
-    function enqueue_scripts_styles_backend( $hook ){
-
-            if ( !$this->is_admin_page() ) return;
-
-            // css
-            wp_register_style( 'wpsstm-admin',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('font-awesome','wpsstm-tracklists'),$this->version );
-            wp_enqueue_style( 'wpsstm-admin' );
-
-            //default styling
-            if ( wpsstm()->get_options('minimal_css') == 'off'){
-                wp_enqueue_style( 'wpsstm-default-style' );
-            }
-            
-        //}
+        wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
         
     }
     
     function enqueue_scripts_styles_frontend(){
         
         //TO FIX TO CHECK embed only for music post types ?
-        wp_enqueue_script( 'wpsstm-shared' );
 
-        //default styling
-        if ( wpsstm()->get_options('minimal_css') == 'off'){
-            wp_enqueue_style( 'wpsstm-default-style' );
-        }
+        //JS
+        wp_enqueue_script( 'wpsstm' );
+        
+        //CSS
+        wp_enqueue_style( 'wpsstm' );
 
+    }
+    
+    function enqueue_scripts_styles_backend( $hook ){
+
+            if ( !$this->is_admin_page() ) return;
+        
+            //JS
+            wp_enqueue_script( 'wpsstm' );
+
+            //CSS
+            wp_enqueue_style( 'wpsstm-backend' );
+
+        //}
+        
     }
 
     /*

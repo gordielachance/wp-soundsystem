@@ -55,7 +55,6 @@
         $(track_el).find('#wpsstm-track-action-favorite a').click(function(e) {
 
             e.preventDefault();
-            if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
             var el = $(this).parents('.wpsstm-track-action');
@@ -79,11 +78,15 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    el.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
+                        link.addClass('action-error');
+                        if (data.notice){
+                            wpsstm_dialog_notice(data.notice);
+                        }
                     }else{
                         var track_instances = track_obj.get_track_instances();
                         
@@ -95,8 +98,13 @@
                         track_instances.addClass('wpsstm-loved-track');
                     }
                 },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                    link.addClass('action-error');
+                },
                 complete: function() {
-                    el.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                     $(document).trigger("wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
@@ -107,10 +115,8 @@
         $(track_el).find('#wpsstm-track-action-unfavorite a').click(function(e) {
 
             e.preventDefault();
-            if ( !wpsstm_get_current_user_id() ) return;
 
             var link = $(this);
-            var action = $(this).parents('.wpsstm-track-action');
             
             var track_ajax = track_obj.to_ajax();
 
@@ -130,22 +136,40 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    action.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
+                        link.addClass('action-error');
                     }else{
                         var track_instances = track_obj.get_track_instances();
                         track_instances.removeClass('wpsstm-loved-track');
                     }
                 },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                    link.addClass('action-error');
+                },
                 complete: function() {
-                    action.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                     $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
 
+        });
+        
+        //remove
+        $(track_el).find('#wpsstm-track-action-remove a').click(function(e) {
+            e.preventDefault();
+            track_obj.tracklist.remove_tracklist_track(track_obj);
+        });
+        
+        //delete
+        $(track_el).find('#wpsstm-track-action-delete a').click(function(e) {
+            e.preventDefault();
+            track_obj.delete_track();
         });
 
     });
@@ -471,8 +495,49 @@ class WpsstmTrack {
         return filtered;
     }
     
+    delete_track(track_obj){
+        
+        var self = this;
+        var track_el = track_obj.track_el;
+        var link = $(track_el).find('#wpsstm-track-action-delete a');
+
+        var ajax_data = {
+            action:     'wpsstm_trash_track',
+            track:      track_obj.to_ajax(),
+        };
+
+        jQuery.ajax({
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                track_el.addClass('track-loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    link.addClass('action-error');
+                    console.log(data);
+                }else{
+                    $(track_el).remove();
+                    self.update_tracks_order();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                link.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                track_el.removeClass('track-loading');
+            }
+        })
+
+    }
+    
     update_source_index(source_obj){
         var self = this;
+        var link = source_obj.source_el.find('#wpsstm-source-action-move a');
 
         //ajax update order
         var ajax_data = {
@@ -486,11 +551,12 @@ class WpsstmTrack {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                self.track_el.addClass('track-loading');
+                link.track_el.addClass('action-loading');
             },
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
+                    link.addClass('action-error');
                 }else{
                     //self.update_sources_order();
                 }
@@ -498,9 +564,10 @@ class WpsstmTrack {
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
+                link.addClass('action-error');
             },
             complete: function() {
-                self.track_el.removeClass('track-loading');
+                link.removeClass('action-loading');
             }
         })
 

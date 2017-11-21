@@ -64,12 +64,12 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                     <div id="track-popup-tabs" class="entry-content">
                         <?php
                         if ( $actions = $wpsstm_track->get_track_links($tracklist,'popup') ){
-                            $list = output_tracklist_actions($actions,'track');
+                            $list = get_actions_list($actions,'track');
                             echo $list;
                         }
                 
                         $tab_content = null;
-                
+ 
                         switch ($popup_action){
                             case 'edit':
                                 ?>
@@ -79,32 +79,14 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                 <?php
                             break;
                             case 'playlists':
-                                
-                                $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-                                $labels = get_post_type_labels($playlist_type_obj);
-                                
                                 ?>
                                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                                    <div id="wpsstm-tracklist-chooser-list" data-wpsstm-track-id="<?php echo $tracklist->post_id;?>">
-                                        <div id="wpsstm-filter-playlists">
-                                            <p>
-                                                <input id="wpsstm-playlists-filter" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" />
-                                            </p>
-                                            <?php echo wpsstm_get_user_playlists_list(array('checked_ids'=>$wpsstm_track->get_parent_ids()));?>
-                                            <p id="wpsstm-new-playlist-add">
-                                                <input type="submit" value="<?php echo $labels->add_new_item;?>"/>
-                                                <?php wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$wpsstm_track->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true );?>
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <?php echo $wpsstm_track->get_playlists_manager();?>
                                 </div>
                                 <?php
                                 
                             break;
                             case 'sources-manager':
-                                
-                                $wpsstm_track->populate_sources();
-                                
                                 ?>
                                 <div id="wpsstm-track-admin-sources" class="wpsstm-track-admin">
                                     <p>
@@ -113,10 +95,8 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                     <p>
                                         <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
                                     </p>
-                                    <form action="<?php echo esc_url($wpsstm_track->get_track_popup_url('sources-manager'));?>" method="POST">
-                                        <?php wpsstm_locate_template( 'track-popup-sources.php',true );?>
-                                    </form>
-                            </div>
+                                    <?php echo $wpsstm_track->get_sources_manager();?>
+                                </div>
                                 <?php
                                 
                             break;

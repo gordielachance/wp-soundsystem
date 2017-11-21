@@ -234,20 +234,14 @@ function wpsstm_get_blank_action(){
         'link_before' =>    null,
         'link_after' =>     null,
         'has_cap' =>        true,
-        'popup' =>          false,
     );
 }
 
-function output_tracklist_actions($actions,$prefix){
+function get_actions_list($actions,$prefix){
     $track_actions_lis = array();
 
     foreach($actions as $slug => $action){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-
-        if ( $action['popup'] ){
-            $action['link_classes'][] = 'thickbox';
-            $action['href'] = add_query_arg(array('TB_iframe'=>true),$action['href']);
-        }
 
         $actions[$slug] = $action;
 
@@ -263,12 +257,13 @@ function output_tracklist_actions($actions,$prefix){
         );
         $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
-
-        $track_actions_lis[] = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
+        
+        $list_item = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
+        $track_actions_list[] = $list_item;
     }
 
-    if ( !empty($track_actions_lis) ){
-        return sprintf('<ul id="wpsstm-%s-actions" class="wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_lis));
+    if ( !empty($track_actions_list) ){
+        return sprintf('<ul id="wpsstm-%s-actions" class="wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_list));
     }
 }
 

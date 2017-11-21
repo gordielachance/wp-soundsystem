@@ -57,7 +57,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_filter( 'template_include', array($this,'tracklist_xspf_template'));
         add_filter( 'template_include', array($this,'tracklist_popup_template'));
         
-        add_action( 'template_redirect', array($this,'handle_tracklist_popup_form')); //TOFIXDDD
+        add_action( 'template_redirect', array($this,'handle_tracklist_popup_form'));
         
         
 
@@ -96,6 +96,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         //toggle favorite tracklist
         add_action('wp_ajax_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist'));
+        add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist')); //so we can output the non-logged user notice
         
 
 
@@ -111,12 +112,9 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function register_tracklists_scripts_styles_shared(){
-        wp_register_style( 'wpsstm-frontend', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend.css',array('font-awesome'),wpsstm()->version );
-
-        wp_register_style( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/css/wpsstm-tracklists.css',array('font-awesome','wpsstm-frontend','thickbox'),wpsstm()->version );
-        //JS
         
-        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','thickbox','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
+        //JS
+        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-ui-sortable','jquery-ui-dialog','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
     }
     
     /*
@@ -137,9 +135,8 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function enqueue_tracklists_scripts_styles_frontend(){
-        //TO FIX load only when tracklist is displayed
+        //TO FIX TO CHECK post types ?
         wp_enqueue_script( 'wpsstm-tracklists' );
-        wp_enqueue_style( 'wpsstm-tracklists' );
     }
 
     function enqueue_tracklists_scripts_styles_backend(){
@@ -147,7 +144,6 @@ class WP_SoundSystem_Core_Tracklists{
         if ( !wpsstm()->is_admin_page() ) return;
         
         wp_enqueue_script( 'wpsstm-tracklists' );
-        wp_enqueue_style( 'wpsstm-tracklists' );
 
     }
 
@@ -187,18 +183,36 @@ class WP_SoundSystem_Core_Tracklists{
             'success'   => false
         );
         
-        $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ?     $ajax_data['post_id'] : null;
-        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
         
-        if ($tracklist_id && ($do_love!==null) ){
-            $tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $success = $tracklist->love_tracklist($do_love);
-            if ( $success ){
-                if( is_wp_error($success) ){
-                    $code = $success->get_error_code();
-                    $result['message'] = $success->get_error_message($code); 
-                }else{
-                   $result['success'] = true; 
+        $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ?     $ajax_data['post_id'] : null;
+        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
+        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null;
+
+        if ( !get_current_user_id() ){
+            
+            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
+            if ($do_love){
+                $action_link = $tracklist->get_tracklist_action_url('favorite');
+            }else{
+                $action_link = $tracklist->get_tracklist_action_url('unfavorite');
+            }
+            
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
+
+        }else{
+            //ajax do send strings
+
+            if ($tracklist->post_id && ($do_love!==null) ){
+                $success = $tracklist->love_tracklist($do_love);
+                if ( $success ){
+                    if( is_wp_error($success) ){
+                        $code = $success->get_error_code();
+                        $result['message'] = $success->get_error_message($code); 
+                    }else{
+                       $result['success'] = true; 
+                    }
                 }
             }
         }

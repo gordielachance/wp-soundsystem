@@ -1,0 +1,184 @@
+/*
+Popup, modals, etc.
+*/
+
+@import "compass";
+
+/*
+MINIMAL STYLES
+*/
+
+html.wpsstm-is-dialog{
+    overflow:hidden;
+}
+
+.wpsstm-dialog{
+    position:relative;
+
+    .ui-dialog-content{
+        @include flexbox((
+            display: flex!important,
+        ));
+        > * {
+            margin: auto;
+        }
+        #wpsstm-dialog-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f19a";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
+        #wpsstm-dialog-lastfm-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f202";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
+        #wpsstm-dialog-loader{
+            display:none;
+        }
+        #wpsstm-dialog-iframe{
+            width: 100%;
+            height: 100%;
+        }
+
+    }
+
+    &.dialog-loading{
+
+        .ui-dialog-content{
+            #wpsstm-dialog-loader{
+                display:inherit;
+            }
+            #wpsstm-dialog-iframe{
+                display:none;
+            }
+        }
+
+    }
+
+}
+
+/*
+DEFAULT STYLES
+*/
+
+body.wpsstm-default,body.wp-admin{
+    .ui-widget-overlay{
+        opacity: .5;
+        background: black;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom:0;
+        right:0;
+        z-index:10;
+    }
+
+    .wpsstm-dialog{
+        z-index:11;
+
+        background:white;
+        border:1px solid #F7F7F7;
+        @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
+
+        .ui-dialog-titlebar-close{
+            position: absolute;
+            right: 0;
+            top: 0;
+            .ui-icon-closethick{
+                @extend .wpsstm-icon;
+                &:before{
+                    content:"\f00d";//.fa-times
+                }
+            }
+            .ui-button-text{
+                display:none;
+            }
+
+        }
+
+        .ui-dialog-content{
+            #wpsstm-dialog-iframe{
+                background-color: white;
+            }
+            #wpsstm-dialog-loader{
+                font-size:3em;
+            }
+        }
+
+
+    }
+    
+    &.wpsstm-popup{
+        header{
+            margin: 2em 0;
+        }
+        //hide default styles - this may have to be adapted to your theme
+        #sidebar,#colophon{
+            display:none;
+        }
+        #page{
+            position: absolute;
+            top: 0;
+            background-color: white;
+            width: 100%;
+            padding: 0;
+            max-width: inherit;
+        }
+        #content{
+            width:100%;
+            margin:0;
+        }
+        #main{
+            margin:0;
+            padding:0;
+            >.hentry{
+                box-shadow: none;
+            }
+        }
+        #wpadminbar{
+            display:none;
+        }
+        // !hide default styles
+
+        .hentry{
+            margin:0;
+            padding:0;
+            #track-popup-tabs{
+                > ul{
+                    list-style: none;
+                    li{
+                        &:not(.ui-state-active){
+                            @include opacity(.8);
+                        }
+                    }
+                }
+            }
+        }
+
+        //submit bt
+        .wpsstm-submit-wrapper{
+            text-align:center;
+            margin: .5em 0;
+        }
+
+        .entry-content > ul.wpsstm-actions-list{
+            border-bottom: 1px solid #F7F7F7;
+            padding-bottom: 1em;
+            text-align: center;
+            display:block;
+            margin: 1em;
+            list-style: none;
+            line-height: 2.8em;
+            li{
+                @extend .wpsstm-action-bt;
+            }
+        }
+    }
+    
+}

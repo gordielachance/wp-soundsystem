@@ -41,24 +41,12 @@ get_header();
                     if ( !$can_wizard ){
 
                         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-                        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
+                        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(get_permalink()),__('here','wpsstm'));
                         $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
                         printf('<p class="wpsstm-notice">%s %s</p>',$wp_auth_icon,$wp_auth_text);
 
                     }else{
-                        ?>
-                        <form action="<?php the_permalink();?>" method="POST">
-                            <?php
-                            wpsstm_locate_template( 'wizard-frontend.php', true );
-                        
-                            if ($wpsstm_tracklist->feed_url){
-                                echo $wpsstm_tracklist->get_tracklist_html();
-                            }
-                        
-                            ?>
-                        </form>
-                        <?php
-                        
+                        wpsstm_locate_template( 'wizard-frontend.php', true );
                     }
                     ?>
                     <?php

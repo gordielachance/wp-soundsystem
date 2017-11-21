@@ -229,6 +229,9 @@ class WP_SoundSystem_Track{
         
         $arr = $this->to_array();
 
+        /*
+        //requires PHP 5.6.0
+        
         $filtered = array_filter(
             $arr,
             function ($key) use ($allowed) {
@@ -236,6 +239,9 @@ class WP_SoundSystem_Track{
             },
             ARRAY_FILTER_USE_KEY
         );
+        */
+        
+        $filtered = array_intersect_key($arr, array_flip($allowed));
         
         return $filtered;
     }
@@ -658,6 +664,7 @@ class WP_SoundSystem_Track{
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('about'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -666,6 +673,7 @@ class WP_SoundSystem_Track{
             $actions['edit'] = array(
                 'text' =>      __('Track Details', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('edit'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -674,7 +682,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('playlists'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -684,7 +692,6 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
             );
         }
 
@@ -694,7 +701,6 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
             );
         }
 
@@ -727,15 +733,9 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
+                unset($actions['edit'],$actions['sources'],$actions['trash']);
 
                 $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
-                
-                //set popup
-                foreach ($actions as $slug=>$action){
-                    if ( !in_array($slug,$popup_action_slugs) ) continue;
-                    $actions[$slug]['popup'] = true;
-                }
 
             break;
             case 'popup':
@@ -938,6 +938,85 @@ class WP_SoundSystem_Track{
             ),$sources_url 
         );
         return $sources_url;
+    }
+    
+    function get_playlists_manager(){
+
+        $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $labels = get_post_type_labels($playlist_type_obj);
+
+        //capability check
+        $create_playlist_cap = $playlist_type_obj->cap->edit_posts;
+        
+        ob_start();
+
+        if ( !current_user_can($create_playlist_cap) ){
+            $action_link = $this->get_track_popup_url('playlists');
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
+        }else{
+            ?>
+            <div id="wpsstm-tracklist-chooser-list" data-wpsstm-track-id="<?php echo $this->post_id;?>">
+                <div id="wpsstm-filter-playlists">
+                <p>
+                    <input id="wpsstm-playlists-filter" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" />
+                </p>
+                <?php echo wpsstm_get_user_playlists_list(array('checked_ids'=>$this->get_parent_ids()));?>
+                <p id="wpsstm-new-playlist-add">
+                    <input type="submit" value="<?php echo $labels->add_new_item;?>"/>
+                    <?php wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$this->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true );?>
+                </p>
+                </div>
+            </div>
+            <?php
+        }
+        
+        $output = ob_get_clean();
+        return $output;
+        
+    }
+    
+    function get_sources_manager(){
+        
+        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$this->post_id);
+
+        ob_start();
+        if ( !$can_edit_track ){
+            $action_link = $this->get_track_popup_url('playlists');
+            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
+            printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
+        }else{
+            ?>
+            <form action="<?php echo esc_url($this->get_track_popup_url('sources-manager'));?>" method="POST">
+                <?php
+                
+                //track sources
+                $this->populate_sources();
+                wpsstm_locate_template( 'track-sources.php', true, false );
+            
+                ?>
+                <p class="wpsstm-submit-wrapper">
+                    <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
+                    <input class="wpsstm-backend-toggle" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
+                </p>
+                <p class="wpsstm-icon-input" id="wpsstm-new-source">
+                    <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="Enter a tracklist URL">
+                    <input type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary wpsstm-icon-button" value="+">
+                </p>
+                <input type="hidden" name="wpsstm-track-popup-action" value="sources-manager" />
+                <input type="hidden" name="wpsstm-track-id" value="<?php echo $this->post_id;?>" />
+
+                <?php wp_nonce_field( sprintf('wpsstm_track_%s_new_source_nonce',$this->post_id), 'wpsstm_track_new_source_nonce', true );?>
+            </form>
+            <?php
+        }
+        
+        $output = ob_get_clean();
+        return $output;
+        
     }
     
     

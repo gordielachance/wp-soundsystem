@@ -71,9 +71,6 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function wizard_register_scripts_style_shared(){
-
-        wp_register_style( 'wpsstm-wizard',  wpsstm()->plugin_url . '_inc/css/wpsstm-wizard.css',array('wpsstm-tracklists'),wpsstm()->version );
-
         // JS
         wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js', array('jquery','jquery-ui-tabs','wpsstm-tracklists'),wpsstm()->version, true);
     }
@@ -90,7 +87,6 @@ class WP_SoundSystem_Core_Wizard{
     }
     
     function wizard_enqueue_script_styles(){
-        wp_enqueue_style('wpsstm-wizard');
         wp_enqueue_script('wpsstm-wizard');
     }
 
@@ -729,7 +725,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $submit_input = null;
         if ( !wpsstm_is_backend() ){
-            $submit_input = sprintf('<input type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary" value="">');
+            $submit_input = '<input type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary wpsstm-icon-button" value="">';
         }
 
         

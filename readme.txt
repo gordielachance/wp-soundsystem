@@ -149,9 +149,17 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
-* see get_track_action_url() and get_new_track_url()
+= 1.8.7 =
+* removed FontAwesome from SCSS
+* use jQuery UI Dialog instead of Thickbox
+* improved tracklists/tracks/sources actions
+* improved notices
+* cleaned SCSS/CSS
+* embed player backend
+
+= 1.8.6 =
 * better code for tracklists and tracks actions
+* ability to redirect to a track action even if the track does not exists in the DB yet - see get_track_action_url() and get_new_track_url()
 * better sources manager
 * WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
 

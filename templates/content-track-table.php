@@ -33,7 +33,7 @@ $track->populate_sources();
     <td class="wpsstm-track-actions">
         <?php
         if ( $actions = $track->get_track_links($tracklist,'page') ){
-            echo output_tracklist_actions($actions,'track');
+            echo get_actions_list($actions,'track');
         }
         ?>
     </td>

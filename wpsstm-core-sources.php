@@ -6,6 +6,7 @@ class WP_SoundSystem_Core_Sources{
     var $source_url_metakey = '_wpsstm_source_url';
     var $source_stream_metakey = '_wpsstm_source_stream';
     var $source_provider_metakey = '_wpsstm_source_provider';
+    var $qvar_source_action = 'source-action';
 
     /**
     * @var The one true Instance
@@ -33,6 +34,7 @@ class WP_SoundSystem_Core_Sources{
     function setup_actions(){
         
         add_action( 'init', array($this,'register_post_type_sources' ));
+        add_filter( 'query_vars', array($this,'add_query_vars_source') );
 
         add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
         
@@ -72,6 +74,11 @@ class WP_SoundSystem_Core_Sources{
         //delete source
         add_action('wp_ajax_wpsstm_delete_source', array($this,'ajax_delete_source'));
 
+    }
+    
+    function add_query_vars_source( $qvars ) {
+        $qvars[] = $this->qvar_source_action;
+        return $qvars;
     }
 
     function register_post_type_sources() {
@@ -351,7 +358,7 @@ class WP_SoundSystem_Core_Sources{
         $sources_url = $wpsstm_track->get_track_popup_url('sources-manager');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
-        $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
+        $manager_link = sprintf('<a class="wpsstm-link-popup button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
         $backend_link = sprintf('<a class="button" href="%s">%s</a>',$wpsstm_track->get_backend_sources_url(),__('Listing','wpsstm'));
         
         printf('<p>%s%s</p>',$manager_link,$backend_link);

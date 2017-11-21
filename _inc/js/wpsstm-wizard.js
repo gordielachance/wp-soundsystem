@@ -72,7 +72,9 @@ jQuery(document).ready(function($){
     /*
     WIZARD INPUT hover & fill
     */
-    var wizard_input_el = $('#wpsstm-wizard-search input[type=text]');
+    var wizard_input_wrapper_el = $('#wpsstm-wizard-search');
+    var wizard_input_el = wizard_input_wrapper_el.find('input[type=text]');
+    var wizard_submit_el = wizard_input_wrapper_el.find('input[type=submit]');
     var wizard_input_placeholder_default = wizard_input_el.attr('placeholder');
     
     //hover
@@ -90,11 +92,14 @@ jQuery(document).ready(function($){
         e.preventDefault();
         var new_value = $(this).attr('data-wpsstm-wizard-click');
         wizard_input_el.val(new_value);
+        wizard_input_wrapper_el.addClass('input-loading');
         
         if (new_value){
             $('html, body').animate({
                 scrollTop: wizard_input_el.offset().top - ( $(window).height() / 3) //not at the very top
-            }, 500);
+            }, 500, function() {
+                wizard_submit_el.trigger('click');
+            });
         }
     });
     

@@ -36,6 +36,10 @@
                 }else if(data.success) {
                 }
             },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
             complete: function() {
                 $(li_el).removeClass('loading');
             }
@@ -82,6 +86,11 @@
                     existingPlaylists_el.replaceWith( data.new_html );
                     $( "#wpsstm-playlists-filter" ).trigger("keyup");
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                link.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
             },
             complete: function() {
                 $(tracklistSelector).removeClass('loading');

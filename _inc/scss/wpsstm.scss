@@ -1,0 +1,265 @@
+@import "compass/css3";
+@import "compass/typography/text/ellipsis";
+
+@import "wpsstm-tracklists";
+@import "wpsstm-tracks";
+@import "wpsstm-sources";
+@import "wpsstm-player";
+@import "wpsstm-wizard";
+@import "wpsstm-popups";
+
+@include keyframes(opacityPulse){
+    0% {opacity: 1;}
+    50% {opacity: 0.5; }
+    100% {opacity: 1;}
+}
+
+@keyframes barberpole {
+    from { background-position: 0 0; }
+    to   { background-position: 60px 30px; }
+}
+
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+
+@mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
+    background-size: 30px 30px;
+    background-image: linear-gradient(
+        $direction, 
+        $color-a    25%, 
+        $color-b    25%, 
+        $color-b    50%, 
+        $color-a    50%, 
+        $color-a    75%, 
+        $color-b    75%, 
+        $color-b
+    );
+    animation: barberpole 0.5s linear infinite;
+}
+
+.wpsstm-no-underline{
+    text-decoration:none;
+    border-bottom:none!important; //fix for twentyfifteen
+}
+
+.wpsstm-can-click{
+    cursor: pointer;
+    cursor: hand;
+}
+
+.wpsstm-loading-el{
+    pointer-events: none;
+}
+
+.wpsstm-icon{
+    &:before{
+        font-weight: normal;
+        font-style: normal;
+        font-family: 'FontAwesome';
+        width: 1.28571429em;
+        text-align: center;
+        display: inline-block;
+    }
+}
+
+.wpsstm-loading-icon{
+    @extend .wpsstm-icon;
+    &:before{
+        animation: spin 2s linear infinite;
+        content: "\f1ce"!important; //.fa-circle-o-notch;
+    }
+}
+
+.wpsstm-action-bt{
+    border: 1px solid #F7F7F7;
+    background:#F7F7F7;
+    padding: .25em .5em;
+    display:inline-block;
+    line-height: 1.8em;
+    &:hover{
+        border-color:#F7F7F7;
+        background:white;
+    }
+    a:before{
+        margin-right:.5em;
+    }
+}
+
+.toggle-children-container{
+    .wpsstm-tracklist{
+        margin:0;
+    }
+    //more - less
+    .toggle-children-link{
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        border-bottom: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        small{
+            font-size: .5em;
+            line-height: 1em;
+            vertical-align: middle;
+        }
+    }
+}
+
+/*
+MINIMAL STYLES
+*/
+
+/*
+DEFAULT STYLES
+*/
+
+
+body.wpsstm-default,body.wp-admin{
+
+    .wpsstm-ellipsis{
+        @include ellipsis($no-wrap: true);
+    }
+    .wpsstm-loading-el{
+        @include opacity(.5);
+    }
+    
+    input{
+        &.wpsstm-fullwidth{
+            width:100%;
+        }
+        &[type="text"].input-loading{
+            @include striped-bg();
+        }
+    }
+    
+    .wpsstm-icon-input{
+        position:relative;
+        margin: 0.5em;
+        input{
+            padding: 0.5em;
+            line-height: 1em;
+            height:100%;
+            &[type="text"]{
+                padding-right:4em;
+            }
+            &[type="submit"]{
+                position: absolute;
+                top:0;
+                right: 0;
+                border: none;
+                @extend .wpsstm-can-click;
+                &.wpsstm-icon-button{
+                    width:4em;
+                    font-weight: normal;
+                    font-style: normal;
+                    font-family: 'FontAwesome';
+                }
+            }
+
+        }
+        &.input-loading{
+            input[type="text"]{
+                @include striped-bg();
+            }
+        }
+    }
+
+    .wpsstm-tracklist-notices{
+        @include align-items(center);
+        @include display-flex();
+        @include justify-content(center);
+        padding: .5em 0;
+
+        #wpsstm-notice-ajax-refresh{
+            background:none;
+            @include animation(opacityPulse 2s infinite ease-out);
+            opacity: 1;
+            font-size:1em;
+            @extend .wpsstm-loading-icon;
+        }
+
+    }
+
+    .wpsstm-notice {
+        font-size: 0.8em;
+        padding: .5em;
+        background-color: #fcf8e3;
+        color: #222;
+        text-align:center;
+        margin: .5em 0;
+        a {
+            color: #222;
+            text-decoration: underline;
+        }
+
+        &.active {
+            display: block;
+        }
+
+        .wpsstm-close-notice{
+            position:absolute;
+            right:1em;
+        }
+
+    }
+
+    ul{
+        &.comma-list{
+            list-style: none;
+            display:inline;
+            li{
+                display:inline;
+                &:not(:last-child):after {
+                  content: ", ";
+                }
+            }
+        }
+
+        &.wpsstm-actions-list{
+            margin:0;
+            padding:0;
+            list-style: none;
+            li.wpsstm-action{
+                a{
+                    @extend .wpsstm-no-underline;
+                    @extend .wpsstm-icon;
+                    &.action-loading{
+                        @extend .wpsstm-loading-icon;
+                    }
+                }
+            }
+        }
+        &.ui-autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            float: left;
+            display: none;
+            min-width: 160px;
+            margin: 0 0 10px 25px;
+            list-style: none;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-color: rgba(0, 0, 0, 0.2);
+            //@include border-radius(5px);
+            @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
+            @include background-clip(padding-box);
+            *border-right-width: 2px;
+            *border-bottom-width: 2px;
+
+            li.ui-menu-item{
+                padding:0 .5em;
+                line-height:2em;
+                font-size:.8em;
+                &.ui-state-focus{
+                    background: #F7F7F7;
+                }
+            }
+
+        }
+    }
+}
