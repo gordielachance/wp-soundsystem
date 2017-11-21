@@ -63,6 +63,33 @@ body.wpsstm-default,body.wp-admin{
             }
         }
     }
+    
+    .wpsstm-tracklist{
+        &.tracklist-playable [itemprop="track"]{
+
+            &[data-wpsstm-sources-count="0"]{
+                @include opacity(.25);
+            } 
+
+            &:not(.track-active){
+                td{
+                    @include opacity(.5);
+                }
+            }
+
+            &.track-has-played,&:hover{
+                td{
+                    @include opacity(.75);
+                }
+            }
+
+            &.track-active{
+                td{
+                    @include opacity(1);
+                }
+            }
+        }
+    }
 
     .wpsstm-tracks-list{
 
@@ -168,32 +195,6 @@ body.wpsstm-default,body.wp-admin{
                 background:rgba(255, 0, 0, 0.10);
             }
         }
-
-        &.tracklist-playable [itemprop="track"]{
-
-            &[data-wpsstm-sources-count="0"]{
-                @include opacity(.25);
-            } 
-
-            &:not(.track-active){
-                td{
-                    @include opacity(.5);
-                }
-            }
-
-            &.track-has-played,&:hover{
-                td{
-                    @include opacity(.75);
-                }
-            }
-
-            &.track-active{
-                td{
-                    @include opacity(1);
-                }
-            }
-        }
-
 
     }
     

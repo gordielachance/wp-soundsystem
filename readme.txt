@@ -152,9 +152,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = 1.8.7 =
 * removed FontAwesome from SCSS
 * use jQuery UI Dialog instead of Thickbox
-* improved tracklists/tracks/sources actions
 * improved notices
-* cleaned SCSS/CSS
+* improved player/tracklists/tracks/sources actions
+* cleaned SCSS/CSS + plugin option to disable default styles
 * embed player backend
 
 = 1.8.6 =
