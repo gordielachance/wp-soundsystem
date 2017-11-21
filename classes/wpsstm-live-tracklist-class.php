@@ -5,6 +5,7 @@ use \ForceUTF8\Encoding;
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $tracklist_type = 'live';
+    public $ajax_refresh = true;//should we query the subtracks through ajax ?
     
     //preset infos
     var $preset_slug = 'default';
