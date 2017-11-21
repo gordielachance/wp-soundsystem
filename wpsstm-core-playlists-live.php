@@ -193,6 +193,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         }
 
         $class_names = apply_filters( 'wpsstm_get_scraper_presets',array() );
+        $class_names = array_reverse($class_names); //reverse in order to respect filters priority
 
         //check and run
         foreach((array)$class_names as $class_name){
