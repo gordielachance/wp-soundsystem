@@ -229,6 +229,9 @@ body.wpsstm-default,body.wp-admin{
                     &.action-loading{
                         @extend .wpsstm-loading-icon;
                     }
+                    &.action-error:before{
+                        content:"\f071"; //.fa-exclamation-triangle;
+                    }
                 }
             }
         }

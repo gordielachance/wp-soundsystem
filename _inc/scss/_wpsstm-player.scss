@@ -145,6 +145,9 @@ body.wpsstm-default,body.wp-admin{
                             &.lastfm-loading a{
                                 @extend .wpsstm-loading-icon;
                             }
+                            &.scrobbler-error a:before{
+                                content:"\f071"; //.fa-exclamation-triangle;
+                            }
                             &.scrobbler-enabled{
                                 @include opacity(1);
                             }

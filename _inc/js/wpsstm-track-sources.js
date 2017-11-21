@@ -1,12 +1,13 @@
-jQuery(document).ready(function($){
+(function($){
     
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
+
         var track_el = track_obj.track_el;
 
         // sort track sources
         track_obj.track_el.find('.wpsstm-track-sources-list').sortable({
             axis: "y",
-            handle: '.wpsstm-source-reorder-action',
+            handle: '#wpsstm-source-action-move a',
             update: function(event, ui) {
                 console.log('update: '+ui.item.index())
 
@@ -20,7 +21,7 @@ jQuery(document).ready(function($){
                 track_obj.update_source_index(source_obj);
             }
         });
-        
+
 
     });
 
@@ -31,31 +32,29 @@ jQuery(document).ready(function($){
             e.preventDefault();
             source_obj.track.play_track(source_obj.index);
         });
-        
+
         //delete source
-        source_obj.source_el.find('.wpsstm-source-delete-action').click(function(e) {
-            
+        source_obj.source_el.find('#wpsstm-source-action-delete a').click(function(e) {
+
             e.preventDefault();
             var promise = source_obj.delete_source();
-            
+
             promise.done(function(data) {
                 var source_instances = source_obj.get_source_instances();
                 source_instances.remove();
-                
-                if ( source_el.hasClass('source-playing') ){
+
+                if ( source_obj.source_el.hasClass('source-playing') ){
                     //TO FIX TO DO skip to next source ? what if it is the last one ?
                 }
-                
+
             })
-            
+
         });
 
     });
+})(jQuery);
 
-    //toggle expand
-    $('.wpsstm-sources-edit-list').toggleChildren();
 
-})
 
 class WpsstmTrackSource {
     constructor(source_html,track) {
