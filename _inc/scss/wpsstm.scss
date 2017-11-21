@@ -117,7 +117,7 @@ DEFAULT STYLES
 */
 
 
-body.wpsstm-default{
+body.wpsstm-default,body.wp-admin{
 
     .wpsstm-ellipsis{
         @include ellipsis($no-wrap: true);
