@@ -68,6 +68,7 @@ class WpsstmLastFM {
                 }
             })
         }else{
+            self.scrobbler_enabled = false;
             $(self.scrobble_icon).removeClass('scrobbler-enabled');
             localStorage.setItem("wpsstm-scrobble", false);
         }
