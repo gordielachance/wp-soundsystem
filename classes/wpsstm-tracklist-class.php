@@ -571,6 +571,7 @@ class WP_SoundSystem_Tracklist{
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
             'href' =>       $this->get_tracklist_popup_url('share'),
+            'classes' =>    array('wpsstm-link-popup'),
         );
         
         //XSPF
@@ -586,7 +587,7 @@ class WP_SoundSystem_Tracklist{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_link('favorite'),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-favorite'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -596,7 +597,7 @@ class WP_SoundSystem_Tracklist{
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_link('unfavorite'),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-icon-unfavorite'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
         
@@ -606,7 +607,7 @@ class WP_SoundSystem_Tracklist{
             $actions['new-subtrack'] = array(
                 'text'     =>   $track_obj->labels->add_new_item,
                 'href'      =>  $this->get_tracklist_popup_url('new-subtrack'),
-                'classes'   =>  array('wpsstm-requires-auth','wpsstm-icon-add'),
+                'classes'   =>  array('wpsstm-requires-auth','wpsstm-link-popup'),
             );
         }
         
@@ -661,13 +662,7 @@ class WP_SoundSystem_Tracklist{
             case 'page':
 
                 $popup_action_slugs = array('share','new-subtrack');
-                
-                //set popup
-                foreach ($actions as $slug=>$action){
-                    if ( !in_array($slug,$popup_action_slugs) ) continue;
-                    $actions[$slug]['popup'] = true;
-                }
-                
+
             break;
             case 'popup':
                 unset($actions['refresh']);

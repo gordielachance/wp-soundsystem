@@ -119,7 +119,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function register_tracks_scripts_styles_shared(){
         //JS
-        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','thickbox','wpsstm-track-sources'),wpsstm()->version );
+        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','wpsstm-track-sources'),wpsstm()->version );
         
     }
     

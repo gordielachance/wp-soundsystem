@@ -2,16 +2,24 @@
 @import "wpsstm";
 
 /*
-Thickbox popups
+Popup content
 */
 
-body.wpsstm-popup{
+body.wpsstm-default.wpsstm-popup{
     header{
         margin: 2em 0;
     }
     //hide default styles - this may have to be adapted to your theme
     #sidebar,#colophon{
         display:none;
+    }
+    #page{
+        position: absolute;
+        top: 0;
+        background-color: white;
+        width: 100%;
+        padding: 0;
+        max-width: inherit;
     }
     #content{
         width:100%;
@@ -20,6 +28,9 @@ body.wpsstm-popup{
     #main{
         margin:0;
         padding:0;
+        >.hentry{
+            box-shadow: none;
+        }
     }
     #wpadminbar{
         display:none;

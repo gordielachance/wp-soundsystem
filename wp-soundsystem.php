@@ -245,7 +245,7 @@ class WP_SoundSystem {
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
         
         //js
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','wp-mediaelement','wpsstm-tracklists'),$this->version);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','wp-mediaelement','wpsstm-tracklists'),$this->version);
         
         $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));

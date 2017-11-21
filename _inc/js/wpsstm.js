@@ -10,15 +10,35 @@
         });
         
         //modals
-        $('a.thickbox').on("click", function (e) {
-            alert("titi");
-            $("#dialog").load(this.href, function () {
-                
-                $(this).dialog("option", "title", $(this).find("h1").text());
-                $(this).find("h1").remove();
+        $(document).on('click', 'body:not(.wpsstm-popup) a.wpsstm-link-popup,body:not(.wpsstm-popup) li.wpsstm-link-popup>a', function(e) {
+            e.preventDefault();
+            
+            var content_url = this.href;
+            
+            var popup = $('<div></div>');
+            
+            popup.dialog({
+                width:800,
+                height:500,
+                modal: true,
+                dialogClass: 'wpsstm-modal wpsstm-loading',
+
+                open: function(ev, ui){
+                    var dialog = $(this).closest('.ui-dialog');
+                    var dialog_content = dialog.find('.ui-dialog-content');
+                    var iframe = $('<iframe id="myIframe" src="'+content_url+'"></iframe>');
+                    dialog_content.html(iframe);
+                    iframe.load(function(){
+                        dialog.removeClass('wpsstm-loading');
+                    });
+                }
+
             });
+
+
         });
         
+
         //artist autocomplete
         $('.wpsstm-artist-autocomplete').each(function() {
             var input = $(this);

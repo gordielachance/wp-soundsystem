@@ -41,6 +41,55 @@
 MINIMAL STYLES
 */
 
+.ui-widget-overlay{
+    opacity: .5;
+    background: black;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom:0;
+    right:0;
+    z-index:10;
+}
+
+.wpsstm-modal{
+    position:relative;
+    z-index:11;
+    
+    background:white;
+    border:1px solid #F7F7F7;
+    @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
+    
+    .ui-dialog-titlebar-close{
+        position: absolute;
+        right: 0;
+        top: 0;
+        .ui-icon-closethick{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f00d";//.fa-times
+            }
+        }
+        .ui-button-text{
+            display:none;
+        }
+
+    }
+    
+    &.wpsstm-loading{
+        background:red;
+        #myIframe{
+            display:none;
+        }
+    }
+    #myIframe{
+        background-color: white;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+    }
+}
+
 .wpsstm-can-click{
     cursor: pointer;
     cursor: hand;

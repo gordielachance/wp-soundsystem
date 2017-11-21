@@ -358,7 +358,7 @@ class WP_SoundSystem_Core_Sources{
         $sources_url = $wpsstm_track->get_track_popup_url('sources-manager');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
-        $manager_link = sprintf('<a class="thickbox button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
+        $manager_link = sprintf('<a class="wpsstm-link-popup button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));
         $backend_link = sprintf('<a class="button" href="%s">%s</a>',$wpsstm_track->get_backend_sources_url(),__('Listing','wpsstm'));
         
         printf('<p>%s%s</p>',$manager_link,$backend_link);

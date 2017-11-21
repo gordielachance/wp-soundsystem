@@ -664,6 +664,7 @@ class WP_SoundSystem_Track{
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('about'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -672,6 +673,7 @@ class WP_SoundSystem_Track{
             $actions['edit'] = array(
                 'text' =>      __('Track Details', 'wpsstm'),
                 'href' =>       $this->get_track_popup_url('edit'),
+                'classes' =>    array('wpsstm-link-popup'),
             );
         }
 
@@ -680,7 +682,7 @@ class WP_SoundSystem_Track{
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('playlists'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action'),
+                'classes' =>    array('wpsstm-requires-auth','wpsstm-link-popup'),
             );
         }
 
@@ -690,7 +692,7 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
                 'desc' =>       __('Add to favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-favorite'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -700,7 +702,7 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('wpsstm-requires-auth','wpsstm-track-action','wpsstm-icon-unfavorite'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -717,6 +719,7 @@ class WP_SoundSystem_Track{
                 'text' =>       __('Sources manager','wpsstm'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources-manager'),
+                'classes' =>    array('wpsstm-requires-auth'),
             );
         }
 
@@ -736,12 +739,6 @@ class WP_SoundSystem_Track{
                 unset($actions['edit'],$actions['playlists'],$actions['sources'],$actions['trash']);
 
                 $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
-                
-                //set popup
-                foreach ($actions as $slug=>$action){
-                    if ( !in_array($slug,$popup_action_slugs) ) continue;
-                    $actions[$slug]['popup'] = true;
-                }
 
             break;
             case 'popup':
