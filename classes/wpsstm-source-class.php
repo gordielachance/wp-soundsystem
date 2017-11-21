@@ -495,6 +495,7 @@ class WP_SoundSystem_Source{
         $actions['provider'] = array(
             'text' =>       $this->provider->name,
             'href' =>       $this->url,
+            'target' =>     '_blank',
         );
 
         if ($can_delete_source){
@@ -523,17 +524,7 @@ class WP_SoundSystem_Source{
             break;
         }
         
-        $actions = apply_filters('wpsstm_source_actions',$actions,$context);
-        
-        $default_action = wpsstm_get_blank_action();
-        
-        foreach((array)$actions as $slug=>$action){
-            $action = wp_parse_args($action,$default_action);
-            $action['classes'][] = 'wpsstm-action';
-            $action['classes'][] = 'wpsstm-source-action';
-            $actions[$slug] = $action;
-        }
-        return $actions;
+        return apply_filters('wpsstm_source_actions',$actions,$context);
     }
     
     

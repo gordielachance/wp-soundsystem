@@ -230,30 +230,34 @@ function wpsstm_get_blank_action(){
         'desc' =>           null,
         'href' =>           '#',
         'classes' =>        array(),
-        'link_classes' =>   array(),
         'link_before' =>    null,
         'link_after' =>     null,
         'has_cap' =>        true,
+        'target' =>         null,
     );
 }
 
 function get_actions_list($actions,$prefix){
-    $track_actions_lis = array();
+    $track_actions_list = array();
+    
+    $default_action = wpsstm_get_blank_action();
 
     foreach($actions as $slug => $action){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
 
-        $actions[$slug] = $action;
+        $action = wp_parse_args($action,$default_action);
+        $classes[] = 'wpsstm-action';
+        $classes[] = sprintf('wpsstm-%s-action',$prefix);
 
         $action_attr = array(
             'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
-            'class'     => implode(" ",$action['classes'])
+            'class'     => implode(" ",$classes),
         );
 
         $link_attr = array(
             'title'     => ($action['desc']) ?$action['desc'] : $action['text'],
             'href'      => $action['href'],
-            'class'     => implode(" ",$action['link_classes'])
+            'target'    => $action['target'],
         );
         $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];

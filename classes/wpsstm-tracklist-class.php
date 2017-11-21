@@ -662,17 +662,7 @@ class WP_SoundSystem_Tracklist{
             break;
         }
         
-        $actions = apply_filters('wpsstm_tracklist_actions',$actions,$context);
-        
-        $default_action = wpsstm_get_blank_action();
-        
-        foreach((array)$actions as $slug=>$action){
-            $action = wp_parse_args($action,$default_action);
-            $action['classes'][] = 'wpsstm-action';
-            $action['classes'][] = 'wpsstm-tracklist-action';
-            $actions[$slug] = $action;
-        }
-        return $actions;
+        return apply_filters('wpsstm_tracklist_actions',$actions,$context);
         
     }
     

@@ -74,7 +74,7 @@ class WP_SoundSystem_Core_Player{
                         <td id="wpsstm-player-actions-wrapper">
                             <?php
                             //player actions
-                            if ( $actions = $this->get_player_actions() ){
+                            if ( $actions = $this->get_player_links() ){
                                 $list = get_actions_list($actions,'player');
                                 echo $list;
                             }                       
@@ -119,20 +119,9 @@ class WP_SoundSystem_Core_Player{
 
     }
     
-    function get_player_actions(){
+    function get_player_links(){
         $actions = array();
-        $actions = apply_filters('wpsstm_get_player_actions',$actions);
-        
-        $default_action = wpsstm_get_blank_action();
-        
-        foreach((array)$actions as $slug=>$action){
-            $action = wp_parse_args($action,$default_action);
-            $action['classes'][] = 'wpsstm-action';
-            $action['classes'][] = 'wpsstm-player-action';
-            $actions[$slug] = $action;
-        }
-        return $actions;
-        
+        return apply_filters('wpsstm_get_player_actions',$actions);
     }
     
 }
