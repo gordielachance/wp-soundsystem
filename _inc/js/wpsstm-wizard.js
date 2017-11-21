@@ -92,7 +92,7 @@ jQuery(document).ready(function($){
         e.preventDefault();
         var new_value = $(this).attr('data-wpsstm-wizard-click');
         wizard_input_el.val(new_value);
-        wizard_input_wrapper_el.addClass('wpsstm-loading');
+        wizard_input_wrapper_el.addClass('input-loading');
         
         if (new_value){
             $('html, body').animate({

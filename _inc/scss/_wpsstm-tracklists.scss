@@ -232,14 +232,12 @@ body.wpsstm-default{
                 content:"\f019";//.fa-download;
             }
 
-            //&:not(.wpsstm-loading){
-                &#wpsstm-tracklist-action-favorite:not(.wpsstm-loading) a:before{
-                    content:"\f08a";//.fa-heart-o;
-                }
-                &#wpsstm-tracklist-action-unfavorite:not(.wpsstm-loading) a:before{
-                    content:"\f004";//.fa-heart;
-                }
-            //}
+            &#wpsstm-tracklist-action-favorite a:before{
+                content:"\f08a";//.fa-heart-o;
+            }
+            &#wpsstm-tracklist-action-unfavorite a:before{
+                content:"\f004";//.fa-heart;
+            }
 
             &#wpsstm-tracklist-action-new-subtrack{
                  a:before{

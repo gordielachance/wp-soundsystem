@@ -41,7 +41,7 @@ class WpsstmLastFM {
                 data:ajax_data,
                 dataType: 'json',
                 beforeSend: function() {
-                    $(self.scrobble_icon).addClass('wpsstm-loading');
+                    $(self.scrobble_icon).addClass('lastfm-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -64,7 +64,7 @@ class WpsstmLastFM {
                     $(self.scrobble_icon).addClass('scrobbler-error');
                 },
                 complete: function() {
-                    $(self.scrobble_icon).removeClass('wpsstm-loading');
+                    $(self.scrobble_icon).removeClass('lastfm-loading');
                 }
             })
         }else{
@@ -94,7 +94,7 @@ class WpsstmLastFM {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                $(self.scrobble_icon).addClass('wpsstm-loading');
+                $(self.scrobble_icon).addClass('lastfm-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -108,7 +108,7 @@ class WpsstmLastFM {
                 $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
-                $(self.scrobble_icon).removeClass('wpsstm-loading');
+                $(self.scrobble_icon).removeClass('lastfm-loading');
             }
         })
     }
@@ -134,7 +134,7 @@ class WpsstmLastFM {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                $(self.scrobble_icon).addClass('wpsstm-loading');
+                $(self.scrobble_icon).addClass('lastfm-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -148,7 +148,7 @@ class WpsstmLastFM {
                 $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
-                $(self.scrobble_icon).removeClass('wpsstm-loading');
+                $(self.scrobble_icon).removeClass('lastfm-loading');
             }
         })
     }
@@ -206,7 +206,7 @@ class WpsstmLastFM {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                $(self.scrobble_icon).addClass('wpsstm-loading');
+                $(self.scrobble_icon).addClass('lastfm-loading');
             },
             success: function(data){ 
                 if (data.success === true) {
@@ -221,7 +221,7 @@ class WpsstmLastFM {
                 $(self.scrobble_icon).addClass('scrobbler-error');
             },
             complete: function() {
-                $(self.scrobble_icon).removeClass('wpsstm-loading');
+                $(self.scrobble_icon).removeClass('lastfm-loading');
             }
         })
     }

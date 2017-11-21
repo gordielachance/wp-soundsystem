@@ -52,7 +52,6 @@
             e.preventDefault();
 
             var link = $(this);
-            var action = $(this).parents('.wpsstm-tracklist-action');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
 
@@ -70,7 +69,7 @@
                 data:       ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    action.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -90,7 +89,7 @@
                     console.log(thrownError);
                 },
                 complete: function() {
-                    action.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                 }
             })
         });
@@ -100,7 +99,6 @@
             e.preventDefault();
 
             var link = $(this);
-            var action = $(this).parents('.wpsstm-tracklist-action');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
 
@@ -120,7 +118,7 @@
                 data:       ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    action.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -137,7 +135,7 @@
                     console.log(thrownError);
                 },
                 complete: function() {
-                    action.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                 }
             })
         });
@@ -547,7 +545,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                link.addClass('wpsstm-loading');
+                link.addClass('action-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -563,7 +561,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
-                link.removeClass('wpsstm-loading');
+                link.removeClass('action-loading');
             }
         })
 

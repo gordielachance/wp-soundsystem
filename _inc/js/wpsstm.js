@@ -14,7 +14,7 @@
                 width:800,
                 height:500,
                 modal: true,
-                dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog wpsstm-loading',
+                dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog dialog-loading',
 
                 open: function(ev, ui){
                     var dialog = $(this).closest('.ui-dialog');
@@ -22,7 +22,7 @@
                     var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
                     dialog_content.append(iframe);
                     iframe.load(function(){
-                        dialog.removeClass('wpsstm-loading');
+                        dialog.removeClass('dialog-loading');
                     });
                 }
 
@@ -46,7 +46,7 @@
                             search:              request.term + '*', //wildcard!
                         },
                         beforeSend: function() {
-                            input.addClass('wpsstm-loading');
+                            input.addClass('input-loading');
                         },
                         success: function( ajax ) {
                             if(ajax.success){
@@ -63,7 +63,7 @@
                             console.log("status: " + textStatus + ", error: " + errorThrown); 
                         },
                         complete: function() {
-                            input.removeClass('wpsstm-loading');
+                            input.removeClass('input-loading');
                         }
                     });
                 },

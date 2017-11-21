@@ -131,7 +131,7 @@ body.wpsstm-default{
         &.wpsstm-fullwidth{
             width:100%;
         }
-        &[type="text"].wpsstm-loading{
+        &[type="text"].input-loading{
             @include striped-bg();
         }
     }
@@ -161,7 +161,7 @@ body.wpsstm-default{
             }
 
         }
-        &.wpsstm-loading{
+        &.input-loading{
             input[type="text"]{
                 @include striped-bg();
             }
@@ -224,12 +224,12 @@ body.wpsstm-default{
             padding:0;
             list-style: none;
             li.wpsstm-action{
-                &.wpsstm-loading a{
-                    @extend .wpsstm-loading-icon;
-                }
                 a{
                     @extend .wpsstm-no-underline;
                     @extend .wpsstm-icon;
+                    &.action-loading{
+                        @extend .wpsstm-loading-icon;
+                    }
                 }
             }
         }

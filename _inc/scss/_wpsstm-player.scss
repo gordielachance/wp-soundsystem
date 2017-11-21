@@ -137,7 +137,7 @@ body.wpsstm-default{
                             }
                         }
 
-                        &:not(.wpsstm-loading){
+                        &:not(.lastfm-loading){
                             &#wpsstm-player-action-scrobbler{
                                 @include opacity(.25);
                                 a:before{

@@ -78,7 +78,7 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    el.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -104,7 +104,7 @@
                     link.addClass('action-error');
                 },
                 complete: function() {
-                    el.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                     $(document).trigger("wpsstmTrackLove", [track_obj,true] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
@@ -117,7 +117,6 @@
             e.preventDefault();
 
             var link = $(this);
-            var action = $(this).parents('.wpsstm-track-action');
             
             var track_ajax = track_obj.to_ajax();
 
@@ -137,7 +136,7 @@
                 dataType:   'json',
 
                 beforeSend: function() {
-                    action.addClass('wpsstm-loading');
+                    link.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -154,7 +153,7 @@
                     link.addClass('action-error');
                 },
                 complete: function() {
-                    action.removeClass('wpsstm-loading');
+                    link.removeClass('action-loading');
                     $(document).trigger( "wpsstmTrackLove", [track_obj,false] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             })
@@ -552,7 +551,7 @@ class WpsstmTrack {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                self.track_el.addClass('track-loading'); //TOFIXEEE TOCHECK
+                link.track_el.addClass('action-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -568,7 +567,7 @@ class WpsstmTrack {
                 link.addClass('action-error');
             },
             complete: function() {
-                self.track_el.removeClass('track-loading');
+                link.removeClass('action-loading');
             }
         })
 
