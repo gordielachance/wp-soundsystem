@@ -14,6 +14,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             
             
             $wpsstm_source->populate_source_provider();
+            if (!$wpsstm_source->url) continue;
             $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
 
             //TO FIX TO CHECK required ?  Does a source not always have a track ?
