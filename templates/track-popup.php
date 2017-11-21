@@ -69,7 +69,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                         }
                 
                         $tab_content = null;
-                
+ 
                         switch ($popup_action){
                             case 'edit':
                                 ?>
@@ -79,24 +79,9 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                                 <?php
                             break;
                             case 'playlists':
-                                
-                                $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-                                $labels = get_post_type_labels($playlist_type_obj);
-                                
                                 ?>
                                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                                    <div id="wpsstm-tracklist-chooser-list" data-wpsstm-track-id="<?php echo $tracklist->post_id;?>">
-                                        <div id="wpsstm-filter-playlists">
-                                            <p>
-                                                <input id="wpsstm-playlists-filter" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" />
-                                            </p>
-                                            <?php echo wpsstm_get_user_playlists_list(array('checked_ids'=>$wpsstm_track->get_parent_ids()));?>
-                                            <p id="wpsstm-new-playlist-add">
-                                                <input type="submit" value="<?php echo $labels->add_new_item;?>"/>
-                                                <?php wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$wpsstm_track->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true );?>
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <?php echo $wpsstm_track->get_playlists_manager();?>
                                 </div>
                                 <?php
                                 
