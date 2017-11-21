@@ -246,8 +246,10 @@ function get_actions_list($actions,$prefix){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
 
         $action = wp_parse_args($action,$default_action);
+        $classes = $action['classes'];
         $classes[] = 'wpsstm-action';
         $classes[] = sprintf('wpsstm-%s-action',$prefix);
+        $classes = array_unique($classes);
 
         $action_attr = array(
             'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
