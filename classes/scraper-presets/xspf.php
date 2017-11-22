@@ -64,7 +64,7 @@ class WP_SoundSystem_Preset_XSPF extends WP_SoundSystem_Live_Playlist_Preset{
         $response_type = $this->get_response_type();
         if( is_wp_error($response_type) ) return false;
         $split = explode('/',$response_type);
-        if ( $split[1] == 'xspf+xml' ) return true;
+        if ( isset($split[1]) && ( $split[1] == 'xspf+xml' ) ) return true;
     }
 }
 
