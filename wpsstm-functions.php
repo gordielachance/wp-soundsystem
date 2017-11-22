@@ -290,6 +290,7 @@ function wpsstm_get_live_tracklist_preset($feed_url){
         if ( !$preset_name::can_handle_url($feed_url) ) continue;
         $preset = new $preset_name();
         $preset->feed_url = $feed_url;
+        return $preset;
     }
 
     $default = new WP_SoundSystem_Remote_Tracklist();
