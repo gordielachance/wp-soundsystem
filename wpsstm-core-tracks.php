@@ -717,7 +717,7 @@ class WP_SoundSystem_Core_Tracks{
         $atts = shortcode_atts($default,$atts);
         
         if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
-            setup_postdata($atts['post_id']); //this will populate the $wpsstm_tracklist
+            $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
             $output = $wpsstm_tracklist->get_tracklist_html();
             wp_reset_postdata();
         }
