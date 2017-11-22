@@ -287,7 +287,6 @@ class WpsstmTrackSource {
 
             },
             function(error_msg){
-                alert(error_msg);
                 success.reject(error_msg);
             }
 

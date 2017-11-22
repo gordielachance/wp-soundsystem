@@ -150,12 +150,14 @@ A track that belongs to another playlist or that has been favorited by a user wi
 == Changelog ==
 
 = 1.8.7 =
+* restored XSPF preset
 * removed FontAwesome from SCSS
 * use jQuery UI Dialog instead of Thickbox
 * improved notices
 * improved player/tracklists/tracks/sources actions
 * cleaned SCSS/CSS + plugin option to disable default styles
 * embed player backend
+* renamed hook 'wpsstm_get_remote_url' to 'wpsstm_live_tracklist_url'
 
 = 1.8.6 =
 * better code for tracklists and tracks actions
