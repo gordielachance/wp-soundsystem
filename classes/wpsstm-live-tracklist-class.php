@@ -274,21 +274,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     private function get_remote_page_tracks(){
 
+        $body_node = $this->get_body_node();
+        if ( is_wp_error($body_node) ){
+            wpsstm()->debug_log($body_node->get_error_message(),'get_remote_page_tracks' );
+            return $body_node;
+        }
+        
         wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
-        //response type
-        $response_type = $this->get_response_type();
-        if ( is_wp_error($response_type) ) return $response_type;
-
-        //response body
-        $content = wp_remote_retrieve_body( $this->response ); 
-        if ( is_wp_error($content) ) return $content;
-
-        $content = Encoding::fixUTF8($content);//fix mixed encoding
-        $body_node = $this->get_body_node($content);
-        if ( is_wp_error($body_node) ) return $body_node;
-        
-        
         $this->body_node = $body_node;
 
         //tracks HTML
@@ -324,10 +317,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     protected function get_remote_response(){
         
-        if( $this->response ) return $this->response; //already populated
+        if( $this->response !== null ) return $this->response; //already populated
 
+        $response = null;
         $url = $this->get_remote_url(); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
-        
         wpsstm()->debug_log($url,'get_remote_response url' );
         
         if ( is_wp_error($url) ){
@@ -355,13 +348,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     protected function get_response_type(){
         
-        if ( $this->response_type ) return $this->response_type; //already populated
-
+        if ( $this->response_type !== null ) return $this->response_type; //already populated
+        
+        $type = null;
         $response = $this->get_remote_response();
         
-        if ( is_wp_error($response) ){
-            $type = $response;
-        }else{
+        if ( !is_wp_error($response) ){
             $content_type = wp_remote_retrieve_header( $response, 'content-type' );
 
             //is JSON
@@ -384,45 +376,28 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
     
-    protected function get_body_node($content){
+    protected function get_body_node(){
 
         $result = null;
+        
+        //response
+        $response = $this->get_remote_response();
+        if ( is_wp_error($response) ) return $response;
+        
+        //response type
+        $response_type = $this->get_response_type();
+        if ( is_wp_error($response_type) ) return $response_type;
 
-        libxml_use_internal_errors(true);
+        //response body
+        $content = wp_remote_retrieve_body( $response ); 
+        if ( is_wp_error($content) ) return $content;
 
-        switch ($this->response_type){
-            
-            case 'text/xspf+xml':
-            case 'application/xspf+xml':
-            case 'application/xml':
-            case 'text/xml':
+        $content = Encoding::fixUTF8($content);//fix mixed encoding //TO FIX TO CHECK at the right place?
 
-                $xml = simplexml_load_string($content);
+        libxml_use_internal_errors(true); //TO FIX TO CHECK should be in the XML part only ?
+
+        switch ($response_type){
                 
-                //maybe libxml will output error but will work; do not abord here.
-                $xml_errors = libxml_get_errors();
-                
-                if ($xml_errors){
-                    $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
-                    $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
-                    wpsstm()->debug_log($notice,'WP_SoundSystem_Remote_Tracklist::get_body_node()' );
-                    
-                    /*
-                    foreach( $xml_errors as $xml_error_obj ) {
-                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WP_SoundSystem_Remote_Tracklist::get_body_node()' );
-                    }
-                    */
-                }
-
-                //QueryPath
-                try{
-                    $result = qp( $xml, null, self::$querypath_options );
-                }catch(Exception $e){
-                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','wpsstm'),$e->getCode(),$e->getMessage()) );
-                }
-
-            break;
-
             case 'application/json':
                 
                 $xml = null;
@@ -438,12 +413,40 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
                 
                 if ($xml){
-                    
-                    //log
-                    wpsstm()->debug_log("The json input has been converted to XML.",'WP_SoundSystem_Remote_Tracklist::get_body_node()' );
-
+                    wpsstm()->debug_log("The json input has been converted to XML.",'WP_SoundSystem_Remote_Tracklist::get_body_node' );
                     $this->response_type = 'text/xml';
-                    return $this->get_body_node($xml);
+                    $content = $xml;
+                }
+            
+            //no break here!
+            
+            case 'text/xspf+xml':
+            case 'application/xspf+xml':
+            case 'application/xml':
+            case 'text/xml':
+
+                $xml = simplexml_load_string($content);
+                
+                //maybe libxml will output error but will work; do not abord here.
+                $xml_errors = libxml_get_errors();
+                
+                if ($xml_errors){
+                    $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
+                    $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
+                    wpsstm()->debug_log($notice,'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                    
+                    /*
+                    foreach( $xml_errors as $xml_error_obj ) {
+                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                    }
+                    */
+                }
+
+                //QueryPath
+                try{
+                    $result = qp( $xml, null, self::$querypath_options );
+                }catch(Exception $e){
+                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','wpsstm'),$e->getCode(),$e->getMessage()) );
                 }
 
             break;
@@ -473,7 +476,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         }
         
-        libxml_clear_errors();
+        libxml_clear_errors(); //TO FIX TO CHECK should be in the XML part only ?
 
         if ( (!$result || ($result->length == 0)) ){
             return new WP_Error( 'querypath', __('We were unable to populate the page node') );
