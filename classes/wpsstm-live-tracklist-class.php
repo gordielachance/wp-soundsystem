@@ -276,33 +276,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
-        //the URL to reach can be overriden in your preset class or with this filter
-        $url = $this->get_remote_url();
-        $url = apply_filters('wpsstm_get_remote_url',$url);
-        
-        wpsstm()->debug_log($url,'get_remote_page_tracks request_url' );
-        
-        if ( is_wp_error($url) ) return $url;
-
-        //response
-        $response = $this->get_remote_response($url);
-        if ( is_wp_error($response) ) return $response;
-        $this->response = $response;
-
         //response type
-        $response_type = $this->get_response_type($this->response);
+        $response_type = $this->get_response_type();
         if ( is_wp_error($response_type) ) return $response_type;
-        $this->response_type = $response_type;
 
         //response body
         $content = wp_remote_retrieve_body( $this->response ); 
         if ( is_wp_error($content) ) return $content;
-        
-        //fixes mixed encoding
-        $content = Encoding::fixUTF8($content);
 
+        $content = Encoding::fixUTF8($content);//fix mixed encoding
         $body_node = $this->get_body_node($content);
         if ( is_wp_error($body_node) ) return $body_node;
+        
+        
         $this->body_node = $body_node;
 
         //tracks HTML
@@ -336,46 +322,65 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         );
     }
     
-    protected function get_remote_response($url){
+    protected function get_remote_response(){
+        
+        if( $this->response ) return $this->response; //already populated
 
-        $error = $remote_body = $source_content = null;
-
-        $response = wp_remote_get( $url, $this->get_request_args() );
-
-        if ( !is_wp_error($response) ){
-
-            $response_code = wp_remote_retrieve_response_code( $response );
-
-            if ($response_code && $response_code != 200){
-                $response_message = wp_remote_retrieve_response_message( $response );
-                return new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
-            }else{ //ok
-                return $response;
-            }
-            
+        $url = $this->get_remote_url(); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
+        
+        wpsstm()->debug_log($url,'get_remote_response url' );
+        
+        if ( is_wp_error($url) ){
+            $response = $url;
         }else{
-            return $response;
+            
+            $response = wp_remote_get( $url, $this->get_request_args() );
+
+            if ( !is_wp_error($response) ){
+
+                $response_code = wp_remote_retrieve_response_code( $response );
+
+                if ($response_code && $response_code != 200){
+                    $response_message = wp_remote_retrieve_response_message( $response );
+                    $response = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
+                }
+
+            }
         }
+
+        $this->response = $response;
+        return $this->response;
 
     }
 
-    protected function get_response_type($response){
-
-        $type = wp_remote_retrieve_header( $response, 'content-type' );
-
-        //is JSON
-        if ( substr(trim(wp_remote_retrieve_body( $response )), 0, 1) === '{' ){ // is JSON
-            $type = 'application/json';
-        }
-
-        //remove charset if any
-        $split = explode(';',$type);
-
-        if ( !isset($split[0]) ){
-            return new WP_Error( 'response_type', __('No response type found','wpsstm') );
-        }
+    protected function get_response_type(){
         
-        return $split[0];
+        if ( $this->response_type ) return $this->response_type; //already populated
+
+        $response = $this->get_remote_response();
+        
+        if ( is_wp_error($response) ){
+            $type = $response;
+        }else{
+            $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+
+            //is JSON
+            if ( substr(trim(wp_remote_retrieve_body( $response )), 0, 1) === '{' ){ // is JSON
+                $content_type = 'application/json';
+            }
+
+            //remove charset if any
+            $split = explode(';',$content_type);
+
+            if ( !isset($split[0]) ){
+                $type = new WP_Error( 'response_type', __('No response type found','wpsstm') );
+            }else{
+                $type = $split[0];
+            }
+        }
+
+        $this->response_type = $type;
+        return $this->response_type;
 
     }
     
@@ -389,40 +394,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             
             case 'text/xspf+xml':
             case 'application/xspf+xml':
-                $xspf_options = array(
-                    'selectors' => array(
-                        'tracklist_title'   => array('path'=>'title'),
-                        'tracks'            => array('path'=>'trackList track'),
-                        'track_artist'      => array('path'=>'creator'),
-                        'track_title'       => array('path'=>'title'),
-                        'track_album'       => array('path'=>'album'),
-                        'track_source_urls' => array('path'=>'location'),
-                        'track_image'       => array('path'=>'image')
-                    )
-                );
-
-                $this->options = array_replace_recursive($this->options, $xspf_options);
-            
             case 'application/xml':
             case 'text/xml':
-                
-                //check for XSPF
-                if ($this->response_type=='application/xml' || $this->response_type=='text/xml'){
-                    
-                    $is_xspf = false;
-                    
-                    //QueryPath
-                    try{
-                        if ( qp( $content, 'playlist trackList track', self::$querypath_options )->length > 0 ){
-                            $is_xspf = true;
-                        }
-                    }catch(Exception $e){}
-                    
-                    if ($is_xspf){
-                        $this->response_type = 'text/xspf+xml';
-                        $this->get_body_node($content);
-                    }
-                }
 
                 $xml = simplexml_load_string($content);
                 
