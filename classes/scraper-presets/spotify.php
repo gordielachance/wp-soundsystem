@@ -38,17 +38,17 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         return true;
     }
     
-    function can_load_feed(){
+    static function can_handle_url($url){
 
-        if ( !$user_slug = $this->get_user_slug() ) return;
-        if ( !$playlist_slug = $this->get_playlist_slug() ) return;
+        if ( !$user_slug = self::get_user_slug($url) ) return;
+        if ( !$playlist_slug = self::get_playlist_slug($url) ) return;
 
         return true;
     }
     
     function get_remote_url(){
 
-        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$this->get_user_slug(),$this->get_playlist_slug());
+        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',self::get_user_slug($this->feed_url),self::get_playlist_slug($this->feed_url));
 
         //handle pagination
         $pagination_args = array(
@@ -62,16 +62,16 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
 
     }
     
-    function get_user_slug(){
+    static function get_user_slug($url){
         $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
 
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_playlist_slug(){
+    static function get_playlist_slug($url){
         $pattern = '~^https?://(?:open|play).spotify.com/user/[^/]+/playlist/([\w\d]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
@@ -95,8 +95,8 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
         return parent::get_remote_tracks($args);
     }
     function get_remote_title(){
-        if ( !$user_id = $this->get_user_slug() ) return;
-        if ( !$playlist_id = $this->get_playlist_slug() ) return;
+        if ( !$user_id = self::get_user_slug($this->feed_url) ) return;
+        if ( !$playlist_id = self::get_playlist_slug($this->feed_url) ) return;
         
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
@@ -110,14 +110,14 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
     }
     
     function get_tracklist_author(){
-        return $this->get_user_slug();
+        return self::get_user_slug($this->feed_url);
     }
     
     //TO FIX TO IMPROVE just get playlist data ?
     protected function get_spotify_playlist_track_count(){
 
-        if ( !$user_id = $this->get_user_slug() ) return;
-        if ( !$playlist_id = $this->get_playlist_slug() ) return;
+        if ( !$user_id = self::get_user_slug($this->feed_url) ) return;
+        if ( !$playlist_id = self::get_playlist_slug($this->feed_url) ) return;
 
         $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
         
@@ -183,15 +183,15 @@ class WP_SoundSystem_Preset_Spotify_URI_Playlists_Api extends WP_SoundSystem_Pre
     var $preset_slug =      'spotify-playlist-uri';
     var $pattern = '~^spotify:user:([^/]+):playlist:([\w\d]+)~i';
     
-    function get_user_slug(){
+    static function get_user_slug($url){
         $pattern = '~^spotify:user:([^:]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_playlist_slug(){
+    static function get_playlist_slug($url){
         $pattern = '~^spotify:user:.*:playlist:([\w\d]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     

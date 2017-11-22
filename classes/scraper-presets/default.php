@@ -7,7 +7,7 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     var $preset_desc =      null;
     var $preset_options =   array();
 
-    var $wizard_suggest =   true; //suggest or not this preset in the wizard
+    static $wizard_suggest =   true; //suggest or not this preset in the wizard
 
     public function __construct($post_id = null){
         
@@ -23,9 +23,9 @@ abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote
     }
     
     /*
-    Checks that the preset can handle $this->feed_url
+    Checks that the preset can handle an URL input
     */
-    function can_load_feed(){
+    static function can_handle_url($url){
         return true;
     }
 

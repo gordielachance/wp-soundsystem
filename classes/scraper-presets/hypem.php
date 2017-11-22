@@ -18,8 +18,8 @@ class WP_SoundSystem_Preset_Hypem_Scraper extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name = 'Hype Machine';
     }
     
-    function can_load_feed(){
-        $domain = wpsstm_get_url_domain( $this->feed_url );
+    static function can_handle_url($url){
+        $domain = wpsstm_get_url_domain( $url );
         if ( $domain != 'hypem') return;
         return true;
     }

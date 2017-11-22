@@ -200,17 +200,10 @@ class WP_SoundSystem_Core_Live_Playlists{
             if ( !class_exists($class_name) ) continue;
             $can_use_preset = $class_name::can_use_preset();
             if ( $can_use_preset !== true ) continue;
-            $presets[] = new $class_name();
+            $presets[] = $class_name;
         }
         
         return $presets;
-    }
-    
-    function is_preset_loaded($slug){
-        foreach ($this->presets as $preset){
-            if ( $slug == $preset->preset_slug ) return true;
-        }
-        return false;
     }
 
     function post_column_register($columns){

@@ -31,8 +31,8 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
         return true;
     }
     
-    function can_load_feed(){
-        if ( !$user_slug = $this->get_user_slug() ) return;
+    static function can_handle_url($url){
+        if ( !$user_slug = self::get_user_slug($url) ) return;
         return true;
     }
     
@@ -42,7 +42,7 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
             return new WP_Error( 'wpsstm_soundcloud_missing_user_id', __('Required user ID missing.','wpsstm') );
         }
         
-        $page = $this->get_user_page();
+        $page = self::get_user_page($this->feed_url);
         $api_page = null;
 
         switch($page){
@@ -58,21 +58,21 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
 
     }
 
-    function get_user_slug(){
+    static function get_user_slug($url){
         $pattern = '~^http(?:s)?://(?:www\.)?soundcloud.com/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_user_page(){
+    static function get_user_page($url){
         $pattern = '~^http(?:s)?://(?:www\.)?soundcloud.com/[^/]+/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_user_id(){
 
-        if ( !$user_slug = $this->get_user_slug() ){
+        if ( !$user_slug = self::get_user_slug($this->feed_url) ){
             return new WP_Error( 'wpsstm_soundcloud_missing_user_slug', __('Required user slug missing.','wpsstm') );
         }
 
@@ -104,8 +104,8 @@ class WP_SoundSystem_Preset_Soundcloud_User_Api extends WP_SoundSystem_Live_Play
     
     function get_remote_title(){
         
-        $page = $this->get_user_page();
-        $user_slug = $this->get_user_slug();
+        $page = self::get_user_page($this->feed_url);
+        $user_slug = self::get_user_slug($this->feed_url);
         
         $title = sprintf(__('%s on Soundcloud','wpsstm'),$user_slug);
         $subtitle = null;

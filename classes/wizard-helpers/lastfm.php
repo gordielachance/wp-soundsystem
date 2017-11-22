@@ -8,8 +8,9 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
     function get_output(){
         $links = array();
         $links_str = array();
-        $output = null;
-        if ( wpsstm_live_playlists()->is_preset_loaded('last-fm-station-user') ){
+        $output = $form = null;
+        
+        if ( in_array('WP_SoundSystem_Preset_LastFM_User_Scraper',wpsstm_live_playlists()->presets) ){
             
             $this->user = new WP_SoundSystem_LastFM_User();
             $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;

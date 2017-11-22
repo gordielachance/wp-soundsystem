@@ -286,11 +286,10 @@ function wpsstm_get_live_tracklist_preset($feed_url){
     $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
     $feed_url = trim($feed_url);
     
-    foreach($presets as $preset){
+    foreach($presets as $preset_name){
+        if ( !$preset_name::can_handle_url($feed_url) ) continue;
+        $preset = new $preset_name();
         $preset->feed_url = $feed_url;
-        if ( !$preset->can_load_feed() ) continue;
-        $preset->feed_url = $feed_url;
-        return $preset;
     }
 
     $default = new WP_SoundSystem_Remote_Tracklist();

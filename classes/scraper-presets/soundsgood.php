@@ -20,20 +20,20 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
 
     }
     
-    function can_load_feed(){
-        if ( !$client_id = $this->get_client_id() ) return;
-        if ( !$station_slug = $this->get_station_slug() ) return;
+    static function can_handle_url($url){
+        if ( !$client_id = self::get_client_id() ) return;
+        if ( !$station_slug = self::get_station_slug($url) ) return;
         
         return true;
     }
     
     function get_remote_url(){
-        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$this->get_station_slug());
+        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',self::get_station_slug($this->feed_url));
     }
     
-    function get_station_slug(){
+    static function get_station_slug($url){
         $pattern = '~^https?://play.soundsgood.co/playlist/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
@@ -41,19 +41,19 @@ class WP_SoundSystem_Preset_Soundsgood_Playlists_Api extends WP_SoundSystem_Live
     function get_request_args(){
         $args = parent::get_request_args();
 
-        if ( $client_id = $this->get_client_id() ){
+        if ( $client_id = self::get_client_id() ){
             $args['headers']['client'] = $client_id;
         }
 
         return $args;
     }
 
-    function get_client_id(){
+    static function get_client_id(){
         return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
     }
     
     function get_remote_title(){
-        $station_slug = $this->get_station_slug();
+        $station_slug = self::get_station_slug($this->feed_url);
         return sprintf(__('%s on Soundsgood','wpsstm'),$station_slug);
     }
     

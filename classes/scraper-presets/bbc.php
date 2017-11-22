@@ -18,8 +18,8 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         $this->preset_name =    __('BBC stations','wpsstm');
     }
     
-    function can_load_feed(){
-        if ( !$station_slug = $this->get_station_slug() ) return;
+    static function can_handle_url($url){
+        if ( !$station_slug = self::get_station_slug($url) ) return;
         return true;
     }
     
@@ -27,9 +27,9 @@ class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Pr
         return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->get_station_slug() );
     }
 
-    function get_station_slug(){
+    static function get_station_slug($url){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
@@ -56,14 +56,14 @@ class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_P
         $this->preset_name =    __('BBC playlists','wpsstm');
     }
     
-    function can_load_feed(){
-        if ( !$playlist_id = $this->get_playlist_id() ) return;
+    static function can_handle_url($url){
+        if ( !$playlist_id = self::get_playlist_id($url) ) return;
         return true;
     }
 
-    function get_playlist_id(){
+    static function get_playlist_id($url){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     

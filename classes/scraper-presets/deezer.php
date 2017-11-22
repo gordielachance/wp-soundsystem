@@ -18,14 +18,14 @@ class WP_SoundSystem_Preset_Deezer_Playlists extends WP_SoundSystem_Live_Playlis
         $this->preset_name =    __('Deezer Playlists','wpsstm');
     }
     
-    function can_load_feed(){
-        if ( !$playlist_id = $this->get_playlist_id() ) return;
+    static function can_handle_url($url){
+        if ( !$playlist_id = self::get_playlist_id($url) ) return;
         return true;
     }
 
-    function get_playlist_id(){
+    static function get_playlist_id($url){
         $pattern = '~^https?://(?:www.)?deezer.com/(?:.*/)?playlist/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     

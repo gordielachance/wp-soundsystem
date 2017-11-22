@@ -7,7 +7,7 @@ class WP_Soundsystem_Wizard_Artist_Helper extends WP_Soundsystem_Wizard_Helper{
     }
     
     static function can_show_helper(){
-        return ( wpsstm_live_playlists()->is_preset_loaded('last-fm-station-user') );
+        return in_array('WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper',wpsstm_live_playlists()->presets);
     }
     
     function get_output(){
@@ -20,12 +20,12 @@ class WP_Soundsystem_Wizard_Artist_Helper extends WP_Soundsystem_Wizard_Helper{
 
         $form = sprintf('<input class="wpsstm-artist-autocomplete" type="text" placeholder="%s" value="%s" />',__('Artist name','wpsstm'),'');
 
-        if ( wpsstm_live_playlists()->is_preset_loaded('last-fm-artist') ){
+        if ( in_array('WP_SoundSystem_Preset_LastFM_Artist_Scraper',wpsstm_live_playlists()->presets) ){
             $widget_link = sprintf('lastfm:user:%s:station:library', $username);
             $links['top-tracks'] = sprintf('<a href="#">%s</a>',__('Top tracks','wpsstm') );
         }
 
-        if ( wpsstm_live_playlists()->is_preset_loaded('last-fm-station-artist') ){
+        if ( in_array('WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper',wpsstm_live_playlists()->presets) ){
             $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
             $links['similar'] = sprintf('<a href="#">%s</a>',__('Similar artists station','wpsstm') );
         }

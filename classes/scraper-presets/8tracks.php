@@ -20,9 +20,9 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
 
     }
     
-    function can_load_feed(){
-        if ( !$user_slug = $this->get_user_slug() ) return;
-        if ( !$playlist_slug = $this->get_tracklist_slug() ) return;
+    static function can_handle_url($url){
+        if ( !$user_slug = self::get_user_slug($url) ) return;
+        if ( !$playlist_slug = self::get_tracklist_slug($url) ) return;
     
         return true;
     }
@@ -42,15 +42,15 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
 
     }
     
-    function get_user_slug(){
+    static function get_user_slug($url){
         $pattern = '~^https?://(?:www.)?8tracks.com/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_tracklist_slug(){
+    static function get_tracklist_slug($url){
         $pattern = '~^https?://(?:www.)?8tracks.com/[^/]+/([[\w\d-]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
@@ -60,10 +60,10 @@ class WP_SoundSystem_Preset_8Tracks_Playlists extends WP_SoundSystem_Live_Playli
         if ( $this->mix_data ) return $this->mix_data;
         
         //can request ?
-        if ( !$user_slug = $this->get_user_slug() ){
+        if ( !$user_slug = self::get_user_slug($this->feed_url) ){
             return new WP_Error( 'wpsstm_8tracks_missing_user_slug', __('Required user slug missing.','wpsstm') );
         }
-        if ( !$playlist_slug = $this->get_tracklist_slug() ){
+        if ( !$playlist_slug = self::get_tracklist_slug($this->feed_url) ){
             return new WP_Error( 'wpsstm_8tracks_missing_tracklist_slug', __('Required tracklist slug missing.','wpsstm') );
         }
         

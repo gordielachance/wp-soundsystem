@@ -9,7 +9,7 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
         )
     );
     
-    var $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
+    static $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
     function __construct($post_id = null){
         parent::__construct($post_id);
@@ -18,18 +18,18 @@ class WP_SoundSystem_Preset_Twitter_Timelines extends WP_SoundSystem_Live_Playli
 
     }
     
-    function can_load_feed(){
-        if ( !$user_slug = $this->get_user_slug() ) return;
+    static function can_handle_url($url){
+        if ( !$user_slug = self::get_user_slug($url) ) return;
         return true;
     }
     
     function get_remote_url(){
-        return sprintf('https://mobile.twitter.com/%s',$this->get_user_slug());
+        return sprintf('https://mobile.twitter.com/%s',self::get_user_slug($this->feed_url));
     }
     
-    function get_user_slug(){
+    static function get_user_slug($url){
         $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     

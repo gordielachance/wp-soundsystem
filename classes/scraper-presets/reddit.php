@@ -22,18 +22,18 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         $this->preset_name = __('Reddit (for music subs)','wpsstm');
     }
     
-    function can_load_feed(){
-        if (!$subreddit_slug = $this->get_subreddit_slug() ) return;
+    static function can_handle_url($url){
+        if (!$subreddit_slug = self::get_subreddit_slug($url) ) return;
         return true;
     }
     
     function get_remote_url(){
-        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->get_subreddit_slug() );
+        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',self::get_subreddit_slug($this->feed_url) );
     }
     
-    function get_subreddit_slug(){
+    static function get_subreddit_slug($url){
         $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
