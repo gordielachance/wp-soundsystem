@@ -11,7 +11,7 @@ class WP_Soundsystem_Wizard_Tracklist_Url_Helper extends WP_Soundsystem_Wizard_H
         $presets_list = array();
         $presets_list_str = null;
         foreach ((array)wpsstm_live_playlists()->presets as $preset){
-            if ( !$preset->wizard_suggest ) continue;
+            if ( !$preset::$wizard_suggest ) continue;
             $preset_str = $preset->preset_name;
             if ($preset->preset_url){
                 $preset_str = sprintf('<a data-wpsstm-wizard-hover="%s" href="%s" title="%s" target="_blank">%s</a>',$preset->preset_url,$preset->preset_url,$preset->preset_desc,$preset_str);
@@ -38,4 +38,4 @@ function register_tracklist_url_helper($helpers){
     return $helpers;
 }
 
-add_filter('wpsstm_get_wizard_helpers','register_tracklist_url_helper');
+//add_filter('wpsstm_get_wizard_helpers','register_tracklist_url_helper');
