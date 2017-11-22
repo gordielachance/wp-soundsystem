@@ -49,7 +49,7 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
         
-        add_filter('wpsstm_get_remote_url',array($this,'filter_dropbox_url'));
+        add_filter('wpsstm_live_tracklist_url',array($this,'filter_dropbox_url'));
         
     }
 

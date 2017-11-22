@@ -283,6 +283,7 @@ function wpsstm_get_live_tracklist_preset($feed_url){
     $presets = (array)wpsstm_live_playlists()->presets;
     $presets = array_reverse($presets); //reverse so we break at the preset that has the higher priority
     foreach($presets as $preset){
+        $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
         $preset->feed_url = trim($feed_url);
         if ( !$preset->can_load_feed() ) continue;
         $preset->feed_url = $feed_url;
