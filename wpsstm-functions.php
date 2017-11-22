@@ -263,7 +263,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         break;
     }
 
-    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist()");
+    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist");
     return $tracklist;
     
 }
@@ -282,14 +282,17 @@ If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist
 function wpsstm_get_live_tracklist_preset($feed_url){
     $presets = (array)wpsstm_live_playlists()->presets;
     $presets = array_reverse($presets); //reverse so we break at the preset that has the higher priority
+    
+    $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
+    $feed_url = trim($feed_url);
+    
     foreach($presets as $preset){
-        $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
-        $preset->feed_url = trim($feed_url);
+        $preset->feed_url = $feed_url;
         if ( !$preset->can_load_feed() ) continue;
         $preset->feed_url = $feed_url;
         return $preset;
     }
-    
+
     $default = new WP_SoundSystem_Remote_Tracklist();
     return $default;
     
