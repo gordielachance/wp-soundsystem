@@ -431,17 +431,17 @@ class WP_SoundSystem_Core_Wizard{
             );
             
             add_settings_field(
-                'feedback_data_type', 
-                __('Input type','wpsstm'), 
-                array( $this, 'feedback_data_type_callback' ), 
+                'feedback_source_content', 
+                __('Input','wpsstm'), 
+                array( $this, 'feedback_source_content_callback' ), 
                 'wpsstm-wizard-step-tracks', 
                 'wizard_section_tracks'
             );
             
             add_settings_field(
-                'feedback_source_content', 
-                __('Input','wpsstm'), 
-                array( $this, 'feedback_source_content_callback' ), 
+                'feedback_data_type', 
+                __('Input type','wpsstm'), 
+                array( $this, 'feedback_data_type_callback' ), 
                 'wpsstm-wizard-step-tracks', 
                 'wizard_section_tracks'
             );
@@ -760,7 +760,7 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
 
         $output = "—";
-        
+
         if ( $body_node = $wpsstm_tracklist->body_node ){
             
             $content = $body_node->html();
