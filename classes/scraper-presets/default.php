@@ -1,47 +1,33 @@
 <?php
 
-abstract class WP_SoundSystem_Live_Playlist_Preset extends WP_SoundSystem_Remote_Tracklist{
-    var $preset_slug =      null;
-    var $preset_url =       null;
+class WP_SoundSystem_URL_Preset extends WP_SoundSystem_Remote_Tracklist{
     var $preset_name =      null;
+    var $preset_url =       null;
     var $preset_desc =      null;
     var $preset_options =   array();
+    var $tracklist;
 
     static $wizard_suggest =   true; //suggest or not this preset in the wizard
 
-    public function __construct($post_id = null){
-        
-        parent::__construct($post_id);
-        
+    public function __construct($feed_url = null){
+        parent::__construct();
+        $this->feed_url = $feed_url;
     }
     
     /*
     Checks that the preset can be used (eg. check for an API client ID)
     */
-    static function can_use_preset(){
-        return true;
-    }
-    
-    /*
-    Checks that the preset can handle an URL input
-    */
-    static function can_handle_url($url){
+    public function can_use_preset(){
         return true;
     }
 
-    function get_default_options(){
-        $defaults = parent::get_default_options();
-        return array_replace_recursive((array)$defaults,(array)$this->preset_options); //last one has priority
+    /*
+    Checks that the preset can load the tracklist URL
+    */
+    protected function can_handle_url(){//TOFIXGGG should be abstract method
+        return false;
     }
 
-    /*
-    Override this functions if your preset needs to filter the tracks.  
-    Don't forget the call to the parent function at the end.
-    */
-    
-    protected function validate_tracks($tracks){
-        return parent::validate_tracks($tracks);
-    }
 
 }
  

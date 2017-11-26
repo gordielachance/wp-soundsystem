@@ -1,224 +1,194 @@
 <?php
 
-abstract class WP_SoundSystem_Preset_LastFM_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
-
-    var $preset_slug =      'last-fm';
+abstract class WP_SoundSystem_LastFM_URL extends WP_SoundSystem_URL_Preset{
     var $preset_url =       'https://www.last.fm';
-
-    var $preset_options =  array(
-        'selectors' => array(
+    
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->options['selectors'] = array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
             'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
             'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
-        )
-    );
+        );
+    }
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM user library','wpsstm');
-    }
-    
-    function get_remote_url(){
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $domain != 'lastfm') return;
-        if ( !$user_slug = self::get_user_slug($this->feed_url) ){
-            return new WP_Error( 'wpsstm_lastfm_missing_user_slug', __('Required user slug missing.','wpsstm') );
-        }
-        
-        return sprintf('https://www.last.fm/user/%s/library',$user_slug);
-    }
-    
-    static function get_user_slug($url){
+    function get_user_slug(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?(?:user/([^/]+))~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
-    static function get_artist_slug($url){
+    function get_artist_slug(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    static function get_user_page($url){
+    function get_user_page(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/.*/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : 'library';
     }
     
-    static function get_artist_page($url){
+    function get_artist_page(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/.*/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : '+tracks';
     }
 
 }
 
-class WP_SoundSystem_Preset_LastFM_User_Scraper extends WP_SoundSystem_Preset_LastFM_Scraper{
-    var $preset_slug =      'last-fm-user';
+class WP_SoundSystem_LastFM_User_URL extends WP_SoundSystem_LastFM_URL{
     var $preset_url =       'https://www.last.fm/user/XXX';
+    var $user_slug;
+    var $page_slug;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM user','wpsstm');
+    function __construct($feed_url = null){
+        
+        parent::__construct($feed_url);
+        $this->user_slug = $this->get_user_slug();
+        $this->page_slug = $this->get_user_page();
+        
+
+        
     }
     
-    static function can_handle_url($url){
-        if ( !$user_slug = self::get_user_slug($url) ) return;
+    function can_handle_url(){
+        if ( !$this->user_slug ) return;
         return true;
     }
-    
+
     function get_remote_url(){
-
-        $page = self::get_user_page($this->feed_url);
-
-        return sprintf('https://www.last.fm/fr/user/%s/%s',self::get_user_slug($this->feed_url),$page);
-    }
-}
-
-class WP_SoundSystem_Preset_LastFM_User_Loved_Scraper extends WP_SoundSystem_Preset_LastFM_User_Scraper{
-
-    var $preset_slug =      'last-fm-user-favorites';
-    var $preset_url =       'https://www.last.fm/user/XXX/loved';
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM user favorites','wpsstm');
-    }
-    
-    static function can_handle_url($url){
-        if ( !$user_slug = self::get_user_slug($url) ) return;
-        if ( self::get_user_page($url) != 'loved' ) return;
-        return true;
+        return sprintf('https://www.last.fm/fr/user/%s/%s',$this->user_slug,$this->page_slug);
     }
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Artist_Scraper extends WP_SoundSystem_Preset_LastFM_Scraper{
-
-    var $preset_slug =      'last-fm-artist';
+class WP_SoundSystem_LastFM_Artist_URL extends WP_SoundSystem_LastFM_URL{
     var $preset_url =       'https://www.last.fm/music/XXX';
-    var $artist;
+    var $page_artist;
+    var $artist_slug;
+    var $page_slug;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM artist (top tracks)','wpsstm');
+    function __construct($feed_url = null){
+        
+        parent::__construct($feed_url);
+        $this->artist_slug = $this->get_artist_slug();
+        $this->page_slug = $this->get_artist_page();
     }
     
-    static function can_handle_url($url){
-        if ( !$artist_slug = self::get_artist_slug($url) ) return;
+    function can_handle_url(){
+        if ( !$this->artist_slug ) return;
         return true;
     }
-    
+
     function get_remote_url(){
-        return sprintf('https://www.last.fm/music/%s/+tracks',self::get_artist_slug($this->feed_url));
+        return sprintf('https://www.last.fm/music/%s/%s',$this->artist_slug,$this->page_slug);
     }
+
     
     //On an artist page, artist is displayed only on the header page; not on each track.
     //So use body_node as input here.
 
     protected function get_track_artist($track_node){
-        if (!$this->artist){
+        if (!$this->page_artist){
             $selector = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
-            $this->artist = $this->parse_node($this->body_node,$selector);
+            $this->page_artist = $this->parse_node($this->body_node,$selector);
         }
-        return $this->artist;
+        return $this->page_artist;
     }
 
 }
 
-abstract class WP_SoundSystem_Preset_LastFM_Station extends WP_SoundSystem_Preset_LastFM_Scraper{
+abstract class WP_SoundSystem_LastFM_Station extends WP_SoundSystem_LastFM_URL{
 
-    var $preset_options =  array(
-        'selectors' => array(
+    function __construct($feed_url = null){
+        
+        parent::__construct($feed_url);
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'>playlist'),
             'track_artist'      => array('path'=>'artists > name'),
             'track_title'       => array('path'=>'playlist > name'),
             'track_source_urls' => array('path'=>'playlinks url'),
-        )
-    );
+        );
+        
+    }
 
 }
 
-class WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
-
-    var $preset_slug =      'last-fm-station-artist';
+class WP_SoundSystem_LastFM_Station_Similar_Artist_Scraper extends WP_SoundSystem_LastFM_Station{
     var $preset_url =       'https://www.last.fm/music/XXX/+similar';
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM stations (similar artist)','wpsstm');
+    var $artist_slug;
+    var $page_slug;
+    
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->artist_slug = $this->get_artist_slug();
+        $this->page_slug = $this->get_artist_page();
     }
     
-    static function can_handle_url($url){
-        if ( !$artist_slug = self::get_artist_slug($url) ) return;
-        if ( self::get_artist_page($url) != '+similar' ) return;
+    function can_handle_url(){
+        if ( !$this->artist_slug ) return;
+        if ( $this->page_slug != '+similar' ) return;
         return true;
     }
-    
+
     function get_remote_url(){
-        return sprintf('https://www.last.fm/player/station/music/%s?ajax=1',self::get_artist_slug($this->feed_url));
+        return sprintf('https://www.last.fm/player/station/music/%s?ajax=1',$this->artist_slug);
     }
-    
+
     function get_remote_title(){
-        return sprintf( __('Last.FM stations (similar artist): %s','wpsstm'), self::get_artist_slug($this->feed_url) );
+        return sprintf( __('Last.FM stations (similar artist): %s','wpsstm'),$this->artist_slug );
     }
 
 }
 
-
-
-class WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper extends WP_SoundSystem_Preset_LastFM_Station{
-
-    var $preset_slug =      'last-fm-station-user';
+class WP_SoundSystem_LastFM_Station_User_Recommandations_Scraper extends WP_SoundSystem_LastFM_Station{
     var $preset_url =       'https://www.last.fm/user/XXX/recommended';
-    var $station_slug;
+    var $user_slug;
+    var $page_slug;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name = __('Last.FM user stations','wpsstm');
-    }
-
-    static function can_handle_url($url){
-        if ( !$user_slug = self::get_user_slug($url) ) return;
-        if ( !self::get_station_page($url) ) return;
-        return true;
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->user_slug = $this->get_user_slug();
+        $this->page_slug = $this->get_station_page();
+        
     }
     
-    static function get_user_slug($url){
+    function can_handle_url(){
+        if ( !$this->user_slug ) return;
+        if ( !$this->page_slug ) return;
+        return true;
+    }
+
+    function get_user_slug(){
         $pattern = '~^lastfm:user:([^:]+):station~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    static function get_station_page($url){
+    function get_station_page(){
         $pattern = '~^lastfm:user:[^:]+:station:([^:]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_remote_url(){
-        return sprintf('https://www.last.fm/player/station/user/%s/%s?ajax=1',self::get_user_slug($this->feed_url),self::get_station_page($this->feed_url) );
+        return sprintf('https://www.last.fm/player/station/user/%s/%s?ajax=1',$this->user_slug,$this->page_slug );
     }
     
     function get_remote_title(){
-        return sprintf( __('Last.FM station for %s - %s','wpsstm'),self::get_user_slug($this->feed_url),self::get_station_page($this->feed_url) );
+        return sprintf( __('Last.FM station for %s - %s','wpsstm'),$this->user_slug,$this->page_slug );
     }
 }
-
-
-
 
 //register preset
-
 function register_lastfm_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_User_Loved_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Artist_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_Similar_Artist_Scraper';
-    $presets[] = 'WP_SoundSystem_Preset_LastFM_Station_User_Recommandations_Scraper';
+    $presets[] = 'WP_SoundSystem_LastFM_User_URL';
+    $presets[] = 'WP_SoundSystem_LastFM_Artist_URL';
+    $presets[] = 'WP_SoundSystem_LastFM_Station_Similar_Artist_Scraper';
+    $presets[] = 'WP_SoundSystem_LastFM_Station_User_Recommandations_Scraper';
     return $presets;
 }
-
-add_filter('wpsstm_get_scraper_presets','register_lastfm_preset');
+add_action('wpsstm_get_scraper_presets','register_lastfm_preset');

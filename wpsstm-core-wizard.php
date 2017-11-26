@@ -187,14 +187,10 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function get_wizard_tracklist($post_id=null,$input=null){
+        
+        $this->tracklist = wpsstm_get_live_tracklist_preset($post_id,$input);
 
-        if ($post_id){
-            $this->tracklist = wpsstm_get_post_live_tracklist($post_id);
-            
-        }elseif($input){
-            if ( $preset = wpsstm_get_live_tracklist_preset($input) ){
-                $this->tracklist = $preset;
-            }
+        if($input){
             $this->tracklist->options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
         }
 
@@ -247,7 +243,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
-        $wpsstm_tracklist = wpsstm_get_post_live_tracklist($post_id);
+        $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($post_id);
         
         wpsstm()->debug_log($wpsstm_tracklist->post_id, "WP_SoundSystem_Core_Wizard::backend_wizard_save()");
         

@@ -343,7 +343,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
 
-    protected function get_response_type(){
+    public function get_response_type(){
         
         if ( $this->response_type !== null ) return $this->response_type; //already populated
         if ( $this->response === null ) return; //response not yet populated
@@ -525,7 +525,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     protected function get_track_nodes($body_node){
-
+        
         $selector = $this->get_selectors( array('tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
 

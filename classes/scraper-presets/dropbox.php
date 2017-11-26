@@ -13,4 +13,4 @@ function wpsstm_filter_dropbox_url($url){
     return $url;
 }
 
-add_filter('wpsstm_live_tracklist_url','wpsstm_filter_dropbox_url');
+add_filter('wpsstm_live_tracklist_url','wpsstm_filter_dropbox_url', 5); //priority before presets

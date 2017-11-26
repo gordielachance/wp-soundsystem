@@ -1,39 +1,35 @@
 <?php
-class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Preset{
-    
-    /* https://regex101.com/r/isVHq9/13 */
-    
-    var $preset_slug =      'reddit';
+class WP_SoundSystem_Reddit_Api extends WP_SoundSystem_URL_Preset{
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
-    var $preset_options =  array(
-        'selectors' => array(
+    var $subreddit_slug;
+
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->subreddit_slug = self::get_subreddit_slug();
+        
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'>data >children'),
             'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
             'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
             //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'url'),
-        )
-    );
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-
-        $this->preset_name = __('Reddit (for music subs)','wpsstm');
+        );
     }
     
-    static function can_handle_url($url){
-        if (!$subreddit_slug = self::get_subreddit_slug($url) ) return;
+    function can_handle_url(){
+        if (!$this->subreddit_slug ) return;
         return true;
     }
-    
+
     function get_remote_url(){
-        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',self::get_subreddit_slug($this->feed_url) );
-    }
-    
-    static function get_subreddit_slug($url){
+        
+        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->subreddit_slug );
+    } 
+
+    function get_subreddit_slug(){
         $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
@@ -43,7 +39,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
     /*
     protected function get_track_nodes($body_node){
 
-        $selector = $this->get_options( array('selectors','tracks','path') );
+        $selector = $this->get_selectors( array('tracks','path') );
         $post_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
         //var_dump($post_nodes->length);
 
@@ -55,21 +51,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         return $post_nodes;
     }
     */
-    
-    /*
-    function get_remote_tracks($args = null){
-        //init pagination before request
-        $pagination_args = array(
-            'page_items_limit'  => 50
-        );
 
-        $this->set_request_pagination( $pagination_args );
-        
-        return parent::get_remote_tracks($args);
-    }
-
-    */
-    
     protected function filter_string($str){
         
         //remove quotation marks
@@ -113,7 +95,7 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
         return $str;
     }
 
-    protected function validate_tracks($tracks){
+    protected function validate_tracks($tracks){ //TOFIXGGG
 
         foreach((array)$tracks as $key=>$track){
             $track->artist = $this->filter_string($track->artist);
@@ -127,10 +109,9 @@ class WP_SoundSystem_Preset_Reddit_Api extends WP_SoundSystem_Live_Playlist_Pres
 }
 
 //register preset
-
 function register_reddit_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_Reddit_Api';
+    $presets[] = 'WP_SoundSystem_Reddit_Api';
     return $presets;
 }
 
-add_filter('wpsstm_get_scraper_presets','register_reddit_preset');
+add_action('wpsstm_get_scraper_presets','register_reddit_preset');

@@ -177,6 +177,8 @@ class WP_SoundSystem_Core_Live_Playlists{
     Register scraper presets.
     */
     private function get_available_presets(){
+        
+        $presets = array();
 
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
         
@@ -196,8 +198,9 @@ class WP_SoundSystem_Core_Live_Playlists{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
-            $can_use_preset = $class_name::can_use_preset();
-            if ( $can_use_preset !== true ) continue;
+            $preset = new $class_name();
+            
+            if ( $preset->can_use_preset() !== true ) continue;
             $presets[] = $class_name;
         }
         

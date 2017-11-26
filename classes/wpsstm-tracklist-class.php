@@ -75,8 +75,9 @@ class WP_SoundSystem_Tracklist{
     function get_options($keys=null){
         
         $default_options = $this->get_default_options();
-        $options = apply_filters('wpsstm_tracklist_options',array(),$this);
-        $options = array_replace_recursive($default_options,$options); //last one has priority
+        $options = $this->options;
+        $options = apply_filters('wpsstm_tracklist_options',$options,$this);
+        $options = array_replace_recursive((array)$default_options,(array)$options); //last one has priority
 
         if ($keys){
             return wpsstm_get_array_value($keys, $options);

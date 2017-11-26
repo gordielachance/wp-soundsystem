@@ -1,81 +1,69 @@
 <?php
-class WP_SoundSystem_Preset_BBC_Stations extends WP_SoundSystem_Live_Playlist_Preset{
-    
-    var $preset_slug =      'bbc-station';
+class WP_SoundSystem_BBC_Stations extends WP_SoundSystem_URL_Preset{
     var $preset_url =       'http://www.bbc.co.uk/radio';
+    var $station_slug;
 
-    var $preset_options =  array(
-        'selectors' => array(
-            'tracks'            => array('path'=>'.music-track'),
-            'track_artist'      => array('path'=>'.music-track__artist'),
-            'track_title'       => array('path'=>'.music-track__title'),
-            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
-        )
-    );
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name =    __('BBC stations','wpsstm');
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->station_slug = $this->get_station_slug();
+        
+        $this->options['selectors'] = array(
+                'tracks'            => array('path'=>'.music-track'),
+                'track_artist'      => array('path'=>'.music-track__artist'),
+                'track_title'       => array('path'=>'.music-track__title'),
+                'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+        );
+        
     }
     
-    static function can_handle_url($url){
-        if ( !$station_slug = self::get_station_slug($url) ) return;
-        return true;
+    function can_handle_url(){
+        if ( $this->station_slug ) return true;
     }
     
-    function get_remote_url(){
-        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->get_station_slug() );
-    }
-
-    static function get_station_slug($url){
+    function get_station_slug(){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    function get_remote_url(){
+        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->station_slug );
     }
 
 }
 
-class WP_SoundSystem_Preset_BBC_Playlists extends WP_SoundSystem_Live_Playlist_Preset{
-    var $preset_slug =      'bbc-playlist';
-    var $preset_url =       'http://www.bbc.co.uk/music/playlists/'; 
-    var $pattern =          '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)/?$~i';
-    var $variables =        array(
-        'bbc-playlist-id' => null
-    );
+class WP_SoundSystem_BBC_Playlists extends WP_SoundSystem_URL_Preset{
+    var $preset_url =       'http://www.bbc.co.uk/music/playlists/';
+    var $playlist_id;
     
-    var $preset_options =  array(
-        'selectors' => array(
+    function __construct($feed_url = null){
+        parent::__construct($feed_url);
+        $this->playlist_id = $this->get_playlist_id();
+        
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
             'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
-        )
-    );
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name =    __('BBC playlists','wpsstm');
+        );
     }
     
-    static function can_handle_url($url){
-        if ( !$playlist_id = self::get_playlist_id($url) ) return;
+    function can_handle_url(){
+        if ( !$this->playlist_id ) return;
         return true;
     }
 
-    static function get_playlist_id($url){
+    function get_playlist_id(){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
-    
 
 }
 
-//register preset
-
 function register_bbc_presets($presets){
-    $presets[] = 'WP_SoundSystem_Preset_BBC_Stations';
-    $presets[] = 'WP_SoundSystem_Preset_BBC_Playlists';
+    $presets[] = 'WP_SoundSystem_BBC_Stations';
+    $presets[] = 'WP_SoundSystem_BBC_Playlists';
     return $presets;
 }
 
-add_filter('wpsstm_get_scraper_presets','register_bbc_presets');
+add_action('wpsstm_get_scraper_presets','register_bbc_presets');
