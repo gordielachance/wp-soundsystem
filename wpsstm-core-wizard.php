@@ -378,7 +378,7 @@ class WP_SoundSystem_Core_Wizard{
         if ( wpsstm_wizard()->is_advanced ){
             $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
         }
-        
+
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
             $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
@@ -594,16 +594,16 @@ class WP_SoundSystem_Core_Wizard{
             <?php
 
             //path
-            $path = $wpsstm_tracklist->get_options( array('selectors',$selector,'path') );
+            $path = $wpsstm_tracklist->get_selectors( array($selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
 
             //regex
-            $regex = $wpsstm_tracklist->get_options( array('selectors',$selector,'regex') );
+            $regex = $wpsstm_tracklist->get_selectors( array($selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
             $attr_disabled = ( $wpsstm_tracklist->response_type != 'text/html');
-            $attr = $wpsstm_tracklist->get_options( array('selectors',$selector,'attr') );
+            $attr = $wpsstm_tracklist->get_selectors( array($selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
 
@@ -844,7 +844,7 @@ class WP_SoundSystem_Core_Wizard{
     function get_track_detail_selector_prefix(){
         global $wpsstm_tracklist;
         
-        $selector = $wpsstm_tracklist->get_options(array('selectors','tracks','path'));
+        $selector = $wpsstm_tracklist->get_selectors( array('tracks','path'));
 
         if (!$selector) return;
         return sprintf(

@@ -6,6 +6,7 @@ class WP_SoundSystem_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
+    var $options_default = array();
     var $options = array();
 
     //infos
@@ -67,18 +68,20 @@ class WP_SoundSystem_Tracklist{
             $this->location = get_permalink($post_id);
 
         }
+
+        
     }
     
     function get_options($keys=null){
         
         $default_options = $this->get_default_options();
-        $options = apply_filters( 'wpsstm_tracklist_options',$this->options );
-        $options = array_replace_recursive((array)$default_options,(array)$options); //last one has priority
+        $options = apply_filters('wpsstm_tracklist_options',array(),$this);
+        $options = array_replace_recursive($default_options,$options); //last one has priority
 
         if ($keys){
-            return wpsstm_get_array_value($keys, $this->options);
+            return wpsstm_get_array_value($keys, $options);
         }else{
-            return $this->options;
+            return $options;
         }
     }
     
@@ -271,12 +274,12 @@ class WP_SoundSystem_Tracklist{
                     $track = new WP_SoundSystem_Track($track_id);
                 }
             }
-
+            
             $add_tracks[] = $track;
         }
 
         //allow users to alter the input tracks.
-        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
+        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);//TOFIXTOCHECKGGG
         $add_tracks = $this->validate_tracks($add_tracks);
         
         return $add_tracks;
@@ -286,20 +289,21 @@ class WP_SoundSystem_Tracklist{
 
         //array unique
         $pending_tracks = array_unique($tracks, SORT_REGULAR);
-        $valid_tracks = array();
+        $valid_tracks = $rejected_tracks = array();
         
         foreach($pending_tracks as $track){
             if ( !$track->validate_track($this->tracks_strict) ){
                 /*
                 wpsstm()->debug_log(json_encode(sprintf('artist:%s - title:%s - album:%s',$this->artist,$this->title,$this->album),JSON_UNESCAPED_UNICODE), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
                 */
+                $rejected_tracks[] = $track;
                 continue;
             }
             $valid_tracks[] = $track;
         }
         
-        if ( $removed = (count($pending_tracks) - count($valid_tracks)) ){
-            wpsstm()->debug_log(sprintf('%s/%s tracks have been rejected',$removed,count($pending_tracks)), "WP_SoundSystem_Tracklist::validate_tracks");
+        if ( $rejected_tracks ){
+            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'rejected'=>json_encode(array($rejected_tracks)) ), "WP_SoundSystem_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
@@ -1145,7 +1149,6 @@ class WP_SoundSystem_Tracklist{
     function empty_tracks_error(){
         return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("No tracks found.",'wpsstm') );
     }
-
 }
 
 class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
