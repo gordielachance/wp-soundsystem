@@ -6,7 +6,6 @@ class WP_SoundSystem_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
-    var $options_default = array();
     var $options = array();
 
     //infos
@@ -68,12 +67,13 @@ class WP_SoundSystem_Tracklist{
             $this->location = get_permalink($post_id);
 
         }
-
-        $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
     }
     
     function get_options($keys=null){
-        $options = array();
+        
+        $default_options = $this->get_default_options();
+        $options = apply_filters( 'wpsstm_tracklist_options',$this->options );
+        $options = array_replace_recursive((array)$default_options,(array)$options); //last one has priority
 
         if ($keys){
             return wpsstm_get_array_value($keys, $this->options);
