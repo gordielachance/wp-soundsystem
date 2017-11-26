@@ -106,7 +106,7 @@ class WP_SoundSystem_LastFM_User{
             'token' =>      $token
         );
 
-        wpsstm()->debug_log($auth_args,"lastfm - request_lastfm_user_api_metas()"); 
+        //wpsstm()->debug_log($auth_args,"lastfm - request_lastfm_user_api_metas()"); 
 
         try {
 
