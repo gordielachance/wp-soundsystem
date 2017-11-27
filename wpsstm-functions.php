@@ -258,7 +258,6 @@ function wpsstm_get_post_tracklist($post_id=null){
             $tracklist = new WP_SoundSystem_Tracklist($post_id);
             
         break;
-        case wpsstm()->post_type_live_playlist:
             $tracklist = wpsstm_get_live_tracklist_preset($post_id);
         break;
     }
@@ -280,16 +279,18 @@ function wpsstm_get_live_tracklist_preset($post_id,$feed_url=null){
     if ($post_id){
         $feed_url = wpsstm_get_live_tracklist_url($post_id);
     }
-    
+
     $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
     $feed_url = trim($feed_url);
     
     //default
-    $selected_preset = new WP_SoundSystem_URL_Preset($feed_url);
+    $selected_preset = new WP_SoundSystem_URL_Preset($post_id);
+    $selected_preset->feed_url = $feed_url;
     
     //try to populate preset from URL
     foreach($presets as $preset_name){
-        $preset = new $preset_name($feed_url);
+        $preset = new $preset_name($post_id);
+        $preset->feed_url = $feed_url;
         if ( !$preset->can_handle_url() ) continue;
         $selected_preset = $preset;
         break; //we've got our preset

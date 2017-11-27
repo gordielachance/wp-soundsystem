@@ -45,6 +45,8 @@ class WP_SoundSystem_Tracklist{
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
+        
+        $this->options = $this->get_default_options();
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -74,10 +76,8 @@ class WP_SoundSystem_Tracklist{
     
     function get_options($keys=null){
         
-        $default_options = $this->get_default_options();
-        $options = $this->options;
-        $options = apply_filters('wpsstm_tracklist_options',$options,$this);
-        $options = array_replace_recursive((array)$default_options,(array)$options); //last one has priority
+        $options = apply_filters('wpsstm_tracklist_options',$this->options,$this);
+
 
         if ($keys){
             return wpsstm_get_array_value($keys, $options);
@@ -954,7 +954,6 @@ class WP_SoundSystem_Tracklist{
         
         //for data attribute
         $options = $this->get_options();
-        unset($options['selectors'],$options['tracks_order'],$options['datas_cache_min']);
 
         $values_defaults = array(
             'itemscope' =>                      true,
@@ -977,10 +976,10 @@ class WP_SoundSystem_Tracklist{
             'wpsstm-tracklist',
             ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
             $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null,
-            $this->get_options('playable_opacity_class') ? 'playable-opacity' : null,
             $this->get_options('autoplay') ? 'tracklist-autoplay' : null,
             $this->get_options('autosource') ? 'tracklist-autosource' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
+            ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
             'tracklist-template-' . $this->get_options('template'),
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
@@ -1148,7 +1147,7 @@ class WP_SoundSystem_Tracklist{
     }
     
     function empty_tracks_error(){
-        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("No tracks found.",'wpsstm') );
+        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("This tracklist is empty.",'wpsstm') );
     }
 }
 

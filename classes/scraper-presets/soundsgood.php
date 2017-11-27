@@ -1,17 +1,17 @@
 <?php
 class WP_SoundSystem_Soundsgood_Playlists_Api extends WP_SoundSystem_URL_Preset{
-    
+    var $preset_slug =      'soundsgood-playlist';
     var $preset_url =       'https://soundsgood.co/';
 
-    var $client_id;
-    var $station_slug;
+    private $client_id;
+    private $station_slug;
     
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->client_id = $this->get_client_id();
         $this->station_slug = $this->get_station_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
             'track_title'       => array('path'=>'title'),
@@ -22,17 +22,16 @@ class WP_SoundSystem_Soundsgood_Playlists_Api extends WP_SoundSystem_URL_Preset{
     
     function can_use_preset(){
         if ( !$this->client_id ) return;
+        return true;
     }
     
     function can_handle_url(){
         if ( !$this->station_slug ) return;
-        
         return true;
     }
 
     function get_remote_url(){
-        if ( !$this->can_handle_url() ) return $url;
-        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$this->station_slug);
+        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',self::get_station_slug($this->feed_url));
     }  
 
     function get_station_slug(){

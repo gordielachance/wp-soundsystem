@@ -35,6 +35,9 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function setup_globals(){
+        global $wpsstm_tracklist;
+        $this->tracklist = new WP_SoundSystem_Remote_Tracklist(); //so we've got always it defined
+        
         $this->tracklist_post_types = array(
             wpsstm()->post_type_album,
             wpsstm()->post_type_playlist,

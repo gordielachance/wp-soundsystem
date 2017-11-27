@@ -20,4 +20,4 @@ function wpsstm_xspf_tracklist_options($options,$tracklist){
     
     return $options;
 }
-add_filter('wpsstm_tracklist_options','wpsstm_xspf_tracklist_options',20,2); //priority after presets
+add_filter('wpsstm_tracklist_scraper_options','wpsstm_xspf_tracklist_options',20,2); //priority after presets

@@ -10,8 +10,8 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
         $links_str = array();
         $output = $form = null;
         
-        if ( in_array('WP_SoundSystem_Preset_LastFM_User_Scraper',wpsstm_live_playlists()->presets) ){
-            
+        if ( in_array('WP_SoundSystem_LastFM_User_Recommandations_Station',wpsstm_live_playlists()->presets) ){
+
             $this->user = new WP_SoundSystem_LastFM_User();
             $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
             
@@ -33,8 +33,10 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
             $links_str[] = sprintf('<li id="wpsstm-wizard-helper-%s-%s">%s</li>',$this->slug,$key,$link);
         }
         
-        return sprintf('<p>%s</p><ul>%s</ul>',$form,implode("\n",$links_str));
-        
+        if ($links_str){
+            return sprintf('<p>%s</p><ul>%s</ul>',$form,implode("\n",$links_str));
+        }
+
     }
 }
 

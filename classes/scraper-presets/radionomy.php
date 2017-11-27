@@ -1,23 +1,16 @@
 <?php
 
-/*
-http://api.radionomy.com/currentsong.cfm?radiouid=0f973ea3-2059-482d-993d-d43e8c5d6a1a&type=xml&cover=yes&callmeback=yes&defaultcover=yes&streamurl=yes&zoneid=0&countrycode=&size=90&dynamicconf=yes&cachbuster=144626
-
-http://api.radionomy.com/tracklist.cfm?radiouid=0f973ea3-2059-482d-993d-d43e8c5d6a1a&apikey=XXX&amount=10&type=xml&cover=true
-
-*/
-
 class WP_SoundSystem_Radionomy_Playlists_API extends WP_SoundSystem_URL_Preset{
-    //api max tracks = 40
+    var $preset_slug =      'radionomy-station';
     var $preset_url =       'https://www.radionomy.com';
-    var $station_slug;
-    var $station_id;
+    private $station_slug;
+    private $station_id;
     
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'tracks track'),
             'track_artist'      => array('path'=>'artists'),
             'track_title'       => array('path'=>'title'),

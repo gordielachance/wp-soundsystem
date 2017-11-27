@@ -1,10 +1,11 @@
 <?php
 class WP_SoundSystem_Hypem_Scraper extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'hypem';
     var $preset_url =       'http://hypem.com/';
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
-        $this->options['selectors'] = array(
+    function __construct($post_id = null){
+        parent::__construct($post_id);
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'.section-track'),
             'track_artist'      => array('path'=>'.track_name .artist'),
             'track_title'       => array('path'=>'.track_name .track'),

@@ -1,18 +1,17 @@
 <?php
 class WP_SoundSystem_Twitter_Timeline extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'twitter';
     var $preset_url =       'https://www.twitter.com/';
 
-    var $user_slug;
+    private $user_slug;
     
     static $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->user_slug = $this->get_user_slug();
         
-        $this->options['selectors'] = array(
-            'tracks'        => array('path'=>'#main_content .timeline .tweet .tweet-text div')
-        );
+        $this->scraper_options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
         
     }
     

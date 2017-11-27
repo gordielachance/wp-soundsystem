@@ -1,19 +1,21 @@
 <?php
 class WP_SoundSystem_Soundcloud_User_Api extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'soundcloud';
     var $preset_url =       'https://soundcloud.com';
 
-    var $user_slug;
-    var $page_slug;
-    var $page_api = null;
-    var $client_id;
+    private $user_id;
+    private $user_slug;
+    private $page_slug;
+    private $page_api = null;
+    private $client_id;
     
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->user_slug = $this->get_user_slug();
         $this->page_slug = $this->get_user_page();
         $this->client_id = wpsstm()->get_options('soundcloud_client_id');
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),
             'track_title'       => array('path'=>'title'),

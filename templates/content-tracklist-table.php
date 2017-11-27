@@ -48,7 +48,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     //tracklist notices
 
     //wizard temporary tracklist notice
-    //TO FIX should be in get_wizard_tracklist() ?
+    //TO FIX should be in populate_wizard_tracklist() ?
     if ( !wpsstm_is_backend() && $tracklist->user_can_get_autorship() ){
         $autorship_url = $tracklist->get_tracklist_action_url('get-autorship');
         $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
@@ -86,9 +86,12 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     <?php 
     }elseif( $error = $tracklist->empty_tracks_error() ){
         ?>
-        <p class="wpsstm-tracks-list wpsstm-empty-tracks-list wpsstm-notice wpsstm-notice-<?php echo $error->get_error_code();?>">
-            <?php echo $error->get_error_message();?>
-        </p>
+        <div class="wpsstm-tracks-list wpsstm-empty-tracks-list">
+            <p class="wpsstm-no-tracks-notice wpsstm-notice wpsstm-notice-<?php echo $error->get_error_code();?>">
+                <strong><?php _e('No tracks found.','wpsstm')?></strong><br/>
+                <small><?php echo $error->get_error_message();?></small>
+            </p>
+        </div>
         <?php
     }
 

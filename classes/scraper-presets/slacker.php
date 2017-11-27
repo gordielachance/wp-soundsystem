@@ -1,13 +1,14 @@
 <?php
 class WP_SoundSystem_Slacker_Stations extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'slacker-station';
     var $preset_url =       'http://slacker.com/';
 
-    var $station_slug;
+    private $station_slug;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
             'track_artist'      => array('path'=>'span.artist'),
             'track_title'       => array('path'=>'span.title')
@@ -34,4 +35,4 @@ function register_slacker_preset($presets){
     return $presets;
 }
 
-add_action('wpsstm_get_scraper_presets','register_slacker_preset');
+//TO FIX TO REPAIR add_action('wpsstm_get_scraper_presets','register_slacker_preset');

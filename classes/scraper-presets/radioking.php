@@ -1,15 +1,16 @@
 <?php
 class WP_SoundSystem_RadioKing_Api extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'radioking-station';
     var $preset_url =       'https://www.radioking.com';
-    var $station_slug;
+    
+    private $station_slug;
+    private $station_data =     null;
 
-    var $station_data =     null;
-
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
             'track_album'       => array('path'=>'album'),

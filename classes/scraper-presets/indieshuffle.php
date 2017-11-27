@@ -7,11 +7,12 @@ https://www.indieshuffle.com/songs/hip-hop/
 */
 
 class WP_SoundSystem_IndieShuffle_Scraper extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'indieshuffle';
     var $preset_url =       'https://www.indieshuffle.com';
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
-        $this->options['selectors'] = array(
+    function __construct($post_id = null){
+        parent::__construct($post_id);
+        $this->scraper_options['selectors'] = array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
             'track_artist'     => array('attr'=>'data-track-artist'),
             'track_title'      => array('attr'=>'data-track-title'),

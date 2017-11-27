@@ -6,10 +6,6 @@ abstract class WP_Soundsystem_Wizard_Helper {
     function __construct(){
            
     }
-    
-    static function can_show_helper(){
-        return true;
-    }
 
     function get_output(){
         

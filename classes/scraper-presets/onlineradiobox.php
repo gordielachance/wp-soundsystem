@@ -1,13 +1,14 @@
 <?php
 class WP_SoundSystem_OnlineRadioBox_Scraper extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'onlineradiobox-playlist';
     var $preset_url =       'http://onlineradiobox.com/';
-    var $station_slug;
+    private $station_slug;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'.tablelist-schedule tr'),
             'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
             'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
@@ -21,7 +22,7 @@ class WP_SoundSystem_OnlineRadioBox_Scraper extends WP_SoundSystem_URL_Preset{
     
     function get_remote_url(){
         
-        return sprintf('http://onlineradiobox.com/ma/%s/playlist',$this->station_slug);
+        return sprintf('http://onlineradiobox.com/gr/%s/playlist',$this->station_slug);
     }
 
     function get_station_slug(){

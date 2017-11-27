@@ -1,23 +1,24 @@
 <?php
 
 class WP_SoundSystem_Spotify_URL_Playlists_Api extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'spotify-playlist';
     var $preset_url =       'https://open.spotify.com';
 
-    var $token = null;
-    var $client_id;
-    var $client_secret;
-    var $user_slug;
-    var $playlist_slug;
+    private $token = null;
+    private $client_id;
+    private $client_secret;
+    private $user_slug;
+    private $playlist_slug;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->client_id = wpsstm()->get_options('spotify_client_id');
         $this->client_secret = wpsstm()->get_options('spotify_client_secret');
         
         $this->user_slug = $this->get_user_slug();
         $this->playlist_slug = $this->get_playlist_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),
             'track_album'      => array('path'=>'track > album > name'),

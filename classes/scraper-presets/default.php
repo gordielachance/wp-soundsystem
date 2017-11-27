@@ -1,17 +1,15 @@
 <?php
 
 class WP_SoundSystem_URL_Preset extends WP_SoundSystem_Remote_Tracklist{
+    var $preset_slug =      'default';
     var $preset_name =      null;
     var $preset_url =       null;
     var $preset_desc =      null;
-    var $preset_options =   array();
-    var $tracklist;
 
     static $wizard_suggest =   true; //suggest or not this preset in the wizard
 
-    public function __construct($feed_url = null){
-        parent::__construct();
-        $this->feed_url = $feed_url;
+    public function __construct($post_id = null){
+        parent::__construct($post_id);
     }
     
     /*

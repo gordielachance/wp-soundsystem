@@ -1,16 +1,17 @@
 <?php
 class WP_SoundSystem_RTBF_Stations extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'rtbf';
     var $preset_url =       'https://www.rtbf.be/';
 
-    var $station_slug;
+    private $station_slug;
     
     static $wizard_suggest = false;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
             'track_title'       => array('path'=>'span[itemprop="name"]'),

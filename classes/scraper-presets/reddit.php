@@ -1,14 +1,15 @@
 <?php
 class WP_SoundSystem_Reddit_Api extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'reddit';
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
-    var $subreddit_slug;
+    private $subreddit_slug;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->subreddit_slug = self::get_subreddit_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'>data >children'),
             'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
             'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),

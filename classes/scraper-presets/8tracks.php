@@ -1,16 +1,17 @@
 <?php
 class WP_SoundSystem_8Tracks_Playlists extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      '8tracks-playlist';
     var $preset_url =       'https://8tracks.com';
-    var $user_slug;
-    var $playlist_slug;
-    var $mix_data;
+    private $user_slug;
+    private $playlist_slug;
+    private $mix_data;
     
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->user_slug = $this->get_user_slug();
         $this->playlist_slug = $this->get_tracklist_slug();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'>tracks'),
             'track_artist'      => array('path'=>'performer'),
             'track_title'       => array('path'=>'name')

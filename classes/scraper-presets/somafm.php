@@ -1,13 +1,14 @@
 <?php
 class WP_SoundSystem_SomaFM_Stations extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'somafm-station';
     var $preset_url =       'http://somafm.com/';
 
-    var $station_slug;
+    private $station_slug;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->station_slug = $this->get_station_slug();
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'song'),
             'track_artist'      => array('path'=>'artist'),
             'track_title'       => array('path'=>'title'),

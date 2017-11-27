@@ -1,13 +1,14 @@
 <?php
 class WP_SoundSystem_Deezer_Playlists extends WP_SoundSystem_URL_Preset{
+    var $preset_slug =      'deezer-playlist';
     var $preset_url =       'http://www.deezer.com/';
-    var $playlist_id;
+    private $playlist_id;
 
-    function __construct($feed_url = null){
-        parent::__construct($feed_url);
+    function __construct($post_id = null){
+        parent::__construct($post_id);
         $this->playlist_id = $this->get_playlist_id();
         
-        $this->options['selectors'] = array(
+        $this->scraper_options['selectors'] = array(
             'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
             'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
             'track_title'       => array('path'=>'span[itemprop="name"]'),
