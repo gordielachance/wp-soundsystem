@@ -139,10 +139,16 @@ class WP_SoundSystem_Settings {
             $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
             
             /*
+            Styling
+            */
+            $new_input['minimal_css'] = ( isset($input['minimal_css']) ) ? 'on' : 'off';
+            $new_input['playable_opacity_class'] = ( isset($input['playable_opacity_class']) ) ? 'on' : 'off';
+            
+            /*
             System
             */
             
-            $new_input['minimal_css'] = ( isset($input['minimal_css']) ) ? 'on' : 'off';
+            
     
         }
         
@@ -219,23 +225,6 @@ class WP_SoundSystem_Settings {
             'tracklist_settings'
         );
 
-        add_settings_field(
-            'hide_empty_columns', 
-            __('Hide empty columns','wpsstm'), 
-            array( $this, 'hide_empty_columns_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_settings'
-        );
-        
-        add_settings_field(
-            'toggle_tracklist', 
-            __('Shorten tracklist','wpsstm'), 
-            array( $this, 'toggle_tracklist_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_settings'
-        );
-        
-        
         /*
         Sources
         */
@@ -414,6 +403,48 @@ class WP_SoundSystem_Settings {
             'wpsstm-settings-page', 
             'settings_apis'
         );
+        
+        /*
+        Styling
+        */
+        add_settings_section(
+            'settings_styling', // ID
+            __('Styling','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'minimal_css', 
+            __('Minimal CSS','wpsstm'), 
+            array( $this, 'minimal_css_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_styling'//section
+        );
+        
+        add_settings_field(
+            'playable_opacity_class', 
+            __('.playable-opacity','wpsstm'), 
+            array( $this, 'playable_opacity_class_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_styling'
+        );
+        
+        add_settings_field(
+            'hide_empty_columns', 
+            __('Hide empty columns','wpsstm'), 
+            array( $this, 'hide_empty_columns_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_styling'
+        );
+        
+        add_settings_field(
+            'toggle_tracklist', 
+            __('Shorten tracklist','wpsstm'), 
+            array( $this, 'toggle_tracklist_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_styling'
+        );
 
         /*
         System
@@ -424,14 +455,6 @@ class WP_SoundSystem_Settings {
             __('System','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
-        );
-
-        add_settings_field(
-            'minimal_css', 
-            __('Minimal CSS','wpsstm'), 
-            array( $this, 'minimal_css_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_system'//section
         );
         
         add_settings_field(
@@ -871,7 +894,7 @@ class WP_SoundSystem_Settings {
         
     }
     
-    //System
+    /*Styling*/
     
     function minimal_css_callback(){
         $option = wpsstm()->get_options('minimal_css');
@@ -883,6 +906,20 @@ class WP_SoundSystem_Settings {
             __("Do not include default styling.","wpsstm")
         );
     }
+
+    function playable_opacity_class_callback(){
+        $option = wpsstm()->get_options('playable_opacity_class');
+        $help = sprintf(__('not playable:%s, playable:%s ,has played/hover:%s, active:%s','wpsstm'),'.25','.5','.75','1');
+        
+        printf(
+            '<input type="checkbox" name="%s[playable_opacity_class]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Toggle tracks opacity according to the playable state.","wpsstm") . sprintf(' <small>%s</small>',$help)
+        );
+    }
+    
+    /*System*/
     
     function reset_options_callback(){
         printf(

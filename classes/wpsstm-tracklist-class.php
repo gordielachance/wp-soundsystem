@@ -88,12 +88,13 @@ class WP_SoundSystem_Tracklist{
     
     protected function get_default_options(){
         return array(
-            'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
-            'can_play'              => ( wpsstm()->get_options('player_enabled') == 'on' ),
-            'toggle_tracklist'      => (int)wpsstm()->get_options('toggle_tracklist'),
-            'hide_empty_columns'    => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
-            'template'              => 'table',
+            'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'                => ( wpsstm()->get_options('autosource') == 'on' ),
+            'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
+            'hide_empty_columns'        => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
+            'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
+            'template'                  => 'table',
         );
     }
     
@@ -974,17 +975,16 @@ class WP_SoundSystem_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
+            ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
+            $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null,
+            $this->get_options('playable_opacity_class') ? 'playable-opacity' : null,
+            $this->get_options('autoplay') ? 'tracklist-autoplay' : null,
+            $this->get_options('autosource') ? 'tracklist-autosource' : null,
+            $this->get_options('can_play') ? 'tracklist-playable' : null,
+            'tracklist-template-' . $this->get_options('template'),
+            ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
+            
         );
-        $classes[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
-        $classes[] = $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null;
-        $classes[] = $this->get_options('autoplay') ? 'tracklist-autoplay' : null;
-        $classes[] = $this->get_options('autosource') ? 'tracklist-autosource' : null;
-        $classes[] = $this->get_options('can_play') ? 'tracklist-playable' : null;
-        $classes[] = 'tracklist-template-' . $this->get_options('template');
-
-        if ( $this->is_tracklist_loved_by() ){
-            $classes[] = 'wpsstm-loved-tracklist';
-        }
 
         if ($extra_classes){
             if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
