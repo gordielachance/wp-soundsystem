@@ -715,6 +715,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $actions['sources'] = array(
                 'text' =>       __('Sources manager','wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources-manager'),
             );
@@ -724,6 +725,7 @@ class WP_SoundSystem_Track{
         if ($can_delete_tracks){
             $actions['delete'] = array(
                 'text' =>      __('Trash'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('trash track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
             );
@@ -733,6 +735,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit backend', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }

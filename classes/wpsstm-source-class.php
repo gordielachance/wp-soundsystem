@@ -517,6 +517,7 @@ class WP_SoundSystem_Source{
         if ( $can_edit_source ){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit backend', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }

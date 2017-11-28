@@ -576,6 +576,7 @@ class WP_SoundSystem_Tracklist{
         $share_url = 
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
             'href' =>       $this->get_tracklist_popup_url('share'),
             'classes' =>    array('wpsstm-link-popup'),
         );
@@ -583,6 +584,7 @@ class WP_SoundSystem_Tracklist{
         //XSPF
         $actions['export'] = array(
             'text' =>       __('Export', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
             'desc' =>       __('Export to XSPF', 'wpsstm'),
             'href' =>       $this->get_tracklist_action_url('export'),
         );
@@ -635,6 +637,7 @@ class WP_SoundSystem_Tracklist{
 
             $actions['status-switch'] = array(
                 'text' =>      __('Status'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
             );
         }
@@ -643,6 +646,7 @@ class WP_SoundSystem_Tracklist{
         if ( $this->user_can_lock_tracklist() ){
             $actions['lock-tracklist'] = array(
                 'text' =>      __('Lock', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('lock-tracklist'),
             );
@@ -652,6 +656,7 @@ class WP_SoundSystem_Tracklist{
         if ( $this->user_can_unlock_tracklist() ){
             $actions['unlock-tracklist'] = array(
                 'text' =>      __('Unlock', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
             );
@@ -660,6 +665,7 @@ class WP_SoundSystem_Tracklist{
         if ( $can_edit_tracklist ){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit backend', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }

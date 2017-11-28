@@ -5,7 +5,7 @@ use \ForceUTF8\Encoding;
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $tracklist_type = 'live';
-    public $ajax_refresh = false;//should we query the subtracks through ajax ?
+    public $ajax_refresh = true; //should we query the subtracks through ajax ? false = Good for debug.
     
 
     //url stuff
@@ -50,7 +50,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->preset_name = __('HTML Scraper','wpsstm');
         
         $this->scraper_options = $this->get_default_scraper_options();
-        
 
         if ($this->post_id){
 
