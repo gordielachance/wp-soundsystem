@@ -256,8 +256,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:
             $tracklist = new WP_SoundSystem_Tracklist($post_id);
-            
-        break;
+        default:
             $tracklist = wpsstm_get_live_tracklist_preset($post_id);
         break;
     }

@@ -177,8 +177,8 @@ class WpsstmPagePlayer {
         var tracklists_autoload = self.tracklists.filter(function (tracklist_obj) {
             return (tracklist_obj.options.autoload === true);
         });
-        $(tracklists_autoload).each(function(index,tracklist_el) {
-            var promise = tracklist.maybe_refresh();
+        $(tracklists_autoload).each(function(index,tracklist_obj) {
+            var promise = tracklist_obj.maybe_refresh();
             preload_promises.push(promise);
         });
         
