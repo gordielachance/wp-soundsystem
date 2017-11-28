@@ -722,10 +722,18 @@ class WP_SoundSystem_Track{
 
         //delete track
         if ($can_delete_tracks){
-            $actions['trash'] = array(
+            $actions['delete'] = array(
                 'text' =>      __('Trash'),
                 'desc' =>       __('trash track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
+            );
+        }
+        
+        //backend
+        if ($can_edit_track){
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit backend', 'wpsstm'),
+                'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
         
@@ -733,9 +741,7 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['sources'],$actions['trash']);
-
-                $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
+                unset($actions['edit'],$actions['sources'],$actions['delete'],$actions['edit-backend']);
 
             break;
             case 'popup':

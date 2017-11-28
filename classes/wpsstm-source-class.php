@@ -489,6 +489,7 @@ class WP_SoundSystem_Source{
         $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
 
         //caps
+        $can_edit_source = current_user_can($source_type_obj->cap->edit_post,$this->post_id);
         $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$this->post_id);
         $can_reorder_sources = $wpsstm_track->user_can_reorder_sources();
         
@@ -510,6 +511,13 @@ class WP_SoundSystem_Source{
             $actions['move'] = array(
                 'text' =>       __('Move', 'wpsstm'),
                 'desc' =>       __('Change source position','wpsstm'),
+            );
+        }
+        
+        if ( $can_edit_source ){
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit backend', 'wpsstm'),
+                'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
         

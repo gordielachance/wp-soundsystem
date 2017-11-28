@@ -266,6 +266,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-tracklist-action-unlock-tracklist a:before{
                 content:"\f023";//.fa-lock;
             }
+            &#wpsstm-tracklist-action-edit-backend a:before{
+                content:"\f084";//.fa-key;
+            }
             
         }
 

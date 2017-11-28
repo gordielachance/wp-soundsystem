@@ -83,6 +83,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-track-action-edit a:before{
                 content: "\f040";//.fa-pencil;
             }
+            &#wpsstm-track-action-edit-backend a:before{
+                content:"\f084";//.fa-key;
+            }
             &#wpsstm-track-action-about a:before{
                 content: "\f05a";//.fa-info-circle;
             }

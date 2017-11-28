@@ -656,13 +656,17 @@ class WP_SoundSystem_Tracklist{
                 'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
             );
         }
+        
+        if ( $can_edit_tracklist ){
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit backend', 'wpsstm'),
+                'href' =>       get_edit_post_link( $this->post_id ),
+            );
+        }
 
         //context
         switch($context){
             case 'page':
-
-                $popup_action_slugs = array('share','new-subtrack');
-
             break;
             case 'popup':
                 unset($actions['refresh']);
