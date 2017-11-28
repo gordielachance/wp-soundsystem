@@ -147,9 +147,9 @@
             
         });
         
-        //toggle expand tracks at init
+        //show more/less (tracks)
         if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
-            tracklist_obj.toggleTracklist({
+            tracklist_obj.showMoreLessTracks({
                 childrenMax:showSubtracksCount
             });
         }
@@ -611,7 +611,7 @@ class WpsstmTracklist {
 
     }
     
-    toggleTracklist(options){
+    showMoreLessTracks(options){
 
         var self = this;
 
@@ -629,7 +629,6 @@ class WpsstmTracklist {
         if ( Number($(this.tracklist_el).attr("data-tracks-count")) > 0 ) {
             return $(this.tracklist_el).find('.wpsstm-tracks-list').toggleChildren(options);
         }
-
 
     }
     

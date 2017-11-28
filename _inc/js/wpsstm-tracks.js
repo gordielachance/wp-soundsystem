@@ -187,7 +187,7 @@
         if ( newTracksCount <= visibleTracksCount ) return;
 
         if ( tracklist_obj.options.toggle_tracklist ){
-            track_obj.tracklist.toggleTracklist({
+            track_obj.tracklist.showMoreLessTracks({
                 childrenMax:newTracksCount
             });
         }
@@ -265,7 +265,7 @@ class WpsstmTrack {
             wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
 
-        var list = $('<table class="wpsstm-tracks-list"></table>');
+        var list = $('<table class="wpsstm-tracks-list"></table>'); 
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed
