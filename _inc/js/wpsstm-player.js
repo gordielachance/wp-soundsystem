@@ -167,13 +167,17 @@ class WpsstmPagePlayer {
         
         var preload_promises = [];
         
-        //should we show it by default ?
         all_tracklists.each(function(index,tracklist_el) {
             var tracklist = new WpsstmTracklist(tracklist_el,index);
             self.tracklists.push(tracklist);
             self.tracklists_shuffle_order.push(index);
-            
-            //preload tracklist on startup
+        });
+        
+        //autoload
+        var tracklists_autoload = self.tracklists.filter(function (tracklist_obj) {
+            return (tracklist_obj.options.autoload === true);
+        });
+        $(tracklists_autoload).each(function(index,tracklist_el) {
             var promise = tracklist.maybe_refresh();
             preload_promises.push(promise);
         });

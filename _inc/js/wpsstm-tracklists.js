@@ -38,7 +38,7 @@
         */
         
         //refresh
-        tracklist_obj.tracklist_el.filter('.tracklist-ajaxed').find("#wpsstm-tracklist-action-refresh a").click(function(e) {
+        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist").click(function(e) {
             e.preventDefault();
             tracklist_obj.can_play = undefined; //will force refresh
             tracklist_obj.debug("clicked 'refresh' link");

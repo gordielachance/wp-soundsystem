@@ -88,6 +88,7 @@ class WP_SoundSystem_Tracklist{
     
     protected function get_default_options(){
         return array(
+            'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'                => ( wpsstm()->get_options('autosource') == 'on' ),
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
@@ -1012,7 +1013,7 @@ class WP_SoundSystem_Tracklist{
 
 
     function populate_tracks($args = null){
-        
+
         if ( $this->ajax_refresh ){
             
             /*
@@ -1020,10 +1021,11 @@ class WP_SoundSystem_Tracklist{
             will be toggled using CSS
             */
             $this->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
-            
-            
+
             if ( $this->wait_for_ajax() ){
-                $error = new WP_Error( 'missing-javascript', __('Javascript is required to fetch tracks.','wpsstm') );
+                $url = $this->get_tracklist_action_url('refresh');
+                $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
+                $error = new WP_Error( 'requires-ajax', $link );
                 $this->tracks_error = $error;
                 return $error;
             }
@@ -1032,7 +1034,7 @@ class WP_SoundSystem_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $tracks_ids = $this->get_tracks($args);
-        
+
         $this->did_query_tracks = true;
 
         if ( is_wp_error($tracks_ids) ){
