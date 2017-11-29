@@ -188,7 +188,7 @@
 
         if ( tracklist_obj.options.toggle_tracklist ){
             track_obj.tracklist.showMoreLessTracks({
-                childrenMax:newTracksCount
+                childrenToShow:newTracksCount
             });
         }
         
