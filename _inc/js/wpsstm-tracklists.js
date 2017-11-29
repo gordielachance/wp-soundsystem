@@ -150,9 +150,13 @@
         //show more/less (tracks)
         if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
             tracklist_obj.showMoreLessTracks({
-                childrenMax:showSubtracksCount
+                childrenToShow:showSubtracksCount
             });
         }
+        
+        //show more/less (tracklist/tracks/sources actions)
+        var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
+        wpsstm.showMoreLessActions(actions_lists);
 
     });
 
@@ -618,7 +622,7 @@ class WpsstmTracklist {
         // OPTIONS
         var defaults = {
             childrenShowCount:  true,
-            childrenMax:        3,
+            childrenToShow:        3,
             childrenSelector:   '[itemprop="track"]',
             moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
             lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',

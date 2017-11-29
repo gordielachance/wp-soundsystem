@@ -289,6 +289,23 @@ class WpsstmPagePlayer {
         tracklist_obj.start_tracklist();
 
     }
+    
+    showMoreLessActions(actions_container_el,options){
+
+        var self = this;
+
+        // OPTIONS
+        var defaults = {
+            childrenToShow:     '.wpsstm-action:not(.wpsstm-advanced-action)',
+            moreText:           '<i class="fa fa-chevron-right" aria-hidden="true"></i>',
+            btLess:             false,
+        };
+
+        var options =  $.extend(defaults, options);
+
+        return $(actions_container_el).toggleChildren(options);
+
+    }
 
 }
 
