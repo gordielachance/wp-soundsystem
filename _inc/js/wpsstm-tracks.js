@@ -253,7 +253,7 @@ class WpsstmTrack {
         return deferredObject.promise();
     }
 
-    set_bottom_trackinfo(){
+    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER
         var self = this;
         //track infos
         
@@ -269,7 +269,7 @@ class WpsstmTrack {
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed
-        
+
         $(list).append(row);
 
         wpsstm.bottom_trackinfo_el.html(list);
