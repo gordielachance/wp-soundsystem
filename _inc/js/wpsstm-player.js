@@ -291,6 +291,8 @@ class WpsstmPagePlayer {
     }
     
     showMoreLessActions(actions_container_el,options){
+        
+        return; //TOFIXGGG temporary disabled until it works as expected.
 
         var self = this;
 
