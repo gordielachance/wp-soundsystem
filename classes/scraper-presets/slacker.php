@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_Slacker_Stations{
-    var $preset_slug =      'slacker-station';
-    var $preset_url =       'http://slacker.com/';
 
     private $station_slug;
 
@@ -42,5 +40,20 @@ class WP_SoundSystem_Slacker_Stations{
 function register_slacker_preset($tracklist){
     new WP_SoundSystem_Slacker_Stations($tracklist);
 }
-
+function register_slacker_service_links($links){
+    $links[] = array(
+        'slug'      => 'slacker',
+        'name'      => 'Slacker',
+        'url'       => 'http://www.slacker.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'stations',
+                'name'      => __('stations','wpsstm'),
+                'example'   => 'http://www.slacker.com/station/STATION_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+//add_filter('wpsstm_wizard_services_links','register_slacker_service_links');
 //TO FIX TO REPAIR add_action('wpsstm_get_remote_tracks','register_slacker_preset');

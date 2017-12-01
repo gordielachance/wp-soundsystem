@@ -202,14 +202,13 @@ function wpsstm_locate_template( $template_name, $load = false, $require_once = 
 }
 
 function wpsstm_get_url_domain($url){
-    $url_parsed = parse_url($url);
-    if ( !isset($url_parsed['host']) ) return;
-
-    $host_with_subdomain = $url_parsed['host'];
-    $host_split = explode(".", $host_with_subdomain);
-    $domain = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
-    
-    return $domain;
+    //https://stackoverflow.com/a/16027164/782013
+    $pieces = parse_url($url);
+    $domain = isset($pieces['host']) ? $pieces['host'] : $pieces['path'];
+    if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
+        return $regs['domain'];
+    }
+    return false;
 }
 
 function wpsstm_array_recursive_diff($aArray1, $aArray2) {

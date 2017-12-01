@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_SomaFM_Stations{
-    var $preset_slug =      'somafm-station';
-    var $preset_url =       'http://somafm.com/';
 
     private $station_slug;
 
@@ -62,5 +60,20 @@ class WP_SoundSystem_SomaFM_Stations{
 function register_somafm_preset($tracklist){
     new WP_SoundSystem_SomaFM_Stations($tracklist);
 }
-
+function register_somafm_service_link($links){
+    $links[] = array(
+        'slug'      => 'somafm',
+        'name'      => 'SomaFM',
+        'url'       => 'https://somafm.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'stations',
+                'name'      => __('stations','wpsstm'),
+                'example'   => 'https://somafm.com/STATION_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_somafm_service_link');
 add_action('wpsstm_get_remote_tracks','register_somafm_preset');

@@ -14,10 +14,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     var $scraper_options = array();
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
-    
-    //preset infos
-    var $preset_slug = 'default';
-    var $preset_name = null;
 
     //response
     var $request_pagination = array(
@@ -986,9 +982,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $values_default['data-wpsstm-expire-time'] = $expiration_time;
         }
         
-        if ( ( property_exists($this,'preset_slug') ) && ($this->preset_slug != 'default') ){
-            $values_default['data-wpsstm-preset'] = $this->preset_slug;
-        }
+        $values_default['data-wpsstm-domain'] = wpsstm_get_url_domain( $this->feed_url );
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 

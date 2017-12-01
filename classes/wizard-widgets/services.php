@@ -21,32 +21,29 @@ class WP_Soundsystem_Wizard_Services_Widget extends WP_Soundsystem_Wizard_Widget
             'desc'          => null,
             'url'           => '#',
             'example'       => null,
+            'pages'         => array(), //sublinks
         );
 
-        //format
-        //separate services & subservices
-        foreach ($services as $key=>$item){
-            $item = $services[$key] = wp_parse_args($item,$default);
-            
-            if ($item['parent_slug']){
-                $slug = $item['parent_slug'];
-                $subservices[$slug][] = $item;
-                unset($services[$key]);
-            }
-        }
-
-        //children
         foreach ($services as $key=>$service){
-
+            $example = null;
+            $service = $services[$key] = wp_parse_args($service,$default);
             $service_slug = $service['slug'];
             $page_els = array();
             $page_str = null;
-            
-            $pages = ( isset($subservices[$service_slug]) ) ? $subservices[$service_slug] : array();
-            
-            if ( $pages ){
-                foreach ($pages as $page){
-                    $page_els[] = sprintf('<a class="wizard-service wizard-service-%s" data-wpsstm-wizard-hover="%s" href="%s" title="%s" target="_blank">%s</a>',$page['slug'],$page['example'],$page['url'],$page['desc'],$page['name']);
+
+            if ( $service['pages'] ){
+                foreach ($service['pages'] as $page){
+                    $page = wp_parse_args($page,$default);
+                    
+                    $page_attr = array(
+                        'href' =>   $page['url'],
+                        'data-wpsstm-wizard-hover' => $page['example'],
+                        'target' => '_blank',
+                    );
+                    
+                    $page_attr_str = wpsstm_get_html_attr($page_attr);
+                    
+                    $page_els[] = sprintf('<a %s>%s</a>',$page_attr_str,$page['name']);
                 }
                 
                 //wrap
@@ -60,10 +57,25 @@ class WP_Soundsystem_Wizard_Services_Widget extends WP_Soundsystem_Wizard_Widget
                 $page_str = sprintf('<ul class="wpsstm-wizard-child-service-list">%s</ul>',implode("\n",$page_els));
             }
             
-            $example = $service['example'] ? $service['example'] : sprintf( '%s...',trailingslashit($service['url']) );
+            $service_attr = array(
+                'class' =>  implode( ' ',array('wizard-service','wizard-service-' . $service['slug']) ),
+                'title' =>  $service['desc'],
+            );
             
-            $service_label = $service['name'] . $page_str;
-            $service_els[] = sprintf('<a class="wizard-service wizard-service-%s" data-wpsstm-wizard-hover="%s" href="%s" title="%s" target="_blank">%s</a>',$service['slug'],$example,$service['url'],$service['desc'],$service_label);
+            if ($service['url'] !== false){
+                $service_attr['href'] = $service['url'];
+                $service_attr['target'] = '_blank';
+                $service_attr['title'] = $service['desc'];
+            }
+            
+            $service_attr_str = wpsstm_get_html_attr($service_attr);
+
+            if ($service['url'] !== false){
+                $service_els[] = sprintf('<a %s>%s</a>%s',$service_attr_str,$service['name'],$page_str);
+            }else{
+                $service_els[] = sprintf('<span %s>%s</span>%s',$service_attr_str,$service['name'],$page_str);
+            }
+
         }
         
         if ( empty($service_els) ) return;

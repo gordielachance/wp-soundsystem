@@ -1,8 +1,6 @@
 <?php
 
 class WP_SoundSystem_Radionomy_Playlists_API{
-    var $preset_slug =      'radionomy-station';
-    var $preset_url =       'https://www.radionomy.com';
     var $tracklist;
     private $station_slug;
     private $station_id;
@@ -112,5 +110,20 @@ class WP_SoundSystem_Radionomy_Playlists_API{
 function register_radionomy_preset($tracklist){
     new WP_SoundSystem_Radionomy_Playlists_API($tracklist);
 }
-
+function register_radionomy_service_links($links){
+    $links[] = array(
+        'slug'      => 'radionomy',
+        'name'      => 'Radionomy',
+        'url'       => 'https://www.radionomy.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'stations',
+                'name'      => __('stations','wpsstm'),
+                'example'   => 'https://www.radionomy.com/LANG/radio/RADIO_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_radionomy_service_links');
 add_action('wpsstm_get_remote_tracks','register_radionomy_preset');

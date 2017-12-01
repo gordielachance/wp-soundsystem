@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_Hypem_Scraper{
-    var $preset_slug =      'hypem';
-    var $preset_url =       'http://hypem.com/';
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -10,7 +8,7 @@ class WP_SoundSystem_Hypem_Scraper{
     
     function can_handle_url(){
         $domain = wpsstm_get_url_domain( $this->tracklist->feed_url );
-        if ( $domain != 'hypem') return;
+        if ( $domain != 'hypem.com') return;
         return true;
     }
     

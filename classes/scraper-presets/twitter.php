@@ -1,8 +1,5 @@
 <?php
 class WP_SoundSystem_Twitter_Timeline{
-    var $preset_slug =      'twitter';
-    var $preset_url =       'https://www.twitter.com/';
-
     private $user_slug;
 
     function __construct($tracklist){

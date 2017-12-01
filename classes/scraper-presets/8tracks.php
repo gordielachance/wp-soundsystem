@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_8Tracks_Playlists{
-    var $preset_slug =      '8tracks-playlist';
-    var $preset_url =       'https://8tracks.com';
     private $user_slug;
     private $playlist_slug;
     private $mix_data;
@@ -113,10 +111,15 @@ function register_8tracks_playlists_preset($tracklist){
 function register_8tracks_service_link($links){
     $links[] = array(
         'slug'      => '8tracks',
-        'name'      => sprintf(__('%s playlists','wpsstm'),'8tracks'),
-        'desc'      => null,
+        'name'      => '8tracks',
         'url'       => 'https://8tracks.com',
-        'example'   => 'https://8tracks.com/USER/PLAYLIST',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'https://8tracks.com/USER/PLAYLIST',
+            ),
+        )
     );
     return $links;
 }

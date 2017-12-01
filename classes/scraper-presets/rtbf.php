@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_RTBF_Stations{
-    var $preset_slug =      'rtbf';
-    var $preset_url =       'https://www.rtbf.be/';
 
     private $station_slug;
 

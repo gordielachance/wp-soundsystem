@@ -7,8 +7,6 @@ https://www.indieshuffle.com/songs/hip-hop/
 */
 
 class WP_SoundSystem_IndieShuffle_Scraper{
-    var $preset_slug =      'indieshuffle';
-    var $preset_url =       'https://www.indieshuffle.com';
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -17,7 +15,7 @@ class WP_SoundSystem_IndieShuffle_Scraper{
     
     function can_handle_url(){
         $domain = wpsstm_get_url_domain( $this->tracklist->feed_url );
-        if ( $domain != 'indieshuffle') return;
+        if ( $domain != 'indieshuffle.com') return;
         return true;
     }
     

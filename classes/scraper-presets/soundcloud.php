@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_Soundcloud_User_Api{
-    var $preset_slug =      'soundcloud';
-    var $preset_url =       'https://soundcloud.com';
 
     private $user_id;
     private $user_slug;
@@ -139,7 +137,16 @@ class WP_SoundSystem_Soundcloud_User_Api{
 function register_soundcloud_preset($tracklist){
     new WP_SoundSystem_Soundcloud_User_Api($tracklist);
 }
+function register_soundcloud_service_links($links){
+    $links[] = array(
+        'slug'      => 'soundcloud',
+        'name'      => 'SoundCloud',
+        'url'       => 'https://soundcloud.com'
+    );
+    return $links;
+}
 
 if ( wpsstm()->get_options('soundcloud_client_id') ){
+    add_filter('wpsstm_wizard_services_links','register_soundcloud_service_links');
     add_action('wpsstm_get_remote_tracks','register_soundcloud_preset');
 }

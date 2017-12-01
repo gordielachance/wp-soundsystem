@@ -20,4 +20,21 @@ function wpsstm_xspf_tracklist_options($options,$tracklist){
     
     return $options;
 }
+
+function register_xspf_service_link($links){
+    $links[] = array(
+        'slug'      => 'xspf',
+        'name'      => 'XSPF',
+        'url'       => false,
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'http://.../FILE.xspf',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_xspf_service_link');
 add_filter('wpsstm_live_tracklist_scraper_options','wpsstm_xspf_tracklist_options',20,2); //priority after presets

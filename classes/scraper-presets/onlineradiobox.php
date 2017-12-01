@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_OnlineRadioBox_Scraper{
-    var $preset_slug =      'onlineradiobox-playlist';
-    var $preset_url =       'http://onlineradiobox.com/';
     private $station_slug;
 
     function __construct($tracklist){
@@ -50,5 +48,20 @@ class WP_SoundSystem_OnlineRadioBox_Scraper{
 function register_onlineradiobox_preset($tracklist){
     new WP_SoundSystem_OnlineRadioBox_Scraper($tracklist);
 }
-
+function register_onlineradiobox_service_link($links){
+    $links[] = array(
+        'slug'      => 'onlineradiobox',
+        'name'      => 'Online Radio Box',
+        'url'       => 'http://onlineradiobox.com/',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'http://onlineradiobox.com/COUNTRY/RADIO_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_onlineradiobox_service_link');
 add_action('wpsstm_get_remote_tracks','register_onlineradiobox_preset');

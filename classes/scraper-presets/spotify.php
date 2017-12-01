@@ -1,8 +1,6 @@
 <?php
 
 class WP_SoundSystem_Spotify_URL_Playlists_Api{
-    var $preset_slug =      'spotify-playlist';
-    var $preset_url =       'https://open.spotify.com';
     var $tracklist;
 
     private $token = null;
@@ -205,7 +203,22 @@ function register_spotify_presets($tracklist){
     new WP_SoundSystem_Spotify_URL_Playlists_Api($tracklist);
     new WP_SoundSystem_Spotify_URI_Playlists_Api($tracklist);
 }
-
+function register_spotify_service_links($links){
+    $links[] = array(
+        'slug'      => 'spotify',
+        'name'      => 'Spotify',
+        'url'       => 'https://www.spotify.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'https://open.spotify.com/user/USER_SLUG/playlist/PLAYLIST_ID',
+            ),
+        )
+    );
+    return $links;
+}
 if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
+    add_filter('wpsstm_wizard_services_links','register_spotify_service_links');
     add_action('wpsstm_get_remote_tracks','register_spotify_presets');
 }

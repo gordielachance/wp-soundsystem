@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_Reddit_Api{
-    var $preset_slug =      'reddit';
-    var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
     private $subreddit_slug;
     private $subreddit_title;
@@ -177,5 +175,20 @@ class WP_SoundSystem_Reddit_Api{
 function register_reddit_preset($tracklist){
     new WP_SoundSystem_Reddit_Api($tracklist);
 }
-
+function register_reddit_service_links($links){
+    $links[] = array(
+        'slug'      => 'reddit',
+        'name'      => 'Reddit',
+        'url'       => 'https://www.reddit.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'subreddit',
+                'name'      => __('Music subreddit','wpsstm'),
+                'example'   => 'https://www.reddit.com/r/SUBREDDIT',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_reddit_service_links');
 add_action('wpsstm_get_remote_tracks','register_reddit_preset');

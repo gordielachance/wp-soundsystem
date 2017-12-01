@@ -376,12 +376,15 @@ class WP_SoundSystem_Core_Wizard{
             $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
         }
 
+        /*
+        TOFIXGGG TO CHECK is this useful ? should we re-enable it ?
         if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
             $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
             $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
             $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
             $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
         }
+        */
 
         /*
         Source

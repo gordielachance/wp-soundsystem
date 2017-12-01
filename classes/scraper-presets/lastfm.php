@@ -2,8 +2,6 @@
 
 class WP_SoundSystem_LastFM_URL{
     var $tracklist;
-    var $preset_slug =      'lastfm';
-    var $preset_url =       'https://www.last.fm';
 
     function __construct($tracklist){
         
@@ -96,8 +94,6 @@ class WP_SoundSystem_LastFM_URL{
 }
 
 abstract class WP_SoundSystem_LastFM_Station extends WP_SoundSystem_LastFM_URL{
-    
-    var $preset_slug =      'lastfm-station';
 
     function __construct($tracklist){
         parent::__construct($tracklist);
@@ -124,8 +120,6 @@ abstract class WP_SoundSystem_LastFM_Station extends WP_SoundSystem_LastFM_URL{
 }
 
 class WP_SoundSystem_LastFM_User_Stations extends WP_SoundSystem_LastFM_Station{
-    var $preset_slug =      'lastfm-station-user-recommandations';
-    var $preset_url =       'https://www.last.fm/user/XXX/recommended';
     private $user_slug;
     private $page_slug;
 
@@ -174,8 +168,6 @@ class WP_SoundSystem_LastFM_User_Stations extends WP_SoundSystem_LastFM_Station{
 }
 
 class WP_SoundSystem_LastFM_Artist_Stations extends WP_SoundSystem_LastFM_Station{
-    var $preset_slug =      'lastfm-station-similar-artist';
-    var $preset_url =       'https://www.last.fm/music/XXX/+similar';
     private $artist_slug;
     private $page_slug;
     
@@ -222,17 +214,15 @@ function register_lastfm_service_links($links){
         'slug'      => 'lastfm',
         'name'      => 'Last.fm',
         'url'       => 'https://www.last.fm/',
+        'pages'     => array(
+            array(
+                'slug'          => 'stations',
+                'name'          => __('stations','wpsstm'),
+                'example'       => 'lastfm:user:USERNAME:station:STATION_TYPE',
+            )
+        )
     );
 
-    $links[] = array(
-        'slug'          => 'lastfm-stations',
-        'parent_slug'   => 'lastfm',
-        'name'          => __('stations','wpsstm'),
-        'example'       => 'https://www.bbc.co.uk/STATION',
-    );
-    
-
-    
     return $links;
 }
 

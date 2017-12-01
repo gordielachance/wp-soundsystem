@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_RadioKing_Api{
-    var $preset_slug =      'radioking-station';
-    var $preset_url =       'https://www.radioking.com';
     
     private $station_slug;
     private $station_data =     null;
@@ -102,5 +100,20 @@ class WP_SoundSystem_RadioKing_Api{
 function register_radioking_preset($tracklist){
     new WP_SoundSystem_RadioKing_Api($tracklist);
 }
-
+function register_radioking_service_link($links){
+    $links[] = array(
+        'slug'      => 'radioking',
+        'name'      => 'RadioKing',
+        'url'       => 'https://www.radioking.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'https://www.radioking.com/radio/RADIO_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_radioking_service_link');
 add_action('wpsstm_get_remote_tracks','register_radioking_preset');

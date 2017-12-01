@@ -1,7 +1,5 @@
 <?php
 class WP_SoundSystem_BBC_Stations{
-    var $preset_slug =      'bbc-station';
-    var $preset_url =       'http://www.bbc.co.uk/radio';
     private $station_slug;
 
     function __construct($tracklist){
@@ -47,8 +45,6 @@ class WP_SoundSystem_BBC_Stations{
 }
 
 class WP_SoundSystem_BBC_Playlists{
-    var $preset_slug =      'bbc-playlist';
-    var $preset_url =       'http://www.bbc.co.uk/music/playlists/';
     private $playlist_id;
     
     function __construct($tracklist){
@@ -94,23 +90,21 @@ function register_bbc_service_links($links){
     $links[] = array(
         'slug'      => 'bbc',
         'name'      => 'BBC',
-        'url'       => 'https://www.bbc.co.uk'
+        'url'       => 'https://www.bbc.co.uk',
+        'pages'     => array(
+            array(
+                'slug'          => 'stations',
+                'name'          => __('stations','wpsstm'),
+                'example'       => 'https://www.bbc.co.uk/STATION',
+            ),
+            array(
+                'slug'          => 'playlists',
+                'name'          => __('playlists','wpsstm'),
+                'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
+            ),
+        )
     );
-    
-    $links[] = array(
-        'slug'          => 'bbc-stations',
-        'parent_slug'   => 'bbc',
-        'name'          => __('stations','wpsstm'),
-        'example'       => 'https://www.bbc.co.uk/STATION',
-    );
-    
-    $links[] = array(
-        'slug'          => 'bbc-playlists',
-        'parent_slug'   => 'bbc',
-        'name'          => __('playlists','wpsstm'),
-        'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
-    );
-    
+
     return $links;
 }
 

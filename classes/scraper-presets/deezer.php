@@ -2,8 +2,6 @@
 //TOFIXGGG playlist title
 
 class WP_SoundSystem_Deezer_Playlists{
-    var $preset_slug =      'deezer-playlist';
-    var $preset_url =       'http://www.deezer.com/';
     var $tracklist;
     private $playlist_id;
 
@@ -48,16 +46,16 @@ function register_deezer_service_links($links){
     $links[] = array(
         'slug'      => 'deezer',
         'name'      => 'Deezer',
-        'url'       => 'https://www.deezer.com'
+        'url'       => 'https://www.deezer.com',
+        'pages'     => array(
+            array(
+                'slug'          => 'playlists',
+                'name'          => __('playlists','wpsstm'),
+                'example'       => 'http://www.deezer.com/fr/playlist/PLAYLIST_ID',
+            )
+        )
     );
 
-    $links[] = array(
-        'slug'          => 'deezer-playlists',
-        'parent_slug'   => 'deezer',
-        'name'          => __('playlists','wpsstm'),
-        'example'       => 'http://www.deezer.com/fr/playlist/PLAYLIST_ID',
-    );
-    
     return $links;
 }
 
