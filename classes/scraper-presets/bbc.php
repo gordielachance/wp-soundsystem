@@ -68,4 +68,29 @@ function register_bbc_presets($presets){
     return $presets;
 }
 
+function register_bbc_service_links($links){
+    $links[] = array(
+        'slug'      => 'bbc',
+        'name'      => 'BBC',
+        'url'       => 'https://www.bbc.co.uk'
+    );
+    
+    $links[] = array(
+        'slug'          => 'bbc-stations',
+        'parent_slug'   => 'bbc',
+        'name'          => __('stations','wpsstm'),
+        'example'       => 'https://www.bbc.co.uk/STATION',
+    );
+    
+    $links[] = array(
+        'slug'          => 'bbc-playlists',
+        'parent_slug'   => 'bbc',
+        'name'          => __('playlists','wpsstm'),
+        'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
+    );
+    
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_bbc_presets');
+add_filter('wpsstm_wizard_services_links','register_bbc_service_links');

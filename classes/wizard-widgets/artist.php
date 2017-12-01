@@ -1,5 +1,5 @@
 <?php
-class WP_Soundsystem_Wizard_Artist_Helper extends WP_Soundsystem_Wizard_Helper{
+class WP_Soundsystem_Wizard_Artist_Widget extends WP_Soundsystem_Wizard_Widget{
     var $user;
     function __construct(){
         $this->slug = 'artist';
@@ -28,7 +28,7 @@ class WP_Soundsystem_Wizard_Artist_Helper extends WP_Soundsystem_Wizard_Helper{
 
         //check and run
         foreach((array)$links as $key=>$link){
-            $links_str[] = sprintf('<li id="wpsstm-wizard-helper-%s-%s">%s</li>',$this->slug,$key,$link);
+            $links_str[] = sprintf('<li id="wpsstm-wizard-widget-%s-%s">%s</li>',$this->slug,$key,$link);
         }
         
         if ($links_str){
@@ -38,9 +38,9 @@ class WP_Soundsystem_Wizard_Artist_Helper extends WP_Soundsystem_Wizard_Helper{
     }
 }
 
-function register_artist_helpers($helpers){
-    $helpers[] = 'WP_Soundsystem_Wizard_Artist_Helper';
+function register_artist_widget($helpers){
+    $helpers[] = 'WP_Soundsystem_Wizard_Artist_Widget';
     return $helpers;
 }
 
-add_filter('wpsstm_get_wizard_helpers','register_artist_helpers');
+add_filter('wpsstm_get_wizard_widgets','register_artist_widget');

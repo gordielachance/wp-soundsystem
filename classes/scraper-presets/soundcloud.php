@@ -23,13 +23,6 @@ class WP_SoundSystem_Soundcloud_User_Api extends WP_SoundSystem_URL_Preset{
         );
         
     }
-    
-    function can_use_preset(){
-        if ( !wpsstm()->get_options('soundcloud_client_id') ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Soundcloud client ID missing.','wpsstm') );
-        }
-        return true;
-    }
 
     function can_handle_url(){
         
@@ -130,4 +123,6 @@ function register_soundcloud_preset($presets){
     return $presets;
 }
 
-add_action('wpsstm_get_scraper_presets','register_soundcloud_preset');
+if ( wpsstm()->get_options('soundcloud_client_id') ){
+    add_action('wpsstm_get_scraper_presets','register_soundcloud_preset');
+}

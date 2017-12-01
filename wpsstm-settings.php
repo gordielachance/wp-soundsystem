@@ -119,7 +119,7 @@ class WP_SoundSystem_Settings {
             $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
             
             /* 
-            Last.FM 
+            Last.fm 
             */
             $new_input['lastfm_client_id'] = ( isset($input['lastfm_client_id']) ) ? trim($input['lastfm_client_id']) : null;
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
@@ -335,12 +335,12 @@ class WP_SoundSystem_Settings {
         );
         
         /*
-        Last.FM
+        Last.fm
         */
         
         add_settings_section(
             'lastfm_settings', // ID
-            'Last.FM', // Title
+            'Last.fm', // Title
             array( $this, 'section_lastfm_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
@@ -646,7 +646,7 @@ class WP_SoundSystem_Settings {
     
     function section_lastfm_desc(){
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
-        printf(__('Required for the Last.FM preset and Last.FM features.  Get an API account %s.','wpsstm'),$api_link );
+        printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
             
         /*
         SCROBBLE ALONG
@@ -684,7 +684,7 @@ class WP_SoundSystem_Settings {
             '<input type="checkbox" name="%s[lastfm_scrobbling]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Allow users to scrobble songs to their Last.FM account.","wpsstm")
+            __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
         );
     }
     
@@ -695,7 +695,7 @@ class WP_SoundSystem_Settings {
             '<input type="checkbox" name="%s[lastfm_favorites]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Allow users to mark tracks as favorites and sync them with their Last.FM account.","wpsstm")
+            __("Allow users to mark tracks as favorites and sync them with their Last.fm account.","wpsstm")
         );
     }
     

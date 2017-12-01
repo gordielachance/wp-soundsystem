@@ -98,7 +98,7 @@ class WP_SoundSystem_LastFM_User{
         $token = $this->get_user_token();
 
         if ( is_wp_error($token) ) return $token;
-        if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.FM PHP Api Error: You must provilde a valid api token','wpsstm') );
+        if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.fm PHP Api Error: You must provilde a valid api token','wpsstm') );
 
         $auth_args = array(
             'apiKey' =>     wpsstm_lastfm()->api_key,
@@ -142,8 +142,8 @@ class WP_SoundSystem_LastFM_User{
         $api_key = wpsstm_lastfm()->api_key;
         $api_secret = wpsstm_lastfm()->api_secret;
         
-        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API key missing", "wpsstm" ) );
-        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.FM API secret missing", "wpsstm" ) );
+        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
+        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.fm API secret missing", "wpsstm" ) );
 
             
         $user_auth = null;

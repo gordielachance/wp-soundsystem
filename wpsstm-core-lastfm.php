@@ -102,7 +102,7 @@ class WP_SoundSystem_Core_LastFM{
     }
 
     /*
-    After user has authorized app on Last.FM; detect callback and set token transient.
+    After user has authorized app on Last.fm; detect callback and set token transient.
     */
     
     public function after_app_auth(){
@@ -120,8 +120,8 @@ class WP_SoundSystem_Core_LastFM{
 
     public function request_auth_token(){
 
-        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API key missing", "wpsstm" ) );
-        if ( !$this->api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API secret missing", "wpsstm" ) );
+        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
+        if ( !$this->api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API secret missing", "wpsstm" ) );
 
         try {
             $authentication = new AuthApi('gettoken', array(
@@ -170,7 +170,7 @@ class WP_SoundSystem_Core_LastFM{
     
     private function get_basic_api_auth(){
         
-        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.FM API key missing", "wpsstm" ) );
+        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
         
         if ($this->basic_auth === null){
             
@@ -195,7 +195,7 @@ class WP_SoundSystem_Core_LastFM{
     }
 
     public function handle_api_exception($e){
-        $message = sprintf(__('Last.FM PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage());
+        $message = sprintf(__('Last.fm PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage());
         wpsstm()->debug_log($message);
         return new WP_Error( 'lastfm_php_api', new WP_Error( 'lastfm_php_api',$message,$e->getCode() ) );
     }
@@ -444,7 +444,7 @@ class WP_SoundSystem_Core_LastFM{
         //enable scrobbler
         if ( wpsstm()->get_options('lastfm_scrobbling') ){
             $actions['scrobbler'] = array(
-                'text' =>       __('Last.FM scrobble', 'wpsstm'),
+                'text' =>       __('Last.fm scrobble', 'wpsstm'),
             );
         }
         

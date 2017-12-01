@@ -35,4 +35,14 @@ function register_indieshuffle_preset($presets){
     return $presets;
 }
 
+function register_indieshuffle_service_links($links){
+    $links[] = array(
+        'slug'      => 'indieshuffle',
+        'name'      => 'indie shuffle',
+        'url'       => 'https://www.indieshuffle.com/',
+    );
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_indieshuffle_preset');
+add_filter('wpsstm_wizard_services_links','register_indieshuffle_service_links');

@@ -46,7 +46,7 @@ But if the URL is not recognized, the advanced wizard will show up and you will 
 
 This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-**Native presets**: Last.FM, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing, Online Radio Box.
+**Native presets**: Last.fm, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing, Online Radio Box.
 
 You may also propose a **Frontend Tracklist Importer** to your visitors: just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
@@ -65,7 +65,7 @@ When managing a track, artist or album, the plugin can search for its **MusicBra
 It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) — an open data music database.
 For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
 
-= Last.FM =
+= Last.fm =
 
 The audio player can **scrobble** tracks to your Last.fm account; or add tracks to your Last.fm favorites.
 
@@ -91,7 +91,7 @@ This would be very appreciated — Thanks !
 = Dependencies =
 
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
-* [PHP Last.FM API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
+* [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
 
 = Contributors =
@@ -174,7 +174,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * fix shortcode fatal error when post requested does not exists
 
 = 1.8.0 =
-* better Last.FM presets (including last.fm stations)
+* better Last.fm presets (including last.fm stations)
 * improved JS player
 * improved caching stuff
 * improved CSS
@@ -373,7 +373,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = 0.9.9.0 =
 
 * new Deezer preset
-* Youtube sources (if any) for Last.FM preset
+* Youtube sources (if any) for Last.fm preset
 * improved player
 * improved sources
 

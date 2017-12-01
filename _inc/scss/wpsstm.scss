@@ -189,7 +189,7 @@ body.wpsstm-default,body.wp-admin{
         &.comma-list{
             list-style: none;
             display:inline;
-            li{
+            > li{
                 display:inline;
                 &:not(:last-child):after {
                   content: ", ";

@@ -26,16 +26,6 @@ class WP_SoundSystem_Spotify_URL_Playlists_Api extends WP_SoundSystem_URL_Preset
         );
         
     }
-    
-    function can_use_preset(){
-        if ( !$this->client_id ){
-            return new WP_Error( 'wpsstm_missing_client_id', __('Required Spotify client ID missing.','wpsstm') );
-        }
-        if ( !$this->client_secret ){
-            return new WP_Error( 'wpsstm_missing_client_secret', __('Required Spotify client secret missing.','wpsstm') );
-        }
-        return true;
-    }
 
     function can_handle_url(){
 
@@ -195,4 +185,6 @@ function register_spotify_presets($presets){
     return $presets;
 }
 
-add_action('wpsstm_get_scraper_presets','register_spotify_presets',10,2);
+if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
+    add_action('wpsstm_get_scraper_presets','register_spotify_presets',10,2);
+}

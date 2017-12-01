@@ -1,9 +1,9 @@
 <?php
-class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wizard_Helper{
+class WP_Soundsystem_Wizard_LastFM_UserStations_Widget extends WP_Soundsystem_Wizard_Widget{
     var $user;
     function __construct(){
         $this->slug = 'lastfm-user-stations';
-        $this->name = __('Last.FM user stations');
+        $this->name = __('Last.fm user stations');
     }
     function get_output(){
         $links = array();
@@ -15,7 +15,7 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
             $this->user = new WP_SoundSystem_LastFM_User();
             $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
             
-            $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.FM username','wpsstm'));
+            $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.fm username','wpsstm'));
 
             $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
             $links['recommendations'] = sprintf('<a href="#">%s</a>',__('Recommendations station','wpsstm') );
@@ -30,7 +30,7 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
 
         //check and run
         foreach((array)$links as $key=>$link){
-            $links_str[] = sprintf('<li id="wpsstm-wizard-helper-%s-%s">%s</li>',$this->slug,$key,$link);
+            $links_str[] = sprintf('<li id="wpsstm-wizard-widget-%s-%s">%s</li>',$this->slug,$key,$link);
         }
         
         if ($links_str){
@@ -40,9 +40,9 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Helper extends WP_Soundsystem_Wi
     }
 }
 
-function register_lastfm_helpers($helpers){
-    $helpers[] = 'WP_Soundsystem_Wizard_LastFM_UserStations_Helper';
+function register_lastfm_widgets($helpers){
+    $helpers[] = 'WP_Soundsystem_Wizard_LastFM_UserStations_Widget';
     return $helpers;
 }
 
-add_filter('wpsstm_get_wizard_helpers','register_lastfm_helpers');
+add_filter('wpsstm_get_wizard_widgets','register_lastfm_widgets');

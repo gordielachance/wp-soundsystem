@@ -35,4 +35,22 @@ function register_deezer_preset($presets){
     return $presets;
 }
 
+function register_deezer_service_links($links){
+    $links[] = array(
+        'slug'      => 'deezer',
+        'name'      => 'Deezer',
+        'url'       => 'https://www.deezer.com'
+    );
+
+    $links[] = array(
+        'slug'          => 'deezer-playlists',
+        'parent_slug'   => 'deezer',
+        'name'          => __('playlists','wpsstm'),
+        'example'       => 'http://www.deezer.com/fr/playlist/PLAYLIST_ID',
+    );
+    
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_deezer_preset');
+add_filter('wpsstm_wizard_services_links','register_deezer_service_links');

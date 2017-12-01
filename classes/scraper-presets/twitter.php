@@ -4,8 +4,6 @@ class WP_SoundSystem_Twitter_Timeline extends WP_SoundSystem_URL_Preset{
     var $preset_url =       'https://www.twitter.com/';
 
     private $user_slug;
-    
-    static $wizard_suggest = false; //Prefills the wizard but is not able to get a tracklist by itself, so don't populate frontend.
 
     function __construct($post_id = null){
         parent::__construct($post_id);

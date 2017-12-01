@@ -764,7 +764,7 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   display: none;
 }
 /* line 48, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers {
+#wizard-wrapper #wpsstm-wizard-widgets {
   list-style: none;
   font-size: .75em;
   position: relative;
@@ -775,7 +775,7 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   text-align: center;
 }
 /* line 55, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper {
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget {
   width: calc(33% - 1em);
   margin: .5em;
   box-sizing: border-box;
@@ -786,102 +786,112 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   border: 1px solid #eaeaea;
 }
 /* line 63, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url {
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services {
   width: calc(100% - 1em);
 }
-/* line 69, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper h3 {
+/* line 67, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list {
+  font-size: .8em;
+  margin: 0;
+  padding: 0;
+}
+/* line 71, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list:before {
+  content: ":\00a0";
+}
+/* line 78, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget h3 {
   margin-top: 0;
 }
-/* line 72, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper ul {
+/* line 81, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget ul {
   list-style: none;
 }
-/* line 75, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper input[type=text] {
+/* line 84, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget input[type=text] {
   font-size: 1em;
   text-align: center;
   background-color: white;
 }
-/* line 82, ../scss/_wpsstm-wizard.scss */
-#wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper:not(.wpsstm-wizard-helper-success) a {
+/* line 91, ../scss/_wpsstm-wizard.scss */
+#wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget:not(.wpsstm-wizard-widget-success) a {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
 
-/* line 92, ../scss/_wpsstm-wizard.scss */
+/* line 101, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;
 }
 
-/* line 97, ../scss/_wpsstm-wizard.scss */
+/* line 106, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections {
   border-bottom: 1px solid #eee;
   margin-bottom: 1em;
 }
-/* line 100, ../scss/_wpsstm-wizard.scss */
+/* line 109, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections #wpsstm-wizard-sections-header {
   clear: both;
   overflow: auto;
 }
-/* line 103, ../scss/_wpsstm-wizard.scss */
+/* line 112, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections #wpsstm-wizard-sections-header li {
   display: inline-block;
 }
-/* line 105, ../scss/_wpsstm-wizard.scss */
+/* line 114, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections #wpsstm-wizard-sections-header li.ui-tabs-active a {
   background: white;
   border-bottom: 0;
 }
-/* line 114, ../scss/_wpsstm-wizard.scss */
+/* line 123, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-source-content table.form-table > tbody th {
   display: none;
 }
-/* line 119, ../scss/_wpsstm-wizard.scss */
+/* line 128, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 50%;
 }
-/* line 122, ../scss/_wpsstm-wizard.scss */
+/* line 131, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced {
   display: none;
 }
-/* line 124, ../scss/_wpsstm-wizard.scss */
+/* line 133, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced.active {
   display: block;
 }
-/* line 127, ../scss/_wpsstm-wizard.scss */
+/* line 136, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc {
   padding: 1em;
   font-style: italic;
 }
-/* line 130, ../scss/_wpsstm-wizard.scss */
+/* line 139, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc code {
   font-style: normal;
 }
-/* line 135, ../scss/_wpsstm-wizard.scss */
+/* line 144, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table td {
   color: #999;
   padding: 5px;
   font-family: Consolas, Monaco, monospace;
 }
-/* line 141, ../scss/_wpsstm-wizard.scss */
+/* line 150, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:before {
   text-align: center;
   width: 20px;
   content: '~';
 }
-/* line 146, ../scss/_wpsstm-wizard.scss */
+/* line 155, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:after {
   text-align: center;
   width: 20px;
   content: '~m';
 }
-/* line 151, ../scss/_wpsstm-wizard.scss */
+/* line 160, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex input {
   width: 90%;
   color: #999;
 }
-/* line 161, ../scss/_wpsstm-wizard.scss */
+/* line 170, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-tracks-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 100%;
 }
@@ -947,7 +957,7 @@ DEFAULT STYLES
 body.wpsstm-default .ui-widget-overlay, body.wp-admin .ui-widget-overlay {
   opacity: .5;
   background: black;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
@@ -1257,16 +1267,16 @@ body.wpsstm-default .wpsstm-notice .wpsstm-close-notice, body.wp-admin .wpsstm-n
   right: 1em;
 }
 /* line 189, ../scss/wpsstm.scss */
-body.wpsstm-default ul.comma-list, body.wpsstm-default ul.wpsstm-track-loved-by-list, body.wpsstm-default ul.wpsstm-track-parents, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wpsstm-default ul, body.wp-admin ul.comma-list, body.wp-admin ul.wpsstm-track-loved-by-list, body.wp-admin ul.wpsstm-track-parents, body.wp-admin #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wp-admin ul {
+body.wpsstm-default ul.comma-list, body.wpsstm-default ul.wpsstm-track-loved-by-list, body.wpsstm-default ul.wpsstm-track-parents, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list, body.wp-admin ul.comma-list, body.wp-admin ul.wpsstm-track-loved-by-list, body.wp-admin ul.wpsstm-track-parents, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list {
   list-style: none;
   display: inline;
 }
 /* line 192, ../scss/wpsstm.scss */
-body.wpsstm-default ul.comma-list li, body.wpsstm-default ul.wpsstm-track-loved-by-list li, body.wpsstm-default ul.wpsstm-track-parents li, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wpsstm-default ul li, body.wp-admin ul.comma-list li, body.wp-admin ul.wpsstm-track-loved-by-list li, body.wp-admin ul.wpsstm-track-parents li, body.wp-admin #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wp-admin ul li {
+body.wpsstm-default ul.comma-list > li, body.wpsstm-default ul.wpsstm-track-loved-by-list > li, body.wpsstm-default ul.wpsstm-track-parents > li, body.wpsstm-default body.wp-admin ul.wpsstm-track-loved-by-list > li, body.wpsstm-default body.wp-admin ul.wpsstm-track-parents > li, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list > li, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list > li, body.wp-admin ul.comma-list > li, body.wp-admin body.wpsstm-default ul.wpsstm-track-loved-by-list > li, body.wp-admin body.wpsstm-default ul.wpsstm-track-parents > li, body.wp-admin ul.wpsstm-track-loved-by-list > li, body.wp-admin ul.wpsstm-track-parents > li, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list > li, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list > li {
   display: inline;
 }
 /* line 194, ../scss/wpsstm.scss */
-body.wpsstm-default ul.comma-list li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-loved-by-list li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-parents li:not(:last-child):after, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wpsstm-default ul li:not(:last-child):after, body.wp-admin ul.comma-list li:not(:last-child):after, body.wp-admin ul.wpsstm-track-loved-by-list li:not(:last-child):after, body.wp-admin ul.wpsstm-track-parents li:not(:last-child):after, body.wp-admin #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url ul li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-helpers .wpsstm-wizard-helper#wpsstm-wizard-helper-tracklist-url body.wp-admin ul li:not(:last-child):after {
+body.wpsstm-default ul.comma-list > li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-parents > li:not(:last-child):after, body.wpsstm-default body.wp-admin ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wpsstm-default body.wp-admin ul.wpsstm-track-parents > li:not(:last-child):after, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list > li:not(:last-child):after, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, body.wp-admin ul.comma-list > li:not(:last-child):after, body.wp-admin body.wpsstm-default ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wp-admin body.wpsstm-default ul.wpsstm-track-parents > li:not(:last-child):after, body.wp-admin ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wp-admin ul.wpsstm-track-parents > li:not(:last-child):after, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list > li:not(:last-child):after, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list > li:not(:last-child):after {
   content: ", ";
 }
 /* line 200, ../scss/wpsstm.scss */

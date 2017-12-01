@@ -27,4 +27,14 @@ function register_hypem_preset($presets){
     return $presets;
 }
 
+function register_hypem_service_links($links){
+    $links[] = array(
+        'slug'      => 'hypem',
+        'name'      => 'Hypem',
+        'url'       => 'https://www.hypem.com',
+    );
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_hypem_preset');
+add_filter('wpsstm_wizard_services_links','register_hypem_service_links');

@@ -1,6 +1,6 @@
 <?php
 
-abstract class WP_SoundSystem_LastFM_URL extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_LastFM_URL extends WP_SoundSystem_URL_Preset{
     var $preset_slug =      'lastfm';
     var $preset_url =       'https://www.last.fm';
     
@@ -13,6 +13,12 @@ abstract class WP_SoundSystem_LastFM_URL extends WP_SoundSystem_URL_Preset{
             'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
         );
+    }
+    
+    function can_handle_url(){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return ( !empty($matches) );
     }
 
     function get_user_slug(){
@@ -27,79 +33,39 @@ abstract class WP_SoundSystem_LastFM_URL extends WP_SoundSystem_URL_Preset{
     }
     
     function get_user_page(){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/.*/([^/]+)~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/[^/]+/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : 'library';
     }
     
     function get_artist_page(){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/.*/([^/]+)~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/([^/]+)~i';
         preg_match($pattern, $this->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : '+tracks';
     }
-
-}
-
-class WP_SoundSystem_LastFM_User_URL extends WP_SoundSystem_LastFM_URL{
-    var $preset_slug =      'lastfm-user';
-    var $preset_url =       'https://www.last.fm/user/XXX';
-    private $user_slug;
-    private $page_slug;
-
-    function __construct($post_id = null){
-        
-        parent::__construct($post_id);
-        $this->user_slug = $this->get_user_slug();
-        $this->page_slug = $this->get_user_page();
-        
-
-        
+    
+    function get_album_name(){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/(?!\+)([^/]+)~i';
+        preg_match($pattern, $this->feed_url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function can_handle_url(){
-        if ( !$this->user_slug ) return;
-        return true;
-    }
-
-    function get_remote_url(){
-        return sprintf('https://www.last.fm/fr/user/%s/%s',$this->user_slug,$this->page_slug);
-    }
-
-}
-
-class WP_SoundSystem_LastFM_Artist_URL extends WP_SoundSystem_LastFM_URL{
-    var $preset_slug =      'lastfm-artist';
-    var $preset_url =       'https://www.last.fm/music/XXX';
-    private $page_artist;
-    private $artist_slug;
-    private $page_slug;
-
-    function __construct($post_id = null){
-        
-        parent::__construct($post_id);
-        $this->artist_slug = $this->get_artist_slug();
-        $this->page_slug = $this->get_artist_page();
-    }
-    
-    function can_handle_url(){
-        if ( !$this->artist_slug ) return;
-        return true;
-    }
-
-    function get_remote_url(){
-        return sprintf('https://www.last.fm/music/%s/%s',$this->artist_slug,$this->page_slug);
-    }
-
-    
-    //On an artist page, artist is displayed only on the header page; not on each track.
-    //So use body_node as input here.
-
+    //Artist is displayed differently on artist/album/track pages.
     protected function get_track_artist($track_node){
-        if (!$this->page_artist){
+
+        $artist = $this->get_artist_slug();
+        
+        if ( !$artist = $this->get_artist_slug() ) return parent::get_track_artist($track_node); //not an artist page
+        
+        if ( $album = $this->get_album_name() ){
+            $selector = array('path'=>'[itemtype="http://schema.org/MusicGroup"] [itemprop="name"]','regex'=>null);
+            $artist = $this->parse_node($this->body_node,$selector);
+        }else{
             $selector = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
-            $this->page_artist = $this->parse_node($this->body_node,$selector);
+            $artist = $this->parse_node($this->body_node,$selector);
         }
-        return $this->page_artist;
+
+        return $artist;
     }
 
 }
@@ -145,7 +111,7 @@ class WP_SoundSystem_LastFM_Similar_Artist_Station extends WP_SoundSystem_LastFM
     }
 
     function get_remote_title(){
-        return sprintf( __('Last.FM stations (similar artist): %s','wpsstm'),$this->artist_slug );
+        return sprintf( __('Last.fm stations (similar artist): %s','wpsstm'),$this->artist_slug );
     }
 
 }
@@ -186,16 +152,37 @@ class WP_SoundSystem_LastFM_User_Recommandations_Station extends WP_SoundSystem_
     }
     
     function get_remote_title(){
-        return sprintf( __('Last.FM station for %s - %s','wpsstm'),$this->user_slug,$this->page_slug );
+        return sprintf( __('Last.fm station for %s - %s','wpsstm'),$this->user_slug,$this->page_slug );
     }
 }
 
 //register preset
 function register_lastfm_preset($presets){
-    $presets[] = 'WP_SoundSystem_LastFM_User_URL';
-    $presets[] = 'WP_SoundSystem_LastFM_Artist_URL';
+    $presets[] = 'WP_SoundSystem_LastFM_URL';
     $presets[] = 'WP_SoundSystem_LastFM_Similar_Artist_Station';
     $presets[] = 'WP_SoundSystem_LastFM_User_Recommandations_Station';
     return $presets;
 }
+
+
+function register_lastfm_service_links($links){
+    $links[] = array(
+        'slug'      => 'lastfm',
+        'name'      => 'Last.fm',
+        'url'       => 'https://www.last.fm/',
+    );
+
+    $links[] = array(
+        'slug'          => 'lastfm-stations',
+        'parent_slug'   => 'lastfm',
+        'name'          => __('stations','wpsstm'),
+        'example'       => 'https://www.bbc.co.uk/STATION',
+    );
+    
+
+    
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_lastfm_preset');
+add_filter('wpsstm_wizard_services_links','register_lastfm_service_links');

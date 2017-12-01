@@ -1,5 +1,5 @@
 <?php
-abstract class WP_Soundsystem_Wizard_Helper {
+abstract class WP_Soundsystem_Wizard_Widget {
     var $slug;
     var $name;
     var $desc;

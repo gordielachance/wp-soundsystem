@@ -1012,7 +1012,7 @@ class WP_SoundSystem_Core_Wizard{
         $helpers = array();
         $helpers_output = array();
         
-        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-helpers' );
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-widgets' );
         require_once($presets_path . 'default.php'); //default class
         
         //get all files in /presets directory
@@ -1021,7 +1021,7 @@ class WP_SoundSystem_Core_Wizard{
         foreach ($preset_files as $file) {
             require_once($file);
         }
-        $class_names = apply_filters('wpsstm_get_wizard_helpers',$class_names);
+        $class_names = apply_filters('wpsstm_get_wizard_widgets',$class_names);
 
         //check and run
         foreach((array)$class_names as $class_name){
@@ -1033,12 +1033,16 @@ class WP_SoundSystem_Core_Wizard{
         foreach((array)$helpers as $helper){
             $helper_title = ($helper->name) ? sprintf('<h3>%s</h3>',$helper->name) : null;
             $helper_desc = ($helper->desc) ? sprintf('<p>%s</p>',$helper->desc) : null;
-            $helper_content = ($content = $helper->get_output()) ? sprintf('<div>%s</div>',$content) : null;
             
-            $helpers_output[] = sprintf('<li class="wpsstm-wizard-helper" id="wpsstm-wizard-helper-%s">%s%s%s</li>',$helper->slug,$helper_title,$helper_desc,$helper_content);
+            if ( $content = $helper->get_output() ){
+                $helper_content = ($content = $helper->get_output()) ? sprintf('<div class="wpsstm-wizard-widget-content">%s</div>',$content) : null;
+
+                $helpers_output[] = sprintf('<li class="wpsstm-wizard-widget" id="wpsstm-wizard-widget-%s">%s%s%s</li>',$helper->slug,$helper_title,$helper_desc,$helper_content);
+            }
+
         }
 
-        if ($helpers_output) return sprintf('<ul id="wpsstm-wizard-helpers">%s</ul>',implode("\n",$helpers_output));
+        if ($helpers_output) return sprintf('<ul id="wpsstm-wizard-widgets">%s</ul>',implode("\n",$helpers_output));
 
     }
 

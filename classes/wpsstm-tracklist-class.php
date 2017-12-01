@@ -293,11 +293,15 @@ class WP_SoundSystem_Tracklist{
         //array unique
         $pending_tracks = array_unique($tracks, SORT_REGULAR);
         $valid_tracks = $rejected_tracks = array();
+        $error_codes = array();
         
         foreach($pending_tracks as $track){
-            if ( !$track->validate_track($this->tracks_strict) ){
+            $valid = $track->validate_track($this->tracks_strict);
+            if ( is_wp_error($valid) ){
+                
+                $error_codes[] = $valid->get_error_code();
                 /*
-                wpsstm()->debug_log(json_encode(sprintf('artist:%s - title:%s - album:%s',$this->artist,$this->title,$this->album),JSON_UNESCAPED_UNICODE), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
+                wpsstm()->debug_log($valid->get_error_message(), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
                 */
                 $rejected_tracks[] = $track;
                 continue;
@@ -306,7 +310,8 @@ class WP_SoundSystem_Tracklist{
         }
         
         if ( $rejected_tracks ){
-            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'rejected'=>json_encode(array($rejected_tracks)) ), "WP_SoundSystem_Tracklist::validate_tracks");
+            $error_codes = array_unique($error_codes);
+            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WP_SoundSystem_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
@@ -1023,7 +1028,9 @@ class WP_SoundSystem_Tracklist{
 
 
     function populate_tracks($args = null){
-
+        
+        if ( $this->did_query_tracks ) return true;
+        
         if ( $this->ajax_refresh ){
             
             /*
@@ -1040,8 +1047,6 @@ class WP_SoundSystem_Tracklist{
                 return $error;
             }
         }
-        
-        if ( $this->did_query_tracks ) return true;
 
         $tracks_ids = $this->get_tracks($args);
 

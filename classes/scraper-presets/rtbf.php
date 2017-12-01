@@ -4,8 +4,6 @@ class WP_SoundSystem_RTBF_Stations extends WP_SoundSystem_URL_Preset{
     var $preset_url =       'https://www.rtbf.be/';
 
     private $station_slug;
-    
-    static $wizard_suggest = false;
 
     function __construct($post_id = null){
         parent::__construct($post_id);

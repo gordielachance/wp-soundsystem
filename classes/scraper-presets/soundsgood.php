@@ -19,12 +19,7 @@ class WP_SoundSystem_Soundsgood_Playlists_Api extends WP_SoundSystem_URL_Preset{
         );
         
     }
-    
-    function can_use_preset(){
-        if ( !$this->client_id ) return;
-        return true;
-    }
-    
+
     function can_handle_url(){
         if ( !$this->station_slug ) return;
         return true;
@@ -45,7 +40,7 @@ class WP_SoundSystem_Soundsgood_Playlists_Api extends WP_SoundSystem_URL_Preset{
         return $args;
     }
 
-    function get_client_id(){
+    static function get_client_id(){
         return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
     }
     
@@ -61,4 +56,7 @@ function register_soundsgood_preset($presets){
     return $presets;
 }
 
-add_action('wpsstm_get_scraper_presets','register_soundsgood_preset');
+if ( WP_SoundSystem_Soundsgood_Playlists_Api::get_client_id() ){
+    add_action('wpsstm_get_scraper_presets','register_soundsgood_preset');
+}
+

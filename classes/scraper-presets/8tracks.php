@@ -96,4 +96,16 @@ function register_8tracks_playlists_preset($presets){
     return $presets;
 }
 
+function register_8tracks_service_link($links){
+    $links[] = array(
+        'slug'      => '8tracks',
+        'name'      => sprintf(__('%s playlists','wpsstm'),'8tracks'),
+        'desc'      => null,
+        'url'       => 'https://8tracks.com',
+        'example'   => 'https://8tracks.com/USER/PLAYLIST',
+    );
+    return $links;
+}
+
 add_action('wpsstm_get_scraper_presets','register_8tracks_playlists_preset');
+add_filter('wpsstm_wizard_services_links','register_8tracks_service_link');

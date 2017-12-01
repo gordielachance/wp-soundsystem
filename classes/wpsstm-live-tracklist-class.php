@@ -5,7 +5,7 @@ use \ForceUTF8\Encoding;
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $tracklist_type = 'live';
-    public $ajax_refresh = true; //should we query the subtracks through ajax ? false = Good for debug.
+    public $ajax_refresh = false; //should we query the subtracks through ajax ? false = Good for debug.
     
 
     //url stuff
@@ -540,7 +540,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     protected function get_track_nodes($body_node){
-        
+
         $selector = $this->get_selectors( array('tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
 
