@@ -149,6 +149,14 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= XXX =
+* presets: use filters instead of extending the tracklist class
+* JS - improved toggleChildren.js
+* Reddit : fetch tracklist title in Subreddit HTML
+* 'edit backend' action for tracklists/tracks/sources
+* new 'autoload' setting for tracklists
+* .playable-opacity setting / CSS
+
 = 1.8.7 =
 * restored XSPF preset
 * removed FontAwesome from SCSS
