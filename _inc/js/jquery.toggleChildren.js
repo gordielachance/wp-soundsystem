@@ -8,10 +8,10 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
             // OPTIONS
             var defaults = {
                 childrenSelector:       '> *',
-                btMore:                 null, //jQuery item or selector
-                btLess:                 null, //jQuery item or selector
+                btMore:                 null, //jQuery item/selector, null, or false
+                btLess:                 null, //jQuery item/selector, null, or false
                 childrenShowCount:      false,
-                childrenMax:            3,
+                childrenToShow:         3, //int, or jQuery item/selector
                 speed:                  500,
                 moreText:               'Read more', //if btMore is not defined
                 lessText:               'Read less', //if btLess is not defined
@@ -21,90 +21,104 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
             // FOR EACH MATCHED ELEMENT
             return this.each(function() {
                 var op =                options;
-                var $container =        $(this);
-                var $children =         $container.find(op.childrenSelector);
-                var totalChildren =     $children.length;
-                var $btMore;
-                var $btLess;
+                var $content =          $(this);
+                var $container =        $(this).parent(".toggle-children-container");
+                var childEls =          $content.find(op.childrenSelector);
+                var btMoreEl =           $container.find('> .toggle-children-more');
+                var btLessEl;            $container.find('> .toggle-children-less');
                 var speedPerChild;
-                var $itemsCount;
-                
-                //Wrap into a container
-                var hasInit = ( $container.parent(".toggle-children-container").length > 0 );
-                if ( !hasInit ){
-                    $container = $container.wrap('<p class="toggle-children-container" />');
-                }
+                var countEl;
+                var visibleChildren;
+                var hiddenChildren;
 
-                // Get or create "Read More" button
-                if ( op.btMore && $(op.btMore).length ) {
-                    $btMore = $(op.btMore);
-                }else if ( $container.nextAll(".toggle-children-more").length > 0 ){ //has already been created
-                    $btMore = $container.nextAll(".toggle-children-more");
-                }else{
-                    $btMore = $('<a href="#">'+op.moreText+'</a>');
-                    $container.after($btMore);
-                }
-
-                $btMore.addClass('toggle-children-link toggle-children-more');
-                
-                // Show children count
-                if(op.childrenShowCount){
-                    if ( $btMore.find(".toggle-children-count").length > 0 ){ //has already been created
-                        $itemsCount = $btMore.find(".toggle-children-count");
-                    }else{
-                        $itemsCount = $('<small class="toggle-children-count" />');
-                        $btMore.append($itemsCount);   
+                //initialize if not done yet
+                if ( !$container.length){
+                    $container = $('<span class="toggle-children-container" />');
+                    
+                    //wrap container
+                    $content = $content.wrap($container);
+                    
+                    /*
+                    create nav
+                    */
+                    
+                    //more
+                    if ( $(op.btMore).length ) { //existing
+                        btMoreEl = $(op.btMore);
+                        countEl = btMoreEl.find(".toggle-children-count");
+                    }else if( op.btMore === null ){ //new
+                        btMoreEl = $('<a href="#">'+op.moreText+'</a>');
+                        $content.after(btMoreEl);
+                        if(op.childrenShowCount){
+                            countEl = $('<small class="toggle-children-count" />');
+                            btMoreEl.append(countEl);   
+                        }
                     }
-                    $itemsCount.text(' +' + (totalChildren - op.childrenMax));
-                }
+                    
+                    if ( btMoreEl ){
+                        btMoreEl.addClass('toggle-children-link toggle-children-more');
+                    }
 
-                // Get or create "Read less" button
-                if ( op.btLess && $(op.btLess).length ) {
-                    $btLess = $(op.btLess);
-                }else if ( $container.nextAll(".toggle-children-less").length > 0 ){ //has already been created
-                    $btLess = $container.nextAll(".toggle-children-less");
-                }else{
-                    $btLess = $('<a href="#">'+op.lessText+'</a>');
-                    $container.after($btLess);
+                    //less
+                    if ( $(op.btLess).length ) { //existing
+                        btLessEl = $(op.btLess);
+                    }else if( op.btLess === null ){ //new
+                        btLessEl = $('<a href="#">'+op.lessText+'</a>');
+                        $content.after(btLessEl);
+                    }
+                    
+                    if ( btLessEl ){
+                        btLessEl.addClass('toggle-children-link toggle-children-less');
+                        btLessEl.hide(); //hide it by default
+                    }
+
                 }
                 
-                $btLess.addClass('toggle-children-link toggle-children-less');
-                $btLess.hide(); //hide it by default
+                //get children to show
+                if ( $.isNumeric( op.childrenToShow ) ){ 
+                    visibleChildren = $(childEls).slice(0,op.childrenToShow);
+                }else{ //show those items
+                    visibleChildren = $(childEls).filter(op.childrenToShow);
+                }
+                
+                //get children to hide
+                hiddenChildren = $(childEls).not(visibleChildren);
+
+                // Update children count
+                if( op.childrenShowCount && $(countEl) ){
+                    $(countEl).text( ' +' + hiddenChildren.length );
+                }
 
                 // Get animation speed per LI; Divide the total speed by num of LIs. 
                 // Avoid dividing by 0 and make it at least 1 for small numbers.
-                if ( totalChildren > 0 && op.speed > 0  ){ 
-                    speedPerChild = Math.round( op.speed / totalChildren );
+                if ( $(childEls).length > 0 && op.speed > 0  ){ 
+                    speedPerChild = Math.round( op.speed / $(childEls).length );
                     if ( speedPerChild < 1 ) { speedPerChild = 1; }
                 } else { 
                     speedPerChild = 0; 
                 }
 
-                // If list has more than the "childrenMax" option
-                if ( (totalChildren > 0) && (totalChildren > op.childrenMax) ){
+                //show & hide children
+                visibleChildren.show();
+                hiddenChildren.hide();
+
+                // Some items are hidden
+                if ( $(childEls).length > $(visibleChildren).length ){
                     
-                    // Initial Page Load: Hide each LI element over the max
-                    $children.each(function(index){
-                        if ( (index+1) > op.childrenMax ) {
-                            $(this).hide(0);
-                        } else {
-                            $(this).show(0);
-                        }
-                    });
-                    
-                    // Get array of children past the maximum option 
-                    var $childrenSliced = $children.slice(op.childrenMax);
+                    //show navigation
+                    $(btMoreEl).show();
+                    $(btLessEl).hide();
 
                     // READ MORE
-                    $btMore.off('click').on("click", function(e){
+                    $(btMoreEl).off('click').on("click", function(e){
                         
-                        $btMore.hide();
-                        $btLess.show();
+                        $(btMoreEl).hide();
+                        $(btLessEl).show();
 
                         // Sequentially show the list items
                         // For more info on this awesome function: http://goo.gl/dW0nM
                         var i = 0;
-                        $childrenSliced.each(function () {
+                        hiddenChildren.each(function () {
                           $(this).delay(speedPerChild*i).slideDown(speedPerChild,'linear');
                           i++;
                         });
@@ -114,13 +128,13 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                     });
                     
                     // READ LESS
-                    $btLess.off('click').on("click", function(e){
+                    $(btLessEl).off('click').on("click", function(e){
                         
-                        $btMore.show();
-                        $btLess.hide();
+                        $(btMoreEl).show();
+                        $(btLessEl).hide();
 
-                        var i = $childrenSliced.length - 1; 
-                        $childrenSliced.each(function () {
+                        var i = hiddenChildren.length - 1; 
+                        hiddenChildren.each(function () {
                           $(this).delay(speedPerChild*i).slideUp(speedPerChild,'linear');
                           i--;
                         });
@@ -129,16 +143,12 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                         e.preventDefault();
                     });
                     
-                }else {
-                    // LIST HAS LESS THAN THE MAX
-                    // Hide buttons
-                    $btMore.hide();
-                    $btLess.hide();
+                }else { //all items are displayed
                     
-                    // Show all list items that may have been hidden
-                    $children.each(function(index){
-                        $(this).show(0);
-                    });
+                    //hide navigation
+                    $(btMoreEl).hide();
+                    $(btLessEl).hide();
+                    
                 }
             });
         }

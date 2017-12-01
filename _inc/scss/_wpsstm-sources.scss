@@ -81,6 +81,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-source-action-move a:before{
                 content: "\f07d";//.fa-arrows-v;
             }
+            &#wpsstm-source-action-edit-backend a:before{
+                content:"\f084";//.fa-key;
+            }
         }
     }
     

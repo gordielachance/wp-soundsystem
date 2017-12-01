@@ -1,146 +1,149 @@
 <?php
 
-class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Live_Playlist_Preset{
+class WP_SoundSystem_Spotify_URL_Playlists_Api{
+    var $tracklist;
 
-    var $preset_slug =      'spotify-playlist-url';
-    var $preset_url =       'https://open.spotify.com';
+    private $token = null;
+    private $client_id;
+    private $client_secret;
+    private $user_slug;
+    private $playlist_slug;
 
-    var $preset_options =  array(
-        'selectors' => array(
-            'tracks'           => array('path'=>'root > items'),
-            'track_artist'     => array('path'=>'track > artists > name'),
-            'track_album'      => array('path'=>'track > album > name'),
-            'track_title'      => array('path'=>'track > name'),
-        )
-    );
-    
-    var $token = null;
-    var $client_id;
-    var $client_secret;
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-
-        $this->preset_name = __('Spotify Playlists','wpsstm');
-
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->client_id = wpsstm()->get_options('spotify_client_id');
         $this->client_secret = wpsstm()->get_options('spotify_client_secret');
-
-    }
-    
-    static function can_use_preset(){
-        if ( !wpsstm()->get_options('spotify_client_id') ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Spotify client ID missing.','wpsstm') );
-        }
-        if ( !wpsstm()->get_options('spotify_client_secret') ){
-            return new WP_Error( 'wpsstm_soundcloud_missing_client_id', __('Required Spotify client secret missing.','wpsstm') );
-        }
-        return true;
-    }
-    
-    static function can_handle_url($url){
-
-        if ( !$user_slug = self::get_user_slug($url) ) return;
-        if ( !$playlist_slug = self::get_playlist_slug($url) ) return;
-
-        return true;
-    }
-    
-    function get_remote_url(){
-
-        $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',self::get_user_slug($this->feed_url),self::get_playlist_slug($this->feed_url));
-
-        //handle pagination
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['page_items_limit'],
-            'offset'    => ($this->request_pagination['current_page'] - 1) * $this->request_pagination['page_items_limit']
-        );
         
-        $url = add_query_arg($pagination_args,$url);
+        $this->user_slug = $this->get_user_slug();
+        $this->playlist_slug = $this->get_playlist_slug();
+
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_filter( 'wppstm_live_tracklist_pagination',array($this,'get_remote_pagination') );
+        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
+        add_filter( 'wpsstm_live_tracklist_author',array($this,'get_remote_author') );
+        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args') );
+        
+    }
+
+    function can_handle_url(){
+
+        if ( !$this->user_slug ) return;
+        if ( !$this->playlist_slug ) return;
+
+        return true;
+    }
+
+    function get_remote_url($url){
+        
+        if ( $this->can_handle_url() ){
+            $url = sprintf('https://api.spotify.com/v1/users/%s/playlists/%s/tracks',$this->user_slug,$this->playlist_slug);
+
+            //handle pagination
+            $limit = $this->tracklist->request_pagination['page_items_limit'];
+            $pagination_args = array(
+                'limit'     => $limit,
+                'offset'    => ($this->tracklist->request_pagination['current_page'] - 1) * $limit
+            );
+
+            $url = add_query_arg($pagination_args,$url);
+        }
+
         return $url;
         
 
     }
     
-    static function get_user_slug($url){
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'           => array('path'=>'root > items'),
+                'track_artist'     => array('path'=>'track > artists > name'),
+                'track_album'      => array('path'=>'track > album > name'),
+                'track_title'      => array('path'=>'track > name'),
+            );
+        }
+        return $options;
+    }
+    
+    function get_user_slug(){
         $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
 
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    static function get_playlist_slug($url){
+    function get_playlist_slug(){
         $pattern = '~^https?://(?:open|play).spotify.com/user/[^/]+/playlist/([\w\d]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
-
-    function get_remote_tracks($args = null){
-        
-        $track_count = $this->get_spotify_playlist_track_count();
-        
-        if ( is_wp_error($track_count) ){
-            return $track_count;
-        }
-        
-        $this->track_count = $track_count;
-        
-        //init pagination before request
-        $pagination_args = array(
-            'page_items_limit'  => 100
-        );
-
-        $this->set_request_pagination( $pagination_args );
-        
-        return parent::get_remote_tracks($args);
-    }
-    function get_remote_title(){
-        if ( !$user_id = self::get_user_slug($this->feed_url) ) return;
-        if ( !$playlist_id = self::get_playlist_slug($this->feed_url) ) return;
-        
-        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
+    
+    function get_playlist_data(){
+        //TO FIX use transient ?
+        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$this->user_slug,$this->playlist_slug), $this->tracklist->get_request_args() );
         
         $json = wp_remote_retrieve_body($response);
         
         if ( is_wp_error($json) ) return $json;
         
-        $api = json_decode($json,true);
-        
-        return wpsstm_get_array_value('name', $api);
+        return json_decode($json,true);
     }
-    
-    function get_tracklist_author(){
-        return self::get_user_slug($this->feed_url);
-    }
-    
-    //TO FIX TO IMPROVE just get playlist data ?
-    protected function get_spotify_playlist_track_count(){
 
-        if ( !$user_id = self::get_user_slug($this->feed_url) ) return;
-        if ( !$playlist_id = self::get_playlist_slug($this->feed_url) ) return;
+    function get_remote_pagination($pagination){
+        
+        if ( $this->can_handle_url() ){
+            $data = $this->get_playlist_data();
 
-        $response = wp_remote_get( sprintf('https://api.spotify.com/v1/users/%s/playlists/%s',$user_id,$playlist_id), $this->get_request_args() );
-        
-        $json = wp_remote_retrieve_body($response);
-        
-        if ( is_wp_error($json) ){
-            return $json;
-        }else{
-            $api = json_decode($json,true);
-            return wpsstm_get_array_value(array('tracks','total'), $api);
+            if ( is_wp_error($data) ){
+                return $data;
+            }
+
+            //TO FIX not very clean ? Should we remove track_count and use pagination variable only ?
+            $this->tracklist->track_count = wpsstm_get_array_value(array('tracks','total'), $data);
+
+            //init pagination before request
+            $pagination['page_items_limit'] = 100;
+            
+
         }
         
+        return $pagination;
+
     }
     
-    function get_request_args(){
-        $args = parent::get_request_args();
-
-        if ( $token = $this->get_access_token() ){
-
-            $args['headers']['Authorization'] = 'Bearer ' . $token;           
-        }
+    function get_remote_title($title){
         
-        $args['headers']['Accept'] = 'application/json';
+        if ( $this->can_handle_url() ){
+            $data = $this->get_playlist_data();
+            if ( !is_wp_error($data) ){
+                 $title = wpsstm_get_array_value('name', $data);
+            }
+           
+        }
+        return $title;
+
+    }
+    
+    function get_remote_author($author){
+        if ( $this->can_handle_url() ){
+            $author = $this->user_slug;
+        }
+        return $author;
+    }
+
+    function remote_request_args($args){
+        
+        if ( $this->can_handle_url() ){
+        
+            if ( $token = $this->get_access_token() ){
+                $args['headers']['Authorization'] = 'Bearer ' . $token;           
+            }
+
+            $args['headers']['Accept'] = 'application/json';
+            
+        }
 
         return $args;
     }
@@ -179,29 +182,43 @@ class WP_SoundSystem_Preset_Spotify_URL_Playlists_Api extends WP_SoundSystem_Liv
 }
 
 //Spotify Playlists URIs
-class WP_SoundSystem_Preset_Spotify_URI_Playlists_Api extends WP_SoundSystem_Preset_Spotify_URL_Playlists_Api{
-    var $preset_slug =      'spotify-playlist-uri';
-    var $pattern = '~^spotify:user:([^/]+):playlist:([\w\d]+)~i';
-    
-    static function get_user_slug($url){
+class WP_SoundSystem_Spotify_URI_Playlists_Api extends WP_SoundSystem_Spotify_URL_Playlists_Api{
+
+    function get_user_slug(){
         $pattern = '~^spotify:user:([^:]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    static function get_playlist_slug($url){
+    function get_playlist_slug(){
         $pattern = '~^spotify:user:.*:playlist:([\w\d]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
 }
 
 //register presets
-function register_spotify_presets($presets){
-    $presets[] = 'WP_SoundSystem_Preset_Spotify_URL_Playlists_Api';
-    $presets[] = 'WP_SoundSystem_Preset_Spotify_URI_Playlists_Api';
-    return $presets;
+function register_spotify_presets($tracklist){
+    new WP_SoundSystem_Spotify_URL_Playlists_Api($tracklist);
+    new WP_SoundSystem_Spotify_URI_Playlists_Api($tracklist);
 }
-
-add_filter('wpsstm_get_scraper_presets','register_spotify_presets');
+function register_spotify_service_links($links){
+    $links[] = array(
+        'slug'      => 'spotify',
+        'name'      => 'Spotify',
+        'url'       => 'https://www.spotify.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'https://open.spotify.com/user/USER_SLUG/playlist/PLAYLIST_ID',
+            ),
+        )
+    );
+    return $links;
+}
+if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
+    add_filter('wpsstm_wizard_services_links','register_spotify_service_links');
+    add_action('wpsstm_get_remote_tracks','register_spotify_presets');
+}

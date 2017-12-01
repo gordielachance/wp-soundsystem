@@ -266,25 +266,26 @@ class WP_SoundSystem_Track{
     function validate_track($strict = true){
 
         if ($strict){
-            //keep only tracks having artist AND title
-            $valid = ($this->artist && $this->title);
-            //artists & title would probably not be equal
-            if ( $valid && ($this->artist == $this->title) ) {
-                $valid = false;
+            if (!$this->artist){
+                return new WP_Error( 'wpsstm_missing_track_artist', __("No artist found for this track.",'wpsstm') );
             }
-        }else{
-            //keep only tracks having artist OR title (Wizard)
-            $valid = ($this->artist || $this->title);
+            if (!$this->title){
+                return new WP_Error( 'wpsstm_missing_track_title', __("No title found for this track.",'wpsstm') );
+            }
+        }else{ //wizard mode
+            if ( !$this->artist || !$this->title ){
+                return new WP_Error( 'wpsstm_missing_track_details', __("No artist or title found for this track.",'wpsstm') );
+            }
         }
-
-        return $valid;
-
+        return true;
     }
 
     function save_track($args = null){
         
-        if ( !$this->validate_track() ){
-            return new WP_Error( 'wpsstm_cannot_validate_track', __("Error while validating the track.",'wpsstm') );
+        $valid = $this->validate_track();
+        
+        if ( is_wp_error( $valid ) ){
+            return new WP_Error( 'wpsstm_cannot_validate_track', sprintf(__("Error while validating the track: %s",'wpsstm'),$valid->get_error_message() ) );
         }
         
         $post_id = null;
@@ -715,6 +716,7 @@ class WP_SoundSystem_Track{
         if ($can_edit_track){
             $actions['sources'] = array(
                 'text' =>       __('Sources manager','wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Sources manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('sources-manager'),
             );
@@ -722,10 +724,20 @@ class WP_SoundSystem_Track{
 
         //delete track
         if ($can_delete_tracks){
-            $actions['trash'] = array(
+            $actions['delete'] = array(
                 'text' =>      __('Trash'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('trash track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
+            );
+        }
+        
+        //backend
+        if ($can_edit_track){
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit backend', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
+                'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
         
@@ -733,9 +745,7 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['sources'],$actions['trash']);
-
-                $popup_action_slugs = array('about','details','edit','playlists','sources','trash');
+                unset($actions['edit'],$actions['sources'],$actions['delete'],$actions['edit-backend']);
 
             break;
             case 'popup':
@@ -771,7 +781,7 @@ class WP_SoundSystem_Track{
             'wpsstm-track',
         );
         
-        $classes[] = ( !$this->validate_track() ) ? 'track-invalid' : null;
+        $classes[] = is_wp_error( $this->validate_track() ) ? 'track-invalid' : null;
         
         if ( $this->is_track_loved_by() ){
             $classes[] = 'wpsstm-loved-track';

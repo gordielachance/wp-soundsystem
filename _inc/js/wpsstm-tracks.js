@@ -187,8 +187,8 @@
         if ( newTracksCount <= visibleTracksCount ) return;
 
         if ( tracklist_obj.options.toggle_tracklist ){
-            track_obj.tracklist.toggleTracklist({
-                childrenMax:newTracksCount
+            track_obj.tracklist.showMoreLessTracks({
+                childrenToShow:newTracksCount
             });
         }
         
@@ -253,7 +253,7 @@ class WpsstmTrack {
         return deferredObject.promise();
     }
 
-    set_bottom_trackinfo(){
+    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER
         var self = this;
         //track infos
         
@@ -265,11 +265,11 @@ class WpsstmTrack {
             wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
 
-        var list = $('<table class="wpsstm-tracks-list"></table>');
+        var list = $('<table class="wpsstm-tracks-list"></table>'); 
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed
-        
+
         $(list).append(row);
 
         wpsstm.bottom_trackinfo_el.html(list);

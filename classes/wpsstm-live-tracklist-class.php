@@ -5,15 +5,13 @@ use \ForceUTF8\Encoding;
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $tracklist_type = 'live';
-    public $ajax_refresh = true;//should we query the subtracks through ajax ?
+    public $ajax_refresh = true; //should we query the subtracks through ajax ? false = Good for debug.
     
-    //preset infos
-    var $preset_slug = 'default';
-    var $preset_name = null;
 
     //url stuff
-    var $variables = array(); //list of variables that matches the regex groups from $pattern
     public $feed_url = null;
+    public $redirect_url = null;
+    var $scraper_options = array();
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
 
@@ -32,7 +30,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     public $datas = null;
 
     public $notices = array();
-    
+
     //request
     static $querypath_options = array(
         'omit_xml_declaration'      => true,
@@ -46,18 +44,16 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         parent::__construct($post_id);
         
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
-
         $this->preset_name = __('HTML Scraper','wpsstm');
         
-        $this->options = $this->options_default = $this->get_default_options();
+        $this->scraper_options = $this->get_default_scraper_options();
 
         if ($this->post_id){
 
             $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
-
-            if ( $options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name ,true) ){
-                $this->options = array_replace_recursive((array)$this->options_default,(array)$options); //last one has priority
-            }
+            
+            $db_options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name,true);
+            $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$db_options); //last one has priority
 
             if ($this->feed_url){
                 $this->location = $this->feed_url;
@@ -76,7 +72,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
 
-    protected function get_default_options(){
+    protected function get_default_scraper_options(){
         $live_options = array(
             'selectors' => array(
                 'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
@@ -97,17 +93,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'datas_cache_min'           => 0, 
         );
         
-        return array_replace_recursive((array)parent::get_default_options(),$live_options); //last one has priority
+        return $live_options;
         
     }
-    
+
     /*
     Compare Tracks / Tracks Details wizard options to check if the user settings match the default preset settings.
     */
     function get_user_edited_scraper_options(){
 
-        $default_options = $this->options_default;
-        $options = $this->options;
+        $default_options = $this->get_default_scraper_options();
+        $options = $this->get_scraper_options();
 
         //compare multi-dimensionnal array
         $diff = wpsstm_array_recursive_diff($options,$default_options);
@@ -135,7 +131,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         //sort
-        if ($this->get_options('tracks_order') == 'asc'){
+        if ($this->get_scraper_options('tracks_order') == 'asc'){
             $tracks = array_reverse($tracks);
         }
 
@@ -162,7 +158,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         SAVE TRACKS 
         if cache is enabled
         */
-        if ( $cache_duration_min = $this->get_options('datas_cache_min') ){
+        if ( $cache_duration_min = $this->get_scraper_options('datas_cache_min') ){
             $this->save_live_tracklist();
         }
 
@@ -258,8 +254,17 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     protected function get_remote_tracks(){
 
         $raw_tracks = array();
+        
+        do_action('wpsstm_get_remote_tracks',$this);
 
-        while ($this->request_pagination['current_page'] <= $this->request_pagination['total_pages']) {
+        //count total pages
+        $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination);
+        
+        if ( $this->request_pagination['page_items_limit'] > 0 ){
+            $this->request_pagination['total_pages'] = ceil( $this->track_count / $this->request_pagination['page_items_limit'] );
+        }
+
+        while ( $this->request_pagination['current_page'] <= $this->request_pagination['total_pages'] ) {
             if ( $page_raw_tracks = $this->get_remote_page_tracks() ) {
                 if ( is_wp_error($page_raw_tracks) ) return $page_raw_tracks;
                 $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
@@ -273,6 +278,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     private function get_remote_page_tracks(){
+        
+        
 
         $body_node = $this->get_body_node();
         if ( is_wp_error($body_node) ){
@@ -283,6 +290,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
         $this->body_node = $body_node;
+        
+        do_action('wpsstm_after_get_remote_body',$this);
 
         //tracks HTML
         $track_nodes = $this->get_track_nodes($this->body_node);
@@ -296,38 +305,35 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         return $tracks;
     }
-    
-    //if your preset needs a redirection; override this function in your preset
-    function get_remote_url(){
-        return $this->feed_url;
-    }
-    
+
     /*
     Arguments for the remote request.  (Could be overriden for presets).
     https://codex.wordpress.org/Function_Reference/wp_remote_get
     */
     
-    protected function get_request_args(){
-        return array(
+    public function get_request_args(){
+        $defaults = array(
             'headers'   => array(
                 'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
             )
         );
+        return apply_filters('wpsstm_live_tracklist_request_args',$defaults);
     }
     
     protected function get_remote_response(){
-        
+
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
-        $url = $this->get_remote_url(); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
-        wpsstm()->debug_log($url,'get_remote_response url' );
-        
-        if ( is_wp_error($url) ){
-            $response = $url;
+
+        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
+        wpsstm()->debug_log($this->redirect_url,'get_remote_response url' );
+
+        if ( is_wp_error($this->redirect_url) ){
+            $response = $this->redirect_url;
         }else{
-            
-            $response = wp_remote_get( $url, $this->get_request_args() );
+
+            $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
 
             if ( !is_wp_error($response) ){
 
@@ -346,19 +352,38 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
 
-    protected function get_response_type(){
+    public function get_response_type(){
         
         if ( $this->response_type !== null ) return $this->response_type; //already populated
-        
-        $type = null;
-        $response = $this->get_remote_response();
-        
-        if ( !is_wp_error($response) ){
-            $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+        if ( $this->response === null ) return; //response not yet populated
 
-            //is JSON
+        $type = null;
+        $response = $this->response;
+        
+        if ( $response && !is_wp_error($response) ){
+            $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+            
+            //JSON
             if ( substr(trim(wp_remote_retrieve_body( $response )), 0, 1) === '{' ){ // is JSON
                 $content_type = 'application/json';
+            }
+            
+            //XML to XSPF
+            $split = explode('/',$content_type);
+            $is_xml = ( ( isset($split[1]) ) && ($split[1]=='xml') );
+            
+            if ( $is_xml ){
+                
+                $content = wp_remote_retrieve_body($response);
+
+                //QueryPath
+                try{
+                    if ( qp( $content, 'playlist trackList track', self::$querypath_options )->length > 0 ){
+                        $content_type = sprintf('%s/xspf+xml',$split[0]);
+                    }
+                }catch(Exception $e){
+
+                }
             }
 
             //remove charset if any
@@ -379,7 +404,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     protected function get_body_node(){
 
         $result = null;
-        
+
         //response
         $response = $this->get_remote_response();
         if ( is_wp_error($response) ) return $response;
@@ -395,7 +420,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $content = Encoding::fixUTF8($content);//fix mixed encoding //TO FIX TO CHECK at the right place?
 
         libxml_use_internal_errors(true); //TO FIX TO CHECK should be in the XML part only ?
-
+        
         switch ($response_type){
                 
             case 'application/json':
@@ -486,14 +511,35 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
     
+    function get_scraper_options($keys=null){
+
+        $options = apply_filters('wpsstm_live_tracklist_scraper_options',$this->scraper_options,$this);
+
+        if ($keys){
+            return wpsstm_get_array_value($keys, $options);
+        }else{
+            return $options;
+        }
+    }
+    
+    public function get_selectors($keys=null){
+        $keys = (array)$keys;
+        array_unshift($keys, 'selectors'); //add at beginning
+        $selectors = $this->get_scraper_options($keys);
+        return $selectors;
+    }
+    
     /*
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */
     
     public function get_remote_title(){
-
-        if ( !$selector_title = $this->get_options( array('selectors','tracklist_title') ) ) return;
-        return $this->parse_node($this->body_node,$selector_title);
+        $title = null;
+        if ( $selector_title = $this->get_selectors( array('tracklist_title') ) ){
+            $title = $this->parse_node($this->body_node,$selector_title);
+        }
+        
+        return apply_filters('wpsstm_live_tracklist_title',$title,$this);
     }
     
     /*
@@ -501,12 +547,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     */
     
     public function get_tracklist_author(){
-
+        $author = null;
+        return apply_filters('wpsstm_live_tracklist_author',$author,$this);
     }
 
     protected function get_track_nodes($body_node){
 
-        $selector = $this->get_options( array('selectors','tracks','path') );
+        $selector = $this->get_selectors( array('tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
 
         //QueryPath
@@ -526,10 +573,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     protected function parse_track_nodes($track_nodes){
 
-        $selector_artist = $this->get_options( array('selectors','track_artist') );
+        $selector_artist = $this->get_selectors( array('track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing.','wpsstm') );
         
-        $selector_title = $this->get_options( array('selectors','track_title') );
+        $selector_title = $this->get_selectors( array('track_title') );
         if (!$selector_title) return new WP_Error( 'no_track_selector', __('Required track title selector is missing.','wpsstm') );
 
         $tracks_arr = array();
@@ -558,27 +605,46 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
     
     protected function get_track_artist($track_node){
-        $selectors = $this->get_options(array('selectors','track_artist'));
-        return $this->parse_node($track_node,$selectors);
+        $selectors = $this->get_selectors( array('track_artist'));
+        $artist = $this->parse_node($track_node,$selectors);
+        return apply_filters('wpsstm_live_tracklist_track_artist',$artist,$track_node,$this);
     }
     
     protected function get_track_title($track_node){
-        $selectors = $this->get_options(array('selectors','track_title'));
-        return $this->parse_node($track_node,$selectors);
+        $selectors = $this->get_selectors( array('track_title'));
+        $title = $this->parse_node($track_node,$selectors);
+        return apply_filters('wpsstm_live_tracklist_track_title',$title,$track_node,$this);
     }
     
     protected function get_track_album($track_node){
-        $selectors = $this->get_options(array('selectors','track_album'));
-        return $this->parse_node($track_node,$selectors);
+        $selectors = $this->get_selectors( array('track_album'));
+        $album = $this->parse_node($track_node,$selectors);
+        return apply_filters('wpsstm_live_tracklist_track_album',$album,$track_node,$this);
     }
     
     protected function get_track_image($track_node){
-        $selectors = $this->get_options(array('selectors','track_image'));
+        $selectors = $this->get_selectors( array('track_image'));
         $image = $this->parse_node($track_node,$selectors);
+        $image = apply_filters('wpsstm_live_tracklist_track_image',$image,$track_node,$this);
         
         if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
         
         return $image;
+    }
+    
+    protected function get_track_source_urls($track_node){
+        $selectors = $this->get_selectors( array('track_source_urls'));
+        $source_urls = $this->parse_node($track_node,$selectors,false);
+        $source_urls = apply_filters('wpsstm_live_tracklist_source_urls',$source_urls,$track_node,$this);
+
+        foreach ((array)$source_urls as $key=>$url){
+            if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
+                unset($source_urls[$key]);
+            }
+        }
+
+        return $source_urls;
+        
     }
     
     protected function get_track_sources($track_node){
@@ -594,22 +660,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         return $sources;
     }
-    
-    protected function get_track_source_urls($track_node){
-        $selectors = $this->get_options(array('selectors','track_source_urls'));
-        $source_urls = $this->parse_node($track_node,$selectors,false);
 
-        foreach ((array)$source_urls as $key=>$url){
-            if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
-                unset($source_urls[$key]);
-            }
-        }
-
-        return $source_urls;
-        
-    }
-
-    protected function parse_node($track_node,$selectors,$single_value=true){
+    public function parse_node($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
@@ -709,17 +761,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $string;
     }
 
-    public function set_request_pagination( $args ) {
-
-        $args = wp_parse_args( $args, $this->request_pagination );
-
-        if ( $args['page_items_limit'] > 0 ){
-            $args['total_pages'] = ceil( $this->track_count / $args['page_items_limit'] );
-        }
-
-        $this->request_pagination = $args;
-    }
-    
     function convert_to_static_playlist(){
         
         //capability check
@@ -792,9 +833,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         //is disabled
         if ( $this->is_wizard_disabled() ) return;
-        
-        $search = isset($wizard_data['search']) ? $wizard_data['search'] : null;
-        $this->save_feed_url($search);
+
         return $this->save_wizard_settings($wizard_data);
 
     }
@@ -807,7 +846,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
         //remove all default values so we store only user-edited stuff
-        $default_args = $this->options_default;
+        $default_args = $this->get_default_scraper_options();
         $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
 
         if (!$wizard_settings){
@@ -863,7 +902,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $new_input['tracks_order'] = $input['tracks_order'];
         }
 
-        $default_args = $default_args = $this->options_default;
+        $default_args = $this->get_default_scraper_options();
         $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
 
         return $new_input;
@@ -871,7 +910,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     //UTC
     function get_expiration_time(){
-        if ( !$cache_duration_min = $this->get_options('datas_cache_min') ) return false;
+        if ( !$cache_duration_min = $this->get_scraper_options('datas_cache_min') ) return false;
         $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
         return $this->updated_time + $cache_duration_s;
     }
@@ -881,7 +920,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     // set 'expiration_time'
     function check_has_expired(){
         
-        $cache_duration_min = $this->get_options('datas_cache_min');
+        $cache_duration_min = $this->get_scraper_options('datas_cache_min');
         $has_cache = (bool)$cache_duration_min;
         
         if (!$has_cache){
@@ -897,7 +936,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function get_time_before_refresh(){
 
-        $cachemin = $this->get_options('datas_cache_min');
+        $cachemin = $this->get_scraper_options('datas_cache_min');
         
         if( !$cachemin ) return false;
         
@@ -920,7 +959,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function get_tracklist_class($extra_classes=null){
         
         $defaults = array(
-            'wpsstm-live-tracklist',
+            'wpsstm-live-tracklist'
         );
 
         $classes = array_merge($defaults,(array)$extra_classes);
@@ -942,6 +981,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $expiration_time ){
             $values_default['data-wpsstm-expire-time'] = $expiration_time;
         }
+        
+        $values_default['data-wpsstm-domain'] = wpsstm_get_url_domain( $this->feed_url );
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 

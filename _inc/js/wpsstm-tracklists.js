@@ -38,7 +38,7 @@
         */
         
         //refresh
-        tracklist_obj.tracklist_el.filter('.tracklist-ajaxed').find("#wpsstm-tracklist-action-refresh a").click(function(e) {
+        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist").click(function(e) {
             e.preventDefault();
             tracklist_obj.can_play = undefined; //will force refresh
             tracklist_obj.debug("clicked 'refresh' link");
@@ -147,12 +147,16 @@
             
         });
         
-        //toggle expand tracks at init
+        //show more/less (tracks)
         if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
-            tracklist_obj.toggleTracklist({
-                childrenMax:showSubtracksCount
+            tracklist_obj.showMoreLessTracks({
+                childrenToShow:showSubtracksCount
             });
         }
+        
+        //show more/less (tracklist/tracks/sources actions)
+        var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
+        wpsstm.showMoreLessActions(actions_lists);
 
     });
 
@@ -611,14 +615,14 @@ class WpsstmTracklist {
 
     }
     
-    toggleTracklist(options){
+    showMoreLessTracks(options){
 
         var self = this;
 
         // OPTIONS
         var defaults = {
             childrenShowCount:  true,
-            childrenMax:        3,
+            childrenToShow:        3,
             childrenSelector:   '[itemprop="track"]',
             moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
             lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
@@ -629,7 +633,6 @@ class WpsstmTracklist {
         if ( Number($(this.tracklist_el).attr("data-tracks-count")) > 0 ) {
             return $(this.tracklist_el).find('.wpsstm-tracks-list').toggleChildren(options);
         }
-
 
     }
     

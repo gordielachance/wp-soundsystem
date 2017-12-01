@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.8.7.1
+Version: 1.8.7.2
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.8.7.1';
+    public $version = '1.8.7.2';
     /**
     * @public string plugin DB version
     */
@@ -97,6 +97,7 @@ class WP_SoundSystem {
             'hide_empty_columns'                => 'on', //hide a tracklist column when it has a unique value for every row
             'autosource_filter_ban_words'       => array('cover'),
             'autosource_filter_requires_artist' => 'off',
+            'playable_opacity_class'            => 'on',
             'minimal_css'                       => 'off',
         );
         

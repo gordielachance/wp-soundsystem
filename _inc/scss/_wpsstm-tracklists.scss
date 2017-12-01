@@ -24,7 +24,36 @@ MINIMAL STYLES
             pointer-events:none;
         }
     }
+    .tracklist-header .toggle-children-container{
+        @extend #wpsstm-tracklist-actions;
+        #wpsstm-tracklist-actions{
+            display:inline;
+        }
+        //more - less
+        .toggle-children-link{
+            
+            @extend .wpsstm-action-bt;
+        }
+    }
+    
+    //more & less tracks links
+    .wpsstm-tracks-list + .toggle-children-less, .wpsstm-tracks-list + .toggle-children-less + .toggle-children-more{
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        border-bottom: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        small{
+            font-size: .5em;
+            line-height: 1em;
+            vertical-align: middle;
+        }
+    }
 }
+
+
 
 ul#wpsstm-tracklist-actions{
 
@@ -61,8 +90,10 @@ body.wpsstm-default,body.wp-admin{
         .tracklist-header{
             border-bottom:1px solid #F7F7F7;
             padding:.25em;
-            ul#wpsstm-tracklist-actions{
-                text-align: center;
+            .wpsstm-tracklist-action,.toggle-children-container{
+                text-align:center;
+            }
+            .wpsstm-tracklist-action,.toggle-children-link{
                 font-size:.8em;
             }
 
@@ -265,6 +296,9 @@ body.wpsstm-default,body.wp-admin{
             }
             &#wpsstm-tracklist-action-unlock-tracklist a:before{
                 content:"\f023";//.fa-lock;
+            }
+            &#wpsstm-tracklist-action-edit-backend a:before{
+                content:"\f084";//.fa-key;
             }
             
         }

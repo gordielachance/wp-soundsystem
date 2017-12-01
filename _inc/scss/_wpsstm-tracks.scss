@@ -5,22 +5,47 @@
 MINIMAL STYLES
 */
 
-.wpsstm-tracklist:not(.tracklist-playable){
-    [itemprop="track"]{
+.wpsstm-tracklist{
+    &.tracklist-playable.playable-opacity [itemprop="track"]{
+
+        &[data-wpsstm-sources-count="0"]{
+            @include opacity(.25);
+        } 
+
+        &:not(.track-active){
+            td{
+                @include opacity(.5);
+            }
+        }
+
+        &.track-has-played,&:hover{
+            td{
+                @include opacity(.75);
+            }
+        }
+
+        &.track-active{
+            td{
+                @include opacity(1);
+            }
+        }
+    }
+
+    &:not(.tracklist-playable) [itemprop="track"]{
         .wpsstm-track-play-bt{
             display:none;
         }
     }
-}
 
-[itemprop="track"]{
-    &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
-        display:none!important;
-    }
-
-    &.wpsstm-loved-track{
-        #wpsstm-track-action-favorite{
+    [itemprop="track"]{
+        &:not(.wpsstm-loved-track) #wpsstm-track-action-unfavorite{
             display:none!important;
+        }
+
+        &.wpsstm-loved-track{
+            #wpsstm-track-action-favorite{
+                display:none!important;
+            }
         }
     }
 }
@@ -58,35 +83,11 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-track-action-edit a:before{
                 content: "\f040";//.fa-pencil;
             }
+            &#wpsstm-track-action-edit-backend a:before{
+                content:"\f084";//.fa-key;
+            }
             &#wpsstm-track-action-about a:before{
                 content: "\f05a";//.fa-info-circle;
-            }
-        }
-    }
-    
-    .wpsstm-tracklist{
-        &.tracklist-playable [itemprop="track"]{
-
-            &[data-wpsstm-sources-count="0"]{
-                @include opacity(.25);
-            } 
-
-            &:not(.track-active){
-                td{
-                    @include opacity(.5);
-                }
-            }
-
-            &.track-has-played,&:hover{
-                td{
-                    @include opacity(.75);
-                }
-            }
-
-            &.track-active{
-                td{
-                    @include opacity(1);
-                }
             }
         }
     }

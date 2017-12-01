@@ -1,9 +1,13 @@
 <?php
-class WP_SoundSystem_Preset_XSPF extends WP_SoundSystem_Live_Playlist_Preset{
-    var $preset_slug =      'xspf';
 
-    var $preset_options =  array(
-        'selectors' => array(
+function wpsstm_xspf_tracklist_options($options,$tracklist){
+
+    if ( !$response_type = $tracklist->get_response_type() ) return $options; // remote content not yet fetched
+    
+    $split = explode('/',$response_type);
+
+    if ( isset($split[1]) && ($split[1]=='xspf+xml') ){
+        $options['selectors'] = array(
             'tracklist_title'   => array('path'=>'title'),
             'tracks'            => array('path'=>'trackList track'),
             'track_artist'      => array('path'=>'creator'),
@@ -11,70 +15,26 @@ class WP_SoundSystem_Preset_XSPF extends WP_SoundSystem_Live_Playlist_Preset{
             'track_album'       => array('path'=>'album'),
             'track_source_urls' => array('path'=>'location'),
             'track_image'       => array('path'=>'image')
+        );
+    }
+    
+    return $options;
+}
+
+function register_xspf_service_link($links){
+    $links[] = array(
+        'slug'      => 'xspf',
+        'name'      => 'XSPF',
+        'url'       => false,
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'http://.../FILE.xspf',
+            ),
         )
     );
-
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-
-        $this->preset_name = __('XSPF files','wpsstm');
-
-    }
-    
-    /*
-    Eventually convert an XML response type to an XSPF response type
-    */
-    function get_response_type(){
-        
-        if ( $this->response_type ) return $this->response_type; //already populated
-
-        $response_type = parent::get_response_type();
-        
-        if ( !is_wp_error($response_type) ){
-            
-            libxml_use_internal_errors(true);
-
-            switch($response_type){
-                case 'application/xml':
-                case 'text/xml':
-
-                    $split = explode('/',$response_type);
-                    $response = $this->get_remote_response();
-                    $content = wp_remote_retrieve_body($response);
-                    
-                    //QueryPath
-                    try{
-                        if ( qp( $content, 'playlist trackList track', self::$querypath_options )->length > 0 ){
-                            $response_type = sprintf('%s/xspf+xml',$split[0]);
-                        }
-                    }catch(Exception $e){
-
-                    }
-
-                break;
-            }
-
-        }
-        
-        $this->response_type = $response_type;
-        return $response_type;
-    }
-    
-    static function can_handle_url($url){
-
-        $path = parse_url($url, PHP_URL_PATH);
-        $ext = pathinfo($path, PATHINFO_EXTENSION);
-        if ( in_array($ext,array('xspf','xml')) ){
-            return true;
-        }
-    }
+    return $links;
 }
-
-//register preset
-
-function register_xspf_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_XSPF';
-    return $presets;
-}
-
-add_filter('wpsstm_get_scraper_presets','register_xspf_preset', 50); //low priority since we need to fetch the remote page first
+add_filter('wpsstm_wizard_services_links','register_xspf_service_link');
+add_filter('wpsstm_live_tracklist_scraper_options','wpsstm_xspf_tracklist_options',20,2); //priority after presets

@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Live_Playlist_Stats{
+class WP_SoundSystem_Live_Playlist_Stats{ //TO FIX TO UPGRADE
     
     static $meta_key_health = 'wpsstm_health';
     static $meta_key_requests = 'wpsstm_total_requests';

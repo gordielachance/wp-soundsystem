@@ -1,66 +1,74 @@
 <?php
-class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_Preset{
-
-    var $preset_slug =      'radioking';
-    var $preset_url =       'https://www.radioking.com';
-
-    var $preset_options =  array(
-        'selectors' => array(
-            'tracks'            => array('path'=>'root > data'),
-            'track_artist'      => array('path'=>'artist'),
-            'track_album'       => array('path'=>'album'),
-            'track_title'       => array('path'=>'title'),
-            'track_image'       => array('path'=>'cover'),
-        )
-    );
+class WP_SoundSystem_RadioKing_Api{
     
-    var $station_data =     null;
+    private $station_slug;
+    private $station_data =     null;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-
-        $this->preset_name = __('Radioking Stations','wpsstm');
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
+        $this->station_slug = $this->get_station_slug();
+        
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
     }
     
-    static function can_handle_url($url){
-        if ( !$station_slug = self::get_station_slug($url) ) return;
+    function can_handle_url(){
+        if ( !$this->station_slug ) return;
         return true;
     }
-    
-    function get_remote_url(){
 
-        $station_id = $this->get_station_id();
-        if ( is_wp_error($station_id) ) return $station_id;
+    function get_remote_url($url){
+        
+        if ( $this->can_handle_url() ){
+            $station_id = $this->get_station_id();
+            if ( is_wp_error($station_id) ) return $station_id;
 
-        return sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
+            $url = sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
+        }
+        return $url;
 
     }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'root > data'),
+                'track_artist'      => array('path'=>'artist'),
+                'track_album'       => array('path'=>'album'),
+                'track_title'       => array('path'=>'title'),
+                'track_image'       => array('path'=>'cover'),
+            );
+        }
+        return $options;
+    }
 
-    static function get_station_slug($url){
+
+    function get_station_slug(){
+        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:.*\.)?radioking.com/radio/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_station_data(){
         
-        if ( !$station_slug = self::get_station_slug($this->feed_url) ){
-            return new WP_Error( 'wpsstm_radioking_missing_station_slug', __('Required station slug missing.','wpsstm') );
-        }
-        
-        $transient_name = 'wpsstm-radioking-' . $station_slug . '-data';
+        if ( !$this->station_data ){
+            $transient_name = 'wpsstm-radioking-' . $this->station_slug . '-data';
 
-        if ( false === ( $station_data = get_transient($transient_name ) ) ) {
-            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$station_slug) );
-            $json = wp_remote_retrieve_body($response);
-            if ( is_wp_error($json) ) return $json;
-            $api = json_decode($json,true);
-            if ( $station_data = wpsstm_get_array_value(array('data'), $api) ){
-                set_transient( $transient_name, $station_data, 1 * DAY_IN_SECONDS );
+            if ( false === ( $station_data = get_transient($transient_name ) ) ) {
+                $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$this->station_slug) );
+                $json = wp_remote_retrieve_body($response);
+                if ( is_wp_error($json) ) return $json;
+                $api = json_decode($json,true);
+                if ( $station_data = wpsstm_get_array_value(array('data'), $api) ){
+                    set_transient( $transient_name, $station_data, 1 * DAY_IN_SECONDS );
+                }
             }
+            $this->station_data = $station_data;
         }
-        
-        return $station_data;
+
+        return $this->station_data;
         
     }
     
@@ -77,7 +85,7 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
     }
     
     protected function get_track_image($track_node){
-        $selectors = $this->get_options(array('selectors','track_image'));
+        $selectors = $this->get_selectors( array('track_image'));
         
         if ( $image_id = $this->parse_node($track_node,$selectors) ){
            $image = sprintf('https://www.radioking.com/api/track/cover/%s?width=55&height=55',$image_id);
@@ -89,10 +97,23 @@ class WP_SoundSystem_Preset_RadioKing_Api extends WP_SoundSystem_Live_Playlist_P
 }
 
 //register preset
-
-function register_radioking_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_RadioKing_Api';
-    return $presets;
+function register_radioking_preset($tracklist){
+    new WP_SoundSystem_RadioKing_Api($tracklist);
 }
-
-add_filter('wpsstm_get_scraper_presets','register_radioking_preset');
+function register_radioking_service_link($links){
+    $links[] = array(
+        'slug'      => 'radioking',
+        'name'      => 'RadioKing',
+        'url'       => 'https://www.radioking.com',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'https://www.radioking.com/radio/RADIO_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_radioking_service_link');
+add_action('wpsstm_get_remote_tracks','register_radioking_preset');

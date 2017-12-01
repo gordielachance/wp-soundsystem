@@ -167,14 +167,18 @@ class WpsstmPagePlayer {
         
         var preload_promises = [];
         
-        //should we show it by default ?
         all_tracklists.each(function(index,tracklist_el) {
             var tracklist = new WpsstmTracklist(tracklist_el,index);
             self.tracklists.push(tracklist);
             self.tracklists_shuffle_order.push(index);
-            
-            //preload tracklist on startup
-            var promise = tracklist.maybe_refresh();
+        });
+        
+        //autoload
+        var tracklists_autoload = self.tracklists.filter(function (tracklist_obj) {
+            return (tracklist_obj.options.autoload === true);
+        });
+        $(tracklists_autoload).each(function(index,tracklist_obj) {
+            var promise = tracklist_obj.maybe_refresh();
             preload_promises.push(promise);
         });
         
@@ -283,6 +287,23 @@ class WpsstmPagePlayer {
         }
         
         tracklist_obj.start_tracklist();
+
+    }
+    
+    showMoreLessActions(actions_container_el,options){
+
+        var self = this;
+
+        // OPTIONS
+        var defaults = {
+            childrenToShow:     '.wpsstm-action:not(.wpsstm-advanced-action)',
+            moreText:           '<i class="fa fa-chevron-right" aria-hidden="true"></i>',
+            btLess:             false,
+        };
+
+        var options =  $.extend(defaults, options);
+
+        return $(actions_container_el).toggleChildren(options);
 
     }
 

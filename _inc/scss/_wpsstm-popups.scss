@@ -71,7 +71,7 @@ body.wpsstm-default,body.wp-admin{
     .ui-widget-overlay{
         opacity: .5;
         background: black;
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         bottom:0;

@@ -202,14 +202,13 @@ function wpsstm_locate_template( $template_name, $load = false, $require_once = 
 }
 
 function wpsstm_get_url_domain($url){
-    $url_parsed = parse_url($url);
-    if ( !isset($url_parsed['host']) ) return;
-
-    $host_with_subdomain = $url_parsed['host'];
-    $host_split = explode(".", $host_with_subdomain);
-    $domain = (array_key_exists(count($host_split) - 2, $host_split)) ? $host_split[count($host_split) - 2] : $host_split[count($host_split) - 1];
-    
-    return $domain;
+    //https://stackoverflow.com/a/16027164/782013
+    $pieces = parse_url($url);
+    $domain = isset($pieces['host']) ? $pieces['host'] : $pieces['path'];
+    if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
+        return $regs['domain'];
+    }
+    return false;
 }
 
 function wpsstm_array_recursive_diff($aArray1, $aArray2) {
@@ -256,44 +255,13 @@ function wpsstm_get_post_tracklist($post_id=null){
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:
             $tracklist = new WP_SoundSystem_Tracklist($post_id);
-            
-        break;
-        case wpsstm()->post_type_live_playlist:
-            $tracklist = wpsstm_get_post_live_tracklist($post_id);
+            break;
+        default:
+            $tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         break;
     }
 
     //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist");
     return $tracklist;
-    
-}
-
-function wpsstm_get_post_live_tracklist($post_id=null){
-    $feed_url = wpsstm_get_live_tracklist_url($post_id);
-    $tracklist = wpsstm_get_live_tracklist_preset($feed_url);
-    $tracklist->__construct($post_id); //repopulate post id since it is not populated in the registered preset.
-    return $tracklist;
-}
-
-/*
-Check if one of the available presets (which are extending WP_SoundSystem_Remote_Tracklist) can load the tracklist url
-If yes, use this preset instead of WP_SoundSystem_Remote_Tracklist
-*/
-function wpsstm_get_live_tracklist_preset($feed_url){
-    $presets = (array)wpsstm_live_playlists()->presets;
-    $presets = array_reverse($presets); //reverse so we break at the preset that has the higher priority
-    
-    $feed_url = apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
-    $feed_url = trim($feed_url);
-    
-    foreach($presets as $preset_name){
-        if ( !$preset_name::can_handle_url($feed_url) ) continue;
-        $preset = new $preset_name();
-        $preset->feed_url = $feed_url;
-        return $preset;
-    }
-
-    $default = new WP_SoundSystem_Remote_Tracklist();
-    return $default;
     
 }

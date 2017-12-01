@@ -21,7 +21,10 @@
                 track_obj.update_source_index(source_obj);
             }
         });
-
+        
+        //show more/less (sources actions)
+        var actions_lists = track_obj.track_el.find('.wpsstm-track-sources-list .wpsstm-actions-list');
+        wpsstm.showMoreLessActions(actions_lists);
 
     });
 

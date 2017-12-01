@@ -5,7 +5,7 @@ jQuery(document).ready(function($){
     */
     
     //artist
-    var artist_helper = $('#wpsstm-wizard-helper-artist');
+    var artist_helper = $('#wpsstm-wizard-widget-artist');
     var artist_helper_input = artist_helper.find('input');
     var artist_helper_links = artist_helper.find('a');
 
@@ -15,10 +15,10 @@ jQuery(document).ready(function($){
         artist.trim();
         
         var lastfm_artist = artist;
-        var wrapper = $(this).parents('.wpsstm-wizard-helper');
+        var wrapper = $(this).parents('.wpsstm-wizard-widget');
         
-        var top_tracks_el = $('#wpsstm-wizard-helper-artist-top-tracks a');
-        var similar_el = $('#wpsstm-wizard-helper-artist-similar a');
+        var top_tracks_el = $('#wpsstm-wizard-widget-artist-top-tracks a');
+        var similar_el = $('#wpsstm-wizard-widget-artist-similar a');
         
         if (artist){
             var artist_url = 'https://www.last.fm/music/'+lastfm_artist;
@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
             similar_el.removeAttr( "data-wpsstm-wizard-click" );
         }
 
-        wrapper.toggleClass('wpsstm-wizard-helper-success',(artist.length !== 0));
+        wrapper.toggleClass('wpsstm-wizard-widget-success',(artist.length !== 0));
 
     });
     
@@ -44,24 +44,24 @@ jQuery(document).ready(function($){
 
     
     //user stations
-    var user_helper_input = $('#wpsstm-wizard-helper-lastfm-user-stations').find('input');
+    var user_helper_input = $('#wpsstm-wizard-widget-lastfm-user-stations').find('input');
 
     user_helper_input.change(function() {
         
         var username = $(this).val();
         username.trim();
         
-        var wrapper = $(this).parents('.wpsstm-wizard-helper');
+        var wrapper = $(this).parents('.wpsstm-wizard-widget');
         
-        var recommandations_el = $('#wpsstm-wizard-helper-lastfm-user-stations-recommendations a');
-        var library_el = $('#wpsstm-wizard-helper-lastfm-user-stations-library a');
-        var mix_el = $('#wpsstm-wizard-helper-lastfm-user-stations-mix a');
+        var recommandations_el = $('#wpsstm-wizard-widget-lastfm-user-stations-recommendations a');
+        var library_el = $('#wpsstm-wizard-widget-lastfm-user-stations-library a');
+        var mix_el = $('#wpsstm-wizard-widget-lastfm-user-stations-mix a');
         
         recommandations_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:recommended');
         library_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:library');
         mix_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:mix');
         
-        wrapper.toggleClass('wpsstm-wizard-helper-success',(username.length !== 0));
+        wrapper.toggleClass('wpsstm-wizard-widget-success',(username.length !== 0));
         
     });
     
@@ -81,6 +81,7 @@ jQuery(document).ready(function($){
     $('#wizard-wrapper [data-wpsstm-wizard-hover]').hover(function(e){
         e.preventDefault();
         var new_value = $(this).attr('data-wpsstm-wizard-hover');
+        if (!new_value) return;
         wizard_input_el.attr('placeholder',new_value);
 
     }, function(){

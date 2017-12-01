@@ -1,44 +1,67 @@
 <?php
-class WP_SoundSystem_Preset_OnlineRadioBox_Scraper extends WP_SoundSystem_Live_Playlist_Preset{
-    
-    var $preset_slug =      'onlineradiobox';
-    var $preset_url =       'http://onlineradiobox.com/';
+class WP_SoundSystem_OnlineRadioBox_Scraper{
+    private $station_slug;
 
-    var $preset_options =  array(
-        'selectors' => array(
-            'tracks'            => array('path'=>'.tablelist-schedule tr'),
-            'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
-            'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
-        )
-    );
-    
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->preset_name =    'Online Radio Box';
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
+        $this->station_slug = $this->get_station_slug();
+        
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        
     }
     
-    static function can_handle_url($url){
-        if ( !$station_slug = self::get_station_slug($url) ) return;
+    function can_handle_url(){
+        if ( !$this->station_slug ) return;
         return true;
     }
     
-    function get_remote_url(){
-        return sprintf('http://onlineradiobox.com/ma/%s/playlist',self::get_station_slug($this->feed_url));
+    function get_remote_url($url){
+        if ( $this->can_handle_url() ){
+            $url = sprintf('http://onlineradiobox.com/gr/%s/playlist',$this->station_slug);
+        }
+        return $url;
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'.tablelist-schedule tr'),
+                'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
+                'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
+            );
+        }
+        return $options;
     }
 
-    static function get_station_slug($url){
+    function get_station_slug(){
+        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)/~i';
-        preg_match($pattern, $url, $matches);
+        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
 }
 
 //register preset
-
-function register_onlineradiobox_preset($presets){
-    $presets[] = 'WP_SoundSystem_Preset_OnlineRadioBox_Scraper';
-    return $presets;
+function register_onlineradiobox_preset($tracklist){
+    new WP_SoundSystem_OnlineRadioBox_Scraper($tracklist);
 }
-
-add_filter('wpsstm_get_scraper_presets','register_onlineradiobox_preset');
+function register_onlineradiobox_service_link($links){
+    $links[] = array(
+        'slug'      => 'onlineradiobox',
+        'name'      => 'Online Radio Box',
+        'url'       => 'http://onlineradiobox.com/',
+        'pages'     => array(
+            array(
+                'slug'      => 'playlists',
+                'name'      => __('playlists','wpsstm'),
+                'example'   => 'http://onlineradiobox.com/COUNTRY/RADIO_SLUG',
+            ),
+        )
+    );
+    return $links;
+}
+add_filter('wpsstm_wizard_services_links','register_onlineradiobox_service_link');
+add_action('wpsstm_get_remote_tracks','register_onlineradiobox_preset');

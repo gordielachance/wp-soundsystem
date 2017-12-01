@@ -26,13 +26,16 @@ class WP_SoundSystem_Core_Live_Playlists{
     function init(){
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
         
+        $this->include_preset_files(); //include files from presets folder
+        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
     
     function setup_globals(){
-        $this->presets = (array)$this->get_available_presets();
+        
     }
+
 
     function setup_actions(){
         
@@ -48,8 +51,6 @@ class WP_SoundSystem_Core_Live_Playlists{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
-        
-        add_filter('wpsstm_live_tracklist_url',array($this,'filter_dropbox_url'));
         
     }
 
@@ -178,32 +179,18 @@ class WP_SoundSystem_Core_Live_Playlists{
     /*
     Register scraper presets.
     */
-    private function get_available_presets(){
+    private function include_preset_files(){
+        
+        $presets = array();
 
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
-        
-        //default class
-        require_once($presets_path . 'default.php');
-        
+
         //get all files in /presets directory
         $preset_files = glob( $presets_path . '*.php' ); 
 
         foreach ($preset_files as $file) {
             require_once($file);
         }
-
-        $class_names = apply_filters( 'wpsstm_get_scraper_presets',array() );
-        $class_names = array_reverse($class_names); //reverse in order to respect filters priority
-
-        //check and run
-        foreach((array)$class_names as $class_name){
-            if ( !class_exists($class_name) ) continue;
-            $can_use_preset = $class_name::can_use_preset();
-            if ( $can_use_preset !== true ) continue;
-            $presets[] = $class_name;
-        }
-        
-        return $presets;
     }
 
     function post_column_register($columns){
@@ -301,19 +288,6 @@ class WP_SoundSystem_Core_Live_Playlists{
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
         return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
-    }
-    
-    function filter_dropbox_url($url){
-
-        $domain = wpsstm_get_url_domain($url );
-
-        //dropbox : convert to raw link
-        if ($domain=='dropbox'){
-            $url_no_args = strtok($url, '?');
-            $url = add_query_arg(array('raw'=>1),$url_no_args); //http://stackoverflow.com/a/11846251/782013
-        }
-        
-        return $url;
     }
 
 }

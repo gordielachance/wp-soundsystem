@@ -45,6 +45,8 @@ class WP_SoundSystem_Tracklist{
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
+        
+        $this->options = $this->get_default_options();
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -69,27 +71,31 @@ class WP_SoundSystem_Tracklist{
 
         }
 
-        $this->options = array_replace_recursive((array)$this->get_default_options(),$this->options); //last one has priority
+        
     }
     
     function get_options($keys=null){
-        $options = array();
+        
+        $options = apply_filters('wpsstm_tracklist_options',$this->options,$this);
+
 
         if ($keys){
-            return wpsstm_get_array_value($keys, $this->options);
+            return wpsstm_get_array_value($keys, $options);
         }else{
-            return $this->options;
+            return $options;
         }
     }
     
     protected function get_default_options(){
         return array(
-            'autoplay'              => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'            => ( wpsstm()->get_options('autosource') == 'on' ),
-            'can_play'              => ( wpsstm()->get_options('player_enabled') == 'on' ),
-            'toggle_tracklist'      => (int)wpsstm()->get_options('toggle_tracklist'),
-            'hide_empty_columns'    => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
-            'template'              => 'table',
+            'autoload'                  => ( !is_admin() ) ? true : false,
+            'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autosource'                => ( wpsstm()->get_options('autosource') == 'on' ),
+            'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
+            'hide_empty_columns'        => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
+            'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
+            'template'                  => 'table',
         );
     }
     
@@ -271,7 +277,7 @@ class WP_SoundSystem_Tracklist{
                     $track = new WP_SoundSystem_Track($track_id);
                 }
             }
-
+            
             $add_tracks[] = $track;
         }
 
@@ -286,20 +292,26 @@ class WP_SoundSystem_Tracklist{
 
         //array unique
         $pending_tracks = array_unique($tracks, SORT_REGULAR);
-        $valid_tracks = array();
+        $valid_tracks = $rejected_tracks = array();
+        $error_codes = array();
         
         foreach($pending_tracks as $track){
-            if ( !$track->validate_track($this->tracks_strict) ){
+            $valid = $track->validate_track($this->tracks_strict);
+            if ( is_wp_error($valid) ){
+                
+                $error_codes[] = $valid->get_error_code();
                 /*
-                wpsstm()->debug_log(json_encode(sprintf('artist:%s - title:%s - album:%s',$this->artist,$this->title,$this->album),JSON_UNESCAPED_UNICODE), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
+                wpsstm()->debug_log($valid->get_error_message(), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
                 */
+                $rejected_tracks[] = $track;
                 continue;
             }
             $valid_tracks[] = $track;
         }
         
-        if ( $removed = (count($pending_tracks) - count($valid_tracks)) ){
-            wpsstm()->debug_log(sprintf('%s/%s tracks have been rejected',$removed,count($pending_tracks)), "WP_SoundSystem_Tracklist::validate_tracks");
+        if ( $rejected_tracks ){
+            $error_codes = array_unique($error_codes);
+            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WP_SoundSystem_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
@@ -569,6 +581,7 @@ class WP_SoundSystem_Tracklist{
         $share_url = 
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
             'href' =>       $this->get_tracklist_popup_url('share'),
             'classes' =>    array('wpsstm-link-popup'),
         );
@@ -576,6 +589,7 @@ class WP_SoundSystem_Tracklist{
         //XSPF
         $actions['export'] = array(
             'text' =>       __('Export', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
             'desc' =>       __('Export to XSPF', 'wpsstm'),
             'href' =>       $this->get_tracklist_action_url('export'),
         );
@@ -628,6 +642,7 @@ class WP_SoundSystem_Tracklist{
 
             $actions['status-switch'] = array(
                 'text' =>      __('Status'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'link_after' => sprintf(' <em>%s</em>%s',$current_status_obj->label,$form),
             );
         }
@@ -636,6 +651,7 @@ class WP_SoundSystem_Tracklist{
         if ( $this->user_can_lock_tracklist() ){
             $actions['lock-tracklist'] = array(
                 'text' =>      __('Lock', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('lock-tracklist'),
             );
@@ -645,17 +661,23 @@ class WP_SoundSystem_Tracklist{
         if ( $this->user_can_unlock_tracklist() ){
             $actions['unlock-tracklist'] = array(
                 'text' =>      __('Unlock', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
+            );
+        }
+        
+        if ( $can_edit_tracklist ){
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit backend', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
+                'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
 
         //context
         switch($context){
             case 'page':
-
-                $popup_action_slugs = array('share','new-subtrack');
-
             break;
             case 'popup':
                 unset($actions['refresh']);
@@ -948,7 +970,6 @@ class WP_SoundSystem_Tracklist{
         
         //for data attribute
         $options = $this->get_options();
-        unset($options['selectors'],$options['tracks_order'],$options['datas_cache_min']);
 
         $values_defaults = array(
             'itemscope' =>                      true,
@@ -969,17 +990,16 @@ class WP_SoundSystem_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
+            ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
+            $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null,
+            $this->get_options('autoplay') ? 'tracklist-autoplay' : null,
+            $this->get_options('autosource') ? 'tracklist-autosource' : null,
+            $this->get_options('can_play') ? 'tracklist-playable' : null,
+            ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
+            'tracklist-template-' . $this->get_options('template'),
+            ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
+            
         );
-        $classes[] = ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null;
-        $classes[] = $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null;
-        $classes[] = $this->get_options('autoplay') ? 'tracklist-autoplay' : null;
-        $classes[] = $this->get_options('autosource') ? 'tracklist-autosource' : null;
-        $classes[] = $this->get_options('can_play') ? 'tracklist-playable' : null;
-        $classes[] = 'tracklist-template-' . $this->get_options('template');
-
-        if ( $this->is_tracklist_loved_by() ){
-            $classes[] = 'wpsstm-loved-tracklist';
-        }
 
         if ($extra_classes){
             if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
@@ -1009,6 +1029,8 @@ class WP_SoundSystem_Tracklist{
 
     function populate_tracks($args = null){
         
+        if ( $this->did_query_tracks ) return true;
+        
         if ( $this->ajax_refresh ){
             
             /*
@@ -1016,19 +1038,18 @@ class WP_SoundSystem_Tracklist{
             will be toggled using CSS
             */
             $this->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
-            
-            
+
             if ( $this->wait_for_ajax() ){
-                $error = new WP_Error( 'missing-javascript', __('Javascript is required to fetch tracks.','wpsstm') );
+                $url = $this->get_tracklist_action_url('refresh');
+                $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
+                $error = new WP_Error( 'requires-ajax', $link );
                 $this->tracks_error = $error;
                 return $error;
             }
         }
-        
-        if ( $this->did_query_tracks ) return true;
 
         $tracks_ids = $this->get_tracks($args);
-        
+
         $this->did_query_tracks = true;
 
         if ( is_wp_error($tracks_ids) ){
@@ -1143,9 +1164,8 @@ class WP_SoundSystem_Tracklist{
     }
     
     function empty_tracks_error(){
-        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("No tracks found.",'wpsstm') );
+        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("This tracklist is empty.",'wpsstm') );
     }
-
 }
 
 class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
