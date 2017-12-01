@@ -152,10 +152,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 = XXX =
 * presets: use filters instead of extending the tracklist class
 * JS - improved toggleChildren.js
-* Reddit : fetch tracklist title in Subreddit HTML
 * 'edit backend' action for tracklists/tracks/sources
 * new 'autoload' setting for tracklists
 * .playable-opacity setting / CSS
+* improved 'services' wizard widget
 
 = 1.8.7 =
 * restored XSPF preset
@@ -174,7 +174,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 = 1.8.5 =
 * welcome Wordpress 4.9! Finally!
-* improved wizard (GUI, presets, helpers), etc.
+* improved wizard (GUI, presets, widgets), etc.
 * ajax artist autocomplete
 * fixed WP_SoundSystem_Preset_LastFM_Artist_Scraper
 * strict validate tracks on the frontend wizard
