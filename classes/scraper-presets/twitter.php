@@ -1,15 +1,18 @@
 <?php
-class WP_SoundSystem_Twitter_Timeline extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_Twitter_Timeline{
     var $preset_slug =      'twitter';
     var $preset_url =       'https://www.twitter.com/';
 
     private $user_slug;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->user_slug = $this->get_user_slug();
+
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
         
-        $this->scraper_options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args') );
         
     }
     
@@ -18,20 +21,32 @@ class WP_SoundSystem_Twitter_Timeline extends WP_SoundSystem_URL_Preset{
         return true;
     }
 
-    function get_remote_url(){
+    function get_remote_url($url){
+        if ( $this->can_handle_url() ){
+            $url = sprintf('https://mobile.twitter.com/%s',$this->user_slug);
+        }
+        return $url;
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
         
-        return sprintf('https://mobile.twitter.com/%s',$this->user_slug);
+        if ( $this->can_handle_url() ){
+            $options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
+        }
+        return $options;
     }
     
     function get_user_slug(){
         $pattern = '~^https?://(?:(?:www|mobile).)?twitter.com/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_request_args(){
-        //it seems that the request fails with our default user agent, remove it.
-        $args['headers']['User-Agent'] = '';
+    function remote_request_args($args){
+        if ( $this->can_handle_url() ){
+            //it seems that the request fails with our default user agent, remove it.
+            $args['headers']['User-Agent'] = '';
+        }
 
         return $args;
     }
@@ -39,8 +54,7 @@ class WP_SoundSystem_Twitter_Timeline extends WP_SoundSystem_URL_Preset{
 }
 
 //register preset
-function register_twitter_preset($presets){
-    $presets[] = 'WP_SoundSystem_Twitter_Timeline';
-    return $presets;
+function register_twitter_preset($tracklist){
+    new WP_SoundSystem_Twitter_Timeline($tracklist);
 }
-add_action('wpsstm_get_scraper_presets','register_twitter_preset');
+add_action('wpsstm_get_remote_tracks','register_twitter_preset');

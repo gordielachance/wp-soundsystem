@@ -9,24 +9,20 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Widget extends WP_Soundsystem_Wi
         $links = array();
         $links_str = array();
         $output = $form = null;
-        
-        if ( in_array('WP_SoundSystem_LastFM_User_Recommandations_Station',wpsstm_live_playlists()->presets) ){
 
-            $this->user = new WP_SoundSystem_LastFM_User();
-            $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
-            
-            $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.fm username','wpsstm'));
+        $this->user = new WP_SoundSystem_LastFM_User();
+        $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
 
-            $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
-            $links['recommendations'] = sprintf('<a href="#">%s</a>',__('Recommendations station','wpsstm') );
+        $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.fm username','wpsstm'));
 
-            $widget_link = sprintf('lastfm:user:%s:station:library', $username);
-            $links['library'] = sprintf('<a href="#">%s</a>',__('Library station','wpsstm') );
+        $widget_link = sprintf('lastfm:user:%s:station:recommended',$username );
+        $links['recommendations'] = sprintf('<a href="#">%s</a>',__('Recommendations station','wpsstm') );
 
-            $widget_link = sprintf('lastfm:user:%s:station:mix',$username );
-            $links['mix'] = sprintf('<a href="#">%s</a>',__('Mix station','wpsstm') );
+        $widget_link = sprintf('lastfm:user:%s:station:library', $username);
+        $links['library'] = sprintf('<a href="#">%s</a>',__('Library station','wpsstm') );
 
-        }
+        $widget_link = sprintf('lastfm:user:%s:station:mix',$username );
+        $links['mix'] = sprintf('<a href="#">%s</a>',__('Mix station','wpsstm') );
 
         //check and run
         foreach((array)$links as $key=>$link){

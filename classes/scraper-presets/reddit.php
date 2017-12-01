@@ -1,25 +1,21 @@
 <?php
-class WP_SoundSystem_Reddit_Api extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_Reddit_Api{
     var $preset_slug =      'reddit';
     var $preset_url =       'https://www.reddit.com/r/Music/wiki/musicsubreddits';
 
     private $subreddit_slug;
     private $subreddit_title;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->subreddit_slug = self::get_subreddit_slug();
         
-        $this->scraper_options['selectors'] = array(
-            //in HTML
-            'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-            //in JSON
-            'tracks'            => array('path'=>'>data >children'),
-            'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
-            'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
-            //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-            'track_source_urls' => array('path'=>'url'),
-        );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
+        
+        add_filter('wpsstm_input_tracks', array($this,'filter_input_tracks'),10,2);
+
     }
     
     function can_handle_url(){
@@ -27,52 +23,77 @@ class WP_SoundSystem_Reddit_Api extends WP_SoundSystem_URL_Preset{
         return true;
     }
 
-    function get_remote_url(){
-        return sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->subreddit_slug );
-    } 
+    function get_remote_url($url){
+        if ( $this->can_handle_url() ){
+            $url = sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->subreddit_slug );
+        }
+        return $url;
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                //in HTML
+                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+                //in JSON
+                'tracks'            => array('path'=>'>data >children'),
+                'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
+                'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
+                //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+                'track_source_urls' => array('path'=>'url'),
+            );
+        }
+        return $options;
+    }
 
     function get_subreddit_slug(){
         $pattern = '~^https?://(?:www.)?reddit.com/r/([^/]+)/?~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_remote_title(){ //because we've got no title in the JSON
-        if (!$this->subreddit_title){
-            $transient_name = 'wpsstm-reddit-' . $this->subreddit_slug . '-title';
+    function get_remote_title($title){ //because we've got no title in the JSON
+        if ( $this->can_handle_url() ){
+            
+            if (!$this->subreddit_title){
+                $transient_name = 'wpsstm-reddit-' . $this->subreddit_slug . '-title';
 
-            if ( false === ( $title = get_transient($transient_name ) ) ) {
+                if ( false === ( $title = get_transient($transient_name ) ) ) {
 
-                $url = sprintf( 'https://www.reddit.com/r/%s',$this->subreddit_slug );
-                $response = wp_remote_get( $url );
+                    $url = sprintf( 'https://www.reddit.com/r/%s',$this->subreddit_slug );
+                    $response = wp_remote_get( $url );
 
-                if ( is_wp_error($response) ) return;
+                    if ( is_wp_error($response) ) return;
 
-                $response_code = wp_remote_retrieve_response_code( $response );
-                if ($response_code != 200) return;
+                    $response_code = wp_remote_retrieve_response_code( $response );
+                    if ($response_code != 200) return;
 
-                $content = wp_remote_retrieve_body( $response );
-                
-                //QueryPath
-                try{
-                    $title = htmlqp( $content, 'title', WP_SoundSystem_Remote_Tracklist::$querypath_options )->innerHTML();
-                }catch(Exception $e){
-                    return false;
+                    $content = wp_remote_retrieve_body( $response );
+
+                    //QueryPath
+                    try{
+                        $title = htmlqp( $content, 'title', WP_SoundSystem_Remote_Tracklist::$querypath_options )->innerHTML();
+                    }catch(Exception $e){
+                        return false;
+                    }
+
+                    libxml_clear_errors();
+
+                    if ( !$title ){
+                        return;
+                    }
+
+                    set_transient( $transient_name, $title, 3 * DAY_IN_SECONDS );
+
                 }
-
-                libxml_clear_errors();
-
-                if ( !$title ){
-                    return;
-                }
-
-                set_transient( $transient_name, $title, 3 * DAY_IN_SECONDS );
-
+                $this->subreddit_title = $title;
             }
-            $this->subreddit_title = $title;
-        }
 
-        return $this->subreddit_title;
+            $title = $this->subreddit_title;
+        }
+        
+        return $title;
     }
     
     /*
@@ -137,23 +158,24 @@ class WP_SoundSystem_Reddit_Api extends WP_SoundSystem_URL_Preset{
         return $str;
     }
 
-    protected function validate_tracks($tracks){ //TOFIXGGG
-
-        foreach((array)$tracks as $key=>$track){
-            $track->artist = $this->filter_string($track->artist);
-            $track->title = $this->filter_string($track->title);
-
+    function filter_input_tracks($tracks,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            foreach((array)$tracks as $key=>$track){
+                $track->artist = $this->filter_string($track->artist);
+                $track->title = $this->filter_string($track->title);
+                $tracks[$key] = $track;
+            }
         }
-
-        return parent::validate_tracks($tracks);
+        
+        return $tracks;
     }
 
 }
 
 //register preset
-function register_reddit_preset($presets){
-    $presets[] = 'WP_SoundSystem_Reddit_Api';
-    return $presets;
+function register_reddit_preset($tracklist){
+    new WP_SoundSystem_Reddit_Api($tracklist);
 }
 
-add_action('wpsstm_get_scraper_presets','register_reddit_preset');
+add_action('wpsstm_get_remote_tracks','register_reddit_preset');

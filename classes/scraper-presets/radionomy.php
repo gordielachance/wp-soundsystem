@@ -1,23 +1,20 @@
 <?php
 
-class WP_SoundSystem_Radionomy_Playlists_API extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_Radionomy_Playlists_API{
     var $preset_slug =      'radionomy-station';
     var $preset_url =       'https://www.radionomy.com';
+    var $tracklist;
     private $station_slug;
     private $station_id;
     
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->station_slug = $this->get_station_slug();
         
-        $this->scraper_options['selectors'] = array(
-            'tracks'            => array('path'=>'tracks track'),
-            'track_artist'      => array('path'=>'artists'),
-            'track_title'       => array('path'=>'title'),
-            'track_image'       => array('path'=>'cover'),
-            //playduration
-        );
-        
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title') );
+
     }
 
     function can_handle_url(){
@@ -25,18 +22,32 @@ class WP_SoundSystem_Radionomy_Playlists_API extends WP_SoundSystem_URL_Preset{
         return true;
     }
 
-    function get_remote_url(){
-        
-        $station_id = $this->get_station_id();
-        if ( is_wp_error($station_id) ) return $station_id;
-        
-        return sprintf('http://api.radionomy.com/tracklist.cfm?radiouid=%s&apikey=XXX&amount=20&type=xml&cover=true',$station_id);
+    function get_remote_url($url){
+        if ( $this->can_handle_url() ){
+            $station_id = $this->get_station_id();
+            if ( is_wp_error($station_id) ) return $station_id;
 
+            $url = sprintf('http://api.radionomy.com/tracklist.cfm?radiouid=%s&apikey=XXX&amount=20&type=xml&cover=true',$station_id);
+        }
+        return $url;
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'tracks track'),
+                'track_artist'      => array('path'=>'artists'),
+                'track_title'       => array('path'=>'title'),
+                'track_image'       => array('path'=>'cover'),
+                //playduration
+            );
+        }
+        return $options;
     }
 
     function get_station_slug(){
         $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
@@ -88,16 +99,18 @@ class WP_SoundSystem_Radionomy_Playlists_API extends WP_SoundSystem_URL_Preset{
 
     }
     
-    function get_remote_title(){
-        return sprintf('Radionomy: %s', $this->station_slug);
+    function get_remote_title($title){
+        if ( $this->can_handle_url() ){
+            $title = sprintf('Radionomy: %s', $this->station_slug);
+        }
+        return $title;
     }
 
 }
 
 //register preset
-function register_radionomy_preset($presets){
-    $presets[] = 'WP_SoundSystem_Radionomy_Playlists_API';
-    return $presets;
+function register_radionomy_preset($tracklist){
+    new WP_SoundSystem_Radionomy_Playlists_API($tracklist);
 }
 
-add_action('wpsstm_get_scraper_presets','register_radionomy_preset');
+add_action('wpsstm_get_remote_tracks','register_radionomy_preset');

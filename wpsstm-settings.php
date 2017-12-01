@@ -826,7 +826,7 @@ class WP_SoundSystem_Settings {
         //client ID
         printf(
             '<p><label>%s</label> <input type="text" name="%s[lastfm_client_id]" value="%s" /></p>',
-            __('Api key:','wppstm'),
+            __('Api key:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_id
         );
@@ -834,7 +834,7 @@ class WP_SoundSystem_Settings {
         //client secret
         printf(
             '<p><label>%s</label> <input type="text" name="%s[lastfm_client_secret]" value="%s" /></p>',
-            __('Shared secret:','wppstm'),
+            __('Shared secret:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );
@@ -852,7 +852,7 @@ class WP_SoundSystem_Settings {
         //client ID
         printf(
             '<p><label>%s</label> <input type="text" name="%s[spotify_client_id]" value="%s" /></p>',
-            __('Client ID:','wppstm'),
+            __('Client ID:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_id
         );
@@ -860,7 +860,7 @@ class WP_SoundSystem_Settings {
         //client secret
         printf(
             '<p><label>%s</label> <input type="text" name="%s[spotify_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wppstm'),
+            __('Client Secret:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );
@@ -879,7 +879,7 @@ class WP_SoundSystem_Settings {
         //client ID
         printf(
             '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_id]" value="%s" /></p>',
-            __('Client ID:','wppstm'),
+            __('Client ID:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_id
         );
@@ -887,7 +887,7 @@ class WP_SoundSystem_Settings {
         //client secret
         printf(
             '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wppstm'),
+            __('Client Secret:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );

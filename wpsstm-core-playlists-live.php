@@ -26,13 +26,16 @@ class WP_SoundSystem_Core_Live_Playlists{
     function init(){
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
         
+        $this->include_preset_files(); //include files from presets folder
+        
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
     
     function setup_globals(){
-        $this->presets = (array)$this->get_available_presets();
+        
     }
+
 
     function setup_actions(){
         
@@ -176,33 +179,18 @@ class WP_SoundSystem_Core_Live_Playlists{
     /*
     Register scraper presets.
     */
-    private function get_available_presets(){
+    private function include_preset_files(){
         
         $presets = array();
 
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
-        
-        //default class
-        require_once($presets_path . 'default.php');
-        
+
         //get all files in /presets directory
         $preset_files = glob( $presets_path . '*.php' ); 
 
         foreach ($preset_files as $file) {
             require_once($file);
         }
-
-        $class_names = apply_filters( 'wpsstm_get_scraper_presets',array() );
-        $class_names = array_reverse($class_names); //reverse in order to respect filters priority
-
-        //check and run
-        foreach((array)$class_names as $class_name){
-            if ( !class_exists($class_name) ) continue;
-            $preset = new $class_name();
-            $presets[] = $class_name;
-        }
-        
-        return $presets;
     }
 
     function post_column_register($columns){

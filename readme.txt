@@ -157,7 +157,6 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * improved player/tracklists/tracks/sources actions
 * cleaned SCSS/CSS + plugin option to disable default styles
 * embed player backend
-* renamed hook 'wpsstm_get_remote_url' to 'wpsstm_live_tracklist_url'
 
 = 1.8.6 =
 * better code for tracklists and tracks actions

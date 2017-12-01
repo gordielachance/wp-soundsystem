@@ -1,38 +1,47 @@
 <?php
-class WP_SoundSystem_Deezer_Playlists extends WP_SoundSystem_URL_Preset{
+//TOFIXGGG playlist title
+
+class WP_SoundSystem_Deezer_Playlists{
     var $preset_slug =      'deezer-playlist';
     var $preset_url =       'http://www.deezer.com/';
+    var $tracklist;
     private $playlist_id;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->playlist_id = $this->get_playlist_id();
         
-        $this->scraper_options['selectors'] = array(
-            'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
-            'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
-            'track_title'       => array('path'=>'span[itemprop="name"]'),
-            'track_album'       => array('path'=>'[itemprop="inAlbum"]')
-        );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
     }
     
     function can_handle_url(){
         if ( !$this->playlist_id ) return;
         return true;
     }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
+                'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
+                'track_title'       => array('path'=>'span[itemprop="name"]'),
+                'track_album'       => array('path'=>'[itemprop="inAlbum"]')
+            );
+        }
+        return $options;
+    }
 
     function get_playlist_id(){
         $pattern = '~^https?://(?:www.)?deezer.com/(?:.*/)?playlist/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
 }
 
 //register preset
-function register_deezer_preset($presets){
-    $presets[] = 'WP_SoundSystem_Deezer_Playlists';
-    return $presets;
+function register_deezer_preset($tracklist){
+    new WP_SoundSystem_Deezer_Playlists($tracklist);
 }
 
 function register_deezer_service_links($links){
@@ -52,5 +61,5 @@ function register_deezer_service_links($links){
     return $links;
 }
 
-add_action('wpsstm_get_scraper_presets','register_deezer_preset');
+add_action('wpsstm_get_remote_tracks','register_deezer_preset');
 add_filter('wpsstm_wizard_services_links','register_deezer_service_links');

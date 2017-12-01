@@ -277,7 +277,7 @@ function wpsstm_get_live_tracklist_url($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $feed_url = get_post_meta($post_id, wpsstm_live_playlists()->feed_url_meta_name, true );
-    return apply_filters('wpsstm_live_tracklist_url',$feed_url); //filter input URL with this hook - several occurences in the code
+    return apply_filters('wpsstm_live_tracklist_raw_url',$feed_url); //filter input URL with this hook - several occurences in the code
 }
 
 function wpsstm_get_datetime($timestamp){

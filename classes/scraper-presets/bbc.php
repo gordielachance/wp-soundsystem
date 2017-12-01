@@ -1,19 +1,15 @@
 <?php
-class WP_SoundSystem_BBC_Stations extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_BBC_Stations{
     var $preset_slug =      'bbc-station';
     var $preset_url =       'http://www.bbc.co.uk/radio';
     private $station_slug;
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->station_slug = $this->get_station_slug();
         
-        $this->scraper_options['selectors'] = array(
-                'tracks'            => array('path'=>'.music-track'),
-                'track_artist'      => array('path'=>'.music-track__artist'),
-                'track_title'       => array('path'=>'.music-track__title'),
-                'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
-        );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
         
     }
     
@@ -23,49 +19,75 @@ class WP_SoundSystem_BBC_Stations extends WP_SoundSystem_URL_Preset{
     
     function get_station_slug(){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/(?!music)([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_remote_url(){
-        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->station_slug );
+    function get_remote_url($url){
+        if ( $this->can_handle_url() ){
+            $url = sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->station_slug );
+        }
+        return $url;
     }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'.music-track'),
+                'track_artist'      => array('path'=>'.music-track__artist'),
+                'track_title'       => array('path'=>'.music-track__title'),
+                'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+            );
+        }
+        return $options;
+    }
+    
 
 }
 
-class WP_SoundSystem_BBC_Playlists extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_BBC_Playlists{
     var $preset_slug =      'bbc-playlist';
     var $preset_url =       'http://www.bbc.co.uk/music/playlists/';
     private $playlist_id;
     
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->playlist_id = $this->get_playlist_id();
         
-        $this->scraper_options['selectors'] = array(
-            'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
-            'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
-            'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
-        );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
     }
     
     function can_handle_url(){
         if ( !$this->playlist_id ) return;
         return true;
     }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
+                'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
+                'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
+            );
+        }
+        return $options;
+    }
+    
 
     function get_playlist_id(){
+        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
 }
 
-function register_bbc_presets($presets){
-    $presets[] = 'WP_SoundSystem_BBC_Stations';
-    $presets[] = 'WP_SoundSystem_BBC_Playlists';
-    return $presets;
+function register_bbc_presets($tracklist){
+    new WP_SoundSystem_BBC_Stations($tracklist);
+    new WP_SoundSystem_BBC_Playlists($tracklist);
 }
 
 function register_bbc_service_links($links){
@@ -92,5 +114,5 @@ function register_bbc_service_links($links){
     return $links;
 }
 
-add_action('wpsstm_get_scraper_presets','register_bbc_presets');
+add_action('wpsstm_get_remote_tracks','register_bbc_presets');
 add_filter('wpsstm_wizard_services_links','register_bbc_service_links');

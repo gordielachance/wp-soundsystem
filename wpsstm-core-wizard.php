@@ -187,9 +187,11 @@ class WP_SoundSystem_Core_Wizard{
 
     function populate_wizard_tracklist($post_id=null,$input=null){
         global $wpsstm_tracklist;
-        $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($post_id,$input);
+        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
 
         if($input){
+            $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
+            $wpsstm_tracklist->feed_url = $feed_url;
             $wpsstm_tracklist->scraper_options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
         }
 
@@ -242,7 +244,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
-        $wpsstm_tracklist = wpsstm_get_live_tracklist_preset($post_id);
+        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         
         wpsstm()->debug_log($wpsstm_tracklist->post_id, "WP_SoundSystem_Core_Wizard::backend_wizard_save()");
 
@@ -726,9 +728,9 @@ class WP_SoundSystem_Core_Wizard{
         
         printf('<p class="wpsstm-icon-input" id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
 
-        //wizard helpers
-        if ( $helpers = wpsstm_wizard()->get_available_helpers() ){
-            echo $helpers;
+        //wizard widgets
+        if ( $widgets = wpsstm_wizard()->get_available_widgets() ){
+            echo $widgets;
         }
 
     }
@@ -1007,10 +1009,10 @@ class WP_SoundSystem_Core_Wizard{
         return user_can($community_user_id,$required_cap);
     }
     
-    function get_available_helpers(){
+    function get_available_widgets(){
         $class_names = array();
-        $helpers = array();
-        $helpers_output = array();
+        $widgets = array();
+        $widgets_output = array();
         
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-widgets' );
         require_once($presets_path . 'default.php'); //default class
@@ -1026,23 +1028,23 @@ class WP_SoundSystem_Core_Wizard{
         //check and run
         foreach((array)$class_names as $class_name){
             if ( !class_exists($class_name) ) continue;
-            $helpers[] = new $class_name();
+            $widgets[] = new $class_name();
             
         }
         
-        foreach((array)$helpers as $helper){
-            $helper_title = ($helper->name) ? sprintf('<h3>%s</h3>',$helper->name) : null;
-            $helper_desc = ($helper->desc) ? sprintf('<p>%s</p>',$helper->desc) : null;
+        foreach((array)$widgets as $widget){
+            $widget_title = ($widget->name) ? sprintf('<h3>%s</h3>',$widget->name) : null;
+            $widget_desc = ($widget->desc) ? sprintf('<p>%s</p>',$widget->desc) : null;
             
-            if ( $content = $helper->get_output() ){
-                $helper_content = ($content = $helper->get_output()) ? sprintf('<div class="wpsstm-wizard-widget-content">%s</div>',$content) : null;
+            if ( $content = $widget->get_output() ){
+                $widget_content = ($content = $widget->get_output()) ? sprintf('<div class="wpsstm-wizard-widget-content">%s</div>',$content) : null;
 
-                $helpers_output[] = sprintf('<li class="wpsstm-wizard-widget" id="wpsstm-wizard-widget-%s">%s%s%s</li>',$helper->slug,$helper_title,$helper_desc,$helper_content);
+                $widgets_output[] = sprintf('<li class="wpsstm-wizard-widget" id="wpsstm-wizard-widget-%s">%s%s%s</li>',$widget->slug,$widget_title,$widget_desc,$widget_content);
             }
 
         }
 
-        if ($helpers_output) return sprintf('<ul id="wpsstm-wizard-widgets">%s</ul>',implode("\n",$helpers_output));
+        if ($widgets_output) return sprintf('<ul id="wpsstm-wizard-widgets">%s</ul>',implode("\n",$widgets_output));
 
     }
 

@@ -6,33 +6,40 @@ https://www.indieshuffle.com/playlists/best-songs-of-april-2017/
 https://www.indieshuffle.com/songs/hip-hop/
 */
 
-class WP_SoundSystem_IndieShuffle_Scraper extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_IndieShuffle_Scraper{
     var $preset_slug =      'indieshuffle';
     var $preset_url =       'https://www.indieshuffle.com';
 
-    function __construct($post_id = null){
-        parent::__construct($post_id);
-        $this->scraper_options['selectors'] = array(
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+    }
+    
+    function can_handle_url(){
+        $domain = wpsstm_get_url_domain( $this->tracklist->feed_url );
+        if ( $domain != 'indieshuffle') return;
+        return true;
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
             'track_artist'     => array('attr'=>'data-track-artist'),
             'track_title'      => array('attr'=>'data-track-title'),
             'track_image'      => array('path'=>'img','attr'=>'src'),
             'track_source_urls' => array('attr'=>'data-source'),
         );
-    }
-    
-    function can_handle_url(){
-        $domain = wpsstm_get_url_domain( $this->feed_url );
-        if ( $domain != 'indieshuffle') return;
-        return true;
+        }
+        return $options;
     }
 
 }
 
 //register preset
-function register_indieshuffle_preset($presets){
-    $presets[] = 'WP_SoundSystem_IndieShuffle_Scraper';
-    return $presets;
+function register_indieshuffle_preset($tracklist){
+    new WP_SoundSystem_IndieShuffle_Scraper($tracklist);
 }
 
 function register_indieshuffle_service_links($links){
@@ -44,5 +51,5 @@ function register_indieshuffle_service_links($links){
     return $links;
 }
 
-add_action('wpsstm_get_scraper_presets','register_indieshuffle_preset');
+add_action('wpsstm_get_remote_tracks','register_indieshuffle_preset');
 add_filter('wpsstm_wizard_services_links','register_indieshuffle_service_links');

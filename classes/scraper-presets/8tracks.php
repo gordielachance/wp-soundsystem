@@ -1,21 +1,18 @@
 <?php
-class WP_SoundSystem_8Tracks_Playlists extends WP_SoundSystem_URL_Preset{
+class WP_SoundSystem_8Tracks_Playlists{
     var $preset_slug =      '8tracks-playlist';
     var $preset_url =       'https://8tracks.com';
     private $user_slug;
     private $playlist_slug;
     private $mix_data;
     
-    function __construct($post_id = null){
-        parent::__construct($post_id);
+    function __construct($tracklist){
+        $this->tracklist = $tracklist;
         $this->user_slug = $this->get_user_slug();
         $this->playlist_slug = $this->get_tracklist_slug();
-        
-        $this->scraper_options['selectors'] = array(
-            'tracks'            => array('path'=>'>tracks'),
-            'track_artist'      => array('path'=>'performer'),
-            'track_title'       => array('path'=>'name')
-        );
+
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
     }
     
     function can_handle_url(){
@@ -25,29 +22,47 @@ class WP_SoundSystem_8Tracks_Playlists extends WP_SoundSystem_URL_Preset{
     }
 
     function get_user_slug(){
+        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?8tracks.com/([^/]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
     function get_tracklist_slug(){
+        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?8tracks.com/[^/]+/([[\w\d-]+)~i';
-        preg_match($pattern, $this->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_remote_url(){
+    function get_remote_url($url){
+        
+        if ( $this->can_handle_url() ){
+            $mix_data = $this->get_mix_data();
+            if ( is_wp_error($mix_data) ) return $mix_data;
 
-        $mix_data = $this->get_mix_data();
-        if ( is_wp_error($mix_data) ) return $mix_data;
+            //populate mix ID
+            if ( !$mix_id = wpsstm_get_array_value(array('id'),  $mix_data) ) {
+                return new WP_Error( 'wpsstm_8tracks_missing_mix_id', __('Required mix ID missing.','wpsstm') );
+            }
 
-        //populate mix ID
-        if ( !$mix_id = wpsstm_get_array_value(array('id'),  $mix_data) ) {
-            return new WP_Error( 'wpsstm_8tracks_missing_mix_id', __('Required mix ID missing.','wpsstm') );
+            $url = sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
         }
 
-        return sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
+        return $url;
 
+    }
+    
+    function get_live_tracklist_options($options,$tracklist){
+        
+        if ( $this->can_handle_url() ){
+            $options['selectors'] = array(
+                'tracks'            => array('path'=>'>tracks'),
+                'track_artist'      => array('path'=>'performer'),
+                'track_title'       => array('path'=>'name')
+            );
+        }
+        return $options;
     }
     
     function get_mix_data(){
@@ -91,9 +106,8 @@ class WP_SoundSystem_8Tracks_Playlists extends WP_SoundSystem_URL_Preset{
 }
 
 //register preset
-function register_8tracks_playlists_preset($presets){
-    $presets[] = 'WP_SoundSystem_8Tracks_Playlists';
-    return $presets;
+function register_8tracks_playlists_preset($tracklist){
+    new WP_SoundSystem_8Tracks_Playlists($tracklist);
 }
 
 function register_8tracks_service_link($links){
@@ -107,5 +121,5 @@ function register_8tracks_service_link($links){
     return $links;
 }
 
-add_action('wpsstm_get_scraper_presets','register_8tracks_playlists_preset');
+add_action('wpsstm_get_remote_tracks','register_8tracks_playlists_preset');
 add_filter('wpsstm_wizard_services_links','register_8tracks_service_link');
