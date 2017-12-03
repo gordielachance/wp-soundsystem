@@ -5,8 +5,6 @@ use \ForceUTF8\Encoding;
 class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     var $tracklist_type = 'live';
-    public $ajax_refresh = true; //should we query the subtracks through ajax ? false = Good for debug.
-    
 
     //url stuff
     public $feed_url = null;
@@ -67,8 +65,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             */
 
         }
-
-        $this->is_expired = $this->check_has_expired(); //set expiration bool & time
+        
+        //set expiration bool & time
+        $this->is_expired = $this->check_has_expired();
+        
+        //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
+        $this->ajax_refresh = $this->is_expired ? true : false;
 
     }
 
