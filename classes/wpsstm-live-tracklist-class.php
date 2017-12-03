@@ -64,6 +64,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
         $this->ajax_refresh = $this->is_expired ? true : false;
+        $this->ajax_refresh = false;
     }
 
     protected function get_default_scraper_options(){
@@ -193,20 +194,16 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $subtracks_args = array(
                 'post_author'   => wpsstm()->get_options('community_user_id'),
             );
-            $new_ids = $this->save_new_subtracks($subtracks_args);
+            $success = $this->save_subtracks($subtracks_args);
             
-            if( is_wp_error($new_ids) ){
-                wpsstm()->debug_log($new_ids->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
-                return $new_ids;
+            if( is_wp_error($success) ){
+                wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
+                return $success;
             }
 
             //update refresh time
             $this->updated_time = current_time( 'timestamp', true );
             $meta_input[wpsstm_tracklists()->time_updated_subtracks_meta_name] = $this->updated_time;
-
-            //flush subtracks
-            $this->flush_update_subtrack_ids($new_ids);
-            wpsstm()->debug_log(json_encode(array('post_id'=>$this->post_id,'remote_tracks_count'=>count($this->tracks))),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist()' );
             
         }
         
@@ -223,26 +220,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         return $this->post_id;
-    }
-
-    function flush_update_subtrack_ids($new_ids){
-
-        $existing_ids = array(); //array of existing posts IDs
-        $subtrack_ids = array();
-        foreach((array)$this->tracks as $track){
-            $subtrack_ids[] = $track->post_id;
-            if ( $track->post_id ){
-                $existing_ids[] = $track->post_id;
-            }
-        }
-
-        //flush orphan subtracks that do not belong to the current tracklist
-        $flushed_ids = $this->flush_subtracks($existing_ids);
-
-        //set new subtracks
-        $this->set_subtrack_ids($subtrack_ids);
-
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$existing_ids,'new_ids'=>$new_ids,'flushed_ids'=>$flushed_ids)), "WP_SoundSystem_Core_Live_Playlists::update_live_playlist()");
     }
 
     protected function get_remote_tracks(){
@@ -764,7 +741,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         //get autorship if this is a community tracklist
-        if ($this->is_community){
+        if ( wpsstm_is_community_post($this->post_id) ){
             $got_autorship = $this->get_autorship();
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }

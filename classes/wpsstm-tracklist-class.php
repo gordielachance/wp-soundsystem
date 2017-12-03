@@ -37,7 +37,6 @@ class WP_SoundSystem_Tracklist{
     var $track_count = 0;
     var $in_track_loop = false;
     var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
-    var $is_community = false; //if set to true, this is a community tracklists (created through the frontend wizard)
 
     function __construct($post_id = null ){
         
@@ -58,8 +57,6 @@ class WP_SoundSystem_Tracklist{
             
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
-            $community_user_id = wpsstm()->get_options('community_user_id');
-            $this->is_community = ( $post_author_id == $community_user_id );
             
             //tracklist time
             $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
@@ -388,26 +385,38 @@ class WP_SoundSystem_Tracklist{
         
     }
 
-    function save_new_subtracks($args = null){
+    function save_subtracks($args = null){
         
-        do_action('wpsstm_before_save_new_subtracks'); //eg. musicbrainz auto-guess ID will be ignored
+        //do not auto guess MBID while saving subtracks
+        remove_action( 'save_post', array(wpsstm_mb(),'auto_set_mbid'), 6);
         
         $new_ids = array();
+
+        //filter tracks that does not exist in the DB yet
+        $new_tracks = array_filter($this->tracks, function($track){
+            if (!$track->post_id) return true;
+            return false;
+        });
         
-        foreach($this->tracks as $key=>$track){
-            
-            $track_id = $track->post_id;
-            
-            if (!$track_id){
-                $track_id = $track->save_track($args);
-                if ( is_wp_error($track_id) ) continue;
-                $new_ids[] = $track_id;
+        //save those new tracks
+        foreach($new_tracks as $key=>$track){
+            $success = $track->save_track($args);
+            if ( is_wp_error($success) ){
+                wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Tracklist::save_subtracks' );
+                continue;
             }
-
         }
-
-        return $new_ids;
         
+        //get all track IDs
+        $track_ids = array_map(
+            function($track){
+                return $track->post_id;
+            },
+            $this->tracks
+        );
+        
+        //set new subtracks
+        return $this->set_subtrack_ids($track_ids);
     }
     
     function set_subtracks_auto_mbid(){
@@ -774,7 +783,7 @@ class WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        if (!$this->is_community){
+        if ( !wpsstm_is_community_post($this->post_id) ){
             return new WP_Error( 'wpsstm_not_community_post', __('This is not a community post.','wpsstm') );
         }
             
@@ -800,7 +809,7 @@ class WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
-        if ($this->is_community){
+        if ( wpsstm_is_community_post($this->post_id) ){
             $got_autorship = $this->get_autorship();
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
@@ -839,56 +848,10 @@ class WP_SoundSystem_Tracklist{
         return $this->set_subtrack_ids($ordered_ids);
     }
     
-    /*
-    Flush orphan subtracks
-    */
-    function flush_subtracks($keep_ids = null){
-        
-        $flush_ids = array();
-        $orphan_tracks = array();
-        $flushed_ids = array();
-
-        $subtrack_ids = wpsstm_get_raw_subtrack_ids($this->tracklist_type,$this->post_id);
-        if ( !$subtrack_ids ) return;
-
-        $flush_ids = array_diff($subtrack_ids,(array)$keep_ids);
-
-        if ( !$flush_ids ) return;
-        
-        foreach( (array)$flush_ids as $track_id ){
-            
-            $track = new WP_SoundSystem_Track($track_id);
-            
-            $parent_ids = (array)$track->get_parent_ids();
-            
-            $loved_by = $track->get_track_loved_by();
-
-            //remove this tracklist from track parents (we can consider a subtrack as orphan if it has no other parent than this tracklist)
-            $tracklist_parent_key = array_search($this->post_id, $parent_ids);
-            if ( $tracklist_parent_key !== false ) unset($parent_ids[$tracklist_parent_key]);
-
-            //is an orphan
-            if ( empty($parent_ids) && empty($loved_by) ) $orphan_tracks[] = $track;
-
-        }
-
-        if ( !$orphan_tracks ) return;
-
-        foreach( (array)$orphan_tracks as $track ){
-            $success = $track->trash_track();
-            if ( $success ) $flushed_ids[] = $track->post_id;
-        }
-
-        wpsstm()->debug_log(json_encode(array('subtrack_ids'=>implode(',',(array)$subtrack_ids),'keep_ids'=>implode(',',(array)$keep_ids),'flush_ids'=>implode(',',(array)$flush_ids),'flushed'=>implode(',',(array)$flushed_ids))),"WP_SoundSystem_Tracklist::flush_subtracks()");
-
-        return $flushed_ids;
-
-    }
-    
     function user_can_get_autorship(){
         
         if ( !$this->post_id ) return false;
-        if ( !$this->is_community ) return false;
+        if ( !wpsstm_is_community_post($this->post_id) ) return false;
             
         //capability check
         $post_type = get_post_type($this->post_id);

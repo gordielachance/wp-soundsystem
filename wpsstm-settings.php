@@ -51,6 +51,10 @@ class WP_SoundSystem_Settings {
             
         }else{ //sanitize values
             
+            if( isset( $input['flush_community_tracks'] ) ){
+                wpsstm_tracks()->flush_community_tracks();
+            }
+
             /*
             Community user
             */
@@ -461,6 +465,14 @@ class WP_SoundSystem_Settings {
             'reset_options', 
             __('Reset Options','wpsstm'), 
             array( $this, 'reset_options_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_system'//section
+        );
+        
+        add_settings_field(
+            'flush_tracks', 
+            __('Flush Community Tracks','wpsstm'), 
+            array( $this, 'flush_tracks_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
@@ -923,9 +935,19 @@ class WP_SoundSystem_Settings {
     
     function reset_options_callback(){
         printf(
-            '<input type="checkbox" name="%1$s[reset_options]" value="on"/> %2$s',
+            '<input type="checkbox" name="%s[reset_options]" value="on"/> %s',
             wpsstm()->meta_name_options,
             __("Reset options to their default values.","wpsstm")
+        );
+    }
+    
+    function flush_tracks_callback(){
+        $desc = __("Delete community tracks.","wpsstm");
+        $desc.= sprintf( ' <small>%s</small>',__("(Only tracks that do not belong to any playlist or user likes)","wpsstm") );
+        printf(
+            '<input type="checkbox" name="%s[flush_community_tracks]" value="on"/> %s',
+            wpsstm()->meta_name_options,
+            $desc
         );
     }
 

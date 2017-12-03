@@ -3,7 +3,7 @@
 class WP_SoundSystem_Track{
     public $post_id = null;
     public $index = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
-
+    
     public $title;
     public $artist;
     public $album;
@@ -38,6 +38,7 @@ class WP_SoundSystem_Track{
             $this->album        = wpsstm_get_post_album($post_id);
             $this->mbid         = wpsstm_get_post_mbid($post_id);
             $this->image_url    = wpsstm_get_post_image_url($post_id);
+
         }
 
         
@@ -352,8 +353,7 @@ class WP_SoundSystem_Track{
             $source = new WP_SoundSystem_Source();
             $source->track = $this;
             
-            $source->from_array($source_raw);
-            $source->is_community = true; //TO FIX TO CHECK should be this here ?            
+            $source->from_array($source_raw);         
         }
 
         return $this->post_id;
@@ -372,7 +372,7 @@ class WP_SoundSystem_Track{
         
         $success = wp_trash_post($this->post_id);
         
-        wpsstm()->debug_log( array('post_id',$this->post_id,'success'=>$success), "WP_SoundSystem_Track::trash_track()"); 
+        //wpsstm()->debug_log( array('post_id',$this->post_id,'success'=>$success), "WP_SoundSystem_Track::trash_track()"); 
         
         return $success;
         
@@ -1019,5 +1019,16 @@ class WP_SoundSystem_Track{
         
     }
     
+    /*
+    Check that a track can be flushed; which means it is a community post that does not belong to any playlist or user's likes
+    */
+    
+    function can_be_flushed(){
+        $parent_ids = (array)$this->get_parent_ids();
+        $loved_by = $this->get_track_loved_by();
+        $can_be_flushed = ( wpsstm_is_community_post($this->post_id) && empty($parent_ids) && empty($loved_by) );
+        
+        return apply_filters('wpsstm_track_can_be_flushed',$can_be_flushed,$this);
+    }
     
 }

@@ -287,3 +287,11 @@ function wpsstm_get_datetime($timestamp){
     $time = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), get_option( 'time_format' ) );
     return sprintf(__('on %s - %s','wpsstm'),$date,$time);
 }
+
+//Check that a post is a community post (created with the bot user)
+function wpsstm_is_community_post($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $post_author_id = get_post_field( 'post_author', $post_id );
+    return ( $post_author_id == wpsstm()->get_options('community_user_id') );
+}

@@ -22,10 +22,6 @@ class WP_SoundSystem_Source{
 
             $this->url = get_post_meta($post_id,wpsstm_sources()->source_url_metakey,true);
 
-            $post_author_id = get_post_field( 'post_author', $post_id );
-            $community_user_id = wpsstm()->get_options('community_user_id');
-            $this->is_community = ( $post_author_id == $community_user_id );
-            
             $this->match = $this->get_track_match();
             
             if ($this->index == -1){ //if not set yet
@@ -441,7 +437,7 @@ class WP_SoundSystem_Source{
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-type' =>            $this->type,
             'data-wpsstm-source-src' =>             $this->stream_url,
-            'data-wpsstm-community-source' =>       (int)$this->is_community,
+            'data-wpsstm-community-source' =>       (int)wpsstm_is_community_post($this->post_id),
             'class'                 =>              implode( ' ',$this->get_source_class() ),
         );
         return $attr;

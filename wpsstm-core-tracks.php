@@ -1008,6 +1008,60 @@ class WP_SoundSystem_Core_Tracks{
 
     }
     
+    //TO FIX have a query that directly selects the flushable tracks without having to populate them all ?
+    //would be much faster.
+    function get_flushable_track_ids(){
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        if ( !$community_user_id ) return;
+        
+        $flushable_ids = array();
+        
+        //get community tracks
+        $community_tracks_args = array(
+            'post_type' =>      wpsstm()->post_type_track,
+            'post_author' =>    $community_user_id,
+            'post_status' =>    'any',
+            'posts_per_page'=>  -1,
+            'fields' =>         'ids',
+        );
+        
+        $query = new WP_Query( $community_tracks_args );
+        $community_tracks_ids = $query->posts;
+        
+        foreach( (array)$community_tracks_ids as $track_id ){
+            $track = new WP_SoundSystem_Track($track_id);
+            if ( $track->can_be_flushed() ){
+                $flushable_ids[] = $track->post_id;
+            }
+            
+        }
+        
+        return $flushable_ids;
+        
+    }
+    
+    /*
+    Flush community tracks
+    */
+    function flush_community_tracks(){
+
+        $flushed_ids = array();
+        
+        if ( $flushable_ids = $this->get_flushable_track_ids() ){
+
+            foreach( (array)$flushable_ids as $track_id ){
+                $track = new WP_SoundSystem_Track($track_id);
+                $success = $track->trash_track();
+                if ( !is_wp_error($success) ) $flushed_ids[] = $track->post_id;
+            }
+        }
+
+        wpsstm()->debug_log(json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WP_SoundSystem_Tracklist::flush_community_tracks()");
+
+        return $flushed_ids;
+
+    }
+    
 }
 
 function wpsstm_tracks() {

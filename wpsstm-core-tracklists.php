@@ -81,8 +81,6 @@ class WP_SoundSystem_Core_Tracklists{
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
-
-        add_action( 'wp_trash_post', array($this,'trash_tracklist_orphans') );
         
         /*
         AJAX
@@ -598,22 +596,10 @@ class WP_SoundSystem_Core_Tracklists{
         }
 
     }
-    
-    function trash_tracklist_orphans($post_id){
 
-        if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
-        
-        $tracklist = wpsstm_get_post_tracklist($post_id);
-        $tracklist->flush_subtracks();
-
-    }
-    
     function get_subtracks_update_time($post = null){
         return get_post_meta($post,$this->time_updated_subtracks_meta_name,true);
     }
-    
-
-
 }
 
 function wpsstm_tracklists() {

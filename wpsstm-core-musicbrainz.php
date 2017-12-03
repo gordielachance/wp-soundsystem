@@ -377,10 +377,6 @@ class WP_SoundSystem_Core_MusicBrainz {
         $is_revision = wp_is_post_revision( $post_id );
         if ( $is_autosave || $skip_status || $is_revision ) return;
 
-        //when saving a tracklist, calls to MusicBrainz are too slow if there is a lot of tracks.  Do not auto-guess MBID for subtracks.
-        //TO FIX smarter way to disable the hooked function auto_set_mbid() ?
-        if ( did_action('wpsstm_before_save_new_subtracks') ) return;
-
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
@@ -687,6 +683,8 @@ class WP_SoundSystem_Core_MusicBrainz {
         
         if ( get_post_type($post_id) != wpsstm()->post_type_album ) return;
         
+        $tracks_arr = array();
+        
         $mbdatas = wpsstm_get_post_mbdatas($post_id);
 
         //check MusicBrainz datas has media(s)
@@ -710,7 +708,7 @@ class WP_SoundSystem_Core_MusicBrainz {
 
             foreach($media_tracks as $track_key=>$track){
                 
-                $save_tracks[] = array(
+                $tracks_arr[] = array(
                     'artist'    => $track['artist-credit'][0]['name'], //TO FIX what if multiple artists ?
                     'title'     => $track['title'],
                     'mbid'      => $track['id']
@@ -719,7 +717,7 @@ class WP_SoundSystem_Core_MusicBrainz {
                 //add media separator
                 /*
                 if ( ($track_key == $media_tracks_last_key) && ($media_key != $media_last_key) ){
-                    $save_tracks[] = array(
+                    $tracks_arr[] = array(
                         'artist'    => '---',
                         'title'     => '---',
                         'mbid'      => '---'
@@ -729,15 +727,11 @@ class WP_SoundSystem_Core_MusicBrainz {
             }
         }
 
-        if (!$save_tracks) return;
+        if (!$tracks_arr) return;
         
         $tracklist = wpsstm_get_post_tracklist($post_id);
-        $tracklist->add_tracks($save_tracks);
-        $new_ids = $tracklist->save_new_subtracks();
-        
-        //add new subtrack IDs
-        $tracklist->append_subtrack_ids($new_ids);
-
+        $tracklist->add_tracks($tracks_arr);
+        return $tracklist->save_subtracks();
     }
 
     function redirect_to_switch_entries($location){
