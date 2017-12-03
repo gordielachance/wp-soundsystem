@@ -64,8 +64,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
         $this->ajax_refresh = $this->is_expired ? true : false;
-        $this->ajax_refresh = false;
-
     }
 
     protected function get_default_scraper_options(){
@@ -171,7 +169,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
-        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats //TOFIXGGG TO CHECK
+        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
         
         $meta_input = array(
             wpsstm_live_playlists()->remote_title_meta_name =>  $this->title, //remote title

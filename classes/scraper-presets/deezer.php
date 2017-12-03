@@ -1,6 +1,4 @@
 <?php
-//TOFIXGGG playlist title
-
 class WP_SoundSystem_Deezer_Playlists{
     var $tracklist;
     private $playlist_id;
