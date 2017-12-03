@@ -514,6 +514,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function get_scraper_options($keys=null){
 
         $options = apply_filters('wpsstm_live_tracklist_scraper_options',$this->scraper_options,$this);
+        $default_options = $this->get_default_scraper_options();
+        $options = array_replace_recursive($default_options,(array)$options); //last one has priority
 
         if ($keys){
             return wpsstm_get_array_value($keys, $options);
