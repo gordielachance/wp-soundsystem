@@ -54,7 +54,7 @@ class WP_SoundSystem_Tracklist{
             
             $this->post_id = $post_id;
 
-            $this->title = get_post_field('post_title',$post_id); //use get_post_field here instead of get_the_title() so title is not filtered
+            $this->title = get_the_title($post_id);
             
             $post_author_id = get_post_field( 'post_author', $post_id );
             $this->author = get_the_author_meta( 'display_name', $post_author_id );
@@ -237,19 +237,6 @@ class WP_SoundSystem_Tracklist{
         $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
         
         return $this->set_subtrack_ids($subtrack_ids);
-    }
-    
-    private function get_tracklist_type(){
-        
-        $tracklist_type = 'static'; //default
-        
-        $post_type = get_post_type($this->post_id);
-        
-        if ($post_type == wpsstm()->post_type_live_playlist){
-            $tracklist_type = 'live';
-        }
-
-        return $tracklist_type;
     }
 
     /*

@@ -36,7 +36,6 @@ class WP_SoundSystem_Core_Live_Playlists{
         
     }
 
-
     function setup_actions(){
         
         if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
@@ -52,6 +51,8 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
         
+        add_filter( 'the_title', array($this, 'the_cached_remote_title'), 10, 2 );
+
     }
 
     function register_post_type_live_playlist() {
@@ -288,6 +289,20 @@ class WP_SoundSystem_Core_Live_Playlists{
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
         return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+    }
+    
+    //for live tracklists; if the WP post does not have a title, return the original tracklist title (stored in meta).
+    function the_cached_remote_title($title,$post_id){
+        
+        //there is already a title
+        if ($title) return $title;
+        
+        //post type check
+        $post_type = get_post_type($post_id);
+        if ( $post_type !== wpsstm()->post_type_live_playlist ) return $title;
+        
+        return get_post_meta($post_id,$this->remote_title_meta_name,true);
+        
     }
 
 }

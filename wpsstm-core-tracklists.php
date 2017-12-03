@@ -61,8 +61,6 @@ class WP_SoundSystem_Core_Tracklists{
         add_filter( 'template_include', array($this,'tracklist_popup_template'));
         
         add_action( 'template_redirect', array($this,'handle_tracklist_popup_form'));
-        
-        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         
@@ -253,8 +251,6 @@ class WP_SoundSystem_Core_Tracklists{
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
         }
-        
-        
 
         header('Content-type: application/json');
         wp_send_json( $result ); 

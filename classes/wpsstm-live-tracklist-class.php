@@ -57,13 +57,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $this->location = $this->feed_url;
             }
 
-            //author
-            /*
-            if ($meta_author = $this->get_cached_remote_author() ){
-                $this->author = $meta_author;
-            }
-            */
-
         }
         
         //set expiration bool & time
@@ -71,6 +64,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
         $this->ajax_refresh = $this->is_expired ? true : false;
+        $this->ajax_refresh = false;
 
     }
 
@@ -145,11 +139,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->updated_time = current_time( 'timestamp', true );
 
         //tracklist title
-        $this->title = $this->get_tracklist_title(); //TO FIX TO CHECK bad encoding (eg. last.fm) ?
+        $this->title = $this->get_remote_title(); //TO FIX TO CHECK bad encoding (eg. last.fm) ?
 
         //tracklist author
         //TO FIX force bad encoding (eg. last.fm)
-        $this->author = $this->get_tracklist_author();
+        $this->author = $this->get_remote_author();
 
         /*
         UPDATE TRACKLIST
@@ -537,7 +531,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */
     
-    public function get_tracklist_title(){
+    public function get_remote_title(){
         $title = null;
         if ( $selector_title = $this->get_selectors( array('tracklist_title') ) ){
             $title = $this->parse_node($this->body_node,$selector_title);
@@ -549,7 +543,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     Get the playlist author.  Could be overriden in presets.
     */
     
-    public function get_tracklist_author(){
+    public function get_remote_author(){
         $author = null;
         return apply_filters('wpsstm_live_tracklist_author',$author,$this);
     }
@@ -949,15 +943,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         return $refresh_time_human = human_time_diff( $now, $time_before );
     }
-    
-    function get_cached_remote_title(){
-        return get_post_meta($this->post_id,wpsstm_live_playlists()->remote_title_meta_name,true);
-    }
-
-    function get_cached_remote_author(){
-        return get_post_meta($this->post_id,wpsstm_live_playlists()->remote_author_meta_name,true);
-    }
-
 
     function get_tracklist_class($extra_classes=null){
         
