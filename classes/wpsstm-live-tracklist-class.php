@@ -64,7 +64,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
         $this->ajax_refresh = $this->is_expired ? true : false;
-        $this->ajax_refresh = false;
     }
 
     protected function get_default_scraper_options(){
