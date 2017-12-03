@@ -149,7 +149,7 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
+= 1.8.8 =
 * presets: use filters instead of extending the tracklist class
 * JS - improved toggleChildren.js
 * 'edit backend' action for tracklists/tracks/sources
