@@ -496,7 +496,10 @@ class WpsstmTracklist {
                 function(success_msg){
  
                     var track_obj = self.tracks[0];
-                    track_obj.play_track();
+                    
+                    if (track_obj){
+                        track_obj.play_track();
+                    }
 
                 },
                 function(error_msg){
