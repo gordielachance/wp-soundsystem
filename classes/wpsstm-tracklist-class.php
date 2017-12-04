@@ -418,19 +418,7 @@ class WP_SoundSystem_Tracklist{
         //set new subtracks
         return $this->set_subtrack_ids($track_ids);
     }
-    
-    function set_subtracks_auto_mbid(){
-        //ignore if option disabled
-        $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
-        if (!$auto_id) return;
-        
-        foreach($this->tracks as $key=>$track){
-            if (!$track->post_id) continue;
-            if ( ( !$mbid = wpsstm_mb()->guess_mbid( $track->post_id ) ) || is_wp_error($mbid) ) continue;
-            wpsstm_mb()->do_update_mbid($track->post_id,$mbid);
-        }
-    }
-    
+
     function get_tracklist_html(){
         
         $template = $this->get_options('template');
