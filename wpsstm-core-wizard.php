@@ -189,7 +189,7 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
         $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         
-        wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
+        wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->is_wizard_disabled() );
 
         if($input){
             $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
@@ -197,10 +197,9 @@ class WP_SoundSystem_Core_Wizard{
         }
 
         if ( wpsstm_wizard()->is_advanced ){
-            $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
-        }
-
-        if ( $this->is_advanced ){
+            //force remote request (so we can get the remote playlist details - content; etc.)
+            $wpsstm_tracklist->ajax_refresh = false;
+            $wpsstm_tracklist->is_expired = true;
             $wpsstm_tracklist->tracks_strict = false;
         }
 
@@ -568,7 +567,7 @@ class WP_SoundSystem_Core_Wizard{
         
         /*
         display tracklist if available.  
-        Not shown this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
+        Do not show this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
         if ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url ){
             add_settings_field(

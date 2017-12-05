@@ -746,7 +746,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
         
-        //ignore ajax refresh so tracks can be populated
+        //force PHP tracks refresh
         $this->ajax_refresh = false;
         
         $updated = $this->update_live_tracklist(true);

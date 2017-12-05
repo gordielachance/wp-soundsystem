@@ -3,11 +3,6 @@
 #wizard-wrapper{
     position:relative;
 
-    #wpsstm-wizard-preview-feed-url{
-        text-align:center;
-        font-size:1.25em;
-    }
-
     pre.spiff-raw, pre.spiff-raw code {
         //Instead of the line below you could use @includebox-sizing($bs)
         box-sizing: border-box;

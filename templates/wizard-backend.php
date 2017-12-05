@@ -54,12 +54,8 @@ $post_type = get_post_type();
         <?php
         
     }else{
-        ?>
-        <p id="wpsstm-wizard-preview-feed-url">
-            <?php printf($wpsstm_tracklist->feed_url);?>
-        </p>
-        <?php
-        
+        //wizard closed, just display tracklist
+        wpsstm_wizard()->feedback_tracklist_callback();
     }
 
     //import tracks
