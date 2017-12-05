@@ -7,7 +7,6 @@ Handle posts that have a tracklist, like albums and playlists.
 class WP_SoundSystem_Core_Tracklists{
     public $qvar_tracklist_action = 'tracklist-action';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
-    public $time_updated_subtracks_meta_name = 'wpsstm_remote_query_time';
     public $tracklist_post_types = array();
     
     /**
@@ -595,10 +594,6 @@ class WP_SoundSystem_Core_Tracklists{
             exit();
         }
 
-    }
-
-    function get_subtracks_update_time($post = null){
-        return get_post_meta($post,$this->time_updated_subtracks_meta_name,true);
     }
 }
 

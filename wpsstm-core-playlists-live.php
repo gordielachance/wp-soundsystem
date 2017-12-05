@@ -6,6 +6,7 @@ class WP_SoundSystem_Core_Live_Playlists{
     public $subtracks_live_metaname = 'wpsstm_live_subtrack_ids';
     public $remote_title_meta_name = 'wpsstm_remote_title';
     public $remote_author_meta_name = 'wpsstm_remote_author_name';
+    public $time_updated_meta_name = 'wpsstm_remote_query_time';
     public $presets;
     
     /**

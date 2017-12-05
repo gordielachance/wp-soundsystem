@@ -60,9 +60,6 @@ class WP_SoundSystem_Tracklist{
             
             //tracklist time
             $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
-            if ( $meta = wpsstm_tracklists()->get_subtracks_update_time($this->post_id) ){
-                $this->updated_time = $meta;
-            }
             
             $this->location = get_permalink($post_id);
 
@@ -1096,7 +1093,6 @@ class WP_SoundSystem_Tracklist{
         if (!$enable){
             return update_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey, true );
         }else{
-            delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name); //force subtracks refresh
             return delete_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey );
         }
     }
