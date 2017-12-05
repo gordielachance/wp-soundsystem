@@ -30,7 +30,6 @@ class WP_SoundSystem_Core_Albums{
         add_action( 'init', array($this,'register_post_type_album' ));
         add_filter( 'query_vars', array($this,'add_query_var_album') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
-        add_action( 'save_post', array($this,'update_title_album'), 99);
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
@@ -38,6 +37,9 @@ class WP_SoundSystem_Core_Albums{
         
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
+        
+        add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
+        
     }
     
     //add custom admin submenu under WPSSTM
@@ -114,45 +116,6 @@ class WP_SoundSystem_Core_Albums{
 
         return $query;
     }
-    
-    /**
-    Update the post title to match the artist/album/track, so we still have a nice post permalink
-    **/
-    
-    function update_title_album( $post_id ) {
-        
-        //only for albums
-        if (get_post_type($post_id) != wpsstm()->post_type_album) return;
-
-        //check capabilities
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        $has_cap = current_user_can('edit_post', $post_id);
-        if ( $is_autosave || $is_autodraft || $is_revision || !$has_cap ) return;
-
-        $artist = wpsstm_get_post_artist($post_id);
-        $album = wpsstm_get_post_album($post_id);
-        if ( !$artist || !$album ) return;
-        
-        $post_title = sanitize_text_field( sprintf('%s - "%s"',$artist,$album) );
-        
-        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
-        if ( $post_title == get_post_field('post_title',$post_id) ) return;
-
-        //log
-        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_album()"); 
-
-        $args = array(
-            'ID'            => $post_id,
-            'post_title'    => $post_title
-        );
-
-        remove_action( 'save_post',array($this,'update_title_album'), 99 ); //avoid infinite loop - ! hook priorities
-        wp_update_post( $args );
-        add_action( 'save_post',array($this,'update_title_album'), 99 );
-
-    }
 
     function register_post_type_album() {
 
@@ -190,7 +153,7 @@ class WP_SoundSystem_Core_Albums{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'author','title','thumbnail','comments' ),
+            'supports' => array( 'author','thumbnail','comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,
@@ -322,6 +285,18 @@ class WP_SoundSystem_Core_Albums{
             update_post_meta( $post_id, $this->album_metakey, $album );
         }
 
+    }
+    
+    function the_album_post_title($title,$post_id){
+
+        //post type check
+        $post_type = get_post_type($post_id);
+        if ( $post_type !== wpsstm()->post_type_album ) return $title;
+
+        $title = get_post_meta( $post_id, $this->album_metakey, true );
+        $artist = get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
+        
+        return sprintf('"%s" - %s',$title,$artist);
     }
     
 }

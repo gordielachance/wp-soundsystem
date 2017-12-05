@@ -40,7 +40,6 @@
         //refresh
         tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist").click(function(e) {
             e.preventDefault();
-            tracklist_obj.can_play = undefined; //will force refresh
             tracklist_obj.debug("clicked 'refresh' link");
             tracklist_obj.get_tracklist_request();
 
@@ -173,6 +172,7 @@ class WpsstmTracklist {
         this.expire_time =              undefined;
         this.options =                  {};
         this.tracks =                   [];
+        this.tracks_count =             undefined;
         this.tracks_shuffle_order =     [];
         this.populate_tracklist(tracklist_el);
         this.can_play =                 undefined;
@@ -239,6 +239,7 @@ class WpsstmTracklist {
 
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
         
+        self.tracks_count = Number( self.tracklist_el.find('[itemprop="numTracks"]').attr('content') ); //if value > -1, tracks have been populated with PHP
         self.tracks = [];
         self.tracks_shuffle_order = [];
         
@@ -440,7 +441,7 @@ class WpsstmTracklist {
             
             if (self.is_expired){
                 self.debug("(tracklist will refresh if it is started again)");
-                self.can_play = undefined; //will force to refresh tracklist
+                self.can_play = undefined; //will allow to refresh tracklist when calling maybe_refresh
             }
             
             

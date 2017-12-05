@@ -28,13 +28,13 @@ class WP_SoundSystem_Tracklist{
     );
     
     var $tracks_strict = true; //requires a title AND an artist
-    public $ajax_refresh = false;//should we query the subtracks through ajax ? (enabled by default for live playlists).
+    public $ajax_refresh = false;//should we load the subtracks through ajax ? (enabled by default for live playlists).
 
     var $paged_var = 'tracklist_page';
     
     var $track;
     var $current_track = -1;
-    var $track_count = 0;
+    var $track_count = -1; //-1 when not yet populated
     var $in_track_loop = false;
     var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
 
@@ -60,9 +60,6 @@ class WP_SoundSystem_Tracklist{
             
             //tracklist time
             $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
-            if ( $meta = wpsstm_tracklists()->get_subtracks_update_time($this->post_id) ){
-                $this->updated_time = $meta;
-            }
             
             $this->location = get_permalink($post_id);
 
@@ -966,7 +963,7 @@ class WP_SoundSystem_Tracklist{
 
 
     function populate_tracks($args = null){
-        
+
         if ( $this->did_query_tracks ) return true;
         
         if ( $this->ajax_refresh ){
@@ -1096,7 +1093,6 @@ class WP_SoundSystem_Tracklist{
         if (!$enable){
             return update_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey, true );
         }else{
-            delete_post_meta($this->post_id,wpsstm_tracklists()->time_updated_subtracks_meta_name); //force subtracks refresh
             return delete_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey );
         }
     }

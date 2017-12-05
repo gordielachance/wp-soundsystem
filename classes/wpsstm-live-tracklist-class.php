@@ -56,14 +56,16 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             if ($this->feed_url){
                 $this->location = $this->feed_url;
             }
+            
+            if ( $meta = get_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name,true) ){
+                $this->updated_time = $meta;
+            }
 
         }
         
         //set expiration bool & time
         $this->is_expired = $this->check_has_expired();
-        
-        //should we query the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
-        $this->ajax_refresh = $this->is_expired ? true : false;
+        $this->ajax_refresh = $this->is_expired; //should we load the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
     }
 
     protected function get_default_scraper_options(){
@@ -131,8 +133,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
-        
-        
+
         //set the time tracklist has been updated
         $this->updated_time = current_time( 'timestamp', true );
 
@@ -202,7 +203,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             //update refresh time
             $this->updated_time = current_time( 'timestamp', true );
-            $meta_input[wpsstm_tracklists()->time_updated_subtracks_meta_name] = $this->updated_time;
+            $meta_input[wpsstm_live_playlists()->time_updated_meta_name] = $this->updated_time;
             
         }
         
@@ -745,7 +746,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
         
-        //ignore ajax refresh so tracks can be populated
+        //force PHP tracks refresh
         $this->ajax_refresh = false;
         
         $updated = $this->update_live_tracklist(true);
@@ -814,11 +815,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( !$wizard_settings ) return;
         if ( !$this->post_id ) return;
 
+        $default_settings = $this->get_default_scraper_options();
+        $old_settings = get_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name,true);
+        
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
         //remove all default values so we store only user-edited stuff
-        $default_args = $this->get_default_scraper_options();
-        $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_args);
+        $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_settings);
+        
+        //settings have been updated, clear tracklist cache
+        if ($old_settings != $wizard_settings){
+            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WP_SoundSystem_Remote_Tracklist::save_wizard_settings' );
+            delete_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name);
+        }
 
         if (!$wizard_settings){
             delete_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name);

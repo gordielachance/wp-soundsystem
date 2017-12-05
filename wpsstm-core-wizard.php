@@ -188,14 +188,20 @@ class WP_SoundSystem_Core_Wizard{
     function populate_wizard_tracklist($post_id=null,$input=null){
         global $wpsstm_tracklist;
         $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
+        
+        wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->is_wizard_disabled() );
 
         if($input){
             $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
             $wpsstm_tracklist->feed_url = $feed_url;
-            $wpsstm_tracklist->scraper_options['datas_cache_min'] = 0; //no cache by default for wizard (do NOT create subtracks until post is saved and cache enabled)
         }
 
-        if ( $this->is_advanced ) $wpsstm_tracklist->tracks_strict = false;
+        if ( wpsstm_wizard()->is_advanced ){
+            //force remote request (so we can get the remote playlist details - content; etc.)
+            $wpsstm_tracklist->ajax_refresh = false;
+            $wpsstm_tracklist->is_expired = true;
+            $wpsstm_tracklist->tracks_strict = false;
+        }
 
         if (wpsstm_is_backend() ){
             $wpsstm_tracklist->options['autoplay'] = false;
@@ -370,11 +376,6 @@ class WP_SoundSystem_Core_Wizard{
         
         //populate backend tracklist
         $this->populate_wizard_tracklist($post->ID); 
-
-        wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
-        if ( wpsstm_wizard()->is_advanced ){
-            $wpsstm_tracklist->ajax_refresh = false; //so we can inspect HTML grabbed, etc.
-        }
 
         /*
         TOFIXGGG TO CHECK is this useful ? should we re-enable it ?
@@ -566,7 +567,7 @@ class WP_SoundSystem_Core_Wizard{
         
         /*
         display tracklist if available.  
-        Not shown this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
+        Do not show this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
         if ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url ){
             add_settings_field(

@@ -175,8 +175,11 @@ class WpsstmPagePlayer {
         
         //autoload
         var tracklists_autoload = self.tracklists.filter(function (tracklist_obj) {
-            return (tracklist_obj.options.autoload === true);
+            var has_autoload = (tracklist_obj.options.autoload === true);
+            var already_populated = (tracklist_obj.tracks_count > -1); //has already been populated through PHP
+            return (has_autoload && !already_populated);
         });
+        
         $(tracklists_autoload).each(function(index,tracklist_obj) {
             var promise = tracklist_obj.maybe_refresh();
             preload_promises.push(promise);
