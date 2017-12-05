@@ -16,8 +16,14 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
             <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post(); ?>
                 <li>
                     <a href="<?php echo get_permalink();?>">
-                    <strong><?php the_title(); ?></strong>
-                    <small><?php echo wpsstm_get_live_tracklist_url();?></small>
+                    <?php 
+                    if ( $title = get_the_title() ){
+                        ?>
+                        <strong><?php echo $title; ?></strong>
+                        <?php
+                    }
+                    ?>
+                    <span><?php echo wpsstm_get_live_tracklist_url();?></span>
                     </a>
                 </li>
             <?php endwhile; ?><!-- end of the loop -->

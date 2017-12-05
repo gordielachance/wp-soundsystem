@@ -891,6 +891,32 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   min-width: 100%;
 }
 
+/* line 173, ../scss/_wpsstm-wizard.scss */
+#wpsstm-frontend-wizard-recent {
+  font-size: .8em;
+}
+/* line 175, ../scss/_wpsstm-wizard.scss */
+#wpsstm-frontend-wizard-recent > ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* line 179, ../scss/_wpsstm-wizard.scss */
+#wpsstm-frontend-wizard-recent > ul li {
+  position: relative;
+  line-height: 1em;
+  line-height: 1.5em;
+}
+/* line 183, ../scss/_wpsstm-wizard.scss */
+#wpsstm-frontend-wizard-recent > ul li a {
+  display: -webkit-flex;
+  display: flex;
+}
+/* line 185, ../scss/_wpsstm-wizard.scss */
+#wpsstm-frontend-wizard-recent > ul li a strong {
+  margin-right: .25em;
+}
+
 /*
 Popup, modals, etc.
 */
@@ -1162,7 +1188,7 @@ MINIMAL STYLES
 DEFAULT STYLES
 */
 /* line 101, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr body.wpsstm-default th.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr body.wpsstm-default td.wpsstm-track-info, body.wpsstm-default #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wpsstm-default li, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] body.wpsstm-default .wpsstm-source-title, body.wp-admin .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr body.wp-admin th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr body.wp-admin td.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wp-admin #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wp-admin li, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] body.wp-admin .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title {
+body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr body.wpsstm-default th.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr body.wpsstm-default td.wpsstm-track-info, body.wpsstm-default #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wpsstm-default li, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] body.wpsstm-default .wpsstm-source-title, body.wpsstm-default #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wpsstm-default a > *, body.wp-admin .wpsstm-ellipsis, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr body.wp-admin th.wpsstm-track-info, body.wpsstm-default .wpsstm-tracklist table.wpsstm-tracks-list tr body.wp-admin td.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr th.wpsstm-track-info, body.wp-admin .wpsstm-tracklist table.wpsstm-tracks-list tr td.wpsstm-track-info, body.wp-admin #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul li, #wpsstm-tracklist-chooser-list #wpsstm-filter-playlists ul body.wp-admin li, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] body.wp-admin .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title, body.wp-admin #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wp-admin a > * {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;
