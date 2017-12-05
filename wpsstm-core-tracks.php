@@ -82,6 +82,8 @@ class WP_SoundSystem_Core_Tracks{
         //delete sources when post is deleted
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         
+        add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
+        
         /*
         AJAX
         */
@@ -1017,6 +1019,18 @@ class WP_SoundSystem_Core_Tracks{
 
         return $flushed_ids;
 
+    }
+    
+    function the_track_post_title($title,$post_id){
+
+        //post type check
+        $post_type = get_post_type($post_id);
+        if ( $post_type !== wpsstm()->post_type_track ) return $title;
+
+        $title = get_post_meta( $post_id, $this->title_metakey, true );
+        $artist = get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
+        
+        return sprintf('"%s" - %s',$title,$artist);
     }
     
 }

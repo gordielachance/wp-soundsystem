@@ -37,6 +37,9 @@ class WP_SoundSystem_Core_Albums{
         
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
+        
+        add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
+        
     }
     
     //add custom admin submenu under WPSSTM
@@ -282,6 +285,18 @@ class WP_SoundSystem_Core_Albums{
             update_post_meta( $post_id, $this->album_metakey, $album );
         }
 
+    }
+    
+    function the_album_post_title($title,$post_id){
+
+        //post type check
+        $post_type = get_post_type($post_id);
+        if ( $post_type !== wpsstm()->post_type_album ) return $title;
+
+        $title = get_post_meta( $post_id, $this->album_metakey, true );
+        $artist = get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
+        
+        return sprintf('"%s" - %s',$title,$artist);
     }
     
 }
