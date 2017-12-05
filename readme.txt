@@ -158,6 +158,9 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * improved 'services' wizard widget
 * new plugin option 'Flush Community Tracks'
 * live playlists : get_the_title() now returns the remote tracklist title if WP post title is empty ('the_cached_remote_title' hooked on 'the_title')
+* remove title support for artist/album/track
+* JS: do not autoload when playlist is cached
+* some live tracklist & wizard improvements
 
 = 1.8.7 =
 * restored XSPF preset
