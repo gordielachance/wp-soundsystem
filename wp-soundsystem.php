@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '152';
+    public $db_version = '153';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -209,9 +209,16 @@ class WP_SoundSystem {
 
         }else{
             
-            if($current_version < 151){ //switch post type to 'pin'
+            if($current_version < 154){ //delete artist/album/track post title (we don't use them anymore)
+
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_title = '' WHERE post_type = '%s' OR post_type = '%s' OR post_type = '%s' ", $this->post_type_album,$this->post_type_artist,$this->post_type_track );
+
+                $result = $wpdb->get_results ( $querystr );
                 
-                //rename old source URL metakeys
+            }
+            
+            if($current_version < 151){ //rename old source URL metakeys
+
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", wpsstm_sources()->source_url_metakey, '_wpsstm_source' );
 
                 $result = $wpdb->get_results ( $querystr );
