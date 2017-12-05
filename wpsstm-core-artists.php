@@ -25,17 +25,16 @@ class WP_SoundSystem_Core_Artists{
         //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
     }
-    
+
     function setup_actions(){
 
         add_action( 'init', array($this,'register_post_type_artist' ));
+        
         add_filter( 'query_vars', array($this,'add_query_var_artist') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
-        
-        add_action( 'save_post', array($this,'update_title_artist'), 99);
-        
+
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
         add_action( 'save_post', array($this,'metabox_artist_save'), 5); 
         
@@ -114,43 +113,6 @@ class WP_SoundSystem_Core_Artists{
 
         return $query;
     }
-    
-    /**
-    Update the post title to match the artist/album/track, so we still have a nice post permalink
-    **/
-    
-    function update_title_artist( $post_id ) {
-        
-        //only for albums
-        if (get_post_type($post_id) != wpsstm()->post_type_artist) return;
-
-        //check capabilities
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        $has_cap = current_user_can('edit_post', $post_id);
-        if ( $is_autosave || $is_autodraft || $is_revision || !$has_cap ) return;
-
-        $artist = $post_title = wpsstm_get_post_artist($post_id);
-        if ( !$artist ) return;
-        
-        //no changes - use get_post_field here instead of get_the_title() so title is not filtered
-        if ( $post_title == get_post_field('post_title',$post_id) ) return;
-
-        //log
-        wpsstm()->debug_log(array('post_id'=>$post_id,'title'=>$post_title),"update_title_artist()"); 
-
-        $args = array(
-            'ID'            => $post_id,
-            'post_title'    => $post_title
-        );
-
-        remove_action( 'save_post',array($this,'update_title_artist'), 99 ); //avoid infinite loop - ! hook priorities
-        wp_update_post( $args );
-        add_action( 'save_post',array($this,'update_title_artist'), 99 );
-
-    }
-
 
     function register_post_type_artist() {
 
@@ -188,7 +150,7 @@ class WP_SoundSystem_Core_Artists{
             'labels' => $labels,
             'hierarchical' => false,
 
-            'supports' => array( 'author','title','thumbnail', 'comments' ),
+            'supports' => array( 'author','thumbnail', 'comments' ),
             'taxonomies' => array( 'post_tag' ),
             'public' => true,
             'show_ui' => true,
