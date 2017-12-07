@@ -134,21 +134,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
 
-        //set the time tracklist has been updated
-        $this->updated_time = current_time( 'timestamp', true );
-
-        //tracklist title
-        $this->title = $this->get_remote_title(); //TO FIX TO CHECK bad encoding (eg. last.fm) ?
-
-        //tracklist author
-        //TO FIX force bad encoding (eg. last.fm)
-        $this->author = $this->get_remote_author();
-
         /*
         UPDATE TRACKLIST
         */
         $updated = $this->update_live_tracklist();
         if ( is_wp_error($updated) ) return $updated;
+        
+        //repopulate tracklist post to retrieve the updated datas
+        $this->__construct($this->post_id);
 
         return true;
     }
@@ -172,23 +165,18 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
         
+        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
+
         $meta_input = array(
-            wpsstm_live_playlists()->remote_title_meta_name =>  $this->title, //remote title
-            wpsstm_live_playlists()->remote_author_meta_name => $this->author, //remote author
+            wpsstm_live_playlists()->remote_title_meta_name =>  $this->get_remote_title(), //remote title
+            wpsstm_live_playlists()->remote_author_meta_name => $this->get_remote_author(), //remote author
+            wpsstm_live_playlists()->time_updated_meta_name =>  $this->updated_time,
         );
         
         //should we save subtracks too ? By default, only if cache is enabled.
         if ($save_subtracks === null) $save_subtracks = (bool)$this->get_scraper_options('datas_cache_min');
 
-        if ($save_subtracks){
-
-            //populate remote tracklist if not done yet
-            $populated = $this->populate_tracks();
-
-            if ( is_wp_error($populated) ) {
-                wpsstm()->debug_log($populated->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
-                return $populated;
-            }
+        if ($this->tracks && $save_subtracks){
 
             //save new subtracks as community tracks
             $subtracks_args = array(
@@ -201,10 +189,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 return $success;
             }
 
-            //update refresh time
-            $this->updated_time = current_time( 'timestamp', true );
-            $meta_input[wpsstm_live_playlists()->time_updated_meta_name] = $this->updated_time;
-            
         }
         
         //update tracklist post
@@ -735,20 +719,20 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     function convert_to_static_playlist(){
         
+        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ){
+            return new WP_Error( 'wpsstm_wrong_post_type', __("This is not a live tracklist.",'wpsstm') );
+        }
+
         //capability check
         if ( !$this->user_can_lock_tracklist() ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
-        
-        //get autorship if this is a community tracklist
-        if ( wpsstm_is_community_post($this->post_id) ){
-            $got_autorship = $this->get_autorship();
-            if ( is_wp_error($got_autorship) ) return $got_autorship;
-        }
-        
+
         //force PHP tracks refresh
         $this->ajax_refresh = false;
         
+        //populate remote tracklist if not done yet
+        $populated = $this->populate_tracks();
         $updated = $this->update_live_tracklist(true);
 
         if ( is_wp_error($updated) ){
@@ -756,28 +740,25 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         $moved_tracks = $this->move_live_tracks();
+        
         if ( is_wp_error($moved_tracks) ){
             return $moved_tracks;
         }
-        
-        if ( get_post_type($this->post_id) != wpsstm()->post_type_playlist ){
-            
-            $args = array(
-                'ID'            => $this->post_id,
-                'post_title'    => $this->title,
-                'post_type'     => wpsstm()->post_type_playlist,
-            );
 
-            $updated = wp_update_post( $args );
-            
-            if ( !$updated ) {
-                return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
-            }
+        $args = array(
+            'ID'            => $this->post_id,
+            'post_title'    => $this->title,
+            'post_type'     => wpsstm()->post_type_playlist,
+        );
+
+        $updated = wp_update_post( $args );
+
+        if ( !$updated ) {
+            return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
         }
-
-        $this->toggle_enable_wizard(false);
         
-        return $this->post_id;
+        $this->toggle_enable_wizard(false);
+        return $updated;
 
     }
 

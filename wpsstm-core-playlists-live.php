@@ -294,15 +294,17 @@ class WP_SoundSystem_Core_Live_Playlists{
     
     //for live tracklists; if the WP post does not have a title, return the original tracklist title (stored in meta).
     function the_cached_remote_title($title,$post_id){
-        
-        //there is already a title
-        if ($title) return $title;
-        
+
         //post type check
         $post_type = get_post_type($post_id);
         if ( $post_type !== wpsstm()->post_type_live_playlist ) return $title;
+
+        //only if no WP post title set
+        if ( !$title ){
+            $title = get_post_meta($post_id,$this->remote_title_meta_name,true);
+        }
         
-        return get_post_meta($post_id,$this->remote_title_meta_name,true);
+        return $title;
         
     }
 
