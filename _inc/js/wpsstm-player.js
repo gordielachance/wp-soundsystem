@@ -223,10 +223,9 @@ class WpsstmPagePlayer {
         }
         
         var tracklist_idx = self.current_track.tracklist.index;
-        tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(tracklist_idx);
-        var first_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(0);
         
-
+        //shuffle ?
+        tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(tracklist_idx);
 
         var tracklists = $(self.tracklists).get();
         var tracklists_before = tracklists.slice(0,tracklist_idx).reverse();
@@ -243,7 +242,7 @@ class WpsstmPagePlayer {
                 self.debug("previous_tracklist_jump: can_repeat is disabled.");
             }else{
                 var last_tracklist = self.tracklists[self.tracklists.length - 1];
-                var last_track = last_tracklist.tracks;
+                var last_track = last_tracklist.tracks[last_tracklist.tracks.length-1];
                 last_track.play_track();
             }
             return;
@@ -258,11 +257,9 @@ class WpsstmPagePlayer {
         var self = this;
         var current_tracklist = self.current_track.tracklist;
         var tracklist_idx = current_tracklist.index;
-        tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(tracklist_idx);
         
-        var last_tracklist = self.tracklists[self.tracklists.length-1];
-        var last_tracklist_idx = last_tracklist.index;
-        last_tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(last_tracklist_idx);
+        //shuffle ?
+        tracklist_idx = self.get_maybe_unshuffle_tracklist_idx(tracklist_idx);
 
         var tracklists = self.tracklists;
         var tracklists_after = tracklists.slice(tracklist_idx+1); 
