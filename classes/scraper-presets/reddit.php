@@ -62,30 +62,28 @@ class WP_SoundSystem_Reddit_Api{
                     $url = sprintf( 'https://www.reddit.com/r/%s',$this->subreddit_slug );
                     $response = wp_remote_get( $url );
 
-                    if ( is_wp_error($response) ) return;
+                    if ( is_wp_error($response) ) return $title;
 
                     $response_code = wp_remote_retrieve_response_code( $response );
-                    if ($response_code != 200) return;
+                    if ($response_code != 200) return $title;
 
                     $content = wp_remote_retrieve_body( $response );
 
                     //QueryPath
                     try{
-                        $title = htmlqp( $content, 'title', WP_SoundSystem_Remote_Tracklist::$querypath_options )->innerHTML();
+                        $remote_title = htmlqp( $content, 'title', WP_SoundSystem_Remote_Tracklist::$querypath_options )->innerHTML();
                     }catch(Exception $e){
-                        return false;
+                        return $title;
                     }
 
                     libxml_clear_errors();
 
-                    if ( !$title ){
-                        return;
-                    }
+                    if ( !$remote_title ) return $title;
 
-                    set_transient( $transient_name, $title, 3 * DAY_IN_SECONDS );
+                    set_transient( $transient_name, $remote_title, 3 * DAY_IN_SECONDS );
 
                 }
-                $this->subreddit_title = $title;
+                $this->subreddit_title = $remote_title;
             }
 
             $title = $this->subreddit_title;

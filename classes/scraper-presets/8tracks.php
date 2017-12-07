@@ -11,6 +11,7 @@ class WP_SoundSystem_8Tracks_Playlists{
 
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
     }
     
     function can_handle_url(){
@@ -76,7 +77,8 @@ class WP_SoundSystem_8Tracks_Playlists{
             return new WP_Error( 'wpsstm_8tracks_missing_tracklist_slug', __('Required tracklist slug missing.','wpsstm') );
         }
         
-        $transient_name = 'wpsstm-8tracks-' . $this->playlist_slug . '-data';
+        //TO FIX TO CHECK might be too long for a transient key ?
+        $transient_name = sprintf('wpsstm-8tracks-%s-%s-data',sanitize_title($this->user_slug),sanitize_title($this->playlist_slug));
 
         //cache?
         if ( false === ( $data = get_transient($transient_name ) ) ) {
@@ -95,12 +97,15 @@ class WP_SoundSystem_8Tracks_Playlists{
         
     }
     
-    function get_remote_title(){
-        if ( is_wp_error( $this->mix_data ) ) return $this->get_mix_data;
-        return wpsstm_get_array_value('name', $this->mix_data);
+    function get_remote_title($title){
+        if ( $this->can_handle_url() ){
+            $mix_data = $this->get_mix_data();
+            if ( !is_wp_error( $mix_data ) ){
+                $title = wpsstm_get_array_value('name', $mix_data);
+            }
+        }
+        return $title;
     }
-    
-
 }
 
 //register preset

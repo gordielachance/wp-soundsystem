@@ -10,6 +10,8 @@ class WP_SoundSystem_RadioKing_Api{
         
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
+        
     }
     
     function can_handle_url(){
@@ -79,9 +81,14 @@ class WP_SoundSystem_RadioKing_Api{
         return wpsstm_get_array_value(array('idradio'),$station_data);
     }
 
-    function get_remote_title(){
-        $station_data = $this->get_station_data();
-        return wpsstm_get_array_value(array('name'), $station_data);
+    function get_remote_title($title){
+        if ( $this->can_handle_url() ){
+            $station_data = $this->get_station_data();
+            if ( !is_wp_error($station_data) ){
+                $title = wpsstm_get_array_value(array('name'), $station_data);
+            }
+        }
+        return $title;
     }
     
     protected function get_track_image($track_node){
