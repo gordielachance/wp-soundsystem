@@ -631,6 +631,8 @@ class WpsstmTrack {
         if (isDuplicatePlay){
             success.resolve("we've already queued this track"); 
         }else{
+            
+            if (wpsstm.current_media) wpsstm.current_media.pause(); //pause current media
 
             wpsstm.current_track = self;
 
