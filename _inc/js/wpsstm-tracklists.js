@@ -171,9 +171,9 @@ class WpsstmTracklist {
         this.is_expired =               undefined;
         this.expire_time =              undefined;
         this.options =                  {};
-        this.tracks =                   [];
+        this.tracks =                   undefined;
         this.tracks_count =             undefined;
-        this.tracks_shuffle_order =     [];
+        this.tracks_shuffle_order =     undefined;
         this.populate_tracklist(tracklist_el);
         this.can_play =                 undefined;
     }
@@ -240,6 +240,7 @@ class WpsstmTracklist {
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
         
         self.tracks_count = Number( self.tracklist_el.find('[itemprop="numTracks"]').attr('content') ); //if value > -1, tracks have been populated with PHP
+        
         self.tracks = [];
         self.tracks_shuffle_order = [];
         
@@ -247,10 +248,9 @@ class WpsstmTracklist {
             $.each(tracks_html, function( index, track_html ) {
                 var new_track = new WpsstmTrack(track_html,self,index);
                 self.tracks.push(new_track);
-                self.tracks_shuffle_order.push(index);
             });
 
-            self.tracks_shuffle_order = wpsstm_shuffle(self.tracks_shuffle_order);
+            self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
 
         }
 
@@ -382,17 +382,38 @@ class WpsstmTracklist {
         });
 
     };
+    
+    /*
+    Return the tracks; in the shuffled order if is_shuffle is true.
+    */
+    get_ordered_tracks(){
+        
+        self = this;
+
+        if ( !wpsstm.is_shuffle ){
+            return self.tracks;
+        }else{
+            
+            var shuffled_tracks = [];
+
+            $(self.tracks_shuffle_order).each(function() {
+                var idx = this;
+                shuffled_tracks.push(self.tracks[idx]);
+            });
+
+            return shuffled_tracks;
+        }
+        
+    }
 
     previous_track_jump(){
 
         var self = this;
         
-        var track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
-        track_idx = self.get_maybe_unshuffle_track_idx(track_idx);
-        var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
+        var current_track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
+        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); //shuffle ?
 
-        var tracks = $(self.tracks).get();
-        var tracks_before = tracks.slice(0,track_idx).reverse();
+        var tracks_before = self.get_ordered_tracks().slice(0,current_track_idx).reverse();
 
         //which one should we play?
         var tracks_playable = tracks_before.filter(function (track_obj) {
@@ -400,55 +421,51 @@ class WpsstmTracklist {
         });
         var track_obj = tracks_playable[0];
 
-        if (!track_obj){
-            self.debug("previous_track_jump: no previous track found, jumping to previous tracklist");
-            wpsstm.previous_tracklist_jump();
-            return;
-        }
-       
-        if ( track_obj.index === track_idx ){ //is loop
-            self.debug("next_track_jump: is looping");
-            if ( !wpsstm.can_repeat ){
-                self.debug("next_track_jump: can_repeat is disabled.");
-                return;
+        if (track_obj){
+            track_obj.play_track();
+        }else{
+            
+            self.debug("previous_track_jump: can repeat ? " + wpsstm.can_repeat);
+            
+            if (wpsstm.can_repeat){
+                wpsstm.previous_tracklist_jump();
             }
         }
-        
-        track_obj.play_track();
-        
     }
     
     next_track_jump(){
 
         var self = this;
+        
+        var current_track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
+        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); // shuffle ?
 
-        var track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
-        track_idx = self.get_maybe_unshuffle_track_idx(track_idx);
-        var last_track = self.tracks[self.tracks.length-1];
-
-        var tracks = $(self.tracks).get();
-        var tracks_after = tracks.slice(track_idx+1); 
-        var tracks_before = [];
+        var tracks_after = self.get_ordered_tracks().slice(current_track_idx+1);
 
         //which one should we play?
         var tracks_playable = tracks_after.filter(function (track_obj) {
             return (track_obj.can_play !== false);
         });
+        
         var track_obj = tracks_playable[0];
 
-        if (!track_obj){
-            self.debug("next_track_jump: is last track");
-            
-            if (self.is_expired){
-                self.debug("(tracklist will refresh if it is started again)");
-                self.can_play = undefined; //will allow to refresh tracklist when calling maybe_refresh
-            }
-            
-            
-            $(document).trigger("wpsstmStopTracklist",[self]); //custom event
-            wpsstm.next_tracklist_jump();
-        }else{
+        if (track_obj){
             track_obj.play_track();
+        }else{
+            
+            self.debug("next_track_jump: can repeat ? " + wpsstm.can_repeat);
+            
+            if (wpsstm.can_repeat){
+                
+                if (self.is_expired){
+                    self.debug("next_track_jump: tracklist is expired, unset 'can_play'");
+                    self.can_play = undefined; //will allow to refresh tracklist when calling maybe_refresh
+                }
+
+                $(document).trigger("wpsstmStopTracklist",[self]); //custom event
+                
+                wpsstm.next_tracklist_jump();
+            }
         }
 
 
@@ -495,8 +512,11 @@ class WpsstmTracklist {
         
         self.maybe_refresh().then(
                 function(success_msg){
- 
-                    var track_obj = self.tracks[0];
+                    
+                    var track_idx = 0;
+                    track_idx = self.get_maybe_shuffle_track_idx(track_idx); //shuffle ?
+                    
+                    var track_obj = self.tracks[track_idx];
                     
                     if (track_obj){
                         track_obj.play_track();

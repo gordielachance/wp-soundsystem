@@ -641,8 +641,6 @@ class WpsstmTrack {
             var track_instances = self.get_track_instances();
             track_instances.addClass('track-loading track-active');
 
-            
-
             self.set_bottom_trackinfo(); //bottom track info
 
             self.maybe_load_sources().then(
