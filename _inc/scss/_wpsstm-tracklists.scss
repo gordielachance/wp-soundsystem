@@ -102,6 +102,15 @@ body.wpsstm-default,body.wp-admin{
         .wpsstm-tracklist-icon{
             @include opacity (.15);
         }
+        
+        &.wpsstm-live-tracklist{
+            .wpsstm-tracklist-title{
+                @extend .wpsstm-icon;
+                &:before{
+                    content: "\f09e";
+                }
+            }
+        }
 
         &.tracklist-loading{
             .wpsstm-tracklist-icon{
