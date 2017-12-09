@@ -240,11 +240,13 @@ class WP_SoundSystem_Core_Tracklists{
             if ($option === 'true') $ajax_options[$key] = true;
             if ($option === 'false') $ajax_options[$key] = false;
         }
+        
+        $options = $result['options'] =wp_parse_args($ajax_options,$wpsstm_tracklist->options);
 
         if ($tracklist_id){
             $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id);
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
-            $wpsstm_tracklist->options = wp_parse_args($ajax_options,$wpsstm_tracklist->options);
+            $wpsstm_tracklist->options = $options;
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
         }

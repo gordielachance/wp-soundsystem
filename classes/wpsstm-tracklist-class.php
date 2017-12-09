@@ -48,30 +48,29 @@ class WP_SoundSystem_Tracklist{
         $this->options = $this->get_default_options();
 
         $this->set_tracklist_pagination($pagination_args);
-
-        if ($post_id){
-            
-            $this->post_id = $post_id;
-
-            $this->title = get_the_title($post_id);
-            
-            $post_author_id = get_post_field( 'post_author', $post_id );
-            $this->author = get_the_author_meta( 'display_name', $post_author_id );
-            
-            //tracklist time
-            $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
-            
-            $this->location = get_permalink($post_id);
-
-        }
-
         
+        $this->post_id = $post_id;
+        $this->populate_tracklist_post();
+        
+    }
+    
+    function populate_tracklist_post(){
+
+        if (!$this->post_id) return;
+
+        $this->title = get_the_title($this->post_id);
+        $post_author_id = get_post_field( 'post_author', $this->post_id );
+        $this->author = get_the_author_meta( 'display_name', $post_author_id );
+
+        //tracklist time
+        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+
+        $this->location = get_permalink($this->post_id);
     }
     
     function get_options($keys=null){
         
         $options = apply_filters('wpsstm_tracklist_options',$this->options,$this);
-
 
         if ($keys){
             return wpsstm_get_array_value($keys, $options);

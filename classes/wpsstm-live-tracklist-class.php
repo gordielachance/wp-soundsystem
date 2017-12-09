@@ -137,13 +137,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         /*
         UPDATE TRACKLIST
         */
-        $updated = $this->update_live_tracklist();
-        if ( is_wp_error($updated) ) return $updated;
-        
-        //repopulate tracklist post to retrieve the updated datas
-        $this->__construct($this->post_id);
-
-        return true;
+        return $this->update_live_tracklist();
     }
 
     /*
@@ -168,8 +162,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            wpsstm_live_playlists()->remote_title_meta_name =>  $this->get_remote_title(), //remote title
-            wpsstm_live_playlists()->remote_author_meta_name => $this->get_remote_author(), //remote author
+            wpsstm_live_playlists()->remote_title_meta_name =>  $this->get_remote_title(),
+            wpsstm_live_playlists()->remote_author_meta_name => $this->get_remote_author(),
             wpsstm_live_playlists()->time_updated_meta_name =>  $this->updated_time,
         );
         
@@ -202,6 +196,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
             return $success;
         }
+        
+       //repopulate post
+        $this->populate_tracklist_post();
         
         return $this->post_id;
     }
