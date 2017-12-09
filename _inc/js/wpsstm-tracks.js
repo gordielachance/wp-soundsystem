@@ -416,6 +416,12 @@ class WpsstmTrack {
                 self.did_sources_request = true;
 
                 if (data.success === true){
+                    
+                    //set track ID if track has been created
+                    if (!ajax_data.track.post_id){
+                        track_instances.attr("data-wpsstm-track-id", data.track.post_id);
+                    }
+                    
                     if ( data.new_html ){
                         self.can_play = true;
                         $(track_instances).find('.wpsstm-track-sources').html(data.new_html); //append new sources

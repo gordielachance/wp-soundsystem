@@ -534,11 +534,7 @@ class WP_SoundSystem_Track{
         }
     }
     
-    function populate_auto_sources(){
-
-        if ( wpsstm()->get_options('autosource') != 'on' ){
-            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
-        }
+    protected function get_remote_sources(){
 
         if ( !$this->artist ){
             return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
@@ -564,15 +560,21 @@ class WP_SoundSystem_Track{
         
     }
 
-    function save_auto_sources(){
+    function autosource(){
+        
+        if ( wpsstm()->get_options('autosource') != 'on' ){
+            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        }
 
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_track_no_post_id', __('Required track ID missing.','wpsstm') );
+        //track does not exists yet, create it
+        if ( !$this->post_id ){
+            $success = $this->save_track();
+            if ( is_wp_error($success) ) return $success;
         }
 
         $new_source_ids = array();
         
-        $new_sources = $this->populate_auto_sources();
+        $new_sources = $this->get_remote_sources();
 
         if ( is_wp_error($new_sources) ) return $new_sources;
 
@@ -582,19 +584,19 @@ class WP_SoundSystem_Track{
                 'post_author'   => wpsstm()->get_options('community_user_id')
             );
             
-            $post_id = $source->add_source($source_args);
+            $source_id = $source->add_source($source_args);
             
-            if ( is_wp_error($post_id) ){
-                $code = $post_id->get_error_code();
-                $error_msg = $post_id->get_error_message($code);
-                wpsstm()->debug_log( $error_msg, "WP_SoundSystem_Track::save_auto_sources() - unable to save source");
+            if ( is_wp_error($source_id) ){
+                $code = $source_id->get_error_code();
+                $error_msg = $source_id->get_error_message($code);
+                wpsstm()->debug_log( $error_msg, "WP_SoundSystem_Track::autosource - unable to save source");
                 continue;
             }
             
-            $new_source_ids[] = $post_id;
+            $new_source_ids[] = $source_id;
         }
 
-        return $new_source_ids;
+        return $this->post_id;
 
     }
     

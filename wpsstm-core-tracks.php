@@ -318,7 +318,7 @@ class WP_SoundSystem_Core_Tracks{
                 //suggest sources
                 if ( isset($source_action['autosource']) ){
                     
-                    $success = $track->save_auto_sources();
+                    $success = $track->autosource();
 
                     if ( is_wp_error($success) ){
                         $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );

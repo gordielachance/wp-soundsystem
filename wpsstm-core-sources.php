@@ -546,14 +546,7 @@ class WP_SoundSystem_Core_Sources{
 
         $track = new WP_SoundSystem_Track();
         $track->from_array($ajax_data['track']);
-
-        //TOFIXDDD
-        
-        if ($track->post_id){
-            $success = $track->save_auto_sources();
-        }else{
-            $success = $track->populate_auto_sources();
-        }
+        $success = $track->autosource();
         
         $result['track'] = $wpsstm_track = $track;
 
@@ -566,7 +559,6 @@ class WP_SoundSystem_Core_Sources{
             ob_start();
             wpsstm_locate_template( 'track-sources.php', true, false );
             $sources_list = ob_get_clean();
-
             $result['new_html'] = $sources_list;
             $result['success'] = true;
 
