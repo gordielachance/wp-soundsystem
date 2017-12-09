@@ -164,51 +164,55 @@ body.wpsstm-default,body.wp-admin{
                 }
             }
         }
+        
+        .wpsstm-tracks-list{
+            position:relative;
+            [itemprop="track"]{
+                position:relative;
+            }
+        }
 
-        table.wpsstm-tracks-list{
-            table-layout:fixed;
-            width:100%;
-            margin:0;
+        &.tracklist-template-table .wpsstm-tracks-list{
+            
             padding:0;
-            th,tr,td{
+            margin:0;
+            list-style: none;
+            
+            [itemprop="track"]{
                 padding:0;
                 margin:0;
-            }
-
-            //no borders
-            border-collapse: collapse;
-            border:none;
-            td,th{
-                border:none;
-                outline:none;
-            }
-
-            //hide header
-            .wpsstm-tracks-list-header{
-                display:none;
-            }
-            tr{ //[itemprop="track"]
-                th,td{
-                    padding:.5em 0;
-
-                    &.wpsstm-track-image{
-                        width:2em;
-                        box-sizing: content-box;
-                    }
-                    &.wpsstm-track-position{
-                        width:2em;
-                    }
+                line-height: 3em;
+                @include display-flex();
+                text-align:center;
+                > * {
+                    @include flex-grow(1);
+                    
+                    &.wpsstm-track-image,
+                    &.wpsstm-track-position,
                     &.wpsstm-track-play-bt{
                         width:2em;
                     }
+
+                    &.wpsstm-track-image{
+                        padding: 0;
+                        box-sizing: content-box;
+                    }
                     &.wpsstm-track-info{
-                        @extend .wpsstm-ellipsis;
-                        [itemprop="byArtist"]{
-                            font-weight: bold;
+                        width:70%;
+                        @include display-flex();
+                        > *{
+                            display:block;
+                            @extend .wpsstm-ellipsis;
+                            text-align:left;
+                            &[itemprop="byArtist"]{
+                                width:30%;
+                                font-weight: bold;
+                            }
+                            &[itemprop="inAlbum"]{
+                                font-size:.8em;
+                            }
                         }
-                        [itemprop="inAlbum"]{
-                            font-size:.8em;
-                        }
+
                     }
                     &.wpsstm-track-sources{
                         [data-wpsstm-source-idx]{
@@ -217,11 +221,6 @@ body.wpsstm-default,body.wp-admin{
                             }
                         }
                     }
-                }
-                th{
-                    text-align:center;
-                }
-                td{
                     &.wpsstm-column-identical-value{
                         display:none;
                     }
