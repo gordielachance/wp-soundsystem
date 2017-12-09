@@ -8,38 +8,58 @@ DEFAULT STYLES
 
 body.wpsstm-default,body.wp-admin{
     .wpsstm-track-sources-list{
+        display:grid;
         position:relative;
-
         //single source
         [data-wpsstm-source-idx]{
 
             position:relative;
-            display:block;
             padding: 0 .75em;
-            width:100%;
             box-sizing: border-box;
+            
+            @include flexbox((
+                display: flex, //overwrite jQuery default
+            ));
+            
+            > *{
+                &.wpsstm-source-icon wpsstm-icon{
 
-            @include display-flex();
+                }
 
-            ul#wpsstm-source-actions{
-                @include order(1);
-                @include flex(0 0 auto);
-                padding-right: .5em;
+                &#wpsstm-source-actions{
+                    padding-right: .5em;
+                    @include flexbox((
+                        flex-shrink:0,
+                    ));
+                    
+                    .wpsstm-source-action{
+                        display:inline-block;
+                        a{
+                            &:before{
+                                margin-right:0;
+                            }
+                            > span{
+                                display:none;
+                            }
+                        }
+                        &#wpsstm-source-action-delete a:before{
+                            content: "\f1f8";//.fa-trash;
+                        }
+                        &#wpsstm-source-action-move a:before{
+                            content: "\f07d";//.fa-arrows-v;
+                        }
+                        &#wpsstm-source-action-edit-backend a:before{
+                            content:"\f084";//.fa-key;
+                        }
+                    }
+                }
+
+                &.wpsstm-source-title{ //source text
+                    @extend .wpsstm-ellipsis;
+                    @extend .wpsstm-can-click;
+                }
             }
 
-            .wpsstm-source-title{ //source text
-                @include order(2);
-                @include flex(0 1 auto); /*important*/
-                min-width:0;
-
-                @extend .wpsstm-ellipsis;
-                overflow:hidden;
-
-            }
-
-            label{
-                @extend .wpsstm-can-click;
-            }
             &.source-error .wpsstm-source-icon{
                 &:before{
                     content:"\f071"; //.fa-exclamation-triangle
@@ -63,31 +83,7 @@ body.wpsstm-default,body.wp-admin{
             }
         }
     }
-    
-    #wpsstm-source-actions{
-        .wpsstm-source-action{
-            display:inline-block;
-            a{
-                &:before{
-                    margin-right:0;
-                }
-                > span{
-                    display:none;
-                }
-            }
-            &#wpsstm-source-action-delete a:before{
-                content: "\f1f8";//.fa-trash;
-            }
-            &#wpsstm-source-action-move a:before{
-                content: "\f07d";//.fa-arrows-v;
-            }
-            &#wpsstm-source-action-edit-backend a:before{
-                content:"\f084";//.fa-key;
-            }
-        }
-    }
-    
-    
+
     
     #wpsstm-track-admin-sources{
         form{

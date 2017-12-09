@@ -33,126 +33,114 @@ body.wpsstm-default,body.wp-admin{
             #wpsstm-bottom-track-wrapper{
 
                 width:100%;
-                table-layout:auto;
                 padding:0;
                 margin:0;
-                td{
+                @include flexbox((
+                    display: flex,
+                ));
+                > *{
                     padding:0;
                     margin:0;
+                    border:none;
+                    @include flexbox((
+                        display: flex,
+                        align-items: center,
+                        justify-content: center,
+                    ));
                     &#wpsstm-bottom-track-info{
-                        vertical-align: top;
-                        border:none;
-                        table{
-                            td{
-                                display:inline-block;
-                                padding: 0 .75em;
-                                box-sizing: content-box;
+                        @include flexbox((
+                            flex-grow:1,
+                            justify-content: flex-start,
+                        ));
+                        [itemprop="track"]{
+                            @include flexbox((
+                                display: flex!important, //overwrite jQuery default
+                            ));
+                            > *{
                                 &.wpsstm-track-position{
                                     @extend .wpsstm-can-click;
                                 }
                                 &.wpsstm-track-play-bt{
                                     display:none;
                                 }
-                                &.wpsstm-track-title{
-                                    &:before{
-                                        content: "—";
-                                        margin-right:1.5em;
+                                &.wpsstm-track-info{
+                                    @include flexbox((
+                                        flex-grow: 0,
+                                    ));
+                                    .wpsstm-track-album{
+                                        display:none!important;
                                     }
                                 }
-                            }
-                        }
-                    }
-                }
 
-                .wpsstm-tracklist{
-
-                    text-transform: uppercase;
-                    font-size: .75em;
-                    letter-spacing: .05em;
-                    
-                    [itemprop="track"]{
-                        ul.wpsstm-actions-list{
-                            display:initial;
-                        }
-                    }
-
-                    table{
-                        td{
-                            &.wpsstm-track-image{
-                                padding-left:0!important;
-                            }
-                            &.wpsstm-track-album{
-                                display:none!important;
-                            }
-                            &.wpsstm-track-sources{
-                                position:relative;
-                                width: 20%;
-                                @include opacity(.25);
-                                .wpsstm-track-sources-list{
-                                    padding:0;
-                                    line-height: 2em;
-
-                                }
-
-                                &:hover{
-                                    width: 30%;
-                                    @include opacity(1);
+                                &.wpsstm-track-sources{
+                                    position:relative;
+                                    display:grid;
+                                    @include opacity(.25);
                                     .wpsstm-track-sources-list{
-                                        background: $player-bg-color;
-                                        text-align: left;
-                                        position: absolute;
-                                        bottom: -1em;
-                                        padding-bottom:1em;
+                                        padding:0;
+                                        line-height: 2em;
+                                    }
+
+                                    &:hover{
+                                        @include opacity(1);
+                                        .wpsstm-track-sources-list{
+                                            position:absolute;
+                                            bottom:0;
+                                            background: $player-bg-color;
+                                            [data-wpsstm-source-idx]{
+                                                line-height:2.5em;
+                                            }
+                                        }
+                                    }
+
+                                    &:not(:hover){
                                         [data-wpsstm-source-idx]{
-                                            line-height:2.5em;
+                                            &:not(.source-playing){
+                                                display:none;
+                                            }
+                                            .wpsstm-source-action:not(#wpsstm-source-action-provider){
+                                                display:none;
+                                            }
                                         }
                                     }
-                                }
 
-                                &:not(:hover){
-                                    [data-wpsstm-source-idx]{
-                                        &:not(.source-playing){
-                                            display:none;
-                                        }
-                                        .wpsstm-source-action:not(#wpsstm-source-action-provider){
-                                            display:none;
-                                        }
-                                    }
                                 }
-
                             }
                         }
                     }
-                }
+                    
+                    &#wpsstm-player-actions{
+                        margin-right:.5em;
+                        @include flexbox((
+                            justify-content: space-between,
+                            flex-shrink: 0,
+                        )); 
+                        .wpsstm-player-action{
 
-                #wpsstm-player-actions{
-                    padding:0;
-                    margin:0;
-                    margin-right:.5em;
-                    .wpsstm-player-action{
+                            a{
+                                span{
+                                    display:none;
+                                }
+                            }
 
-                        a{
-                            span{
-                                display:none;
-                            }
-                        }
-                        
-                        &#wpsstm-player-action-scrobbler{
-                            @include opacity(.25);
-                            a:before{
-                                content:"\f202"; //.fa-lastfm
-                            }
-                            &.lastfm-loading a{
-                                @extend .wpsstm-loading-icon;
-                            }
-                            &.scrobbler-error a:before{
-                                content:"\f071"; //.fa-exclamation-triangle;
-                            }
-                            &.scrobbler-enabled{
-                                @include opacity(1);
+                            &#wpsstm-player-action-scrobbler{
+                                @include opacity(.25);
+                                a:before{
+                                    content:"\f202"; //.fa-lastfm
+                                }
+                                &.lastfm-loading a{
+                                    @extend .wpsstm-loading-icon;
+                                }
+                                &.scrobbler-error a:before{
+                                    content:"\f071"; //.fa-exclamation-triangle;
+                                }
+                                &.scrobbler-enabled{
+                                    @include opacity(1);
+                                }
                             }
                         }
                     }
+                    
                 }
             }
 

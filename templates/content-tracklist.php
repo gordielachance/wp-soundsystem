@@ -80,27 +80,57 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
     }
     ?>
-    
-    
-    
+
     <?php
     if ( $tracklist->have_tracks() ) {
     ?>
-        <table class="wpsstm-tracks-list">
-            <tr class="wpsstm-tracks-list-header">
-                <th class="wpsstm-track-image wpsstm-toggle-same-value" itemprop="image"></th>
-                <th class="wpsstm-track-play-bt"></th>
-                <th class="wpsstm-track-position">#</th>
-                <th class="wpsstm-track-info wpsstm-track-artist wpsstm-toggle-same-value"><?php _e('Artist','wpsstm');?></th>
-                <th class="wpsstm-track-info wpsstm-track-title wpsstm-toggle-same-value"><?php _e('Title','wpsstm');?></th>
-                <th class="wpsstm-track-info wpsstm-track-album wpsstm-toggle-same-value"><?php _e('Album','wpsstm');?></th>
-                <th class="wpsstm-track-actions"><?php _e('Actions','wpsstm');?></th>
-                <th class="wpsstm-track-sources"><?php _e('Sources','wpsstm');?></th>
-            </tr>
+        <ul class="wpsstm-tracks-list">
             <?php
             while ( $tracklist->have_tracks() ) {
                 $tracklist->the_track();
-                wpsstm_locate_template( 'content-track-table.php', true, false );
+                global $wpsstm_track;
+                $track = $wpsstm_track;
+                $track->populate_sources();
+
+                ?>
+                    <li class="<?php echo implode(' ',$track->get_track_class());?>" <?php echo $track->get_track_attr();?>>
+                        <span class="wpsstm-track-image" itemprop="image">
+                            <?php 
+                            if ($track->image_url){
+                                ?>
+                                <img src="<?php echo $track->image_url;?>" />
+                                <?php
+                            }
+                            ?>
+                        </span>
+                        <?php if ( $wpsstm_tracklist->get_options('can_play') ){ ?>
+                            <span class="wpsstm-track-play-bt">
+                                <a class="wpsstm-track-icon wpsstm-icon" href="#"></a>
+                            </span>
+                        <?php } ?>
+                        <span class="wpsstm-track-position">
+                            <span itemprop="position"><?php echo $tracklist->current_track + 1;?></span>
+                        </span>
+                        <span class="wpsstm-track-info">
+                            <span class="wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></span>
+                            <span class="wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
+                            <span class="wpsstm-track-album" itemprop="inAlbum"><?php echo $track->album;?></span>
+                        </span>
+                        <span class="wpsstm-track-actions">
+                            <?php
+                            if ( $actions = $track->get_track_links($tracklist,'page') ){
+                                echo get_actions_list($actions,'track');
+                            }
+                            ?>
+                        </span>
+                        <span class="wpsstm-track-sources">
+                            <?php
+                            //track sources
+                            wpsstm_locate_template( 'track-sources.php', true, false );
+                            ?>
+                        </span>
+                    </li>
+                <?php
             } 
             ?>
        </table>

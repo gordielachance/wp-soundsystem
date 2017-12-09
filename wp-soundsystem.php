@@ -165,8 +165,6 @@ class WP_SoundSystem {
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_styles_backend' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles_frontend' ) );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
@@ -246,7 +244,6 @@ class WP_SoundSystem {
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
         wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
-        wp_register_style( 'wpsstm-backend',  $this->plugin_url . '_inc/css/wpsstm-backend.css',array('wpsstm'),$this->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
@@ -261,31 +258,11 @@ class WP_SoundSystem {
 
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
         
-    }
-    
-    function enqueue_scripts_styles_frontend(){
-        
-        //TO FIX TO CHECK embed only for music post types ?
-
         //JS
         wp_enqueue_script( 'wpsstm' );
         
         //CSS
         wp_enqueue_style( 'wpsstm' );
-
-    }
-    
-    function enqueue_scripts_styles_backend( $hook ){
-
-            if ( !$this->is_admin_page() ) return;
-        
-            //JS
-            wp_enqueue_script( 'wpsstm' );
-
-            //CSS
-            wp_enqueue_style( 'wpsstm-backend' );
-
-        //}
         
     }
 

@@ -24,6 +24,13 @@ MINIMAL STYLES
             pointer-events:none;
         }
     }
+    
+    &[data-tracks-count="-1"],&[data-tracks-count="0"],&[data-tracks-count="1"]{
+        #wpsstm-track-action-move{
+            visibility: hidden;
+        }
+    }
+    
     .tracklist-header .toggle-children-container{
         @extend #wpsstm-tracklist-actions;
         #wpsstm-tracklist-actions{
@@ -53,7 +60,22 @@ MINIMAL STYLES
     }
 }
 
+.tracklist-list{ //output a simplier style
+    .tracklist-header{
+        display:none!important;
+    }
+    .wpsstm-tracks-list{
+        [itemprop="track"]{
+            @extend .wpsstm-ellipsis;
+            .wpsstm-track-info{
+            }
+            .wpsstm-track-actions{
+                display:none;
+            }
+        }
+    }
 
+}
 
 ul#wpsstm-tracklist-actions{
 
@@ -164,64 +186,84 @@ body.wpsstm-default,body.wp-admin{
                 }
             }
         }
-
-        table.wpsstm-tracks-list{
-            table-layout:fixed;
-            width:100%;
-            margin:0;
+        
+        .wpsstm-tracks-list{
+            position:relative;
             padding:0;
-            th,tr,td{
+            margin:0;
+            list-style: none;
+            
+            [itemprop="track"]{
+                position:relative;
                 padding:0;
                 margin:0;
-            }
-
-            //no borders
-            border-collapse: collapse;
-            border:none;
-            td,th{
-                border:none;
-                outline:none;
-            }
-
-            //hide header
-            .wpsstm-tracks-list-header{
-                display:none;
-            }
-            tr{ //[itemprop="track"]
-                th,td{
-                    padding:.5em 0;
-
-                    &.wpsstm-track-image{
-                        width:2em;
-                        box-sizing: content-box;
-                    }
-                    &.wpsstm-track-position{
-                        width:2em;
-                    }
+                line-height: 3em;
+                @include flexbox((
+                    display: flex,
+                    flex-direction: row
+                ));
+                text-align:center;
+                > * {
+                    padding: 0 .5em;
+                    box-sizing: content-box;
+                    @include flexbox((
+                        display: flex
+                    ));
+                    
+                    &.wpsstm-track-image,
+                    &.wpsstm-track-position,
                     &.wpsstm-track-play-bt{
                         width:2em;
                     }
+
+                    &.wpsstm-track-image{
+                        padding: 0;
+                        text-align: center;
+                        display: inline-block;
+                    }
                     &.wpsstm-track-info{
-                        @extend .wpsstm-ellipsis;
-                        [itemprop="byArtist"]{
-                            font-weight: bold;
+                        @include flexbox((
+                            display: flex,
+                            flex-grow: 1
+                        ));
+                        > *{
+                            display:block;
+                            @extend .wpsstm-ellipsis;
+                            text-align:left;
+                            margin-right:.5em;
+                            &[itemprop="byArtist"]{
+                                max-width:30%;
+                                font-weight: bold;
+                            }
+                            &[itemprop="name"]{
+                                &:before{
+                                    content: "—";
+                                    margin-right:.5em;
+                                }
+                            }
+                            &[itemprop="inAlbum"]{
+                                font-size:.8em;
+                            }
                         }
-                        [itemprop="inAlbum"]{
-                            font-size:.8em;
-                        }
+
+                    }
+                    &.wpsstm-track-actions{
+                        @include flexbox((
+                            justify-content: space-between,
+                            flex-shrink: 0,
+                        ));
                     }
                     &.wpsstm-track-sources{
+                        display:none; //hide by default
+                        max-width:50%;
+                        align-items: center;
+                        flex: 1 1 auto;
                         [data-wpsstm-source-idx]{
                             label{
                                 @extend .wpsstm-can-click;
                             }
                         }
                     }
-                }
-                th{
-                    text-align:center;
-                }
-                td{
                     &.wpsstm-column-identical-value{
                         display:none;
                     }
@@ -249,7 +291,6 @@ body.wpsstm-default,body.wp-admin{
             }
 
         }
-
     }
 
     #wpsstm-tracklist-actions{

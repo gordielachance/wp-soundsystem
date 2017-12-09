@@ -1,5 +1,7 @@
 @import "pure-tree"; //for MBdata
 
+
+
 #wpsstm-promo-notice{
     padding: .75em;
     border-bottom:1px solid #DDD;
@@ -72,6 +74,14 @@
 }
 
 .wp-list-table{
+    .column-tracklist{
+        .wpsstm-tracklist{
+            @extend .tracklist-list;
+        }
+    } 
+}
+
+.wp-list-table{
     .mbz-id{
         color:silver;
         font-size:0.8em;
@@ -81,6 +91,8 @@
         font-size:0.9em;
     }
 }
+
+
 
 
 #mbid-value,#mbid-do-lookup{

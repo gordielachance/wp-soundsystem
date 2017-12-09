@@ -7,6 +7,7 @@
 @import "wpsstm-player";
 @import "wpsstm-wizard";
 @import "wpsstm-popups";
+@import "wpsstm-backend";
 
 @include keyframes(opacityPulse){
     0% {opacity: 1;}

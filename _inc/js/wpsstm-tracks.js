@@ -253,7 +253,7 @@ class WpsstmTrack {
         return deferredObject.promise();
     }
 
-    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER
+    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER ?
         var self = this;
         //track infos
         
@@ -265,7 +265,7 @@ class WpsstmTrack {
             wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
 
-        var list = $('<table class="wpsstm-tracks-list"></table>'); 
+        var list = $('<ul class="wpsstm-tracks-list" />'); 
 
         var row = self.track_el.clone(true,true);
         row.show(); //be sure it will be displayed

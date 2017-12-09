@@ -277,7 +277,6 @@ class WP_SoundSystem_Core_Tracklists{
         $wpsstm_tracklist->options['autoplay'] =    false;
         $wpsstm_tracklist->options['autosource'] =  false;
         $wpsstm_tracklist->options['can_play'] =    false;
-        $wpsstm_tracklist->options['template'] =    'list';
 
         if ( !$output = $wpsstm_tracklist->get_tracklist_html() ){
             $output = '—';

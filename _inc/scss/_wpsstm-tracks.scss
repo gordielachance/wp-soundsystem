@@ -42,10 +42,8 @@ MINIMAL STYLES
             display:none!important;
         }
 
-        &.wpsstm-loved-track{
-            #wpsstm-track-action-favorite{
-                display:none!important;
-            }
+        &.wpsstm-loved-track #wpsstm-track-action-favorite{
+            display:none!important;
         }
     }
 }
@@ -98,7 +96,7 @@ body.wpsstm-default,body.wp-admin{
             
             ul#wpsstm-track-actions{
                 width: 100%;
-                display:none;
+                @include opacity(0);
                 li.wpsstm-track-action{
                     display:inline;
                     a{
@@ -114,7 +112,7 @@ body.wpsstm-default,body.wp-admin{
 
             &:hover,&.track-active{
                 ul#wpsstm-track-actions{
-                    display:inherit;
+                     @include opacity(1);
                 }
             }
 
