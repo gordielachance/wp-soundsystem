@@ -24,6 +24,13 @@ MINIMAL STYLES
             pointer-events:none;
         }
     }
+    
+    &[data-tracks-count="-1"],&[data-tracks-count="0"],&[data-tracks-count="1"]{
+        #wpsstm-track-action-move{
+            visibility: hidden;
+        }
+    }
+    
     .tracklist-header .toggle-children-container{
         @extend #wpsstm-tracklist-actions;
         #wpsstm-tracklist-actions{
