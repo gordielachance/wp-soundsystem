@@ -905,17 +905,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $refresh_time_human = human_time_diff( $now, $time_before );
     }
 
-    function get_tracklist_class($extra_classes=null){
-        
-        $defaults = array(
-            'wpsstm-live-tracklist'
-        );
-
-        $classes = array_merge($defaults,(array)$extra_classes);
-
-        return parent::get_tracklist_class($classes);
-    }
-
     function get_tracklist_attr($values_attr=null){
         
         $values_default = array();

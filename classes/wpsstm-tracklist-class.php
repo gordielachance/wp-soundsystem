@@ -88,7 +88,6 @@ class WP_SoundSystem_Tracklist{
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'hide_empty_columns'        => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
-            'template'                  => 'table',
         );
     }
     
@@ -416,12 +415,8 @@ class WP_SoundSystem_Tracklist{
     }
 
     function get_tracklist_html(){
-        
-        $template = $this->get_options('template');
-        $template_file = sprintf('content-tracklist-%s.php',$template);
-
         ob_start();
-        wpsstm_locate_template( $template_file, true, false );
+        wpsstm_locate_template( 'content-tracklist.php', true, false );
         $output = ob_get_clean();
 
         return $output;
@@ -920,7 +915,7 @@ class WP_SoundSystem_Tracklist{
         return wpsstm_get_html_attr($values_attr);
     }
 
-    function get_tracklist_class($extra_classes = null){
+    function get_tracklist_class(){
 
         $classes = array(
             'wpsstm-tracklist',
@@ -930,16 +925,9 @@ class WP_SoundSystem_Tracklist{
             $this->get_options('autosource') ? 'tracklist-autosource' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
             ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
-            'tracklist-template-' . $this->get_options('template'),
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
         );
-
-        if ($extra_classes){
-            if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
-        }
-        
-        $classes = array_merge($classes,(array)$extra_classes);
 
         //capabilities
         $tracklist_type = get_post_type($this->post_id);
@@ -949,6 +937,8 @@ class WP_SoundSystem_Tracklist{
         if ($can_manage_tracklist){
             $classes[] = 'wpsstm-can-manage-tracklist';
         }
+        
+        $classes = apply_filters('wpsstm_tracklist_classes',$classes,$this);
 
         return array_filter(array_unique($classes));
     }
