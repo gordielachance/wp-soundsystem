@@ -68,20 +68,16 @@ class WP_SoundSystem_Core_Player{
         ?>
         <div id="wpsstm-bottom-wrapper">
             <div id="wpsstm-bottom">
-                <table id="wpsstm-bottom-track-wrapper">
-                    <tr>
-                        <td id="wpsstm-bottom-track-info"></td>
-                        <td id="wpsstm-player-actions-wrapper">
-                            <?php
-                            //player actions
-                            if ( $actions = $this->get_player_links() ){
-                                $list = get_actions_list($actions,'player');
-                                echo $list;
-                            }                       
-                            ?>
-                        </td>
-                    </tr>
-                </table>
+                <div id="wpsstm-bottom-track-wrapper">
+                    <span id="wpsstm-bottom-track-info"></span>
+                    <?php
+                    //player actions
+                    if ( $actions = $this->get_player_links() ){
+                        $list = get_actions_list($actions,'player');
+                        echo $list;
+                    }                       
+                    ?>
+                </div>
                 <table id="wpsstm-bottom-player-wrapper">
                     <tr>
                         <td id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></td>

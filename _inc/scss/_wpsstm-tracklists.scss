@@ -182,10 +182,16 @@ body.wpsstm-default,body.wp-admin{
                 padding:0;
                 margin:0;
                 line-height: 3em;
-                @include display-flex();
+                @include flexbox((
+                    display: flex,
+                    flex-direction: row
+                ));
                 text-align:center;
                 > * {
-                    @include flex-grow(1);
+                    box-sizing: content-box;
+                    @include flexbox((
+                        display: flex
+                    ));
                     
                     &.wpsstm-track-image,
                     &.wpsstm-track-position,
@@ -195,18 +201,28 @@ body.wpsstm-default,body.wp-admin{
 
                     &.wpsstm-track-image{
                         padding: 0;
-                        box-sizing: content-box;
+                        text-align: center;
+                        display: inline-block;
                     }
                     &.wpsstm-track-info{
-                        width:70%;
-                        @include display-flex();
+                        @include flexbox((
+                            display: flex,
+                            flex-grow: 1
+                        ));
                         > *{
                             display:block;
                             @extend .wpsstm-ellipsis;
                             text-align:left;
+                            margin-right:.5em;
                             &[itemprop="byArtist"]{
-                                width:30%;
+                                max-width:30%;
                                 font-weight: bold;
+                            }
+                            &[itemprop="name"]{
+                                &:before{
+                                    content: "—";
+                                    margin-right:.5em;
+                                }
                             }
                             &[itemprop="inAlbum"]{
                                 font-size:.8em;
@@ -214,7 +230,16 @@ body.wpsstm-default,body.wp-admin{
                         }
 
                     }
+                    &.wpsstm-track-actions{
+                        @include flexbox((
+                            justify-content: space-between,
+                            flex-shrink: 0,
+                        ));
+                    }
                     &.wpsstm-track-sources{
+                        max-width:50%;
+                        align-items: center;
+                        flex: 1 1 auto;
                         [data-wpsstm-source-idx]{
                             label{
                                 @extend .wpsstm-can-click;
