@@ -60,7 +60,22 @@ MINIMAL STYLES
     }
 }
 
+.tracklist-list{ //output a simplier style
+    .tracklist-header{
+        display:none!important;
+    }
+    .wpsstm-tracks-list{
+        [itemprop="track"]{
+            @extend .wpsstm-ellipsis;
+            .wpsstm-track-info{
+            }
+            .wpsstm-track-actions{
+                display:none;
+            }
+        }
+    }
 
+}
 
 ul#wpsstm-tracklist-actions{
 
@@ -174,18 +189,12 @@ body.wpsstm-default,body.wp-admin{
         
         .wpsstm-tracks-list{
             position:relative;
-            [itemprop="track"]{
-                position:relative;
-            }
-        }
-
-        &.tracklist-template-table .wpsstm-tracks-list{
-            
             padding:0;
             margin:0;
             list-style: none;
             
             [itemprop="track"]{
+                position:relative;
                 padding:0;
                 margin:0;
                 line-height: 3em;
@@ -195,6 +204,7 @@ body.wpsstm-default,body.wp-admin{
                 ));
                 text-align:center;
                 > * {
+                    padding: 0 .5em;
                     box-sizing: content-box;
                     @include flexbox((
                         display: flex
@@ -244,6 +254,7 @@ body.wpsstm-default,body.wp-admin{
                         ));
                     }
                     &.wpsstm-track-sources{
+                        display:none; //hide by default
                         max-width:50%;
                         align-items: center;
                         flex: 1 1 auto;
@@ -280,7 +291,6 @@ body.wpsstm-default,body.wp-admin{
             }
 
         }
-
     }
 
     #wpsstm-tracklist-actions{

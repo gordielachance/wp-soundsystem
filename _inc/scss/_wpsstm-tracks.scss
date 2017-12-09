@@ -42,10 +42,8 @@ MINIMAL STYLES
             display:none!important;
         }
 
-        &.wpsstm-loved-track{
-            #wpsstm-track-action-favorite{
-                display:none!important;
-            }
+        &.wpsstm-loved-track #wpsstm-track-action-favorite{
+            display:none!important;
         }
     }
 }

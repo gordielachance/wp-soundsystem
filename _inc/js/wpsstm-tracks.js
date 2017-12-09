@@ -253,7 +253,7 @@ class WpsstmTrack {
         return deferredObject.promise();
     }
 
-    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER
+    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER ?
         var self = this;
         //track infos
         
