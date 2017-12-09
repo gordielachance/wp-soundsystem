@@ -971,7 +971,7 @@ class WP_SoundSystem_Tracklist{
             if ( $this->wait_for_ajax() ){
                 $url = $this->get_tracklist_action_url('refresh');
                 $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
-                $error = new WP_Error( 'requires-ajax', $link );
+                $error = new WP_Error( 'requires-refresh', $link );
                 $this->tracks_error = $error;
                 return $error;
             }
@@ -1089,10 +1089,6 @@ class WP_SoundSystem_Tracklist{
         }else{
             return delete_post_meta($this->post_id, wpsstm_wizard()->wizard_disabled_metakey );
         }
-    }
-    
-    function empty_tracks_error(){
-        return ( $this->tracks_error ) ? $this->tracks_error : new WP_Error( 'wpsstm_empty_tracklist', __("This tracklist is empty.",'wpsstm') );
     }
 }
 

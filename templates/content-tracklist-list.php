@@ -28,7 +28,7 @@ $tracklist = $wpsstm_tracklist;
             ?>
        </ol>
     <?php 
-    }elseif( $error = $tracklist->empty_tracks_error() ){
+    }elseif( $error = $tracklist->tracks_error ){
         ?>
             <?php echo $error->get_error_message();?>
         <?php

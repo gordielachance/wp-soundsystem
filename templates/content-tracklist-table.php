@@ -64,6 +64,16 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         will be toggled using CSS
         */
         $tracklist->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
+    }else{
+        
+    }
+    
+    /*
+    empty tracklist
+    */
+    if( $error = $tracklist->tracks_error ){
+        $msg = sprintf( '<strong>%s</strong><br/><small>%s</small>',__('No tracks found.','wpsstm'),$error->get_error_message() );
+        $tracklist->add_notice( 'tracklist-header', 'empty-tracklist', $msg );
     }
 
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
@@ -95,15 +105,6 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             ?>
        </table>
     <?php 
-    }elseif( $error = $tracklist->empty_tracks_error() ){
-        ?>
-        <div class="wpsstm-tracks-list wpsstm-empty-tracks-list">
-            <p class="wpsstm-no-tracks-notice wpsstm-notice wpsstm-notice-<?php echo $error->get_error_code();?>">
-                <strong><?php _e('No tracks found.','wpsstm')?></strong><br/>
-                <small><?php echo $error->get_error_message();?></small>
-            </p>
-        </div>
-        <?php
     }
 
     ?>

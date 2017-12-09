@@ -1247,24 +1247,23 @@ body.wpsstm-default .wpsstm-icon-input.input-loading input[type="text"], body.wp
 }
 /* line 149, ../scss/wpsstm.scss */
 body.wpsstm-default .wpsstm-tracklist-notices, body.wp-admin .wpsstm-tracklist-notices {
-  -webkit-align-items: center;
-  align-items: center;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: center;
-  justify-content: center;
+  position: relative;
+  margin: auto;
   padding: .5em 0;
 }
-/* line 155, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh {
+/* line 154, ../scss/wpsstm.scss */
+body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh, body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-empty-tracklist, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-empty-tracklist {
   background: none;
-  -moz-animation: opacityPulse 2s infinite ease-out;
-  -webkit-animation: opacityPulse 2s infinite ease-out;
-  animation: opacityPulse 2s infinite ease-out;
   opacity: 1;
   font-size: 1em;
 }
-/* line 165, ../scss/wpsstm.scss */
+/* line 160, ../scss/wpsstm.scss */
+body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh {
+  -moz-animation: opacityPulse 2s infinite ease-out;
+  -webkit-animation: opacityPulse 2s infinite ease-out;
+  animation: opacityPulse 2s infinite ease-out;
+}
+/* line 167, ../scss/wpsstm.scss */
 body.wpsstm-default .wpsstm-notice, body.wp-admin .wpsstm-notice {
   font-size: 0.8em;
   padding: .5em;
@@ -1273,44 +1272,44 @@ body.wpsstm-default .wpsstm-notice, body.wp-admin .wpsstm-notice {
   text-align: center;
   margin: .5em 0;
 }
-/* line 172, ../scss/wpsstm.scss */
+/* line 174, ../scss/wpsstm.scss */
 body.wpsstm-default .wpsstm-notice a, body.wp-admin .wpsstm-notice a {
   color: #222;
   text-decoration: underline;
 }
-/* line 177, ../scss/wpsstm.scss */
+/* line 179, ../scss/wpsstm.scss */
 body.wpsstm-default .wpsstm-notice.active, body.wp-admin .wpsstm-notice.active {
   display: block;
 }
-/* line 181, ../scss/wpsstm.scss */
+/* line 183, ../scss/wpsstm.scss */
 body.wpsstm-default .wpsstm-notice .wpsstm-close-notice, body.wp-admin .wpsstm-notice .wpsstm-close-notice {
   position: absolute;
   right: 1em;
 }
-/* line 189, ../scss/wpsstm.scss */
+/* line 191, ../scss/wpsstm.scss */
 body.wpsstm-default ul.comma-list, body.wpsstm-default ul.wpsstm-track-loved-by-list, body.wpsstm-default ul.wpsstm-track-parents, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list, body.wp-admin ul.comma-list, body.wp-admin ul.wpsstm-track-loved-by-list, body.wp-admin ul.wpsstm-track-parents, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list {
   list-style: none;
   display: inline;
 }
-/* line 192, ../scss/wpsstm.scss */
+/* line 194, ../scss/wpsstm.scss */
 body.wpsstm-default ul.comma-list > li, body.wpsstm-default ul.wpsstm-track-loved-by-list > li, body.wpsstm-default ul.wpsstm-track-parents > li, body.wpsstm-default body.wp-admin ul.wpsstm-track-loved-by-list > li, body.wpsstm-default body.wp-admin ul.wpsstm-track-parents > li, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list > li, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list > li, body.wp-admin ul.comma-list > li, body.wp-admin body.wpsstm-default ul.wpsstm-track-loved-by-list > li, body.wp-admin body.wpsstm-default ul.wpsstm-track-parents > li, body.wp-admin ul.wpsstm-track-loved-by-list > li, body.wp-admin ul.wpsstm-track-parents > li, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list > li, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list > li {
   display: inline;
 }
-/* line 194, ../scss/wpsstm.scss */
+/* line 196, ../scss/wpsstm.scss */
 body.wpsstm-default ul.comma-list > li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wpsstm-default ul.wpsstm-track-parents > li:not(:last-child):after, body.wpsstm-default body.wp-admin ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wpsstm-default body.wp-admin ul.wpsstm-track-parents > li:not(:last-child):after, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wpsstm-default ul#wpsstm-wizard-services-list > li:not(:last-child):after, body.wpsstm-default #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wpsstm-default ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, body.wp-admin ul.comma-list > li:not(:last-child):after, body.wp-admin body.wpsstm-default ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wp-admin body.wpsstm-default ul.wpsstm-track-parents > li:not(:last-child):after, body.wp-admin ul.wpsstm-track-loved-by-list > li:not(:last-child):after, body.wp-admin ul.wpsstm-track-parents > li:not(:last-child):after, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services body.wp-admin ul#wpsstm-wizard-services-list > li:not(:last-child):after, body.wp-admin #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li:not(:last-child):after, #wizard-wrapper #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list body.wp-admin ul.wpsstm-wizard-child-service-list > li:not(:last-child):after {
   content: ", ";
 }
-/* line 200, ../scss/wpsstm.scss */
+/* line 202, ../scss/wpsstm.scss */
 body.wpsstm-default ul.wpsstm-actions-list, body.wp-admin ul.wpsstm-actions-list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-/* line 211, ../scss/wpsstm.scss */
+/* line 213, ../scss/wpsstm.scss */
 body.wpsstm-default ul.wpsstm-actions-list li.wpsstm-action a.action-error:before, body.wp-admin ul.wpsstm-actions-list li.wpsstm-action a.action-error:before {
   content: "\f071";
 }
-/* line 217, ../scss/wpsstm.scss */
+/* line 219, ../scss/wpsstm.scss */
 body.wpsstm-default ul.ui-autocomplete, body.wp-admin ul.ui-autocomplete {
   position: absolute;
   top: 100%;
@@ -1334,13 +1333,13 @@ body.wpsstm-default ul.ui-autocomplete, body.wp-admin ul.ui-autocomplete {
   *border-right-width: 2px;
   *border-bottom-width: 2px;
 }
-/* line 236, ../scss/wpsstm.scss */
+/* line 238, ../scss/wpsstm.scss */
 body.wpsstm-default ul.ui-autocomplete li.ui-menu-item, body.wp-admin ul.ui-autocomplete li.ui-menu-item {
   padding: 0 .5em;
   line-height: 2em;
   font-size: .8em;
 }
-/* line 240, ../scss/wpsstm.scss */
+/* line 242, ../scss/wpsstm.scss */
 body.wpsstm-default ul.ui-autocomplete li.ui-menu-item.ui-state-focus, body.wp-admin ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   background: #F7F7F7;
 }
