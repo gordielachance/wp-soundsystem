@@ -301,13 +301,7 @@ class WpsstmPagePlayer {
                 var first_tracklist_idx = 0;
                 first_tracklist_idx = self.get_maybe_shuffle_tracklist_idx(first_tracklist_idx); //shuffle ?
                 var first_tracklist = self.tracklists[first_tracklist_idx];
-                
-                var first_track_idx = 0
-                first_track_idx = first_tracklist.get_maybe_shuffle_track_idx(first_track_idx); //shuffle ?
-                
-                var first_track = first_tracklist.tracks[first_track_idx];
-                first_track.play_track();
-                
+                first_tracklist.start_tracklist();
             }
         }
 
