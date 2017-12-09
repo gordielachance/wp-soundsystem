@@ -965,14 +965,8 @@ class WP_SoundSystem_Tracklist{
     function populate_tracks($args = null){
 
         if ( $this->did_query_tracks ) return true;
-        
+
         if ( $this->ajax_refresh ){
-            
-            /*
-            REFRESH notice
-            will be toggled using CSS
-            */
-            $this->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
 
             if ( $this->wait_for_ajax() ){
                 $url = $this->get_tracklist_action_url('refresh');

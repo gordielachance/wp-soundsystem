@@ -271,13 +271,6 @@ class WpsstmTracklist {
         if (self.tracklist_request) return self.tracklist_request.promise();
         
         self.tracklist_request = $.Deferred();
-        
-        //not ajaxed
-        if ( !self.tracklist_el.hasClass('tracklist-ajaxed') ){
-            self.tracklist_request.resolve("tracklist is not ajaxed");
-            return self.tracklist_request.promise();
-        }
-
         self.debug("get_tracklist_request");
 
         var tracklist_instances = self.get_tracklist_instances();

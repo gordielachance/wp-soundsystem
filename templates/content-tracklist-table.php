@@ -57,11 +57,22 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         $tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
 
     }
+    
+    if ( $tracklist->ajax_refresh ){
+        /*
+        REFRESH notice
+        will be toggled using CSS
+        */
+        $tracklist->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
+    }
 
     if ( $notices_el = $tracklist->get_notices_output('tracklist-header') ){
         echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
     }
     ?>
+    
+    
+    
     <?php
     if ( $tracklist->have_tracks() ) {
     ?>
