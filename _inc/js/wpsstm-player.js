@@ -94,27 +94,6 @@
         });
         
     });
-    
-    /*
-    AUTOPLAY
-    */
-    $(document).on( "PageTracklistsInit", function( event ) {
-
-        //which one should we autoplay play?
-        var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
-            return (tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
-        });
-        
-        //first to autoplay
-        var play_tracklist = tracklists_autoplay[0];
-        
-        if ( !play_tracklist ) return;
-        
-        play_tracklist.debug("autoplay");
-        play_tracklist.start_tracklist();
-        
-    });
-
 
     //Confirmation popup is a media is playing and that we leave the page
     //TO FIX TO improve ?
@@ -173,18 +152,39 @@ class WpsstmPagePlayer {
         });
 
         self.tracklists_shuffle_order = wpsstm_shuffle( Object.keys(self.tracklists).map(Number) );
+        
+        /*
+        autoplay
+        */
+        //which one should we autoplay play?
+        var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
+            return (tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
+        });
+        
+        //first to autoplay
+        var play_tracklist = tracklists_autoplay[0];
+        
+        if ( play_tracklist ){
+            play_tracklist.debug("autoplay");
+            //TOFIXIIIplay_tracklist.start_tracklist();
+        }
+        
 
-        //autoload
+
+        /*
+        autoload
+        */
         var tracklists_autoload = self.tracklists.filter(function (tracklist_obj) {
             var has_autoload = (tracklist_obj.options.autoload === true);
             var already_populated = (tracklist_obj.tracks_count > -1); //has already been populated through PHP
             return (has_autoload && !already_populated);
         });
-        
+        /*TOFIXIII
         $(tracklists_autoload).each(function(index,tracklist_obj) {
             var promise = tracklist_obj.maybe_refresh();
             preload_promises.push(promise);
         });
+        */        
         
         $(document).trigger("PageTracklistsInit"); //custom event
 
