@@ -11,7 +11,7 @@
     $(document).on( "wpsstmTracklistRefreshed", function( event, tracklist_obj ) {
 
         // sort tracks
-        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list tbody' ).sortable({
+        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
             axis: "y",
             handle: '#wpsstm-track-action-move',
             update: function(event, ui) {
@@ -28,9 +28,8 @@
             }
         });
         
-        if ( tracklist_obj.tracklist_el.hasClass("wpsstm-hide-empty-columns" ) ){
-            tracklist_obj.hideEmptyColumns();
-        }
+        //hide a tracklist columns if all datas are the same
+        tracklist_obj.checkTracksIdenticalValues();
         
         
         /*
@@ -652,59 +651,44 @@ class WpsstmTracklist {
         }
 
     }
-    //TOFIXIII
-    hideEmptyColumns() {
+    /*
+    For each track, check if certain cells (image, artist, album...) have the same value - and hide them if yes.
+    */
+    checkTracksIdenticalValues() {
         
         var self = this;
 
-        /*
-        per column, make an array of every cell value
-        */
-        var all_rows = $(self.tracklist_el).find('tr');
-        var header_row = all_rows.filter('.wpsstm-tracks-list-header');
+        var all_tracks = $(self.tracklist_el).find('.wpsstm-tracks-list > *');
+        var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
+        var values_by_selector = [];
         
-        //get the IDX of the columns we should check
-        var toggable_header_cells = $(header_row).find('th.wpsstm-toggle-same-value');
-        
-        $.each( toggable_header_cells, function( i,e ) {
-            
-            var column_idx = $( this ).index() + 1;
-            var column = all_rows.find('>*:nth-child('+column_idx+')');
-            var column_head = column.filter('th');
-            var column_body = column.filter('td');
-            var hide_column = false;
-            
-            //collect tracks data for this column
-            var column_datas = [];
-            
-            $.each( column_body, function() {
-                var value = $(this).html();
-                value = $.trim(value);
-                column_datas.push(value);
-            });
+        function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
+        }
 
-            //check status
-            function onlyUnique(value, index, self) { 
-                return self.indexOf(value) === index;
-            }
+        $.each( $(selectors), function() {
+            var hide_column = undefined;
+            var cells = all_tracks.find(this); //get all track children by selector
             
-            //exceptions
-            if (column_datas.length == 1){ //there is only a single row displayed
-                var value = $(column_datas).get(0);
-                if (!value) hide_column = true; //the is not empty; hide this column
-            }else{
-                var unique_values = column_datas.filter( onlyUnique );
-                if (unique_values.length <= 1){
-                    hide_column = true; //column has a single values; hide this column
-                }
+            var column_datas = cells.map(function() { //get all values for the matching items
+                return $(this).html();
+            }).get();
+            
+            var unique_values = column_datas.filter( onlyUnique ); //remove duplicate values
+            
+            console.log("selector: " + this);
+            console.log(unique_values);
+            
+            if (unique_values.length <= 1){
+                hide_column = true; //column has a single values; hide this column
             }
             
             if (hide_column){
-                column.addClass('wpsstm-column-identical-value');
+                cells.addClass('wpsstm-column-identical-value');
             }else{
-                column.removeClass('wpsstm-column-identical-value');
+                cells.removeClass('wpsstm-column-identical-value');
             }
-
+            
         });
         
     }

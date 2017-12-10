@@ -76,7 +76,6 @@ class WP_SoundSystem_Settings {
             $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
             $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
             $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
-            $new_input['hide_empty_columns'] = ( isset($input['hide_empty_columns']) ) ? 'on' : 'off';
             
             //shorten tracklist
             if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
@@ -433,15 +432,7 @@ class WP_SoundSystem_Settings {
             'wpsstm-settings-page', 
             'settings_styling'
         );
-        
-        add_settings_field(
-            'hide_empty_columns', 
-            __('Hide empty columns','wpsstm'), 
-            array( $this, 'hide_empty_columns_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_styling'
-        );
-        
+
         add_settings_field(
             'toggle_tracklist', 
             __('Shorten tracklist','wpsstm'), 
@@ -617,18 +608,7 @@ class WP_SoundSystem_Settings {
             __("This requires the community user ID to be set.","wpsstm")
         );
     }
-    
-    function hide_empty_columns_callback(){
-        $option = wpsstm()->get_options('hide_empty_columns');
 
-        printf(
-            '<input type="checkbox" name="%s[hide_empty_columns]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("If all the tracks have the same value (artist, album, image...); hide the corresponding tracklist column.","wpsstm")
-        );
-    }
-    
     function toggle_tracklist_callback(){
         $option = (int)wpsstm()->get_options('toggle_tracklist');
 

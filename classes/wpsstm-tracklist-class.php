@@ -86,7 +86,6 @@ class WP_SoundSystem_Tracklist{
             'autosource'                => ( wpsstm()->get_options('autosource') == 'on' ),
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
-            'hide_empty_columns'        => ( wpsstm()->get_options('hide_empty_columns') == 'on' ),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
         );
     }
@@ -920,7 +919,6 @@ class WP_SoundSystem_Tracklist{
         $classes = array(
             'wpsstm-tracklist',
             ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
-            $this->get_options('hide_empty_columns') ? 'wpsstm-hide-empty-columns' : null,
             $this->get_options('autoplay') ? 'tracklist-autoplay' : null,
             $this->get_options('autosource') ? 'tracklist-autosource' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
