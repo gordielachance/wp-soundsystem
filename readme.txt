@@ -320,7 +320,6 @@ A track that belongs to another playlist or that has been favorited by a user wi
 * improved WP_SoundSystem_Player_Provider subclasses
 * new action hook 'init_playable_tracklist'
 * fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
-* tracklist.js: tableToggleColumns()
 * track & tracklist: sources popup (thickbox) + ajaxed sources suggestions
 
 = 1.0.0 =

@@ -657,7 +657,7 @@ class WP_SoundSystem_Track{
         $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') ); //TO FIX if tracklist has tracks
         $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
 
         $actions = array();
