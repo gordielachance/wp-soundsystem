@@ -659,6 +659,7 @@ class WpsstmTracklist {
         var self = this;
 
         var all_tracks = $(self.tracklist_el).find('.wpsstm-tracks-list > *');
+        if (all_tracks.length < 2) return;
         var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
         var values_by_selector = [];
         
@@ -684,9 +685,9 @@ class WpsstmTracklist {
             }
             
             if (hide_column){
-                cells.addClass('wpsstm-column-identical-value');
+                cells.addClass('wpsstm-track-unique-value');
             }else{
-                cells.removeClass('wpsstm-column-identical-value');
+                cells.removeClass('wpsstm-track-unique-value');
             }
             
         });

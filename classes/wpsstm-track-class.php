@@ -783,7 +783,7 @@ class WP_SoundSystem_Track{
             'wpsstm-track',
         );
         
-        $classes[] = is_wp_error( $this->validate_track() ) ? 'track-invalid' : null;
+        $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
         
         if ( $this->is_track_loved_by() ){
             $classes[] = 'wpsstm-loved-track';

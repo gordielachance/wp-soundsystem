@@ -263,9 +263,6 @@ body.wpsstm-default,body.wp-admin{
                             }
                         }
                     }
-                    &.wpsstm-column-identical-value{
-                        display:none;
-                    }
                 }
 
                 @include transition-property(background);

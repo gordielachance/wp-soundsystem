@@ -152,8 +152,8 @@ body.wpsstm-default,body.wp-admin{
                 content:"\f071"; //.fa-exclamation-triangle;
             }
 
-            &.track-invalid{
-                color:red;
+            &.wpsstm-invalid-track{
+                background:rgba(255, 0, 0, 0.10);
             }
 
             .wpsstm-track-image{
@@ -189,9 +189,8 @@ body.wpsstm-default,body.wp-admin{
                     }
                 }
             }
-
-            &.wpsstm-invalid-track{
-                background:rgba(255, 0, 0, 0.10);
+            .wpsstm-track-unique-value{
+                display:none!important;
             }
         }
 
