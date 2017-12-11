@@ -16,9 +16,8 @@ html.wpsstm-is-dialog{
     position:relative;
 
     .ui-dialog-content{
-        @include flexbox((
-            display: flex!important,
-        ));
+        
+        @include display-flex(flex!important);
         > * {
             margin: auto;
         }

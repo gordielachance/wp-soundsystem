@@ -16,10 +16,7 @@ body.wpsstm-default,body.wp-admin{
             position:relative;
             padding: 0 .75em;
             box-sizing: border-box;
-            
-            @include flexbox((
-                display: flex, //overwrite jQuery default
-            ));
+            @include display-flex();
             
             > *{
                 &.wpsstm-source-icon wpsstm-icon{
@@ -28,9 +25,7 @@ body.wpsstm-default,body.wp-admin{
 
                 &#wpsstm-source-actions{
                     padding-right: .5em;
-                    @include flexbox((
-                        flex-shrink:0,
-                    ));
+                    @include flex-shrink(0);
                     
                     .wpsstm-source-action{
                         display:inline-block;

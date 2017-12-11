@@ -198,22 +198,21 @@ body.wpsstm-default,body.wp-admin{
                 padding:0;
                 margin:0;
                 line-height: 3em;
-                @include flexbox((
-                    display: flex,
-                    flex-direction: row
-                ));
+                @include display-flex();
+                @include flex-direction(row);
                 text-align:center;
                 > * {
-                    padding: 0 .5em;
-                    box-sizing: content-box;
-                    @include flexbox((
-                        display: flex
-                    ));
+                    padding: 0 .25em;
+                    box-sizing:border-box;
+                    @include display-flex();
                     
                     &.wpsstm-track-image,
                     &.wpsstm-track-position,
                     &.wpsstm-track-play-bt{
-                        width:2em;
+                        @include display-flex();
+                        @include flex-grow(0);
+                        @include flex-shrink(0);
+                        @include flex-basis(2em);
                     }
 
                     &.wpsstm-track-image{
@@ -222,10 +221,11 @@ body.wpsstm-default,body.wp-admin{
                         display: inline-block;
                     }
                     &.wpsstm-track-info{
-                        @include flexbox((
-                            display: flex,
-                            flex-grow: 1
-                        ));
+                        @include display-flex();
+                        @include flex-basis(0);
+                        @include flex-grow(1);
+                        @include flex-shrink(1);
+                        align-items:baseline;
                         > *{
                             display:block;
                             @extend .wpsstm-ellipsis;
@@ -246,11 +246,10 @@ body.wpsstm-default,body.wp-admin{
                         }
 
                     }
+                    
                     &.wpsstm-track-actions{
-                        @include flexbox((
-                            justify-content: space-between,
-                            flex-shrink: 0,
-                        ));
+                        @include justify-content(space-between);
+                        @include flex-shrink(0);
                     }
                     &.wpsstm-track-sources{
                         display:none; //hide by default

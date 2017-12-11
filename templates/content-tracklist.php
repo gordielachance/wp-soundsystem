@@ -133,7 +133,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                 <?php
             } 
             ?>
-       </table>
+       </ul>
     <?php 
     }
 

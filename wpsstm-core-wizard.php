@@ -732,7 +732,6 @@ class WP_SoundSystem_Core_Wizard{
     function section_desc_empty(){
     }
 
-
     function feed_url_callback(){
         global $wpsstm_tracklist;
         

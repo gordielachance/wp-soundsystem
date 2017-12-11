@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "masterminds/html5",
-            "version": "2.2.2",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Masterminds/html5-php.git",
-                "reference": "7866e93dcf0245de22378414e0c2c7350abc45af"
+                "reference": "2c37c6c520b995b761674de3be8455a381679067"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/7866e93dcf0245de22378414e0c2c7350abc45af",
-                "reference": "7866e93dcf0245de22378414e0c2c7350abc45af",
+                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/2c37c6c520b995b761674de3be8455a381679067",
+                "reference": "2c37c6c520b995b761674de3be8455a381679067",
                 "shasum": ""
             },
             "require": {
@@ -69,7 +69,7 @@
                 "serializer",
                 "xml"
             ],
-            "time": "2016-09-22T11:01:11+00:00"
+            "time": "2017-09-04T12:26:28+00:00"
         },
         {
             "name": "matto1990/lastfm-api",
@@ -77,12 +77,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
-                "reference": "5340be5a58222300160ef23221ddbcfd648c6983"
+                "reference": "b257bb96f547f169f4ade2d23bd11514f588c383"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/5340be5a58222300160ef23221ddbcfd648c6983",
-                "reference": "5340be5a58222300160ef23221ddbcfd648c6983",
+                "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/b257bb96f547f169f4ade2d23bd11514f588c383",
+                "reference": "b257bb96f547f169f4ade2d23bd11514f588c383",
                 "shasum": ""
             },
             "require": {
@@ -121,7 +121,7 @@
                 "last.fm",
                 "webservice client"
             ],
-            "time": "2017-05-18 08:26:23"
+            "time": "2017-08-03T06:23:22+00:00"
         },
         {
             "name": "neitanod/forceutf8",

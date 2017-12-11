@@ -35,27 +35,19 @@ body.wpsstm-default,body.wp-admin{
                 width:100%;
                 padding:0;
                 margin:0;
-                @include flexbox((
-                    display: flex,
-                ));
+                @include display-flex();
                 > *{
                     padding:0;
                     margin:0;
                     border:none;
-                    @include flexbox((
-                        display: flex,
-                        align-items: center,
-                        justify-content: center,
-                    ));
+                    @include display-flex();
+                    @include align-items(center);
+                    @include justify-content(center);
                     &#wpsstm-bottom-track-info{
-                        @include flexbox((
-                            flex-grow:1,
-                            justify-content: flex-start,
-                        ));
+                        @include flex-grow(1);
+                        @include justify-content(flex-start);
                         [itemprop="track"]{
-                            @include flexbox((
-                                display: flex!important, //overwrite jQuery default
-                            ));
+                            @include display-flex(flex!important);//overwrite jQuery default
                             > *{
                                 &.wpsstm-track-position{
                                     @extend .wpsstm-can-click;
@@ -64,9 +56,7 @@ body.wpsstm-default,body.wp-admin{
                                     display:none;
                                 }
                                 &.wpsstm-track-info{
-                                    @include flexbox((
-                                        flex-grow: 0,
-                                    ));
+                                    @include flex-grow(0);
                                     .wpsstm-track-album{
                                         display:none!important;
                                     }
@@ -111,10 +101,8 @@ body.wpsstm-default,body.wp-admin{
                     
                     &#wpsstm-player-actions{
                         margin-right:.5em;
-                        @include flexbox((
-                            justify-content: space-between,
-                            flex-shrink: 0,
-                        )); 
+                        @include justify-content(space-between);
+                        @include flex-shrink(0);
                         .wpsstm-player-action{
 
                             a{
