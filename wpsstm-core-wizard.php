@@ -742,7 +742,7 @@ class WP_SoundSystem_Core_Wizard{
             '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
             'wpsstm_wizard',
             $option,
-            __('Enter a tracklist URL','wpsstm')
+            __('Type something or enter a tracklist URL','wpsstm')
         );
         
         $submit_input = null;

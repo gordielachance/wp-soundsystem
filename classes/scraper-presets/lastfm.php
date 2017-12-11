@@ -226,5 +226,19 @@ function register_lastfm_service_links($links){
     return $links;
 }
 
+/*
+When the wizard input is NOT an URL, redirect to Last.fm tracks search
+*/
+function wizard_no_url_input($input){
+    if ($input){
+        $url_parsed = parse_url($input);
+        if ( empty($url_parsed['scheme']) ){
+            $input = sprintf( 'https://www.last.fm/search/tracks?q=%s',urlencode($input) );
+        }
+    }
+    return $input;
+}
+        
+add_filter( 'wpsstm_wizard_input', 'wizard_no_url_input');
 add_action('wpsstm_get_remote_tracks','register_lastfm_preset');
 add_filter('wpsstm_wizard_services_links','register_lastfm_service_links');
