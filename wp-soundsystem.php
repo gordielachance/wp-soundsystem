@@ -175,7 +175,9 @@ class WP_SoundSystem {
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
         
-        add_filter( 'pre_get_posts', array($this, 'filter_user_posts_by_statii'));
+        add_filter( 'pre_get_posts', array($this, 'expand_self_author_statii'));
+        
+        add_filter( 'the_title', array($this, 'self_author_statii_title'),10,2);
 
     }
     
@@ -450,7 +452,7 @@ class WP_SoundSystem {
     /*
     filter music posts by status for author queries; if the current user is the author
     */
-    function filter_user_posts_by_statii( $query ) {
+    function expand_self_author_statii( $query ) {
         
         if ( !$wpsstm_statii = $query->get($this->qvar_wpsstm_statii) ) return $query; //no statii filter
         if ( !$query->is_author() ) return $query; //not an author query
@@ -493,9 +495,46 @@ class WP_SoundSystem {
         
         $query->set('post_status',$wpsstm_statii);
         
-        wpsstm()->debug_log($wpsstm_statii,'filter_user_posts_by_statii');
+        wpsstm()->debug_log(json_encode(array('statii'=>$wpsstm_statii,'author'=>$user_id)),'expand_self_author_statii');
 
         return $query;
+    }
+    
+    /*
+    For music posts that have not the 'publish' post status, filter title and append post status (frontend)
+    //TO FIX maybe it would be better to echo the post status from within a template rather than to filter the post title ?
+    */
+    
+    function self_author_statii_title($title, $id = null){
+        
+        if ( is_admin() ) return $title;
+        
+        $post_status = get_post_status($id);
+        $post_type = get_post_type($id);
+        
+        $allowed_post_types = array(
+            $this->post_type_album,
+            $this->post_type_artist,
+            $this->post_type_track,
+            $this->post_type_source,
+            $this->post_type_playlist,
+            $this->post_type_live_playlist
+        );
+
+        if ( in_array($post_type,$allowed_post_types) ){
+            
+            $display_statii = array('private','future','pending','draft');
+            
+            if ( in_array($post_status,$display_statii) ){
+                
+                $post_status_obj = get_post_status_object($post_status);
+                
+                $title .= ' — '.$post_status_obj->label;
+            }
+            
+        }
+
+        return $title;
     }
 
 }
