@@ -169,7 +169,7 @@ function wpsstm_get_playlists_ids_for_author($user_id = null, $args=array() ){
     return $post_ids;
 }
 
-function wpsstm_get_user_playlists_list($args = null,$user_id = false){
+function wpsstm_get_user_playlists_list($args = null,$user_id = false){ //TOFIXGGG
 
     if(!$user_id) $user_id = get_current_user_id();
     if(!$user_id) return false;
