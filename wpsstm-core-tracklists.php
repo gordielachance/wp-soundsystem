@@ -53,8 +53,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
-        
-        
+
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
         add_filter( 'template_include', array($this,'tracklist_xspf_template'));
         add_filter( 'template_include', array($this,'tracklist_popup_template'));
@@ -99,11 +98,7 @@ class WP_SoundSystem_Core_Tracklists{
 
 
     }
-    
-    /**
-    *   Add the 'xspf' query variable so Wordpress
-    *   won't mangle it.
-    */
+
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_action;
         return $vars;
@@ -596,6 +591,8 @@ class WP_SoundSystem_Core_Tracklists{
         }
 
     }
+    
+
 }
 
 function wpsstm_tracklists() {

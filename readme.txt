@@ -149,6 +149,11 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
+= 1.8.9 =
+* Single template for tracklists
+* When wizard input is not an URL, redirect to last.fm track search
+* Autosourcing: create post if it does not exists yet
+
 = 1.8.8 =
 * presets: use filters instead of extending the tracklist class
 * JS - improved toggleChildren.js
