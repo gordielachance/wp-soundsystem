@@ -192,6 +192,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         );
 
         $success = wp_update_post( $tracklist_post );
+        
         if( is_wp_error($success) ){
             wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
             return $success;
@@ -730,18 +731,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //populate remote tracklist if not done yet
         $populated = $this->populate_subtracks();
+        
         $updated = $this->update_live_tracklist(true);
 
         if ( is_wp_error($updated) ){
             return $updated;
         }
         
-        $moved_tracks = $this->move_live_tracks();
-        
-        if ( is_wp_error($moved_tracks) ){
-            return $moved_tracks;
-        }
-
         $args = array(
             'ID'            => $this->post_id,
             'post_title'    => $this->title,

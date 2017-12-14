@@ -105,11 +105,8 @@ class WP_SoundSystem_Tracklist{
 
         //capability check
         if ($this->tracklist_type == 'live'){
-            
             $can_set_subtracks = wpsstm_live_playlists()->can_live_playlists();
-            
         }else{
-            
             $can_set_subtracks = $this->user_can_reorder_tracks();
             
         }
@@ -646,27 +643,6 @@ class WP_SoundSystem_Tracklist{
         return $url;
     }
 
-    function move_live_tracks(){
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-        
-        wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
-        
-        $this->append_wizard_tracks();
-        
-        //clear live playlist subtracks
-        $this->tracklist_type = 'live';
-        $this->set_subtrack_ids();
-        
-        //revert type
-        $this->tracklist_type = 'static';
-        
-        //clear wizard datas
-        $this->toggle_enable_wizard(false);
-
-    }
-    
     function append_wizard_tracks(){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
