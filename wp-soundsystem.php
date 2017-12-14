@@ -36,6 +36,8 @@ class WP_SoundSystem {
     public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
+    
+    public $qvar_wpsstm_statii = 'wpsstm_statii';
 
     /**
     * @var The one true Instance
@@ -170,7 +172,18 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'body_class', array($this,'default_style_class'));
+        
+        add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        add_filter( 'pre_get_posts', array($this, 'expand_self_author_statii'));
+        
+        add_filter( 'the_title', array($this, 'self_author_statii_title'),10,2);
 
+    }
+    
+    function add_wpsstm_query_vars($vars){
+        $vars[] = $this->qvar_wpsstm_statii;
+        return $vars;
     }
     
     function default_style_class($classes){
@@ -434,6 +447,94 @@ class WP_SoundSystem {
             
         }
         
+    }
+    
+    /*
+    filter music posts by status for author queries; if the current user is the author
+    */
+    function expand_self_author_statii( $query ) {
+        
+        if ( !$wpsstm_statii = $query->get($this->qvar_wpsstm_statii) ) return $query; //no statii filter
+        if ( !$query->is_author() ) return $query; //not an author query
+        if ( !$user_id = get_current_user_id() ) return $query; //user is not logged
+        
+        $allowed_post_types = array(
+            $this->post_type_album,
+            $this->post_type_artist,
+            $this->post_type_track,
+            $this->post_type_source,
+            $this->post_type_playlist,
+            $this->post_type_live_playlist
+        );
+        
+        if ( !in_array($query->get('post_type'),$allowed_post_types) ) return $query; //not a wpsstm post type
+        
+        //query by author ID
+        if ( $author_id = $query->get('author') ){
+            if ( $user_id != $author_id ) return $query; //user mismatch
+        }
+        
+        //query by author name
+        if ( $author_name = $query->get('author_name') ){
+            $user_name = get_the_author_meta('display_name',$user_id);
+            if ( $user_name != $author_name ) return $query; //user mismatch
+        }
+        
+        $allowed_statii = array('publish','private','future','pending','draft');
+        
+        //set - check input statii
+        
+        if ($wpsstm_statii == 1){ //all
+            $wpsstm_statii = $allowed_statii;
+        }else{
+            $wpsstm_statii = explode(',',$wpsstm_statii);
+            $wpsstm_statii = array_intersect($wpsstm_statii,$allowed_statii);
+        }
+        
+        if ( !$wpsstm_statii ) return $query;
+        
+        $query->set('post_status',$wpsstm_statii);
+        
+        wpsstm()->debug_log(json_encode(array('statii'=>$wpsstm_statii,'author'=>$user_id)),'expand_self_author_statii');
+
+        return $query;
+    }
+    
+    /*
+    For music posts that have not the 'publish' post status, filter title and append post status (frontend)
+    //TO FIX maybe it would be better to echo the post status from within a template rather than to filter the post title ?
+    */
+    
+    function self_author_statii_title($title, $id = null){
+        
+        if ( is_admin() ) return $title;
+        
+        $post_status = get_post_status($id);
+        $post_type = get_post_type($id);
+        
+        $allowed_post_types = array(
+            $this->post_type_album,
+            $this->post_type_artist,
+            $this->post_type_track,
+            $this->post_type_source,
+            $this->post_type_playlist,
+            $this->post_type_live_playlist
+        );
+
+        if ( in_array($post_type,$allowed_post_types) ){
+            
+            $display_statii = array('private','future','pending','draft');
+            
+            if ( in_array($post_status,$display_statii) ){
+                
+                $post_status_obj = get_post_status_object($post_status);
+                
+                $title .= ' — '.$post_status_obj->label;
+            }
+            
+        }
+
+        return $title;
     }
 
 }
