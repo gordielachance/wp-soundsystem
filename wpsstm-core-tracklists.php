@@ -6,6 +6,7 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WP_SoundSystem_Core_Tracklists{
     public $qvar_tracklist_action = 'tracklist-action';
+    public $qvar_user_favorites = 'user-favorites';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     public $tracklist_post_types = array();
     
@@ -74,6 +75,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         //tracklist queries
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
         add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
@@ -101,6 +103,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_action;
+        $vars[] = $this->qvar_user_favorites;
         return $vars;
     }
 
@@ -541,9 +544,29 @@ class WP_SoundSystem_Core_Tracklists{
         }
 
     }
+    
+    function pre_get_posts_user_favorites( $query ) {
+
+        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+
+            $meta_query = (array)$query->get('meta_query');
+
+            $meta_query[] = array(
+                'key'     => $this->favorited_tracklist_meta_key,
+                'value'   => $user_id,
+            );
+
+            $query->set( 'meta_query', $meta_query);
+            
+        }
+
+        return $query;
+    }
 
     function subtrack_tracklists_join_query($join,$query){
         global $wpdb;
+        
+        //TO FIX add post type check ?
 
         if ( $query->get('subtrack_id') ) {
             $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
@@ -553,6 +576,8 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function subtrack_tracklists_where_query($where,$query){
+        
+        //TO FIX add post type check ?
 
         if ( $subtrack_id = $query->get('subtrack_id') ) {
             $where .= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
