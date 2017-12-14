@@ -47,15 +47,25 @@ class WP_SoundSystem_Core_BuddyPress{
 		/*
         Tracks Menu
         */
-		$favorite_track_count = $this->member_get_favorite_tracks_count($user_id);
-		$favorite_track_class = ( 0 === $favorite_track_count ) ? 'no-count' : 'count';
+        
+        //favorite tracks query
+        $favorite_tracks_args = array(
+            'post_type' =>      wpsstm()->post_type_track,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            wpsstm_tracks()->qvar_user_favorites => bp_displayed_user_id(),
+            'fields' =>         'ids',
+        );
+        $member_favorite_tracks = new WP_Query( $favorite_tracks_args );
+
+		$favorite_track_class = ( 0 === $member_favorite_tracks->found_posts ) ? 'no-count' : 'count';
 
 		$menu_tracks_name = sprintf(
 			__( 'Tracks %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $favorite_track_class ),
-				bp_core_number_format( $favorite_track_count )
+				bp_core_number_format( $member_favorite_tracks->found_posts )
 			)
 		);
 
@@ -80,7 +90,7 @@ class WP_SoundSystem_Core_BuddyPress{
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $favorite_track_class ),
-				bp_core_number_format( $favorite_track_count )
+				bp_core_number_format( $member_favorite_tracks->found_posts )
 			)
 		);
         
@@ -97,11 +107,47 @@ class WP_SoundSystem_Core_BuddyPress{
 		/*
         Playlist Menu
         */
-		$all_playlists_count = $this->member_get_playlist_count($user_id);
+        
+        //static query
+        $static_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
+            'orderby' =>        'title',
+            'fields' =>         'ids',
+        );
+        $member_static_playlists = new WP_Query( $static_playlists_args );
+        
+        //live query
+        $live_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_live_playlist,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
+            'orderby' =>        'title',
+            'fields' =>         'ids',
+        );
+        $member_live_playlists = new WP_Query( $live_playlists_args );
+        
+        //favorite query
+        $favorite_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'orderby' =>        'title',
+            'fields' =>         'ids',
+        );
+
+        $member_favorite_playlists = new WP_Query( $favorite_playlists_args );
+        
+        
+        //total playlists
+		$all_playlists_count = $member_static_playlists->found_posts + $member_live_playlists->found_posts + $member_favorite_playlists->found_posts;
 		$all_playlists_class = ( 0 === $all_playlists_count ) ? 'no-count' : 'count';
 
 		$menu_playlists_name = sprintf(
-			__( 'Playlists %s', 'wpsstm' ),
+			__( 'Tracklists %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $all_playlists_class ),
@@ -125,17 +171,15 @@ class WP_SoundSystem_Core_BuddyPress{
         Playlists Submenus
         */
 
-        //static
-        
-		$static_playlists_count = $this->member_get_playlist_count($user_id,'static');
-		$static_playlists_class = ( 0 === $static_playlists_count ) ? 'no-count' : 'count';
+        //member static playlists
+		$static_playlists_class = ( 0 === $member_static_playlists->found_posts ) ? 'no-count' : 'count';
 
 		$submenu_playlists_name = sprintf(
 			__( 'Playlists %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $static_playlists_class ),
-				bp_core_number_format( $static_playlists_count )
+				bp_core_number_format( $member_static_playlists->found_posts )
 			)
 		);
         
@@ -148,9 +192,8 @@ class WP_SoundSystem_Core_BuddyPress{
             'screen_function' => array($this,'view_user_static_playlists'),
         ) );
         
-        //live playlists
-		$live_playlists_count = $this->member_get_playlist_count($user_id,'live');
-		$live_playlists_class = ( 0 === $live_playlists_count ) ? 'no-count' : 'count';
+        //member live playlists
+		$live_playlists_class = ( 0 === $member_live_playlists->found_posts ) ? 'no-count' : 'count';
         
         
 
@@ -159,7 +202,7 @@ class WP_SoundSystem_Core_BuddyPress{
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $live_playlists_class ),
-				bp_core_number_format( $live_playlists_count )
+				bp_core_number_format( $member_live_playlists->found_posts )
 			)
 		);
         
@@ -172,16 +215,15 @@ class WP_SoundSystem_Core_BuddyPress{
             'screen_function' => array($this,'view_user_live_playlists'),
         ) );
         
-        //favorites
-		$favorite_playlists_count = $this->member_get_playlist_count($user_id,'favorite');
-		$favorite_playlists_class = ( 0 === $favorite_playlists_count ) ? 'no-count' : 'count';
+        //member favorite playlists
+		$favorite_playlists_class = ( 0 === $member_favorite_playlists->found_posts ) ? 'no-count' : 'count';
 
 		$submenu_favorite_playlists_name = sprintf(
 			__( 'Favorites %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
 				esc_attr( $favorite_playlists_class ),
-				bp_core_number_format( $favorite_playlists_count )
+				bp_core_number_format( $member_favorite_playlists->found_posts )
 			)
 		);
         
@@ -238,46 +280,50 @@ class WP_SoundSystem_Core_BuddyPress{
     }
     
     function user_static_playlists_subnav_content(){
-        $this->user_playlists_loop('static');
-    }
-    
-    function user_favorite_playlists_subnav_content(){
-        $this->user_playlists_loop('favorite');
+        global $tracklist_manager_query;
+
+        //member static playlists
+        $static_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
+            'orderby' =>        'title',
+        );
+        
+        $tracklist_manager_query = new WP_Query( $static_playlists_args );
+        wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
     function user_live_playlists_subnav_content(){
-        $this->user_playlists_loop('live');
-    }
-
-    function user_playlists_loop($type){
-        $user_id = bp_displayed_user_id();
-        $args = $this->member_get_playlists_query_args($user_id,$type);
-        query_posts($args);
+        global $tracklist_manager_query;
         
-		if ( have_posts() ) { ?>
+        //member live playlists
+        $live_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_live_playlist,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
+            'orderby' =>        'title',
+        );
+        
+        $tracklist_manager_query = new WP_Query( $live_playlists_args );
+        wpsstm_locate_template( 'list-tracklists.php', true, false );
+    }
+    
+    function user_favorite_playlists_subnav_content(){
+        global $tracklist_manager_query;
 
-            <div class="wpsstm-playlists-loop">
-                <?php 
-                 //TO FIX this template does not exists yet, build it.
-                 //wpsstm_locate_template( 'tracklist-list.php', true, false ); 
-                 ?>
-            </div>
-
-			<?php
-            
-			// Previous/next page navigation.
-			the_posts_pagination( array(
-				'prev_text'          => __( 'Previous page', 'twentyfifteen' ),
-				'next_text'          => __( 'Next page', 'twentyfifteen' ),
-				'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'Page', 'twentyfifteen' ) . ' </span>',
-			) );
-
-		// If no content, include the "No posts found" template.
-		}else{
-            printf( '<p>%s</p>',__('No matching posts found','wppstm') );
-        }
-
-        wp_reset_query();
+        //member favorite playlists
+        $favorite_playlists_args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            'orderby' =>        'title',
+        );
+        
+        $tracklist_manager_query = new WP_Query( $favorite_playlists_args );
+        wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
     function view_user_favorite_tracks(){
@@ -299,135 +345,29 @@ class WP_SoundSystem_Core_BuddyPress{
         $wpsstm_tracklist = $this->member_get_favorite_tracks_playlist();
         echo $wpsstm_tracklist->get_tracklist_html();
     }
-
-    public function member_get_playlists_query_args($user_id = null, $type=array('static','live','favorite'),$args = array() ){
-        $post_types = array();
-        if ( is_string($type) ) $type = (array)$type;
-        if (!$user_id) $user_id = get_current_user_id();
-        
-        $default_args = array();
-        $args = wp_parse_args($args,$default_args);
-        
-        if ( in_array('static',$type) || in_array('favorite',$type) ){
-            $args['post_type'][] = wpsstm()->post_type_playlist;
-        }
-
-        if ( in_array('live',$type) || in_array('favorite',$type) ){
-            $args['post_type'][] = wpsstm()->post_type_live_playlist;
-        }
-        
-        if ( !in_array('favorite',$type) ){
-            $args['author'] = $user_id;
-        }else{
-            $meta_query = array();
-            $args['meta_query'][] = array(
-                 'key'     => wpsstm_tracklists()->favorited_tracklist_meta_key,
-                 'value'   => $user_id
-            );
-        }
-        
-        if ( !isset($args['post_type']) ) return;
-        
-        return $args;
-    }
     
-    public function member_get_playlist_count($user_id = null, $type=array('static','live','favorite'),$args = array() ){
-        $count = 0;
-        $post_types = array();
-        
-        if ( is_string($type) ) $type = (array)$type;
-        
-        $defaults = array(
-            'posts_per_page'    => -1,
-            'fields'            => 'ids'
+    /*
+    TO FIX in the end, this should be part of core-playlists.php
+    */
+
+    public function member_get_favorite_tracks_playlist(){
+
+        //favorite tracks query
+        $favorite_tracks_args = array(
+            'post_type' =>      wpsstm()->post_type_track,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            wpsstm_tracks()->qvar_user_favorites => bp_displayed_user_id(),
+            'fields' =>         'ids',
         );
-        
-        $args = wp_parse_args($args,$defaults);
-
-        //static
-        if ( in_array('static',$type) ){
-            $pl_args = $this->member_get_playlists_query_args($user_id,'static',$args);
-            $static_args = wp_parse_args($pl_args,$args);
-            $query = new WP_Query( $static_args );
-            $count += $query->found_posts;
-        }
-        
-        //live
-        if ( in_array('live',$type) ){
-            $pl_args = $this->member_get_playlists_query_args($user_id,'live',$args);
-            $live_args = wp_parse_args($pl_args,$args);
-            $query = new WP_Query( $live_args );
-            $count += $query->found_posts;
-        }
-
-        //favorite
-        if ( in_array('favorite',$type) ){
-            $pl_args = $this->member_get_playlists_query_args($user_id,'favorite',$args);
-            $favorite_args = wp_parse_args($pl_args,$args);
-            $query = new WP_Query( $favorite_args );
-            $count += $query->found_posts;
-        }
-
-        return $count;
-
-    }
-    
-    public function member_get_favorite_tracks_count($user_id = null,$args = array() ){
-        $count = 0;
-
-        $defaults = array(
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids'
-        );
-        
-        $args = wp_parse_args($args,$defaults);
-            
-        $track_args = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'meta_query'        => array(
-                array(
-                     'key'     => wpsstm_tracks()->favorited_track_meta_key,
-                     'value'   => $user_id
-                )
-            )
-        );
-        
-        $track_args = wp_parse_args($track_args,$args);
-        $query = new WP_Query( $track_args );
-        $count += $query->found_posts;
-
-        return $count;
-
-    }
-    
-    public function member_get_favorite_tracks_playlist($user_id = null){
-        
-        if (!$user_id) $user_id = bp_displayed_user_id();
-
-        //fetch favorite tracks IDs
-        $favorite_track_args = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'meta_query'        => array(
-                array(
-                     'key'     => wpsstm_tracks()->favorited_track_meta_key,
-                     'value'   => $user_id
-                )
-            )
-
-        );
-
-        $query = new WP_Query( $favorite_track_args );
+        $member_favorite_tracks = new WP_Query( $favorite_tracks_args );
         
         //build playlist track args
         $track_args = array(
-            'post__in'  => $query->posts
+            'post__in'  => $member_favorite_tracks->posts
         );
 
-        $user_id = bp_displayed_user_id();
-        $user_datas = get_userdata( $user_id );
+        $user_datas = get_userdata( bp_displayed_user_id() );
         $display_name = $user_datas->display_name;
         $tracklist_title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
         
