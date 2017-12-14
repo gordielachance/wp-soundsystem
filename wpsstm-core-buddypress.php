@@ -1,6 +1,12 @@
 <?php
 
 class WP_SoundSystem_Core_BuddyPress{
+    
+    var $music_slug;
+    var $favorite_tracks_slug;
+    var $static_playlists_slug;
+    var $live_playlists_slug;
+    var $favorite_tracklists_slug;
 
     /**
     * @var The one true Instance
@@ -24,92 +30,47 @@ class WP_SoundSystem_Core_BuddyPress{
     }
     
     function setup_globals(){
-
+        $this->music_slug = 'music';
+        $this->favorite_tracks_slug = 'favorite-tracks';
+        $this->static_playlists_slug = 'static';
+        $this->live_playlists_slug = 'live';
+        $this->favorite_tracklists_slug = 'favorite-tracklists';
     }
 
     function setup_actions(){
-        add_action( 'bp_setup_nav', array($this,'register_member_playlists_menu'), 99 );
+        add_action( 'bp_setup_nav', array($this,'register_music_menu'), 99 );
     }
     
-    function register_member_playlists_menu() {
+    function register_music_menu() {
         global $bp;
         
-        // Determine user to use.
-        $user_id = bp_displayed_user_id();
-        
-        $menu_tracks_slug = 'tracks';
-        $submenu_favorite_tracks_slug = 'favorite';
-        $menu_playlists_slug = 'playlists';
-        $submenu_static_playlists_slug = 'static';
-        $submenu_live_playlists_slug = 'live';
-        $submenu_favorite_playlists_slug = 'favorite';
-        
-		/*
-        Tracks Menu
-        */
-        
-        //favorite tracks query
-        $favorite_tracks_args = array(
-            'post_type' =>      wpsstm()->post_type_track,
-            'author' =>         bp_displayed_user_id(),
-            'posts_per_page' => -1,
-            wpsstm_tracks()->qvar_user_favorites => bp_displayed_user_id(),
-            'fields' =>         'ids',
-        );
-        $member_favorite_tracks = new WP_Query( $favorite_tracks_args );
-
-		$favorite_track_class = ( 0 === $member_favorite_tracks->found_posts ) ? 'no-count' : 'count';
-
-		$menu_tracks_name = sprintf(
-			__( 'Tracks %s', 'wpsstm' ),
-			sprintf(
-				'<span class="%s">%s</span>',
-				esc_attr( $favorite_track_class ),
-				bp_core_number_format( $member_favorite_tracks->found_posts )
-			)
-		);
-
-        $tracks_menu_args = array(
-                'name'                      => $menu_tracks_name,
-                'slug'                      => $menu_tracks_slug,
-                'default_subnav_slug'       => $submenu_favorite_tracks_slug,
+        $menu_args = array(
+                'name'                      => __('Music','wpsstm'),
+                'slug'                      => $this->music_slug,
+                'default_subnav_slug'       => $this->static_playlists_slug,
                 'position'                  => 50,
                 'show_for_displayed_user'   => true,
-                //'screen_function'           => array($this,'view_user_favorite_tracks'),
+                //'screen_function' => array($this,'view_user_static_playlists'),
                 'item_css_id'               => 'wpsstm-member-tracks-favorite'
         );
 
-        bp_core_new_nav_item( $tracks_menu_args );
+        bp_core_new_nav_item( $menu_args );
         
         /*
-        Tracks Submenus
+        Music Submenus
         */
+        $this->register_static_playlists_submenu();
+        $this->register_live_playlists_submenu();
+        $this->register_favorite_tracklists_submenu();
+        $this->register_favorite_tracks_submenu();
 
-		$submenu_loved_tracks_name = sprintf(
-			__( 'Favorite tracks %s', 'wpsstm' ),
-			sprintf(
-				'<span class="%s">%s</span>',
-				esc_attr( $favorite_track_class ),
-				bp_core_number_format( $member_favorite_tracks->found_posts )
-			)
-		);
-        
-        bp_core_new_subnav_item( array(
-            'name'            => $submenu_loved_tracks_name,
-            'slug'            => $submenu_favorite_tracks_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $menu_playlists_slug . '/',
-            'parent_slug'     => $menu_tracks_slug,
-            'position'        => 10,
-            'screen_function' => array($this,'view_user_favorite_tracks')
-        ) );
-        
-        
-		/*
-        Playlist Menu
-        */
+    }
+    
+    function register_static_playlists_submenu(){
+        global $bp;
         
         //static query
-        $static_playlists_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_playlist,
             'author' =>         bp_displayed_user_id(),
             'posts_per_page' => -1,
@@ -117,10 +78,36 @@ class WP_SoundSystem_Core_BuddyPress{
             'orderby' =>        'title',
             'fields' =>         'ids',
         );
-        $member_static_playlists = new WP_Query( $static_playlists_args );
+        $query = new WP_Query( $query_args );
+        $count = $query->found_posts;
         
-        //live query
-        $live_playlists_args = array(
+        ///
+        
+		$class = ( 0 === $count ) ? 'no-count' : 'count';
+
+		$name = sprintf(
+			__( 'Playlists %s', 'wpsstm' ),
+			sprintf(
+				'<span class="%s">%s</span>',
+				esc_attr( $class ),
+				bp_core_number_format( $count )
+			)
+		);
+        
+        bp_core_new_subnav_item( array(
+            'name'            => $name,
+            'slug'            => $this->static_playlists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
+            'parent_slug'     => $this->music_slug,
+            'position'        => 10,
+            'screen_function' => array($this,'view_user_static_playlists'),
+        ) );
+    }
+    
+    function register_live_playlists_submenu(){
+        global $bp;
+        
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_live_playlist,
             'author' =>         bp_displayed_user_id(),
             'posts_per_page' => -1,
@@ -128,10 +115,37 @@ class WP_SoundSystem_Core_BuddyPress{
             'orderby' =>        'title',
             'fields' =>         'ids',
         );
-        $member_live_playlists = new WP_Query( $live_playlists_args );
+        $query = new WP_Query( $query_args );
+        $count = $query->found_posts;
+        ///
+        
+		$class = ( 0 === $count ) ? 'no-count' : 'count';
+
+		$name = sprintf(
+			__( 'Live playlists %s', 'wpsstm' ),
+			sprintf(
+				'<span class="%s">%s</span>',
+				esc_attr( $class ),
+				bp_core_number_format( $count )
+			)
+		);
+        
+        bp_core_new_subnav_item( array(
+            'name'            => $name,
+            'slug'            => $this->live_playlists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
+            'parent_slug'     => $this->music_slug,
+            'position'        => 20,
+            'screen_function' => array($this,'view_user_live_playlists'),
+        ) );
+        
+    }
+    
+    function register_favorite_tracklists_submenu(){
+        global $bp;
         
         //favorite query
-        $favorite_playlists_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_playlist,
             wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
             'posts_per_page' => -1,
@@ -139,101 +153,68 @@ class WP_SoundSystem_Core_BuddyPress{
             'fields' =>         'ids',
         );
 
-        $member_favorite_playlists = new WP_Query( $favorite_playlists_args );
+        $query = new WP_Query( $query_args );
+        $count = $query->found_posts;
         
+        ///
         
-        //total playlists
-		$all_playlists_count = $member_static_playlists->found_posts + $member_live_playlists->found_posts + $member_favorite_playlists->found_posts;
-		$all_playlists_class = ( 0 === $all_playlists_count ) ? 'no-count' : 'count';
+        if ( !$count ) return;
+        
+		$class = ( 0 === $count ) ? 'no-count' : 'count';
 
-		$menu_playlists_name = sprintf(
-			__( 'Tracklists %s', 'wpsstm' ),
+		$name = sprintf(
+			__( 'Favorites tracklists %s', 'wpsstm' ),
 			sprintf(
 				'<span class="%s">%s</span>',
-				esc_attr( $all_playlists_class ),
-				bp_core_number_format( $all_playlists_count )
-			)
-		);
-
-        $playlists_menu_args = array(
-                'name'                      => $menu_playlists_name,
-                'slug'                      => $menu_playlists_slug,
-                'default_subnav_slug'       => $submenu_static_playlists_slug,
-                'position'                  => 50,
-                'show_for_displayed_user'   => true,
-                //'screen_function' => array($this,'view_user_static_playlists'),
-                'item_css_id'               => 'wpsstm-member-tracks-favorite'
-        );
-
-        bp_core_new_nav_item( $playlists_menu_args );
-        
-        /*
-        Playlists Submenus
-        */
-
-        //member static playlists
-		$static_playlists_class = ( 0 === $member_static_playlists->found_posts ) ? 'no-count' : 'count';
-
-		$submenu_playlists_name = sprintf(
-			__( 'Playlists %s', 'wpsstm' ),
-			sprintf(
-				'<span class="%s">%s</span>',
-				esc_attr( $static_playlists_class ),
-				bp_core_number_format( $member_static_playlists->found_posts )
+				esc_attr( $class ),
+				bp_core_number_format( $count )
 			)
 		);
         
         bp_core_new_subnav_item( array(
-            'name'            => $submenu_playlists_name,
-            'slug'            => $submenu_static_playlists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $menu_playlists_slug . '/',
-            'parent_slug'     => $menu_playlists_slug,
-            'position'        => 10,
-            'screen_function' => array($this,'view_user_static_playlists'),
-        ) );
-        
-        //member live playlists
-		$live_playlists_class = ( 0 === $member_live_playlists->found_posts ) ? 'no-count' : 'count';
-        
-        
-
-		$submenu_live_playlists_name = sprintf(
-			__( 'Live playlists %s', 'wpsstm' ),
-			sprintf(
-				'<span class="%s">%s</span>',
-				esc_attr( $live_playlists_class ),
-				bp_core_number_format( $member_live_playlists->found_posts )
-			)
-		);
-        
-        bp_core_new_subnav_item( array(
-            'name'            => $submenu_live_playlists_name,
-            'slug'            => $submenu_live_playlists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $menu_playlists_slug . '/',
-            'parent_slug'     => $menu_playlists_slug,
-            'position'        => 20,
-            'screen_function' => array($this,'view_user_live_playlists'),
-        ) );
-        
-        //member favorite playlists
-		$favorite_playlists_class = ( 0 === $member_favorite_playlists->found_posts ) ? 'no-count' : 'count';
-
-		$submenu_favorite_playlists_name = sprintf(
-			__( 'Favorites %s', 'wpsstm' ),
-			sprintf(
-				'<span class="%s">%s</span>',
-				esc_attr( $favorite_playlists_class ),
-				bp_core_number_format( $member_favorite_playlists->found_posts )
-			)
-		);
-        
-        bp_core_new_subnav_item( array(
-            'name'            => $submenu_favorite_playlists_name,
-            'slug'            => $submenu_favorite_playlists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $menu_playlists_slug . '/',
-            'parent_slug'     => $menu_playlists_slug,
-            'position'        => 20,
+            'name'            => $name,
+            'slug'            => $this->favorite_tracklists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
+            'parent_slug'     => $this->music_slug,
+            'position'        => 40,
             'screen_function' => array($this,'view_user_favorite_playlists'),
+        ) );
+    }
+    
+    function register_favorite_tracks_submenu(){
+        global $bp;
+        
+        //favorite tracks query
+        $query_args = array(
+            'post_type' =>      wpsstm()->post_type_track,
+            'author' =>         bp_displayed_user_id(),
+            'posts_per_page' => -1,
+            wpsstm_tracks()->qvar_user_favorites => bp_displayed_user_id(),
+            'fields' =>         'ids',
+        );
+        $query = new WP_Query( $query_args );
+        $count = $query->found_posts;
+        
+        ///
+        
+        if ( !$count ) return;
+		$class = ( 0 === $count ) ? 'no-count' : 'count';
+
+		$name = sprintf(
+			__( 'Favorite tracks %s', 'wpsstm' ),
+			sprintf(
+				'<span class="%s">%s</span>',
+				esc_attr( $class ),
+				bp_core_number_format( $count )
+			)
+		);
+        bp_core_new_subnav_item( array(
+            'name'            => $name,
+            'slug'            => $this->favorite_tracks_slug,
+            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
+            'parent_slug'     => $this->music_slug,
+            'position'        => 40,
+            'screen_function' => array($this,'view_user_favorite_tracks')
         ) );
     }
 
@@ -283,7 +264,7 @@ class WP_SoundSystem_Core_BuddyPress{
         global $tracklist_manager_query;
 
         //member static playlists
-        $static_playlists_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_playlist,
             'author' =>         bp_displayed_user_id(),
             'posts_per_page' => -1,
@@ -291,7 +272,7 @@ class WP_SoundSystem_Core_BuddyPress{
             'orderby' =>        'title',
         );
         
-        $tracklist_manager_query = new WP_Query( $static_playlists_args );
+        $tracklist_manager_query = new WP_Query( $query_args );
         wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
@@ -299,7 +280,7 @@ class WP_SoundSystem_Core_BuddyPress{
         global $tracklist_manager_query;
         
         //member live playlists
-        $live_playlists_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_live_playlist,
             'author' =>         bp_displayed_user_id(),
             'posts_per_page' => -1,
@@ -307,7 +288,7 @@ class WP_SoundSystem_Core_BuddyPress{
             'orderby' =>        'title',
         );
         
-        $tracklist_manager_query = new WP_Query( $live_playlists_args );
+        $tracklist_manager_query = new WP_Query( $query_args );
         wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
@@ -315,14 +296,14 @@ class WP_SoundSystem_Core_BuddyPress{
         global $tracklist_manager_query;
 
         //member favorite playlists
-        $favorite_playlists_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_playlist,
             wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
         );
         
-        $tracklist_manager_query = new WP_Query( $favorite_playlists_args );
+        $tracklist_manager_query = new WP_Query( $query_args );
         wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
@@ -353,18 +334,18 @@ class WP_SoundSystem_Core_BuddyPress{
     public function member_get_favorite_tracks_playlist(){
 
         //favorite tracks query
-        $favorite_tracks_args = array(
+        $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'author' =>         bp_displayed_user_id(),
             'posts_per_page' => -1,
             wpsstm_tracks()->qvar_user_favorites => bp_displayed_user_id(),
             'fields' =>         'ids',
         );
-        $member_favorite_tracks = new WP_Query( $favorite_tracks_args );
+        $query = new WP_Query( $query_args );
         
         //build playlist track args
         $track_args = array(
-            'post__in'  => $member_favorite_tracks->posts
+            'post__in'  => $query->posts
         );
 
         $user_datas = get_userdata( bp_displayed_user_id() );
