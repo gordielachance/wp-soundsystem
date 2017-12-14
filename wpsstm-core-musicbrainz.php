@@ -584,7 +584,7 @@ class WP_SoundSystem_Core_MusicBrainz {
             if ( in_array('tracklist',$post_type_items) ){
                 //TO FIX TO CHECK
                 $tracklist = wpsstm_get_post_tracklist($post_id);
-                $subtrack_ids = $tracklist->get_subtrack_ids();
+                $subtrack_ids = $tracklist->get_subtracks(array('fields' =>'ids'));
                 if ( empty($subtrack_ids) ) $items[] = 'tracklist';
             }
 
