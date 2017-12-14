@@ -97,16 +97,9 @@ body.wpsstm-default,body.wp-admin{
             ul#wpsstm-track-actions{
                 width: 100%;
                 @include opacity(0);
-                li.wpsstm-track-action{
+                li.wpsstm-action{
                     display:inline;
-                    a{
-                        &:before{
-                            margin-right:0;
-                        }
-                        > span{
-                            display:none;
-                        }
-                    }
+                    @extend .wpsstm-action-icon;
                 }
             }
 
@@ -203,3 +196,26 @@ body.wpsstm-default,body.wp-admin{
     
 }
 
+//track tracklists selector
+#wpsstm-track-tracklists{
+    ul{
+
+        li{
+
+            &.loading{
+                @extend .wpsstm-loading-el;
+            }
+
+        }
+    }
+
+    #wpsstm-new-playlist-add{
+        display:none;
+        margin: 1em;
+        text-align: center;
+    }
+
+    &.loading{
+        @extend .wpsstm-loading-el;
+    }
+}

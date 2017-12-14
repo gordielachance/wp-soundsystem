@@ -6,7 +6,6 @@ class WP_SoundSystem_Core_Playlists{
     * @var The one true Instance
     */
     private static $instance;
-    public $subtracks_static_metaname = 'wpsstm_subtrack_ids';
 
     public static function instance() {
             if ( ! isset( self::$instance ) ) {

@@ -436,7 +436,7 @@ class WP_SoundSystem_Core_BuddyPress{
         $tracklist->author = $display_name;
         
         //WIP TO FIX NOT WORKING YET
-        $tracklist->populate_tracks($track_args);
+        $tracklist->populate_subtracks($track_args);
         return $tracklist;
     }
     

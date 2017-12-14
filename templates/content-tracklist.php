@@ -1,7 +1,7 @@
 <?php
 
 global $wpsstm_tracklist;
-$wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
+$wpsstm_tracklist->populate_subtracks();
 
 $tracklist = $wpsstm_tracklist;
 

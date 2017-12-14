@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '153';
+    public $db_version = '155';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -38,6 +38,8 @@ class WP_SoundSystem {
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
+    
+    public $subtracks_table_name = 'wpsstm_subtracks';
 
     /**
     * @var The one true Instance
@@ -176,8 +178,6 @@ class WP_SoundSystem {
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
         
         add_filter( 'pre_get_posts', array($this, 'expand_self_author_statii'));
-        
-        add_filter( 'the_title', array($this, 'self_author_statii_title'),10,2);
 
     }
     
@@ -212,12 +212,14 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
-            /*
-            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-            dbDelta( $sql );
-            */
+            $this->setup_subtracks_table();
 
         }else{
+
+            if ($current_version < 155){
+                $this->setup_subtracks_table();
+                $this->migrate_subtracks();
+            }
             
             if($current_version < 154){ //delete artist/album/track post title (we don't use them anymore)
 
@@ -239,6 +241,54 @@ class WP_SoundSystem {
         
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
+    }
+    
+    function setup_subtracks_table(){
+        global $wpdb;
+
+        $subtracks_table_name = $wpdb->prefix . $this->subtracks_table_name;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $subtracks_table_name (
+            ID bigint(20) NOT NULL AUTO_INCREMENT,
+            track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
+            tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
+            track_order int(11) NOT NULL DEFAULT '0',
+            PRIMARY KEY  (ID)
+        ) $charset_collate;";
+
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        return dbDelta( $sql );
+    }
+    
+    /*
+    Migrate old subtracks (stored in tracklist posts metas) to the new subtracks table
+    Can be removed after a few months once the plugin has been updated.
+    */
+    function migrate_subtracks(){
+        global $wpdb;
+        
+        $subtracks_table_name = $wpdb->prefix . $this->subtracks_table_name;
+        
+        //get all subtracks metas
+        $querystr = $wpdb->prepare( "SELECT * FROM $wpdb->postmeta WHERE meta_key = '%s' OR meta_key = '%s'", 'wpsstm_subtrack_ids','wpsstm_live_subtrack_ids' );
+        $metas = $wpdb->get_results ( $querystr );
+
+        foreach($metas as $meta){
+            $subtrack_ids = maybe_unserialize( $meta->meta_value );
+            $subtrack_pos = 0;
+            foreach((array)$subtrack_ids as $subtrack_id){
+                $wpdb->insert($subtracks_table_name, array(
+                    'track_id' =>       $subtrack_id,
+                    'tracklist_id' =>   $meta->post_id,
+                    'track_order' =>    $subtrack_pos
+                ));
+                $subtrack_pos++;
+            }
+        }
+        //delete subtracks metas
+        $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s' OR meta_key = '%s'", 'wpsstm_subtrack_ids','wpsstm_live_subtrack_ids' );
+        $wpdb->get_results ( $querystr );
     }
     
     function get_options($keys = null){
@@ -498,43 +548,6 @@ class WP_SoundSystem {
         wpsstm()->debug_log(json_encode(array('statii'=>$wpsstm_statii,'author'=>$user_id)),'expand_self_author_statii');
 
         return $query;
-    }
-    
-    /*
-    For music posts that have not the 'publish' post status, filter title and append post status (frontend)
-    //TO FIX maybe it would be better to echo the post status from within a template rather than to filter the post title ?
-    */
-    
-    function self_author_statii_title($title, $id = null){
-        
-        if ( is_admin() ) return $title;
-        
-        $post_status = get_post_status($id);
-        $post_type = get_post_type($id);
-        
-        $allowed_post_types = array(
-            $this->post_type_album,
-            $this->post_type_artist,
-            $this->post_type_track,
-            $this->post_type_source,
-            $this->post_type_playlist,
-            $this->post_type_live_playlist
-        );
-
-        if ( in_array($post_type,$allowed_post_types) ){
-            
-            $display_statii = array('private','future','pending','draft');
-            
-            if ( in_array($post_status,$display_statii) ){
-                
-                $post_status_obj = get_post_status_object($post_status);
-                
-                $title .= ' — '.$post_status_obj->label;
-            }
-            
-        }
-
-        return $title;
     }
 
 }

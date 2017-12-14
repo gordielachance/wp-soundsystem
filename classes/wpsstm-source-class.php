@@ -279,20 +279,6 @@ class WP_SoundSystem_Source{
 
         return wp_update_post( $post, true );
 
-        /*
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
-
-        //delete current
-        if(($key = array_search($track_id, $ordered_ids)) !== false) {
-            unset($ordered_ids[$key]);
-        }
-
-        //insert at position
-        array_splice( $ordered_ids, $index, 0, $track_id );
-
-        //save
-        return $this->set_subtrack_ids($ordered_ids);
-        */
     }
     
     /*
