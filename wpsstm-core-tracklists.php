@@ -49,8 +49,6 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function setup_actions(){
-        
-        add_action( 'the_post', array($this,'the_tracklist'),10,2);
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
@@ -74,6 +72,8 @@ class WP_SoundSystem_Core_Tracklists{
         add_filter( 'manage_posts_columns', array($this,'tracklist_column_lovedby_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'tracklist_column_lovedby_content'), 10, 2 );
         
+        //tracklist queries
+        add_action( 'the_post', array($this,'the_tracklist'),10,2);
         add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
@@ -86,7 +86,7 @@ class WP_SoundSystem_Core_Tracklists{
         /*
         AJAX
         */
-        
+
         //refresh tracklist
         add_action('wp_ajax_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
@@ -213,7 +213,7 @@ class WP_SoundSystem_Core_Tracklists{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
+        
     function ajax_refresh_tracklist(){
         global $wpsstm_tracklist;
         
@@ -553,6 +553,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function subtrack_tracklists_where_query($where,$query){
+
         if ( $subtrack_id = $query->get('subtrack_id') ) {
             $where .= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
         }

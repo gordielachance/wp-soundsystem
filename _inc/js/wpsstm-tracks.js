@@ -62,6 +62,7 @@
                 dataType: 'json',
                 beforeSend: function() {
                     $(tracklistSelector).addClass('loading');
+                    newPlaylistTitle_el.addClass('input-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
@@ -87,6 +88,7 @@
                 },
                 complete: function() {
                     $(tracklistSelector).removeClass('loading');
+                    newPlaylistTitle_el.removeClass('input-loading');
                 }
             })
 
