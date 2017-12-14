@@ -257,7 +257,10 @@ class WP_SoundSystem_Core_BuddyPress{
 		if ( have_posts() ) { ?>
 
             <div class="wpsstm-playlists-loop">
-                <?php get_template_part('loop', wpsstm()->post_type_live_playlist); ?>
+                <?php 
+                 //TO FIX this template does not exists yet, build it.
+                 //wpsstm_locate_template( 'tracklist-list.php', true, false ); 
+                 ?>
             </div>
 
 			<?php
@@ -271,7 +274,7 @@ class WP_SoundSystem_Core_BuddyPress{
 
 		// If no content, include the "No posts found" template.
 		}else{
-			get_template_part( 'content', 'none' );
+            printf( '<p>%s</p>',__('No matching posts found','wppstm') );
         }
 
         wp_reset_query();
