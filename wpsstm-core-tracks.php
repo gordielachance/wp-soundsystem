@@ -57,7 +57,7 @@ class WP_SoundSystem_Core_Tracks{
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
         
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
+        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_title_save'), 5);
@@ -69,10 +69,9 @@ class WP_SoundSystem_Core_Tracks{
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
-        //subtracks
-        
-        //TO FIX 
-        //add filters to exclude tracks if 'exclude_subtracks' query var is set
+        //subtracks queries
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
+        //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         add_filter( 'posts_join', array($this,'subtracks_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtracks_where_query'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'sort_subtracks_by_position'), 10, 2 );
@@ -470,7 +469,7 @@ class WP_SoundSystem_Core_Tracks{
 
     function subtracks_join_query($join,$query){
         global $wpdb;
-
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
         if ( $query->get('tracklist_id') ){
             $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
             $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table_name,$wpdb->posts);
@@ -479,6 +478,7 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function subtracks_where_query($where,$query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
         if ( $tracklist_id = $query->get('tracklist_id') ){
             $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
         }
@@ -492,6 +492,8 @@ class WP_SoundSystem_Core_Tracks{
     
     function sort_subtracks_by_position($orderby_sql, $query){
 
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
+        
         $query_orderby = $query->get('orderby') ? $query->get('orderby') : 'track_order';
 
         if ( $query->get('tracklist_id') && ( $query_orderby == 'track_order') ){
