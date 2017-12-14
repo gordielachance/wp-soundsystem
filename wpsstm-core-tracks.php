@@ -98,7 +98,6 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
 
         //add/remove tracklist track
-        add_action('wp_ajax_wpsstm_append_to_new_tracklist', array($this,'ajax_append_track_to_new_tracklist'));
         add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
 
     }
@@ -876,61 +875,7 @@ class WP_SoundSystem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
-    /*
-    When checking/unchecking a playlist from the track playlists manager
-    */
-    
-    function ajax_append_track_to_new_tracklist(){ //TOFIXGGG TO CHECK
-        $ajax_data = wp_unslash($_POST);
-
-        wpsstm()->debug_log($ajax_data,"ajax_append_track_to_new_tracklist()");
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-
-        $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
-        $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-
-        $playlist = wpsstm_get_post_tracklist();
-        $playlist->title = $tracklist_title;
         
-        $tracklist_id = $playlist->save_playlist();
-
-        if ( is_wp_error($tracklist_id) ){
-            
-            $code = $tracklist_id->get_error_code();
-            $result['message'] = $tracklist_id->get_error_message($code);
-            
-        }else{
-
-            $parent_ids = null;
-            $result['playlist_id'] = $tracklist_id;
-            $result['success'] = true;
-            
-            if ($track_id){
-                
-                $track = new WP_SoundSystem_Track($track_id);
-                $append_success = $playlist->append_subtrack_ids($track->post_id);
-                $parent_ids = $track->get_parent_ids();
-                
-            }
-
-            $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$parent_ids));
-            
-            $result['new_html'] = $list_all;
-
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-        
-    }
-    
     function trash_track_sources($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;

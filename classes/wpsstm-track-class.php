@@ -137,8 +137,6 @@ class WP_SoundSystem_Track{
     
     /*
     Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
-    
-    //TOFIXGGG
     */
     function get_parent_ids($args = null){
         global $wpdb;
@@ -923,33 +921,13 @@ class WP_SoundSystem_Track{
         );
         return $sources_url;
     }
-    
-    function playlists_manager_append_track_checkbox($tracklist){
-        global $wpsstm_track;
-        $checked_playlist_ids = $wpsstm_track->get_parent_ids();
 
-        ?>
-        <span class="tracklist-row-action">
-            <?php
-            //checked
-            $checked = in_array($tracklist->post_id,$checked_playlist_ids);
-            $checked_str = checked($checked,true,false);
-            printf('<input name="wpsstm_append_tracklist_track" type="checkbox" value="%s" %s />',$tracklist->post_id,$checked_str);
-            ?>
-        </span>
-        <?php
-    }
-    
-    function get_playlists_manager(){
-        global $list_tracklists_query;
+    function get_subtrack_playlist_manager(){
         $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $labels = get_post_type_labels($playlist_type_obj);
 
         //capability check
         $create_playlist_cap = $playlist_type_obj->cap->edit_posts;
-        
-        //handle checkbox
-        add_filter('wpsstm_before_tracklist_row',array($this,'playlists_manager_append_track_checkbox'));
 
         ob_start();
 
@@ -964,20 +942,7 @@ class WP_SoundSystem_Track{
                 <p id="wpsstm-playlists-filter">
                     <input type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" />
                 </p>
-                <?php
-                //get logged user static playlists
-                $args = array(
-                    'post_type' =>      wpsstm()->post_type_playlist,
-                    'author' =>         get_current_user_id(), //TOFIX TO CHECK IF NOT LOGGED
-                    'post_status' =>    array('publish','private','future','pending','draft'),
-                    'posts_per_page' => -1,
-                    'orderby' =>        'title',
-                    'order'=>           'ASC'
-                );
-
-                $list_tracklists_query = new WP_Query( $args );
-                wpsstm_locate_template( 'list-tracklists.php', true, false );
-                ?>
+                <?php echo $this->get_subtrack_playlist_manager_list(); ?>
                 <p id="wpsstm-new-playlist-add">
                     <input type="submit" value="<?php echo $labels->add_new_item;?>"/>
                     <?php wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$this->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true );?>
@@ -989,6 +954,47 @@ class WP_SoundSystem_Track{
         $output = ob_get_clean();
         return $output;
         
+    }
+    
+    function get_subtrack_playlist_manager_list(){
+        global $list_tracklists_query;
+        
+        //handle checkbox
+        add_filter('wpsstm_before_tracklist_row',array($this,'playlists_manager_append_track_checkbox'));
+        
+        ob_start();
+        //get logged user static playlists
+        $args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            'author' =>         get_current_user_id(), //TOFIX TO CHECK WHAT IF NOT LOGGED ?
+            'post_status' =>    array('publish','private','future','pending','draft'),
+            'posts_per_page' => -1,
+            'orderby' =>        'title',
+            'order'=>           'ASC'
+        );
+
+        $list_tracklists_query = new WP_Query( $args );
+        wpsstm_locate_template( 'list-tracklists.php', true, false );
+        $output = ob_get_clean();
+        return $output;
+    }
+    
+    /*
+    Add a checkbox in front of every tracklist row to append/remove track
+    */
+    function playlists_manager_append_track_checkbox($tracklist){
+        $checked_playlist_ids = $this->get_parent_ids();
+
+        ?>
+        <span class="tracklist-row-action">
+            <?php
+            //checked
+            $checked = in_array($tracklist->post_id,$checked_playlist_ids);
+            $checked_str = checked($checked,true,false);
+            printf('<input name="wpsstm_playlist_id" type="checkbox" value="%s" %s />',$tracklist->post_id,$checked_str);
+            ?>
+        </span>
+        <?php
     }
     
     function get_sources_manager(){

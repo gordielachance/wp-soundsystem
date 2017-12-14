@@ -81,7 +81,7 @@ $popup_action = isset($_REQUEST['popup-action']) ? $_REQUEST['popup-action'] : n
                             case 'playlists':
                                 ?>
                                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                                    <?php echo $wpsstm_track->get_playlists_manager();?>
+                                    <?php echo $wpsstm_track->get_subtrack_playlist_manager();?>
                                 </div>
                                 <?php
                                 

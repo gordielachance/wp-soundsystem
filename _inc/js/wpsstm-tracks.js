@@ -49,7 +49,7 @@
             }
 
             var ajax_data = {
-                action:         'wpsstm_append_to_new_tracklist',
+                action:         'wpsstm_subtrack_tracklist_manager_new_playlist',
                 playlist_title: newPlaylistTitle_el.val(),
                 track_id:       track_id,
             };
@@ -67,8 +67,17 @@
                     if (data.success === false) {
                         console.log(data);
                     }else if(data.new_html) {
+                        
+                        //refresh tracklists list
                         existingPlaylists_el.replaceWith( data.new_html );
-                        $( '#wpsstm-playlists-filter  input[type="text"]' ).trigger("keyup"); //simulate keyup
+                        
+                        //simulate keyup to keep the original filtering
+                        $( '#wpsstm-playlists-filter input[type="text"]' ).trigger("keyup"); 
+                        
+                        //simulate new playlist checkbox click
+                        var playlist_id = data.playlist_id;
+                        var checkbox_el = $('input[name="wpsstm_playlist_id"][value="'+playlist_id+'"]');
+                        checkbox_el.trigger("click");
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
