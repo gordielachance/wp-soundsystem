@@ -419,6 +419,7 @@ class WP_SoundSystem_Source{
         
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
+            'data-wpsstm-track-id' =>               $this->track_id,
             'data-wpsstm-source-provider' =>        $this->provider->slug,
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-type' =>            $this->type,
