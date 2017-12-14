@@ -1,6 +1,6 @@
 <?php
-global $list_tracklists_query;
-$query = $list_tracklists_query;
+global $tracklist_manager_query;
+$query = $tracklist_manager_query;
 
 if ( $query->have_posts() ) {
     ?>

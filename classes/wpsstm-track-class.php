@@ -957,7 +957,7 @@ class WP_SoundSystem_Track{
     }
     
     function get_subtrack_playlist_manager_list(){
-        global $list_tracklists_query;
+        global $tracklist_manager_query;
         
         //handle checkbox
         add_filter('wpsstm_before_tracklist_row',array($this,'playlists_manager_append_track_checkbox'));
@@ -973,7 +973,7 @@ class WP_SoundSystem_Track{
             'order'=>           'ASC'
         );
 
-        $list_tracklists_query = new WP_Query( $args );
+        $tracklist_manager_query = new WP_Query( $args );
         wpsstm_locate_template( 'list-tracklists.php', true, false );
         $output = ob_get_clean();
         return $output;
