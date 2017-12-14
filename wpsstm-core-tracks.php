@@ -6,6 +6,7 @@ class WP_SoundSystem_Core_Tracks{
     public $image_url_metakey = '_wpsstm_track_image_url';
     public $qvar_track_action = 'track-action';
     public $qvar_track_lookup = 'lookup_track';
+    public $qvar_user_favorites = 'user-favorites';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
@@ -71,6 +72,7 @@ class WP_SoundSystem_Core_Tracks{
         
         //subtracks queries
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         add_filter( 'posts_join', array($this,'subtracks_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtracks_where_query'), 10, 2 );
@@ -449,8 +451,30 @@ class WP_SoundSystem_Core_Tracks{
             break;
         }
     }
+    
+    function pre_get_posts_user_favorites( $query ) {
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+
+        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+
+            $meta_query = (array)$query->get('meta_query');
+
+            $meta_query[] = array(
+                'key'     => $this->favorited_track_meta_key,
+                'value'   => $user_id,
+            );
+
+            $query->set( 'meta_query', $meta_query);
+            
+        }
+
+        return $query;
+    }
 
     function pre_get_posts_by_track_title( $query ) {
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
 
         if ( $track = $query->get( $this->qvar_track_lookup ) ){
 
