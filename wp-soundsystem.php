@@ -176,8 +176,6 @@ class WP_SoundSystem {
         add_filter( 'body_class', array($this,'default_style_class'));
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
-        add_filter( 'pre_get_posts', array($this, 'expand_self_author_statii'));
 
     }
     
@@ -497,57 +495,6 @@ class WP_SoundSystem {
             
         }
         
-    }
-    
-    /*
-    filter music posts by status for author queries; if the current user is the author
-    */
-    function expand_self_author_statii( $query ) {
-        
-        if ( !$wpsstm_statii = $query->get($this->qvar_wpsstm_statii) ) return $query; //no statii filter
-        if ( !$query->is_author() ) return $query; //not an author query
-        if ( !$user_id = get_current_user_id() ) return $query; //user is not logged
-        
-        $allowed_post_types = array(
-            $this->post_type_album,
-            $this->post_type_artist,
-            $this->post_type_track,
-            $this->post_type_source,
-            $this->post_type_playlist,
-            $this->post_type_live_playlist
-        );
-        
-        if ( !in_array($query->get('post_type'),$allowed_post_types) ) return $query; //not a wpsstm post type
-        
-        //query by author ID
-        if ( $author_id = $query->get('author') ){
-            if ( $user_id != $author_id ) return $query; //user mismatch
-        }
-        
-        //query by author name
-        if ( $author_name = $query->get('author_name') ){
-            $user_name = get_the_author_meta('display_name',$user_id);
-            if ( $user_name != $author_name ) return $query; //user mismatch
-        }
-        
-        $allowed_statii = array('publish','private','future','pending','draft');
-        
-        //set - check input statii
-        
-        if ($wpsstm_statii == 1){ //all
-            $wpsstm_statii = $allowed_statii;
-        }else{
-            $wpsstm_statii = explode(',',$wpsstm_statii);
-            $wpsstm_statii = array_intersect($wpsstm_statii,$allowed_statii);
-        }
-        
-        if ( !$wpsstm_statii ) return $query;
-        
-        $query->set('post_status',$wpsstm_statii);
-        
-        wpsstm()->debug_log(json_encode(array('statii'=>$wpsstm_statii,'author'=>$user_id)),'expand_self_author_statii');
-
-        return $query;
     }
 
 }
