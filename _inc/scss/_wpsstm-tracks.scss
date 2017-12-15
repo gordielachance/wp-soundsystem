@@ -93,8 +93,8 @@ body.wpsstm-default,body.wp-admin{
     .wpsstm-tracks-list{
 
         [itemprop="track"]{
-            
-            ul#wpsstm-track-actions{
+
+            #wpsstm-track-actions{
                 width: 100%;
                 @include opacity(0);
                 li.wpsstm-action{
@@ -113,21 +113,6 @@ body.wpsstm-default,body.wp-admin{
                 a{
                     @extend .wpsstm-no-underline;
                 }
-            }
-
-            .wpsstm-track-sources{
-                a{
-                    @extend .wpsstm-no-underline;
-                }
-                [data-wpsstm-source-idx]{
-                    &:not(.source-playing){
-                        @include opacity(.25);
-                        &:hover{
-                            @include opacity(.5);
-                        }
-                    }
-                }
-
             }
 
             &.track-loading .wpsstm-track-icon{
@@ -175,13 +160,7 @@ body.wpsstm-default,body.wp-admin{
                     margin:0;
                 }
             }
-            .wpsstm-track-actions{
-                ul li {
-                    label{
-                        display:none;
-                    }
-                }
-            }
+            
             .wpsstm-track-unique-value{
                 display:none!important;
             }
@@ -192,16 +171,12 @@ body.wpsstm-default,body.wp-admin{
     ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
         @extend .comma-list;
     }
-
-    
 }
 
 //track tracklists selector
 #wpsstm-track-tracklists{
     ul{
-
         li{
-
             &.loading{
                 @extend .wpsstm-loading-el;
             }

@@ -251,7 +251,7 @@ body.wpsstm-default,body.wp-admin{
                         @include flex-shrink(0);
                     }
                     &.wpsstm-track-sources{
-                        display:none; //hide by default
+                        //display:none; //hide by default
                         max-width:50%;
                         align-items: center;
                         flex: 1 1 auto;

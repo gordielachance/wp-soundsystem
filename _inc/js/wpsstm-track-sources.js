@@ -33,15 +33,15 @@
 
                 //not a sources manager
                 if ( !sources_list_el.hasClass('wpsstm-track-sources-list') ){
-                    console.log("sourceManager: missing class .wpsstm-track-sources-list:");
-                    console.log(sources_list_el);
+                    wpsstm_debug("missing class .wpsstm-track-sources-list:",'sourceManager');
+                    wpsstm_debug(sources_list_el,'sourceManager');
                     return false;
                 }
                 
                 //no track ID
                 if ( !track_id ){
-                    console.log("sourceManager: missing track ID:");
-                    console.log(sources_list_el);
+                    wpsstm_debug("missing attr data-wpsstm-track-id:",'sourceManager');
+                    wpsstm_debug(sources_list_el,'sourceManager');
                     return false;
                 }
 
@@ -53,28 +53,8 @@
                 sources_list_el.find('#wpsstm-source-action-delete a').click(function(e) {
                     
                     e.preventDefault();
-                    
-                    //grab some info about the source before it is deleted
                     var source_el = $(this).parents('[data-wpsstm-source-idx]');
-                    var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
-
-                    var track_el = source_el.parents('[data-wpsstm-track-idx]');
-                    var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
-
-                    var tracklist_el = track_el.parents('[data-wpsstm-tracklist-idx]');
-                    var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
-
-                    source_el.deleteSources().done(function(){
-                        
-                        if ( source_el.hasClass('source-playing') ){ //this was the actual source playing, so play next media
-                            console.log("source was playing ! source_idx:"+source_idx+",track_idx:"+track_idx+",tracklist_idx:"+tracklist_idx +", go to next available source");
-
-                            var current_source = wpsstm.current_track.get_source_obj(); //get current source
-                            current_source.can_play = false; //make it disabled - TO FIX would it be usefeul to physically delete it, from within deleteSources() ?
-                            wpsstm.current_track.play_track(source_idx + 1);
-                            
-                        }
-                    });
+                    source_el.deleteSources();
 
                 });
                 
@@ -116,7 +96,12 @@
                 
                 var source_el = $(this);
                 var source_id = source_el.attr('data-wpsstm-source-id');
+                var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
+                var track_el = source_el.parents('[data-wpsstm-track-idx]');
                 var track_id = source_el.attr('data-wpsstm-track-id');
+                var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
+                var tracklist_el = track_el.parents('[data-wpsstm-tracklist-idx]');
+                var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
                 
                 //missing source ID
                 if ( !source_id ){
@@ -136,7 +121,6 @@
                     post_id:        source_id
                 };
 
-                source_instances.addClass('source-loading');
                 source_action_links.addClass('action-loading');
 
                 var ajax_request = $.ajax({
@@ -149,6 +133,22 @@
 
                 ajax_request.done(function(data){
                     if (data.success === true){
+
+                        //set source 'can_play' to false
+                        if ( ( tracklist_obj = wpsstm.tracklists[tracklist_idx] ) && ( track_obj = tracklist_obj.tracks[track_idx] ) && ( source_obj = track_obj.sources[source_idx] ) ){
+                            
+                            source_obj.can_play = false;
+
+                            //skip current source as it was playibg
+                            if ( source_el.hasClass('source-playing') ){
+                                source_obj.debug('source was playing, skip it !');
+                                source_obj.debug(source_obj);
+                                
+                                track_obj.play_track(source_idx + 1);
+                            }
+                        }
+                        
+                        ///
                         source_instances.remove();
                         deferredSingle.resolve();
                         
@@ -165,7 +165,6 @@
                 })
 
                 ajax_request.always(function(data, textStatus, jqXHR) {
-                    source_instances.removeClass('source-loading');
                     source_action_links.removeClass('action-loading');
                 })
                 
@@ -206,7 +205,7 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index + ": ";
+        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 
@@ -243,7 +242,6 @@ class WpsstmTrackSource {
 
         var self = this;
         var success = $.Deferred();
-        
 
         var new_source = { src: self.src, 'type': self.type };
         
@@ -306,12 +304,14 @@ class WpsstmTrackSource {
         var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
         var source_instances = self.get_source_instances();
+        source_instances.addClass('provider-loading');
 
         //TO FIX check if same source playing already ?
         //if (self.track.current_source_idx === self.index){
         //}
 
         var promise = self.init_source();
+        
 
         promise.then(
             function(success_msg){
@@ -373,6 +373,10 @@ class WpsstmTrackSource {
             }
 
         )
+        
+        success.always(function(data, textStatus, jqXHR) {
+            source_instances.removeClass('provider-loading');
+        })
 
         return success.promise();
 
