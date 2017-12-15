@@ -61,18 +61,22 @@
                 // sort track sources
                 sources_list_el.sortable({
                     axis: "y",
+                    items : "[data-wpsstm-source-id]",
                     handle: '#wpsstm-source-action-move a',
                     update: function(event, ui) {
-                        console.log('update: '+ui.item.index())
+                        
+                        var sourceOrder = sources_list_el.sortable('toArray', {
+                            attribute: 'data-wpsstm-source-id'
+                        });
+                        
+                        sources_list_el.addClass('wpsstm-freeze');
 
-                        //get source
-                        var source_el = $(ui.item);
-                        var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
-                        var source_obj = track_obj.get_source_obj(source_idx);
+                        var reordered = WpsstmTrack.update_sources_order(track_id,sourceOrder);
 
-                        //new position
-                        source_obj.index = ui.item.index();
-                        track_obj.update_source_index(source_obj);
+                        reordered.always(function() {
+                            sources_list_el.removeClass('wpsstm-freeze');
+                        })
+
                     }
                 });
                 

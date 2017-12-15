@@ -486,6 +486,8 @@ class WP_SoundSystem_Track{
         $default_args = array(
             'post_status'       => 'publish',
             'posts_per_page'    => -1,
+            'orderby'           => 'menu_order',
+            'order'             => 'ASC',
         );
 
         $required_args = array(
@@ -1049,6 +1051,30 @@ class WP_SoundSystem_Track{
         $can_be_flushed = ( wpsstm_is_community_post($this->post_id) && empty($parent_ids) && empty($loved_by) );
         
         return apply_filters('wpsstm_track_can_be_flushed',$can_be_flushed,$this);
+    }
+    
+    function update_sources_order($source_ids){
+        global $wpdb;
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
+        }
+
+        if ( !$this->user_can_reorder_sources() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
+        }
+
+        foreach((array)$source_ids as $order=>$post_id){
+            
+            $wpdb->update( 
+                $wpdb->posts, //table
+                array('menu_order'=>$order), //data
+                array('ID'=>$post_id) //where
+            );
+
+        }
+
+        return true;
     }
     
 }
