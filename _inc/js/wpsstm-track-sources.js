@@ -8,7 +8,6 @@
         track_obj.track_el.find('.wpsstm-track-sources-list').sourceManager();
     });
 
-
     $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
         //click on source trigger
@@ -18,18 +17,7 @@
         });
 
     });
-    
-    $(document).on( "wpsstmSourceDeleted", function( event, source_el, source_id,track_id ) {
-        //TO FIX
-        
-        console.log('source has been deleted - we should check if it is playing; and in that case, skip to the next track');
-        console.log(source_el);
-        console.log(source_id);
-        console.log(source_el);
-    });
-    
-    
-    
+
     $.fn.extend({
         sourceManager: function(options){
             // OPTIONS
@@ -63,11 +51,30 @@
                 
                 //delete source
                 sources_list_el.find('#wpsstm-source-action-delete a').click(function(e) {
-
+                    
                     e.preventDefault();
                     
-                    var source_item_el = $(this).parents('[data-wpsstm-source-idx]');
-                    source_item_el.deleteSources();
+                    //grab some info about the source before it is deleted
+                    var source_el = $(this).parents('[data-wpsstm-source-idx]');
+                    var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
+
+                    var track_el = source_el.parents('[data-wpsstm-track-idx]');
+                    var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
+
+                    var tracklist_el = track_el.parents('[data-wpsstm-tracklist-idx]');
+                    var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
+
+                    source_el.deleteSources().done(function(){
+                        
+                        if ( source_el.hasClass('source-playing') ){ //this was the actual source playing, so play next media
+                            console.log("source was playing ! source_idx:"+source_idx+",track_idx:"+track_idx+",tracklist_idx:"+tracklist_idx +", go to next available source");
+
+                            var current_source = wpsstm.current_track.get_source_obj(); //get current source
+                            current_source.can_play = false; //make it disabled - TO FIX would it be usefeul to physically delete it, from within deleteSources() ?
+                            wpsstm.current_track.play_track(source_idx + 1);
+                            
+                        }
+                    });
 
                 });
                 
@@ -143,7 +150,6 @@
                 ajax_request.done(function(data){
                     if (data.success === true){
                         source_instances.remove();
-                        $(document).trigger( "wpsstmSourceDeleted",[source_el,source_id,track_id] ); //custom event
                         deferredSingle.resolve();
                         
                     }else{
@@ -338,10 +344,7 @@ class WpsstmTrackSource {
 
                     self.debug('media - play');
 
-
-
                     self.track.current_source_idx = self.index;
-
                     success.resolve(self);
                 });
 
