@@ -168,7 +168,7 @@ class WP_SoundSystem_Source{
         $required_cap = $post_type_obj->cap->edit_posts;
 
         if ( !user_can($args['post_author'],$required_cap) ){
-            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to create a new live playlist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit sources.",'wpsstm') );
         }
         
         //specific checks for community sources
@@ -220,10 +220,13 @@ class WP_SoundSystem_Source{
         $args = wp_parse_args($required_args,$args);
 
         if (!$this->post_id){
-            $this->post_id = wp_insert_post( $args );
+            $success = wp_insert_post( $args, true );
         }else{
-            $this->post_id = wp_update_post( $args );
+            $success = wp_update_post( $args, true );
         }
+        
+        if ( is_wp_error($success) ) return $success;
+        $this->post_id = $success;
 
         wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
         

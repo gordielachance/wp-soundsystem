@@ -312,20 +312,19 @@ class WP_SoundSystem_Track{
         
         if (!$this->post_id){
             
-            $post_id = wp_insert_post( $args );
+            $success = wp_insert_post( $args, true );
             
         }else{ //is a track update
             
             $args['ID'] = $this->post_id;
-            $post_id = wp_update_post( $args );
+            $success = wp_update_post( $args, true );
         }
         
-        wpsstm()->debug_log( array('post_id'=>$post_id,'args'=>json_encode($args)), "WP_SoundSystem_Track::save_track()" ); 
-
-        if ( is_wp_error($post_id) ) return $post_id;
-
-        $this->post_id = $post_id;
+        if ( is_wp_error($success) ) return $success;
+        $this->post_id = $success;
         
+        wpsstm()->debug_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WP_SoundSystem_Track::save_track()" ); 
+
         //save sources if any set
         //TO FIX TO CHECK how often this runs; and when ?
         foreach ((array)$this->sources as $source_raw){
@@ -427,10 +426,11 @@ class WP_SoundSystem_Track{
         //set post status to 'publish' if it is not done yet (it could be a temporary post)
         $track_post_type = get_post_status($this->post_id);
         if ($track_post_type != 'publish'){
-            wp_update_post(array(
+            $success = wp_update_post(array(
                 'ID' =>             $this->post_id,
                 'post_status' =>    'publish'
-            ));
+            ), true);
+            if( is_wp_error($success) ) return $success;
         }
         
         //capability check

@@ -313,7 +313,10 @@ class WP_SoundSystem_Tracklist{
 
             $post_playlist_new_args = wp_parse_args($post_playlist_new_args,$post_playlist_args);
 
-            $post_playlist_id = wp_insert_post( $post_playlist_new_args );
+            $success = wp_insert_post( $post_playlist_new_args, true );
+            if ( is_wp_error($success) ) return $success;
+            $post_playlist_id = $success;
+            
             wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WP_SoundSystem_Tracklist::save_playlist() - post playlist inserted"); 
 
         }else{ //is a playlist update
@@ -324,12 +327,12 @@ class WP_SoundSystem_Tracklist{
             
             $post_playlist_update_args = wp_parse_args($post_playlist_update_args,$post_playlist_args);
             
-            $post_playlist_id = wp_update_post( $post_playlist_update_args );
+            $success = wp_update_post( $post_playlist_update_args, true );
+            if ( is_wp_error($success) ) return $success;
+            $post_playlist_id = $success;
             
             wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WP_SoundSystem_Tracklist::save_playlist() - post track updated"); 
         }
-
-        if ( is_wp_error($post_playlist_id) ) return $post_playlist_id;
 
         $this->post_id = $post_playlist_id;
 
@@ -684,7 +687,7 @@ class WP_SoundSystem_Tracklist{
             'post_status'   => $new_status
         );
 
-        return wp_update_post( $updated_post );
+        return wp_update_post( $updated_post, true );
         
     }
 
@@ -714,7 +717,7 @@ class WP_SoundSystem_Tracklist{
             'post_author'   => get_current_user_id(),
         );
 
-        return wp_update_post( $args );
+        return wp_update_post( $args, true );
             
     }
 

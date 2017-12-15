@@ -377,15 +377,16 @@ class WP_SoundSystem_Core_Wizard{
             )
         );
 
-        $new_tracklist_id = wp_insert_post( $post_args );
+        $success = wp_insert_post( $post_args, true );
 
-        if ( is_wp_error($new_tracklist_id) ){
+        if ( is_wp_error($success) ){
             $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('wizard_error'=>$new_tracklist_id->get_error_code()),$link);
+            $link = add_query_arg(array('wizard_error'=>$success->get_error_code()),$link);
             wp_redirect($link);
             exit();
         }else{
-            $link = get_permalink($new_tracklist_id);
+            $post_id = $success;
+            $link = get_permalink($post_id);
             wp_redirect($link);
             exit();
         }

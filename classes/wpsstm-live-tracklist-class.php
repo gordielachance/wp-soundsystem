@@ -191,7 +191,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'meta_input' => $meta_input,
         );
 
-        $success = wp_update_post( $tracklist_post );
+        $success = wp_update_post( $tracklist_post, true );
         
         if( is_wp_error($success) ){
             wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
@@ -744,14 +744,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             'post_type'     => wpsstm()->post_type_playlist,
         );
 
-        $updated = wp_update_post( $args );
+        $success = wp_update_post( $args, true );
 
-        if ( !$updated ) {
+        if ( is_wp_error($success) ) {
             return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
         }
         
         $this->toggle_enable_wizard(false);
-        return $updated;
+        return $success;
 
     }
 

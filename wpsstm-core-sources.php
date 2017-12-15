@@ -277,10 +277,10 @@ class WP_SoundSystem_Core_Sources{
         $parent_post_type = get_post_type($parent_id);
         if ( $parent_post_type != wpsstm()->post_type_track ) $parent_id = null;
 
-        wp_update_post(array(
+        $success = wp_update_post(array(
             'ID' =>             $post_id,
             'post_parent' =>    $parent_id,
-        ));
+        ),true);
 
     }
 
