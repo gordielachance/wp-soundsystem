@@ -101,11 +101,4 @@ body.wpsstm-default,body.wp-admin{
         }
     }
 
-    #wpsstm-track-admin-sources{
-        form{
-            &.loading{
-                @extend .wpsstm-loading-el;
-            }
-        }
-    }
 }

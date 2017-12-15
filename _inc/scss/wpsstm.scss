@@ -50,7 +50,7 @@
     cursor: hand;
 }
 
-.wpsstm-loading-el{
+.wpsstm-freeze{
     pointer-events: none;
 }
 
@@ -87,7 +87,7 @@ body.wpsstm-default,body.wp-admin{
     .wpsstm-ellipsis{
         @include ellipsis($no-wrap: true);
     }
-    .wpsstm-loading-el{
+    .wpsstm-freeze{
         @include opacity(.5);
     }
     

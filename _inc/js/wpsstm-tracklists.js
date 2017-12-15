@@ -192,9 +192,7 @@ class WpsstmTracklist {
             initCheck.resolve("we already have refreshed this playlist");
         }else{
 
-            var upToDateTracklist = $.Deferred();
-
-            upToDateTracklist = self.get_tracklist_request();
+            var upToDateTracklist = self.get_tracklist_request();
             upToDateTracklist.done(function(message) {
                 initCheck.resolve(message);
             });

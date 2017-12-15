@@ -229,6 +229,7 @@ body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *
 }
 /* line 253, ../scss/_wpsstm-tracklists.scss */
 body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources {
+  display: none;
   max-width: 50%;
   align-items: center;
   flex: 1 1 auto;
@@ -501,7 +502,7 @@ body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-unique-
   display: none !important;
 }
 
-/* line 187, ../scss/_wpsstm-tracks.scss */
+/* line 178, ../scss/_wpsstm-tracks.scss */
 #wpsstm-track-tracklists #wpsstm-new-playlist-add {
   display: none;
   margin: 1em;
@@ -1440,7 +1441,7 @@ body.wpsstm-default.wpsstm-popup .entry-content > ul.wpsstm-actions-list, body.w
 }
 
 /* line 53, ../scss/wpsstm.scss */
-.wpsstm-loading-el, #wpsstm-track-tracklists ul li.loading, #wpsstm-track-tracklists.loading, body.wpsstm-default #wpsstm-track-admin-sources form.loading, body.wp-admin #wpsstm-track-admin-sources form.loading {
+.wpsstm-freeze {
   pointer-events: none;
 }
 
@@ -1475,7 +1476,7 @@ body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .tracklist-list .wpsst
   text-overflow: ellipsis;
 }
 /* line 90, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-loading-el, body.wpsstm-default #wpsstm-track-tracklists ul li.loading, #wpsstm-track-tracklists ul body.wpsstm-default li.loading, body.wpsstm-default #wpsstm-track-tracklists.loading, body.wpsstm-default #wpsstm-track-admin-sources form.loading, body.wp-admin #wpsstm-track-admin-sources body.wpsstm-default form.loading, body.wp-admin .wpsstm-loading-el, body.wp-admin #wpsstm-track-tracklists ul li.loading, #wpsstm-track-tracklists ul body.wp-admin li.loading, body.wp-admin #wpsstm-track-tracklists.loading, body.wpsstm-default #wpsstm-track-admin-sources body.wp-admin form.loading, body.wp-admin #wpsstm-track-admin-sources form.loading {
+body.wpsstm-default .wpsstm-freeze, body.wp-admin .wpsstm-freeze {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }

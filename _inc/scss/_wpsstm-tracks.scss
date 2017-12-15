@@ -175,22 +175,9 @@ body.wpsstm-default,body.wp-admin{
 
 //track tracklists selector
 #wpsstm-track-tracklists{
-    ul{
-        li{
-            &.loading{
-                @extend .wpsstm-loading-el;
-            }
-
-        }
-    }
-
     #wpsstm-new-playlist-add{
         display:none;
         margin: 1em;
         text-align: center;
-    }
-
-    &.loading{
-        @extend .wpsstm-loading-el;
     }
 }
