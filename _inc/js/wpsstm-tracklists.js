@@ -178,7 +178,7 @@ class WpsstmTracklist {
     }
     
     debug(msg){
-        var prefix = "WpsstmTracklist #" + this.index + ": ";
+        var prefix = "WpsstmTracklist #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 

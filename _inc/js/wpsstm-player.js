@@ -130,7 +130,7 @@ class WpsstmPagePlayer {
     }
 
     debug(msg){
-        var prefix = "WpsstmPagePlayer: ";
+        var prefix = "WpsstmPagePlayer";
         wpsstm_debug(msg,prefix);
     }
 

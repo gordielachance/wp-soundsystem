@@ -330,7 +330,7 @@ class WpsstmTrack {
     }
 
     debug(msg){
-        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.index + ": ";
+        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 
@@ -570,7 +570,7 @@ class WpsstmTrack {
 
         //self.debug("found "+source_els.length +" sources");
         
-        self.sources = [];
+        self.sources = []; //reset array
         $.each(source_els, function( index, source_el ) {
             var source_obj = new WpsstmTrackSource(source_el,self);
             self.sources.push(source_obj);

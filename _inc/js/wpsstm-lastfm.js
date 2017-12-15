@@ -228,7 +228,7 @@ class WpsstmLastFM {
     }
         
     debug(msg){
-        var prefix = "WpsstmLastFM: ";
+        var prefix = "WpsstmLastFM";
         wpsstm_debug(msg,prefix);
     }
     
