@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 4.9
+Tested up to: 4.9.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -148,6 +148,11 @@ A track that belongs to another playlist or that has been favorited by a user wi
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.9 =
+* Subtracks are now stored in the custom 'wp_wpsstm_subtracks' SQL table.  It contains the track ID, tracklist ID, and track position.  This makes easier to handle subtracks.
+* Improved sources reorder
+* Improved source delete
 
 = 1.8.9 =
 * Single template for tracklists
@@ -471,7 +476,6 @@ informations overriden
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
 * no more options for the "Fill with datas" button from the Musicbrainz Metabox
 * improved how posts are automatically filled with MusicBrainz data
-* improved wpsstm_get_raw_subtrack_ids() and WP_SoundSystem_Subtrack::get_parent_ids()
 
 = 0.9.6 =
 

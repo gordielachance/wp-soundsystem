@@ -247,54 +247,6 @@ class WP_SoundSystem_Source{
         return wp_delete_post( $this->post_id );
     }
     
-    function save_source_position(){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
-        }
-        
-        if ($this->index < 0){
-            return new WP_Error( 'wpsstm_invalid_menu_order', __("Invalid source order.",'wpsstm') );
-        }
-        
-        if (!$this->track_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
-        }
-        
-        $track = new WP_SoundSystem_Track($this->track_id);
-        
-        if ( !$track->user_can_reorder_sources() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
-        }
-        
-        //TO FIX TO CHECK
-        //use save_source() here ?
-
-        $post = array(
-            'ID' =>         $this->post_id,
-            'menu_order' => $this->index, 
-        );
-        
-        //TO FIX should we update the other sources position too ?
-
-        return wp_update_post( $post, true );
-
-        /*
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
-
-        //delete current
-        if(($key = array_search($track_id, $ordered_ids)) !== false) {
-            unset($ordered_ids[$key]);
-        }
-
-        //insert at position
-        array_splice( $ordered_ids, $index, 0, $track_id );
-
-        //save
-        return $this->set_subtrack_ids($ordered_ids);
-        */
-    }
-    
     /*
     Source have one word of the banned words list in their titles (eg 'cover').
     */
@@ -433,6 +385,7 @@ class WP_SoundSystem_Source{
         
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
+            'data-wpsstm-track-id' =>               $this->track_id,
             'data-wpsstm-source-provider' =>        $this->provider->slug,
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-type' =>            $this->type,
@@ -456,9 +409,6 @@ class WP_SoundSystem_Source{
         
         if ($can_manage_source){
             $classes[] = 'wpsstm-can-manage-source';
-        }
-        if ($wpsstm_track->current_source == 0){
-            $classes[] = 'source-playing';
         }
 
         return $classes;

@@ -1,31 +1,11 @@
 (function($){
+
+    $(document).ready(function(){
+        $('.wpsstm-track-sources-list').sourceManager();
+    });
     
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-
-        var track_el = track_obj.track_el;
-
-        // sort track sources
-        track_obj.track_el.find('.wpsstm-track-sources-list').sortable({
-            axis: "y",
-            handle: '#wpsstm-source-action-move a',
-            update: function(event, ui) {
-                console.log('update: '+ui.item.index())
-
-                //get source
-                var source_el = $(ui.item);
-                var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
-                var source_obj = track_obj.get_source_obj(source_idx);
-
-                //new position
-                source_obj.index = ui.item.index();
-                track_obj.update_source_index(source_obj);
-            }
-        });
-        
-        //show more/less (sources actions)
-        var actions_lists = track_obj.track_el.find('.wpsstm-track-sources-list .wpsstm-actions-list');
-        wpsstm.showMoreLessActions(actions_lists);
-
+        track_obj.track_el.find('.wpsstm-track-sources-list').sourceManager();
     });
 
     $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
@@ -36,28 +16,175 @@
             source_obj.track.play_track(source_obj.index);
         });
 
-        //delete source
-        source_obj.source_el.find('#wpsstm-source-action-delete a').click(function(e) {
+    });
 
-            e.preventDefault();
-            var promise = source_obj.delete_source();
+    $.fn.extend({
+        sourceManager: function(options){
+            // OPTIONS
+            var defaults = {};
+            
+            var options =  $.extend(defaults, options);
 
-            promise.done(function(data) {
-                var source_instances = source_obj.get_source_instances();
-                source_instances.remove();
+            // FOR EACH MATCHED ELEMENT
+            $.each( this, function() {
+                
+                var sources_list_el = $(this);
+                var track_id = $(this).attr('data-wpsstm-track-id');
 
-                if ( source_obj.source_el.hasClass('source-playing') ){
-                    //TO FIX TO DO skip to next source ? what if it is the last one ?
+                //not a sources manager
+                if ( !sources_list_el.hasClass('wpsstm-track-sources-list') ){
+                    wpsstm_debug("missing class .wpsstm-track-sources-list:",'sourceManager');
+                    wpsstm_debug(sources_list_el,'sourceManager');
+                    return false;
+                }
+                
+                //no track ID
+                if ( !track_id ){
+                    wpsstm_debug("missing attr data-wpsstm-track-id:",'sourceManager');
+                    wpsstm_debug(sources_list_el,'sourceManager');
+                    return false;
                 }
 
-            })
+                //show more/less (sources actions)
+                var actions_lists = sources_list_el.find('.wpsstm-actions-list');
+                wpsstm.showMoreLessActions(actions_lists);
+                
+                //delete source
+                sources_list_el.find('#wpsstm-source-action-delete a').click(function(e) {
+                    
+                    e.preventDefault();
+                    var source_el = $(this).parents('[data-wpsstm-source-idx]');
+                    source_el.deleteSources();
 
-        });
+                });
+                
+                // sort track sources
+                sources_list_el.sortable({
+                    axis: "y",
+                    items : "[data-wpsstm-source-id]",
+                    handle: '#wpsstm-source-action-move a',
+                    update: function(event, ui) {
+                        
+                        var sourceOrder = sources_list_el.sortable('toArray', {
+                            attribute: 'data-wpsstm-source-id'
+                        });
+                        
+                        sources_list_el.addClass('wpsstm-freeze');
 
+                        var reordered = WpsstmTrack.update_sources_order(track_id,sourceOrder);
+
+                        reordered.always(function() {
+                            sources_list_el.removeClass('wpsstm-freeze');
+                        })
+
+                    }
+                });
+                
+            });
+        },
+        deleteSources: function(options){
+            
+            // OPTIONS
+            var defaults = {};
+            var options =  $.extend(defaults, options);
+            
+            //see https://stackoverflow.com/a/19574266/782013
+            var deferredSum = $.Deferred();
+            var deferredList = [];
+
+            // FOR EACH MATCHED ELEMENT
+            $.each( this, function() {
+
+                var deferredSingle = $.Deferred();
+                deferredList.push(deferredSingle.promise());
+                
+                var source_el = $(this);
+                var source_id = source_el.attr('data-wpsstm-source-id');
+                var source_idx = Number(source_el.attr('data-wpsstm-source-idx'));
+                var track_el = source_el.parents('[data-wpsstm-track-idx]');
+                var track_id = source_el.attr('data-wpsstm-track-id');
+                var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
+                var tracklist_el = track_el.parents('[data-wpsstm-tracklist-idx]');
+                var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
+                
+                //missing source ID
+                if ( !source_id ){
+                    deferredSingle.reject("deleteSource: missing 'data-wpsstm-source-id' attr");
+                }
+                
+                //missing track ID
+                if ( !track_id ){
+                    deferredSingle.reject("deleteSource: missing 'data-wpsstm-track-id' attr");
+                }
+
+                var source_instances = $('[data-wpsstm-source-idx][data-wpsstm-track-id="'+track_id+'"][data-wpsstm-source-id="'+source_id+'"]');
+                var source_action_links = source_instances.find('#wpsstm-source-action-delete a');
+
+                var ajax_data = {
+                    action:         'wpsstm_delete_source',
+                    post_id:        source_id
+                };
+
+                source_action_links.addClass('action-loading');
+
+                var ajax_request = $.ajax({
+
+                    type:       "post",
+                    url:        wpsstmL10n.ajaxurl,
+                    data:       ajax_data,
+                    dataType:   'json'
+                })
+
+                ajax_request.done(function(data){
+                    if (data.success === true){
+
+                        //set source 'can_play' to false
+                        if ( ( tracklist_obj = wpsstm.tracklists[tracklist_idx] ) && ( track_obj = tracklist_obj.tracks[track_idx] ) && ( source_obj = track_obj.sources[source_idx] ) ){
+                            
+                            source_obj.can_play = false;
+
+                            //skip current source as it was playibg
+                            if ( source_el.hasClass('source-playing') ){
+                                source_obj.debug('source was playing, skip it !');
+                                source_obj.debug(source_obj);
+                                
+                                track_obj.play_track(source_idx + 1);
+                            }
+                        }
+                        
+                        ///
+                        source_instances.remove();
+                        deferredSingle.resolve();
+                        
+                    }else{
+                        source_action_links.addClass('action-error');
+                        console.log(data);
+                        deferredSingle.reject(data.message);
+                    }
+                });
+
+                ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
+                    source_action_links.addClass('action-error');
+                    deferredSingle.reject();
+                })
+
+                ajax_request.always(function(data, textStatus, jqXHR) {
+                    source_action_links.removeClass('action-loading');
+                })
+                
+            });
+            
+            $.when.apply($, deferredList).done(function() {
+               deferredSum.resolve(); 
+            });
+
+            return deferredSum.promise();
+            
+
+        }
     });
+    
 })(jQuery);
-
-
 
 class WpsstmTrackSource {
     constructor(source_html,track) {
@@ -82,7 +209,7 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index + ": ";
+        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 
@@ -102,48 +229,6 @@ class WpsstmTrackSource {
         }
     }
 
-    delete_source(){
-        
-        var self = this;
-        var deferredObject = $.Deferred();
-        var source_instances = self.get_source_instances();
-        
-        var ajax_data = {
-            action:         'wpsstm_delete_source',
-            post_id:        self.post_id
-        };
-        
-        source_instances.addClass('source-loading');
-
-        var ajax_request = $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json'
-        })
-        
-        ajax_request.done(function(data){
-            if (data.success === true){
-                deferredObject.resolve();
-            }else{
-                console.log(data);
-                deferredObject.reject(data.message);
-            }
-        });
-
-        ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
-            deferredObject.reject();
-        })
-
-        ajax_request.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('source-loading');
-        })
-        
-        return deferredObject.promise();
-        
-    }
-    
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
@@ -161,7 +246,6 @@ class WpsstmTrackSource {
 
         var self = this;
         var success = $.Deferred();
-        
 
         var new_source = { src: self.src, 'type': self.type };
         
@@ -224,12 +308,14 @@ class WpsstmTrackSource {
         var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
         var source_instances = self.get_source_instances();
+        source_instances.addClass('provider-loading');
 
         //TO FIX check if same source playing already ?
         //if (self.track.current_source_idx === self.index){
         //}
 
         var promise = self.init_source();
+        
 
         promise.then(
             function(success_msg){
@@ -262,10 +348,7 @@ class WpsstmTrackSource {
 
                     self.debug('media - play');
 
-
-
                     self.track.current_source_idx = self.index;
-
                     success.resolve(self);
                 });
 
@@ -294,6 +377,10 @@ class WpsstmTrackSource {
             }
 
         )
+        
+        success.always(function(data, textStatus, jqXHR) {
+            source_instances.removeClass('provider-loading');
+        })
 
         return success.promise();
 

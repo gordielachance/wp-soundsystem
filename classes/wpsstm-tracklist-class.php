@@ -91,44 +91,11 @@ class WP_SoundSystem_Tracklist{
     }
     
     /*
-    Return the subtracks IDs for a tracklist; by type ('static' or 'live')
-    */
-
-    function get_subtrack_ids($args = null){
-        
-        //get available subtracks
-        
-        $default = array(
-            'post_status'   => 'any',
-            'posts_per_page'=> -1,
-            'orderby'       => 'subtrack_position',
-        );
-
-        $args = wp_parse_args((array)$args,$default);
-
-        $forced = array(
-            'post_type' =>      wpsstm()->post_type_track,
-            'fields' =>         'ids',
-            'tracklist_id' =>   $this->post_id,
-            'subtracks_include' =>  $this->tracklist_type,
-        );
-
-        $args = wp_parse_args($forced,$args);
-
-        $query = new WP_Query( $args );
-        $ordered_ids = $query->posts;
-
-        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::get_subtrack_ids()"); 
-        
-        return $ordered_ids;
-        
-    }
-    
-    /*
-    Assign (static) subtracks IDs to a tracklist.
+    Assign subtracks IDs to a tracklist.
     */
 
     function set_subtrack_ids($ordered_ids = null){
+        global $wpdb;
         
         $success = false;
         
@@ -138,11 +105,8 @@ class WP_SoundSystem_Tracklist{
 
         //capability check
         if ($this->tracklist_type == 'live'){
-            
             $can_set_subtracks = wpsstm_live_playlists()->can_live_playlists();
-            
         }else{
-            
             $can_set_subtracks = $this->user_can_reorder_tracks();
             
         }
@@ -157,34 +121,25 @@ class WP_SoundSystem_Tracklist{
             $ordered_ids = array_unique($ordered_ids);
         }
 
-        //set post status to 'publish' if it is not done yet (it could be a temporary post)
-        //TO FIX TO CHECK
-        foreach((array)$ordered_ids as $track_id){
-            $track_post_type = get_post_status($track_id);
-            if ($track_post_type != 'publish'){
-                wp_update_post(array(
-                    'ID' =>             $track_id,
-                    'post_status' =>    'publish'
-                ));
-            }
-        }
-
-        //static or live ?
-        if ($this->tracklist_type == 'live'){
-            $metaname = wpsstm_live_playlists()->subtracks_live_metaname;
-        }else{
-            $metaname = wpsstm_playlists()->subtracks_static_metaname;
-        }
-        
         wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
         
-        if ($ordered_ids){
-            $success = update_post_meta($this->post_id,$metaname,$ordered_ids);
-        }else{
-            $success = delete_post_meta($this->post_id,$metaname);
+        //delete actual subtracks
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table_name WHERE tracklist_id = '%s'", $this->post_id );
+        $success = $wpdb->get_results ( $querystr );
+        
+        //set new subtracks
+        $subtrack_pos = 0;
+        foreach((array)$ordered_ids as $subtrack_id){
+            $wpdb->insert($subtracks_table_name, array(
+                'track_id' =>       $subtrack_id,
+                'tracklist_id' =>   $this->post_id,
+                'track_order' =>    $subtrack_pos
+            ));
+            $subtrack_pos++;
         }
         
-        if ( is_wp_error($success) ) return $success;
+        //TO FIX handle errors ?
         
         return true;
 
@@ -195,6 +150,7 @@ class WP_SoundSystem_Tracklist{
     */
     
     function append_subtrack_ids($append_ids){
+        
         //force array
         if ( !is_array($append_ids) ) $append_ids = array($append_ids);
         
@@ -202,12 +158,13 @@ class WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
 
-        $old_ids = (array)$this->get_subtrack_ids();
-        $subtrack_ids = array_merge($old_ids,$append_ids);
+        $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
+
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
         
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id,'old_ids'=>json_encode($old_ids),'new_ids'=>json_encode($append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
+        $updated_ids = array_merge($subtrack_ids,$append_ids);
         
-        return $this->set_subtrack_ids($subtrack_ids);
+        return $this->set_subtrack_ids($updated_ids);
     }
     
     /*
@@ -222,12 +179,13 @@ class WP_SoundSystem_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
         
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'subtrack_ids'=>json_encode($remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
+        $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
+
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
+
+        $updated_ids = array_diff($subtrack_ids,$remove_ids);
         
-        $subtrack_ids = (array)$this->get_subtrack_ids();
-        $subtrack_ids = array_diff($subtrack_ids,$remove_ids);
-        
-        return $this->set_subtrack_ids($subtrack_ids);
+        return $this->set_subtrack_ids($updated_ids);
     }
 
     /*
@@ -685,27 +643,6 @@ class WP_SoundSystem_Tracklist{
         return $url;
     }
 
-    function move_live_tracks(){
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-        
-        wpsstm()->debug_log($this->post_id, "WP_SoundSystem_Tracklist::move_live_tracks()");
-        
-        $this->append_wizard_tracks();
-        
-        //clear live playlist subtracks
-        $this->tracklist_type = 'live';
-        $this->set_subtrack_ids();
-        
-        //revert type
-        $this->tracklist_type = 'static';
-        
-        //clear wizard datas
-        $this->toggle_enable_wizard(false);
-
-    }
-    
     function append_wizard_tracks(){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
@@ -713,7 +650,7 @@ class WP_SoundSystem_Tracklist{
 
         //get live IDs
         $this->tracklist_type = 'live';
-        $live_ids = $this->get_subtrack_ids();
+        $live_ids = $this->get_subtracks(array('fields' =>'ids'));
 
         //switch to static
         $this->tracklist_type = 'static';
@@ -811,19 +748,19 @@ class WP_SoundSystem_Tracklist{
         if ( !$this->user_can_reorder_tracks() ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
-        
-        $ordered_ids = get_post_meta($this->post_id,wpsstm_playlists()->subtracks_static_metaname,true);
+
+        $subtrack_ids = $this->get_subtracks(array('fields' =>'ids'));
         
         //delete current
-        if(($key = array_search($track_id, $ordered_ids)) !== false) {
-            unset($ordered_ids[$key]);
+        if(($key = array_search($track_id, $subtrack_ids)) !== false) {
+            unset($subtrack_ids[$key]);
         }
         
         //insert at position
-        array_splice( $ordered_ids, $index, 0, $track_id );
+        array_splice( $subtrack_ids, $index, 0, $track_id );
         
         //save
-        return $this->set_subtrack_ids($ordered_ids);
+        return $this->set_subtrack_ids($subtrack_ids);
     }
     
     function user_can_get_autorship(){
@@ -949,7 +886,7 @@ class WP_SoundSystem_Tracklist{
     }
 
 
-    function populate_tracks($args = null){
+    function populate_subtracks($args = null){
 
         if ( $this->did_query_tracks ) return true;
 
@@ -964,7 +901,10 @@ class WP_SoundSystem_Tracklist{
             }
         }
 
-        $tracks_ids = $this->get_tracks($args);
+        $required = array('fields' => 'ids',);
+        $args = wp_parse_args($required,(array)$args);
+        
+        $tracks_ids = $this->get_subtracks($args);
 
         $this->did_query_tracks = true;
 
@@ -978,18 +918,30 @@ class WP_SoundSystem_Tracklist{
         return true;
     }
     
-    protected function get_tracks($args = null){
+    public function get_subtracks($args = null){
+        
+        $default = array(
+            'post_status'   => 'any',
+            'posts_per_page'=> -1,
+            'orderby'       => 'track_order',
+            'order'         => 'ASC',
+        );
+
+        $args = wp_parse_args((array)$args,$default);
+        
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
-            'tracklist_id'      => $this->post_id,
-            'subtracks_include' => $this->tracklist_type,
-            'orderby'           => 'subtrack_position',
+            'tracklist_id'      => $this->post_id, //fetch only subtracks for this tracklist
         );
         
         $args = wp_parse_args($required,(array)$args);
         
-        $subtrack_ids = $this->get_subtrack_ids();
-        return $subtrack_ids;
+        $query = new WP_Query( $args );
+        $subtracks = $query->posts;
+
+        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::get_subtracks"); 
+
+        return $subtracks;
     }
 
     /**
@@ -1080,7 +1032,11 @@ class WP_SoundSystem_Tracklist{
 }
 
 class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
-    function get_subtrack_ids($args = null){
-        return array($this->post_id);
+    function get_subtracks($args = null){
+        $required = array(
+            'post__in' => array($this->post_id)
+        );
+        $args = wp_parse_args($required,(array)$args);
+        return parent::get_subtracks($args);
     }
 }

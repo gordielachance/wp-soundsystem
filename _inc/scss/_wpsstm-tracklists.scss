@@ -33,9 +33,6 @@ MINIMAL STYLES
     
     .tracklist-header .toggle-children-container{
         @extend #wpsstm-tracklist-actions;
-        #wpsstm-tracklist-actions{
-            display:inline;
-        }
         //more - less
         .toggle-children-link{
             
@@ -112,11 +109,13 @@ body.wpsstm-default,body.wp-admin{
         .tracklist-header{
             border-bottom:1px solid #F7F7F7;
             padding:.25em;
-            .wpsstm-tracklist-action,.toggle-children-container{
-                text-align:center;
-            }
-            .wpsstm-tracklist-action,.toggle-children-link{
-                font-size:.8em;
+            
+            #wpsstm-tracklist-actions{
+                display:inline;
+                .wpsstm-action{
+                    @extend .wpsstm-action-bt;
+                    font-size:.8em;
+                }
             }
 
         }
@@ -248,7 +247,7 @@ body.wpsstm-default,body.wp-admin{
                     }
                     
                     &.wpsstm-track-actions{
-                        @include justify-content(space-between);
+                        @include justify-content(flex-end);
                         @include flex-shrink(0);
                     }
                     &.wpsstm-track-sources{
@@ -295,9 +294,6 @@ body.wpsstm-default,body.wp-admin{
         line-height: 2.8em;
 
         .wpsstm-tracklist-action{
-            @extend .wpsstm-action-bt;
-
-
             &#wpsstm-tracklist-action-refresh a:before{
                 content:"\f021";//.fa-refresh;
             }
@@ -352,33 +348,43 @@ body.wpsstm-default,body.wp-admin{
     
 }
 
-//tracklists chooser
-#wpsstm-tracklist-chooser-list{
-    #wpsstm-filter-playlists{
-        position:relative;
-        ul{
-            font-size:.8em;
-            list-style: none;
-            //@include column-count(2);
-            li{
-                @extend .wpsstm-ellipsis;
-                padding: 1em;
-                border-bottom: 1px solid rgba(51, 51, 51, 0.1);
-                &.loading{
-                    @extend .wpsstm-loading-el;
+#tracklists-manager{
+    > li{
+        border-bottom: 1px solid rgba(51, 51, 51, 0.1);
+        @include display-flex();
+        height: 1em;
+        padding: 1em 0;
+        font-size: .7em;
+        > *{
+            @include display-flex();
+            @include flex-grow(1);
+            align-items: center;
+            padding: 0 .25em;
+            box-sizing: border-box;
+            &.tracklist-row-action{
+                @include flex-grow(0);
+                @include flex-shrink(0);
+            }
+            &.wpsstm-tracklist-actions{
+                @include justify-content(space-between);
+                @include flex-grow(0);
+                @include flex-shrink(0);
+                text-align:right;
+                visibility:hidden;
+                ul{
+                    display:inline;
+                    li{
+                        display:inline;
+                        @extend .wpsstm-action-icon;
+                    }
                 }
-
             }
         }
-    }
+        &:hover{
+            .wpsstm-tracklist-actions{
+                visibility:visible;
+            }
+        }
 
-    #wpsstm-new-playlist-add{
-        display:none;
-        margin: 1em;
-        text-align: center;
-    }
-
-    &.loading{
-        @extend .wpsstm-loading-el;
     }
 }

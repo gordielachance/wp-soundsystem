@@ -101,7 +101,7 @@ body.wpsstm-default,body.wp-admin{
                     
                     &#wpsstm-player-actions{
                         margin-right:.5em;
-                        @include justify-content(space-between);
+                        @include justify-content(flex-end);
                         @include flex-shrink(0);
                         .wpsstm-player-action{
 

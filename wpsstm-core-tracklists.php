@@ -6,6 +6,7 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WP_SoundSystem_Core_Tracklists{
     public $qvar_tracklist_action = 'tracklist-action';
+    public $qvar_user_favorites = 'user-favorites';
     public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
     public $tracklist_post_types = array();
     
@@ -49,8 +50,6 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     function setup_actions(){
-        
-        add_action( 'the_post', array($this,'the_tracklist'),10,2);
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
@@ -73,6 +72,12 @@ class WP_SoundSystem_Core_Tracklists{
         add_action( 'manage_posts_custom_column', array($this,'tracks_column_playlist_content'), 10, 2 );
         add_filter( 'manage_posts_columns', array($this,'tracklist_column_lovedby_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'tracklist_column_lovedby_content'), 10, 2 );
+        
+        //tracklist queries
+        add_action( 'the_post', array($this,'the_tracklist'),10,2);
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
+        add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
+        add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table'));
@@ -83,10 +88,7 @@ class WP_SoundSystem_Core_Tracklists{
         /*
         AJAX
         */
-        
-        //new tracklist
-        add_action('wp_ajax_wpsstm_append_to_new_tracklist', array($this,'ajax_append_track_to_new_tracklist')); //TOFIXDDD
-        
+
         //refresh tracklist
         add_action('wp_ajax_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_refresh_tracklist', array($this,'ajax_refresh_tracklist'));
@@ -95,12 +97,16 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist')); //so we can output the non-logged user notice
         
-
+        /*
+        DB relationships
+        */
+        add_action( 'delete_post', array($this,'delete_subtracks_tracklist_entry') );
 
     }
 
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_action;
+        $vars[] = $this->qvar_user_favorites;
         return $vars;
     }
 
@@ -213,7 +219,7 @@ class WP_SoundSystem_Core_Tracklists{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
+        
     function ajax_refresh_tracklist(){
         global $wpsstm_tracklist;
         
@@ -293,9 +299,9 @@ class WP_SoundSystem_Core_Tracklists{
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
 
-            if ( !$wp_query->get('subtracks_exclude') ){
-                $after['playlist'] = __('In playlists:','wpsstm');
-            }
+        if ( !$wp_query->get('exclude_subtracks') ){
+            $after['playlist'] = __('In playlists:','wpsstm');
+        }
             
         }
         
@@ -422,56 +428,6 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
-    function ajax_append_track_to_new_tracklist(){
-        $ajax_data = wp_unslash($_POST);
-
-        wpsstm()->debug_log($ajax_data,"ajax_append_track_to_new_tracklist()");
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-
-        $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
-        $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-
-        $playlist = wpsstm_get_post_tracklist();
-        $playlist->title = $tracklist_title;
-        
-        $tracklist_id = $playlist->save_playlist();
-
-        if ( is_wp_error($tracklist_id) ){
-            
-            $code = $tracklist_id->get_error_code();
-            $result['message'] = $tracklist_id->get_error_message($code);
-            
-        }else{
-
-            $parent_ids = null;
-            $result['playlist_id'] = $tracklist_id;
-            $result['success'] = true;
-            
-            if ($track_id){
-                
-                $track = new WP_SoundSystem_Track($track_id);
-                $append_success = $playlist->append_subtrack_ids($track->post_id);
-                $parent_ids = $track->get_parent_ids();
-                
-            }
-
-            $list_all = wpsstm_get_user_playlists_list(array('checked_ids'=>$parent_ids));
-            
-            $result['new_html'] = $list_all;
-
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-        
-    }
-    
     function handle_tracklist_popup_form(){
         global $post;
         $popup_action = ( isset($_POST['wpsstm-tracklist-popup-action']) ) ? $_POST['wpsstm-tracklist-popup-action'] : null;
@@ -552,7 +508,7 @@ class WP_SoundSystem_Core_Tracklists{
             break;
             case 'refresh':
                 $tracklist->is_expired = true; //will force tracklist refresh
-                $success = $tracklist->populate_tracks(); //TO FIX query args ?
+                $success = $tracklist->populate_subtracks(); //TO FIX query args ?
             break;
             case 'favorite':
                 $success = $tracklist->love_tracklist(true);
@@ -592,6 +548,62 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
+    function pre_get_posts_user_favorites( $query ) {
+
+        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+
+            $meta_query = (array)$query->get('meta_query');
+
+            $meta_query[] = array(
+                'key'     => $this->favorited_tracklist_meta_key,
+                'value'   => $user_id,
+            );
+
+            $query->set( 'meta_query', $meta_query);
+            
+        }
+
+        return $query;
+    }
+
+    function subtrack_tracklists_join_query($join,$query){
+        global $wpdb;
+        
+        //TO FIX add post type check ?
+
+        if ( $query->get('subtrack_id') ) {
+            $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table_name,$wpdb->posts);
+        }
+        return $join;
+    }
+    
+    function subtrack_tracklists_where_query($where,$query){
+        
+        //TO FIX add post type check ?
+
+        if ( $subtrack_id = $query->get('subtrack_id') ) {
+            $where .= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
+        }
+        return $where;
+    }
+    
+    /*
+    Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
+    */
+    
+    function delete_subtracks_tracklist_entry($post_id){
+        global $wpdb;
+
+        if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
+
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        return $wpdb->delete( 
+            $subtracks_table_name, //table
+            array('tracklist_id'=>$post_id) //where
+        );
+    }
 
 }
 

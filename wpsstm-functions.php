@@ -50,44 +50,6 @@ function wpsstm_array_unique_by_subkey($array,$subkey){
     return $unique;
 }
 
-/*
-Get the IDs of subtracks; by type (static|live) and optional tracklist id.
-Used for subtrack queries; which will "filter" those subtracks (by post status, etc.); while this array will allow us to sort tracks.
-*/
-
-function wpsstm_get_raw_subtrack_ids($type='any',$tracklist_id=null){
-    global $wpdb;
-    
-    $type_clauses = array();
-    $subtrack_ids = array();
-    $type_clauses_str = $parent_clause_str = null;
-    
-    if ($tracklist_id !== null){
-        $parent_clause_str = sprintf(" AND `post_id` = '%d'",(int)$tracklist_id);
-    }
-    
-    if ( ($type=='any') || ($type=='static') ) {
-        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_playlists()->subtracks_static_metaname);
-    }
-    if ( ($type=='any') || ($type=='live') ) {
-        $type_clauses[] = sprintf("`meta_key` = '%s'",wpsstm_live_playlists()->subtracks_live_metaname);
-    }
-    
-    if ( $type_clauses ) $type_clauses_str = sprintf('(%s)',implode(' OR ',$type_clauses));
-    
-    $query = "SELECT meta_value FROM $wpdb->postmeta WHERE " . $type_clauses_str . $parent_clause_str;
-
-    $tracklists_subtrack_ids = $wpdb->get_col( $query );
-    
-    //unserialize all those subtracks lists
-    foreach((array)$tracklists_subtrack_ids as $meta){
-        $ids = maybe_unserialize($meta);
-        $subtrack_ids = array_merge($subtrack_ids,(array)$ids);
-    }
-    
-    return array_unique($subtrack_ids);
-    
-}
 
 /**
 * Make a nested HTML list from a multi-dimensionnal array.

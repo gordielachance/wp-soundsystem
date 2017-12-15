@@ -6,6 +6,7 @@ class WP_SoundSystem_Core_Tracks{
     public $image_url_metakey = '_wpsstm_track_image_url';
     public $qvar_track_action = 'track-action';
     public $qvar_track_lookup = 'lookup_track';
+    public $qvar_user_favorites = 'user-favorites';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
@@ -57,7 +58,7 @@ class WP_SoundSystem_Core_Tracks{
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
         
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
+        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_title_save'), 5);
@@ -69,8 +70,12 @@ class WP_SoundSystem_Core_Tracks{
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
-        //subtracks
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_subtracks') );
+        //subtracks queries
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
+        //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
+        add_filter( 'posts_join', array($this,'subtracks_join_query'), 10, 2 );
+        add_filter( 'posts_where', array($this,'subtracks_where_query'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'sort_subtracks_by_position'), 10, 2 );
         
         /*
@@ -78,9 +83,8 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         */
+
         
-        //delete sources when post is deleted
-        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
         
@@ -95,8 +99,15 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
 
         //add/remove tracklist track
-        add_action('wp_ajax_wpsstm_append_to_tracklist', array($this,'ajax_append_to_tracklist')); //TOFIXDDD
-        add_action('wp_ajax_wpsstm_remove_from_tracklist', array($this,'ajax_remove_from_tracklist'));//TOFIXDDD
+        add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
+        
+        add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
+        
+        /*
+        DB relationships
+        */
+        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
+        add_action( 'delete_post', array($this,'delete_subtracks_track_entry') );
 
     }
 
@@ -120,7 +131,7 @@ class WP_SoundSystem_Core_Tracks{
     
     function register_tracks_scripts_styles_shared(){
         //JS
-        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','wpsstm-track-sources'),wpsstm()->version );
+        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-track-sources'),wpsstm()->version );
         
     }
     
@@ -156,9 +167,6 @@ class WP_SoundSystem_Core_Tracks{
         $wpsstm_track = new WP_SoundSystem_Track( get_the_ID() );
 
         if ( $template = wpsstm_locate_template( 'track-popup.php' ) ){
-
-            //TO FIX should be registered in register_tracks_scripts_styles_shared() then enqueued here, but it is not working
-            wp_enqueue_script( 'wpsstm-track-admin', wpsstm()->plugin_url . '_inc/js/wpsstm-track-admin.js', array('jquery','jquery-ui-tabs'),wpsstm()->version, true );
             add_filter( 'body_class', array($this,'track_popup_body_classes'));
         }
         
@@ -407,11 +415,11 @@ class WP_SoundSystem_Core_Tracks{
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
         
         //already defined
-        if ( $query->get('subtracks_exclude') ) return $query;
+        if ( $query->get('exclude_subtracks') ) return $query;
         
         //option enabled ?
         if ($this->subtracks_hide){
-            $query->set('subtracks_exclude',true);
+            $query->set('exclude_subtracks',true); //set to false
         }
 
         return $query;
@@ -450,8 +458,30 @@ class WP_SoundSystem_Core_Tracks{
             break;
         }
     }
+    
+    function pre_get_posts_user_favorites( $query ) {
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+
+        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+
+            $meta_query = (array)$query->get('meta_query');
+
+            $meta_query[] = array(
+                'key'     => $this->favorited_track_meta_key,
+                'value'   => $user_id,
+            );
+
+            $query->set( 'meta_query', $meta_query);
+            
+        }
+
+        return $query;
+    }
 
     function pre_get_posts_by_track_title( $query ) {
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
 
         if ( $track = $query->get( $this->qvar_track_lookup ) ){
 
@@ -466,6 +496,44 @@ class WP_SoundSystem_Core_Tracks{
 
         return $query;
     }
+
+    function subtracks_join_query($join,$query){
+        global $wpdb;
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
+        if ( $query->get('tracklist_id') ){
+            $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table_name,$wpdb->posts);
+        }
+        return $join;
+    }
+    
+    function subtracks_where_query($where,$query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( $tracklist_id = $query->get('tracklist_id') ){
+            $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
+        }
+        return $where;
+    }
+    
+    /*
+    By default, Wordpress will sort the subtracks by date.
+    If we have a subtracks query with a tracklist ID set; and that no orderby is defined, rather sort by tracklist position.
+    */
+    
+    function sort_subtracks_by_position($orderby_sql, $query){
+
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
+        
+        $query_orderby = $query->get('orderby') ? $query->get('orderby') : 'track_order';
+
+        if ( $query->get('tracklist_id') && ( $query_orderby == 'track_order') ){
+            $orderby_sql = 'subtracks.track_order ' . $query->get('order');
+        }
+        
+        return $orderby_sql;
+
+    }
+    
 
     function register_post_type_track() {
 
@@ -686,10 +754,11 @@ class WP_SoundSystem_Core_Tracks{
     }
 
     
-    function ajax_append_to_tracklist(){
+    function ajax_toggle_playlist_subtrack(){
+        
         $ajax_data = wp_unslash($_POST);
         
-        wpsstm()->debug_log($ajax_data,"ajax_append_to_tracklist"); 
+        wpsstm()->debug_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
 
         $result = array(
             'input'     => $ajax_data,
@@ -698,60 +767,64 @@ class WP_SoundSystem_Core_Tracks{
         );
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($track_id);
         
-        if ($track_id && $tracklist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        $tracklist = $result['tracklist'] = new WP_SoundSystem_Tracklist($tracklist_id);
+        
+        $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
+        $success = false;
 
-            //wpsstm()->debug_log($track,"ajax_append_to_tracklist");
+        if ($track_id && $tracklist->post_id && $track_action){
 
-            $success = $tracklist->append_subtrack_ids($track_id);
-
-            if ( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code);
-            }else{
-                $result['success'] = $success;
+            switch($track_action){
+                case 'append':
+                    $success = $tracklist->append_subtrack_ids($track->post_id);
+                break;
+                case 'remove':
+                    $success = $tracklist->remove_subtrack_ids($track->post_id);
+                break;
             }
             
         }
+        
+        if ( is_wp_error($success) ){
+            $code = $success->get_error_code();
+            $result['message'] = $success->get_error_message($code);
+        }else{
+            $result['success'] = $success;
+        }
+
    
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
     
-    function ajax_remove_from_tracklist(){
+    function ajax_update_sources_order(){
         $ajax_data = wp_unslash($_POST);
-
+        
         $result = array(
-            'input'     => $ajax_data,
             'message'   => null,
-            'success'   => false
+            'success'   => false,
+            'input'     => $ajax_data
         );
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        $track = $result['track'] = new WP_SoundSystem_Track($track_id);
         
-        if ($track_id && $tracklist_id){
-            
-            $tracklist = new WP_SoundSystem_Tracklist($tracklist_id);
+        $source_ids = isset($ajax_data['source_ids']) ? $ajax_data['source_ids'] : null;
+        $success = $track->update_sources_order($source_ids);
 
-            //wpsstm()->debug_log($track,"ajax_remove_from_tracklist()"); 
-
-            $success = $tracklist->remove_subtrack_ids($track_id);
-
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
         }
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
+
     
     function ajax_toggle_favorite_track(){
 
@@ -858,7 +931,7 @@ class WP_SoundSystem_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
+        
     function trash_track_sources($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
@@ -888,86 +961,23 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     /*
-    Include or exclude subtracks from tracks queries.
-    Subtrack type can be 'static', 'live' or true (both).
-    
-    include & true : returns all subtracks
-    include & live|static : returns live|static subtracks
-    
-    exclude & true : return all tracks that are not subtracks
-    exclude & live|static : return all tracks that are not live|static subtracks
-.   */
-    
-    function pre_get_posts_subtracks( $query ) {
-
-        //only for tracks
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-
-        $type = true;
-        $include = null;
-
-        $include_type = $query->get('subtracks_include');
-        $exclude_type = $query->get('subtracks_exclude');
-
-        if($include_type){
-            $type = $include_type;
-            $include = true;
-        }elseif($exclude_type){
-            $type = $exclude_type;
-            $include = false;
-        }else{ //cannot process
-            return;
-        }
-
-        //get all subtracks; optionnally for a tracklist ID
-        $tracklist_id = $query->get('tracklist_id');
-        $subtrack_ids = wpsstm_get_raw_subtrack_ids($type,$tracklist_id);
-
-        if ($include){
-            
-            //if we want to include subtracks and that there is none, force return nothing
-            //https://core.trac.wordpress.org/ticket/28099
-            //https://wordpress.stackexchange.com/a/140727/70449
-            if (!$subtrack_ids){ 
-                $subtrack_ids[] = 0;
-            }
-            
-            $query->set('post__in',(array)$subtrack_ids);
-        }else{
-            
-            //if we want to exclude subtracks and that there is none, abord
-            if (!$subtrack_ids){ 
-                return $query;
-            }
-            
-            $query->set('post__not_in',(array)$subtrack_ids);
-        }
-
-        return $query;
-    }
-    
-    /*
-    By default, Wordpress will sort the subtracks by date.
-    If we have a subtracks query with a tracklist ID set; and that no orderby is defined, rather sort by tracklist position.
+    Delete the track related entries from the subtracks table when a track post is deleted.
     */
     
-    function sort_subtracks_by_position($orderby_sql, $query){
-        $tracklist_id = $query->get('tracklist_id');
-        $orderby = $query->get('orderby');
-        $include_type = $query->get('subtracks_include');
+    function delete_subtracks_track_entry($post_id){
+        global $wpdb;
+
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
+
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        if ( !$include_type || !$tracklist_id || ($orderby != 'subtrack_position') ) return $orderby_sql;
-
-        $subtrack_ids = wpsstm_get_raw_subtrack_ids($include_type,$tracklist_id);
-        if (!$subtrack_ids) return $orderby_sql;
-        
-        $ordered_ids = implode(' ,',$subtrack_ids);
-
-        return sprintf('FIELD(ID, %s)',$ordered_ids);
-
+        return $wpdb->delete( 
+            $subtracks_table_name, //table
+            array('track_id'=>$post_id) //where
+        );
     }
     
-    //TO FIX have a query that directly selects the flushable tracks without having to populate them all ?
+    //TO FIX TO IMPROVE have a query that directly selects the flushable tracks without having to populate them all ?
     //would be much faster.
     function get_flushable_track_ids(){
         $community_user_id = wpsstm()->get_options('community_user_id');

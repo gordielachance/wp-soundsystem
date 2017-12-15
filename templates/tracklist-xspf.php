@@ -2,7 +2,7 @@
 
 global $wpsstm_tracklist;
 $wpsstm_tracklist->ajax_refresh = false;
-$wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1));
+$wpsstm_tracklist->populate_subtracks(array('posts_per_page'=>-1));
 
 $tracklist = $wpsstm_tracklist;
 

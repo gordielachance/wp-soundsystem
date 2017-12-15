@@ -178,7 +178,7 @@ class WpsstmTracklist {
     }
     
     debug(msg){
-        var prefix = "WpsstmTracklist #" + this.index + ": ";
+        var prefix = "WpsstmTracklist #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 
@@ -192,9 +192,7 @@ class WpsstmTracklist {
             initCheck.resolve("we already have refreshed this playlist");
         }else{
 
-            var upToDateTracklist = $.Deferred();
-
-            upToDateTracklist = self.get_tracklist_request();
+            var upToDateTracklist = self.get_tracklist_request();
             upToDateTracklist.done(function(message) {
                 initCheck.resolve(message);
             });
@@ -676,10 +674,7 @@ class WpsstmTracklist {
             }).get();
             
             var unique_values = column_datas.filter( onlyUnique ); //remove duplicate values
-            
-            console.log("selector: " + this);
-            console.log(unique_values);
-            
+
             if (unique_values.length <= 1){
                 hide_column = true; //column has a single values; hide this column
             }

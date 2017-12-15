@@ -111,10 +111,10 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         return $diff;
     }
     
-    function populate_tracks($args = null){
+    function populate_subtracks($args = null){
 
         if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
-            return parent::populate_tracks($args);
+            return parent::populate_subtracks($args);
         }
 
         $tracks = $this->get_remote_tracks();
@@ -192,6 +192,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         );
 
         $success = wp_update_post( $tracklist_post );
+        
         if( is_wp_error($success) ){
             wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
             return $success;
@@ -729,19 +730,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->ajax_refresh = false;
         
         //populate remote tracklist if not done yet
-        $populated = $this->populate_tracks();
+        $populated = $this->populate_subtracks();
+        
         $updated = $this->update_live_tracklist(true);
 
         if ( is_wp_error($updated) ){
             return $updated;
         }
         
-        $moved_tracks = $this->move_live_tracks();
-        
-        if ( is_wp_error($moved_tracks) ){
-            return $moved_tracks;
-        }
-
         $args = array(
             'ID'            => $this->post_id,
             'post_title'    => $this->title,

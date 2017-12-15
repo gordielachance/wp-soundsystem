@@ -141,54 +141,6 @@ function wpsstm_get_post_mb_link_for_post($post_id){
     return $mbid;
 }
 
-function wpsstm_get_user_playlists_list($args = null,$user_id = false){ //TOFIXGGG
-
-    if(!$user_id) $user_id = get_current_user_id();
-    if(!$user_id) return false;
-
-    $list = null;
-    $li_els = array();
-    
-    //get logged user static playlists
-    $args = array(
-        'post_type' =>      wpsstm()->post_type_playlist,
-        'author' =>         $user_id,
-        'fields' =>         'ids',
-        'post_status' =>    array('publish','private','future','pending','draft'),
-        'posts_per_page' => -1,
-        'orderby' =>        'title',
-        'order'=>           'ASC'
-    );
-    
-    $query = new WP_Query( $args );
-
-    if ( $playlists_ids = $query->posts ){
-        foreach($playlists_ids as $playlist_id){
-            
-            //get post title without filters so we can check it is empty
-            $li_title = ( $title = get_post_field( 'post_title', $playlist_id ) ) ? $title : __('(no title)');
-            //now apply regular post titles filters
-            $li_title = apply_filters('the_title',$li_title,$playlist_id);
-            
-            $status = get_post_status($playlist_id);
-            $li_classes = array($status);
-            $attr['id'] = sprintf('wpsstm-playlist-%s',$playlist_id);
-            $attr['classes'] = implode(' ',$li_classes);
-            
-            $attr_str = wpsstm_get_html_attr($attr);
-
-            //checked
-            $checked = ( isset($args['checked_ids']) && in_array($playlist_id,$args['checked_ids']) );
-            $checked_str = checked($checked,true,false);
-            
-            $li_els[] = sprintf('<li %s><input type="checkbox" value="%s" %s /> <label>%s</label></li>',$attr_str,$playlist_id,$checked_str,$li_title);
-        }
-        $list = sprintf('<ul>%s</ul>',implode("\n",$li_els) );
-    }
-
-    return $list;
-}
-
 function wpsstm_get_blank_action(){
     return array(
         'text' =>           null,

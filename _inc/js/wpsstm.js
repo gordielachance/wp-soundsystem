@@ -85,6 +85,7 @@ function wpsstm_debug(msg,prefix){
     if (typeof msg === 'object'){
         console.log(msg);
     }else{
+        if (prefix) prefix = prefix + ': ';
         console.log(prefix + msg);
     }
 }

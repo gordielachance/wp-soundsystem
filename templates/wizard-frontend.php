@@ -2,7 +2,7 @@
 
 global $post;
 global $wpsstm_tracklist;
-$wpsstm_tracklist->populate_tracks(array('posts_per_page'=>-1)); //we must have the tracks populated before we output the notices
+$wpsstm_tracklist->populate_subtracks(); //we must have the tracks populated before we output the notices
 
 ?>
 
