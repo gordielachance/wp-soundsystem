@@ -588,7 +588,7 @@ class WpsstmTrack {
     get_source_obj(source_idx){
         var self = this;
         
-        if(typeof source_idx === undefined){
+        if(source_idx === undefined){
             source_idx = self.current_source_idx;
         }
 
