@@ -444,9 +444,6 @@ class WP_SoundSystem_Source{
         if ($can_manage_source){
             $classes[] = 'wpsstm-can-manage-source';
         }
-        if ($wpsstm_track->current_source == 0){
-            $classes[] = 'source-playing';
-        }
 
         return $classes;
     }
