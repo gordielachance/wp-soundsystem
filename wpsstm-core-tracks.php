@@ -977,7 +977,7 @@ class WP_SoundSystem_Core_Tracks{
         );
     }
     
-    //TO FIX have a query that directly selects the flushable tracks without having to populate them all ?
+    //TO FIX TO IMPROVE have a query that directly selects the flushable tracks without having to populate them all ?
     //would be much faster.
     function get_flushable_track_ids(){
         $community_user_id = wpsstm()->get_options('community_user_id');

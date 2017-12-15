@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 4.9
+Tested up to: 4.9.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -149,8 +149,10 @@ A track that belongs to another playlist or that has been favorited by a user wi
 
 == Changelog ==
 
-= XXX =
-* Subtracks are now stored in a custom table; wp_wpsstm_subtracks.  It contains the track ID, tracklist ID, and track position.  This makes easier all our subtrack queries.
+= 1.9 =
+* Subtracks are now stored in the custom 'wp_wpsstm_subtracks' SQL table.  It contains the track ID, tracklist ID, and track position.  This makes easier to handle subtracks.
+* Improved sources reorder
+* Improved source delete
 
 = 1.8.9 =
 * Single template for tracklists
