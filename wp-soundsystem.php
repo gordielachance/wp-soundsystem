@@ -281,13 +281,16 @@ class WP_SoundSystem {
                     'tracklist_id' =>   $meta->post_id,
                     'track_order' =>    $subtrack_pos
                 ));
+                
+                //delete subtracks metas
+                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_id = '%s'", $meta->meta_id );
+                $wpdb->get_results ( $querystr );
+                
                 $subtrack_pos++;
             }
         }
-        //delete subtracks metas
-        $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s' OR meta_key = '%s'", 'wpsstm_subtrack_ids','wpsstm_live_subtrack_ids' );
-        $wpdb->get_results ( $querystr );
     }
+    
     
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
