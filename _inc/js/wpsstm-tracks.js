@@ -713,6 +713,7 @@ class WpsstmTrack {
             self.media.pause();
         }
         
+        source.get_source_instances().removeClass('source-playing');
         wpsstm.current_media = undefined;
         self.current_source_idx = undefined;
 
