@@ -97,7 +97,10 @@ class WP_SoundSystem_Core_Tracklists{
         add_action('wp_ajax_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist')); //so we can output the non-logged user notice
         
-
+        /*
+        DB relationships
+        */
+        add_action( 'delete_post', array($this,'delete_subtracks_tracklist_entry') );
 
     }
 
@@ -585,6 +588,22 @@ class WP_SoundSystem_Core_Tracklists{
         return $where;
     }
     
+    /*
+    Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
+    */
+    
+    function delete_subtracks_tracklist_entry($post_id){
+        global $wpdb;
+
+        if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
+
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        return $wpdb->delete( 
+            $subtracks_table_name, //table
+            array('tracklist_id'=>$post_id) //where
+        );
+    }
 
 }
 

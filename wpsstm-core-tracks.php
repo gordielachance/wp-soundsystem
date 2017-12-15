@@ -83,9 +83,8 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         */
+
         
-        //delete sources when post is deleted
-        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
         
@@ -103,6 +102,12 @@ class WP_SoundSystem_Core_Tracks{
         add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
         
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
+        
+        /*
+        DB relationships
+        */
+        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
+        add_action( 'delete_post', array($this,'delete_subtracks_track_entry') );
 
     }
 
@@ -953,6 +958,23 @@ class WP_SoundSystem_Core_Tracks{
             wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WP_SoundSystem_Tracklist::trash_track_sources()");
         }
 
+    }
+    
+    /*
+    Delete the track related entries from the subtracks table when a track post is deleted.
+    */
+    
+    function delete_subtracks_track_entry($post_id){
+        global $wpdb;
+
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
+
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        return $wpdb->delete( 
+            $subtracks_table_name, //table
+            array('track_id'=>$post_id) //where
+        );
     }
     
     //TO FIX have a query that directly selects the flushable tracks without having to populate them all ?
