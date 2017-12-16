@@ -708,10 +708,10 @@ class WP_SoundSystem_Track{
 
         //delete track
         if ($can_delete_tracks){
-            $actions['delete'] = array(
+            $actions['trash'] = array(
                 'text' =>      __('Trash'),
                 'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('trash track','wpsstm'),
+                'desc' =>       __('Trash this track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
             );
         }
@@ -729,7 +729,7 @@ class WP_SoundSystem_Track{
         switch($context){
             case 'page':
                 
-                unset($actions['edit'],$actions['sources'],$actions['delete'],$actions['edit-backend']);
+                unset($actions['edit'],$actions['sources'],$actions['trash'],$actions['edit-backend']);
 
             break;
             case 'popup':
@@ -1025,7 +1025,7 @@ class WP_SoundSystem_Track{
                     <input class="wpsstm-backend-toggle" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
                 </p>
                 <p class="wpsstm-icon-input" id="wpsstm-new-source">
-                    <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="Enter a tracklist URL">
+                    <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a source URL','wpsstm');?>">
                     <input type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary wpsstm-icon-button" value="+">
                 </p>
                 <input type="hidden" name="wpsstm-track-popup-action" value="sources-manager" />

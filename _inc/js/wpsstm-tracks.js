@@ -277,7 +277,7 @@
         });
         
         //delete
-        $(track_el).find('#wpsstm-track-action-delete a').click(function(e) {
+        $(track_el).find('#wpsstm-track-action-trash a').click(function(e) {
             e.preventDefault();
             track_obj.delete_track();
         });
@@ -614,7 +614,7 @@ class WpsstmTrack {
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link = $(track_el).find('#wpsstm-track-action-delete a');
+        var link = $(track_el).find('#wpsstm-track-action-trash a');
 
         var ajax_data = {
             action:     'wpsstm_trash_track',

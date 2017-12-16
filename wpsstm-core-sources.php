@@ -70,7 +70,7 @@ class WP_SoundSystem_Core_Sources{
         add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
         
         //delete source
-        add_action('wp_ajax_wpsstm_delete_source', array($this,'ajax_delete_source'));
+        add_action('wp_ajax_wpsstm_trash_source', array($this,'ajax_trash_source'));
 
     }
     
@@ -567,7 +567,7 @@ class WP_SoundSystem_Core_Sources{
 
     }
     
-    function ajax_delete_source(){
+    function ajax_trash_source(){
         $ajax_data = wp_unslash($_POST);
         
         $result = array(

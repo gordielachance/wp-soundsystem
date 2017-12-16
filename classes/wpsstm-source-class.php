@@ -449,10 +449,10 @@ class WP_SoundSystem_Source{
         );
 
         if ($can_delete_source){
-            $actions['delete'] = array(
-                'text' =>       __('Delete', 'wpsstm'),
-                'desc' =>       __('Delete this source','wpsstm'),
-                'href' =>       $this->get_source_action_url('delete'),
+            $actions['trash'] = array(
+                'text' =>       __('Trash', 'wpsstm'),
+                'desc' =>       __('Trash this source','wpsstm'),
+                'href' =>       $this->get_source_action_url('trash'),
             );
         }
 

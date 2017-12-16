@@ -50,7 +50,7 @@
                 wpsstm.showMoreLessActions(actions_lists);
                 
                 //delete source
-                sources_list_el.find('#wpsstm-source-action-delete a').click(function(e) {
+                sources_list_el.find('#wpsstm-source-action-trash a').click(function(e) {
                     
                     e.preventDefault();
                     var source_el = $(this).parents('[data-wpsstm-source-idx]');
@@ -118,10 +118,10 @@
                 }
 
                 var source_instances = $('[data-wpsstm-source-idx][data-wpsstm-track-id="'+track_id+'"][data-wpsstm-source-id="'+source_id+'"]');
-                var source_action_links = source_instances.find('#wpsstm-source-action-delete a');
+                var source_action_links = source_instances.find('#wpsstm-source-action-trash a');
 
                 var ajax_data = {
-                    action:         'wpsstm_delete_source',
+                    action:         'wpsstm_trash_source',
                     post_id:        source_id
                 };
 
