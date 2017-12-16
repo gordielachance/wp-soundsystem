@@ -489,17 +489,14 @@ class WP_SoundSystem_Tracklist{
         //playlist
         $permalink = get_permalink($this->post_id);
         
-        $tracklist_obj = get_post_type_object($tracklist_post_type);
+        $post_type_obj = get_post_type_object($tracklist_post_type);
         
         $tracklist_status = get_post_status($this->post_id);
         $current_status_obj = get_post_status_object( $tracklist_status );
 
-        //track
-        $track_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_edit_tracklist = ($this->post_id && current_user_can($tracklist_obj->cap->edit_post,$this->post_id) );
-        
+        $can_edit_tracklist = ($this->post_id && current_user_can($post_type_obj->cap->edit_post,$this->post_id) );
+        $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
         $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && wpsstm_live_playlists()->can_live_playlists() );
-
         $can_favorite = $this->post_id; //call to action TO FIX to CHECK
 
         $actions = array();
@@ -521,7 +518,7 @@ class WP_SoundSystem_Tracklist{
             'classes' =>    array('wpsstm-link-popup'),
         );
         
-        //XSPF
+        //export
         $actions['export'] = array(
             'text' =>       __('Export', 'wpsstm'),
             'classes' =>    array('wpsstm-advanced-action'),
@@ -529,17 +526,15 @@ class WP_SoundSystem_Tracklist{
             'href' =>       $this->get_tracklist_action_url('export'),
         );
         
-        //favorite
+        //favorite / unfavorite
         if ($can_favorite){
+            
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('favorite'),
                 'desc' =>       __('Add to favorites','wpsstm'),
             );
-        }
-
-        //unfavorite
-        if ($can_favorite){
+            
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unfavorite'),
@@ -549,9 +544,11 @@ class WP_SoundSystem_Tracklist{
         
         //add track
         if ( $this->user_can_reorder_tracks() ){
+            
+            $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
 
             $actions['new-subtrack'] = array(
-                'text'     =>   $track_obj->labels->add_new_item,
+                'text'     =>   $track_post_type_obj->labels->add_new_item,
                 'href'      =>  $this->get_tracklist_popup_url('new-subtrack'),
                 'classes'   =>  array('wpsstm-link-popup'),
             );
@@ -559,6 +556,7 @@ class WP_SoundSystem_Tracklist{
         
         //switch status
         if ( $can_edit_tracklist ){
+            
             $status_options = array();
             $statii = array('draft','publish','private','trash');
 
@@ -602,6 +600,7 @@ class WP_SoundSystem_Tracklist{
             );
         }
         
+        //edit backend
         if ( $can_edit_tracklist ){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit backend', 'wpsstm'),
@@ -609,7 +608,17 @@ class WP_SoundSystem_Tracklist{
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
-
+        
+        //trash tracklist
+        if ( $can_trash_tracklist ){
+            $actions['trash'] = array(
+                'text' =>      __('Trash'),
+                'classes' =>    array('wpsstm-advanced-action'),
+                'desc' =>       __('Trash this tracklist','wpsstm'),
+                'href' =>       $this->get_tracklist_action_url('trash'),
+            );
+        }
+        
         //context
         switch($context){
             case 'page':
@@ -620,8 +629,8 @@ class WP_SoundSystem_Tracklist{
         }
         
         return apply_filters('wpsstm_tracklist_actions',$actions,$context);
-        
     }
+
     
     function get_tracklist_popup_url($action =  null){
         $url = $this->get_tracklist_action_url('popup');
@@ -744,6 +753,24 @@ class WP_SoundSystem_Tracklist{
 
         return $converted;
 
+    }
+    
+    function trash_tracklist(){
+        
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
+        }
+        
+        //capability check
+        $tracklist_post_type = get_post_type($this->post_id);
+        $post_type_obj = get_post_type_object($tracklist_post_type);
+        $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
+
+        if ( !$can_trash_tracklist ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this tracklist.",'wpsstm') );
+        }
+        
+        return wp_trash_post($this->post_id);
     }
     
     function save_track_position($track_id,$index){

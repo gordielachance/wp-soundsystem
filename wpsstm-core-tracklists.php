@@ -529,7 +529,10 @@ class WP_SoundSystem_Core_Tracklists{
                 $success = $tracklist->convert_to_static_playlist();
             break;
             case 'unlock-tracklist':
-                $success = $tracklist->convert_to_live_playlist($tracklist->post_id);
+                $success = $tracklist->convert_to_live_playlist();
+            break;
+            case 'trash':
+                $success = $tracklist->trash_tracklist();
             break;
         }
         

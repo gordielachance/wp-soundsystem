@@ -341,7 +341,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-tracklist-action-edit-backend a:before{
                 content:"\f084";//.fa-key;
             }
-            
+            &#wpsstm-tracklist-action-trash a:before{
+                content: "\f1f8";//.fa-trash;
+            }
         }
 
     }
