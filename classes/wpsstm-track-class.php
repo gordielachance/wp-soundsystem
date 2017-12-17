@@ -622,28 +622,57 @@ class WP_SoundSystem_Track{
     
     function get_track_links($tracklist,$context = null){
         
-        $tracklist_id = $tracklist->post_id;
+        $actions = array();
 
         /*
-        Capability check
+        Tracklist
+        //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
         */
-
-       //tracklist
+        
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
-        $tracklist_obj =            $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
+        $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
+        $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') ); //TO FIX if tracklist has tracks
+        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
+        
+        /*
+        Track
+        */
         $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
-
-        $can_edit_tracklist =       ( $tracklist_obj && current_user_can($tracklist_obj->cap->edit_post,$tracklist_id) );
         $can_track_details =        ($this->title && $this->artist);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
         $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') ); //TO FIX if tracklist has tracks
-        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
 
-        $actions = array();
+        //share
+        /*
+        TO FIX in playlist, etc.
+        $actions['share'] = array(
+            'text' =>       __('Share', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
+            'href' =>       $this->get_track_action_url('share'),
+        );
+        */
 
+        //favorite
+        if ($can_favorite_track){
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_track_action_url('favorite'),
+                'desc' =>       __('Add to favorites','wpsstm'),
+            );
+        }
+
+        //unfavorite
+        if ($can_favorite_track){
+            $actions['unfavorite'] = array(
+                'text' =>      __('Unfavorite','wpsstm'),
+                'href' =>       $this->get_track_action_url('unfavorite'),
+                'desc' =>       __('Remove track from favorites','wpsstm'),
+            );
+        }
+        
         //track details
         if ($can_track_details){
             $actions['about'] = array(
@@ -668,24 +697,6 @@ class WP_SoundSystem_Track{
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_popup_url('playlists'),
                 'classes' =>    array('wpsstm-link-popup'),
-            );
-        }
-
-        //favorite
-        if ($can_favorite_track){
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite',$tracklist_id),
-                'desc' =>       __('Add to favorites','wpsstm'),
-            );
-        }
-
-        //unfavorite
-        if ($can_favorite_track){
-            $actions['unfavorite'] = array(
-                'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite',$tracklist_id),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
             );
         }
 
@@ -759,33 +770,17 @@ class WP_SoundSystem_Track{
         return wpsstm_get_html_attr($attr);
     }
     
-    function get_track_class($extra_classes = null){
+    function get_track_class(){
 
         $classes = array(
             'wpsstm-track',
         );
         
         $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
-        
-        if ( $this->is_track_loved_by() ){
-            $classes[] = 'wpsstm-loved-track';
-        }
-        
-        if ($extra_classes){
-            if ( !is_array($extra_classes) ) $extra_classes = explode(' ',$extra_classes);
-        }
-        
-        $classes = array_merge($classes,(array)$extra_classes);
-        
-        //capabilities
-        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_manage_track = current_user_can($track_type_obj->cap->edit_post,$this->post_id);
-        
-        if ($can_manage_track){
-            $classes[] = 'wpsstm-can-manage-track';
-        }
+        $classes[] = ( $this->is_track_loved_by() ) ? 'wpsstm-loved-track' : null;
 
-        return $classes;
+        $classes = apply_filters('wpsstm_track_classes',$classes,$this);
+        return array_filter(array_unique($classes));
     }
     
     /*

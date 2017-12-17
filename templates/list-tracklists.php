@@ -14,9 +14,13 @@ if ( $query->have_posts() ) {
             $wpsstm_tracklist->options['can_play'] = false;
             $wpsstm_tracklist->options['autoload'] = false;
             $wpsstm_tracklist->options['autoplay'] = false;
+            
+            //TO FIX TO CHECK or use get_tracklist_class() here ?
+            $row_classes = array('tracklist-row','wpsstm-tracklist');
+            if ($wpsstm_tracklist->tracklist_type=='live') $row_classes[] = 'wpsstm-live-tracklist';
 
             ?>
-            <li class="tracklist-row">
+            <li class="<?php echo implode(' ',$row_classes);?>">
                 <?php do_action('wpsstm_before_tracklist_row',$wpsstm_tracklist);?>
                 <span>
                     <span class="wpsstm-tracklist-title">

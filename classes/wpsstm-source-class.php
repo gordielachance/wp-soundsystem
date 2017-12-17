@@ -399,22 +399,10 @@ class WP_SoundSystem_Source{
         return $attr;
     }
     
-    function get_source_class($extra_classes = null){
-        global $wpsstm_track;
-
+    function get_source_class(){
         $classes = array('wpsstm-source');
-        
-        $classes = array_merge($classes,(array)$extra_classes);
-
-        //capabilities
-        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $can_manage_source = ( $this->post_id && current_user_can($source_type_obj->cap->edit_post,$this->post_id) );
-        
-        if ($can_manage_source){
-            $classes[] = 'wpsstm-can-manage-source';
-        }
-
-        return $classes;
+        $classes = apply_filters('wpsstm_source_classes',$classes,$this);
+        return array_filter(array_unique($classes));
     }
     
     function get_source_action_url($action = null){

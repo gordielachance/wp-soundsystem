@@ -893,15 +893,6 @@ class WP_SoundSystem_Tracklist{
             
         );
 
-        //capabilities
-        $tracklist_type = get_post_type($this->post_id);
-        $tracklist_type_obj = get_post_type_object($tracklist_type);
-        $can_manage_tracklist = current_user_can($tracklist_type_obj->cap->edit_post,$this->post_id);
-        
-        if ($can_manage_tracklist){
-            $classes[] = 'wpsstm-can-manage-tracklist';
-        }
-        
         $classes = apply_filters('wpsstm_tracklist_classes',$classes,$this);
 
         return array_filter(array_unique($classes));
