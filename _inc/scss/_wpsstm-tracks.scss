@@ -66,6 +66,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-track-action-unfavorite a:before{
                 content: "\f004";//.fa-heart;
             }
+            &#wpsstm-track-action-share a:before{
+                content:"\f1e0";//.fa-share-alt;
+            }
             &#wpsstm-track-action-trash a:before{
                 content: "\f1f8";//.fa-trash;
             }

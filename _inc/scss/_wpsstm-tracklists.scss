@@ -111,7 +111,8 @@ body.wpsstm-default,body.wp-admin{
             padding:.25em;
             
             #wpsstm-tracklist-actions{
-                display:inline;
+                display:block;
+                text-align: center;
                 .wpsstm-action{
                     @extend .wpsstm-action-bt;
                     font-size:.8em;

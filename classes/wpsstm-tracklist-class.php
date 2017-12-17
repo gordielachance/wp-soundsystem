@@ -510,7 +510,6 @@ class WP_SoundSystem_Tracklist{
         }
         
         //share
-        $share_url = 
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
             'classes' =>    array('wpsstm-advanced-action'),
