@@ -628,7 +628,7 @@ class WP_SoundSystem_Track{
         Tracklist
         //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
         */
-        
+        $tracklist_id = $tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
@@ -647,10 +647,9 @@ class WP_SoundSystem_Track{
 
         //share
         /*
-        TO FIX in playlist, etc.
+        //TO FIX in playlist, etc.
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
-            'classes' =>    array('wpsstm-advanced-action'),
             'href' =>       $this->get_track_action_url('share'),
         );
         */
@@ -704,6 +703,7 @@ class WP_SoundSystem_Track{
             $actions['move'] = array(
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action'),
             );
         }
 

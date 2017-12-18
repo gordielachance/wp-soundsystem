@@ -32,8 +32,12 @@ body.wpsstm-default,body.wp-admin{
                     padding-right: .5em;
                     @include flex-shrink(0);
                     
-                    .wpsstm-source-action{
+                    > *{
                         display:inline-block;
+                    }
+                    
+                    .wpsstm-source-action{
+                        
                         a{
                             &:before{
                                 margin-right:0;

@@ -9,12 +9,12 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
             var defaults = {
                 childrenSelector:       '> *',
                 btMore:                 null, //jQuery item/selector, null, or false
+                moreText:               'Read more', //if btMore is not defined
                 btLess:                 null, //jQuery item/selector, null, or false
+                lessText:               'Read less', //if btLess is not defined
                 childrenShowCount:      false,
                 childrenToShow:         3, //int, or jQuery item/selector
                 speed:                  500,
-                moreText:               'Read more', //if btMore is not defined
-                lessText:               'Read less', //if btLess is not defined
             };
             var options =  $.extend(defaults, options);
 
@@ -24,55 +24,12 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                 var $content =          $(this);
                 var $container =        $(this).parent(".toggle-children-container");
                 var childEls =          $content.find(op.childrenSelector);
-                var btMoreEl =           $container.find('> .toggle-children-more');
-                var btLessEl;            $container.find('> .toggle-children-less');
+                var btMoreEl =          $container.find('> .toggle-children-more');
+                var btLessEl;           $container.find('> .toggle-children-less');
                 var speedPerChild;
                 var countEl;
                 var visibleChildren;
                 var hiddenChildren;
-
-                //initialize if not done yet
-                if ( !$container.length){
-                    $container = $('<span class="toggle-children-container" />');
-                    
-                    //wrap container
-                    $content = $content.wrap($container);
-                    
-                    /*
-                    create nav
-                    */
-                    
-                    //more
-                    if ( $(op.btMore).length ) { //existing
-                        btMoreEl = $(op.btMore);
-                        countEl = btMoreEl.find(".toggle-children-count");
-                    }else if( op.btMore === null ){ //new
-                        btMoreEl = $('<a href="#">'+op.moreText+'</a>');
-                        $content.after(btMoreEl);
-                        if(op.childrenShowCount){
-                            countEl = $('<small class="toggle-children-count" />');
-                            btMoreEl.append(countEl);   
-                        }
-                    }
-                    
-                    if ( btMoreEl ){
-                        btMoreEl.addClass('toggle-children-link toggle-children-more');
-                    }
-
-                    //less
-                    if ( $(op.btLess).length ) { //existing
-                        btLessEl = $(op.btLess);
-                    }else if( op.btLess === null ){ //new
-                        btLessEl = $('<a href="#">'+op.lessText+'</a>');
-                        $content.after(btLessEl);
-                    }
-                    
-                    if ( btLessEl ){
-                        btLessEl.addClass('toggle-children-link toggle-children-less');
-                        btLessEl.hide(); //hide it by default
-                    }
-
-                }
                 
                 //get children to show
                 if ( $.isNumeric( op.childrenToShow ) ){ 
@@ -83,6 +40,50 @@ Forked from HIDE MAX LIST ITEMS JQUERY PLUGIN by Josh Winn (https://github.com/j
                 
                 //get children to hide
                 hiddenChildren = $(childEls).not(visibleChildren);
+
+                if ( childEls.length <= (visibleChildren.length + 1) ) {
+                    //there is less or only one more item to show.  No need to shorten this list.
+                    return;
+                }
+                
+                if ( !$content.hasClass('toggle-children') ){ //not yet initialized
+                    
+                    /*
+                    more BT
+                    */
+                    if( op.btMore === null ){ //no selector defined, create new bt
+                        btMoreEl = $('<a href="#">'+op.moreText+'</a>');
+                    }else{
+                        btMoreEl = $(op.btMore);
+                    }
+                    $content.append(btMoreEl);
+                    
+                    //more count
+                    countEl = $('<small class="toggle-children-count" />');
+                    btMoreEl.append(countEl);
+                    
+                    /*
+                    less BT
+                    */
+                    if( op.btLess === null ){ //no selector defined, create new bt
+                        btLessEl = $('<a href="#">'+op.lessText+'</a>');
+                    }else{
+                        btLessEl = $(op.btLess);
+                    }
+                    $content.append(btLessEl);
+                    
+                    $content.addClass('toggle-children');
+                    btMoreEl.addClass('toggle-children-link toggle-children-more');
+                    btLessEl.addClass('toggle-children-link toggle-children-less');
+
+                }else{
+                    btMoreEl = $content.find('.toggle-children-more');
+                    countEl = btMoreEl.find(".toggle-children-count");
+                    btLessEl = $content.find('.toggle-children-less');
+                }
+
+                btLessEl.hide(); //hide it by default
+                if(!op.childrenShowCount) countEl.hide(); 
 
                 // Update children count
                 if( op.childrenShowCount && $(countEl) ){

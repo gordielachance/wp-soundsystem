@@ -307,15 +307,13 @@ class WpsstmPagePlayer {
     }
     
     showMoreLessActions(actions_container_el,options){
-        
+ 
         return; //TOFIXGGG temporary disabled until it works as expected.
-
-        var self = this;
 
         // OPTIONS
         var defaults = {
             childrenToShow:     '.wpsstm-action:not(.wpsstm-advanced-action)',
-            moreText:           '<i class="fa fa-chevron-right" aria-hidden="true"></i>',
+            btMore:             '<li class="wpsstm-action"><i class="fa fa-chevron-right" aria-hidden="true"></i></li>',
             btLess:             false,
         };
 

@@ -88,9 +88,12 @@ body.wpsstm-default,body.wp-admin{
                                             &:not(.source-playing){
                                                 display:none;
                                             }
-                                            .wpsstm-source-action:not(#wpsstm-source-action-provider){
-                                                display:none;
+                                            .wpsstm-actions-list > *{
+                                                &:not(#wpsstm-source-action-provider){
+                                                    display:none;
+                                                }
                                             }
+
                                         }
                                     }
 

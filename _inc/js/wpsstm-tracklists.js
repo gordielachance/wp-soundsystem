@@ -638,8 +638,8 @@ class WpsstmTracklist {
             childrenShowCount:  true,
             childrenToShow:        3,
             childrenSelector:   '[itemprop="track"]',
-            moreText:           '<i class="fa fa-angle-down" aria-hidden="true"></i>',
-            lessText:           '<i class="fa fa-angle-up" aria-hidden="true"></i>',
+            btMore:             '<li><i class="fa fa-angle-down" aria-hidden="true"></i></li>',
+            lessText:           '<li><i class="fa fa-angle-up" aria-hidden="true"></i></li>',
         };
 
         var options =  $.extend(defaults, options);

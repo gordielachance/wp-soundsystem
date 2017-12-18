@@ -55,11 +55,13 @@ DEFAULT STYLES
 body.wpsstm-default,body.wp-admin{
 
     #wpsstm-track-actions{
-        .wpsstm-track-action{
+        > * {
             @include opacity(.5);
             &:hover{
                 @include opacity(1);
             }
+        }
+        .wpsstm-track-action{
             &#wpsstm-track-action-favorite a:before{
                 content: "\f08a";//.fa-heart-o;
             }

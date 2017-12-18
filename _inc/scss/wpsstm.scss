@@ -258,5 +258,18 @@ body.wpsstm-default,body.wp-admin{
             }
         }
     }
-    
+    //toggleChildren
+    .toggle-children-link{
+        @extend .wpsstm-can-click;
+    }
+    a.toggle-children-link, .toggle-children-link a{
+        @extend .wpsstm-no-underline;
+    }
+    .wpsstm-tracks-list{
+        > .toggle-children-link{
+            text-align:center;
+            padding: .5em;
+            font-size:1.2em;
+        }
+    }
 }
