@@ -13,21 +13,15 @@ MINIMAL STYLES
         } 
 
         &:not(.track-active){
-            td{
-                @include opacity(.5);
-            }
+            @include opacity(.5);
         }
 
         &.track-has-played,&:hover{
-            td{
-                @include opacity(.75);
-            }
+            @include opacity(.75);
         }
 
         &.track-active{
-            td{
-                @include opacity(1);
-            }
+            @include opacity(1);
         }
     }
 
