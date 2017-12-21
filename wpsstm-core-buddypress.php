@@ -39,6 +39,8 @@ class WP_SoundSystem_Core_BuddyPress{
 
     function setup_actions(){
         add_action( 'bp_setup_nav', array($this,'register_music_menu'), 99 );
+        add_action( 'wpsstm_love_track', array($this,'love_track_activity') );
+        add_action( 'wpsstm_love_tracklist', array($this,'love_tracklist_activity') );
     }
     
     function register_music_menu() {
@@ -361,7 +363,52 @@ class WP_SoundSystem_Core_BuddyPress{
         return $tracklist;
     }
     
+    function love_track_activity($track_id){
+        $user_link = bp_core_get_userlink( get_current_user_id() );
+        $track_link = sprintf('<a href="%s">%s</a>',get_permalink($track_id),get_the_title($track_id));
+        $args = array(
+            //'id' =>
+            'action' =>         sprintf(__('%s loved the track %s','wpsstm'),$user_link,$track_link),
+            //'content' =>
+            'component' =>      $this->music_slug,
+            'type' =>           'loved_track',
+            'primary_link' =>   get_permalink($track_id),
+            //'user_id' =>        
+            'item_id' =>        $track_id,
+            //'secondary_item_id' =>
+            //'recorded_time' =>
+            //'hide_sitewide' =>
+            //'is_spam' =>
+            
+        );
+        $activity_id = bp_activity_add($args);
+    }
+    
+    function love_tracklist_activity($tracklist_id){
+        $user_link = bp_core_get_userlink( get_current_user_id() );
+        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
 
+        //TO FIX 
+        //switch different action depending on the post type ?
+        
+        $args = array(
+            //'id' =>
+            'action' =>         sprintf(__('%s loved the tracklist %s','wpsstm'),$user_link,$tracklist_link),
+            //'content' =>
+            'component' =>      $this->music_slug,
+            'type' =>           'loved_tracklist',
+            'primary_link' =>   get_permalink($tracklist_id),
+            //'user_id' =>        
+            'item_id' =>        $tracklist_id,
+            //'secondary_item_id' =>
+            //'recorded_time' =>
+            //'hide_sitewide' =>
+            //'is_spam' =>
+            
+        );
+        $activity_id = bp_activity_add($args);
+    }
+    
 }
 
 
