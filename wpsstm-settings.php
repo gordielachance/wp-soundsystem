@@ -112,6 +112,11 @@ class WP_SoundSystem_Settings {
                 }
                 
             }
+            
+            //recent wizard entries
+            if ( isset ($input['recent_wizard_entries']) && ctype_digit($input['recent_wizard_entries']) ){
+                    $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
+            }
 
             /* 
             Musicbrainz 
@@ -298,6 +303,14 @@ class WP_SoundSystem_Settings {
             'visitors_wizard', 
             __('Enable for visitors','wpsstm'), 
             array( $this, 'visitors_wizard_callback' ), 
+            'wpsstm-settings-page', 
+            'frontend_wizard_settings'
+        );
+        
+        add_settings_field(
+            'recent_wizard_entries', 
+            __('Show recent entries','wpsstm'), 
+            array( $this, 'recent_wizard_entries_callback' ), 
             'wpsstm-settings-page', 
             'frontend_wizard_settings'
         );
@@ -795,6 +808,22 @@ class WP_SoundSystem_Settings {
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
             __("Enable frontend wizard for non-logged users.","wpsstm")
+        );
+    }
+    
+    function recent_wizard_entries_callback(){
+        $option = (int)wpsstm()->get_options('recent_wizard_entries');
+        
+        $help = array();
+        $help[]= __("Number of recent entries to display on the wizard page.","wpsstm");
+        $help[]= __("0 = Disabled.","wpsstm");
+        $help = sprintf("<small>%s</small>",implode('  ',$help));
+
+        printf(
+            '<input type="number" name="%s[recent_wizard_entries]" size="2" min="0" value="%s" /><br/>%s',
+            wpsstm()->meta_name_options,
+            $option,
+            $help
         );
     }
     

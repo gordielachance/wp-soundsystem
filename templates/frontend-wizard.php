@@ -51,9 +51,11 @@ get_header();
                     ?>
                     <?php
                     //recent
-                    $has_wizard_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard);
-                    if ( !$has_wizard_id ) {
-                        wpsstm_locate_template( 'recent-wizard-entries.php', true );
+                    if ( wpsstm()->get_options('recent_wizard_entries') ) {
+                        $has_wizard_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard);
+                        if ( !$has_wizard_id ) {
+                            wpsstm_locate_template( 'recent-wizard-entries.php', true );
+                        }
                     }
                     ?>
 

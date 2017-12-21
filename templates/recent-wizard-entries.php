@@ -1,7 +1,7 @@
 <?php
 $recent_wizard_args = array(
     'post_type'         => wpsstm()->post_type_live_playlist,
-    'posts_per_page'    => 10,
+    'posts_per_page'    => (int)wpsstm()->get_options('recent_wizard_entries'),
     'meta_query'        => array(
         array( wpsstm_wizard()->is_wizard_tracklist_metakey => true ) //created with wizard
     )
