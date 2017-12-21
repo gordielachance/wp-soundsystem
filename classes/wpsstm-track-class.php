@@ -444,10 +444,10 @@ class WP_SoundSystem_Track{
         */
 
         if ($do_love){
-            $success = update_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            $success = update_post_meta( $this->post_id, wpsstm_tracks()->loved_track_meta_key, $user_id );
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id, wpsstm_tracks()->loved_track_meta_key, $user_id );
             do_action('wpsstm_unlove_track',$this->post_id,$this);
         }
 
@@ -459,7 +459,7 @@ class WP_SoundSystem_Track{
         //track ID is required
         if ( !$this->post_id  ) return;//track does not exists in DB
         
-        return get_post_meta($this->post_id, wpsstm_tracks()->favorited_track_meta_key);
+        return get_post_meta($this->post_id, wpsstm_tracks()->loved_track_meta_key);
     }
     
     function is_track_loved_by($user_id = null){

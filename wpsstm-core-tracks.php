@@ -6,11 +6,11 @@ class WP_SoundSystem_Core_Tracks{
     public $image_url_metakey = '_wpsstm_track_image_url';
     public $qvar_track_action = 'track-action';
     public $qvar_track_lookup = 'lookup_track';
-    public $qvar_user_favorites = 'user-favorites';
+    public $qvar_loved_tracks = 'loved-tracks';
     public $track_mbtype = 'recording'; //musicbrainz type, for lookups
     
     public $subtracks_hide = true; //default hide subtracks in track listings
-    public $favorited_track_meta_key = '_wpsstm_user_favorite';
+    public $loved_track_meta_key = '_wpsstm_user_favorite';
 
     /**
     * @var The one true Instance
@@ -72,7 +72,7 @@ class WP_SoundSystem_Core_Tracks{
         
         //subtracks queries
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracks') );
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         add_filter( 'posts_join', array($this,'subtracks_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtracks_where_query'), 10, 2 );
@@ -459,16 +459,16 @@ class WP_SoundSystem_Core_Tracks{
         }
     }
     
-    function pre_get_posts_user_favorites( $query ) {
+    function pre_get_posts_loved_tracks( $query ) {
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
 
-        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+        if ( $user_id = $query->get( $this->qvar_loved_tracks ) ){
 
             $meta_query = (array)$query->get('meta_query');
 
             $meta_query[] = array(
-                'key'     => $this->favorited_track_meta_key,
+                'key'     => $this->loved_track_meta_key,
                 'value'   => $user_id,
             );
 
@@ -639,6 +639,7 @@ class WP_SoundSystem_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = $this->qvar_track_lookup;
         $qvars[] = $this->qvar_track_action;
+        $qvars[] = $this->qvar_loved_tracks;
         return $qvars;
     }
     

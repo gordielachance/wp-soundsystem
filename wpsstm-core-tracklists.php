@@ -6,8 +6,8 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WP_SoundSystem_Core_Tracklists{
     public $qvar_tracklist_action = 'tracklist-action';
-    public $qvar_user_favorites = 'user-favorites';
-    public $favorited_tracklist_meta_key = '_wpsstm_user_favorite';
+    public $qvar_loved_tracklists = 'loved-tracklists';
+    public $loved_tracklist_meta_key = '_wpsstm_user_favorite';
     public $tracklist_post_types = array();
     
     /**
@@ -75,7 +75,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         //tracklist queries
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_user_favorites') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
         add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
@@ -106,7 +106,7 @@ class WP_SoundSystem_Core_Tracklists{
 
     function add_tracklist_query_vars($vars){
         $vars[] = $this->qvar_tracklist_action;
-        $vars[] = $this->qvar_user_favorites;
+        $vars[] = $this->qvar_loved_tracklists;
         return $vars;
     }
 
@@ -551,14 +551,14 @@ class WP_SoundSystem_Core_Tracklists{
 
     }
     
-    function pre_get_posts_user_favorites( $query ) {
+    function pre_get_posts_loved_tracklists( $query ) {
 
-        if ( $user_id = $query->get( $this->qvar_user_favorites ) ){
+        if ( $user_id = $query->get( $this->qvar_loved_tracklists ) ){
 
             $meta_query = (array)$query->get('meta_query');
 
             $meta_query[] = array(
-                'key'     => $this->favorited_tracklist_meta_key,
+                'key'     => $this->loved_tracklist_meta_key,
                 'value'   => $user_id,
             );
 
