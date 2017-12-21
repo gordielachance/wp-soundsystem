@@ -127,14 +127,13 @@ $tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argu
 echo $tracklist->get_tracklist_html();
 ?>`
 
-= How does the (live) tracklists cache works ? =
+= What are community tracks and when are they created ? =
 
-Each time a live tracklist is requested, we check if it has a cache enabled.
-If it is disabled; tracks are not cached to the database and we just request the remote tracklist.
-If it is enabled and that the tracklist has not expired, tracks are populated from the database without requesting the remote page.
-If it is enabled and that the tracklist has expired, we request the remote tracklist; old tracks are flushed and new ones are inserted.
+Community tracks are tracks that are automatically created by the plugin and for which the author is the community user (see settings).
+They are created when a live tracklist is updated; only if its cache is disabled/expired.
+A community track is also created when we autosource a track; so the sources query is ran only once.
 
-A track that belongs to another playlist or that has been favorited by a user will only be removed from the live playlist without being trashed.
+There is an option in the plugin settings to flush those community tracks : they will be deleted; but only if they do not appear in a tracklist and are not favorited by any users.
 
 == Screenshots ==
 
