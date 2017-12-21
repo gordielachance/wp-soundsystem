@@ -332,9 +332,16 @@ body.wpsstm-default,body.wp-admin{
             align-items: center;
             padding: 0 .25em;
             box-sizing: border-box;
-            &.tracklist-row-action{
-                @include flex-grow(0);
-                @include flex-shrink(0);
+            max-width:50%;
+            &.wpsstm-tracklist-title{
+                a{
+                    @extend .wpsstm-ellipsis;
+                }
+                .wpsstm-tracklist-post-state{
+                    &.wpsstm-tracklist-post-state-publish{
+                        display:none;
+                    }
+                }
             }
             &.wpsstm-tracklist-actions{
                 @include justify-content(space-between);

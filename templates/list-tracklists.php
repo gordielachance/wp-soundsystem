@@ -22,19 +22,23 @@ if ( $query->have_posts() ) {
             ?>
             <li class="<?php echo implode(' ',$row_classes);?>">
                 <?php do_action('wpsstm_before_tracklist_row',$wpsstm_tracklist);?>
-                <span>
-                    <span class="wpsstm-tracklist-title">
-                        <?php 
-                        $title = ( $wpsstm_tracklist->title ) ? $wpsstm_tracklist->title : sprintf(__('(playlist #%d)','wpsstm'),$wpsstm_tracklist->post_id);
-                        ?>
-                        <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $title;?></a>
-                    </span>
-                    <strong class="wpsstm-tracklist-post-state">
+                <span class="wpsstm-tracklist-title">
+                    <?php 
+                    $title = ( $wpsstm_tracklist->title ) ? $wpsstm_tracklist->title : sprintf(__('(playlist #%d)','wpsstm'),$wpsstm_tracklist->post_id);
+                    ?>
+                    <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $title;?></a>
+
+                <?php
+                    $post_status = get_post_status();
+                    ?>
+                    <strong class="wpsstm-tracklist-post-state wpsstm-tracklist-post-state-<?php echo $post_status;?>">
                         <?php
                             $post_status_obj = get_post_status_object( get_post_status() );
                             echo ' — ' . $post_status_obj->label;
                         ?>
                     </strong>
+                    <?php
+                ?>
                 </span>
                 <span class="wpsstm-tracklist-actions">
                     <?php

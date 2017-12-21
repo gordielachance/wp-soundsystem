@@ -314,15 +314,13 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
   align-items: center;
   padding: 0 .25em;
   box-sizing: border-box;
+  max-width: 50%;
 }
-/* line 335, ../scss/_wpsstm-tracklists.scss */
-#tracklists-manager > li > *.tracklist-row-action {
-  -webkit-flex-grow: 0;
-  flex-grow: 0;
-  -webkit-flex-shrink: 0;
-  flex-shrink: 0;
+/* line 341, ../scss/_wpsstm-tracklists.scss */
+#tracklists-manager > li > *.wpsstm-tracklist-title .wpsstm-tracklist-post-state.wpsstm-tracklist-post-state-publish {
+  display: none;
 }
-/* line 339, ../scss/_wpsstm-tracklists.scss */
+/* line 346, ../scss/_wpsstm-tracklists.scss */
 #tracklists-manager > li > *.wpsstm-tracklist-actions {
   -webkit-justify-content: space-between;
   justify-content: space-between;
@@ -333,15 +331,15 @@ body.wpsstm-default #wpsstm-tracklist-actions .wpsstm-tracklist-action#wpsstm-tr
   text-align: right;
   visibility: hidden;
 }
-/* line 345, ../scss/_wpsstm-tracklists.scss */
+/* line 352, ../scss/_wpsstm-tracklists.scss */
 #tracklists-manager > li > *.wpsstm-tracklist-actions ul {
   display: inline;
 }
-/* line 347, ../scss/_wpsstm-tracklists.scss */
+/* line 354, ../scss/_wpsstm-tracklists.scss */
 #tracklists-manager > li > *.wpsstm-tracklist-actions ul li {
   display: inline;
 }
-/* line 355, ../scss/_wpsstm-tracklists.scss */
+/* line 362, ../scss/_wpsstm-tracklists.scss */
 #tracklists-manager > li:hover .wpsstm-tracklist-actions {
   visibility: visible;
 }
@@ -1457,7 +1455,7 @@ MINIMAL STYLES
 DEFAULT STYLES
 */
 /* line 87, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"] > *.wpsstm-track-info > *, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list body.wpsstm-default [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wpsstm-default #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wpsstm-default a > *, body.wp-admin .wpsstm-ellipsis, body.wp-admin .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wp-admin .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wpsstm-default .wpsstm-track-sources-list body.wp-admin [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wp-admin a > * {
+body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"] > *.wpsstm-track-info > *, body.wpsstm-default #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wpsstm-default a, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list body.wpsstm-default [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wpsstm-default #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wpsstm-default a > *, body.wp-admin .wpsstm-ellipsis, body.wp-admin .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wp-admin .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wp-admin a, body.wpsstm-default .wpsstm-track-sources-list body.wp-admin [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wp-admin a > * {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;
