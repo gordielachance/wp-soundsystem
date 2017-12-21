@@ -455,10 +455,13 @@ class WP_SoundSystem_Tracklist{
         */
 
         if ($do_love){
-            return add_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
+            $success = add_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
+            do_action('wpsstm_love_tracklist',$this->post_id,$this);
         }else{
-            return delete_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id, wpsstm_tracklists()->favorited_tracklist_meta_key, $user_id );
+            do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
         }
+        return $success;
     }
     
     function get_tracklist_loved_by(){

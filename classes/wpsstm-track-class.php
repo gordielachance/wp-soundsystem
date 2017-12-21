@@ -444,10 +444,14 @@ class WP_SoundSystem_Track{
         */
 
         if ($do_love){
-            return update_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            $success = update_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
-            return delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id, wpsstm_tracks()->favorited_track_meta_key, $user_id );
+            do_action('wpsstm_unlove_track',$this->post_id,$this);
         }
+
+        return $success;
         
     }
     
