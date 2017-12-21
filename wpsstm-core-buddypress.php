@@ -148,7 +148,7 @@ class WP_SoundSystem_Core_BuddyPress{
         
         //favorite query
         $query_args = array(
-            'post_type' =>      wpsstm()->post_type_playlist,
+            'post_type' =>      wpsstm_tracklists()->tracklist_post_types,
             wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
@@ -157,11 +157,7 @@ class WP_SoundSystem_Core_BuddyPress{
 
         $query = new WP_Query( $query_args );
         $count = $query->found_posts;
-        
-        ///
-        
-        if ( !$count ) return;
-        
+
 		$class = ( 0 === $count ) ? 'no-count' : 'count';
 
 		$name = sprintf(
@@ -179,7 +175,7 @@ class WP_SoundSystem_Core_BuddyPress{
             'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
             'parent_slug'     => $this->music_slug,
             'position'        => 40,
-            'screen_function' => array($this,'view_user_favorite_playlists'),
+            'screen_function' => array($this,'view_user_favorite_tracklists'),
         ) );
     }
     
@@ -196,10 +192,7 @@ class WP_SoundSystem_Core_BuddyPress{
         );
         $query = new WP_Query( $query_args );
         $count = $query->found_posts;
-        
-        ///
-        
-        if ( !$count ) return;
+
 		$class = ( 0 === $count ) ? 'no-count' : 'count';
 
 		$name = sprintf(
@@ -232,9 +225,9 @@ class WP_SoundSystem_Core_BuddyPress{
         bp_core_load_template( apply_filters( 'bp_core_template_plugin', 'members/single/plugins' ) );
     }
     
-    function view_user_favorite_playlists() {
-        add_action( 'bp_template_title', array($this,'user_favorite_playlists_subnav_title') );
-        add_action( 'bp_template_content', array($this,'user_favorite_playlists_subnav_content') );
+    function view_user_favorite_tracklists() {
+        add_action( 'bp_template_title', array($this,'user_favorite_tracklists_subnav_title') );
+        add_action( 'bp_template_content', array($this,'user_favorite_tracklists_subnav_content') );
         bp_core_load_template( apply_filters( 'bp_core_template_plugin', 'members/single/plugins' ) );
     }
 
@@ -254,10 +247,10 @@ class WP_SoundSystem_Core_BuddyPress{
         echo $title;
     }
     
-    function user_favorite_playlists_subnav_title(){
-        $title = sprintf(__("%s's favorite playlists",'wpsstm'),bp_get_displayed_user_fullname());
+    function user_favorite_tracklists_subnav_title(){
+        $title = sprintf(__("%s's favorite tracklists",'wpsstm'),bp_get_displayed_user_fullname());
         if ( bp_is_my_profile() ) {
-            $title = __('Favorite playlists','wpsstm');
+            $title = __('Favorite tracklists','wpsstm');
         }
         echo $title;
     }
@@ -294,12 +287,12 @@ class WP_SoundSystem_Core_BuddyPress{
         wpsstm_locate_template( 'list-tracklists.php', true, false );
     }
     
-    function user_favorite_playlists_subnav_content(){
+    function user_favorite_tracklists_subnav_content(){
         global $tracklist_manager_query;
 
         //member favorite playlists
         $query_args = array(
-            'post_type' =>      wpsstm()->post_type_playlist,
+            'post_type' =>      wpsstm_tracklists()->tracklist_post_types,
             wpsstm_tracklists()->qvar_user_favorites => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
