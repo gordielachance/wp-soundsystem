@@ -44,7 +44,7 @@ class WP_SoundSystem_Core_Wizard{
         add_action( 'wp', array($this,'populate_input_wizard_tracklist'));
         add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
         add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
-        add_filter( 'template_include', array($this,'frontend_wizard_template'));
+        add_filter( 'the_content', array($this,'frontend_wizard_content'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
@@ -182,13 +182,17 @@ class WP_SoundSystem_Core_Wizard{
     eventually populate wizard tracklist
     */
     
-    function frontend_wizard_template($template){
+    function frontend_wizard_content($content){
         global $post;
         global $wpsstm_tracklist;
         
-        if ( !is_page($this->frontend_wizard_page_id) ) return $template;
+        if ( !is_page($this->frontend_wizard_page_id) ) return $content;
+        
+        ob_start();
+        wpsstm_locate_template( 'frontend-wizard.php', true, false );
+        $extra = ob_get_clean();
 
-        return wpsstm_locate_template( 'frontend-wizard.php' );
+        return $content . $extra;
     }
 
     function populate_wizard_tracklist($post_id=null,$input=null){
