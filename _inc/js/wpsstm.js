@@ -7,6 +7,17 @@
             e.preventDefault();
             
             var content_url = this.href;
+            
+            //append popup arg
+            if( content_url.indexOf("?") >= 0 ) {
+                content_url = content_url+"&wpsstm-popup=true";
+            }else{
+                content_url = content_url+"?wpsstm-popup=true";
+            }
+            
+            console.log(content_url);
+            
+            
             var loader_el = $('<p id="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
             var popup = $('<div></div>').append(loader_el);
             
@@ -32,8 +43,10 @@
 
             });
 
-
         });
+        
+        //popup links
+        //TOFIXGGG when link in popup is clicked, close / reopen popup ?
         
 
         //artist autocomplete

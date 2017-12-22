@@ -5,6 +5,7 @@ Handle posts that have a tracklist, like albums and playlists.
 **/
 
 class WP_SoundSystem_Core_Tracklists{
+    public $qvar_tracklist_admin = 'admin-tracklist';
     public $qvar_tracklist_action = 'tracklist-action';
     public $qvar_loved_tracklists = 'loved-tracklists';
     public $loved_tracklist_meta_key = '_wpsstm_user_favorite';
@@ -55,7 +56,7 @@ class WP_SoundSystem_Core_Tracklists{
 
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
         add_filter( 'template_include', array($this,'tracklist_xspf_template'));
-        add_filter( 'template_include', array($this,'tracklist_popup_template'));
+        add_filter( 'the_content', array($this,'tracklist_admin'));
         
         add_action( 'template_redirect', array($this,'handle_tracklist_popup_form'));
 
@@ -80,7 +81,7 @@ class WP_SoundSystem_Core_Tracklists{
         add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
         //post content
-        add_filter( 'the_content', array($this,'content_append_tracklist_table'));
+        add_filter( 'the_content', array($this,'content_append_tracklist_table'), 5);
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
@@ -105,6 +106,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
+        $vars[] = $this->qvar_tracklist_admin;
         $vars[] = $this->qvar_tracklist_action;
         $vars[] = $this->qvar_loved_tracklists;
         return $vars;
@@ -145,34 +147,17 @@ class WP_SoundSystem_Core_Tracklists{
         wp_enqueue_script( 'wpsstm-tracklists' );
 
     }
-
-    /**
-    *    From http://codex.wordpress.org/Template_Hierarchy
-    *
-    *    Adds a custom template to the query queue.
-    */
-    function tracklist_popup_template($template){
-        global $post;
-        
-        $tracklist_action = get_query_var( $this->qvar_tracklist_action );
-        if( $tracklist_action != 'popup' ) return $template;
-        
-        $is_tracklist_post = in_array(get_post_type($post),wpsstm_tracklists()->tracklist_post_types );
-        if ( !$is_tracklist_post ) return $template;
-
-        //popup admin
-        if ( $template = wpsstm_locate_template( 'tracklist-popup.php' ) ) {
-            add_filter( 'body_class', array($this,'tracklist_popup_body_classes'));
+    
+    //load the admin template instead of regular content when 'admin-tracklist' is set
+    function tracklist_admin($content){
+        if ( $tracklist_admin = get_query_var( $this->qvar_tracklist_admin ) ){
+            ob_start();
+            wpsstm_locate_template( 'tracklist-admin.php', true, false );
+            $content = ob_get_clean();
         }
+        return $content;
+    }
 
-        return $template;
-    }
-    
-    function tracklist_popup_body_classes($classes){
-        $classes[] = 'wpsstm-tracklist-popup wpsstm-popup';
-        return $classes;
-    }
-    
     function ajax_toggle_favorite_tracklist(){
         
         $ajax_data = wp_unslash($_POST);
@@ -459,7 +444,7 @@ class WP_SoundSystem_Core_Tracklists{
                 if ( !is_wp_error($track_id) ){
                     $success = $tracklist->append_subtrack_ids($track_id);
                     if ($success){
-                        $track_admin_url = $track->get_track_popup_url('edit');
+                        $track_admin_url = $track->get_track_admin_url('edit');
                         wp_redirect($track_admin_url);
                         exit();
                     }
@@ -471,7 +456,7 @@ class WP_SoundSystem_Core_Tracklists{
         }
 
         if ($success){ //redirect with a success / error code
-            $redirect_url = $tracklist->get_tracklist_popup_url($popup_action);
+            $redirect_url = $tracklist->get_tracklist_admin_url($popup_action);
             if ( is_wp_error($success) ){
                 $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
             }else{
@@ -503,9 +488,6 @@ class WP_SoundSystem_Core_Tracklists{
         $success = null;
 
         switch($action){
-            case 'popup':
-                //see tracklist_popup_template
-            break;
             case 'refresh':
                 $tracklist->is_expired = true; //will force tracklist refresh
                 $success = $tracklist->populate_subtracks(); //TO FIX query args ?

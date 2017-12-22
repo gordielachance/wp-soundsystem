@@ -114,69 +114,35 @@ body.wpsstm-default,body.wp-admin{
     }
     
     &.wpsstm-popup{
-        header{
-            margin: 2em 0;
-        }
-        //hide default styles - this may have to be adapted to your theme
-        #sidebar,#colophon{
-            display:none;
-        }
-        #page{
-            position: absolute;
-            top: 0;
-            background-color: white;
-            width: 100%;
-            padding: 0;
-            max-width: inherit;
-        }
-        #content{
-            width:100%;
-            margin:0;
-        }
-        #main{
-            margin:0;
-            padding:0;
-            >.hentry{
-                box-shadow: none;
-            }
-        }
         #wpadminbar{
             display:none;
         }
-        // !hide default styles
 
-        .hentry{
-            margin:0;
-            padding:0;
-            #track-popup-tabs{
-                > ul{
-                    list-style: none;
-                    li{
-                        &:not(.ui-state-active){
-                            @include opacity(.8);
-                        }
-                    }
-                }
-            }
+        /*
+        input[type="text"]{
+            width: 100%;
+            line-height: 3em;
+            margin: 2em 0;
         }
+        */
 
         //submit bt
         .wpsstm-submit-wrapper{
             text-align:center;
             margin: .5em 0;
         }
-
-        .entry-content > ul.wpsstm-actions-list{
-            border-bottom: 1px solid #F7F7F7;
-            padding-bottom: 1em;
-            text-align: center;
-            display:block;
-            margin: 1em;
-            list-style: none;
-            line-height: 2.8em;
-            li{
-                @extend .wpsstm-action-bt;
-            }
+    }
+    
+    .wpsstm-post-admin > ul.wpsstm-actions-list{
+        border-bottom: 1px solid #F7F7F7;
+        padding-bottom: 1em;
+        text-align: center;
+        display:block;
+        margin: 1em;
+        list-style: none;
+        line-height: 2.8em;
+        li{
+            @extend .wpsstm-action-bt;
         }
     }
     

@@ -353,7 +353,7 @@ class WP_SoundSystem_Core_Sources{
 
         $wpsstm_track = new WP_SoundSystem_Track($post->ID);
 
-        $sources_url = $wpsstm_track->get_track_popup_url('sources-manager');
+        $sources_url = $wpsstm_track->get_track_admin_url('sources-manager');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
         $manager_link = sprintf('<a class="wpsstm-link-popup button" href="%s">%s</a>',$sources_url,__('Sources manager','wpsstm'));

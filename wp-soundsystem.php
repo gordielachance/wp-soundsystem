@@ -38,6 +38,7 @@ class WP_SoundSystem {
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
+    public $qvar_popup = 'wpsstm-popup';
     
     public $subtracks_table_name = 'wpsstm_subtracks';
 
@@ -136,7 +137,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'classes/wpsstm-lastfm-user.php';
         require $this->plugin_dir . 'wpsstm-core-lastfm.php';
-        //require $this->plugin_dir . 'wpsstm-core-buddypress.php';
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
@@ -177,10 +178,13 @@ class WP_SoundSystem {
         add_filter( 'body_class', array($this,'default_style_class'));
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        add_filter( 'template_include', array($this,'popup_template'));
 
     }
     
     function add_wpsstm_query_vars($vars){
+        $vars[] = $this->qvar_popup;
         $vars[] = $this->qvar_wpsstm_statii;
         return $vars;
     }
@@ -499,6 +503,16 @@ class WP_SoundSystem {
             
         }
         
+    }
+    
+    //loads the popup template if 'wpsstm-popup' is defined
+    function popup_template($template){
+        $is_popup = get_query_var( $this->qvar_popup );
+        if ( $is_popup ){
+            $template = wpsstm_locate_template( 'popup.php' );
+        }
+
+        return $template;
     }
 
 }

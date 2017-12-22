@@ -34,7 +34,7 @@
         });
         
         //create new playlist from input
-        $(document).on( "click",'#wpsstm-track-tracklists #wpsstm-new-playlist-add input[type="submit"]', function(e){
+        $(document).on( "click",'#wpsstm-new-playlist-add', function(e){
 
             e.preventDefault();
             var bt =                        $(this);
