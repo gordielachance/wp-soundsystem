@@ -148,6 +148,10 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
+= 1.9.1 =
+* Improve popup template
+* Improve track/tracklist frontend admin
+
 = 1.9.0 =
 * Subtracks are now stored in the custom 'wp_wpsstm_subtracks' SQL table.  It contains the track ID, tracklist ID, and track position.  This makes easier to handle subtracks.
 * Improved sources reorder

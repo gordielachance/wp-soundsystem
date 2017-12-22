@@ -219,6 +219,7 @@ body.wpsstm-default,body.wp-admin{
                     &.wpsstm-track-actions{
                         @include justify-content(flex-end);
                         @include flex-shrink(0);
+                        align-items:center;
                     }
                     &.wpsstm-track-sources{
                         display:none; //hide by default
