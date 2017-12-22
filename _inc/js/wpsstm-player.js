@@ -138,7 +138,7 @@ class WpsstmPagePlayer {
         
         var self = this;
         
-        var all_tracklists = $( ".wpsstm-tracklist" );
+        var all_tracklists = $( ".tracklist-playable" );
 
         if ( all_tracklists.length <= 0 ) return;
 
