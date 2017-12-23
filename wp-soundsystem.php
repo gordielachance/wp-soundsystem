@@ -510,9 +510,20 @@ class WP_SoundSystem {
         $is_popup = get_query_var( $this->qvar_popup );
         if ( $is_popup ){
             $template = wpsstm_locate_template( 'popup.php' );
+            add_filter('wpsstm_track_actions',array($this,'popup_template_action_links'));
         }
 
         return $template;
+    }
+    
+    //if the popup template is loaded, append 'wpsstm-popup=true' to the action URLs
+    function popup_template_action_links($actions){
+        foreach((array)$actions as $key=>$action){
+            if( isset($action['href']) ){
+                $actions[$key]['href'] = add_query_arg(array($this->qvar_popup=>true),$action['href']);
+            }
+        }
+        return $actions;
     }
 
 }
