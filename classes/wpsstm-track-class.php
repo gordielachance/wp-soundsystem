@@ -922,40 +922,6 @@ class WP_SoundSystem_Track{
         return $sources_url;
     }
 
-    function get_subtrack_playlist_manager(){
-        $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $labels = get_post_type_labels($playlist_type_obj);
-
-        //capability check
-        $create_playlist_cap = $playlist_type_obj->cap->edit_posts;
-
-        ob_start();
-
-        if ( !current_user_can($create_playlist_cap) ){
-            $action_link = $this->get_track_admin_url('playlists');
-            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
-        }else{
-            ?>
-            <div id="wpsstm-track-tracklists" data-wpsstm-track-id="<?php echo $this->post_id;?>">
-                <p id="wpsstm-playlists-filter" class="wpsstm-icon-input">
-                    <input type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
-                    <button type="submit" id="wpsstm-new-playlist-add" class="button button-primary wpsstm-icon-button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                    <?php wp_nonce_field( 'wpsstm_admin_track_gui_playlists_'.$this->post_id, 'wpsstm_admin_track_gui_playlists_nonce', true );?>
-                </p>
-                <?php echo $this->get_subtrack_playlist_manager_list(); ?>
-            </div>
-            <?php
-        }
-        
-        $output = ob_get_clean();
-        return $output;
-        
-    }
-    
     function get_subtrack_playlist_manager_list(){
         global $tracklist_manager_query;
         
@@ -996,51 +962,7 @@ class WP_SoundSystem_Track{
         </span>
         <?php
     }
-    
-    function get_sources_manager(){
-        
-        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$this->post_id);
 
-        ob_start();
-        if ( !$can_edit_track ){
-            $action_link = $this->get_track_admin_url('playlists');
-            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
-        }else{
-            ?>
-            <form action="<?php echo esc_url($this->get_track_admin_url('sources-manager'));?>" method="POST">
-                <?php
-                
-                //track sources
-                $this->populate_sources();
-                wpsstm_locate_template( 'track-sources.php', true, false );
-            
-                ?>
-                <p class="wpsstm-submit-wrapper">
-                    <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
-                    <input class="wpsstm-backend-toggle" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
-                </p>
-                <p class="wpsstm-icon-input" id="wpsstm-new-source">
-                    <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a source URL','wpsstm');?>">
-                    <button type="submit" name="wpsstm_sources[action][new-source]" class="button button-primary wpsstm-icon-button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </p>
-                <input type="hidden" name="wpsstm-track-popup-action" value="sources-manager" />
-                <input type="hidden" name="wpsstm-track-id" value="<?php echo $this->post_id;?>" />
-
-                <?php wp_nonce_field( sprintf('wpsstm_track_%s_new_source_nonce',$this->post_id), 'wpsstm_track_new_source_nonce', true );?>
-            </form>
-            <?php
-        }
-        
-        $output = ob_get_clean();
-        return $output;
-        
-    }
-    
     /*
     Check that a track can be flushed; which means it is a community post that does not belong to any playlist or user's likes
     */

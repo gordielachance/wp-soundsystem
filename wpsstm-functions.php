@@ -211,9 +211,6 @@ function wpsstm_get_post_tracklist($post_id=null){
     $post_type = get_post_type($post_id);
 
     switch ($post_type){
-        case wpsstm()->post_type_track:
-            $tracklist = new WP_SoundSystem_Single_Track_Tracklist($post_id);
-        break;
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:
             $tracklist = new WP_SoundSystem_Tracklist($post_id);

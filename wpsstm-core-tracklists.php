@@ -37,7 +37,9 @@ class WP_SoundSystem_Core_Tracklists{
     
     function setup_globals(){
         global $wpsstm_tracklist;
-        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //so we've got always it defined
+        
+        //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
+        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         
         $this->tracklist_post_types = array(
             wpsstm()->post_type_album,
@@ -56,7 +58,6 @@ class WP_SoundSystem_Core_Tracklists{
 
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
         add_filter( 'template_include', array($this,'tracklist_xspf_template'));
-        add_filter( 'the_content', array($this,'tracklist_admin'));
         
         add_action( 'template_redirect', array($this,'handle_tracklist_popup_form'));
 
@@ -76,12 +77,14 @@ class WP_SoundSystem_Core_Tracklists{
         
         //tracklist queries
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
+        add_action( 'current_screen',  array($this, 'the_single_backend_tracklist'));
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
         add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
         add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
 
         //post content
-        add_filter( 'the_content', array($this,'content_append_tracklist_table'), 5);
+        add_filter( 'the_content', array($this,'content_append_tracklist_table') );
+        add_filter( 'the_content', array($this,'tracklist_admin') );
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
@@ -119,20 +122,31 @@ class WP_SoundSystem_Core_Tracklists{
     }
     
     /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action)
+    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action) for tracklists
+    For single tracks, check the_track function in -core-tracks.php
     */
     
     function the_tracklist($post,$query){
         global $wpsstm_tracklist;
-        
-        $allowed_post_types = $this->tracklist_post_types;
-        $allowed_post_types[] = wpsstm()->post_type_track;
 
-        if ( in_array(get_post_type($post),$allowed_post_types) ){
+        if ( in_array($query->get('post_type'),$this->tracklist_post_types) ){
+            //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post + 1;
         }
-
+    }
+    
+    function the_single_backend_tracklist(){
+        global $post;
+        global $wpsstm_tracklist;
+        $screen = get_current_screen();
+        
+        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,$this->tracklist_post_types)  ){
+            $post_id = isset($_GET['post']) ? $_GET['post'] : null;
+            //set global $wpsstm_source
+            $wpsstm_tracklist = wpsstm_get_post_tracklist($post_id);
+            $wpsstm_tracklist->options['autoplay'] = false;
+        }
     }
 
     function enqueue_tracklists_scripts_styles_frontend(){
@@ -230,9 +244,12 @@ class WP_SoundSystem_Core_Tracklists{
         $options = $result['options'] =wp_parse_args($ajax_options,$wpsstm_tracklist->options);
 
         if ($tracklist_id){
+            
+            //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id);
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
             $wpsstm_tracklist->options = $options;
+            
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
         }
@@ -254,12 +271,10 @@ class WP_SoundSystem_Core_Tracklists{
     
     function column_tracklist_content($column,$post_id){
         global $post;
+        global $wpsstm_tracklist;
         
         if ($column != 'tracklist') return;
-        
-        global $wpsstm_tracklist;
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($post_id);
-        
+
         $wpsstm_tracklist->options['autoplay'] =    false;
         $wpsstm_tracklist->options['autosource'] =  false;
         $wpsstm_tracklist->options['can_play'] =    false;
@@ -364,30 +379,18 @@ class WP_SoundSystem_Core_Tracklists{
     function metabox_tracklist_content( $post ){
         global $wpsstm_tracklist;
         
-        $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
-        $wpsstm_tracklist->options['autoplay'] = false;
         $output = $wpsstm_tracklist->get_tracklist_html();
-
-        wp_reset_postdata();
-        
         echo $output;
     }
 
     function content_append_tracklist_table($content){
         global $post;
         global $wpsstm_tracklist;
-        
-        if( !is_single() ) return $content;
+
+        if( !is_singular($this->tracklist_post_types) ) return $content;
         if (!$wpsstm_tracklist) return $content;
-        
-        //check post type
-        $allowed_post_types = $this->tracklist_post_types;
-        $allowed_post_types[] =  wpsstm()->post_type_track;
 
-        $post_type = get_post_type($post->ID);
-        if ( !in_array($post_type,$allowed_post_types) ) return $content;
-
-        return $wpsstm_tracklist->get_tracklist_html() . $content;
+        return  $content . $wpsstm_tracklist->get_tracklist_html();
     }
     
     function shortcode_tracklist( $atts ) {
@@ -404,7 +407,10 @@ class WP_SoundSystem_Core_Tracklists{
         $atts = shortcode_atts($default,$atts);
 
         if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,$this->tracklist_post_types) ){ //check that the post exists
+            
+            //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+            
             $output = $wpsstm_tracklist->get_tracklist_html();
             wp_reset_postdata();
         }

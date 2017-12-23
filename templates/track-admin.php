@@ -1,13 +1,12 @@
-<?php 
+<?php
+global $wpsstm_tracklist;
 global $wpsstm_track;
 $track_admin = get_query_var( wpsstm_tracks()->qvar_track_admin );
-$wpsstm_track = new WP_SoundSystem_Track( get_the_ID() );
-$tracklist = wpsstm_get_post_tracklist( get_the_ID() );
 ?>
 
 <div id="wpsstm-track-admin" class="wpsstm-post-admin">
     <?php
-    if ( $actions = $wpsstm_track->get_track_links($tracklist,'popup') ){
+    if ( $actions = $wpsstm_track->get_track_links($wpsstm_tracklist,'popup') ){
         $list = get_actions_list($actions,'track');
         echo $list;
     }
@@ -25,7 +24,7 @@ $tracklist = wpsstm_get_post_tracklist( get_the_ID() );
         case 'playlists':
             ?>
             <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                <?php echo $wpsstm_track->get_subtrack_playlist_manager();?>
+                <?php wpsstm_locate_template( 'track-admin-playlists.php',true );?>
             </div>
             <?php
 
@@ -33,13 +32,7 @@ $tracklist = wpsstm_get_post_tracklist( get_the_ID() );
         case 'sources-manager':
             ?>
             <div id="wpsstm-track-admin-sources" class="wpsstm-track-admin">
-                <p>
-                    <?php _e('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');?>
-                </p>
-                <p>
-                    <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
-                </p>
-                <?php echo $wpsstm_track->get_sources_manager();?>
+                <?php wpsstm_locate_template( 'track-admin-sources.php',true );?>
             </div>
             <?php
 

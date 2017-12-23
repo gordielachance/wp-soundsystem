@@ -956,7 +956,7 @@ class WP_SoundSystem_Tracklist{
         );
         
         $args = wp_parse_args($required,(array)$args);
-        
+
         $query = new WP_Query( $args );
         $subtracks = $query->posts;
 
@@ -1054,10 +1054,29 @@ class WP_SoundSystem_Tracklist{
 
 class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
     function get_subtracks($args = null){
-        $required = array(
-            'post__in' => array($this->post_id)
+        
+        $default = array(
+            'post_status'   => 'any',
+            'posts_per_page'=> -1,
+            'orderby'       => 'track_order',
+            'order'         => 'ASC',
         );
+
+        $args = wp_parse_args((array)$args,$default);
+        
+        $required = array(
+            'post_type'         => wpsstm()->post_type_track,
+            'post__in' => array($this->post_id),
+        );
+        
         $args = wp_parse_args($required,(array)$args);
-        return parent::get_subtracks($args);
+
+        $query = new WP_Query( $args );
+        $subtracks = $query->posts;
+
+        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::get_subtracks"); 
+
+        return $subtracks;
+        
     }
 }

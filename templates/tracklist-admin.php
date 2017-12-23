@@ -1,12 +1,13 @@
 <?php
 global $post;
-$tracklist = wpsstm_get_post_tracklist(get_the_ID());
+global $wpsstm_track;
+global $wpsstm_tracklist;
 $tracklist_admin = get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
 ?>
 
 <div id="wpsstm-tracklist-admin" class="wpsstm-post-admin">
     <?php 
-    if ( $actions = $tracklist->get_tracklist_links('popup') ){
+    if ( $actions = $wpsstm_tracklist->get_tracklist_links('popup') ){
         $list = get_actions_list($actions,'tracklist');
         echo $list;
     }
@@ -17,19 +18,18 @@ $tracklist_admin = get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
         case 'share':
 
             $text = __("Use this link to share this playlist:","wpsstm");
-            $link = get_permalink($tracklist->post_id);
+            $link = get_permalink($wpsstm_tracklist->post_id);
             $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
 
         break;
         case 'new-subtrack':
-            global $wpsstm_track;
-            $wpsstm_track = new WP_SoundSystem_Track();
+            //TOFIXGGG : create subtrack then redirect to it ???
             ?>
-            <form action="<?php echo esc_url($tracklist->get_tracklist_admin_url($tracklist_admin));?>" method="POST">
+            <form action="<?php echo esc_url($wpsstm_tracklist->get_tracklist_admin_url($tracklist_admin));?>" method="POST">
                 <?php wpsstm_locate_template( 'track-admin-edit.php',true );?>
                 <input type="hidden" name="wpsstm-tracklist-popup-action" value="<?php echo $tracklist_admin;?>" />
-                <input type="hidden" name="wpsstm-tracklist-id" value="<?php echo $tracklist->post_id;?>" />
-                <?php wp_nonce_field( sprintf('wpsstm_tracklist_%s_new_track_nonce',$tracklist->post_id), 'wpsstm_tracklist_new_track_nonce', true );?>
+                <input type="hidden" name="wpsstm-tracklist-id" value="<?php echo $wpsstm_tracklist->post_id;?>" />
+                <?php wp_nonce_field( sprintf('wpsstm_tracklist_%s_new_track_nonce',$wpsstm_tracklist->post_id), 'wpsstm_tracklist_new_track_nonce', true );?>
             </form>
             <?php
         break;

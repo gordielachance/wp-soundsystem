@@ -17,10 +17,6 @@ if ( $wpsstm_track->have_sources() ) { ?>
             if (!$wpsstm_source->url) continue;
             $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
 
-            //TO FIX TO CHECK required ?  Does a source not always have a track ?
-            if(!$wpsstm_track){
-                $wpsstm_track = new WP_SoundSystem_Track($wpsstm_source->track_id);
-            }
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
                 <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>

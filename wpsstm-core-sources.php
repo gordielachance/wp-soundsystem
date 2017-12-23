@@ -29,6 +29,10 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function setup_globals(){
+        global $wpsstm_source;
+        
+        //initialize global (blank) $wpsstm_source so plugin never breaks when calling it.
+        $wpsstm_source = new WP_SoundSystem_Source();
     }
 
     function setup_actions(){
@@ -36,8 +40,6 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'init', array($this,'register_post_type_sources' ));
         add_filter( 'query_vars', array($this,'add_query_vars_source') );
 
-        add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
-        
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_sources_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         
@@ -60,6 +62,13 @@ class WP_SoundSystem_Core_Sources{
         add_action( 'manage_pages_custom_column', array($this,'column_track_match_content'), 10, 2 );
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
+        
+        /*
+        QUERIES
+        */
+        add_action( 'the_post', array($this,'the_source'),10,2);
+        add_action( 'current_screen',  array($this, 'the_single_backend_source'));
+        add_filter( 'pre_get_posts', array($this,'filter_backend_sources_by_track_id') );
         
         /*
         AJAX
@@ -179,6 +188,30 @@ class WP_SoundSystem_Core_Sources{
         register_post_type( wpsstm()->post_type_source, $args );
     }
     
+    /*
+    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action) for tracklists
+    For single tracks, check the_track function in -core-tracks.php
+    */
+    
+    function the_source($post,$query){
+        global $wpsstm_source;
+        if ( $query->get('post_type') == wpsstm()->post_type_source ){
+            //set global $wpsstm_source
+            $wpsstm_source = new WP_SoundSystem_Source($post->ID);
+        }
+    }
+    
+    function the_single_backend_source(){
+        global $post;
+        global $wpsstm_source;
+        $screen = get_current_screen();
+        if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_source )  ){
+            $post_id = isset($_GET['post']) ? $_GET['post'] : null;
+            //set global $wpsstm_source
+            $wpsstm_source = new WP_SoundSystem_Source($post_id);
+        }
+    }
+    
     //add custom admin submenu under WPSSTM
     function backend_sources_submenu($parent_slug){
 
@@ -215,11 +248,7 @@ class WP_SoundSystem_Core_Sources{
     
     function metabox_source_register(){
         global $post;
-        global $wpsstm_source;
-        
-        //TO FIX move elsewhere ? the_post filter ?
-        $wpsstm_source = new WP_SoundSystem_Source($post->ID);
-        
+
         $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
         
         add_meta_box(
@@ -351,8 +380,6 @@ class WP_SoundSystem_Core_Sources{
     function metabox_sources_content( $post ){
         global $wpsstm_track;
 
-        $wpsstm_track = new WP_SoundSystem_Track($post->ID);
-
         $sources_url = $wpsstm_track->get_track_admin_url('sources-manager');
         $sources_url = add_query_arg(array('TB_iframe'=>true),$sources_url);
 
@@ -419,7 +446,7 @@ class WP_SoundSystem_Core_Sources{
         if ( $post_type != wpsstm()->post_type_source ) return $defaults;
         
         if ( $post_type == wpsstm()->post_type_source ){
-            $after['sources_list'] = __('URL','wpsstm');
+            $after['source_url'] = __('URL','wpsstm');
         }
         
         return array_merge($before,$defaults,$after);
@@ -430,9 +457,7 @@ class WP_SoundSystem_Core_Sources{
         global $wpsstm_source;
         
         switch ( $column ) {
-            case 'sources_list':
-                
-                $wpsstm_source = new WP_SoundSystem_Source($post_id);
+            case 'source_url':
                 
                 $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->url,$wpsstm_source->title,$wpsstm_source->url);
                 
@@ -477,9 +502,7 @@ class WP_SoundSystem_Core_Sources{
     function column_track_match_content($column,$post_id){
         global $post;
         global $wpsstm_source;
-        
-        $wpsstm_source = new WP_SoundSystem_Source($post_id);
-        
+
         switch ( $column ) {
             case 'order':
                 if ($wpsstm_source->index != -1){
@@ -542,11 +565,12 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $track = new WP_SoundSystem_Track();
-        $track->from_array($ajax_data['track']);
-        $success = $track->autosource();
+        //set global $wpsstm_track
+        $wpsstm_track = new WP_SoundSystem_Track();
+        $wpsstm_track->from_array($ajax_data['track']);
+        $success = $wpsstm_track->autosource();
         
-        $result['track'] = $wpsstm_track = $track;
+        $result['track'] = $wpsstm_track;
 
         if ( is_wp_error($success) ){
             

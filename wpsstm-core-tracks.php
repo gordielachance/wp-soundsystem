@@ -34,6 +34,10 @@ class WP_SoundSystem_Core_Tracks{
     }
     
     function setup_globals(){
+        global $wpsstm_track;
+        
+        //initialize global (blank) $wpsstm_track so plugin never breaks when calling it.
+        $wpsstm_track = new WP_SoundSystem_Track();
         
         if ( isset($_REQUEST['wpsstm_subtracks_hide']) ){
             $this->subtracks_hide = ($_REQUEST['wpsstm_subtracks_hide'] == 'on') ? true : false;
@@ -50,11 +54,12 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'template_redirect', array($this,'handle_track_action'));
         add_action( 'template_redirect', array($this,'handle_track_popup_form'));
         add_filter( 'template_include', array($this,'new_track_redirect'));
-        
-        //TOFIXGGG
-        //add_filter( 'the_content', array($this,'track_lovedby'));
-        //add_filter( 'the_content', array($this,'track_in_tracklists'));
-        add_filter( 'the_content', array($this,'track_admin'));
+
+        //post content
+        add_filter( 'the_content', array($this,'track_tracklist_table') );
+        add_filter( 'the_content', array($this,'track_admin') );
+        add_filter( 'the_content', array($this,'track_lovedby') );
+        add_filter( 'the_content', array($this,'track_in_tracklists') );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -62,8 +67,6 @@ class WP_SoundSystem_Core_Tracks{
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_backend' ) );
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
-        
-        
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_track_title_save'), 5);
@@ -75,7 +78,13 @@ class WP_SoundSystem_Core_Tracks{
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
-        //subtracks queries
+        /*
+        QUERIES
+        */
+        
+        add_action( 'the_post', array($this,'the_track'),10,2);
+        add_action( 'current_screen',  array($this, 'the_single_backend_track'));
+        
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracks') );
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
@@ -196,6 +205,16 @@ class WP_SoundSystem_Core_Tracks{
         }
         
         return $content;
+    }
+    
+    function track_tracklist_table($content){
+        global $post;
+        global $wpsstm_tracklist;
+
+        if( !is_singular(wpsstm()->post_type_track) ) return $content;
+        if (!$wpsstm_tracklist) return $content;
+
+        return  $content . $wpsstm_tracklist->get_tracklist_html();
     }
     
     //load the admin template instead of regular content when 'admin-track' is set
@@ -505,6 +524,41 @@ class WP_SoundSystem_Core_Tracks{
 
         return $query;
     }
+    
+    /*
+    Register the global $wpsstm_tracklist and  $wpsstm_track global objects (hooked on 'the_post' action)
+    */
+    
+    function the_track($post,$query){
+        global $wpsstm_tracklist;
+
+        if ( $query->get('post_type') == wpsstm()->post_type_track ){
+            //set global $wpsstm_track
+            $this->setup_global_track($post->ID);
+            $wpsstm_tracklist->index = $query->current_post + 1;
+        }
+
+
+    }
+    
+    function the_single_backend_track(){
+        global $post;
+        $screen = get_current_screen();
+        if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_track )  ){
+            $post_id = isset($_GET['post']) ? $_GET['post'] : null;
+            $this->setup_global_track($post_id);
+        }
+    }
+    
+    private function setup_global_track($track_id){
+        global $wpsstm_tracklist;
+        global $wpsstm_track;
+        
+        $wpsstm_track = new WP_SoundSystem_Track( $track_id );
+
+        //set global $wpsstm_tracklist (a tracklists with this single track)
+        $wpsstm_tracklist = new WP_SoundSystem_Single_Track_Tracklist($track_id);
+    }
 
     function pre_get_posts_by_track_title( $query ) {
         
@@ -773,7 +827,8 @@ class WP_SoundSystem_Core_Tracks{
         $atts = shortcode_atts($default,$atts);
         
         if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
-            $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
+            //set global $wpsstm_tracklist
+            $this->setup_global_track($atts['post_id']);
             $output = $wpsstm_tracklist->get_tracklist_html();
             wp_reset_postdata();
         }
