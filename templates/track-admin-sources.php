@@ -27,7 +27,7 @@ if ( !$can_edit_track ){
         ?>
         <p class="wpsstm-submit-wrapper">
             <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
-            <input class="wpsstm-backend-toggle" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
+            <input id="wpsstm-backend-sources-bt" type="submit" name="wpsstm_sources[action][backend]" class="button" value="<?php _e('Backend listing','wpsstm');?>">
         </p>
         <p class="wpsstm-icon-input" id="wpsstm-new-source">
             <input type="text" name="wpsstm_sources[source-url]" value="" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a source URL','wpsstm');?>">
