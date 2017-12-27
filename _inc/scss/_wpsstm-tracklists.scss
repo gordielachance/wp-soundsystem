@@ -5,11 +5,6 @@ MINIMAL STYLES
 */
 
 .wpsstm-tracklist{
-    &.tracklist-loading{
-        #wpsstm-tracklist-actions{
-            pointer-events:none;
-        }
-    }
     &:not(.wpsstm-loved-tracklist) #wpsstm-tracklist-action-unfavorite{
         display:none!important;
     }
@@ -19,7 +14,7 @@ MINIMAL STYLES
             display:none!important;
         }
     }
-    &:not(.tracklist-expired){
+    &.tracklist-loading, &:not(.tracklist-expired){
         #wpsstm-tracklist-action-refresh{
             pointer-events:none;
         }
@@ -106,9 +101,6 @@ body.wpsstm-default,body.wp-admin{
         &.tracklist-loading{
             .wpsstm-tracklist-icon{
                 @extend .wpsstm-loading-icon;
-            }
-            #wpsstm-tracklist-actions{
-                @include opacity(.5);
             }
         }
 
@@ -322,7 +314,6 @@ body.wpsstm-default,body.wp-admin{
         @include display-flex();
         height: 1em;
         padding: 1em 0;
-        font-size: .7em;
         > *{
             @include display-flex();
             @include flex-grow(1);
