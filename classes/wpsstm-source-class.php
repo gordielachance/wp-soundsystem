@@ -458,18 +458,7 @@ class WP_SoundSystem_Source{
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
-        
-        
-        //context
-        switch($context){
-            case 'page':
 
-            break;
-            case 'popup':
-                
-            break;
-        }
-        
         return apply_filters('wpsstm_source_actions',$actions,$context);
     }
     

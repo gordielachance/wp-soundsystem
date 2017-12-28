@@ -1,146 +1,142 @@
 (function($){
+ 
+    /*
+    Tracklist manager
+    */
 
-    $(document).ready(function(){
-        
-        /*
-        Track tracklists
-        */
-        
-        //filter playlists input
-        $(document).on("keyup", '#wpsstm-playlists-filter input[type="text"]', function(e){
-            e.preventDefault();
-            var container = $(this).parents('#wpsstm-track-tracklists');
-            var newPlaylistEl = $(container).find('#wpsstm-new-playlist-add');
-            var value = $(this).val().toLowerCase();
-            var tracklist_items = $(container).find('#tracklists-manager .tracklist-row');
+    //filter playlists input
+    $(document).on("keyup", '#wpsstm-playlists-filter input[type="text"]', function(e){
+        e.preventDefault();
+        var container = $(this).parents('#wpsstm-track-tracklists');
+        var newPlaylistEl = $(container).find('#wpsstm-new-playlist-add');
+        var value = $(this).val().toLowerCase();
+        var tracklist_items = $(container).find('#tracklists-manager .tracklist-row');
 
-            var has_results = false;
-            $(tracklist_items).each(function() {
-                if ($(this).text().toLowerCase().search(value) > -1) {
-                    $(this).show();
-                    has_results = true;
-                }
-                else {
-                    $(this).hide();
-                }
-            });
-
-            if (has_results){
-                newPlaylistEl.hide();
-            }else{
-                newPlaylistEl.show();
+        var has_results = false;
+        $(tracklist_items).each(function() {
+            if ($(this).text().toLowerCase().search(value) > -1) {
+                $(this).show();
+                has_results = true;
             }
-
-        });
-        
-        //create new playlist from input
-        $(document).on( "click",'#wpsstm-track-tracklists #wpsstm-new-playlist-add input[type="submit"]', function(e){
-
-            e.preventDefault();
-            var bt =                        $(this);
-            var tracklistSelector =         bt.closest('#wpsstm-track-tracklists');
-            var track_id =                  Number($(tracklistSelector).attr('data-wpsstm-track-id'));
-
-            var existingPlaylists_el =      $(tracklistSelector).find('ul');
-            var newPlaylistTitle_el =       $(tracklistSelector).find('#wpsstm-playlists-filter input[type="text"]');
-
-            if (!newPlaylistTitle_el.val()){
-                $(newPlaylistTitle_el).focus();
+            else {
+                $(this).hide();
             }
-
-            var ajax_data = {
-                action:         'wpsstm_subtrack_tracklist_manager_new_playlist',
-                playlist_title: newPlaylistTitle_el.val(),
-                track_id:       track_id,
-            };
-
-            return $.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
-                beforeSend: function() {
-                    $(tracklistSelector).addClass('wpsstm-freeze');
-                    newPlaylistTitle_el.addClass('input-loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                    }else if(data.new_html) {
-                        
-                        //refresh tracklists list
-                        existingPlaylists_el.replaceWith( data.new_html );
-                        
-                        //simulate keyup to keep the original filtering
-                        $( '#wpsstm-playlists-filter input[type="text"]' ).trigger("keyup"); 
-                        
-                        //simulate new playlist checkbox click
-                        var playlist_id = data.playlist_id;
-                        var checkbox_el = $('input[name="wpsstm_playlist_id"][value="'+playlist_id+'"]');
-                        checkbox_el.trigger("click");
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    bt.addClass('action-error');
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    $(tracklistSelector).removeClass('wpsstm-freeze');
-                    newPlaylistTitle_el.removeClass('input-loading');
-                }
-            })
-
         });
-        
-        //toggle track in playlist
-        $(document).on( "click",'#wpsstm-track-tracklists li input[type="checkbox"]', function(e){
 
-            var checkbox =              $(this);
-            var tracklistSelector =     $(this).closest('#wpsstm-track-tracklists');
-            var track_id =              Number($(tracklistSelector).attr('data-wpsstm-track-id'));
+        if (has_results){
+            newPlaylistEl.hide();
+        }else{
+            newPlaylistEl.show();
+        }
 
-            var is_checked =            $(checkbox).is(':checked');
-            var tracklist_id =          $(this).val();
-            var li_el =                 $(checkbox).closest('li');
-
-            var ajax_data = {
-                action:         'wpsstm_toggle_playlist_subtrack',
-                track_id:       track_id,
-                tracklist_id:   tracklist_id,
-                track_action:   (is_checked ? 'append' : 'remove'),
-            };
-
-            return $.ajax({
-
-                type: "post",
-                url: wpsstmL10n.ajaxurl,
-                data:ajax_data,
-                dataType: 'json',
-                beforeSend: function() {
-                    $(li_el).addClass('wpsstm-freeze');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                        checkbox.prop("checked", !checkbox.prop("checked")); //restore previous state
-                    }else if(data.success) {
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    $(li_el).removeClass('wpsstm-freeze');
-                }
-            })
-
-        });
-        
     });
-    
+
+    //create new playlist from input
+    $(document).on( "click",'#wpsstm-new-playlist-add', function(e){
+
+        e.preventDefault();
+        var bt =                        $(this);
+        var tracklistSelector =         bt.closest('#wpsstm-track-tracklists');
+        var track_id =                  Number($(tracklistSelector).attr('data-wpsstm-track-id'));
+
+        var existingPlaylists_el =      $(tracklistSelector).find('ul');
+        var newPlaylistTitle_el =       $(tracklistSelector).find('#wpsstm-playlists-filter input[type="text"]');
+
+        if (!newPlaylistTitle_el.val()){
+            $(newPlaylistTitle_el).focus();
+        }
+
+        var ajax_data = {
+            action:         'wpsstm_subtrack_tracklist_manager_new_playlist',
+            playlist_title: newPlaylistTitle_el.val(),
+            track_id:       track_id,
+        };
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(tracklistSelector).addClass('wpsstm-freeze');
+                newPlaylistTitle_el.addClass('input-loading');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                }else if(data.new_html) {
+
+                    //refresh tracklists list
+                    existingPlaylists_el.replaceWith( data.new_html );
+
+                    //simulate keyup to keep the original filtering
+                    $( '#wpsstm-playlists-filter input[type="text"]' ).trigger("keyup"); 
+
+                    //simulate new playlist checkbox click
+                    var playlist_id = data.playlist_id;
+                    var checkbox_el = $('input[name="wpsstm_playlist_id"][value="'+playlist_id+'"]');
+                    checkbox_el.trigger("click");
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                bt.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                $(tracklistSelector).removeClass('wpsstm-freeze');
+                newPlaylistTitle_el.removeClass('input-loading');
+            }
+        })
+
+    });
+
+    //toggle track in playlist
+    $(document).on( "click",'#wpsstm-track-tracklists li input[type="checkbox"]', function(e){
+
+        var checkbox =              $(this);
+        var tracklistSelector =     $(this).closest('#wpsstm-track-tracklists');
+        var track_id =              Number($(tracklistSelector).attr('data-wpsstm-track-id'));
+
+        var is_checked =            $(checkbox).is(':checked');
+        var tracklist_id =          $(this).val();
+        var li_el =                 $(checkbox).closest('li');
+
+        var ajax_data = {
+            action:         'wpsstm_toggle_playlist_subtrack',
+            track_id:       track_id,
+            tracklist_id:   tracklist_id,
+            track_action:   (is_checked ? 'append' : 'remove'),
+        };
+
+        return $.ajax({
+
+            type: "post",
+            url: wpsstmL10n.ajaxurl,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                $(li_el).addClass('wpsstm-freeze');
+            },
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
+                    checkbox.prop("checked", !checkbox.prop("checked")); //restore previous state
+                }else if(data.success) {
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                $(li_el).removeClass('wpsstm-freeze');
+            }
+        })
+
+    });
+
     $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
         var track_el = track_obj.track_el;
 

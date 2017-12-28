@@ -1,82 +1,90 @@
 (function($){
 
-    $(document).ready(function(){
+    //modals
+    $(document).on('click', 'body:not(.wpsstm-popup) a.wpsstm-link-popup,body:not(.wpsstm-popup) li.wpsstm-link-popup>a', function(e) {
+        e.preventDefault();
 
-        //modals
-        $(document).on('click', 'body:not(.wpsstm-popup) a.wpsstm-link-popup,body:not(.wpsstm-popup) li.wpsstm-link-popup>a', function(e) {
-            e.preventDefault();
-            
-            var content_url = this.href;
-            var loader_el = $('<p id="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
-            var popup = $('<div></div>').append(loader_el);
-            
-            popup.dialog({
-                width:800,
-                height:500,
-                modal: true,
-                dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog dialog-loading',
+        var content_url = this.href;
 
-                open: function(ev, ui){
-                    $('html').addClass('wpsstm-is-dialog');
-                    var dialog = $(this).closest('.ui-dialog');
-                    var dialog_content = dialog.find('.ui-dialog-content');
-                    var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
-                    dialog_content.append(iframe);
-                    iframe.load(function(){
-                        dialog.removeClass('dialog-loading');
-                    });
-                },
-                close: function(ev, ui){
-                    $('html').removeClass('wpsstm-is-dialog');
-                }
+        //append popup arg
+        if( content_url.indexOf("?") >= 0 ) {
+            content_url = content_url+"&wpsstm-popup=true";
+        }else{
+            content_url = content_url+"?wpsstm-popup=true";
+        }
 
-            });
+        console.log(content_url);
 
+
+        var loader_el = $('<p id="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
+        var popup = $('<div></div>').append(loader_el);
+
+        popup.dialog({
+            width:800,
+            height:500,
+            modal: true,
+            dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog dialog-loading',
+
+            open: function(ev, ui){
+                $('html').addClass('wpsstm-is-dialog');
+                var dialog = $(this).closest('.ui-dialog');
+                var dialog_content = dialog.find('.ui-dialog-content');
+                var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
+                dialog_content.append(iframe);
+                iframe.load(function(){
+                    dialog.removeClass('dialog-loading');
+                });
+            },
+            close: function(ev, ui){
+                $('html').removeClass('wpsstm-is-dialog');
+            }
 
         });
-        
 
-        //artist autocomplete
-        $('.wpsstm-artist-autocomplete').each(function() {
-            var input = $(this);
-            input.autocomplete({
-                source: function( request, response ) {
-                    $.ajax({
-                        type: "post",
-                        dataType: "json",
-                        url: wpsstmL10n.ajaxurl,
-                        data: {
-                            action:             'wpsstm_search_artists',
-                            search:              request.term + '*', //wildcard!
-                        },
-                        beforeSend: function() {
-                            input.addClass('input-loading');
-                        },
-                        success: function( ajax ) {
-                            if(ajax.success){
-                                var artists = ajax.data.artists;
-                                response($.map(artists, function(artist){
-                                    return artist.name;
-                                }));
-                            }else{
-                                console.log(ajax);
-                            }
+    });
 
-                        },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                            console.log("status: " + textStatus + ", error: " + errorThrown); 
-                        },
-                        complete: function() {
-                            input.removeClass('input-loading');
+    //popup links
+    //TOFIXGGG when link in popup is clicked, close / reopen popup ?
+
+    //artist autocomplete
+    $('.wpsstm-artist-autocomplete').each(function() {
+        var input = $(this);
+        input.autocomplete({
+            source: function( request, response ) {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    url: wpsstmL10n.ajaxurl,
+                    data: {
+                        action:             'wpsstm_search_artists',
+                        search:              request.term + '*', //wildcard!
+                    },
+                    beforeSend: function() {
+                        input.addClass('input-loading');
+                    },
+                    success: function( ajax ) {
+                        if(ajax.success){
+                            var artists = ajax.data.artists;
+                            response($.map(artists, function(artist){
+                                return artist.name;
+                            }));
+                        }else{
+                            console.log(ajax);
                         }
-                    });
-                },
-                delay: 500,
-                minLength: 2,
-            });
-        });
-    });  
 
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                        console.log("status: " + textStatus + ", error: " + errorThrown); 
+                    },
+                    complete: function() {
+                        input.removeClass('input-loading');
+                    }
+                });
+            },
+            delay: 500,
+            minLength: 2,
+        });
+    });
 
 })(jQuery);
 

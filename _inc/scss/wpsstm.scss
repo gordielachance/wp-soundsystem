@@ -105,25 +105,23 @@ body.wpsstm-default,body.wp-admin{
         margin: 0.5em;
         input{
             padding: 0.5em;
-            line-height: 1em;
-            height:100%;
             &[type="text"]{
                 padding-right:4em;
             }
-            &[type="submit"]{
-                position: absolute;
-                top:0;
-                right: 0;
-                border: none;
-                @extend .wpsstm-can-click;
-                &.wpsstm-icon-button{
-                    width:4em;
-                    font-weight: normal;
-                    font-style: normal;
-                    font-family: 'FontAwesome';
-                }
-            }
 
+        }
+        [type="submit"]{ //input & button
+            position: absolute;
+            top:0;
+            right: 0;
+            border: none;
+            @extend .wpsstm-can-click;
+            &.wpsstm-icon-button{
+                display: block;
+                height: 100%;
+                box-sizing: border-box;
+                padding: 0 2em;
+            }
         }
         &.input-loading{
             input[type="text"]{

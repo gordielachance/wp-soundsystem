@@ -197,6 +197,8 @@ class WP_SoundSystem_Core_Wizard{
 
     function populate_wizard_tracklist($post_id=null,$input=null){
         global $wpsstm_tracklist;
+        
+        //set global $wpsstm_tracklist
         $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->is_wizard_disabled() );
@@ -274,6 +276,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
+        //set global $wpsstm_tracklist
         $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         
         wpsstm()->debug_log($wpsstm_tracklist->post_id, "WP_SoundSystem_Core_Wizard::backend_wizard_save()");

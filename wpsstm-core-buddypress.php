@@ -26,7 +26,6 @@ class WP_SoundSystem_Core_BuddyPress{
     function init(){
         add_action( 'wpsstm_loaded',array($this,'setup_globals') );
         add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-        
     }
     
     function setup_globals(){
@@ -317,6 +316,8 @@ class WP_SoundSystem_Core_BuddyPress{
     
     function user_loved_tracks_subnav_content(){
         global $wpsstm_tracklist;
+        
+        //set global $wpsstm_tracklist
         $wpsstm_tracklist = $this->member_get_favorite_tracks_playlist();
         echo $wpsstm_tracklist->get_tracklist_html();
     }
@@ -326,31 +327,26 @@ class WP_SoundSystem_Core_BuddyPress{
     */
 
     public function member_get_favorite_tracks_playlist(){
-
-        //favorite tracks query
-        $query_args = array(
-            'post_type' =>      wpsstm()->post_type_track,
-            'posts_per_page' => -1,
-            wpsstm_tracks()->qvar_loved_tracks => bp_displayed_user_id(),
-            'fields' =>         'ids',
-        );
-        $query = new WP_Query( $query_args );
-        
-        //build playlist track args
-        $track_args = array(
-            'post__in'  => $query->posts
-        );
-
-        $user_datas = get_userdata( bp_displayed_user_id() );
-        $display_name = $user_datas->display_name;
-        $tracklist_title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
         
         $tracklist = new WP_SoundSystem_Tracklist();
-        $tracklist->title = $tracklist_title;
-        $tracklist->author = $display_name;
+        $user_id = bp_displayed_user_id();
         
-        //WIP TO FIX NOT WORKING YET
-        $tracklist->populate_subtracks($track_args);
+        if ( $user_datas = get_userdata( $user_id ) ) {
+
+            $display_name = $user_datas->display_name;
+            $tracklist_title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
+
+            $tracklist->title = $tracklist_title;
+            $tracklist->author = $display_name;
+
+            $subtracks_qargs = array(
+                wpsstm_tracks()->qvar_loved_tracks =>   $user_id,
+            );
+            $tracklist->populate_subtracks($subtracks_qargs);
+        }else{
+            $tracklist->did_query_tracks = true; //so it's not requested later
+        }
+
         return $tracklist;
     }
     
@@ -401,7 +397,6 @@ class WP_SoundSystem_Core_BuddyPress{
     }
     
 }
-
 
 function wpsstm_buddypress() {
 	return WP_SoundSystem_Core_BuddyPress::instance();

@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.9.0
+Version: 1.9.1
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.9.0';
+    public $version = '1.9.1';
     /**
     * @public string plugin DB version
     */
@@ -38,6 +38,7 @@ class WP_SoundSystem {
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
+    public $qvar_popup = 'wpsstm-popup';
     
     public $subtracks_table_name = 'wpsstm_subtracks';
 
@@ -136,7 +137,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'classes/wpsstm-lastfm-user.php';
         require $this->plugin_dir . 'wpsstm-core-lastfm.php';
-        //require $this->plugin_dir . 'wpsstm-core-buddypress.php';
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
         if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
@@ -177,10 +178,13 @@ class WP_SoundSystem {
         add_filter( 'body_class', array($this,'default_style_class'));
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        add_filter( 'template_include', array($this,'popup_template'));
 
     }
     
     function add_wpsstm_query_vars($vars){
+        $vars[] = $this->qvar_popup;
         $vars[] = $this->qvar_wpsstm_statii;
         return $vars;
     }
@@ -310,10 +314,10 @@ class WP_SoundSystem {
         wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
 
         //JS
-        wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36');
+        wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
         
         //js
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version, true);
 
         $datas = array(
             'debug'             => (WP_DEBUG),
@@ -499,6 +503,27 @@ class WP_SoundSystem {
             
         }
         
+    }
+    
+    //loads the popup template if 'wpsstm-popup' is defined
+    function popup_template($template){
+        $is_popup = get_query_var( $this->qvar_popup );
+        if ( $is_popup ){
+            $template = wpsstm_locate_template( 'popup.php' );
+            add_filter('wpsstm_track_actions',array($this,'popup_template_action_links'));
+        }
+
+        return $template;
+    }
+    
+    //if the popup template is loaded, append 'wpsstm-popup=true' to the action URLs
+    function popup_template_action_links($actions){
+        foreach((array)$actions as $key=>$action){
+            if( isset($action['href']) ){
+                $actions[$key]['href'] = add_query_arg(array($this->qvar_popup=>true),$action['href']);
+            }
+        }
+        return $actions;
     }
 
 }
