@@ -17,32 +17,43 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 <div class="<?php echo implode(' ',$tracklist->get_tracklist_class());?>" <?php echo $tracklist->get_tracklist_attr();?>>
     <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
-        <div>
-            <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
-            <strong class="wpsstm-tracklist-title" itemprop="name">
-                <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->title;?></a>
-            </strong>
-            <small class="wpsstm-tracklist-time">
-                <time class="wpsstm-tracklist-published"><i class="fa fa-clock-o" aria-hidden="true"></i> <?php echo wpsstm_get_datetime( $tracklist->updated_time );?></time>
-                <?php 
-                if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_time_before_refresh() ) ){
-                    ?>
-                    <time class="wpsstm-tracklist-refresh-time"><i class="fa fa-rss" aria-hidden="true"></i> <?php printf(__('cached for %s','wpsstm'),$rate);?></time>
-                    <?php
-                }
-                ?>
-            </small>
+        <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
+        <strong class="wpsstm-tracklist-title" itemprop="name">
+            <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->title;?></a>
+        </strong>
+        <small class="wpsstm-tracklist-time">
+            <time class="wpsstm-tracklist-published">
+                <i class="fa fa-clock-o" aria-hidden="true"></i> 
+                <?php echo wpsstm_get_datetime( $tracklist->updated_time );?>
+            </time>
             <?php 
-                //tracklist actions
-                if ( $actions = $tracklist->get_tracklist_links('page') ){
-                    echo get_actions_list($actions,'tracklist');
-                }
+            if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_time_before_refresh() ) ){
+                ?>
+                <time class="wpsstm-tracklist-refresh-time">
+                    <i class="fa fa-rss" aria-hidden="true"></i> 
+                    <?php printf(__('cached for %s','wpsstm'),$rate);?>
+                </time>
+                <?php
+            }
             ?>
-        </div>
-        
-
-        
-        
+        </small>
+        <?php
+            //original link
+            if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url) ){
+                ?> 
+                <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $tracklist_url;?>">
+                    <i class="fa fa-link" aria-hidden="true"></i> 
+                    <?php _e('Source','wpsstm');?>
+                </a>
+                <?php
+            }
+        ?>
+        <?php 
+            //tracklist actions
+            if ( $actions = $tracklist->get_tracklist_links('page') ){
+                echo get_actions_list($actions,'tracklist');
+            }
+        ?>
     </div>
     <?php
     //tracklist notices
