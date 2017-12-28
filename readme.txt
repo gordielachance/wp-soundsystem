@@ -148,6 +148,9 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
+= XXX =
+* Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
+
 = 1.9.1 =
 * Improve popup template
 * Improve track/tracklist frontend admin
