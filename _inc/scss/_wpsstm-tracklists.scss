@@ -75,6 +75,14 @@ body.wpsstm-default,body.wp-admin{
             border-bottom:1px solid #F7F7F7;
             padding:.25em;
             
+            .wpsstm-tracklist-icon{
+                @include opacity (.15);
+            }
+            
+            .wpsstm-live-tracklist-link{
+                float:right;
+            }
+            
             #wpsstm-tracklist-actions{
                 display:block;
                 text-align: center;
@@ -83,10 +91,6 @@ body.wpsstm-default,body.wp-admin{
                     font-size:.8em;
                 }
             }
-        }
-
-        .wpsstm-tracklist-icon{
-            @include opacity (.15);
         }
         
         &.wpsstm-live-tracklist{
