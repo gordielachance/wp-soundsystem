@@ -270,11 +270,3 @@ class WpsstmLastFM {
 })(jQuery);
 
 var wpsstm_lastfm = new WpsstmLastFM();
-
-
-
-
-
-
-
-
