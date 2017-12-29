@@ -23,7 +23,13 @@ class WP_SoundSystem_Reddit_Api{
 
     function get_remote_url($url){
         if ( $this->can_handle_url() ){
-            $url = sprintf( 'https://www.reddit.com/r/%s.json?limit=100',$this->subreddit_slug );
+            $url = sprintf( 'https://www.reddit.com/r/%s.json',$this->subreddit_slug );
+            
+            //https://www.reddit.com/dev/api/
+            $args = array(
+                'limit' => 25, //default:25
+            );
+            $url = add_query_arg($args,$url);
         }
         return $url;
     }
@@ -58,6 +64,8 @@ class WP_SoundSystem_Reddit_Api{
                 $transient_name = 'wpsstm-reddit-' . $this->subreddit_slug . '-title';
 
                 if ( false === ( $title = get_transient($transient_name ) ) ) {
+                    
+                    $remote_title = null;
 
                     $url = sprintf( 'https://www.reddit.com/r/%s',$this->subreddit_slug );
                     $response = wp_remote_get( $url );
