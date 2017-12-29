@@ -30,6 +30,6 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
         </ul>
     </section>
     <?php
-   wp_reset_query();
+    wp_reset_postdata();
 }
 ?>

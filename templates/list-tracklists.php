@@ -51,10 +51,9 @@ if ( $query->have_posts() ) {
             <?php
         }
         ?>
-        <!-- put pagination functions here -->
-        <?php wp_reset_postdata(); ?>
     </ul>
     <?php
+    wp_reset_postdata();
 }else{
     ?>
     <p><?php _e( 'Sorry, no tracklists matching those criteria.','wpsstm' ); ?></p>

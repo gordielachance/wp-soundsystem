@@ -830,7 +830,6 @@ class WP_SoundSystem_Core_Tracks{
             //set global $wpsstm_tracklist
             $this->setup_global_track($atts['post_id']);
             $output = $wpsstm_tracklist->get_tracklist_html();
-            wp_reset_postdata();
         }
 
         return $output;

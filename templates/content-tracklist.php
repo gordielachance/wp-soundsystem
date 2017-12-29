@@ -5,8 +5,6 @@ $wpsstm_tracklist->populate_subtracks();
 
 $tracklist = $wpsstm_tracklist;
 
-
-
 //TO FIX move at a smarter place ?
 if ( $wpsstm_tracklist->get_options('can_play') ){
     do_action('init_playable_tracklist'); //used to know if we must load the player stuff (scripts/styles/html...)
@@ -145,7 +143,8 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             } 
             ?>
        </ul>
-    <?php 
+    <?php
+        wp_reset_postdata(); //TOFIXTOCHECK useful ? Since we don't use the_post here...
     }
 
     ?>
