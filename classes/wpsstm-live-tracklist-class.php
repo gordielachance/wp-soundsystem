@@ -755,15 +755,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
 
-    function save_feed_url($feed_url){
+    function save_feed_url(){
 
-        //save feed url
-        $feed_url = trim($feed_url);
-
-        if (!$feed_url){
+        if (!$this->feed_url){
             return delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name );
         }else{
-            return update_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $feed_url );
+            return update_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $this->feed_url );
         }
     }
     
