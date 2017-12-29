@@ -41,7 +41,6 @@ class WP_SoundSystem_Core_Wizard{
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
 
         //frontend
-        add_action( 'wp', array($this,'populate_input_wizard_tracklist'));
         add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
         add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
         add_filter( 'the_content', array($this,'frontend_wizard_content'));
@@ -100,45 +99,16 @@ class WP_SoundSystem_Core_Wizard{
     }
 
     function metabox_wizard_display(){
-        global $post;
-
         wpsstm_wizard()->wizard_settings_init();
         wpsstm_locate_template( 'wizard-backend.php', true );
     }
-    
+
     /*
     For wizard tracklists (created with the community user); 
     Redirect to wizard and pass tracklist ID as parameter
     
     If user try to hacks this (by passing a tracklist ID that is not a community post); redirect to regular tracklist.
     */
-    
-    function populate_input_wizard_tracklist(){
-        global $post;
-        global $wpsstm_tracklist;
-        
-        if ( !$this->can_frontend_wizard() ) return;
-        if ( !is_page($this->frontend_wizard_page_id) ) return;
-        
-        //an error is already populated
-        $wizard_error_code = isset($_REQUEST['wizard_error']) ? $_REQUEST['wizard_error'] : null;
-        if ( $wizard_error_code ) return;
-
-        //no data sent
-        $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;
-        if (!$wizard_data) return;
-        
-        $input = isset($wizard_data['search']) ? trim($wizard_data['search']) : null;
-        $success = $this->populate_wizard_tracklist(null,$input);
-
-        if ( is_wp_error($success) ){
-            $error_code = $success->get_error_code();
-            $link = get_permalink($this->frontend_wizard_page_id);
-            $link = add_query_arg(array('wizard_error'=>$error_code),$link);
-            wp_redirect($link);
-            exit();
-        }
-    }
     
     function community_tracklist_redirect(){
         global $post;
@@ -183,16 +153,13 @@ class WP_SoundSystem_Core_Wizard{
     */
     
     function frontend_wizard_content($content){
-        global $post;
-        global $wpsstm_tracklist;
-        
+
         if ( !is_page($this->frontend_wizard_page_id) ) return $content;
         
         ob_start();
-        wpsstm_locate_template( 'frontend-wizard.php', true, false );
-        $extra = ob_get_clean();
-
-        return $content . $extra;
+        wpsstm_locate_template( 'wizard-frontend.php', true, false );
+        $wizard = ob_get_clean();
+        return $content . $wizard;
     }
 
     function populate_wizard_tracklist($post_id=null,$input=null){
@@ -202,26 +169,7 @@ class WP_SoundSystem_Core_Wizard{
         $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist($post_id);
         
         wpsstm_wizard()->is_advanced = ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->is_wizard_disabled() );
-
-        if ( !$post_id ){ //is wizard input
-            $input = trim($input);
-            $input = apply_filters('wpsstm_wizard_input',$input);
-
-            if( !$input ){
-                return new WP_Error( 'wpsstm_wizard_missing_input', __('Missing wizard input.','wpsstm') );
-            }
-
-            $url_parsed = parse_url($input); //check this is an URL
-
-            if( empty($url_parsed['scheme']) ){
-                return new WP_Error( 'wpsstm_wizard_missing_url_input', __('Missing wizard URL input.','wpsstm') );
-            }
-
-            $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
-            $wpsstm_tracklist->feed_url = $feed_url;
-            
-        }
-
+        
         if ( wpsstm_wizard()->is_advanced ){
             //force remote request (so we can get the remote playlist details - content; etc.)
             $wpsstm_tracklist->ajax_refresh = false;
@@ -231,6 +179,27 @@ class WP_SoundSystem_Core_Wizard{
 
         if (wpsstm_is_backend() ){
             $wpsstm_tracklist->options['autoplay'] = false;
+        }
+
+        if ( !$post_id && $input ){ //is wizard input
+            $input = trim($input);
+            $input = apply_filters('wpsstm_wizard_input',$input);
+
+            if( !$input ){
+                $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_input', __('Missing wizard input.','wpsstm') );
+                return false;
+            }
+
+            $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
+            
+            $url_parsed = parse_url($input); //check this is an URL
+            if( empty($url_parsed['scheme']) ){
+                $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_url_input', __('Missing wizard URL input.','wpsstm') );
+                return false;
+            }
+            
+            $wpsstm_tracklist->feed_url = $feed_url;
+            
         }
 
         return true;
@@ -286,7 +255,8 @@ class WP_SoundSystem_Core_Wizard{
         if ( isset($wizard_data['save-wizard']) ){
             //save feed URL
             $input = isset($wizard_data['search']) ? $wizard_data['search'] : null;
-            $success = $wpsstm_tracklist->save_feed_url($input);
+            $wpsstm_tracklist->feed_url = trim($input);
+            $success = $wpsstm_tracklist->save_feed_url(); //TO FIX input not filtered. Should we rather use populate_wizard_tracklist(null,$input) here ?
             //save wizard settings
             $success = $wpsstm_tracklist->save_wizard($wizard_data);
         }elseif ( isset($wizard_data['import-tracks']) ){
@@ -322,11 +292,17 @@ class WP_SoundSystem_Core_Wizard{
         if ( !$this->can_frontend_wizard() ) return;
 
         //wizard action
-        $wizard_data = isset($_REQUEST[ 'wpsstm_wizard' ]) ? $_REQUEST[ 'wpsstm_wizard' ] : array();
-        $is_load_url = isset($wizard_data['action']['load-url']);
+        $is_load_url = isset($_REQUEST[ 'wpsstm_wizard' ]['action']['load-url']);
         if ( !$is_load_url ) return;
-        if ( !$wpsstm_tracklist->feed_url ) return;
         
+        //populate tracklist
+        $input = isset($_POST['wpsstm_wizard']['search']) ? trim($_POST['wpsstm_wizard']['search']) : null;
+        if ($input){
+            $this->populate_wizard_tracklist(null,$input);
+        }
+        
+        if ( !$wpsstm_tracklist->feed_url ) return;
+
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
