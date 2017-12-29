@@ -734,7 +734,7 @@ class WP_SoundSystem_Core_Wizard{
         
         $submit_input = null;
         if ( !wpsstm_is_backend() ){
-            $submit_input = '<input type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary wpsstm-icon-button" value="">';
+            $submit_input = '<button type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary wpsstm-icon-button"><i class="fa fa-search" aria-hidden="true"></i></button>';
         }
 
         
