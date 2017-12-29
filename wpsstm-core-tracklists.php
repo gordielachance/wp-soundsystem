@@ -133,6 +133,10 @@ class WP_SoundSystem_Core_Tracklists{
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post + 1;
+        }else{
+            //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
+            //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
+            $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     

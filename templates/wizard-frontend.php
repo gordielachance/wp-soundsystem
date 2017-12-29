@@ -12,13 +12,7 @@ if ( !$can_wizard ){
 }else{
     
     global $wpsstm_tracklist;
-    
-    //get tracklist from wizard input
-    $input = isset($_POST['wpsstm_wizard']['search']) ? trim($_POST['wpsstm_wizard']['search']) : null;
-    if ($input){
-        $this->populate_wizard_tracklist(null,$input);
-    }
-    
+
     $wpsstm_tracklist->populate_subtracks(); //we must have the tracks populated before we output the notices
 
     ?>
