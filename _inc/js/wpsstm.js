@@ -43,9 +43,6 @@
 
     });
 
-    //popup links
-    //TOFIXGGG when link in popup is clicked, close / reopen popup ?
-
     //artist autocomplete
     $('.wpsstm-artist-autocomplete').each(function() {
         var input = $(this);
