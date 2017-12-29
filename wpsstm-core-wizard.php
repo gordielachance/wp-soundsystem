@@ -284,6 +284,10 @@ class WP_SoundSystem_Core_Wizard{
         $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;
 
         if ( isset($wizard_data['save-wizard']) ){
+            //save feed URL
+            $input = isset($wizard_data['search']) ? $wizard_data['search'] : null;
+            $success = $wpsstm_tracklist->save_feed_url($input);
+            //save wizard settings
             $success = $wpsstm_tracklist->save_wizard($wizard_data);
         }elseif ( isset($wizard_data['import-tracks']) ){
             $wpsstm_tracklist->append_wizard_tracks();
