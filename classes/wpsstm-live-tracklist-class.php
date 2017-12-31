@@ -869,7 +869,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     // checks if the playlist has expired (and thus should be refreshed)
     // set 'expiration_time'
-    function check_has_expired(){
+    private function check_has_expired(){
         
         $cache_duration_min = $this->get_scraper_options('datas_cache_min');
         $has_cache = (bool)$cache_duration_min;
@@ -887,9 +887,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     
     function get_time_before_refresh(){
 
-        $cachemin = $this->get_scraper_options('datas_cache_min');
-        
-        if( !$cachemin ) return false;
+        if ( !$cachemin = $this->get_scraper_options('datas_cache_min') ) return false;
+        if ( $this->is_expired ) return false;
         
         $time_refreshed = $this->updated_time;
         $time_before = $time_refreshed + ($cachemin * MINUTE_IN_SECONDS);
