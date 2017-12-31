@@ -174,7 +174,17 @@ class WpsstmTracklist {
         this.tracks_count =             undefined;
         this.tracks_shuffle_order =     undefined;
         this.populate_tracklist(tracklist_el);
-        this.can_play =                 undefined;
+        this.can_play =                 (this.tracks_count < 0) ? undefined : (this.tracks_count); //if -1:not yet populated
+        
+        /*
+        autoload
+        Wheter or not populate the tracks through ajax at initialization, if not done yet.
+        */
+
+        if( (this.options.hasOwnProperty('autoload')) && (this.options.autoload == true) ){
+            this.maybe_refresh();
+        }
+        
     }
     
     debug(msg){
@@ -189,9 +199,11 @@ class WpsstmTracklist {
         var initCheck = $.Deferred();
         
         if (typeof self.can_play !== 'undefined'){
-            initCheck.resolve("we already have refreshed this playlist");
+            
+            initCheck.resolve("we already have populated this playlist");
+            
         }else{
-
+            
             var upToDateTracklist = self.get_tracklist_request();
             upToDateTracklist.done(function(message) {
                 initCheck.resolve(message);
@@ -201,7 +213,6 @@ class WpsstmTracklist {
                 self.debug("init refresh did NOT succeed");
                 initCheck.reject();
             });
-
 
         }
 
