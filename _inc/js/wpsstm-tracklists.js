@@ -1,5 +1,5 @@
 (function($){
-    
+
     $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
         
         if ( tracklist_obj.is_expired ){
@@ -9,33 +9,11 @@
     });
 
     $(document).on( "wpsstmTracklistRefreshed", function( event, tracklist_obj ) {
-
-        // sort tracks
-        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
-            axis: "y",
-            handle: '#wpsstm-track-action-move',
-            update: function(event, ui) {
-                console.log('update: '+ui.item.index())
-                //get track
-                var track_el = $(ui.item);
-                var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
-                var track_obj = tracklist_obj.get_track_obj(track_idx);
-
-                //new position
-                track_obj.index = ui.item.index();
-                tracklist_obj.update_track_index(track_obj);
-                
-            }
-        });
-        
-        //hide a tracklist columns if all datas are the same
-        tracklist_obj.checkTracksIdenticalValues();
-        
         
         /*
         Tracklist actions
         */
-        
+
         //refresh
         tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist").click(function(e) {
             e.preventDefault();
@@ -43,7 +21,6 @@
             tracklist_obj.get_tracklist_request();
 
         });
-
 
         //favorite
         tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a').click(function(e) {
@@ -145,6 +122,31 @@
             
         });
         
+        /*
+        Tracks
+        */
+        
+        // sort tracks
+        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
+            axis: "y",
+            handle: '#wpsstm-track-action-move',
+            update: function(event, ui) {
+                console.log('update: '+ui.item.index())
+                //get track
+                var track_el = $(ui.item);
+                var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
+                var track_obj = tracklist_obj.get_track_obj(track_idx);
+
+                //new position
+                track_obj.index = ui.item.index();
+                tracklist_obj.update_track_index(track_obj);
+                
+            }
+        });
+        
+        //hide a tracklist columns if all datas are the same
+        tracklist_obj.checkTracksIdenticalValues();
+        
         //show more/less (tracks)
         if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
             tracklist_obj.showMoreLessTracks({
@@ -175,7 +177,7 @@ class WpsstmTracklist {
         this.tracks_shuffle_order =     undefined;
         this.populate_tracklist(tracklist_el);
         this.can_play =                 (this.tracks_count < 0) ? undefined : (this.tracks_count); //if -1:not yet populated
-        
+
         /*
         autoload
         Wheter or not populate the tracks through ajax at initialization, if not done yet.
@@ -184,7 +186,7 @@ class WpsstmTracklist {
         if( (this.options.hasOwnProperty('autoload')) && (this.options.autoload == true) ){
             this.maybe_refresh();
         }
-        
+
     }
     
     debug(msg){
@@ -244,9 +246,16 @@ class WpsstmTracklist {
             self.is_expired = now > self.expire_time;
             self.tracklist_el.toggleClass('tracklist-expired',self.is_expired);
         }
+        
+        if (self.expire_time){
+            self.init_refresh_timer();
+        }
+        
+        /*
+        tracks
+        */
 
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
-        
         self.tracks_count = Number( self.tracklist_el.find('[itemprop="numTracks"]').attr('content') ); //if value > -1, tracks have been populated with PHP
         
         self.tracks = [];
@@ -261,12 +270,8 @@ class WpsstmTracklist {
             self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
 
         }
-
-        $(document).trigger("wpsstmTracklistRefreshed",[self]); //custom event
         
-        if (self.expire_time){
-            self.init_refresh_timer();
-        }
+        $(document).trigger("wpsstmTracklistRefreshed",[self]); //custom event
 
     }
 
