@@ -23,12 +23,10 @@ class WpsstmPagePlayer {
     }
 
     init_page_tracklists(){
-        
+
         var self = this;
         
-        var all_tracklists = $( ".tracklist-playable" );
-
-        if ( all_tracklists.length <= 0 ) return;
+        var all_tracklists = $( ".wpsstm-tracklist" );
 
         self.debug("init_page_tracklists()");
 
@@ -42,12 +40,12 @@ class WpsstmPagePlayer {
         /*
         autoplay
         */
-        //which one should we autoplay play?
+        //which one could we autoplay?
         var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
             return (tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
         });
         
-        //first to autoplay
+        //autoplay the first one of those.
         var play_tracklist = tracklists_autoplay[0];
         
         if ( play_tracklist ){
