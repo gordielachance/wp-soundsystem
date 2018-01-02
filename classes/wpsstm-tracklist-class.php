@@ -715,7 +715,7 @@ class WP_SoundSystem_Tracklist{
         }
             
         //capability check
-        $can_get_authorship = $this->user_can_get_autorship();
+        $can_get_authorship = $this->can_get_tracklist_authorship();
         
         if ( !$can_get_authorship ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
@@ -793,13 +793,13 @@ class WP_SoundSystem_Tracklist{
         return $this->set_subtrack_ids($subtrack_ids);
     }
     
-    function user_can_get_autorship(){
+    function can_get_tracklist_authorship(){
         
-        if ( !$this->post_id ) return false;
+        if ( !$post_type = get_post_type($this->post_id) ) return false;
+        if ( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types) ) return false; //is not a tracklist (maybe we are checking a single track here)
         if ( !wpsstm_is_community_post($this->post_id) ) return false;
             
         //capability check
-        $post_type = get_post_type($this->post_id);
         $post_type_obj = get_post_type_object($post_type);
         return current_user_can($post_type_obj->cap->edit_posts);
     }
