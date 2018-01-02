@@ -81,6 +81,7 @@ body.wpsstm-default,body.wp-admin{
             
             .wpsstm-live-tracklist-link{
                 float:right;
+                @extend .wpsstm-no-underline;
             }
             
             #wpsstm-tracklist-actions{
