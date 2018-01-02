@@ -117,7 +117,7 @@ class WP_SoundSystem_Core_Wizard{
         global $wpsstm_tracklist;
         if ( is_page($this->frontend_wizard_page_id) ){
             //wizard called on a tracklist that is not a community one.  Redirect to regular tracklist.
-            if ( $wztr_id = get_query_var($this->qvar_tracklist_wizard,null) ){
+            if ( $wztr_id = get_query_var($this->qvar_tracklist_wizard) ){
                 
                 //this is not a community tracklist, abord wizard
                 if ( !wpsstm_is_community_post($wztr_id) ){
@@ -152,7 +152,6 @@ class WP_SoundSystem_Core_Wizard{
     function populate_wizard_tracklist_id($post,$query){
         if ( !is_page($this->frontend_wizard_page_id) ) return;
         if ( !$wztr = get_query_var($this->qvar_tracklist_wizard,null) ) return;
-        
         $this->populate_wizard_tracklist($wztr);
     }
     
@@ -745,7 +744,7 @@ class WP_SoundSystem_Core_Wizard{
     function feed_url_callback(){
         global $wpsstm_tracklist;
         
-        $option = $wpsstm_tracklist->feed_url;
+        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url : null;
 
         $text_input = sprintf(
             '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
