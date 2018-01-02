@@ -13,23 +13,23 @@ if ( !$can_wizard ){
     
     global $wpsstm_tracklist;
 
-    $wpsstm_tracklist->populate_subtracks(); //we must have the tracks populated before we output the notices
-
     ?>
 
     <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr('wizard-wrapper-frontend');?>>
 
         <?php
-        if ($wpsstm_tracklist->feed_url){
-            echo $wpsstm_tracklist->get_tracklist_html();
-        }
-        ?>
-
-        <?php
-
+    
+        //we must have the tracks populated before we output the notices
+        $wpsstm_tracklist->populate_subtracks();
+    
         //wizard notices
         if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
             echo $notices_el;
+        }
+    
+        //we requested something through the wizard form
+        if ( $wztr_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard) ){
+            echo $wpsstm_tracklist->get_tracklist_html();
         }
         ?>
 
@@ -63,9 +63,9 @@ if ( !$can_wizard ){
 <?php
 //recent
 if ( wpsstm()->get_options('recent_wizard_entries') ) {
-    $has_wizard_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard);
-    if ( !$has_wizard_id ) {
-        wpsstm_locate_template( 'recent-wizard-entries.php', true, false );
+    /*check that no tracklist is loaded by the wizard*/
+    if ( !$has_wizard_id = get_query_var(wpsstm_wizard()->qvar_tracklist_wizard) ) {
+        wpsstm_locate_template( 'wizard-recent-entries.php', true, false );
     }
 }
 ?>
