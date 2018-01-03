@@ -20,11 +20,17 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->title;?></a>
         </strong>
         <small class="wpsstm-tracklist-time">
-            <time class="wpsstm-tracklist-published">
-                <i class="fa fa-clock-o" aria-hidden="true"></i> 
-                <?php echo wpsstm_get_datetime( $tracklist->updated_time );?>
-            </time>
-            <?php 
+            <?php
+            //updated
+            if ($updated = $tracklist->updated_time){
+                ?>
+                <time class="wpsstm-tracklist-published">
+                    <i class="fa fa-clock-o" aria-hidden="true"></i> 
+                    <?php echo wpsstm_get_datetime( $updated );?>
+                </time>
+                <?php 
+            }
+            //refreshed
             if ( ($tracklist->tracklist_type == 'live') && ( $rate = $tracklist->get_time_before_refresh() ) ){
                 ?>
                 <time class="wpsstm-tracklist-refresh-time">
