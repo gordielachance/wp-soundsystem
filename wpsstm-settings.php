@@ -138,6 +138,10 @@ class WP_SoundSystem_Settings {
             Other APIs
             */
             
+            //tuneefy
+            $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
+            $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
+            
             //spotify
             $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
             $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
@@ -155,9 +159,7 @@ class WP_SoundSystem_Settings {
             /*
             System
             */
-            
-            
-    
+
         }
         
         //remove default values
@@ -405,6 +407,14 @@ class WP_SoundSystem_Settings {
         );
         
         add_settings_field(
+            'tuneefy_client', 
+            __('Tuneefy'), 
+            array( $this, 'tuneefy_client_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
+        );
+        
+        add_settings_field(
             'spotify_client', 
             __('Spotify'), 
             array( $this, 'spotify_client_callback' ), 
@@ -544,13 +554,10 @@ class WP_SoundSystem_Settings {
 
             }else{
 
-                //cap missing
-                if ( !$can_autosource = wpsstm_sources()->can_autosource() ){
-                    
-                    $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-                    $autosource_cap = $sources_post_type_obj->cap->edit_posts;
-                    
-                    add_settings_error( 'wpsstm-settings-tracklists', 'community-user-cap-missing', sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>') );
+                //autosource
+                $can_autosource = wpsstm_sources()->can_autosource();
+                if ( is_wp_error($can_autosource) ){
+                    add_settings_error('wpsstm-settings-tracklists', 'cannot_autosource', $can_autosource->get_error_message());
                 }
 
             }
@@ -618,7 +625,7 @@ class WP_SoundSystem_Settings {
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
             __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
-            __("This requires the community user ID to be set.","wpsstm")
+            __("This requires a Tuneefy client ID & secret (see below); and the community user ID to be set.","wpsstm")
         );
     }
 
@@ -862,6 +869,31 @@ class WP_SoundSystem_Settings {
 
     }
     
+    function tuneefy_client_callback(){
+        $client_id = wpsstm()->get_options('tuneefy_client_id');
+        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
+        $new_app_link = 'https://data.tuneefy.com/#header-oauth';
+        
+        $desc = sprintf(__('Required for autosourcing. Request your Tuneefy credentials %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+        
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_id]" value="%s" /></p>',
+            __('Client ID:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_secret]" value="%s" /></p>',
+            __('Client Secret:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
+    }
+    
     function spotify_client_callback(){
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');
@@ -885,7 +917,6 @@ class WP_SoundSystem_Settings {
             wpsstm()->meta_name_options,
             $client_secret
         );
-        
     }
     
     function soundcloud_client_id_callback(){

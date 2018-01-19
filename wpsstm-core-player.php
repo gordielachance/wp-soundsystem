@@ -126,6 +126,7 @@ class WP_SoundSystem_Player_Provider{
     
     var $name;
     var $slug = 'default';
+    var $tuneefy_slug = ''; //slug used for the 'include' parameter when searching tracks on Tuneefy (see https://data.tuneefy.com)
     
     function __construct(){
     }
@@ -151,61 +152,8 @@ class WP_SoundSystem_Player_Provider{
     function format_source_title($title){
         return $title;
     }
-
-    /*
-    Search sources from this provider
-    */
-    
-    function sources_lookup($track){
-        
-    }
-    
-    function get_soundsgood_sources(WP_SoundSystem_Track $track,$platform){
-
-        $args = array(
-            'limit'         => 3
-        );
-
-        $sources_raw = array();
-
-        $api_url = 'https://heartbeat.soundsgood.co/v1.0/search/sources';
-        $api_args = array(
-            'apiKey'                    => '0ecf356d31616a345686b9a42de8314891b87782031a2db5',
-            'limit'                     => $args['limit'],
-            'platforms'                 => $platform,
-            'q'                         => urlencode($track->artist . ' ' . $track->title),
-            'skipSavingInDatabase'      => true
-        );
-        $api_url = add_query_arg($api_args,$api_url);
-        $response = wp_remote_get($api_url);
-        $body = wp_remote_retrieve_body($response);
-
-        if ( is_wp_error($body) ) return $body;
-        $api_response = json_decode( $body, true );
-
-        $items = wpsstm_get_array_value(array(0,'items'),$api_response);
-
-        foreach( (array)$items as $item ){
-
-            $raw = array(
-                'url'   => wpsstm_get_array_value('permalink',$item),
-                'title' => wpsstm_get_array_value('initTitle',$item),
-            );
-            
-            $sources_raw[] = $raw;
-            
-        }
-
-        /*
-        wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s',$track->artist,$track->title),'platform'=>$platform,'args'=>$args,'sources_count'=>count($sources_raw)),JSON_UNESCAPED_UNICODE),'WP_SoundSystem_Player_Provider::get_soundsgood_sources() request'); 
-        */
-
-        return $sources_raw;
-    }
     
 }
-
-
 
 class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
     
@@ -245,6 +193,7 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
     
     var $name = 'Youtube';
     var $slug = 'youtube';
+    var $tuneefy_slug = 'youtube';
     
     function get_youtube_id($url){
         //youtube
@@ -265,10 +214,6 @@ class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provi
         return 'video/youtube';
     }
 
-    function sources_lookup($track){
-        return $this->get_soundsgood_sources($track,'youtube');
-    }
-
 }
 
 /*
@@ -280,6 +225,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
+    var $tuneefy_slug = 'soundcloud';
     var $client_id;
     
     function __construct(){
@@ -404,15 +350,13 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
         }
     }
 
-    function sources_lookup($track){
-        return $this->get_soundsgood_sources($track,'soundcloud');
-    }
 }
 
 class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Provider{
     
     var $name = 'Mixcloud';
     var $slug = 'mixcloud';
+    var $tuneefy_slug = 'mixcloud';
     var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
     
     function get_stream_url($url){
