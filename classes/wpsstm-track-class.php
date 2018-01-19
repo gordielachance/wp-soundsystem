@@ -531,11 +531,43 @@ class WP_SoundSystem_Track{
         }
 
         $auto_sources = array();
+        $tuneefy_providers = array();
 
+        //tuneefy providers slugs
         foreach( (array)wpsstm_player()->providers as $provider ){
-            if ( !$provider_sources = $provider->sources_lookup( $this ) ) continue; //cannot play source
+            $tuneefy_providers[] = $provider->tuneefy_slug;
+        }
+        
+        $tuneefy_providers = array_filter($tuneefy_providers);
+        
+        $tuneefy_args = array(
+            'q' =>          urlencode($this->artist . ' ' . $this->title),
+            'mode' =>       'lazy',
+            'aggressive' => 'false',
+            'include' =>    implode(',',$tuneefy_providers),
+        );
 
-            $auto_sources = array_merge($auto_sources,(array)$provider_sources);
+        $api = wpsstm_sources()->tuneefy_api_aggregate('track',$tuneefy_args);
+        if ( is_wp_error($api) ) return $api;
+
+        $items = wpsstm_get_array_value(array('results'),$api);
+        
+        //wpsstm()->debug_log( json_encode($items), "get_remote_sources");
+
+        //TO FIX have a more consistent extraction of datas ?
+        foreach( (array)$items as $item ){
+            
+            $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
+            $first_provider =       reset($links_by_providers);
+            $first_link =           reset($first_provider);
+
+            $raw = array(
+                'url'   =>      $first_link,
+                'title'   =>     wpsstm_get_array_value(array('musical_entity','title'),$item),
+            );
+            
+            $auto_sources[] = $raw;
+            
         }
 
         //allow plugins to filter this

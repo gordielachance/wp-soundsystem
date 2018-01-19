@@ -96,6 +96,8 @@ class WP_SoundSystem {
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
             'soundcloud_client_secret'          => null,
+            'tuneefy_client_id'                 => null,
+            'tuneefy_client_secret'             => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',

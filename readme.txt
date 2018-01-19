@@ -90,6 +90,7 @@ This would be very appreciated — Thanks !
 
 = Dependencies =
 
+* [Tuneefy](https://data.tuneefy.com/) - API used to autosource
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
@@ -150,6 +151,7 @@ There is an option in the plugin settings to flush those community tracks : they
 
 = XXX =
 * Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
+* Autosource : use Tuneefy API (https://data.tuneefy.com/)
 
 = 1.9.1 =
 * Improve popup template

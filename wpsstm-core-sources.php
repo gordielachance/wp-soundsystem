@@ -607,15 +607,139 @@ class WP_SoundSystem_Core_Sources{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
+    
+    function can_tuneefy(){
+        if ( !wpsstm()->get_options('tuneefy_client_id') ){
+            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client id missing.','wpsstm') );
+        }
+        if ( !wpsstm()->get_options('tuneefy_client_secret') ){
+            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client secret missing.','wpsstm') );
+        }
+        return true;
+    }
+    
+    function get_tuneefy_token(){
+        
+        $can_tuneefy = $this->can_tuneefy();
+        if( is_wp_error($can_tuneefy) ) return $can_tuneefy;
+        
+        $transient_name = 'tuneefy_token';
+        
+        $client_id = wpsstm()->get_options('tuneefy_client_id');
+        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
+
+        if ( false === ( $token = get_transient($transient_name ) ) ) {
+            
+            $args = array(
+                'headers' => array(
+                    'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8',
+                ),
+                'body' => sprintf('client_id=%s&client_secret=%s&grant_type=client_credentials',$client_id,$client_secret),
+            );
+            $response = wp_remote_post('https://data.tuneefy.com/v2/auth/token', $args );
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ) return $body;
+            $api_response = json_decode( $body, true );
+            
+            wpsstm()->debug_log( json_encode($api_response), "WP_SoundSystem_Core_Sources::get_tuneefy_token"); 
+
+            if ( isset($api_response['access_token']) &&  isset($api_response['expires_in']) ) {
+                $token = $api_response['access_token'];
+                $time = $api_response['expires_in']; //TO FIX TO CHECK is seconds ?
+                set_transient( $transient_name, $token, $time );
+            }elseif( isset($api_response['error_description']) ){
+                return new WP_Error( 'wpsstm_tuneefy_auth', sprintf(__('Unable to get Tuneefy Token: %s','wpsstm'),$data['error_description']) );
+            }else{
+                return new WP_Error( 'wpsstm_tuneefy_auth', __('Unable to get Tuneefy Token.','wpsstm') );
+            }
+            
+        }
+        
+        return $token;
+        
+    }
+    
+    /*
+    Get track/album informations using Tuneefy API
+    See https://data.tuneefy.com/#search-aggregate-get
+    */
+    
+    function tuneefy_api_aggregate($type,$url_args){
+        
+        $error = null;
+        $url = null;
+        $request_args = null;
+        $api_response = null;
+        
+        
+        $token = $this->get_tuneefy_token();
+        
+        if ( is_wp_error($token) ){
+            $error = $token;
+        }else{
+            $request_args = array(
+                'headers' => array(
+                    'Accept' => 'application/json',
+                    'Authorization' => sprintf('Bearer %s',$token),
+                ),
+            );
+
+
+            $url = sprintf('https://data.tuneefy.com/v2/aggregate/%s',$type);
+            $url = add_query_arg($url_args,$url);
+
+
+            wpsstm()->debug_log( json_encode(array('url'=>$url,'request_args'=>$request_args)), "WP_SoundSystem_Core_Sources::tuneefy_api_aggregate"); 
+
+            $response = wp_remote_get($url,$request_args);
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ){
+                $error = $body;
+            }else{
+
+                $api_response = json_decode( $body, true );
+
+                if( !empty($api_response['errors']) ){
+                    $error_msg =    reset($api_response['errors']); //first item
+                    $error_code =   key($api_response['errors']);
+                    $error = new WP_Error( 'wpsstm_tuneefy_aggregate', sprintf( __('Unable to aggregate using Tuneefy - %s: %s','wpsstm'),$error_code,$error_msg ) );
+                }
+            }
+        }
+
+        if($error){
+            wpsstm()->debug_log( json_encode(array('error'=>$error->get_error_message(),'url'=>$url,'request_args'=>$request_args)), "WP_SoundSystem_Core_Sources::tuneefy_api_aggregate"); 
+            return $error;
+        }
+
+        return $api_response;
+    }
 
     
     function can_autosource(){
+        
+        //tuneefy
+        $can_tuneefy = $this->can_tuneefy();
+        if ( is_wp_error($can_tuneefy) ) return $can_tuneefy;
+        
+        //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
-        if (!$community_user_id) return;
+        if (!$community_user_id){
+            return new WP_Error( 'wpsstm_autosource',__('Autosource requires a community user to be set.','wpsstm') );   
+        }
 
+        //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
         $autosource_cap = $sources_post_type_obj->cap->edit_posts;
-        return user_can($community_user_id,$autosource_cap);
+        if ( !$has_cap = user_can($community_user_id,$autosource_cap) ){
+            $error = sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>');
+            return new WP_Error( 'wpsstm_autosource',$error );
+        }
+
+        return true;
+        
     }
 
 }
