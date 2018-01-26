@@ -305,7 +305,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
 
-    public function get_response_type(){
+    private function get_response_type(){
         
         if ( $this->response_type !== null ) return $this->response_type; //already populated
         if ( $this->response === null ) return; //response not yet populated

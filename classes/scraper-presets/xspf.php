@@ -2,9 +2,9 @@
 
 function wpsstm_xspf_tracklist_options($options,$tracklist){
 
-    if ( !$response_type = $tracklist->get_response_type() ) return $options; // remote content not yet fetched
+    if ( !$tracklist->response_type ) return $options; // remote content not yet fetched
     
-    $split = explode('/',$response_type);
+    $split = explode('/',$tracklist->response_type);
 
     if ( isset($split[1]) && ($split[1]=='xspf+xml') ){
         $options['selectors'] = array(
