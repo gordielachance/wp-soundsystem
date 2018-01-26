@@ -903,7 +903,6 @@ class WPSSTM_Tracklist{
             'wpsstm-tracklist',
             ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
             $this->get_options('autoplay') ? 'tracklist-autoplay' : null,
-            $this->get_options('autosource') ? 'tracklist-autosource' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
             ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
