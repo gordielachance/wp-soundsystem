@@ -472,6 +472,7 @@ class WpsstmTrack {
     }
     
     maybe_load_sources(){
+
         var self = this;
         var success = $.Deferred();
         if (self.sources.length > 0){
@@ -489,8 +490,14 @@ class WpsstmTrack {
         
         var track_el    = self.track_el;
         var track_instances = self.get_track_instances();
-
-        if ( self.did_sources_request ) {
+        
+        var can_autosource = this.tracklist.options.autosource;
+        
+        if ( !can_autosource ){
+            
+            deferredObject.resolve("Autosource is disabled");
+            
+        } else if ( self.did_sources_request ) {
             
             deferredObject.resolve("already did sources auto request for track #" + self.index);
             
