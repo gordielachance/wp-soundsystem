@@ -83,7 +83,7 @@ class WP_SoundSystem_Tracklist{
         return array(
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'                => ( wpsstm()->get_options('autosource') == 'on' ),
+            'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WP_SoundSystem_Core_Sources::can_autosource() === true) ),
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
