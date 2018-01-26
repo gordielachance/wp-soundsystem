@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 4.9.1
+Tested up to: 4.9.2
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -149,6 +149,9 @@ There is an option in the plugin settings to flush those community tracks : they
 8. Music sources metabox
 
 == Changelog ==
+
+= 1.9.3 =
+* Cleaned up a lot of code : https://github.com/gordielachance/wp-soundsystem/commit/9b2742e9e4fc0a021766c115dd81a58bd0b90073
 
 = 1.9.2 =
 * Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
