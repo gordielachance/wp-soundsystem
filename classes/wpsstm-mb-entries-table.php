@@ -49,7 +49,7 @@ class WP_SoundSystem_MB_Entries extends WP_List_Table {
         //mbid
         $columns['mbitem_mbid'] = __('MusicBrainz ID','wpsstm');
         
-        if (wpsstm_mb()->is_switch_entries){
+        if ( WP_SoundSystem_Core_MusicBrainz::is_entries_switch() ){
             $columns['mbitem_score'] = __('Score','wpsstm');
         }
 
@@ -67,7 +67,7 @@ class WP_SoundSystem_MB_Entries extends WP_List_Table {
 	public function column_cb( $item ) {
         global $post;
         
-        if (!wpsstm_mb()->is_switch_entries) return;
+        if ( !WP_SoundSystem_Core_MusicBrainz::is_entries_switch() ) return;
 
         $mbid = wpsstm_get_post_mbid($post->ID);
 
@@ -172,8 +172,8 @@ class WP_SoundSystem_MB_Entries extends WP_List_Table {
         $mbid = $item['id'];
         $url = null;
         
-        $mbtype = wpsstm_mb()->get_musicbrainz_type_by_post_id($post->ID);
-        $url = wpsstm_mb()->get_mb_url($mbtype,$mbid);
+        $mbtype = WP_SoundSystem_Core_Musicbrainz::get_musicbrainz_type_by_post_id($post->ID);
+        $url = WP_SoundSystem_Core_Musicbrainz::get_mb_url($mbtype,$mbid);
         
         printf('<a href="%1s" target="_blank">%2s</a>',$url,$mbid);
 	}

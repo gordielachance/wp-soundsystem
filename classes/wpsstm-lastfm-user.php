@@ -39,7 +39,7 @@ class WP_SoundSystem_LastFM_User{
             if ( $token = $token_transient = get_transient( $token_name ) ) {
                 $this->token = $token;
             }else{
-                $token = $token_request = wpsstm_lastfm()->request_auth_token();
+                $token = $token_request = WP_SoundSystem_Core_LastFM::request_auth_token();
                 if ( is_wp_error($token) ) return $token;
                 $this->token = (string)$this->set_user_token($token);
             }
@@ -71,7 +71,7 @@ class WP_SoundSystem_LastFM_User{
         if ( $this->user_api_metas === null ) {
             $this->user_api_metas = false;
 
-            if ( $api_metas = get_user_meta( $this->user_id, wpsstm_lastfm()->lastfm_user_api_metas_name, true ) ){
+            if ( $api_metas = get_user_meta( $this->user_id, WP_SoundSystem_Core_LastFM::$lastfm_user_api_metas_name, true ) ){
                 $this->user_api_metas = $api_metas;
             }else{
                 //try to populate it
@@ -94,6 +94,13 @@ class WP_SoundSystem_LastFM_User{
 
     private function request_lastfm_user_api_metas(){
         if (!$this->user_id) return false;
+        
+        $api_key = wpsstm()->get_options('lastfm_client_id');
+        $api_secret = wpsstm()->get_options('lastfm_client_secret');
+        
+        if (!$api_key || !$api_secret){
+            return new WP_Error( 'lastfm_php_api', __('WP_SoundSystem_LastFM_User: Missing Last.fm credentials','wpsstm') );
+        }
 
         $token = $this->get_user_token();
 
@@ -101,8 +108,8 @@ class WP_SoundSystem_LastFM_User{
         if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.fm PHP Api Error: You must provilde a valid api token','wpsstm') );
 
         $auth_args = array(
-            'apiKey' =>     wpsstm_lastfm()->api_key,
-            'apiSecret' =>  wpsstm_lastfm()->api_secret,
+            'apiKey' =>     $api_key,
+            'apiSecret' =>  $api_secret,
             'token' =>      $token
         );
 
@@ -121,11 +128,11 @@ class WP_SoundSystem_LastFM_User{
 
             wpsstm()->debug_log(json_encode($user_api_metas),"WP_SoundSystem_LastFM_User::request_lastfm_user_api_metas()");
 
-            update_user_meta( $this->user_id, wpsstm_lastfm()->lastfm_user_api_metas_name, $user_api_metas );
+            update_user_meta( $this->user_id, WP_SoundSystem_Core_LastFM::$lastfm_user_api_metas_name, $user_api_metas );
 
 
         }catch(Exception $e){
-            return wpsstm_lastfm()->handle_api_exception($e);
+            return WP_SoundSystem_Core_LastFM::handle_api_exception($e);
         }
 
         return $user_api_metas;
@@ -139,8 +146,8 @@ class WP_SoundSystem_LastFM_User{
 
     private function get_user_api_auth(){
         
-        $api_key = wpsstm_lastfm()->api_key;
-        $api_secret = wpsstm_lastfm()->api_secret;
+        $api_key = wpsstm()->get_options('lastfm_client_id');
+        $api_secret = wpsstm()->get_options('lastfm_client_secret');
         
         if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
         if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.fm API secret missing", "wpsstm" ) );
@@ -165,7 +172,7 @@ class WP_SoundSystem_LastFM_User{
             try{
                 $user_auth = new AuthApi('setsession', $auth_args);
             }catch(Exception $e){
-                $user_auth = wpsstm_lastfm()->handle_api_exception($e);
+                $user_auth = WP_SoundSystem_Core_LastFM::handle_api_exception($e);
             }
         }
 
@@ -225,7 +232,7 @@ class WP_SoundSystem_LastFM_User{
     
     private function delete_lastfm_user_api_metas(){
         if (!$this->user_id) return false;
-        if ( delete_user_meta( $this->user_id, wpsstm_lastfm()->lastfm_user_api_metas_name ) ){
+        if ( delete_user_meta( $this->user_id, WP_SoundSystem_Core_LastFM::$lastfm_user_api_metas_name ) ){
             delete_transient( $this->user_token_transient_name );
             $this->user_api_metas = false;
         }
@@ -251,7 +258,7 @@ class WP_SoundSystem_LastFM_User{
                 $results = $track_api->unlove($api_args);
             }
         }catch(Exception $e){
-            return wpsstm_lastfm()->handle_api_exception($e);
+            return WP_SoundSystem_Core_LastFM::handle_api_exception($e);
         }
         
         $debug_args = $api_args;
@@ -283,7 +290,7 @@ class WP_SoundSystem_LastFM_User{
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->updateNowPlaying($api_args);
         }catch(Exception $e){
-            return wpsstm_lastfm()->handle_api_exception($e);
+            return WP_SoundSystem_Core_LastFM::handle_api_exception($e);
         }
         
         return $results;
@@ -318,7 +325,7 @@ class WP_SoundSystem_LastFM_User{
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->scrobble($api_args);
         }catch(Exception $e){
-            return wpsstm_lastfm()->handle_api_exception($e);
+            return WP_SoundSystem_Core_LastFM::handle_api_exception($e);
         }
         
         return $results;

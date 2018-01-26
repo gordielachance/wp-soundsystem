@@ -1,37 +1,8 @@
 <?php
 
 class WP_SoundSystem_Core_Player{
-    
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-    
-    var $providers = array();
 
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Player;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-    
-    function setup_globals(){
-        $providers = $this->register_providers();
-        $this->providers = apply_filters( 'wpsstm_player_providers',$providers );
-    }
-    
-    function setup_actions(){
-        
-        
+    function __construct() {
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
 
@@ -39,8 +10,8 @@ class WP_SoundSystem_Core_Player{
         add_action( 'admin_footer', array($this,'player_html'));
 
     }
-    
-    function register_providers(){
+
+    public static function get_providers(){
         
         $providers = array();
         
@@ -56,8 +27,8 @@ class WP_SoundSystem_Core_Player{
             if ( !class_exists($classname) ) continue;
             $providers[] = new $classname();
         }
-        
-        return $providers;
+
+        return apply_filters( 'wpsstm_player_providers',$providers );
     }
 
     function player_html(){
@@ -371,10 +342,3 @@ class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Prov
         return 'audio/mixcloud';
     }
 }
-
-function wpsstm_player() {
-	return WP_SoundSystem_Core_Player::instance();
-}
-
-wpsstm_player();
-

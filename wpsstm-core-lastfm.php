@@ -6,38 +6,18 @@ use LastFmApi\Api\TrackApi;
 
 class WP_SoundSystem_Core_LastFM{
     
-    var $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
-    var $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
-    
-    public $api_key = null;
-    public $api_secret = null;
+    static $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
+    static $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
     private $basic_auth = null;
-    
     public $lastfm_user = null;
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_LastFM;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
+    public function __construct() {
         
+        add_action( 'wp', array($this,'after_app_auth') );
+        add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
         add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
-        
         add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
         
         /*
@@ -64,22 +44,6 @@ class WP_SoundSystem_Core_LastFM{
         
         
     }
-    
-    function setup_globals(){
-
-        if ( $api_key = wpsstm()->get_options('lastfm_client_id') ){
-            $this->api_key = $api_key;
-        }
-
-        if ( $api_secret = wpsstm()->get_options('lastfm_client_secret') ){
-            $this->api_secret = $api_secret;
-        }
-    }
-    
-    function setup_actions(){
-        add_action( 'init', array($this,'setup_lastfm_user') );
-        add_action( 'wp', array($this,'after_app_auth') );
-    }
 
     function setup_lastfm_user(){
         $this->lastfm_user = new WP_SoundSystem_LastFM_User();
@@ -95,7 +59,7 @@ class WP_SoundSystem_Core_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => ( $this->can_community_scrobble() && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
+            'lastfm_scrobble_along'     => ( self::can_community_scrobble() && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -106,7 +70,7 @@ class WP_SoundSystem_Core_LastFM{
     */
     
     public function after_app_auth(){
-        if ( !isset($_GET[$this->qvar_after_app_auth]) ) return;
+        if ( !isset($_GET[self::$qvar_after_app_auth]) ) return;
         $token = ( isset($_GET['token']) ) ? $_GET['token'] : null;
         if (!$token) return;
         $this->lastfm_user->set_user_token($token);
@@ -118,18 +82,21 @@ class WP_SoundSystem_Core_LastFM{
     Api request for a token
     */
 
-    public function request_auth_token(){
+    public static function request_auth_token(){
+        
+        $api_key = wpsstm()->get_options('lastfm_client_id');
+        $api_secret = wpsstm()->get_options('lastfm_client_secret');
 
-        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
-        if ( !$this->api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API secret missing", "wpsstm" ) );
+        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
+        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API secret missing", "wpsstm" ) );
 
         try {
             $authentication = new AuthApi('gettoken', array(
-                'apiKey' =>     $this->api_key,
-                'apiSecret' =>  $this->api_secret
+                'apiKey' =>     $api_key,
+                'apiSecret' =>  $api_secret
             ));
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return self::handle_api_exception($e);
         }
 
         return $authentication->token;
@@ -139,7 +106,7 @@ class WP_SoundSystem_Core_LastFM{
     Get the URL of the app authentification at last.fm.
     */
     
-    public function get_app_auth_url(){
+    private static function get_app_auth_url(){
         $url = 'http://www.last.fm/api/auth/';
         
         if ( !$callback_url = get_permalink() ){
@@ -148,13 +115,13 @@ class WP_SoundSystem_Core_LastFM{
         
         //add qvar_after_app_auth variable so we can intercept the token when returning to our website
         $callback_args = array(
-            $this->qvar_after_app_auth => true
+            self::$qvar_after_app_auth => true
         );
 
         $callback_url = add_query_arg($callback_args,$callback_url);
         
         $args = array(
-            'api_key'   => $this->api_key,
+            'api_key'   => wpsstm()->get_options('lastfm_client_id'),
             'cb'        => $callback_url
         );
         
@@ -168,22 +135,23 @@ class WP_SoundSystem_Core_LastFM{
     Get basic API authentification
     */
     
-    private function get_basic_api_auth(){
+    private static function get_basic_api_auth(){
         
-        if ( !$this->api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
+        $api_key = wpsstm()->get_options('lastfm_client_id');
+        if ( !$api_key ) return new WP_Error( 'lastfm_missing_credentials', __( "Required Last.fm API key missing", "wpsstm" ) );
         
         if ($this->basic_auth === null){
             
             $basic_auth = false;
 
             $auth_args = array(
-                'apiKey' => $this->api_key
+                'apiKey' => $api_key
             );
 
             try{
                 $basic_auth = new AuthApi('setsession', $auth_args);
             }catch(Exception $e){
-                $basic_auth = $this->handle_api_exception($e);
+                $basic_auth = self::handle_api_exception($e);
             }
             
             $this->basic_auth = $basic_auth;
@@ -194,14 +162,14 @@ class WP_SoundSystem_Core_LastFM{
 
     }
 
-    public function handle_api_exception($e){
+    public static function handle_api_exception($e){
         $message = sprintf(__('Last.fm PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage());
         wpsstm()->debug_log($message);
         return new WP_Error( 'lastfm_php_api', new WP_Error( 'lastfm_php_api',$message,$e->getCode() ) );
     }
     
-    public function search_artists($input){
-        $auth = $this->get_basic_api_auth();
+    public static function search_artists($input){
+        $auth = self::get_basic_api_auth();
 
         if ( !$auth || is_wp_error($auth) ) return $auth;
         
@@ -211,15 +179,15 @@ class WP_SoundSystem_Core_LastFM{
             $artist_api = new ArtistApi($auth);
             $results = $artist_api->search(array("artist" => $input));
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return self::handle_api_exception($e);
         }
         
         return $results;
     }
 
-    public function get_artist_bio($artist){
+    public static function get_artist_bio($artist){
         
-        $auth = $this->get_basic_api_auth();
+        $auth = self::get_basic_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
         
         $results = null;
@@ -229,15 +197,15 @@ class WP_SoundSystem_Core_LastFM{
             $artistInfo = $artist_api->getInfo(array("artist" => $artist));
             $results = $artistInfo['bio'];
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return self::handle_api_exception($e);
         }
         
         return $results;
     }
     
-    public function search_track(WP_SoundSystem_Track $track,$limit=1,$page=null){
+    public static function search_track(WP_SoundSystem_Track $track,$limit=1,$page=null){
         
-        $auth = $this->get_basic_api_auth();
+        $auth = self::get_basic_api_auth();
         if ( !$auth || is_wp_error($auth) ) return $auth;
         
         $results = null;
@@ -251,7 +219,7 @@ class WP_SoundSystem_Core_LastFM{
                 )
             );
         }catch(Exception $e){
-            return $this->handle_api_exception($e);
+            return self::handle_api_exception($e);
         }
         
         return $results;
@@ -274,7 +242,7 @@ class WP_SoundSystem_Core_LastFM{
             $is_lastfm_auth = (int)$this->lastfm_user->is_user_api_logged();
             
             if (!$is_lastfm_auth){
-                $lastfm_auth_url = wpsstm_lastfm()->get_app_auth_url();
+                $lastfm_auth_url = self::get_app_auth_url();
                 $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
                 $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
                 $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
@@ -451,7 +419,7 @@ class WP_SoundSystem_Core_LastFM{
         return $actions;
     }
     
-    function can_community_scrobble(){
+    public static function can_community_scrobble(){
         $community_user_id = wpsstm()->get_options('community_user_id');
         if (!$community_user_id) return;
         $community_user = new WP_SoundSystem_LastFM_User($community_user_id);
@@ -459,10 +427,3 @@ class WP_SoundSystem_Core_LastFM{
     }
 
 }
-
-
-function wpsstm_lastfm() {
-	return WP_SoundSystem_Core_LastFM::instance();
-}
-
-wpsstm_lastfm();

@@ -77,9 +77,9 @@ class WP_SoundSystem_Source{
         /*
         $query_meta_trackinfo = array(
             'relation' => 'AND',
-            wpsstm_artists()->artist_metakey    => $track->artist,
-            wpsstm_tracks()->title_metakey      => $track->title,
-            wpsstm_albums()->album_metakey      => $track->album,
+            WP_SoundSystem_Core_Artists::$artist_metakey    => $track->artist,
+            WP_SoundSystem_Core_Tracks::$title_metakey      => $track->title,
+            WP_SoundSystem_Core_Albums::$album_metakey      => $track->album,
         );
         $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         */
@@ -201,10 +201,10 @@ class WP_SoundSystem_Source{
             
             //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
             /*
-            wpsstm_artists()->artist_metakey    => $this-track->artist,
-            wpsstm_tracks()->title_metakey      => $this-track->title,
-            wpsstm_albums()->album_metakey      => $this-track->album,
-            wpsstm_mb()->mbid_metakey           => $this-track->mbid,
+            WP_SoundSystem_Core_Artists::$artist_metakey    => $this-track->artist,
+            WP_SoundSystem_Core_Tracks::$title_metakey      => $this-track->title,
+            WP_SoundSystem_Core_Albums::$album_metakey      => $this-track->album,
+            WP_SoundSystem_Core_MusicBrainz::$mbid_metakey           => $this-track->mbid,
             */
         );
         
@@ -318,7 +318,7 @@ class WP_SoundSystem_Source{
         //try to populate it from the stored value
         if ( $provider_slug = get_post_meta($this->post_id,WP_SoundSystem_Core_Sources::$source_provider_metakey,true) ){
             
-            foreach( (array)wpsstm_player()->providers as $provider ){
+            foreach( (array)WP_SoundSystem_Core_Player::get_providers() as $provider ){
                 if ($provider_slug != $provider->slug) continue;
                 $this->provider = $provider;
                 if (!$this->stream_url && $this->url){
@@ -333,7 +333,7 @@ class WP_SoundSystem_Source{
         //try to find a match using the input URL
         if ( ($this->provider->slug == 'default') && $this->url){
             
-            foreach( (array)wpsstm_player()->providers as $provider ){
+            foreach( (array)WP_SoundSystem_Core_Player::get_providers() as $provider ){
 
                 if ( !$match_url = $provider->get_stream_url($this->url) ) continue;
 

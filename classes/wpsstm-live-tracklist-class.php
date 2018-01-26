@@ -51,14 +51,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
             
-            $db_options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name,true);
+            $db_options = get_post_meta($this->post_id,WP_SoundSystem_Core_Live_Playlists::$scraper_meta_name,true);
             $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$db_options); //last one has priority
 
             if ($this->feed_url){
                 $this->location = $this->feed_url;
             }
             
-            if ( $meta = get_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name,true) ){
+            if ( $meta = get_post_meta($this->post_id,WP_SoundSystem_Core_Live_Playlists::$time_updated_meta_name,true) ){
                 $this->updated_time = $meta;
             }
 
@@ -157,7 +157,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         }
         
         //capability check
-        if ( !wpsstm_live_playlists()->can_live_playlists() ){
+        if ( !WP_SoundSystem_Core_Live_Playlists::can_live_playlists() ){
             wpsstm()->debug_log('wpsstm_missing_cap','WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
@@ -167,9 +167,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            wpsstm_live_playlists()->remote_title_meta_name =>  $this->get_remote_title(),
-            wpsstm_live_playlists()->remote_author_meta_name => $this->get_remote_author(),
-            wpsstm_live_playlists()->time_updated_meta_name =>  $this->updated_time,
+            WP_SoundSystem_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
+            WP_SoundSystem_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
+            WP_SoundSystem_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
         );
         
         //should we save subtracks too ? By default, only if cache is enabled.
@@ -775,9 +775,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function save_feed_url(){
 
         if (!$this->feed_url){
-            return delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name );
+            return delete_post_meta( $this->post_id, WP_SoundSystem_Core_Live_Playlists::$feed_url_meta_name );
         }else{
-            return update_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $this->feed_url );
+            return update_post_meta( $this->post_id, WP_SoundSystem_Core_Live_Playlists::$feed_url_meta_name, $this->feed_url );
         }
     }
     
@@ -785,7 +785,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         $post_type = get_post_type($this->post_id);
 
-        if( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
 
         $disable = (bool)isset($wizard_data['disable']);
@@ -804,7 +804,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( !$this->post_id ) return;
 
         $default_settings = $this->get_default_scraper_options();
-        $old_settings = get_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name,true);
+        $old_settings = get_post_meta($this->post_id, WP_SoundSystem_Core_Live_Playlists::$scraper_meta_name,true);
         
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
@@ -814,13 +814,13 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //settings have been updated, clear tracklist cache
         if ($old_settings != $wizard_settings){
             wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WP_SoundSystem_Remote_Tracklist::save_wizard_settings' );
-            delete_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name);
+            delete_post_meta($this->post_id,WP_SoundSystem_Core_Live_Playlists::$time_updated_meta_name);
         }
 
         if (!$wizard_settings){
-            delete_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name);
+            delete_post_meta($this->post_id, WP_SoundSystem_Core_Live_Playlists::$scraper_meta_name);
         }else{
-            update_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name, $wizard_settings);
+            update_post_meta($this->post_id, WP_SoundSystem_Core_Live_Playlists::$scraper_meta_name, $wizard_settings);
         }
 
     }

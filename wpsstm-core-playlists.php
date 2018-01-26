@@ -2,32 +2,9 @@
 
 class WP_SoundSystem_Core_Playlists{
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Playlists;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        
+    function __construct() {
         require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
         
-        //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-
-    
-    function setup_actions(){
-
         add_action( 'init', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
         
@@ -205,9 +182,3 @@ class WP_SoundSystem_Core_Playlists{
     }
     
 }
-
-function wpsstm_playlists() {
-	return WP_SoundSystem_Core_Playlists::instance();
-}
-
-wpsstm_playlists();

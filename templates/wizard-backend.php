@@ -63,7 +63,7 @@ $post_type = get_post_type();
     }
 
     //import tracks
-    if ( !$is_wizard_disabled && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
+    if ( !$is_wizard_disabled && in_array($post_type,wpsstm()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
         submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
     }
 

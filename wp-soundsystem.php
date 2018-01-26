@@ -36,6 +36,8 @@ class WP_SoundSystem {
     public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
+    public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
+    public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
     public $qvar_popup = 'wpsstm-popup';
@@ -110,6 +112,7 @@ class WP_SoundSystem {
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
         
+        
         //validate options
         /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
         https://wordpress.stackexchange.com/a/126206/70449
@@ -156,9 +159,20 @@ class WP_SoundSystem {
             require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
 
-        do_action('wpsstm_loaded');
-        
+        new WP_SoundSystem_Core_Albums();
+        new WP_SoundSystem_Core_Artists();
+        new WP_SoundSystem_Core_BuddyPress();
+        new WP_SoundSystem_Core_LastFM();
+        new WP_SoundSystem_Core_MusicBrainz();
+        new WP_SoundSystem_Core_Player();
+        new WP_SoundSystem_Core_Live_Playlists();
+        new WP_SoundSystem_Core_Playlists();
         new WP_SoundSystem_Core_Sources();
+        new WP_SoundSystem_Core_Tracks();
+        new WP_SoundSystem_Core_Tracklists();
+        new WP_SoundSystem_Core_Wizard();
+        
+        do_action('wpsstm_loaded');
         
         
     }

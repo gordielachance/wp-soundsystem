@@ -2,7 +2,7 @@
 global $post;
 global $wpsstm_track;
 global $wpsstm_tracklist;
-$tracklist_admin = get_query_var( wpsstm_tracklists()->qvar_tracklist_admin );
+$tracklist_admin = get_query_var( WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin );
 ?>
 
 <div id="wpsstm-tracklist-admin" class="wpsstm-post-admin">

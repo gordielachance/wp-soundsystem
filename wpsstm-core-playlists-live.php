@@ -1,43 +1,18 @@
 <?php
 class WP_SoundSystem_Core_Live_Playlists{
 
-    public $feed_url_meta_name = '_wpsstm_scraper_url';
-    public $scraper_meta_name = '_wpsstm_scraper_options';
-    public $remote_title_meta_name = 'wpsstm_remote_title';
-    public $remote_author_meta_name = 'wpsstm_remote_author_name';
-    public $time_updated_meta_name = 'wpsstm_remote_query_time';
+    static $feed_url_meta_name = '_wpsstm_scraper_url';
+    static $scraper_meta_name = '_wpsstm_scraper_options';
+    static $remote_title_meta_name = 'wpsstm_remote_title';
+    static $remote_author_meta_name = 'wpsstm_remote_author_name';
+    static $time_updated_meta_name = 'wpsstm_remote_query_time';
     public $presets;
-    
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
 
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Live_Playlists;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
+    function __construct() {
+        
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
-        
         $this->include_preset_files(); //include files from presets folder
-        
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-    
-    function setup_globals(){
-        
-    }
 
-    function setup_actions(){
-        
         if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
@@ -287,7 +262,7 @@ class WP_SoundSystem_Core_Live_Playlists{
         
     }
 
-    function can_live_playlists(){
+    public static function can_live_playlists(){
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
         return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
@@ -302,7 +277,7 @@ class WP_SoundSystem_Core_Live_Playlists{
 
         //only if no WP post title set
         if ( !$title ){
-            $title = get_post_meta($post_id,$this->remote_title_meta_name,true);
+            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
         }
         
         return $title;
@@ -317,9 +292,3 @@ class WP_SoundSystem_Core_Live_Playlists{
     }
 
 }
-
-function wpsstm_live_playlists() {
-	return WP_SoundSystem_Core_Live_Playlists::instance();
-}
-
-wpsstm_live_playlists();

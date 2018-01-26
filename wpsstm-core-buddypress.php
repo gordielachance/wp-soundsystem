@@ -2,41 +2,13 @@
 
 class WP_SoundSystem_Core_BuddyPress{
     
-    var $music_slug;
-    var $favorite_tracks_slug;
-    var $static_playlists_slug;
-    var $live_playlists_slug;
-    var $favorite_tracklists_slug;
+    static $music_slug = 'music';
+    static $favorite_tracks_slug = 'favorite-tracks';
+    static $static_playlists_slug = 'static';
+    static $live_playlists_slug = 'live';
+    static $favorite_tracklists_slug = 'favorite-tracklists';
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_BuddyPress;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-    
-    function setup_globals(){
-        $this->music_slug = 'music';
-        $this->favorite_tracks_slug = 'favorite-tracks';
-        $this->static_playlists_slug = 'static';
-        $this->live_playlists_slug = 'live';
-        $this->favorite_tracklists_slug = 'favorite-tracklists';
-    }
-
-    function setup_actions(){
+    function __construct() {
         add_action( 'bp_setup_nav', array($this,'register_music_menu'), 99 );
         add_action( 'wpsstm_love_track', array($this,'love_track_activity') );
         add_action( 'wpsstm_love_tracklist', array($this,'love_tracklist_activity') );
@@ -47,8 +19,8 @@ class WP_SoundSystem_Core_BuddyPress{
         
         $menu_args = array(
                 'name'                      => __('Music','wpsstm'),
-                'slug'                      => $this->music_slug,
-                'default_subnav_slug'       => $this->static_playlists_slug,
+                'slug'                      => self::$music_slug,
+                'default_subnav_slug'       => self::$static_playlists_slug,
                 'position'                  => 50,
                 'show_for_displayed_user'   => true,
                 //'screen_function' => array($this,'view_user_static_playlists'),
@@ -97,9 +69,9 @@ class WP_SoundSystem_Core_BuddyPress{
         
         bp_core_new_subnav_item( array(
             'name'            => $name,
-            'slug'            => $this->static_playlists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
-            'parent_slug'     => $this->music_slug,
+            'slug'            => self::$static_playlists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . self::$music_slug . '/',
+            'parent_slug'     => self::$music_slug,
             'position'        => 10,
             'screen_function' => array($this,'view_user_static_playlists'),
         ) );
@@ -133,9 +105,9 @@ class WP_SoundSystem_Core_BuddyPress{
         
         bp_core_new_subnav_item( array(
             'name'            => $name,
-            'slug'            => $this->live_playlists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
-            'parent_slug'     => $this->music_slug,
+            'slug'            => self::$live_playlists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . self::$music_slug . '/',
+            'parent_slug'     => self::$music_slug,
             'position'        => 20,
             'screen_function' => array($this,'view_user_live_playlists'),
         ) );
@@ -147,8 +119,8 @@ class WP_SoundSystem_Core_BuddyPress{
         
         //favorite query
         $query_args = array(
-            'post_type' =>      wpsstm_tracklists()->tracklist_post_types,
-            wpsstm_tracklists()->qvar_loved_tracklists => bp_displayed_user_id(),
+            'post_type' =>      wpsstm()->tracklist_post_types,
+            //WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin//WP_SoundSystem_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
             'fields' =>         'ids',
@@ -170,9 +142,9 @@ class WP_SoundSystem_Core_BuddyPress{
         
         bp_core_new_subnav_item( array(
             'name'            => $name,
-            'slug'            => $this->favorite_tracklists_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
-            'parent_slug'     => $this->music_slug,
+            'slug'            => self::$favorite_tracklists_slug,
+            'parent_url'      => $bp->loggedin_user->domain . self::$music_slug . '/',
+            'parent_slug'     => self::$music_slug,
             'position'        => 40,
             'screen_function' => array($this,'view_user_loved_tracklists'),
         ) );
@@ -185,7 +157,7 @@ class WP_SoundSystem_Core_BuddyPress{
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'posts_per_page' => -1,
-            wpsstm_tracks()->qvar_loved_tracks => bp_displayed_user_id(),
+            WP_SoundSystem_Core_Tracks::$qvar_loved_tracks => bp_displayed_user_id(),
             'fields' =>         'ids',
         );
         $query = new WP_Query( $query_args );
@@ -203,9 +175,9 @@ class WP_SoundSystem_Core_BuddyPress{
 		);
         bp_core_new_subnav_item( array(
             'name'            => $name,
-            'slug'            => $this->favorite_tracks_slug,
-            'parent_url'      => $bp->loggedin_user->domain . $this->music_slug . '/',
-            'parent_slug'     => $this->music_slug,
+            'slug'            => self::$favorite_tracks_slug,
+            'parent_url'      => $bp->loggedin_user->domain . self::$music_slug . '/',
+            'parent_slug'     => self::$music_slug,
             'position'        => 40,
             'screen_function' => array($this,'view_user_loved_tracks')
         ) );
@@ -290,8 +262,8 @@ class WP_SoundSystem_Core_BuddyPress{
 
         //member favorite playlists
         $query_args = array(
-            'post_type' =>      wpsstm_tracklists()->tracklist_post_types,
-            wpsstm_tracklists()->qvar_loved_tracklists => bp_displayed_user_id(),
+            'post_type' =>      wpsstm()->tracklist_post_types,
+            //WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin//WP_SoundSystem_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
         );
@@ -340,7 +312,7 @@ class WP_SoundSystem_Core_BuddyPress{
             $tracklist->author = $display_name;
 
             $subtracks_qargs = array(
-                wpsstm_tracks()->qvar_loved_tracks =>   $user_id,
+                WP_SoundSystem_Core_Tracks::$qvar_loved_tracks =>   $user_id,
             );
             $tracklist->populate_subtracks($subtracks_qargs);
         }else{
@@ -357,7 +329,7 @@ class WP_SoundSystem_Core_BuddyPress{
             //'id' =>
             'action' =>         sprintf(__('%s loved the track %s','wpsstm'),$user_link,$track_link),
             //'content' =>
-            'component' =>      $this->music_slug,
+            'component' =>      self::$music_slug,
             'type' =>           'loved_track',
             'primary_link' =>   get_permalink($track_id),
             //'user_id' =>        
@@ -382,7 +354,7 @@ class WP_SoundSystem_Core_BuddyPress{
             //'id' =>
             'action' =>         sprintf(__('%s loved the tracklist %s','wpsstm'),$user_link,$tracklist_link),
             //'content' =>
-            'component' =>      $this->music_slug,
+            'component' =>      self::$music_slug,
             'type' =>           'loved_tracklist',
             'primary_link' =>   get_permalink($tracklist_id),
             //'user_id' =>        
@@ -397,9 +369,3 @@ class WP_SoundSystem_Core_BuddyPress{
     }
     
 }
-
-function wpsstm_buddypress() {
-	return WP_SoundSystem_Core_BuddyPress::instance();
-}
-
-wpsstm_buddypress();

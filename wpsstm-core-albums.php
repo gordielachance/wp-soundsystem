@@ -2,31 +2,12 @@
 
 class WP_SoundSystem_Core_Albums{
 
-    public $album_metakey = '_wpsstm_release';
-    public $qvar_album_lookup = 'lookup_release';
-    public $album_mbtype = 'release'; //musicbrainz type, for lookups
-    
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
+    static $album_metakey = '_wpsstm_release';
+    static $qvar_album_lookup = 'lookup_release';
+    static $album_mbtype = 'release'; //musicbrainz type, for lookups
 
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Albums;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
     
-    private function __construct() { /* Do nothing here */ }
-
-    function init(){
-        //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-    
-    function setup_actions(){
+    function __construct() {
         add_action( 'init', array($this,'register_post_type_album' ));
         add_filter( 'query_vars', array($this,'add_query_var_album') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
@@ -102,11 +83,11 @@ class WP_SoundSystem_Core_Albums{
 
     function pre_get_posts_by_album( $query ) {
 
-        if ( $album = $query->get( $this->qvar_album_lookup ) ){
+        if ( $album = $query->get( self::$qvar_album_lookup ) ){
 
             $query->set( 'meta_query', array(
                 array(
-                     'key'     => $this->album_metakey,
+                     'key'     => self::$album_metakey,
                      'value'   => $album,
                      'compare' => '='
                 )
@@ -218,7 +199,7 @@ class WP_SoundSystem_Core_Albums{
     }
     
     function add_query_var_album( $qvars ) {
-        $qvars[] = $this->qvar_album_lookup;
+        $qvars[] = self::$qvar_album_lookup;
         return $qvars;
     }
     
@@ -242,7 +223,7 @@ class WP_SoundSystem_Core_Albums{
     
     function metabox_album_content( $post ){
 
-        $album_title = get_post_meta( $post->ID, $this->album_metakey, true );
+        $album_title = get_post_meta( $post->ID, self::$album_metakey, true );
         
         ?>
         <input type="text" name="wpsstm_album" class="wpsstm-fullwidth" value="<?php echo $album_title;?>" placeholder="<?php printf("Enter album title here",'wpsstm');?>"/>
@@ -279,9 +260,9 @@ class WP_SoundSystem_Core_Albums{
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
 
         if (!$album){
-            delete_post_meta( $post_id, $this->album_metakey );
+            delete_post_meta( $post_id, self::$album_metakey );
         }else{
-            update_post_meta( $post_id, $this->album_metakey, $album );
+            update_post_meta( $post_id, self::$album_metakey, $album );
         }
 
     }
@@ -292,16 +273,10 @@ class WP_SoundSystem_Core_Albums{
         $post_type = get_post_type($post_id);
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
 
-        $title = get_post_meta( $post_id, $this->album_metakey, true );
-        $artist = get_post_meta( $post_id, wpsstm_artists()->artist_metakey, true );
+        $title = get_post_meta( $post_id, self::$album_metakey, true );
+        $artist = get_post_meta( $post_id, WP_SoundSystem_Core_Artists::$artist_metakey, true );
         
         return sprintf('"%s" - %s',$title,$artist);
     }
     
 }
-
-function wpsstm_albums() {
-	return WP_SoundSystem_Core_Albums::instance();
-}
-
-wpsstm_albums();
