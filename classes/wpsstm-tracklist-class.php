@@ -888,7 +888,6 @@ class WPSSTM_Tracklist{
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-tracklist-unique-id' =>    $this->unique_id,
             'data-wpsstm-tracklist-idx' =>          $this->index,
-            'data-tracks-count' =>                  $this->track_count,
             'data-wpsstm-toggle-tracklist' =>       $this->get_options('toggle_tracklist'),
         );
 
@@ -1062,6 +1061,20 @@ class WPSSTM_Tracklist{
             return update_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey, true );
         }else{
             return delete_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey );
+        }
+    }
+    
+    function get_html_metas(){
+        $metas = array(
+            'numTracks' => $this->track_count
+        );
+        return $metas;
+    }
+    
+    function html_metas(){
+        $metas = $this->get_html_metas();
+        foreach( (array)$metas as $key=>$value ){
+            printf('<meta itemprop="%s" content="%s"/>',$key,$value);
         }
     }
 }

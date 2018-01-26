@@ -202,26 +202,12 @@ class WPSSTM_Core_Tracklists{
         wpsstm()->debug_log($ajax_data,"ajax_refresh_tracklist()");
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
-        $tracklist_unique_id = $result['unique_id'] = ( isset($ajax_data['unique_id']) ) ? $ajax_data['unique_id'] : null;
-        
-        //TO FIX TO CHECK
-        //populate back the options from JS.  Is this required ? Do check that.
-        $ajax_options = (array)$ajax_data['options'];
-        foreach($ajax_options as $key=>$option){
-            //convert AJAX strings to bool
-            if ($option === 'true') $ajax_options[$key] = true;
-            if ($option === 'false') $ajax_options[$key] = false;
-        }
-        
-        $options = $result['options'] =wp_parse_args($ajax_options,$wpsstm_tracklist->options);
 
         if ($tracklist_id){
             
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $wpsstm_tracklist->unique_id = $tracklist_unique_id; //populate unique ID back from JS so we keep its value
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
-            $wpsstm_tracklist->options = $options;
             
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;

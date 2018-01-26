@@ -921,19 +921,31 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $expiration_time = $this->get_expiration_time();
         
         if (!$expiration_time){ 
-            //no real cache is set; so let's say tracklist is already expired at load!
+            //
             $expiration_time = current_time( 'timestamp', true );
         }
-        
-        if ( $expiration_time ){
-            $values_default['data-wpsstm-expire-time'] = $expiration_time;
-        }
-        
+
         $values_default['data-wpsstm-domain'] = wpsstm_get_url_domain( $this->feed_url );
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 
         return parent::get_tracklist_attr($values_attr);
     }
+    
+    function get_html_metas(){
+        $metas = parent::get_html_metas();
+        
+        /*
+        expiration time
+        */
+        //if no real cache is set; let's say tracklist is already expired at load!
+        $expiration_time = ($expiration = $this->get_expiration_time() ) ? $expiration : current_time( 'timestamp', true );
+        
+        $metas['wpsstmExpiration'] = $expiration_time;
+        
+        return $metas;
+    }
+    
+
     
 }
