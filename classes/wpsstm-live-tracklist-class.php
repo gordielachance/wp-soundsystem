@@ -21,6 +21,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     );
     public $response = null;
     public $response_type = null;
+    public $response_body = null;
     public $body_node = null;
     public $track_nodes = array();
     public $tracks = array();
@@ -116,9 +117,12 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
             return parent::populate_subtracks($args);
         }
+        
+        //abord if we don't have a feed URL yet.
+        if( $this->feed_url) return;
 
         $tracks = $this->get_remote_tracks();
-        
+
         $this->did_query_tracks = true;
 
         if ( is_wp_error($tracks) ){
@@ -137,7 +141,8 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         /*
         UPDATE TRACKLIST
         */
-        return $this->update_live_tracklist();
+        $post_id = $this->update_live_tracklist();
+        return $post_id;
     }
 
     /*
@@ -207,7 +212,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     protected function get_remote_tracks(){
 
         $raw_tracks = array();
-        
+
         do_action('wpsstm_get_remote_tracks',$this);
 
         //count total pages
@@ -231,8 +236,6 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     }
 
     private function get_remote_page_tracks(){
-        
-        
 
         $body_node = $this->get_body_node();
         if ( is_wp_error($body_node) ){
@@ -308,10 +311,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     private function get_response_type(){
         
         if ( $this->response_type !== null ) return $this->response_type; //already populated
-        if ( $this->response === null ) return; //response not yet populated
 
         $type = null;
-        $response = $this->response;
+        $response = $this->get_remote_response();
         
         if ( $response && !is_wp_error($response) ){
             $content_type = wp_remote_retrieve_header( $response, 'content-type' );
@@ -354,9 +356,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
     }
     
-    protected function get_body_node(){
-
-        $result = null;
+    protected function get_response_body(){
+        
+        if ( $this->response_body !== null ) return $this->response_body; //already populated
+        
+        $content = null;
 
         //response
         $response = $this->get_remote_response();
@@ -369,8 +373,19 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         //response body
         $content = wp_remote_retrieve_body( $response ); 
         if ( is_wp_error($content) ) return $content;
-
+        
         $content = Encoding::fixUTF8($content);//fix mixed encoding //TO FIX TO CHECK at the right place?
+        
+        $this->response_body = $content;
+        return $this->response_body;
+    }
+    
+    protected function get_body_node(){
+
+        $result = null;
+
+        $response_type = $this->get_response_type();
+        $response_body = $this->get_response_body();
 
         libxml_use_internal_errors(true); //TO FIX TO CHECK should be in the XML part only ?
         
@@ -381,7 +396,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 $xml = null;
 
                 try{
-                    $data = json_decode($content, true);
+                    $data = json_decode($response_body, true);
                     $dom = WP_SoundSystem_Array2XML::createXML($data,'root','element');
                     $xml = $dom->saveXML($dom);
                     
@@ -392,18 +407,20 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 
                 if ($xml){
                     wpsstm()->debug_log("The json input has been converted to XML.",'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                    
+                    //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
-                    $content = $xml;
+                    $this->response_body = $xml;
+                    return $this->get_body_node();
                 }
-            
-            //no break here!
-            
+            break;
+
             case 'text/xspf+xml':
             case 'application/xspf+xml':
             case 'application/xml':
             case 'text/xml':
 
-                $xml = simplexml_load_string($content);
+                $xml = simplexml_load_string($response_body);
                 
                 //maybe libxml will output error but will work; do not abord here.
                 $xml_errors = libxml_get_errors();
@@ -433,7 +450,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
                 //QueryPath
                 try{
-                    $result = htmlqp( $content, null, self::$querypath_options );
+                    $result = htmlqp( $response_body, null, self::$querypath_options );
                 }catch(Exception $e){
                     return WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }
@@ -445,7 +462,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             default: //text/plain
                 //QueryPath
                 try{
-                    $result = qp( $content, 'body', self::$querypath_options );
+                    $result = qp( $response_body, 'body', self::$querypath_options );
                 }catch(Exception $e){
                     return WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }
