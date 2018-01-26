@@ -63,8 +63,6 @@ class WP_SoundSystem_Core_Tracks{
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_frontend' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracks_scripts_styles_backend' ) );
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
 
@@ -148,21 +146,7 @@ class WP_SoundSystem_Core_Tracks{
         wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-track-sources'),wpsstm()->version, true );
         
     }
-    
-    function enqueue_tracks_scripts_styles_frontend(){
-        //TO FIX load only when single track is displayed ? but anyway is loaded through wpsstm-tracklists ?
-        wp_enqueue_script( 'wpsstm-tracks' );
-        
-    }
 
-    function enqueue_tracks_scripts_styles_backend(){
-        
-        if ( !wpsstm()->is_admin_page() ) return;
-        
-        wp_enqueue_script( 'wpsstm-tracks' );
-
-    }
-    
     /*
     Prepend the list of users that have favorited this track before the content
     */
