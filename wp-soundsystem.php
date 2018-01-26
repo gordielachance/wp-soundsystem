@@ -158,6 +158,8 @@ class WP_SoundSystem {
 
         do_action('wpsstm_loaded');
         
+        new WP_SoundSystem_Core_Sources();
+        
         
     }
     function setup_actions(){
@@ -236,7 +238,7 @@ class WP_SoundSystem {
             
             if($current_version < 151){ //rename old source URL metakeys
 
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", wpsstm_sources()->source_url_metakey, '_wpsstm_source' );
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WP_SoundSystem_Core_Sources::$source_url_metakey, '_wpsstm_source' );
 
                 $result = $wpdb->get_results ( $querystr );
                 

@@ -20,7 +20,7 @@ class WP_SoundSystem_Source{
             $this->title = get_the_title($post_id);
             $this->track_id = wp_get_post_parent_id( $post_id );
 
-            $this->url = get_post_meta($post_id,wpsstm_sources()->source_url_metakey,true);
+            $this->url = get_post_meta($post_id,WP_SoundSystem_Core_Sources::$source_url_metakey,true);
 
             $this->match = $this->get_track_match();
             
@@ -102,7 +102,7 @@ class WP_SoundSystem_Source{
                 'relation' => 'OR',
                 //by source URL
                 'source_url' => array(
-                    'key'     => wpsstm_sources()->source_url_metakey,
+                    'key'     => WP_SoundSystem_Core_Sources::$source_url_metakey,
                     'value'   => $this->url
                 ),
                 //by track info, TO FIX TO CHECK required ?
@@ -195,9 +195,9 @@ class WP_SoundSystem_Source{
         $this->populate_source_provider();
 
         $meta_input = array(
-            wpsstm_sources()->source_url_metakey        => $this->url,
-            wpsstm_sources()->source_stream_metakey     => $this->stream_url,
-            wpsstm_sources()->source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
+            WP_SoundSystem_Core_Sources::$source_url_metakey        => $this->url,
+            WP_SoundSystem_Core_Sources::$source_stream_metakey     => $this->stream_url,
+            WP_SoundSystem_Core_Sources::$source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
             
             //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
             /*
@@ -311,12 +311,12 @@ class WP_SoundSystem_Source{
 
     function populate_source_provider(){
 
-        if ( $meta = get_post_meta($this->post_id,wpsstm_sources()->source_stream_metakey,true) ){
+        if ( $meta = get_post_meta($this->post_id,WP_SoundSystem_Core_Sources::$source_stream_metakey,true) ){
             $this->stream_url = $meta;
         }
 
         //try to populate it from the stored value
-        if ( $provider_slug = get_post_meta($this->post_id,wpsstm_sources()->source_provider_metakey,true) ){
+        if ( $provider_slug = get_post_meta($this->post_id,WP_SoundSystem_Core_Sources::$source_provider_metakey,true) ){
             
             foreach( (array)wpsstm_player()->providers as $provider ){
                 if ($provider_slug != $provider->slug) continue;
@@ -409,7 +409,7 @@ class WP_SoundSystem_Source{
         
         $url = null;
         
-        $args = array(wpsstm_sources()->qvar_source_action=>$action);
+        $args = array(WP_SoundSystem_Core_Sources::$qvar_source_action=>$action);
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);

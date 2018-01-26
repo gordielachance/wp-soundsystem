@@ -547,7 +547,7 @@ class WP_SoundSystem_Track{
             'include' =>    implode(',',$tuneefy_providers),
         );
 
-        $api = wpsstm_sources()->tuneefy_api_aggregate('track',$tuneefy_args);
+        $api = WP_SoundSystem_Core_Sources::tuneefy_api_aggregate('track',$tuneefy_args);
         if ( is_wp_error($api) ) return $api;
 
         $items = wpsstm_get_array_value(array('results'),$api);

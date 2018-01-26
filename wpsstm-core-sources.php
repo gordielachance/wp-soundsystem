@@ -3,41 +3,19 @@
 class WP_SoundSystem_Core_Sources{
 
     var $providers = array();
-    var $source_url_metakey = '_wpsstm_source_url';
-    var $source_stream_metakey = '_wpsstm_source_stream';
-    var $source_provider_metakey = '_wpsstm_source_provider';
-    var $qvar_source_action = 'source-action';
+    static $source_url_metakey = '_wpsstm_source_url';
+    static $source_stream_metakey = '_wpsstm_source_stream';
+    static $source_provider_metakey = '_wpsstm_source_provider';
+    static $qvar_source_action = 'source-action';
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Sources;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-    
-    function setup_globals(){
+    function __construct() {
         global $wpsstm_source;
-        
+
         //initialize global (blank) $wpsstm_source so plugin never breaks when calling it.
         $wpsstm_source = new WP_SoundSystem_Source();
-    }
-
-    function setup_actions(){
         
         add_action( 'init', array($this,'register_post_type_sources' ));
+
         add_filter( 'query_vars', array($this,'add_query_vars_source') );
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_sources_submenu' ) );
@@ -84,7 +62,7 @@ class WP_SoundSystem_Core_Sources{
     }
     
     function add_query_vars_source( $qvars ) {
-        $qvars[] = $this->qvar_source_action;
+        $qvars[] = self::$qvar_source_action;
         return $qvars;
     }
 
@@ -345,9 +323,9 @@ class WP_SoundSystem_Core_Sources{
         //TO FIX validate URL
 
         if (!$source_url){
-            delete_post_meta( $post_id, $this->source_url_metakey );
+            delete_post_meta( $post_id, self::$source_url_metakey );
         }else{
-            update_post_meta( $post_id, $this->source_url_metakey, $source_url );
+            update_post_meta( $post_id, self::$source_url_metakey, $source_url );
         }
 
     }
@@ -608,7 +586,7 @@ class WP_SoundSystem_Core_Sources{
         wp_send_json( $result ); 
     }
     
-    function can_tuneefy(){
+    static function can_tuneefy(){
         if ( !wpsstm()->get_options('tuneefy_client_id') ){
             return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client id missing.','wpsstm') );
         }
@@ -618,9 +596,9 @@ class WP_SoundSystem_Core_Sources{
         return true;
     }
     
-    function get_tuneefy_token(){
+    static function get_tuneefy_token(){
         
-        $can_tuneefy = $this->can_tuneefy();
+        $can_tuneefy = self::can_tuneefy();
         if( is_wp_error($can_tuneefy) ) return $can_tuneefy;
         
         $transient_name = 'tuneefy_token';
@@ -665,7 +643,7 @@ class WP_SoundSystem_Core_Sources{
     See https://data.tuneefy.com/#search-aggregate-get
     */
     
-    function tuneefy_api_aggregate($type,$url_args){
+    static function tuneefy_api_aggregate($type,$url_args){
         
         $error = null;
         $url = null;
@@ -673,7 +651,7 @@ class WP_SoundSystem_Core_Sources{
         $api_response = null;
         
         
-        $token = $this->get_tuneefy_token();
+        $token = self::get_tuneefy_token();
         
         if ( is_wp_error($token) ){
             $error = $token;
@@ -718,10 +696,10 @@ class WP_SoundSystem_Core_Sources{
     }
 
     
-    function can_autosource(){
+    static function can_autosource(){
         
         //tuneefy
-        $can_tuneefy = $this->can_tuneefy();
+        $can_tuneefy = self::can_tuneefy();
         if ( is_wp_error($can_tuneefy) ) return $can_tuneefy;
         
         //community user
@@ -732,10 +710,12 @@ class WP_SoundSystem_Core_Sources{
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $autosource_cap = $sources_post_type_obj->cap->edit_posts;
-        if ( !$has_cap = user_can($community_user_id,$autosource_cap) ){
-            $error = sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>');
-            return new WP_Error( 'wpsstm_autosource',$error );
+        if ($sources_post_type_obj){ //be sure post type is registered before doing that check - eg. it isn't when saving settings.
+            $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+            if ( !$has_cap = user_can($community_user_id,$autosource_cap) ){
+                $error = sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>');
+                return new WP_Error( 'wpsstm_autosource',$error );
+            }
         }
 
         return true;
@@ -743,8 +723,3 @@ class WP_SoundSystem_Core_Sources{
     }
 
 }
-
-function wpsstm_sources() {
-	return WP_SoundSystem_Core_Sources::instance();
-}
-wpsstm_sources();

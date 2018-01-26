@@ -555,7 +555,7 @@ class WP_SoundSystem_Settings {
             }else{
 
                 //autosource
-                $can_autosource = wpsstm_sources()->can_autosource();
+                $can_autosource = WP_SoundSystem_Core_Sources::can_autosource();
                 if ( is_wp_error($can_autosource) ){
                     add_settings_error('wpsstm-settings-tracklists', 'cannot_autosource', $can_autosource->get_error_message());
                 }
