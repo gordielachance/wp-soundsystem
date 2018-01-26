@@ -117,9 +117,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
             return parent::populate_subtracks($args);
         }
-        
+
         //abord if we don't have a feed URL yet.
-        if( $this->feed_url) return;
+        if( !$this->feed_url) return;
 
         $tracks = $this->get_remote_tracks();
 
