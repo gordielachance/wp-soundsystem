@@ -42,7 +42,7 @@ class WpsstmPagePlayer {
         */
         //which one could we autoplay?
         var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
-            return (tracklist_obj.tracklist_el.hasClass('tracklist-autoplay') );
+            return tracklist_obj.options.autoplay;
         });
         
         //autoplay the first one of those.
