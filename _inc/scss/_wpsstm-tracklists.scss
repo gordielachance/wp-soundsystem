@@ -126,12 +126,12 @@ body.wpsstm-default,body.wp-admin{
                 @include opacity(.5);
             }
         }
+        
+        &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
+            display:none;
+        }
 
         &.tracklist-ajaxed{
-
-            &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
-                display:none;
-            }
 
             &.tracklist-refresh{
                 > * {

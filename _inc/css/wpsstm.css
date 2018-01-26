@@ -90,8 +90,8 @@ body.wpsstm-default .wpsstm-tracklist:not(.tracklist-expired) #wpsstm-tracklist-
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
-/* line 132, ../scss/_wpsstm-tracklists.scss */
-body.wpsstm-default .wpsstm-tracklist.tracklist-ajaxed:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh, body.wp-admin .wpsstm-tracklist.tracklist-ajaxed:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh {
+/* line 130, ../scss/_wpsstm-tracklists.scss */
+body.wpsstm-default .wpsstm-tracklist:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh, body.wp-admin .wpsstm-tracklist:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh {
   display: none;
 }
 /* line 137, ../scss/_wpsstm-tracklists.scss */

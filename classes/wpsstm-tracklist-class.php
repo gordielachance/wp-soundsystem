@@ -864,7 +864,6 @@ class WPSSTM_Tracklist{
         ob_start();
         ?>
         var wpsstm_tracklist_<?php echo $this->unique_id;?>_options = <?php echo json_encode($this->get_options());?>;
-        console.log(wpsstm_tracklist_<?php echo $this->unique_id;?>_options);
         <?php
         $inline = ob_get_clean();
 

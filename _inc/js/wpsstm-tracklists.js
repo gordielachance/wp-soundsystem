@@ -8,14 +8,15 @@
         }
     });
 
-    $(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
+    $(document).on( "wpsstmTracklistLoaded", function( event, tracklist_obj ) {
         
         /*
         Tracklist actions
         */
 
         //refresh
-        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist").click(function(e) {
+        var refresh_bts = tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
+        refresh_bts.click(function(e) {
             e.preventDefault();
             tracklist_obj.debug("clicked 'refresh' link");
             tracklist_obj.get_tracklist_request();
@@ -23,7 +24,8 @@
         });
 
         //favorite
-        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a').click(function(e) {
+        var favorite_bt = tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a');
+        favorite_bt.click(function(e) {
             e.preventDefault();
 
             var link = $(this);
@@ -70,7 +72,8 @@
         });
         
         //unfavorite
-        tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-unfavorite a').click(function(e) {
+        var unfavorite_bt = tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-unfavorite a');
+        unfavorite_bt.click(function(e) {
             e.preventDefault();
 
             var link = $(this);
@@ -116,15 +119,17 @@
         });
         
         //switch status
-        tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-status-switch a").click(function(e) {
+        var switch_bt = tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-status-switch a");
+        switch_bt.click(function(e) {
             e.preventDefault();
             $(this).closest('li').toggleClass('expanded');
             
         });
 
-    });
-    
-    $(document).on( "wpsstmTracklistLoaded", function( event, tracklist_obj ) {
+        /*
+        Tracks
+        */
+
 
         // sort tracks
         tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
@@ -186,12 +191,12 @@ class WpsstmTracklist {
         
         ///
         this.tracklist_el.attr('data-wpsstm-tracklist-idx',this.index);
-        
-        ///
-        $(document).trigger("wpsstmTracklistInit",[this]); //custom event
 
         ///
         this.load_tracklist_tracks();
+        
+        ///
+        $(document).trigger("wpsstmTracklistInit",[this]); //custom event
 
     }
     
@@ -211,10 +216,7 @@ class WpsstmTracklist {
         /*
         tracks
         */
-        
-        //TO FIX 
-        //update wpsstm-tracklist-updated time
-        
+
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
 
         self.tracks = [];

@@ -73,14 +73,12 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
     }
     
-    if ( $tracklist->ajax_refresh ){
+    if ($tracklist->tracklist_type == 'live'){
         /*
         REFRESH notice
         will be toggled using CSS
         */
         $tracklist->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
-    }else{
-        
     }
     
     /*
