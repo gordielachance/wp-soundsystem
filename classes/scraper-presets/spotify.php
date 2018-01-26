@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Spotify_URL_Playlists_Api{
+class WPSSTM_Spotify_URL_Playlists_Api{
     var $tracklist;
 
     private $token = null;
@@ -182,7 +182,7 @@ class WP_SoundSystem_Spotify_URL_Playlists_Api{
 }
 
 //Spotify Playlists URIs
-class WP_SoundSystem_Spotify_URI_Playlists_Api extends WP_SoundSystem_Spotify_URL_Playlists_Api{
+class WPSSTM_Spotify_URI_Playlists_Api extends WPSSTM_Spotify_URL_Playlists_Api{
 
     function get_user_slug(){
         $pattern = '~^spotify:user:([^:]+)~i';
@@ -200,8 +200,8 @@ class WP_SoundSystem_Spotify_URI_Playlists_Api extends WP_SoundSystem_Spotify_UR
 
 //register presets
 function register_spotify_presets($tracklist){
-    new WP_SoundSystem_Spotify_URL_Playlists_Api($tracklist);
-    new WP_SoundSystem_Spotify_URI_Playlists_Api($tracklist);
+    new WPSSTM_Spotify_URL_Playlists_Api($tracklist);
+    new WPSSTM_Spotify_URI_Playlists_Api($tracklist);
 }
 function register_spotify_service_links($links){
     $links[] = array(

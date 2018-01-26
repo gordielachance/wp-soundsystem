@@ -3,7 +3,7 @@
 /**
 Handle posts that have a tracklist, like albums and playlists.
 **/
-class WP_SoundSystem_Core_Tracklists{
+class WPSSTM_Core_Tracklists{
     
     static $qvar_tracklist_admin = 'admin-tracklist';
     static $qvar_tracklist_action = 'tracklist-action';
@@ -16,7 +16,7 @@ class WP_SoundSystem_Core_Tracklists{
         require_once(wpsstm()->plugin_dir . 'wpsstm-core-wizard.php');
 
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
-        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
+        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
@@ -101,7 +101,7 @@ class WP_SoundSystem_Core_Tracklists{
         }else{
             //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
             //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
-            $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
+            $wpsstm_tracklist = new WPSSTM_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     
@@ -289,7 +289,7 @@ class WP_SoundSystem_Core_Tracklists{
         switch ( $column ) {
             case 'playlist':
                 
-                $track = new WP_SoundSystem_Track($post_id);
+                $track = new WPSSTM_Track($post_id);
 
                 if ( $list = $track->get_parents_list() ){
                     echo $list;
@@ -410,7 +410,7 @@ class WP_SoundSystem_Core_Tracklists{
                     break;
                 }
                 
-                $track = new WP_SoundSystem_Track();
+                $track = new WPSSTM_Track();
 
                 $track->artist = ( isset($_POST[ 'wpsstm_track_artist' ]) ) ? $_POST[ 'wpsstm_track_artist' ] : null;
                 $track->title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;

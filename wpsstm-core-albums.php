@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_Albums{
+class WPSSTM_Core_Albums{
 
     static $album_metakey = '_wpsstm_release';
     static $qvar_album_lookup = 'lookup_release';
@@ -274,7 +274,7 @@ class WP_SoundSystem_Core_Albums{
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
 
         $title = get_post_meta( $post_id, self::$album_metakey, true );
-        $artist = get_post_meta( $post_id, WP_SoundSystem_Core_Artists::$artist_metakey, true );
+        $artist = get_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, true );
         
         return sprintf('"%s" - %s',$title,$artist);
     }

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_BBC_Stations{
+class WPSSTM_BBC_Stations{
     private $station_slug;
 
     function __construct($tracklist){
@@ -44,7 +44,7 @@ class WP_SoundSystem_BBC_Stations{
 
 }
 
-class WP_SoundSystem_BBC_Playlists{
+class WPSSTM_BBC_Playlists{
     private $playlist_id;
     
     function __construct($tracklist){
@@ -82,8 +82,8 @@ class WP_SoundSystem_BBC_Playlists{
 }
 
 function register_bbc_presets($tracklist){
-    new WP_SoundSystem_BBC_Stations($tracklist);
-    new WP_SoundSystem_BBC_Playlists($tracklist);
+    new WPSSTM_BBC_Stations($tracklist);
+    new WPSSTM_BBC_Playlists($tracklist);
 }
 
 function register_bbc_service_links($links){

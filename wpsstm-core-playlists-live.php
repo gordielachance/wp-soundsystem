@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Core_Live_Playlists{
+class WPSSTM_Core_Live_Playlists{
 
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $scraper_meta_name = '_wpsstm_scraper_options';
@@ -199,7 +199,7 @@ class WP_SoundSystem_Core_Live_Playlists{
 
                 if ( get_post_status($post_id) != 'publish') break;
 
-                $percentage = WP_SoundSystem_Live_Playlist_Stats::get_health($post_id);
+                $percentage = WPSSTM_Live_Playlist_Stats::get_health($post_id);
                 $output = wpsstm_get_percent_bar($percentage);
             break;
             
@@ -208,7 +208,7 @@ class WP_SoundSystem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSystem_Live_Playlist_Stats::get_monthly_request_count($post_id);
+                $output = WPSSTM_Live_Playlist_Stats::get_monthly_request_count($post_id);
             break;
                 
             //total requests
@@ -216,7 +216,7 @@ class WP_SoundSystem_Core_Live_Playlists{
                 
                 if ( get_post_status($post_id) != 'publish') break;
                 
-                $output = WP_SoundSystem_Live_Playlist_Stats::get_request_count($post_id);
+                $output = WPSSTM_Live_Playlist_Stats::get_request_count($post_id);
 
                 
             break;  
@@ -234,21 +234,21 @@ class WP_SoundSystem_Core_Live_Playlists{
             switch ($orderby){
 
                 case 'health':
-                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_health );
+                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_health );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'trending':
                     //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_monthly_requests );
+                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_monthly_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;
                     
                 case 'popular':
                     //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WP_SoundSystem_Live_Playlist_Stats::$meta_key_requests );
+                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_requests );
                     $query->set('orderby','meta_value_num');
                     $query->set('order', $order);
                 break;

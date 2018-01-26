@@ -51,7 +51,7 @@ function wpsstm_get_post_mbid($post_id = null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, WP_SoundSystem_Core_MusicBrainz::$mbid_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_MusicBrainz::$mbid_metakey, true );
 }
 
 function wpsstm_get_post_image_url($post_id = null){
@@ -60,7 +60,7 @@ function wpsstm_get_post_image_url($post_id = null){
     
     //easier to use a meta like this than to upload the remote image if the track is imported
     
-    $image_url = get_post_meta( $post_id, WP_SoundSystem_Core_Tracks::$image_url_metakey, true ); //remote track
+    $image_url = get_post_meta( $post_id, WPSSTM_Core_Tracks::$image_url_metakey, true ); //remote track
     
     //regular WP post
     if( has_post_thumbnail($post_id) ){
@@ -77,7 +77,7 @@ function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, WP_SoundSystem_Core_MusicBrainz::$mbdata_metakey, true );
+    $data = get_post_meta( $post_id, WPSSTM_Core_MusicBrainz::$mbdata_metakey, true );
     
     if ($keys){
         return wpsstm_get_array_value($keys, $data);
@@ -91,21 +91,21 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WP_SoundSystem_Core_Artists::$artist_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, true );
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WP_SoundSystem_Core_Tracks::$title_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$title_metakey, true );
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WP_SoundSystem_Core_Albums::$album_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_Albums::$album_metakey, true );
 }
 
 /**
@@ -121,20 +121,20 @@ function wpsstm_get_post_mb_link_for_post($post_id){
         switch($post_type){
 
             case wpsstm()->post_type_artist:
-                $mbtype = WP_SoundSystem_Core_Artists::$artist_mbtype;
+                $mbtype = WPSSTM_Core_Artists::$artist_mbtype;
             break;
 
             case wpsstm()->post_type_track:
-                $mbtype = WP_SoundSystem_Core_Tracks::$track_mbtype;
+                $mbtype = WPSSTM_Core_Tracks::$track_mbtype;
             break;
 
             case wpsstm()->post_type_album:
-                $mbtype = WP_SoundSystem_Core_Albums::$album_mbtype;
+                $mbtype = WPSSTM_Core_Albums::$album_mbtype;
             break;
 
         }
 
-        if ( $url = WP_SoundSystem_Core_Musicbrainz::get_mb_url($mbtype,$mbid) ){
+        if ( $url = WPSSTM_Core_Musicbrainz::get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
         }
     }
@@ -193,7 +193,7 @@ function get_actions_list($actions,$prefix){
 function wpsstm_get_live_tracklist_url($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $feed_url = get_post_meta($post_id, WP_SoundSystem_Core_Live_Playlists::$feed_url_meta_name, true );
+    $feed_url = get_post_meta($post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name, true );
     return apply_filters('wpsstm_live_tracklist_raw_url',$feed_url); //filter input URL with this hook - several occurences in the code
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_Artists{
+class WPSSTM_Core_Artists{
 
     static $artist_metakey = '_wpsstm_artist';
     static $qvar_artist_lookup = 'lookup_artist';
@@ -284,7 +284,7 @@ class WP_SoundSystem_Core_Artists{
         
         $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
         if ($search){
-            $results = WP_SoundSystem_Core_Musicbrainz::get_musicbrainz_api_entry('artist',null,$search);
+            $results = WPSSTM_Core_Musicbrainz::get_musicbrainz_api_entry('artist',null,$search);
             if ( is_wp_error($results) ){
                 $result['message'] = $results->get_error_message();
             }else{

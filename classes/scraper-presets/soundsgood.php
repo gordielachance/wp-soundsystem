@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Soundsgood_Playlists_Api{
+class WPSSTM_Soundsgood_Playlists_Api{
 
     private $client_id;
     private $station_slug;
@@ -72,7 +72,7 @@ class WP_SoundSystem_Soundsgood_Playlists_Api{
 
 //register preset
 function register_soundsgood_preset($tracklist){
-    new WP_SoundSystem_Soundsgood_Playlists_Api($tracklist);
+    new WPSSTM_Soundsgood_Playlists_Api($tracklist);
 }
 function register_soundsgood_service_links($links){
     $links[] = array(
@@ -90,7 +90,7 @@ function register_soundsgood_service_links($links){
     return $links;
 }
 
-if ( WP_SoundSystem_Soundsgood_Playlists_Api::get_client_id() ){
+if ( WPSSTM_Soundsgood_Playlists_Api::get_client_id() ){
     add_action('wpsstm_get_remote_tracks','register_soundsgood_preset');
     add_filter('wpsstm_wizard_services_links','register_soundsgood_service_links');
 }

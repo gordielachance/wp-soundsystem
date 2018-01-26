@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_RTBF_Stations{
+class WPSSTM_RTBF_Stations{
 
     private $station_slug;
 
@@ -47,7 +47,7 @@ class WP_SoundSystem_RTBF_Stations{
 
 //register preset
 function register_rtbf_preset($tracklist){
-    new WP_SoundSystem_RTBF_Stations($tracklist);
+    new WPSSTM_RTBF_Stations($tracklist);
 }
 
 add_action('wpsstm_get_remote_tracks','register_rtbf_preset');

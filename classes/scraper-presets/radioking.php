@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_RadioKing_Api{
+class WPSSTM_RadioKing_Api{
     
     private $station_slug;
     private $station_data =     null;
@@ -105,7 +105,7 @@ class WP_SoundSystem_RadioKing_Api{
 
 //register preset
 function register_radioking_preset($tracklist){
-    new WP_SoundSystem_RadioKing_Api($tracklist);
+    new WPSSTM_RadioKing_Api($tracklist);
 }
 function register_radioking_service_link($links){
     $links[] = array(

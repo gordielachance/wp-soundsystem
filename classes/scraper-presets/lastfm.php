@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_LastFM_URL{
+class WPSSTM_LastFM_URL{
     var $tracklist;
 
     function __construct($tracklist){
@@ -93,7 +93,7 @@ class WP_SoundSystem_LastFM_URL{
 
 }
 
-abstract class WP_SoundSystem_LastFM_Station extends WP_SoundSystem_LastFM_URL{
+abstract class WPSSTM_LastFM_Station extends WPSSTM_LastFM_URL{
 
     function __construct($tracklist){
         parent::__construct($tracklist);
@@ -119,7 +119,7 @@ abstract class WP_SoundSystem_LastFM_Station extends WP_SoundSystem_LastFM_URL{
 
 }
 
-class WP_SoundSystem_LastFM_User_Stations extends WP_SoundSystem_LastFM_Station{
+class WPSSTM_LastFM_User_Stations extends WPSSTM_LastFM_Station{
     private $user_slug;
     private $page_slug;
 
@@ -167,7 +167,7 @@ class WP_SoundSystem_LastFM_User_Stations extends WP_SoundSystem_LastFM_Station{
     }
 }
 
-class WP_SoundSystem_LastFM_Artist_Stations extends WP_SoundSystem_LastFM_Station{
+class WPSSTM_LastFM_Artist_Stations extends WPSSTM_LastFM_Station{
     private $artist_slug;
     private $page_slug;
     
@@ -203,9 +203,9 @@ class WP_SoundSystem_LastFM_Artist_Stations extends WP_SoundSystem_LastFM_Statio
 
 //register presets
 function register_lastfm_preset($tracklist){
-    new WP_SoundSystem_LastFM_URL($tracklist);
-    new WP_SoundSystem_LastFM_User_Stations($tracklist);
-    new WP_SoundSystem_LastFM_Artist_Stations($tracklist);
+    new WPSSTM_LastFM_URL($tracklist);
+    new WPSSTM_LastFM_User_Stations($tracklist);
+    new WPSSTM_LastFM_Artist_Stations($tracklist);
 }
 
 

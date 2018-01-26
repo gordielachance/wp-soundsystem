@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Radionomy_Playlists_API{
+class WPSSTM_Radionomy_Playlists_API{
     var $tracklist;
     private $station_slug;
     private $station_id;
@@ -70,7 +70,7 @@ class WP_SoundSystem_Radionomy_Playlists_API{
 
                 //QueryPath
                 try{
-                    $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WP_SoundSystem_Remote_Tracklist::$querypath_options )->attr('content');
+                    $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Tracklist::$querypath_options )->attr('content');
                 }catch(Exception $e){
                     return false;
                 }
@@ -108,7 +108,7 @@ class WP_SoundSystem_Radionomy_Playlists_API{
 
 //register preset
 function register_radionomy_preset($tracklist){
-    new WP_SoundSystem_Radionomy_Playlists_API($tracklist);
+    new WPSSTM_Radionomy_Playlists_API($tracklist);
 }
 function register_radionomy_service_links($links){
     $links[] = array(

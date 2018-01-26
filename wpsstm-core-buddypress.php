@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_BuddyPress{
+class WPSSTM_Core_BuddyPress{
     
     static $music_slug = 'music';
     static $favorite_tracks_slug = 'favorite-tracks';
@@ -120,7 +120,7 @@ class WP_SoundSystem_Core_BuddyPress{
         //favorite query
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin//WP_SoundSystem_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WPSSTM_Core_Tracklists::$qvar_tracklist_admin//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
             'fields' =>         'ids',
@@ -157,7 +157,7 @@ class WP_SoundSystem_Core_BuddyPress{
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'posts_per_page' => -1,
-            WP_SoundSystem_Core_Tracks::$qvar_loved_tracks => bp_displayed_user_id(),
+            WPSSTM_Core_Tracks::$qvar_loved_tracks => bp_displayed_user_id(),
             'fields' =>         'ids',
         );
         $query = new WP_Query( $query_args );
@@ -263,7 +263,7 @@ class WP_SoundSystem_Core_BuddyPress{
         //member favorite playlists
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin//WP_SoundSystem_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WPSSTM_Core_Tracklists::$qvar_tracklist_admin//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
         );
@@ -300,7 +300,7 @@ class WP_SoundSystem_Core_BuddyPress{
 
     public function member_get_favorite_tracks_playlist(){
         
-        $tracklist = new WP_SoundSystem_Tracklist();
+        $tracklist = new WPSSTM_Tracklist();
         $user_id = bp_displayed_user_id();
         
         if ( $user_datas = get_userdata( $user_id ) ) {
@@ -312,7 +312,7 @@ class WP_SoundSystem_Core_BuddyPress{
             $tracklist->author = $display_name;
 
             $subtracks_qargs = array(
-                WP_SoundSystem_Core_Tracks::$qvar_loved_tracks =>   $user_id,
+                WPSSTM_Core_Tracks::$qvar_loved_tracks =>   $user_id,
             );
             $tracklist->populate_subtracks($subtracks_qargs);
         }else{

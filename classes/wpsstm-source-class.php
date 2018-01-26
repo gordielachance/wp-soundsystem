@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Source{
+class WPSSTM_Source{
     var $post_id;
     var $track_id;
     var $index = -1;
@@ -13,14 +13,14 @@ class WP_SoundSystem_Source{
 
     function __construct($post_id = null){
         
-        $this->provider = new WP_SoundSystem_Player_Provider(); //default
+        $this->provider = new WPSSTM_Player_Provider(); //default
 
         if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
             $this->post_id = (int)$post_id;
             $this->title = get_the_title($post_id);
             $this->track_id = wp_get_post_parent_id( $post_id );
 
-            $this->url = get_post_meta($post_id,WP_SoundSystem_Core_Sources::$source_url_metakey,true);
+            $this->url = get_post_meta($post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
 
             $this->match = $this->get_track_match();
             
@@ -72,14 +72,14 @@ class WP_SoundSystem_Source{
     */
     function get_source_duplicates_ids($args=null){
         
-        $track = new WP_SoundSystem_Track($this->track_id);
+        $track = new WPSSTM_Track($this->track_id);
         
         /*
         $query_meta_trackinfo = array(
             'relation' => 'AND',
-            WP_SoundSystem_Core_Artists::$artist_metakey    => $track->artist,
-            WP_SoundSystem_Core_Tracks::$title_metakey      => $track->title,
-            WP_SoundSystem_Core_Albums::$album_metakey      => $track->album,
+            WPSSTM_Core_Artists::$artist_metakey    => $track->artist,
+            WPSSTM_Core_Tracks::$title_metakey      => $track->title,
+            WPSSTM_Core_Albums::$album_metakey      => $track->album,
         );
         $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         */
@@ -102,7 +102,7 @@ class WP_SoundSystem_Source{
                 'relation' => 'OR',
                 //by source URL
                 'source_url' => array(
-                    'key'     => WP_SoundSystem_Core_Sources::$source_url_metakey,
+                    'key'     => WPSSTM_Core_Sources::$source_url_metakey,
                     'value'   => $this->url
                 ),
                 //by track info, TO FIX TO CHECK required ?
@@ -146,7 +146,7 @@ class WP_SoundSystem_Source{
             return $this->post_id;
         }
 
-        wpsstm()->debug_log(json_encode(array('args'=>$args)),"WP_SoundSystem_Source::add_source()");
+        wpsstm()->debug_log(json_encode(array('args'=>$args)),"WPSSTM_Source::add_source()");
         
         return $this->save_source($args);
         
@@ -195,16 +195,16 @@ class WP_SoundSystem_Source{
         $this->populate_source_provider();
 
         $meta_input = array(
-            WP_SoundSystem_Core_Sources::$source_url_metakey        => $this->url,
-            WP_SoundSystem_Core_Sources::$source_stream_metakey     => $this->stream_url,
-            WP_SoundSystem_Core_Sources::$source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
+            WPSSTM_Core_Sources::$source_url_metakey        => $this->url,
+            WPSSTM_Core_Sources::$source_stream_metakey     => $this->stream_url,
+            WPSSTM_Core_Sources::$source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
             
             //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
             /*
-            WP_SoundSystem_Core_Artists::$artist_metakey    => $this-track->artist,
-            WP_SoundSystem_Core_Tracks::$title_metakey      => $this-track->title,
-            WP_SoundSystem_Core_Albums::$album_metakey      => $this-track->album,
-            WP_SoundSystem_Core_MusicBrainz::$mbid_metakey           => $this-track->mbid,
+            WPSSTM_Core_Artists::$artist_metakey    => $this-track->artist,
+            WPSSTM_Core_Tracks::$title_metakey      => $this-track->title,
+            WPSSTM_Core_Albums::$album_metakey      => $this-track->album,
+            WPSSTM_Core_MusicBrainz::$mbid_metakey           => $this-track->mbid,
             */
         );
         
@@ -228,7 +228,7 @@ class WP_SoundSystem_Source{
         if ( is_wp_error($success) ) return $success;
         $this->post_id = $success;
 
-        wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WP_SoundSystem_Source::save_source()");
+        wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WPSSTM_Source::save_source()");
         
         return $this->post_id;
     }
@@ -256,7 +256,7 @@ class WP_SoundSystem_Source{
     
     function source_has_banned_word(){
         
-        $track = new WP_SoundSystem_Track($this->track_id);
+        $track = new WPSSTM_Track($this->track_id);
         $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
 
         foreach((array)$ban_words as $word){
@@ -269,7 +269,7 @@ class WP_SoundSystem_Source{
             $source_has_word = stripos($this->title, $word);//case insensitive
             if ( !$source_has_word ) continue;
             
-            wpsstm()->debug_log( json_encode( array('source_title'=>$this->title,'word'=>$word),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Source::source_has_banned_word()");
+            wpsstm()->debug_log( json_encode( array('source_title'=>$this->title,'word'=>$word),JSON_UNESCAPED_UNICODE ), "WPSSTM_Source::source_has_banned_word()");
             
             return true;
         }
@@ -284,7 +284,7 @@ class WP_SoundSystem_Source{
     
     function source_lacks_track_artist(){
         
-        $track = new WP_SoundSystem_Track($this->track_id);
+        $track = new WPSSTM_Track($this->track_id);
 
         /*TO FIX check if it works when artist has special characters like / or &
         What if the artist is written a little differently ?
@@ -296,7 +296,7 @@ class WP_SoundSystem_Source{
         $artist_sanitized = sanitize_title($track->artist);
 
         if (strpos($source_sanitized, $artist_sanitized) === false) {
-            wpsstm()->debug_log( json_encode( array('artist'=>$track->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$track->title,'source_title'=>$this->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WP_SoundSystem_Source::source_lacks_track_artist()");
+            wpsstm()->debug_log( json_encode( array('artist'=>$track->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$track->title,'source_title'=>$this->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WPSSTM_Source::source_lacks_track_artist()");
             return true;
         }
 
@@ -311,14 +311,14 @@ class WP_SoundSystem_Source{
 
     function populate_source_provider(){
 
-        if ( $meta = get_post_meta($this->post_id,WP_SoundSystem_Core_Sources::$source_stream_metakey,true) ){
+        if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_stream_metakey,true) ){
             $this->stream_url = $meta;
         }
 
         //try to populate it from the stored value
-        if ( $provider_slug = get_post_meta($this->post_id,WP_SoundSystem_Core_Sources::$source_provider_metakey,true) ){
+        if ( $provider_slug = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_provider_metakey,true) ){
             
-            foreach( (array)WP_SoundSystem_Core_Player::get_providers() as $provider ){
+            foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
                 if ($provider_slug != $provider->slug) continue;
                 $this->provider = $provider;
                 if (!$this->stream_url && $this->url){
@@ -333,7 +333,7 @@ class WP_SoundSystem_Source{
         //try to find a match using the input URL
         if ( ($this->provider->slug == 'default') && $this->url){
             
-            foreach( (array)WP_SoundSystem_Core_Player::get_providers() as $provider ){
+            foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
 
                 if ( !$match_url = $provider->get_stream_url($this->url) ) continue;
 
@@ -362,7 +362,7 @@ class WP_SoundSystem_Source{
     
     function get_track_match(){
         
-        $track = new WP_SoundSystem_Track($this->track_id);
+        $track = new WPSSTM_Track($this->track_id);
         
         //TO FIX what if source has been populated at tracklist request ? Should be 100% ?
 
@@ -409,7 +409,7 @@ class WP_SoundSystem_Source{
         
         $url = null;
         
-        $args = array(WP_SoundSystem_Core_Sources::$qvar_source_action=>$action);
+        $args = array(WPSSTM_Core_Sources::$qvar_source_action=>$action);
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);

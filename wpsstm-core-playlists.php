@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_Playlists{
+class WPSSTM_Core_Playlists{
 
     function __construct() {
         require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
@@ -153,7 +153,7 @@ class WP_SoundSystem_Core_Playlists{
 
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
 
-        $playlist = new WP_SoundSystem_Tracklist();
+        $playlist = new WPSSTM_Tracklist();
         $playlist->title = $tracklist_title;
         $playlist_id = $playlist->save_playlist();
 
@@ -168,7 +168,7 @@ class WP_SoundSystem_Core_Playlists{
             $result['success'] = true;
             
             $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-            $track = new WP_SoundSystem_Track($track_id);
+            $track = new WPSSTM_Track($track_id);
 
             $list_all = $track->get_subtrack_playlist_manager_list();
             

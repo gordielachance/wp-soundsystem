@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Reddit_Api{
+class WPSSTM_Reddit_Api{
 
     private $subreddit_slug;
     private $subreddit_title;
@@ -79,7 +79,7 @@ class WP_SoundSystem_Reddit_Api{
 
                     //QueryPath
                     try{
-                        $remote_title = htmlqp( $content, 'title', WP_SoundSystem_Remote_Tracklist::$querypath_options )->innerHTML();
+                        $remote_title = htmlqp( $content, 'title', WPSSTM_Remote_Tracklist::$querypath_options )->innerHTML();
                     }catch(Exception $e){
                         return $title;
                     }
@@ -179,7 +179,7 @@ class WP_SoundSystem_Reddit_Api{
 
 //register preset
 function register_reddit_preset($tracklist){
-    new WP_SoundSystem_Reddit_Api($tracklist);
+    new WPSSTM_Reddit_Api($tracklist);
 }
 function register_reddit_service_links($links){
     $links[] = array(

@@ -11,7 +11,7 @@ class WP_Soundsystem_Wizard_Artist_Widget extends WP_Soundsystem_Wizard_Widget{
         $links_str = array();
         $output = null;
             
-        $this->user = new WP_SoundSystem_LastFM_User();
+        $this->user = new WPSSTM_LastFM_User();
         $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
 
         $form = sprintf('<input class="wpsstm-artist-autocomplete" type="text" placeholder="%s" value="%s" />',__('Artist name','wpsstm'),'');

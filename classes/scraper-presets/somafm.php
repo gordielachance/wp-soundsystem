@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_SomaFM_Stations{
+class WPSSTM_SomaFM_Stations{
 
     private $station_slug;
 
@@ -58,7 +58,7 @@ class WP_SoundSystem_SomaFM_Stations{
 
 //register preset
 function register_somafm_preset($tracklist){
-    new WP_SoundSystem_SomaFM_Stations($tracklist);
+    new WPSSTM_SomaFM_Stations($tracklist);
 }
 function register_somafm_service_link($links){
     $links[] = array(

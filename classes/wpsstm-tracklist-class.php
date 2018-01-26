@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Tracklist{
+class WPSSTM_Tracklist{
     
     var $unique_id = null;
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
@@ -85,7 +85,7 @@ class WP_SoundSystem_Tracklist{
         return array(
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
-            'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WP_SoundSystem_Core_Sources::can_autosource() === true) ),
+            'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
@@ -107,7 +107,7 @@ class WP_SoundSystem_Tracklist{
 
         //capability check
         if ($this->tracklist_type == 'live'){
-            $can_set_subtracks = WP_SoundSystem_Core_Live_Playlists::can_live_playlists();
+            $can_set_subtracks = WPSSTM_Core_Live_Playlists::can_live_playlists();
         }else{
             $can_set_subtracks = $this->user_can_reorder_tracks();
             
@@ -118,12 +118,12 @@ class WP_SoundSystem_Tracklist{
         }
         
         if ($ordered_ids){
-            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WP_SoundSystem_Track::get_parent_ids()
+            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WPSSTM_Track::get_parent_ids()
             $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
             $ordered_ids = array_unique($ordered_ids);
         }
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::set_subtrack_ids()"); 
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::set_subtrack_ids()"); 
         
         //delete actual subtracks
         $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
@@ -162,7 +162,7 @@ class WP_SoundSystem_Tracklist{
 
         $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WP_SoundSystem_Tracklist::append_subtrack_ids()");
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Tracklist::append_subtrack_ids()");
         
         $updated_ids = array_merge($subtrack_ids,$append_ids);
         
@@ -183,7 +183,7 @@ class WP_SoundSystem_Tracklist{
         
         $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WP_SoundSystem_Tracklist::remove_subtrack_ids()");
+        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Tracklist::remove_subtrack_ids()");
 
         $updated_ids = array_diff($subtrack_ids,$remove_ids);
         
@@ -203,16 +203,16 @@ class WP_SoundSystem_Tracklist{
 
         foreach ($input_tracks as $track){
 
-            if ( !is_a($track, 'WP_SoundSystem_Track') ){
+            if ( !is_a($track, 'WPSSTM_Track') ){
                 
                 if ( is_array($track) ){
                     $track_args = $track;
-                    $track = new WP_SoundSystem_Track();
+                    $track = new WPSSTM_Track();
                     $track->from_array($track_args);
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
-                    $track = new WP_SoundSystem_Track($track_id);
+                    $track = new WPSSTM_Track($track_id);
                 }
             }
             
@@ -239,7 +239,7 @@ class WP_SoundSystem_Tracklist{
                 
                 $error_codes[] = $valid->get_error_code();
                 /*
-                wpsstm()->debug_log($valid->get_error_message(), "WP_SoundSystem_Tracklist::validate_tracks - rejected");
+                wpsstm()->debug_log($valid->get_error_message(), "WPSSTM_Tracklist::validate_tracks - rejected");
                 */
                 $rejected_tracks[] = $track;
                 continue;
@@ -249,7 +249,7 @@ class WP_SoundSystem_Tracklist{
         
         if ( $rejected_tracks ){
             $error_codes = array_unique($error_codes);
-            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WP_SoundSystem_Tracklist::validate_tracks");
+            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WPSSTM_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
@@ -293,10 +293,10 @@ class WP_SoundSystem_Tracklist{
         
         /*
         $meta_input = array(
-            WP_SoundSystem_Core_Artists::$artist_metakey    => $this->artist,
-            WP_SoundSystem_Core_Tracks::$title_metakey      => $this->title,
-            WP_SoundSystem_Core_Albums::$album_metakey      => $this->album,
-            WP_SoundSystem_Core_MusicBrainz::$mbid_metakey           => $this->mbid,
+            WPSSTM_Core_Artists::$artist_metakey    => $this->artist,
+            WPSSTM_Core_Tracks::$title_metakey      => $this->title,
+            WPSSTM_Core_Albums::$album_metakey      => $this->album,
+            WPSSTM_Core_MusicBrainz::$mbid_metakey           => $this->mbid,
             //sources is more specific, will be saved below
         );
         */
@@ -319,7 +319,7 @@ class WP_SoundSystem_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WP_SoundSystem_Tracklist::save_playlist() - post playlist inserted"); 
+            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Tracklist::save_playlist() - post playlist inserted"); 
 
         }else{ //is a playlist update
             
@@ -333,7 +333,7 @@ class WP_SoundSystem_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WP_SoundSystem_Tracklist::save_playlist() - post track updated"); 
+            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Tracklist::save_playlist() - post track updated"); 
         }
 
         $this->post_id = $post_playlist_id;
@@ -345,7 +345,7 @@ class WP_SoundSystem_Tracklist{
     function save_subtracks($args = null){
         
         //do not auto guess MBID while saving subtracks
-        remove_action( 'save_post', array('WP_SoundSystem_Core_MusicBrainz','auto_set_mbid'), 6);
+        remove_action( 'save_post', array('WPSSTM_Core_MusicBrainz','auto_set_mbid'), 6);
         
         $new_ids = array();
 
@@ -359,7 +359,7 @@ class WP_SoundSystem_Tracklist{
         foreach($new_tracks as $key=>$track){
             $success = $track->save_track($args);
             if ( is_wp_error($success) ){
-                wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Tracklist::save_subtracks' );
+                wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Tracklist::save_subtracks' );
                 continue;
             }
         }
@@ -402,7 +402,7 @@ class WP_SoundSystem_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        //wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WP_SoundSystem_Tracklist notice]: ' . $message ); 
+        //wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -457,10 +457,10 @@ class WP_SoundSystem_Tracklist{
         */
 
         if ($do_love){
-            $success = add_post_meta( $this->post_id, WP_SoundSystem_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = add_post_meta( $this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_love_tracklist',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id,WP_SoundSystem_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id,WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
         }
         return $success;
@@ -468,7 +468,7 @@ class WP_SoundSystem_Tracklist{
     
     function get_tracklist_loved_by(){
         if ( !$this->post_id ) return false;
-        return get_post_meta($this->post_id, WP_SoundSystem_Core_Tracklists::$loved_tracklist_meta_key);
+        return get_post_meta($this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key);
     }
     
     function is_tracklist_loved_by($user_id = null){
@@ -501,7 +501,7 @@ class WP_SoundSystem_Tracklist{
 
         $can_edit_tracklist = ($this->post_id && current_user_can($post_type_obj->cap->edit_post,$this->post_id) );
         $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
-        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && WP_SoundSystem_Core_Live_Playlists::can_live_playlists() );
+        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && WPSSTM_Core_Live_Playlists::can_live_playlists() );
         $can_favorite = $this->post_id; //call to action TO FIX to CHECK
 
         $actions = array();
@@ -575,7 +575,7 @@ class WP_SoundSystem_Tracklist{
             //status form
             $status_options_str = implode("\n",$status_options);
             $form_onchange = "if(this.value !='') { this.form.submit(); }";
-            $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="%s" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str,WP_SoundSystem_Core_Tracklists::$qvar_tracklist_action);
+            $form = sprintf('<form action="%s" method="POST" class="wpsstm-playlist-status"><select name="frontend-wizard-status" onchange="%s">%s</select><input type="hidden" name="%s" value="switch-status"/></form>',$permalink,$form_onchange,$status_options_str,WPSSTM_Core_Tracklists::$qvar_tracklist_action);
 
             $actions['status-switch'] = array(
                 'text' =>      __('Status'),
@@ -638,7 +638,7 @@ class WP_SoundSystem_Tracklist{
     
     function get_tracklist_admin_url($tab =  null){
         if ( !$this->post_id ) return;
-        $args = array(WP_SoundSystem_Core_Tracklists::$qvar_tracklist_admin=>$tab);
+        $args = array(WPSSTM_Core_Tracklists::$qvar_tracklist_admin=>$tab);
         $url = get_permalink($this->post_id);
         $url = add_query_arg($args,$url);
         return $url;
@@ -649,7 +649,7 @@ class WP_SoundSystem_Tracklist{
 
         $url = add_query_arg(
             array(
-                WP_SoundSystem_Core_Tracklists::$qvar_tracklist_action=>$action
+                WPSSTM_Core_Tracklists::$qvar_tracklist_action=>$action
             ),
             get_permalink($this->post_id)
         );
@@ -670,7 +670,7 @@ class WP_SoundSystem_Tracklist{
         $this->tracklist_type = 'static';
         $this->append_subtrack_ids($live_ids);
 
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WP_SoundSystem_Tracklist::append_wizard_tracks()");
+        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WPSSTM_Tracklist::append_wizard_tracks()");
     }
     
     function switch_status(){
@@ -976,7 +976,7 @@ class WP_SoundSystem_Tracklist{
         $query = new WP_Query( $args );
         $subtracks = $query->posts;
 
-        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::get_subtracks"); 
+        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
 
         return $subtracks;
     }
@@ -1056,19 +1056,19 @@ class WP_SoundSystem_Tracklist{
 	}
     
     function is_wizard_disabled(){
-        return (bool)get_post_meta($this->post_id, WP_SoundSystem_Core_Wizard::$wizard_disabled_metakey, true );
+        return (bool)get_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey, true );
     }
     
     function toggle_enable_wizard($enable=true){
         if (!$enable){
-            return update_post_meta($this->post_id, WP_SoundSystem_Core_Wizard::$wizard_disabled_metakey, true );
+            return update_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey, true );
         }else{
-            return delete_post_meta($this->post_id, WP_SoundSystem_Core_Wizard::$wizard_disabled_metakey );
+            return delete_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey );
         }
     }
 }
 
-class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
+class WPSSTM_Single_Track_Tracklist extends WPSSTM_Tracklist{
     function get_subtracks($args = null){
         
         $default = array(
@@ -1090,7 +1090,7 @@ class WP_SoundSystem_Single_Track_Tracklist extends WP_SoundSystem_Tracklist{
         $query = new WP_Query( $args );
         $subtracks = $query->posts;
 
-        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WP_SoundSystem_Tracklist::get_subtracks"); 
+        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
 
         return $subtracks;
         

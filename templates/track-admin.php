@@ -1,7 +1,7 @@
 <?php
 global $wpsstm_tracklist;
 global $wpsstm_track;
-$track_admin = get_query_var( WP_SoundSystem_Core_Tracks::$qvar_track_admin );
+$track_admin = get_query_var( WPSSTM_Core_Tracks::$qvar_track_admin );
 ?>
 
 <div id="wpsstm-track-admin" class="wpsstm-post-admin">
@@ -46,7 +46,7 @@ $track_admin = get_query_var( WP_SoundSystem_Core_Tracks::$qvar_track_admin );
         break;
         default: //about
             $text_el = null;
-            $bio = WP_SoundSystem_Core_LastFM::get_artist_bio($wpsstm_track->artist);
+            $bio = WPSSTM_Core_LastFM::get_artist_bio($wpsstm_track->artist);
 
             //artist
             if ( !is_wp_error($bio) && isset($bio['summary']) ){

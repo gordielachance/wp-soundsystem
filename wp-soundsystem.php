@@ -158,25 +158,24 @@ class WP_SoundSystem {
         if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
             require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
-
-        new WP_SoundSystem_Core_Albums();
-        new WP_SoundSystem_Core_Artists();
-        new WP_SoundSystem_Core_BuddyPress();
-        new WP_SoundSystem_Core_LastFM();
-        new WP_SoundSystem_Core_MusicBrainz();
-        new WP_SoundSystem_Core_Player();
-        new WP_SoundSystem_Core_Live_Playlists();
-        new WP_SoundSystem_Core_Playlists();
-        new WP_SoundSystem_Core_Sources();
-        new WP_SoundSystem_Core_Tracks();
-        new WP_SoundSystem_Core_Tracklists();
-        new WP_SoundSystem_Core_Wizard();
-        
-        do_action('wpsstm_loaded');
-        
-        
     }
     function setup_actions(){
+        
+        /* Now that files have been loaded, init all core classes */
+        new WPSSTM_Core_Albums();
+        new WPSSTM_Core_Artists();
+        new WPSSTM_Core_BuddyPress();
+        new WPSSTM_Core_LastFM();
+        new WPSSTM_Core_MusicBrainz();
+        new WPSSTM_Core_Player();
+        new WPSSTM_Core_Live_Playlists();
+        new WPSSTM_Core_Playlists();
+        new WPSSTM_Core_Sources();
+        new WPSSTM_Core_Tracklists();
+        new WPSSTM_Core_Tracks();
+        new WPSSTM_Core_Wizard();
+        
+        ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
 
@@ -252,7 +251,7 @@ class WP_SoundSystem {
             
             if($current_version < 151){ //rename old source URL metakeys
 
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WP_SoundSystem_Core_Sources::$source_url_metakey, '_wpsstm_source' );
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Sources::$source_url_metakey, '_wpsstm_source' );
 
                 $result = $wpdb->get_results ( $querystr );
                 

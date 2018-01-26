@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Deezer_Playlists{
+class WPSSTM_Deezer_Playlists{
     var $tracklist;
     private $playlist_id;
 
@@ -37,7 +37,7 @@ class WP_SoundSystem_Deezer_Playlists{
 
 //register preset
 function register_deezer_preset($tracklist){
-    new WP_SoundSystem_Deezer_Playlists($tracklist);
+    new WPSSTM_Deezer_Playlists($tracklist);
 }
 
 function register_deezer_service_links($links){

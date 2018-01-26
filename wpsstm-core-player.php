@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_Player{
+class WPSSTM_Core_Player{
 
     function __construct() {
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
@@ -16,10 +16,10 @@ class WP_SoundSystem_Core_Player{
         $providers = array();
         
         $slugs = array(
-            'WP_SoundSystem_Player_Provider_Native',
-            'WP_SoundSystem_Player_Provider_Youtube',
-            'WP_SoundSystem_Player_Provider_Soundcloud',
-            //'WP_SoundSystem_Player_Provider_Mixcloud'
+            'WPSSTM_Player_Provider_Native',
+            'WPSSTM_Player_Provider_Youtube',
+            'WPSSTM_Player_Provider_Soundcloud',
+            //'WPSSTM_Player_Provider_Mixcloud'
         );
         //$slugs = null;
         
@@ -93,7 +93,7 @@ class WP_SoundSystem_Core_Player{
     
 }
 
-class WP_SoundSystem_Player_Provider{
+class WPSSTM_Player_Provider{
     
     var $name;
     var $slug = 'default';
@@ -126,7 +126,7 @@ class WP_SoundSystem_Player_Provider{
     
 }
 
-class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provider{
+class WPSSTM_Player_Provider_Native extends WPSSTM_Player_Provider{
     
     var $name = 'Audio';
     var $slug = 'audio';
@@ -160,7 +160,7 @@ class WP_SoundSystem_Player_Provider_Native extends WP_SoundSystem_Player_Provid
 
 }
 
-class WP_SoundSystem_Player_Provider_Youtube extends WP_SoundSystem_Player_Provider{
+class WPSSTM_Player_Provider_Youtube extends WPSSTM_Player_Provider{
     
     var $name = 'Youtube';
     var $slug = 'youtube';
@@ -192,7 +192,7 @@ The Soundcloud Provider reacts differently if we've got a soundcloud client ID o
 */
 
 
-class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Provider{
+class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
     
     var $name = 'Soundcloud';
     var $slug = 'soundcloud';
@@ -323,7 +323,7 @@ class WP_SoundSystem_Player_Provider_Soundcloud extends WP_SoundSystem_Player_Pr
 
 }
 
-class WP_SoundSystem_Player_Provider_Mixcloud extends WP_SoundSystem_Player_Provider{
+class WPSSTM_Player_Provider_Mixcloud extends WPSSTM_Player_Provider{
     
     var $name = 'Mixcloud';
     var $slug = 'mixcloud';

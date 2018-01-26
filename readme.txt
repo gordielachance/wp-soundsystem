@@ -200,7 +200,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * welcome Wordpress 4.9! Finally!
 * improved wizard (GUI, presets, widgets), etc.
 * ajax artist autocomplete
-* fixed WP_SoundSystem_Preset_LastFM_Artist_Scraper
+* fixed WPSSTM_Preset_LastFM_Artist_Scraper
 * strict validate tracks on the frontend wizard
 * fix shortcode fatal error when post requested does not exists
 
@@ -291,8 +291,8 @@ There is an option in the plugin settings to flush those community tracks : they
 * better code structure (splitted into files) for tracklists / tracks / track sources (JS & CSS)
 * new JS events: wpsstmTracklistRefreshed,wpsstmTrackDomReady - wpsstmTrackSingleSourceDomReady
 * Improved wizard backend & frontend
-* Removed class 'WP_SoundSystem_Subtrack': cleaner to handle everything with WP_SoundSystem_Track
-* removed WP_SoundSystem_TracksList_Admin_Table, now everything is handled by WP_SoundSystem_Tracklist_Table
+* Removed class 'WPSSTM_Subtrack': cleaner to handle everything with WPSSTM_Track
+* removed WPSSTM_TracksList_Admin_Table, now everything is handled by WPSSTM_Tracklist_Table
 * Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
 * improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
 * new option autosource_filter_ban_words (experimental)
@@ -314,7 +314,7 @@ There is an option in the plugin settings to flush those community tracks : they
 
 * wp_unslash() ajax_data 
 * improved wizard cache
-* WP_SoundSystem_Preset_Radionomy_Playlists_API
+* WPSSTM_Preset_Radionomy_Playlists_API
 * new dependency: forceutf8 + composer update
 * wizard: better cache handling for wizard
 * player.js: fix playlist no more refreshing
@@ -325,18 +325,18 @@ There is an option in the plugin settings to flush those community tracks : they
 = 1.0.2 =
 
 * Setting for Last.fm bot scrobbler (scrobbles every track listened by any user)
-* new class WP_SoundSystem_LastFM_User()
+* new class WPSSTM_LastFM_User()
 
 = 1.0.1 =
 
 * Improved sources / autosource code
 * lastfm.js: fixed lastfm_auth_notice()
 * removed 'autoredirect' option
-* WP_SoundSystem_Core_Wizard: option to delete current cache
+* WPSSTM_Core_Wizard: option to delete current cache
 * fixed ignore cache in wizard
 * bottom player: better GUI for source selection
 * if the track has 'native' sources and that they cannot play, try to autosource
-* improved WP_SoundSystem_Player_Provider subclasses
+* improved WPSSTM_Player_Provider subclasses
 * new action hook 'init_playable_tracklist'
 * fixed crash when Live Playlists are not enabled (always include wpsstm-core-playlists-live.php)
 * track & tracklist: sources popup (thickbox) + ajaxed sources suggestions
@@ -358,7 +358,7 @@ There is an option in the plugin settings to flush those community tracks : they
 
 = 0.9.9.5 =
 
-* remove WP_SoundSystem_Playlist_Scraper class, new class WP_SoundSystem_Remote_Tracklist instead (much simplier)
+* remove WPSSTM_Playlist_Scraper class, new class WPSSTM_Remote_Tracklist instead (much simplier)
 * improved saving wizard options
 * tracklists pagination !
 * live tracklists: new expiration_time var
@@ -372,7 +372,7 @@ There is an option in the plugin settings to flush those community tracks : they
 
 = 0.9.9.4 =
 
-* WP_SoundSystem_Track:: get_unique_id(): use sanitize_title
+* WPSSTM_Track:: get_unique_id(): use sanitize_title
 * Tracklists Table: share link
 * Tracklists Table: fixed time scraped
 * Scraper: handle Dropbox links
@@ -434,7 +434,7 @@ There is an option in the plugin settings to flush those community tracks : they
 
 * scraper: set tracklist informations only if not already defined - So tracklist that has been populated with a post ID has not its
 informations overriden
-* sanitize string at the end of WP_SoundSystem_Remote_Tracklist::parse_node()
+* sanitize string at the end of WPSSTM_Remote_Tracklist::parse_node()
 * new Hype Machine preset
 
 = 0.9.8.4 =
@@ -461,10 +461,10 @@ informations overriden
 
 * sort stations by health / trending / popular
 * fixed ajaxed row actions for tracklist rows
-* improved classes WP_SoundSystem_Subtrack() and WP_SoundSystem_Track()
+* improved classes WPSSTM_Subtrack() and WPSSTM_Track()
 * fix title comparaison check when updating artist/album/track
 * fix Spiff plugin upgrade routine
-* renamed Array2XML > WP_SoundSystem_Array2XML
+* renamed Array2XML > WPSSTM_Array2XML
 * new function WP_SoundSystem::is_admin_page()
 * no CSS background for tracklist table
 
