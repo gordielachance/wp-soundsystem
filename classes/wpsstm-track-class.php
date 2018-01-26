@@ -579,9 +579,14 @@ class WP_SoundSystem_Track{
     }
 
     function autosource(){
-        
+
         if ( wpsstm()->get_options('autosource') != 'on' ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        }
+        
+        $can_autosource = WP_SoundSystem_Core_Sources::can_autosource();
+        if ( is_wp_error($can_autosource) ){
+            return $can_autosource;
         }
 
         //track does not exists yet, create it
