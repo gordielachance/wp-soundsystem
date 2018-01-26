@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_8Tracks_Playlists{
+class WPSSTM_8Tracks_Playlists{
     private $user_slug;
     private $playlist_slug;
     private $mix_data;
@@ -110,7 +110,7 @@ class WP_SoundSystem_8Tracks_Playlists{
 
 //register preset
 function register_8tracks_playlists_preset($tracklist){
-    new WP_SoundSystem_8Tracks_Playlists($tracklist);
+    new WPSSTM_8Tracks_Playlists($tracklist);
 }
 
 function register_8tracks_service_link($links){

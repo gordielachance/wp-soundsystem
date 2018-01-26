@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_OnlineRadioBox_Scraper{
+class WPSSTM_OnlineRadioBox_Scraper{
     private $station_slug;
 
     function __construct($tracklist){
@@ -46,7 +46,7 @@ class WP_SoundSystem_OnlineRadioBox_Scraper{
 
 //register preset
 function register_onlineradiobox_preset($tracklist){
-    new WP_SoundSystem_OnlineRadioBox_Scraper($tracklist);
+    new WPSSTM_OnlineRadioBox_Scraper($tracklist);
 }
 function register_onlineradiobox_service_link($links){
     $links[] = array(

@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Soundcloud_User_Api{
+class WPSSTM_Soundcloud_User_Api{
 
     private $user_id;
     private $user_slug;
@@ -135,7 +135,7 @@ class WP_SoundSystem_Soundcloud_User_Api{
 
 //register preset
 function register_soundcloud_preset($tracklist){
-    new WP_SoundSystem_Soundcloud_User_Api($tracklist);
+    new WPSSTM_Soundcloud_User_Api($tracklist);
 }
 function register_soundcloud_service_links($links){
     $links[] = array(

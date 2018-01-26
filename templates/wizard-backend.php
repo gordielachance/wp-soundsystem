@@ -22,10 +22,10 @@ $post_type = get_post_type();
         <div id="wpsstm-wizard-sections">
 
             <?php 
-            if ( wpsstm_wizard()->is_advanced ){ 
+            if ( WPSSTM_Core_Wizard::is_advanced_wizard() ){ 
                 ?>
                 <ul id="wpsstm-wizard-sections-header">
-                    <?php wpsstm_wizard()->wizard_tabs(); ?>
+                    <?php WPSSTM_Core_Wizard::wizard_tabs(); ?>
                 </ul>
                 <?php
             }
@@ -35,7 +35,7 @@ $post_type = get_post_type();
                 <?php do_settings_sections( 'wpsstm-wizard-step-source' );?>
             </div>
 
-            <?php if ( wpsstm_wizard()->is_advanced ){ ?>
+            <?php if ( WPSSTM_Core_Wizard::is_advanced_wizard() ){ ?>
 
                 <div id="wpsstm-wizard-step-tracks-content" class="wpsstm-wizard-step-content">
                     <?php do_settings_sections( 'wpsstm-wizard-step-tracks' );?>
@@ -63,7 +63,7 @@ $post_type = get_post_type();
     }
 
     //import tracks
-    if ( !$is_wizard_disabled && in_array($post_type,wpsstm_tracklists()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
+    if ( !$is_wizard_disabled && in_array($post_type,wpsstm()->static_tracklist_post_types) && $wpsstm_tracklist->track_count ){
         submit_button(__('Import Tracks','wpsstm'),'primary','wpsstm_wizard[import-tracks]');
     }
 

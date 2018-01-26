@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Slacker_Stations{
+class WPSSTM_Slacker_Stations{
 
     private $station_slug;
 
@@ -38,7 +38,7 @@ class WP_SoundSystem_Slacker_Stations{
 
 //register preset
 function register_slacker_preset($tracklist){
-    new WP_SoundSystem_Slacker_Stations($tracklist);
+    new WPSSTM_Slacker_Stations($tracklist);
 }
 function register_slacker_service_links($links){
     $links[] = array(

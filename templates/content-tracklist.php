@@ -13,7 +13,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 ?>
 
 <div class="<?php echo implode(' ',$tracklist->get_tracklist_class());?>" <?php echo $tracklist->get_tracklist_attr();?>>
-    <meta itemprop="numTracks" content="<?php echo $tracklist->track_count;?>" />
+    <?php $tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
         <strong class="wpsstm-tracklist-title" itemprop="name">
@@ -24,7 +24,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
             //updated
             if ($updated = $tracklist->updated_time){
                 ?>
-                <time class="wpsstm-tracklist-published">
+                <time class="wpsstm-tracklist-updated">
                     <i class="fa fa-clock-o" aria-hidden="true"></i> 
                     <?php echo wpsstm_get_datetime( $updated );?>
                 </time>
@@ -73,14 +73,12 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
     }
     
-    if ( $tracklist->ajax_refresh ){
+    if ($tracklist->tracklist_type == 'live'){
         /*
         REFRESH notice
         will be toggled using CSS
         */
         $tracklist->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
-    }else{
-        
     }
     
     /*

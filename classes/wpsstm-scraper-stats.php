@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Live_Playlist_Stats{ //TO FIX TO UPGRADE
+class WPSSTM_Live_Playlist_Stats{ //TO FIX TO UPGRADE
     
     static $meta_key_health = 'wpsstm_health';
     static $meta_key_requests = 'wpsstm_total_requests';
@@ -105,7 +105,7 @@ class WP_SoundSystem_Live_Playlist_Stats{ //TO FIX TO UPGRADE
         $count++;
         
         if ( $success = update_post_meta($post_id, self::$meta_key_requests, $count) ){
-            wpsstm()->debug_log($count,"WP_SoundSystem_Live_Playlist_Stats::set_request_count()"); 
+            wpsstm()->debug_log($count,"WPSSTM_Live_Playlist_Stats::set_request_count()"); 
             return $success;
         }
 
@@ -150,7 +150,7 @@ class WP_SoundSystem_Live_Playlist_Stats{ //TO FIX TO UPGRADE
         $count = count($log);
 
         if ( $success = update_post_meta($post_id, self::$meta_key_monthly_requests, $count ) ){
-            wpsstm()->debug_log($count,"WP_SoundSystem_Live_Playlist_Stats::set_monthly_request_count()"); 
+            wpsstm()->debug_log($count,"WPSSTM_Live_Playlist_Stats::set_monthly_request_count()"); 
             return $success;
         }
         
@@ -196,7 +196,7 @@ class WP_SoundSystem_Live_Playlist_Stats{ //TO FIX TO UPGRADE
         //freeze for 10 mins
         set_transient( $transient_name_freeze, true, 10 * MINUTE_IN_SECONDS );
 
-        wpsstm()->debug_log($log_success_pc,"WP_SoundSystem_Live_Playlist_Stats::set_health()"); 
+        wpsstm()->debug_log($log_success_pc,"WPSSTM_Live_Playlist_Stats::set_health()"); 
         return update_post_meta($post_id, self::$meta_key_health, $log_success_pc);
         
     }

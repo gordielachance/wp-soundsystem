@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Core_Sources{
+class WPSSTM_Core_Sources{
 
     var $providers = array();
     static $source_url_metakey = '_wpsstm_source_url';
@@ -12,7 +12,7 @@ class WP_SoundSystem_Core_Sources{
         global $wpsstm_source;
 
         //initialize global (blank) $wpsstm_source so plugin never breaks when calling it.
-        $wpsstm_source = new WP_SoundSystem_Source();
+        $wpsstm_source = new WPSSTM_Source();
         
         add_action( 'init', array($this,'register_post_type_sources' ));
 
@@ -175,7 +175,7 @@ class WP_SoundSystem_Core_Sources{
         global $wpsstm_source;
         if ( $query->get('post_type') == wpsstm()->post_type_source ){
             //set global $wpsstm_source
-            $wpsstm_source = new WP_SoundSystem_Source($post->ID);
+            $wpsstm_source = new WPSSTM_Source($post->ID);
         }
     }
     
@@ -186,7 +186,7 @@ class WP_SoundSystem_Core_Sources{
         if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_source )  ){
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
             //set global $wpsstm_source
-            $wpsstm_source = new WP_SoundSystem_Source($post_id);
+            $wpsstm_source = new WPSSTM_Source($post_id);
         }
     }
     
@@ -253,7 +253,7 @@ class WP_SoundSystem_Core_Sources{
         ?>
         <div style="text-align:center">
             <?php
-                $track = new WP_SoundSystem_Track($post->post_parent);
+                $track = new WPSSTM_Track($post->post_parent);
                 if ($track->post_id){
                     printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
                 }
@@ -293,7 +293,7 @@ class WP_SoundSystem_Core_Sources{
 
     function metabox_source_content( $post ){
         
-        $source = new WP_SoundSystem_Source($post->ID);
+        $source = new WPSSTM_Source($post->ID);
         
         ?>
         <p>
@@ -384,7 +384,7 @@ class WP_SoundSystem_Core_Sources{
                 
                 $published_str = $pending_str = null;
 
-                $track = new WP_SoundSystem_Track($post_id);
+                $track = new WPSSTM_Track($post_id);
                 $sources_published_query = $track->query_sources();
                 $sources_pending_query = $track->query_sources(array('post_status'=>'pending'));
 
@@ -484,7 +484,7 @@ class WP_SoundSystem_Core_Sources{
 
                 if ( $match = $wpsstm_source->match ){
                     
-                    $track = new WP_SoundSystem_Track($post->post_parent);
+                    $track = new WPSSTM_Track($post->post_parent);
                     if ($track->artist && $track->artist){
                         
                         $sources_url = $track->get_backend_sources_url();
@@ -511,7 +511,7 @@ class WP_SoundSystem_Core_Sources{
     }
     
     //TO FIX TO enable somewhere
-    function sort_sources_by_track_match($sources,WP_SoundSystem_Track $track){
+    function sort_sources_by_track_match($sources,WPSSTM_Track $track){
 
         //reorder by similarity
         usort($sources, function ($a, $b){
@@ -535,7 +535,7 @@ class WP_SoundSystem_Core_Sources{
         );
 
         //set global $wpsstm_track
-        $wpsstm_track = new WP_SoundSystem_Track();
+        $wpsstm_track = new WPSSTM_Track();
         $wpsstm_track->from_array($ajax_data['track']);
         $success = $wpsstm_track->autosource();
         
@@ -569,7 +569,7 @@ class WP_SoundSystem_Core_Sources{
             'success'   => false
         );
 
-        $source = new WP_SoundSystem_Source($ajax_data['post_id']);
+        $source = new WPSSTM_Source($ajax_data['post_id']);
         $success = $source->delete_source();
         
         if ( is_wp_error($success) ){
@@ -620,7 +620,7 @@ class WP_SoundSystem_Core_Sources{
             if ( is_wp_error($body) ) return $body;
             $api_response = json_decode( $body, true );
             
-            wpsstm()->debug_log( json_encode($api_response), "WP_SoundSystem_Core_Sources::get_tuneefy_token"); 
+            wpsstm()->debug_log( json_encode($api_response), "WPSSTM_Core_Sources::get_tuneefy_token"); 
 
             if ( isset($api_response['access_token']) &&  isset($api_response['expires_in']) ) {
                 $token = $api_response['access_token'];
@@ -669,7 +669,7 @@ class WP_SoundSystem_Core_Sources{
             $url = add_query_arg($url_args,$url);
 
 
-            wpsstm()->debug_log( json_encode(array('url'=>$url,'request_args'=>$request_args)), "WP_SoundSystem_Core_Sources::tuneefy_api_aggregate"); 
+            wpsstm()->debug_log( json_encode(array('url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
 
             $response = wp_remote_get($url,$request_args);
             $body = wp_remote_retrieve_body($response);
@@ -688,7 +688,7 @@ class WP_SoundSystem_Core_Sources{
         }
 
         if($error){
-            wpsstm()->debug_log( json_encode(array('error'=>$error->get_error_message(),'url'=>$url,'request_args'=>$request_args)), "WP_SoundSystem_Core_Sources::tuneefy_api_aggregate"); 
+            wpsstm()->debug_log( json_encode(array('error'=>$error->get_error_message(),'url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
             return $error;
         }
 

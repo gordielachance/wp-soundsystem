@@ -3,56 +3,20 @@
 /**
 Handle posts that have a tracklist, like albums and playlists.
 **/
-
-class WP_SoundSystem_Core_Tracklists{
-    public $qvar_tracklist_admin = 'admin-tracklist';
-    public $qvar_tracklist_action = 'tracklist-action';
-    public $qvar_loved_tracklists = 'loved-tracklists';
-    public $loved_tracklist_meta_key = '_wpsstm_user_favorite';
-    public $tracklist_post_types = array();
+class WPSSTM_Core_Tracklists{
     
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
+    static $qvar_tracklist_admin = 'admin-tracklist';
+    static $qvar_tracklist_action = 'tracklist-action';
+    static $qvar_loved_tracklists = 'loved-tracklists';
+    static $loved_tracklist_meta_key = '_wpsstm_user_favorite';
 
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Tracklists;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-
-    private function __construct() { /* Do nothing here */ }
-
-    function init(){
-        
-        require_once(wpsstm()->plugin_dir . 'wpsstm-core-wizard.php');
-        
-        add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-        
-    }
-    
-    function setup_globals(){
+    function __construct() {
         global $wpsstm_tracklist;
         
+        require_once(wpsstm()->plugin_dir . 'wpsstm-core-wizard.php');
+
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
-        $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
-        
-        $this->tracklist_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist
-        );
-        $this->static_tracklist_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_playlist
-        );
-    }
-    
-    function setup_actions(){
+        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
@@ -109,9 +73,9 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = $this->qvar_tracklist_admin;
-        $vars[] = $this->qvar_tracklist_action;
-        $vars[] = $this->qvar_loved_tracklists;
+        $vars[] = self::$qvar_tracklist_admin;
+        $vars[] = self::$qvar_tracklist_action;
+        $vars[] = self::$qvar_loved_tracklists;
         return $vars;
     }
 
@@ -130,14 +94,14 @@ class WP_SoundSystem_Core_Tracklists{
     function the_tracklist($post,$query){
         global $wpsstm_tracklist;
 
-        if ( in_array($query->get('post_type'),$this->tracklist_post_types) ){
+        if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post + 1;
         }else{
             //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
             //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
-            $wpsstm_tracklist = new WP_SoundSystem_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
+            $wpsstm_tracklist = new WPSSTM_Remote_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     
@@ -146,7 +110,7 @@ class WP_SoundSystem_Core_Tracklists{
         global $wpsstm_tracklist;
         $screen = get_current_screen();
         
-        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,$this->tracklist_post_types)  ){
+        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
             //set global $wpsstm_source
             $wpsstm_tracklist = wpsstm_get_post_tracklist($post_id);
@@ -169,7 +133,7 @@ class WP_SoundSystem_Core_Tracklists{
     
     //load the admin template instead of regular content when 'admin-tracklist' is set
     function tracklist_admin($content){
-        if ( $tracklist_admin = get_query_var( $this->qvar_tracklist_admin ) ){
+        if ( $tracklist_admin = get_query_var( self::$qvar_tracklist_admin ) ){
             ob_start();
             wpsstm_locate_template( 'tracklist-admin.php', true, false );
             $content = ob_get_clean();
@@ -238,26 +202,12 @@ class WP_SoundSystem_Core_Tracklists{
         wpsstm()->debug_log($ajax_data,"ajax_refresh_tracklist()");
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
-        $tracklist_unique_id = $result['unique_id'] = ( isset($ajax_data['unique_id']) ) ? $ajax_data['unique_id'] : null;
-        
-        //TO FIX TO CHECK
-        //populate back the options from JS.  Is this required ? Do check that.
-        $ajax_options = (array)$ajax_data['options'];
-        foreach($ajax_options as $key=>$option){
-            //convert AJAX strings to bool
-            if ($option === 'true') $ajax_options[$key] = true;
-            if ($option === 'false') $ajax_options[$key] = false;
-        }
-        
-        $options = $result['options'] =wp_parse_args($ajax_options,$wpsstm_tracklist->options);
 
         if ($tracklist_id){
             
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id);
-            $wpsstm_tracklist->unique_id = $tracklist_unique_id; //populate unique ID back from JS so we keep its value
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
-            $wpsstm_tracklist->options = $options;
             
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
@@ -270,7 +220,7 @@ class WP_SoundSystem_Core_Tracklists{
     function column_tracklist_register($defaults) {
         global $post;
 
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$this->tracklist_post_types) ){
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],wpsstm()->tracklist_post_types) ){
             $defaults['tracklist'] = __('Tracklist','wpsstm');
         }
         
@@ -325,7 +275,7 @@ class WP_SoundSystem_Core_Tracklists{
         switch ( $column ) {
             case 'playlist':
                 
-                $track = new WP_SoundSystem_Track($post_id);
+                $track = new WPSSTM_Track($post_id);
 
                 if ( $list = $track->get_parents_list() ){
                     echo $list;
@@ -344,7 +294,7 @@ class WP_SoundSystem_Core_Tracklists{
         $before = array();
         $after = array();
         
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$this->tracklist_post_types) ){
+        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],wpsstm()->tracklist_post_types) ){
             $after['tracklist-lovedby'] = __('Loved by:','wpsstm');
         }
         
@@ -378,7 +328,7 @@ class WP_SoundSystem_Core_Tracklists{
             'wpsstm-tracklist', 
             __('Tracklist','wpsstm'),
             array($this,'metabox_tracklist_content'),
-            $this->static_tracklist_post_types, 
+            wpsstm()->static_tracklist_post_types, 
             'normal', 
             'high' //priority 
         );
@@ -396,7 +346,7 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         global $wpsstm_tracklist;
 
-        if( !is_singular($this->tracklist_post_types) ) return $content;
+        if( !is_singular(wpsstm()->tracklist_post_types) ) return $content;
         if (!$wpsstm_tracklist) return $content;
 
         return  $content . $wpsstm_tracklist->get_tracklist_html();
@@ -415,7 +365,7 @@ class WP_SoundSystem_Core_Tracklists{
         );
         $atts = shortcode_atts($default,$atts);
 
-        if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,$this->tracklist_post_types) ){ //check that the post exists
+        if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,wpsstm()->tracklist_post_types) ){ //check that the post exists
             
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($atts['post_id']);
@@ -446,7 +396,7 @@ class WP_SoundSystem_Core_Tracklists{
                     break;
                 }
                 
-                $track = new WP_SoundSystem_Track();
+                $track = new WPSSTM_Track();
 
                 $track->artist = ( isset($_POST[ 'wpsstm_track_artist' ]) ) ? $_POST[ 'wpsstm_track_artist' ] : null;
                 $track->title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
@@ -486,7 +436,7 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
     function tracklist_xspf_template($template){
-        if( !$admin_action = get_query_var( $this->qvar_tracklist_action ) ) return $template;
+        if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
         if ( $admin_action != 'export' ) return $template;
         the_post();
         return wpsstm_locate_template( 'tracklist-xspf.php' );
@@ -496,7 +446,7 @@ class WP_SoundSystem_Core_Tracklists{
         global $post;
         if (!$post) return;
         
-        if( !$action = get_query_var( $this->qvar_tracklist_action ) ) return;
+        if( !$action = get_query_var( self::$qvar_tracklist_action ) ) return;
         
         $tracklist = wpsstm_get_post_tracklist($post->ID);
         $success = null;
@@ -549,12 +499,12 @@ class WP_SoundSystem_Core_Tracklists{
     
     function pre_get_posts_loved_tracklists( $query ) {
 
-        if ( $user_id = $query->get( $this->qvar_loved_tracklists ) ){
+        if ( $user_id = $query->get( self::$qvar_loved_tracklists ) ){
 
             $meta_query = (array)$query->get('meta_query');
 
             $meta_query[] = array(
-                'key'     => $this->loved_tracklist_meta_key,
+                'key'     => self::$loved_tracklist_meta_key,
                 'value'   => $user_id,
             );
 
@@ -594,7 +544,7 @@ class WP_SoundSystem_Core_Tracklists{
     function delete_subtracks_tracklist_entry($post_id){
         global $wpdb;
 
-        if ( !in_array(get_post_type($post_id),$this->tracklist_post_types) ) return;
+        if ( !in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ) return;
 
         $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -605,9 +555,3 @@ class WP_SoundSystem_Core_Tracklists{
     }
 
 }
-
-function wpsstm_tracklists() {
-	return WP_SoundSystem_Core_Tracklists::instance();
-}
-
-wpsstm_tracklists();

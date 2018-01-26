@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Array2XML {
+class WPSSTM_Array2XML {
     
     /* based (but tweaked) on
      * https://github.com/easydigitaldownloads/Easy-Digital-Downloads/blob/master/includes/libraries/array2xml.php

@@ -1,6 +1,6 @@
 <?php
 
-class WP_SoundSystem_Settings {
+class WPSSTM_Settings {
     
     static $menu_slug = 'wpsstm';
     
@@ -52,7 +52,7 @@ class WP_SoundSystem_Settings {
         }else{ //sanitize values
             
             if( isset( $input['flush_community_tracks'] ) ){
-                wpsstm_tracks()->flush_community_tracks();
+                WPSSTM_Core_Tracks::flush_community_tracks();
             }
 
             /*
@@ -555,7 +555,7 @@ class WP_SoundSystem_Settings {
             }else{
 
                 //autosource
-                $can_autosource = WP_SoundSystem_Core_Sources::can_autosource();
+                $can_autosource = WPSSTM_Core_Sources::can_autosource();
                 if ( is_wp_error($can_autosource) ){
                     add_settings_error('wpsstm-settings-tracklists', 'cannot_autosource', $can_autosource->get_error_message());
                 }
@@ -675,7 +675,7 @@ class WP_SoundSystem_Settings {
             }else{
 
                 //cap missing
-                if ( !$can_community_scrobble = wpsstm_lastfm()->can_community_scrobble() ){
+                if ( !$can_community_scrobble = WPSSTM_Core_LastFM::can_community_scrobble() ){
 
                     add_settings_error( 'wpsstm-settings-lastfm', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm') );
                 }
@@ -735,7 +735,7 @@ class WP_SoundSystem_Settings {
         
         if ( $live_playlists_enabled ){
 
-            $can_live_playlists = wpsstm_live_playlists()->can_live_playlists();
+            $can_live_playlists = WPSSTM_Core_Live_Playlists::can_live_playlists();
             $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
 
             if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
@@ -1018,4 +1018,4 @@ class WP_SoundSystem_Settings {
 	}
 }
 
-new WP_SoundSystem_Settings;
+new WPSSTM_Settings;

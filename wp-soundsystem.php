@@ -36,6 +36,8 @@ class WP_SoundSystem {
     public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
+    public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
+    public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
     public $qvar_popup = 'wpsstm-popup';
@@ -110,6 +112,7 @@ class WP_SoundSystem {
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
         
+        
         //validate options
         /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
         https://wordpress.stackexchange.com/a/126206/70449
@@ -155,14 +158,24 @@ class WP_SoundSystem {
         if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
             require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
-
-        do_action('wpsstm_loaded');
-        
-        new WP_SoundSystem_Core_Sources();
-        
-        
     }
     function setup_actions(){
+        
+        /* Now that files have been loaded, init all core classes */
+        new WPSSTM_Core_Albums();
+        new WPSSTM_Core_Artists();
+        new WPSSTM_Core_BuddyPress();
+        new WPSSTM_Core_LastFM();
+        new WPSSTM_Core_MusicBrainz();
+        new WPSSTM_Core_Player();
+        new WPSSTM_Core_Live_Playlists();
+        new WPSSTM_Core_Playlists();
+        new WPSSTM_Core_Sources();
+        new WPSSTM_Core_Tracklists();
+        new WPSSTM_Core_Tracks();
+        new WPSSTM_Core_Wizard();
+        
+        ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
 
@@ -238,7 +251,7 @@ class WP_SoundSystem {
             
             if($current_version < 151){ //rename old source URL metakeys
 
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WP_SoundSystem_Core_Sources::$source_url_metakey, '_wpsstm_source' );
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Sources::$source_url_metakey, '_wpsstm_source' );
 
                 $result = $wpdb->get_results ( $querystr );
                 

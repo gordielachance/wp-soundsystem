@@ -6,7 +6,7 @@ https://www.indieshuffle.com/playlists/best-songs-of-april-2017/
 https://www.indieshuffle.com/songs/hip-hop/
 */
 
-class WP_SoundSystem_IndieShuffle_Scraper{
+class WPSSTM_IndieShuffle_Scraper{
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -37,7 +37,7 @@ class WP_SoundSystem_IndieShuffle_Scraper{
 
 //register preset
 function register_indieshuffle_preset($tracklist){
-    new WP_SoundSystem_IndieShuffle_Scraper($tracklist);
+    new WPSSTM_IndieShuffle_Scraper($tracklist);
 }
 
 function register_indieshuffle_service_links($links){

@@ -1,33 +1,10 @@
 <?php
 
-class WP_SoundSystem_Core_Playlists{
+class WPSSTM_Core_Playlists{
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
-    public static function instance() {
-            if ( ! isset( self::$instance ) ) {
-                    self::$instance = new WP_SoundSystem_Core_Playlists;
-                    self::$instance->init();
-            }
-            return self::$instance;
-    }
-    
-    private function __construct() { /* Do nothing here */ }
-    
-    function init(){
-        
+    function __construct() {
         require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
         
-        //add_action( 'wpsstm_loaded',array($this,'setup_globals') );
-        add_action( 'wpsstm_loaded',array($this,'setup_actions') );
-    }
-
-    
-    function setup_actions(){
-
         add_action( 'init', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
         
@@ -176,7 +153,7 @@ class WP_SoundSystem_Core_Playlists{
 
         $tracklist_title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
 
-        $playlist = new WP_SoundSystem_Tracklist();
+        $playlist = new WPSSTM_Tracklist();
         $playlist->title = $tracklist_title;
         $playlist_id = $playlist->save_playlist();
 
@@ -191,7 +168,7 @@ class WP_SoundSystem_Core_Playlists{
             $result['success'] = true;
             
             $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-            $track = new WP_SoundSystem_Track($track_id);
+            $track = new WPSSTM_Track($track_id);
 
             $list_all = $track->get_subtrack_playlist_manager_list();
             
@@ -205,9 +182,3 @@ class WP_SoundSystem_Core_Playlists{
     }
     
 }
-
-function wpsstm_playlists() {
-	return WP_SoundSystem_Core_Playlists::instance();
-}
-
-wpsstm_playlists();

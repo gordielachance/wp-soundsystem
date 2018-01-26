@@ -728,11 +728,8 @@ class WpsstmTrack {
 
                     var source_play = self.play_first_available_source(source_idx);
 
-                    source_play.done(function(v) {
-                        //fetch sources for next tracks
-                        if ( self.tracklist.tracklist_el.hasClass('tracklist-autosource') ) {
-                            self.tracklist.get_next_tracks_sources_auto();
-                        }
+                    source_play.done(function(v) { //fetch sources for next tracks
+                        self.tracklist.get_next_tracks_sources_auto();
                         success.resolve();
                     })
                     source_play.fail(function(reason) {

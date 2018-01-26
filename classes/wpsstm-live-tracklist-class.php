@@ -2,7 +2,7 @@
 
 use \ForceUTF8\Encoding;
 
-class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
+class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     var $tracklist_type = 'live';
 
@@ -51,14 +51,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
             $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
             
-            $db_options = get_post_meta($this->post_id,wpsstm_live_playlists()->scraper_meta_name,true);
+            $db_options = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$scraper_meta_name,true);
             $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$db_options); //last one has priority
 
             if ($this->feed_url){
                 $this->location = $this->feed_url;
             }
             
-            if ( $meta = get_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name,true) ){
+            if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
                 $this->updated_time = $meta;
             }
 
@@ -152,24 +152,24 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function update_live_tracklist($save_subtracks = null){
 
         if (!$this->post_id){
-            wpsstm()->debug_log('wpsstm_missing_post_id','WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
+            wpsstm()->debug_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
         //capability check
-        if ( !wpsstm_live_playlists()->can_live_playlists() ){
-            wpsstm()->debug_log('wpsstm_missing_cap','WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
+        if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
+            wpsstm()->debug_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
-        new WP_SoundSystem_Live_Playlist_Stats($this); //remote request stats
+        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
         
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            wpsstm_live_playlists()->remote_title_meta_name =>  $this->get_remote_title(),
-            wpsstm_live_playlists()->remote_author_meta_name => $this->get_remote_author(),
-            wpsstm_live_playlists()->time_updated_meta_name =>  $this->updated_time,
+            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
+            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
+            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
         );
         
         //should we save subtracks too ? By default, only if cache is enabled.
@@ -184,7 +184,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
             $success = $this->save_subtracks($subtracks_args);
             
             if( is_wp_error($success) ){
-                wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
+                wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
                 return $success;
             }
 
@@ -199,7 +199,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $success = wp_update_post( $tracklist_post, true );
         
         if( is_wp_error($success) ){
-            wpsstm()->debug_log($success->get_error_code(),'WP_SoundSystem_Remote_Tracklist::update_live_tracklist' );
+            wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return $success;
         }
         
@@ -397,7 +397,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
 
                 try{
                     $data = json_decode($response_body, true);
-                    $dom = WP_SoundSystem_Array2XML::createXML($data,'root','element');
+                    $dom = WPSSTM_Array2XML::createXML($data,'root','element');
                     $xml = $dom->saveXML($dom);
                     
 
@@ -406,7 +406,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 }
                 
                 if ($xml){
-                    wpsstm()->debug_log("The json input has been converted to XML.",'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                    wpsstm()->debug_log("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
@@ -428,11 +428,11 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
                 if ($xml_errors){
                     $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
                     $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
-                    wpsstm()->debug_log($notice,'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                    wpsstm()->debug_log($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     /*
                     foreach( $xml_errors as $xml_error_obj ) {
-                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WP_SoundSystem_Remote_Tracklist::get_body_node' );
+                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
                     }
                     */
                 }
@@ -623,7 +623,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $source_urls = $this->get_track_source_urls($track_node);
         
         foreach((array)$source_urls as $source_url){
-            $source = new WP_SoundSystem_Source();
+            $source = new WPSSTM_Source();
             $source_args = array('url'=>$source_url);
             $source->from_array($source_args);
             $sources[] = $source;
@@ -775,9 +775,9 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
     function save_feed_url(){
 
         if (!$this->feed_url){
-            return delete_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name );
+            return delete_post_meta( $this->post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name );
         }else{
-            return update_post_meta( $this->post_id, wpsstm_live_playlists()->feed_url_meta_name, $this->feed_url );
+            return update_post_meta( $this->post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name, $this->feed_url );
         }
     }
     
@@ -785,7 +785,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         $post_type = get_post_type($this->post_id);
 
-        if( !in_array($post_type,wpsstm_tracklists()->tracklist_post_types ) ) return;
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
 
         $disable = (bool)isset($wizard_data['disable']);
@@ -804,7 +804,7 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         if ( !$this->post_id ) return;
 
         $default_settings = $this->get_default_scraper_options();
-        $old_settings = get_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name,true);
+        $old_settings = get_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name,true);
         
         $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
 
@@ -813,14 +813,14 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         
         //settings have been updated, clear tracklist cache
         if ($old_settings != $wizard_settings){
-            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WP_SoundSystem_Remote_Tracklist::save_wizard_settings' );
-            delete_post_meta($this->post_id,wpsstm_live_playlists()->time_updated_meta_name);
+            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
+            delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         }
 
         if (!$wizard_settings){
-            delete_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name);
+            delete_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name);
         }else{
-            update_post_meta($this->post_id, wpsstm_live_playlists()->scraper_meta_name, $wizard_settings);
+            update_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name, $wizard_settings);
         }
 
     }
@@ -921,19 +921,31 @@ class WP_SoundSystem_Remote_Tracklist extends WP_SoundSystem_Tracklist{
         $expiration_time = $this->get_expiration_time();
         
         if (!$expiration_time){ 
-            //no real cache is set; so let's say tracklist is already expired at load!
+            //
             $expiration_time = current_time( 'timestamp', true );
         }
-        
-        if ( $expiration_time ){
-            $values_default['data-wpsstm-expire-time'] = $expiration_time;
-        }
-        
+
         $values_default['data-wpsstm-domain'] = wpsstm_get_url_domain( $this->feed_url );
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 
         return parent::get_tracklist_attr($values_attr);
     }
+    
+    function get_html_metas(){
+        $metas = parent::get_html_metas();
+        
+        /*
+        expiration time
+        */
+        //if no real cache is set; let's say tracklist is already expired at load!
+        $expiration_time = ($expiration = $this->get_expiration_time() ) ? $expiration : current_time( 'timestamp', true );
+        
+        $metas['wpsstmExpiration'] = $expiration_time;
+        
+        return $metas;
+    }
+    
+
     
 }

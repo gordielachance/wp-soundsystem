@@ -10,7 +10,7 @@ class WP_Soundsystem_Wizard_LastFM_UserStations_Widget extends WP_Soundsystem_Wi
         $links_str = array();
         $output = $form = null;
 
-        $this->user = new WP_SoundSystem_LastFM_User();
+        $this->user = new WPSSTM_LastFM_User();
         $username = ( $this->user->is_user_api_logged() ) ? $this->user->user_api_metas['username'] : null;
 
         $form = sprintf('<input type="text" name="%s-input" value="%s" placeholder="%s" />',$this->slug,$username,__('Last.fm username','wpsstm'));

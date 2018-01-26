@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Hypem_Scraper{
+class WPSSTM_Hypem_Scraper{
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -29,7 +29,7 @@ class WP_SoundSystem_Hypem_Scraper{
 
 //register preset
 function register_hypem_preset($tracklist){
-    new WP_SoundSystem_Hypem_Scraper($tracklist);
+    new WPSSTM_Hypem_Scraper($tracklist);
 }
 
 function register_hypem_service_links($links){

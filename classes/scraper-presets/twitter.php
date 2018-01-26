@@ -1,5 +1,5 @@
 <?php
-class WP_SoundSystem_Twitter_Timeline{
+class WPSSTM_Twitter_Timeline{
     private $user_slug;
 
     function __construct($tracklist){
@@ -52,6 +52,6 @@ class WP_SoundSystem_Twitter_Timeline{
 
 //register preset
 function register_twitter_preset($tracklist){
-    new WP_SoundSystem_Twitter_Timeline($tracklist);
+    new WPSSTM_Twitter_Timeline($tracklist);
 }
 add_action('wpsstm_get_remote_tracks','register_twitter_preset');
