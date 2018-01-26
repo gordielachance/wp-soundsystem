@@ -650,7 +650,8 @@ class WP_SoundSystem_Core_Sources{
         $request_args = null;
         $api_response = null;
         
-        
+        //TO FIX use a transient to store results for a certain time ?
+
         $token = self::get_tuneefy_token();
         
         if ( is_wp_error($token) ){
@@ -680,9 +681,8 @@ class WP_SoundSystem_Core_Sources{
                 $api_response = json_decode( $body, true );
 
                 if( !empty($api_response['errors']) ){
-                    $error_msg =    reset($api_response['errors']); //first item
-                    $error_code =   key($api_response['errors']);
-                    $error = new WP_Error( 'wpsstm_tuneefy_aggregate', sprintf( __('Unable to aggregate using Tuneefy - %s: %s','wpsstm'),$error_code,$error_msg ) );
+                    $errors = $api_response['errors'];
+                    $error = new WP_Error( 'wpsstm_tuneefy_aggregate', sprintf( __('Unable to aggregate using Tuneefy : %s','wpsstm'),json_encode($errors) ) );
                 }
             }
         }
