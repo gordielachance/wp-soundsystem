@@ -2,6 +2,7 @@
 
 class WP_SoundSystem_Tracklist{
     
+    var $unique_id = null;
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     var $index = -1;
     var $tracklist_type = 'static';
@@ -50,6 +51,7 @@ class WP_SoundSystem_Tracklist{
         $this->set_tracklist_pagination($pagination_args);
         
         $this->post_id = $post_id;
+        $this->unique_id = uniqid(); //in case we don't have a post ID; useful for JS
         $this->populate_tracklist_post();
         
     }
@@ -375,11 +377,11 @@ class WP_SoundSystem_Tracklist{
     }
 
     function get_tracklist_html(){
+        $this->register_tracklist_inline_js();
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
-        $output = ob_get_clean();
-
-        return $output;
+        $html = ob_get_clean();
+        return $html;
         
     }
 
@@ -857,6 +859,20 @@ class WP_SoundSystem_Tracklist{
         return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
     }
     
+    function register_tracklist_inline_js(){
+
+        ob_start();
+        ?>
+        var wpsstm_tracklist_<?php echo $this->unique_id;?>_options = <?php echo json_encode($this->get_options());?>;
+        console.log(wpsstm_tracklist_<?php echo $this->unique_id;?>_options);
+        <?php
+        $inline = ob_get_clean();
+
+        //TO FIX TO CHECK we should rather hook this on 'wpsstm-tracklists' ?  But it does not work
+        wp_add_inline_script('wpsstm', $inline);
+
+    }
+    
     function get_tracklist_attr($values_attr=null){
         
         //TO FIX weird code, not effiscient
@@ -867,13 +883,13 @@ class WP_SoundSystem_Tracklist{
         $options = $this->get_options();
 
         $values_defaults = array(
-            'itemscope' =>                      true,
-            'itemtype' =>                       "http://schema.org/MusicPlaylist",
-            'data-wpsstm-tracklist-id' =>       $this->post_id,
-            'data-wpsstm-tracklist-idx' =>      $this->index,
-            'data-tracks-count' =>              $this->track_count,
-            'data-wpsstm-tracklist-options' =>  htmlspecialchars(json_encode($options)), 
-            'data-wpsstm-toggle-tracklist' =>   $this->get_options('toggle_tracklist'),
+            'itemscope' =>                          true,
+            'itemtype' =>                           "http://schema.org/MusicPlaylist",
+            'data-wpsstm-tracklist-id' =>           $this->post_id,
+            'data-wpsstm-tracklist-unique-id' =>    $this->unique_id,
+            'data-wpsstm-tracklist-idx' =>          $this->index,
+            'data-tracks-count' =>                  $this->track_count,
+            'data-wpsstm-toggle-tracklist' =>       $this->get_options('toggle_tracklist'),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);

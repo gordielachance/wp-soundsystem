@@ -119,6 +119,7 @@ class WP_SoundSystem_Core_Tracklists{
         
         //JS
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-ui-sortable','jquery-ui-dialog','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version );
+        
     }
     
     /*
@@ -237,7 +238,10 @@ class WP_SoundSystem_Core_Tracklists{
         wpsstm()->debug_log($ajax_data,"ajax_refresh_tracklist()");
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
+        $tracklist_unique_id = $result['unique_id'] = ( isset($ajax_data['unique_id']) ) ? $ajax_data['unique_id'] : null;
         
+        //TO FIX TO CHECK
+        //populate back the options from JS.  Is this required ? Do check that.
         $ajax_options = (array)$ajax_data['options'];
         foreach($ajax_options as $key=>$option){
             //convert AJAX strings to bool
@@ -251,6 +255,7 @@ class WP_SoundSystem_Core_Tracklists{
             
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_post_tracklist($tracklist_id);
+            $wpsstm_tracklist->unique_id = $tracklist_unique_id; //populate unique ID back from JS so we keep its value
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
             $wpsstm_tracklist->options = $options;
             

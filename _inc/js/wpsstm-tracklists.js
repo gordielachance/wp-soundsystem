@@ -168,6 +168,7 @@ class WpsstmTracklist {
         this.index =                    tracklist_index; //index in page
         this.tracklist_el =             undefined;
         this.post_id =                  undefined;
+        this.unique_id =                undefined;
         this.tracklist_request =        undefined;
         this.is_expired =               undefined;
         this.expire_time =              undefined;
@@ -232,8 +233,11 @@ class WpsstmTracklist {
         self.tracklist_el.attr('data-wpsstm-tracklist-idx',self.index);
 
         self.post_id = Number( self.tracklist_el.attr('data-wpsstm-tracklist-id') );
+        self.unique_id = self.tracklist_el.attr('data-wpsstm-tracklist-unique-id');
         
-        self.options = $.parseJSON( self.tracklist_el.attr('data-wpsstm-tracklist-options') );
+        /* options */
+        var options_var_name = 'wpsstm_tracklist_' + self.unique_id + '_options';
+        self.options = window[options_var_name];
         
         /*
         expiration
@@ -293,7 +297,8 @@ class WpsstmTracklist {
         var ajax_data = {
             'action':           'wpsstm_refresh_tracklist',
             'post_id':          self.post_id,
-            'options':          self.options,
+            'unique_id':        self.unique_id, //pass unique ID so we don't generate a new one
+            'options':          self.options
         };
 
         self.tracklist_request = $.ajax({
