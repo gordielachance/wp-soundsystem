@@ -9,7 +9,6 @@ class WPSSTM_Core_LastFM{
     static $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
     static $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
-    private $basic_auth = null;
     public $lastfm_user = null;
 
     public function __construct() {
@@ -137,28 +136,23 @@ class WPSSTM_Core_LastFM{
     
     private static function get_basic_api_auth(){
         
+        //TO FIX KKK store temporary ?
+        $basic_auth = null;
+        
         $api_key = wpsstm()->get_options('lastfm_client_id');
         if ( !$api_key ) return new WP_Error( 'lastfm_missing_credentials', __( "Required Last.fm API key missing", "wpsstm" ) );
-        
-        if ($this->basic_auth === null){
-            
-            $basic_auth = false;
 
-            $auth_args = array(
-                'apiKey' => $api_key
-            );
+        $auth_args = array(
+            'apiKey' => $api_key
+        );
 
-            try{
-                $basic_auth = new AuthApi('setsession', $auth_args);
-            }catch(Exception $e){
-                $basic_auth = self::handle_api_exception($e);
-            }
-            
-            $this->basic_auth = $basic_auth;
-            
+        try{
+            $basic_auth = new AuthApi('setsession', $auth_args);
+        }catch(Exception $e){
+            $basic_auth = self::handle_api_exception($e);
         }
-        
-        return $this->basic_auth;
+
+        return $basic_auth;
 
     }
 
