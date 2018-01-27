@@ -13,6 +13,7 @@ function wpsstm_get_classes_attr($classes){
 function wpsstm_get_html_attr($arr=null){
     $str = null;
     $arr = (array)$arr;
+    $arr = array_filter($arr);
     
     //attributes with values
     if (!empty($arr) ){
