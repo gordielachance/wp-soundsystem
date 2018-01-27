@@ -693,29 +693,32 @@ class WPSSTM_Core_Tracks{
         );
 
         add_meta_box( 
-            'wpsstm-track', 
-            __('Track','wpsstm'),
-            array($this,'metabox_track_content'),
+            'wpsstm-track-title', 
+            __('Track Title','wpsstm'),
+            array($this,'metabox_track_title_content'),
             $metabox_post_types, 
             'after_title', 
             'high' 
         );
-        
-    }
-    
-    function metabox_track_content( $post ){
-
-        $track_title = get_post_meta( $post->ID, self::$title_metakey, true );
-        
-        ?>
-        <input type="text" name="wpsstm_track" class="wpsstm-fullwidth" value="<?php echo $track_title;?>" placeholder="<?php printf("Enter track title here",'wpsstm');?>"/>
-        <?php
-        wp_nonce_field( 'wpsstm_track_meta_box', 'wpsstm_track_meta_box_nonce' );
 
     }
     
+    function metabox_track_title_content( $post ){
 
-    
+        $input_attr = array(
+            'id' => 'wpsstm-track-title',
+            'name' => 'wpsstm_track_title',
+            'value' => get_post_meta( $post->ID, self::$title_metakey, true ),
+            'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
+            'label' => __("Track title",'wpsstm'),
+            'placeholder' => __("Enter track title here",'wpsstm')
+        );
+        echo wpsstm_get_backend_form_input($input_attr);
+
+        wp_nonce_field( 'wpsstm_track_title_meta_box', 'wpsstm_track_title_meta_box_nonce' );
+
+    }
+
     function mb_populate_trackid( $post_id ) {
         
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -748,7 +751,7 @@ class WPSSTM_Core_Tracks{
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_track_meta_box_nonce']);
+        $is_metabox = isset($_POST['wpsstm_track_title_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
         //check post type
@@ -757,19 +760,19 @@ class WPSSTM_Core_Tracks{
         if ( !in_array($post_type,$allowed_post_types) ) return;
 
         //nonce
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_meta_box_nonce'], 'wpsstm_track_meta_box' ) );
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_title_meta_box_nonce'], 'wpsstm_track_title_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_track_meta_box_nonce']);
+        unset($_POST['wpsstm_track_title_meta_box_nonce']);
 
-        $track = ( isset($_POST[ 'wpsstm_track' ]) ) ? $_POST[ 'wpsstm_track' ] : null;
+        $title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
 
-        if (!$track){
+        if (!$title){
             delete_post_meta( $post_id, self::$title_metakey );
         }else{
-            update_post_meta( $post_id, self::$title_metakey, $track );
+            update_post_meta( $post_id, self::$title_metakey, $title );
         }
 
     }

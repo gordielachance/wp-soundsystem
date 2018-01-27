@@ -212,3 +212,43 @@ function wpsstm_is_community_post($post_id = null){
     $post_author_id = get_post_field( 'post_author', $post_id );
     return ( $post_author_id == wpsstm()->get_options('community_user_id') );
 }
+
+function wpsstm_get_backend_form_input($options = null){
+
+    $label_el = $input_el = $icon_el = null;
+
+    //options
+    $option_defaults = array(
+        'id' => null,
+        'name' => null,
+        'value' => null,
+        'icon' => null,
+        'label' => null,
+        'placeholder' => null
+    );
+    $options = wp_parse_args((array)$options,$option_defaults);
+
+    //label
+    $label_el = (isset($options['label'])) ? sprintf('<label for="%s">%s</label>',$options['id'],$options['label']) : null;
+
+    //input
+    $input_attr = array(
+        'id' =>             isset($options['id']) ? $options['id'] : null,
+        'type' =>           'text',
+        'name' =>           isset($options['name']) ? $options['name'] : null,
+        'class' =>          'wpsstm-fullwidth input-group-field',
+        'value' =>          isset($options['value']) ? $options['value'] : null,
+        'placeholder' =>    isset($options['placeholder']) ? $options['placeholder'] : null,
+
+    );
+
+    $attr_str = wpsstm_get_html_attr($input_attr);
+    $input_el = sprintf('<input "%s"/>',$attr_str);
+
+    //icon el
+    $icon_el = (isset($options['label'])) ? sprintf('<span class="input-group-icon">%s</span>',$options['icon']) : null;
+
+    //output
+
+    return sprintf('<div id="input-group">%s%s%s</div>',$label_el,$input_el,$icon_el);
+}
