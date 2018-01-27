@@ -117,9 +117,6 @@ class WPSSTM_Core_MusicBrainz {
     }
     
     function metabox_mbid_content( $post ){
-
-        $mbid = wpsstm_get_post_mbid($post->ID);
-        
         ?>
         <div>
             <?php
@@ -127,7 +124,16 @@ class WPSSTM_Core_MusicBrainz {
                 if ( self::is_entries_switch() ){
                     $this->metabox_mbid_content_list_entries($post);
                 }else{
-                    printf('<input type="text" name="wpsstm_mbid" class="wpsstm-fullwidth" value="%s" placeholder="%s"/>',$mbid,__("Enter MusicBrainz ID here",'wpsstm'));
+                    $input_attr = array(
+                        'id' => 'wpsstm-mbid',
+                        'name' => 'wpsstm_mbid',
+                        'value' => wpsstm_get_post_mbid($post->ID),
+                        'icon' => '<i class="fa fa-key" aria-hidden="true"></i>',
+                        'label' => __("MBID",'wpsstm'),
+                        'placeholder' => __("Enter Musicbrainz ID here",'wpsstm')
+                    );
+                    echo wpsstm_get_backend_form_input($input_attr);
+
                     if ( wpsstm()->get_options('mb_auto_id') == "on" ){
                         printf('<small>%s</small>',sprintf(__("If left empty, we'll try to guess it.  Set it to %s to disable auto ID.",'wpsstm'),'<code>-</code>'));
                     }

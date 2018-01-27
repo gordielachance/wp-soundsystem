@@ -709,7 +709,7 @@ class WPSSTM_Core_Tracks{
             'id' => 'wpsstm-track-title',
             'name' => 'wpsstm_track_title',
             'value' => get_post_meta( $post->ID, self::$title_metakey, true ),
-            'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
+            'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
             'label' => __("Track title",'wpsstm'),
             'placeholder' => __("Enter track title here",'wpsstm')
         );

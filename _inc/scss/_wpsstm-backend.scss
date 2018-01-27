@@ -146,6 +146,17 @@
         > button.handlediv{
             display:none;
         }
+        
+        .input-group{
+            label{
+                font-size: 1.2em;
+                margin-bottom: .25em;
+                display: block;
+            }
+            .input-group-icon{
+                display:none;
+            }
+        }
 
     }
 

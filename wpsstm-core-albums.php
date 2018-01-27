@@ -223,11 +223,16 @@ class WPSSTM_Core_Albums{
     
     function metabox_album_content( $post ){
 
-        $album_title = get_post_meta( $post->ID, self::$album_metakey, true );
-        
-        ?>
-        <input type="text" name="wpsstm_album" class="wpsstm-fullwidth" value="<?php echo $album_title;?>" placeholder="<?php printf("Enter album title here",'wpsstm');?>"/>
-        <?php
+        $input_attr = array(
+            'id' => 'wpsstm-album',
+            'name' => 'wpsstm_album',
+            'value' => get_post_meta( $post->ID, self::$album_metakey, true ),
+            'icon' => '<i class="fa fa-bars" aria-hidden="true"></i>',
+            'label' => __("Album",'wpsstm'),
+            'placeholder' => __("Enter album here",'wpsstm')
+        );
+        echo wpsstm_get_backend_form_input($input_attr);
+
         wp_nonce_field( 'wpsstm_album_meta_box', 'wpsstm_album_meta_box_nonce' );
 
     }

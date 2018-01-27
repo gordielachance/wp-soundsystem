@@ -223,11 +223,16 @@ class WPSSTM_Core_Artists{
 
     function metabox_artist_content( $post ){
 
-        $artist_name = get_post_meta( $post->ID, self::$artist_metakey, true );
-        
-        ?>
-        <input type="text" name="wpsstm_artist" class="wpsstm-fullwidth wpsstm-artist-autocomplete" value="<?php echo $artist_name;?>" placeholder="<?php printf("Enter artist here",'wpsstm');?>"/>
-        <?php
+        $input_attr = array(
+            'id' => 'wpsstm-artist',
+            'name' => 'wpsstm_artist',
+            'value' => get_post_meta( $post->ID, self::$artist_metakey, true ),
+            'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
+            'label' => __("Artist",'wpsstm'),
+            'placeholder' => __("Enter artist here",'wpsstm')
+        );
+        echo wpsstm_get_backend_form_input($input_attr);
+
         wp_nonce_field( 'wpsstm_artist_meta_box', 'wpsstm_artist_meta_box_nonce' );
 
     }

@@ -251,5 +251,5 @@ function wpsstm_get_backend_form_input($options = null){
 
     //output
 
-    return sprintf('<div id="input-group">%s%s%s</div>',$label_el,$input_el,$icon_el);
+    return sprintf('<div class="input-group">%s%s%s</div>',$label_el,$input_el,$icon_el);
 }
