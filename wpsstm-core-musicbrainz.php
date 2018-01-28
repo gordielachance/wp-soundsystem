@@ -33,7 +33,7 @@ class WPSSTM_Core_MusicBrainz {
     }
     
     static function is_entries_switch(){
-        return  ( isset($_GET['mb-switch-entries'])) ? true : false;
+        return  ( isset($_GET['mb-list-entries'])) ? true : false;
     }
 
     
@@ -83,24 +83,30 @@ class WPSSTM_Core_MusicBrainz {
     }
     
     function metaboxes_mb_register(){
-            global $post;
-            if (!$post) return;
+        global $post;
+        if (!$post) return;
 
-            $entries_post_types = array(
-                wpsstm()->post_type_artist,
-                wpsstm()->post_type_track,
-                wpsstm()->post_type_album
-            );
+        $entries_post_types = array(
+            wpsstm()->post_type_artist,
+            wpsstm()->post_type_track,
+            wpsstm()->post_type_album
+        );
+        $autoguess_url = 'http://localhost:8888/la-bonne-toune/wordpress/wp-admin/post-new.php?post_type=wpsstm_track';
+        $autoguess_link = sprintf( '<a href="%s" class="page-title-action">%s</a>',$autoguess_url,__('Autoguess','wpsstm') );
+        $title = __('MusicBrainz','wpsstm') . $autoguess_link;
 
-            add_meta_box( 
-                'wpsstm-mbid', 
-                __('MusicBrainz ID','wpsstm'),
-                array($this,'metabox_mbid_content'),
-                $entries_post_types,
-                'after_title', 
-                'high' 
-            );
+        add_meta_box( 
+            'wpsstm-mbid', 
+            $title,
+            array($this,'metabox_mbid_content'),
+            $entries_post_types,
+            'after_title', 
+            'high' 
+        );
 
+        /* 
+        Musicbrainz entry data 
+        */
         if ( $mbid = wpsstm_get_post_mbid($post->ID) ){
             
             add_meta_box( 
@@ -116,37 +122,28 @@ class WPSSTM_Core_MusicBrainz {
         
     }
     
-    function metabox_mbid_content( $post ){
-        ?>
-        <div>
-            <?php
+    static function get_edit_mbid_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
         
-                if ( self::is_entries_switch() ){
-                    $this->metabox_mbid_content_list_entries($post);
-                }else{
-                    $input_attr = array(
-                        'id' => 'wpsstm-mbid',
-                        'name' => 'wpsstm_mbid',
-                        'value' => wpsstm_get_post_mbid($post->ID),
-                        'icon' => '<i class="fa fa-key" aria-hidden="true"></i>',
-                        'label' => __("MBID",'wpsstm'),
-                        'placeholder' => __("Enter Musicbrainz ID here",'wpsstm')
-                    );
-                    echo wpsstm_get_backend_form_input($input_attr);
-
-                    if ( wpsstm()->get_options('mb_auto_id') == "on" ){
-                        printf('<small>%s</small>',sprintf(__("If left empty, we'll try to guess it.  Set it to %s to disable auto ID.",'wpsstm'),'<code>-</code>'));
-                    }
-                }
+        $input_el = $desc_el = null;
         
-
-                
-            ?>
-        </div>
-
-        <?php settings_errors('wpsstm_mbid');
-        wp_nonce_field( 'wpsstm_mbid_meta_box', 'wpsstm_mbid_meta_box_nonce' );
-
+        $input_attr = array(
+            'id' => 'wpsstm-mbid',
+            'name' => 'wpsstm_mbid',
+            'value' => wpsstm_get_post_mbid($post_id),
+            'icon' => '<i class="fa fa-key" aria-hidden="true"></i>',
+            'label' => __("MBID",'wpsstm'),
+            'placeholder' => __("Enter Musicbrainz ID here",'wpsstm')
+        );
+        
+        $input_el = wpsstm_get_backend_form_input($input_attr);
+        
+        if ( wpsstm()->get_options('mb_auto_id') == "on" ){
+            $desc_el = sprintf('<small>%s</small>',sprintf(__("If left empty, we'll try to guess it.  Set it to %s to disable auto ID.",'wpsstm'),'<code>-</code>'));
+        }
+        
+        return $input_el . $desc_el;
     }
 
     static function can_lookup($post_id){
@@ -174,48 +171,58 @@ class WPSSTM_Core_MusicBrainz {
         return $can;
 
     }
+    
+    function metabox_mbid_content($post){
 
-    function metabox_mbid_content_list_entries(){
-        global $post;
-
-        $this->load_api_errors($post);
+        /*
+        form
+        */
+        echo self::get_edit_mbid_input($post->ID);
         
-        $summary_url = get_edit_post_link($post->ID);
-        $summary_classes = $entries_classes = array("nav-tab");
-        $tablewrapper_classes = array('table-mbz');
-        $entries_url = add_query_arg(array('mb_metabox_action'=>'entries'),get_edit_post_link($post->ID));
-        
+        /*
+        entries
+        */
         if ( self::is_entries_switch() ){
-            $entries_classes[] = 'nav-tab-active';
-            $tablewrapper_classes[] = 'table-mbz-entries';
-        }else{
-            $summary_classes[] = 'nav-tab-active';
-            $tablewrapper_classes[] = 'table-mbz-summary';
-        }
 
-        settings_errors('wpsstm_musicbrainz');
-        
-        ?>
-        <div id="wpsstm-metabox-content"<?php wpsstm_classes($tablewrapper_classes);?>>
-            <?php
+            $this->load_api_errors($post);
 
-            switch($post->post_type){
-                case wpsstm()->post_type_artist:
-                    $this->metabox_mb_entries_artist($post);
-                break;
-                case wpsstm()->post_type_track:
-                    $this->metabox_mb_entries_track($post);
-                break;
-                case wpsstm()->post_type_album:
-                    $this->metabox_mb_entries_release($post);
-                break;
+            $summary_url = get_edit_post_link($post->ID);
+            $summary_classes = $entries_classes = array("nav-tab");
+            $tablewrapper_classes = array('table-mbz');
+            $entries_url = add_query_arg(array('mb_metabox_action'=>'entries'),get_edit_post_link($post->ID));
 
+            if ( self::is_entries_switch() ){
+                $entries_classes[] = 'nav-tab-active';
+                $tablewrapper_classes[] = 'table-mbz-entries';
+            }else{
+                $summary_classes[] = 'nav-tab-active';
+                $tablewrapper_classes[] = 'table-mbz-summary';
             }
 
-        
+            settings_errors('wpsstm_musicbrainz');
+
             ?>
-        </div>
-        <?php
+            <div id="wpsstm-metabox-content"<?php wpsstm_classes($tablewrapper_classes);?>>
+                <?php
+
+                switch($post->post_type){
+                    case wpsstm()->post_type_artist:
+                        $this->metabox_mb_entries_artist($post);
+                    break;
+                    case wpsstm()->post_type_track:
+                        $this->metabox_mb_entries_track($post);
+                    break;
+                    case wpsstm()->post_type_album:
+                        $this->metabox_mb_entries_release($post);
+                    break;
+
+                }
+
+
+                ?>
+            </div>
+            <?php
+        }
     }
     
     function metabox_mbdata_content($post){
@@ -504,7 +511,7 @@ class WPSSTM_Core_MusicBrainz {
                         $this->fill_post_with_mbdatas($post_id);
                     break;
                     case 'switch':
-                        $_GET['mb-switch-entries'] = true;
+                        $_GET['mb-list-entries'] = true;
                     break;
                 }
                 
@@ -718,14 +725,14 @@ class WPSSTM_Core_MusicBrainz {
 
     function redirect_to_switch_entries($location){
         if ( isset( $_POST['wpsstm-mbdata-switch'] ) ){
-            $location = add_query_arg(array('mb-switch-entries'=>true),$location);
+            $location = add_query_arg(array('mb-list-entries'=>true),$location);
         }
         return $location;
     }
     
     function redirect_to_switch_entries_after_new_mbid($location){
         if ( isset( $_POST['save'] ) ){
-            $location = add_query_arg(array('mb-switch-entries'=>true),$location);
+            $location = add_query_arg(array('mb-list-entries'=>true),$location);
         }
         return $location;
     }

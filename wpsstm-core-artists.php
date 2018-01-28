@@ -203,38 +203,39 @@ class WPSSTM_Core_Artists{
     }
     
     function metabox_artist_register(){
-        
-        $metabox_post_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_track,
-            wpsstm()->post_type_album
-        );
 
         add_meta_box( 
-            'wpsstm-artist', 
-            __('Artist','wpsstm'),
-            array($this,'metabox_artist_content'),
-            $metabox_post_types, 
+            'wpsstm-artist-settings', 
+            __('Artist Settings','wpsstm'),
+            array($this,'metabox_artist_settings_content'),
+            wpsstm()->post_type_artist, 
             'after_title', 
             'high' 
         );
         
     }
 
-    function metabox_artist_content( $post ){
+    function metabox_artist_settings_content( $post ){
 
+        echo self::get_edit_artist_input($post->ID); //artist
+
+        wp_nonce_field( 'wpsstm_artist_settings_meta_box', 'wpsstm_artist_settings_meta_box_nonce' );
+
+    }
+    
+    static function get_edit_artist_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
+        
         $input_attr = array(
             'id' => 'wpsstm-artist',
             'name' => 'wpsstm_artist',
-            'value' => get_post_meta( $post->ID, self::$artist_metakey, true ),
+            'value' => get_post_meta( $post_id, self::$artist_metakey, true ),
             'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
             'label' => __("Artist",'wpsstm'),
             'placeholder' => __("Enter artist here",'wpsstm')
         );
-        echo wpsstm_get_backend_form_input($input_attr);
-
-        wp_nonce_field( 'wpsstm_artist_meta_box', 'wpsstm_artist_meta_box_nonce' );
-
+        return wpsstm_get_backend_form_input($input_attr);
     }
     
     /**
@@ -247,7 +248,7 @@ class WPSSTM_Core_Artists{
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_artist_meta_box_nonce']);
+        $is_metabox = isset($_POST['wpsstm_artist_settings_meta_box_nonce']);
         if ( !$is_metabox || $is_autodraft || $is_autosave || $is_revision ) return;
         
         //check post type
@@ -255,21 +256,28 @@ class WPSSTM_Core_Artists{
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_album,wpsstm()->post_type_track);
         if ( !in_array($post_type,$allowed_post_types) ) return;
 
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_artist_meta_box_nonce'], 'wpsstm_artist_meta_box' ) );
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_artist_settings_meta_box_nonce'], 'wpsstm_artist_settings_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_artist_meta_box_nonce']);
+        unset($_POST['wpsstm_artist_settings_meta_box_nonce']);
 
+        /*artist*/
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
+        self::save_meta_artist($post_id,$artist);
 
-        if (!$artist){
+
+
+    }
+    
+    static function save_meta_artist($post_id, $value = null){
+        $value = trim($value);
+        if (!$value){
             delete_post_meta( $post_id, self::$artist_metakey );
         }else{
-            update_post_meta( $post_id, self::$artist_metakey, $artist );
+            update_post_meta( $post_id, self::$artist_metakey, $value );
         }
-
     }
     
     /*

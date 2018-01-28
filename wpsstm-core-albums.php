@@ -14,7 +14,7 @@ class WPSSTM_Core_Albums{
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
-        add_action( 'save_post', array($this,'metabox_album_save'), 5); 
+        add_action( 'save_post', array($this,'metabox_save_album_settings'), 5); 
         
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
@@ -204,50 +204,54 @@ class WPSSTM_Core_Albums{
     }
     
     function metabox_album_register(){
-        
-        $metabox_post_types = array(
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_track
-        );
 
         add_meta_box( 
-            'wpsstm-album', 
-            __('Album','wpsstm'),
-            array($this,'metabox_album_content'),
-            $metabox_post_types, 
+            'wpsstm-album-settings', 
+            __('Album Settings','wpsstm'),
+            array($this,'metabox_album_settings_content'),
+            wpsstm()->post_type_album, 
             'after_title', 
             'high' 
         );
         
     }
     
-    function metabox_album_content( $post ){
+    function metabox_album_settings_content( $post ){
 
+        echo WPSSTM_Core_Artists::get_edit_artist_input($post->ID);
+        echo self::get_edit_album_input($post->ID);
+
+
+        wp_nonce_field( 'wpsstm_album_settings_meta_box', 'wpsstm_album_settings_meta_box_nonce' );
+
+    }
+    
+    static function get_edit_album_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
+        
         $input_attr = array(
             'id' => 'wpsstm-album',
             'name' => 'wpsstm_album',
-            'value' => get_post_meta( $post->ID, self::$album_metakey, true ),
+            'value' => get_post_meta( $post_id, self::$album_metakey, true ),
             'icon' => '<i class="fa fa-bars" aria-hidden="true"></i>',
             'label' => __("Album",'wpsstm'),
             'placeholder' => __("Enter album here",'wpsstm')
         );
-        echo wpsstm_get_backend_form_input($input_attr);
-
-        wp_nonce_field( 'wpsstm_album_meta_box', 'wpsstm_album_meta_box_nonce' );
-
+        return wpsstm_get_backend_form_input($input_attr);
     }
     
     /**
     Save album field for this post
     **/
     
-    function metabox_album_save( $post_id ) {
+    function metabox_save_album_settings( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_album_meta_box_nonce']);
+        $is_metabox = isset($_POST['wpsstm_album_settings_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
         //check post type
@@ -255,21 +259,32 @@ class WPSSTM_Core_Albums{
         $allowed_post_types = array(wpsstm()->post_type_album,wpsstm()->post_type_track);
         if ( !in_array($post_type,$allowed_post_types) ) return;
 
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_album_meta_box_nonce'], 'wpsstm_album_meta_box' ) );
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_album_settings_meta_box_nonce'], 'wpsstm_album_settings_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_album_meta_box_nonce']);
-
+        unset($_POST['wpsstm_album_settings_meta_box_nonce']);
+        
+        /*artist*/
+        $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
+        WPSSTM_Core_Artists::save_meta_artist($post_id, $artist);
+        
+        /*album*/
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
+        self::save_meta_album($post_id, $album);
 
-        if (!$album){
+
+
+    }
+    
+    static function save_meta_album($post_id, $value = null){
+        $value = trim($value);
+        if (!$value){
             delete_post_meta( $post_id, self::$album_metakey );
         }else{
-            update_post_meta( $post_id, self::$album_metakey, $album );
+            update_post_meta( $post_id, self::$album_metakey, $value );
         }
-
     }
     
     function the_album_post_title($title,$post_id){

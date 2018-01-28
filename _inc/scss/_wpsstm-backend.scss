@@ -135,18 +135,8 @@
         }
     }
     
-    &#wpsstm-artist,&#wpsstm-track-title,&#wpsstm-album,&#wpsstm-mbid{
-        background:none;
-        border:none;
-        box-shadow: none;
-        
-        > h2{
-            display:none;
-        }
-        > button.handlediv{
-            display:none;
-        }
-        
+    &#wpsstm-artist-settings,&#wpsstm-track-settings,&#wpsstm-album-settings,&#wpsstm-mbid{
+
         .input-group{
             label{
                 font-size: 1.2em;
