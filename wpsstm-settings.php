@@ -207,7 +207,7 @@ class WPSSTM_Settings {
         add_settings_section(
             'tracklist_settings', // ID
             __('Tracklists','wpsstm'), // Title
-            array( $this, 'section_tracklists_desc' ), // Callback
+            array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -226,14 +226,6 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'tracklist_settings'
         );
-        
-        add_settings_field(
-            'autosource', 
-            __('Autosource','wpsstm'), 
-            array( $this, 'autosource_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_settings'
-        );
 
         /*
         Sources
@@ -244,6 +236,14 @@ class WPSSTM_Settings {
             __('Sources','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'autosource', 
+            __('Autosource','wpsstm'), 
+            array( $this, 'autosource_callback' ), 
+            'wpsstm-settings-page', 
+            'sources'
         );
 
         add_settings_field(
@@ -539,36 +539,6 @@ class WPSSTM_Settings {
         echo '  <small> ' . sprintf(__('Can be ignored by setting %s for input value.','wpsstm'),'<code>-</code>') . '</small>';
     }
     
-    function section_tracklists_desc(){
-        
-        /*NOTICES*/
-        
-        //autosource
-        $autosource_enabled = ( wpsstm()->get_options('autosource') == 'on' );
-        
-        if ( $autosource_enabled ){
-        
-            if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
-
-                add_settings_error( 'wpsstm-settings-tracklists', 'community-user-id-required', __("A Community user ID is required if you want to enable the tracks autosource feature.",'wpsstm') );
-
-            }else{
-
-                //autosource
-                $can_autosource = WPSSTM_Core_Sources::can_autosource();
-                if ( is_wp_error($can_autosource) ){
-                    add_settings_error('wpsstm-settings-tracklists', 'cannot_autosource', $can_autosource->get_error_message());
-                }
-
-            }
-            
-        }
-        
-        //display settings errors
-        settings_errors('wpsstm-settings-tracklists');
-        
-    }
-    
     function player_enabled_callback(){
         $option = wpsstm()->get_options('player_enabled');
         $desc = '';
@@ -618,15 +588,39 @@ class WPSSTM_Settings {
     }
     
     function autosource_callback(){
-        $option = wpsstm()->get_options('autosource');
+        
+        $enabled = ( wpsstm()->get_options('autosource') == 'on' );
 
+        /*
+        form
+        */
+        
         printf(
             '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s <small>%s</small>',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $enabled, true, false ),
             __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
             __("This requires a Tuneefy client ID & secret (see below); and the community user ID to be set.","wpsstm")
         );
+        
+        /*
+        errors
+        */
+        
+        //register errors
+        if ( $enabled ){
+        
+            //autosource
+            $can_autosource = WPSSTM_Core_Sources::can_autosource();
+            if ( is_wp_error($can_autosource) ){
+                add_settings_error('autosource', 'cannot_autosource', $can_autosource->get_error_message(),'inline');
+            }
+            
+        }
+        
+        //display errors
+        settings_errors('autosource');
+
     }
 
     function toggle_tracklist_callback(){
@@ -658,35 +652,7 @@ class WPSSTM_Settings {
     
     function section_lastfm_desc(){
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
-        printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
-            
-        /*
-        SCROBBLE ALONG
-        */
-        
-        $scrobble_along_enabled = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
-        
-        if ( $scrobble_along_enabled ){
-
-            if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
-
-                add_settings_error( 'wpsstm-settings-lastfm', 'community-user-id-required', __("A Community user ID is required if you want to enable the scrobble along feature.",'wpsstm') );
-
-            }else{
-
-                //cap missing
-                if ( !$can_community_scrobble = WPSSTM_Core_LastFM::can_community_scrobble() ){
-
-                    add_settings_error( 'wpsstm-settings-lastfm', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm') );
-                }
-
-            }
-            
-        }
-        
-        //display settings errors
-        settings_errors('wpsstm-settings-lastfm');
-            
+        printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );            
     }
     
     function lastfm_scrobbling_callback(){
@@ -712,8 +678,13 @@ class WPSSTM_Settings {
     }
     
     function lastfm_community_scrobble_callback(){
-        $option = wpsstm()->get_options('lastfm_community_scrobble');
         
+        $enabled = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
+        
+        /*
+        form
+        */
+
         $help = array();
         $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble along with the community user.","wpsstm");
         $help[]= sprintf( "<small>%s</small>",__("0 = Disabled.","wpsstm") );
@@ -722,32 +693,26 @@ class WPSSTM_Settings {
         printf(
             '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $enabled,true, false ),
             implode('  ',$help)
         );
-    }
-    
-    function section_live_playlists_desc(){
         
-        _e('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
-        
-        $live_playlists_enabled = ( wpsstm()->get_options('live_playlists_enabled') == 'on' );
-        
-        if ( $live_playlists_enabled ){
+        /*
+        errors
+        */
 
-            $can_live_playlists = WPSSTM_Core_Live_Playlists::can_live_playlists();
-            $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+        if ( $enabled ){
 
             if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
 
-                add_settings_error( 'wpsstm-settings-live-playlists', 'community-user-id-required', __("A Community user ID is required if you want to enable the live playlists feature.",'wpsstm') );
+                add_settings_error( 'lastfm_community_scrobble', 'community-user-id-required', __("A Community user ID is required if you want to enable the scrobble along feature.",'wpsstm'), 'inline' );
 
             }else{
 
                 //cap missing
-                if(!$can_live_playlists){
-                    $live_playlists_cap = $live_playlist_post_type_obj->cap->edit_posts;
-                    add_settings_error( 'wpsstm-settings-live-playlists', 'community-user-cap-missing', sprintf(__("Live Playlists requires the community user to have the %s capability granted",'wpsstm'),'<em>'.$live_playlists_cap.'</em>') );
+                if ( !$can_community_scrobble = WPSSTM_Core_LastFM::can_community_scrobble() ){
+
+                    add_settings_error( 'lastfm_community_scrobble', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm'), 'inline' );
                 }
 
             }
@@ -755,19 +720,59 @@ class WPSSTM_Settings {
         }
         
         //display settings errors
-        settings_errors('wpsstm-settings-live-playlists');
+        settings_errors('lastfm_community_scrobble');
+    }
+    
+    function section_live_playlists_desc(){
+        
+        _e('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
         
     }
 
     function live_playlists_enabled_callback(){
-        $option = wpsstm()->get_options('live_playlists_enabled');
+        $enabled = ( wpsstm()->get_options('live_playlists_enabled') == 'on' );
+        
+        /*
+        form
+        */
         
         printf(
             '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $enabled,true, false ),
             __("Enable Live Playlists","wpsstm")
         );
+        
+        /*
+        errors
+        */
+        
+        
+        
+        if ( $enabled ){
+
+            $can_live_playlists = WPSSTM_Core_Live_Playlists::can_live_playlists();
+            $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
+
+            if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
+
+                add_settings_error( 'live_playlists_enabled', 'community-user-id-required', __("A Community user ID is required if you want to enable the live playlists feature.",'wpsstm'), 'inline' );
+
+            }else{
+
+                //cap missing
+                if(!$can_live_playlists){
+                    $live_playlists_cap = $live_playlist_post_type_obj->cap->edit_posts;
+                    add_settings_error( 'live_playlists_enabled', 'community-user-cap-missing', sprintf(__("Live Playlists requires the community user to have the %s capability granted",'wpsstm'),'<em>'.$live_playlists_cap.'</em>') );
+                }
+
+            }
+            
+        }
+        
+        //display settings errors
+        settings_errors('live_playlists_enabled');
+        
     }
     
     function section_community_user_desc(){
@@ -835,13 +840,21 @@ class WPSSTM_Settings {
     }
     
     function community_user_id_callback(){
-        $option = (int)wpsstm()->get_options('community_user_id');
+        $option = wpsstm()->get_options('community_user_id');
 
+        /*
+        form
+        */
         printf(
             '<input type="number" name="%s[community_user_id]" size="4" min="0" value="%s" />',
             wpsstm()->meta_name_options,
             $option
         );
+        
+        /*
+        errors
+        */
+        settings_errors('community_user_id');
     }
 
     //APIs
