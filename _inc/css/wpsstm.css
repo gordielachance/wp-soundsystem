@@ -1254,63 +1254,59 @@ body.wpsstm-default .wpsstm-post-admin > ul.wpsstm-actions-list, body.wp-admin .
   font-size: 1.2em;
   text-align: center;
 }
-/* line 138, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-artist, .postbox#wpsstm-track, .postbox#wpsstm-album, .postbox#wpsstm-mbid {
-  background: none;
-  border: none;
-  box-shadow: none;
-}
-/* line 143, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-artist > h2, .postbox#wpsstm-track > h2, .postbox#wpsstm-album > h2, .postbox#wpsstm-mbid > h2 {
-  display: none;
+/* line 141, ../scss/_wpsstm-backend.scss */
+.postbox#wpsstm-artist-settings .input-group label, .postbox#wpsstm-track-settings .input-group label, .postbox#wpsstm-album-settings .input-group label, .postbox#wpsstm-mbid .input-group label {
+  font-size: 1.2em;
+  margin-bottom: .25em;
+  display: block;
 }
 /* line 146, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-artist > button.handlediv, .postbox#wpsstm-track > button.handlediv, .postbox#wpsstm-album > button.handlediv, .postbox#wpsstm-mbid > button.handlediv {
+.postbox#wpsstm-artist-settings .input-group .input-group-icon, .postbox#wpsstm-track-settings .input-group .input-group-icon, .postbox#wpsstm-album-settings .input-group .input-group-icon, .postbox#wpsstm-mbid .input-group .input-group-icon {
   display: none;
 }
-/* line 155, ../scss/_wpsstm-backend.scss */
+/* line 156, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span {
   font-weight: bold;
 }
-/* line 157, ../scss/_wpsstm-backend.scss */
+/* line 158, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span:after {
   content: " ";
 }
-/* line 165, ../scss/_wpsstm-backend.scss */
+/* line 166, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions {
   margin-top: 1em;
   position: relative;
   text-align: center;
 }
-/* line 170, ../scss/_wpsstm-backend.scss */
+/* line 171, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions a {
   margin: .5em auto;
   display: block;
   max-width: 75%;
 }
-/* line 176, ../scss/_wpsstm-backend.scss */
+/* line 177, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions p.submit {
   text-align: center;
   margin: .5em 0;
   padding: 0;
 }
-/* line 192, ../scss/_wpsstm-backend.scss */
+/* line 193, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries > span {
   font-weight: bold;
 }
-/* line 196, ../scss/_wpsstm-backend.scss */
+/* line 197, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries #wpsstm-mb-section-data {
   display: none;
 }
-/* line 203, ../scss/_wpsstm-backend.scss */
+/* line 204, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table {
   border: none;
 }
-/* line 205, ../scss/_wpsstm-backend.scss */
+/* line 206, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table .column-score {
   width: 10%;
 }
-/* line 217, ../scss/_wpsstm-backend.scss */
+/* line 218, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
 }

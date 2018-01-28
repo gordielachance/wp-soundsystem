@@ -172,8 +172,8 @@ class WPSSTM_MB_Entries extends WP_List_Table {
         $mbid = $item['id'];
         $url = null;
         
-        $mbtype = WPSSTM_Core_Musicbrainz::get_musicbrainz_type_by_post_id($post->ID);
-        $url = WPSSTM_Core_Musicbrainz::get_mb_url($mbtype,$mbid);
+        $mbtype = WPSSTM_Core_MusicBrainz::get_musicbrainz_type_by_post_id($post->ID);
+        $url = WPSSTM_Core_MusicBrainz::get_mb_url($mbtype,$mbid);
         
         printf('<a href="%1s" target="_blank">%2s</a>',$url,$mbid);
 	}

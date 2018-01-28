@@ -135,7 +135,7 @@ function wpsstm_get_post_mb_link_for_post($post_id){
 
         }
 
-        if ( $url = WPSSTM_Core_Musicbrainz::get_mb_url($mbtype,$mbid) ){
+        if ( $url = WPSSTM_Core_MusicBrainz::get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
         }
     }

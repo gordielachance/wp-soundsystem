@@ -18,7 +18,7 @@ global $wpsstm_track;
     </div>
 
     <div id="track-admin-mbid">
-        <h3><?php _e('Musicbrainz ID','wpsstm');?></h3>
+        <h3><?php _e('MusicBrainz ID','wpsstm');?></h3>
         <input name="wpsstm_track_mbid" type="text" value="<?php echo $wpsstm_track->mbid;?>" class="wpsstm-fullwidth" />
     </div>
 

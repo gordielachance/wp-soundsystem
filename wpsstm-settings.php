@@ -119,7 +119,7 @@ class WPSSTM_Settings {
             }
 
             /* 
-            Musicbrainz 
+            MusicBrainz 
             */
             
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
@@ -498,7 +498,7 @@ class WPSSTM_Settings {
     }
     
     function section_musicbrainz_desc(){
-        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">Musicbrainz</a>';
+        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">MusicBrainz</a>';
         printf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post with this plugin, and will for example try to get the unique MusicBrainz ID of each item.','wpsstm'),$mb_link);
     }
     

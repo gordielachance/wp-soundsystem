@@ -486,7 +486,7 @@ informations overriden
 
 * Better track & album auto title
 * Hide title input as we set it automatically - but keep the feature since it outputs the permalink and 'view' link
-* no more options for the "Fill with datas" button from the Musicbrainz Metabox
+* no more options for the "Fill with datas" button from the MusicBrainz Metabox
 * improved how posts are automatically filled with MusicBrainz data
 
 = 0.9.6 =

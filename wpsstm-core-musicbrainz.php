@@ -105,7 +105,7 @@ class WPSSTM_Core_MusicBrainz {
         );
 
         /* 
-        Musicbrainz entry data 
+        MusicBrainz entry data 
         */
         if ( $mbid = wpsstm_get_post_mbid($post->ID) ){
             
@@ -133,8 +133,8 @@ class WPSSTM_Core_MusicBrainz {
             'name' => 'wpsstm_mbid',
             'value' => wpsstm_get_post_mbid($post_id),
             'icon' => '<i class="fa fa-key" aria-hidden="true"></i>',
-            'label' => __("MBID",'wpsstm'),
-            'placeholder' => __("Enter Musicbrainz ID here",'wpsstm')
+            'label' => __("MusicBrainz ID",'wpsstm'),
+            'placeholder' => __("Enter MusicBrainz ID here",'wpsstm')
         );
         
         $input_el = wpsstm_get_backend_form_input($input_attr);

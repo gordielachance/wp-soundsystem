@@ -376,7 +376,7 @@ class WPSSTM_Track{
         }
         */
         $api_type = WPSSTM_Core_Tracks::$track_mbtype;
-        $api_response = WPSSTM_Core_Musicbrainz::get_musicbrainz_api_entry($api_type,null,$mzb_args);
+        $api_response = WPSSTM_Core_MusicBrainz::get_musicbrainz_api_entry($api_type,null,$mzb_args);
 
         if (is_wp_error($api_response)) return;
 

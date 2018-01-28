@@ -281,7 +281,7 @@ class WPSSTM_Core_Artists{
     }
     
     /*
-    Use Musicbrainz API to search artists
+    Use MusicBrainz API to search artists
     WARNING for partial search, you'll need a wildcard * !
     */
     
@@ -297,7 +297,7 @@ class WPSSTM_Core_Artists{
         
         $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
         if ($search){
-            $results = WPSSTM_Core_Musicbrainz::get_musicbrainz_api_entry('artist',null,$search);
+            $results = WPSSTM_Core_MusicBrainz::get_musicbrainz_api_entry('artist',null,$search);
             if ( is_wp_error($results) ){
                 $result['message'] = $results->get_error_message();
             }else{
