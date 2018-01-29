@@ -520,7 +520,7 @@ class WPSSTM_Track{
         }
     }
     
-    protected function get_remote_sources(){
+    protected function get_sources_auto(){
 
         if ( !$this->artist ){
             return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
@@ -552,7 +552,7 @@ class WPSSTM_Track{
 
         $items = wpsstm_get_array_value(array('results'),$api);
         
-        //wpsstm()->debug_log( json_encode($items), "get_remote_sources");
+        //wpsstm()->debug_log( json_encode($items), "get_sources_auto");
 
         //TO FIX have a more consistent extraction of datas ?
         foreach( (array)$items as $item ){
@@ -597,18 +597,18 @@ class WPSSTM_Track{
 
         $new_source_ids = array();
         
-        $new_sources = $this->get_remote_sources();
+        $new_sources = $this->get_sources_auto();
 
         if ( is_wp_error($new_sources) ) return $new_sources;
+        
+        $source_args = array(
+            'post_author'   => wpsstm()->get_options('community_user_id')
+        );
 
         foreach((array)$new_sources as $source){
+            
+            $source_id = $source->save_unique_source($source_args);
 
-            $source_args = array(
-                'post_author'   => wpsstm()->get_options('community_user_id')
-            );
-            
-            $source_id = $source->add_source($source_args);
-            
             if ( is_wp_error($source_id) ){
                 $code = $source_id->get_error_code();
                 $error_msg = $source_id->get_error_message($code);
@@ -618,6 +618,10 @@ class WPSSTM_Track{
             
             $new_source_ids[] = $source_id;
         }
+        
+        //save time autosourced
+        $now = current_time('timestamp');
+        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
 
         return $this->post_id;
 

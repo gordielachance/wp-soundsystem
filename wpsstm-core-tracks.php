@@ -11,6 +11,7 @@ class WPSSTM_Core_Tracks{
     static $qvar_loved_tracks = 'loved-tracks';
     static $track_mbtype = 'recording'; //musicbrainz type, for lookups
     static $loved_track_meta_key = '_wpsstm_user_favorite';
+    static $autosource_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
     
     var $subtracks_hide = null; //default hide subtracks in track listings
 
@@ -674,9 +675,8 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
-
-
         ?>
+
         <p>
             <?php _e('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');?>
         </p>
@@ -685,6 +685,13 @@ class WPSSTM_Core_Tracks{
         </p>
 
         <?php
+        
+        if ( $then = get_post_meta( $post->ID, self::$autosource_time_metakey, true ) ){
+            $now = current_time( 'timestamp' );
+            $refreshed = human_time_diff( $now, $then );
+            $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);
+            echo '  ' . $refreshed;
+        }
 
         //track sources
         $wpsstm_track->populate_sources();
@@ -813,7 +820,7 @@ class WPSSTM_Core_Tracks{
             $source = new WPSSTM_Source();
             $source->track_id = $post_id;
             $source->url = $url;
-            $source->save_source();
+            $source->save_unique_source();//save only if it does not exists yet
         }
         
         //autosource

@@ -134,24 +134,28 @@ class WPSSTM_Source{
         $this->title = trim($this->title);
     }
     
-    function add_source($args = null){
+    /*
+    Save source only if it does not exists yet
+    */
+    function save_unique_source($args = null){
         
+        //sanitize
         $sanitized = $this->sanitize_source();
-        if ( is_wp_error($sanitized) ) return $sanitized;
 
-        //check if this source exists already
-        $duplicate_args = array('fields'=>'ids');
-        if ( $duplicate_ids = $this->get_source_duplicates_ids($duplicate_args) ){
-            $this->post_id = $duplicate_ids[0];
-            return $this->post_id;
+        if ( is_wp_error($sanitized) ){
+            return $sanitized;
         }
 
-        wpsstm()->debug_log(json_encode(array('args'=>$args)),"WPSSTM_Source::add_source()");
-        
-        return $this->save_source($args);
-        
+        //check for duplicates
+        $duplicates = $this->get_source_duplicates_ids();
+        if ( !empty($duplicates) ){
+            $source_id = $duplicates[0];
+        }else{
+            $source_id = $this->save_source($args);
+        }
+        return $source_id;
     }
-    
+
     function save_source($args = null){
         $sanitized = $this->sanitize_source();
         if ( is_wp_error($sanitized) ) return $sanitized;
