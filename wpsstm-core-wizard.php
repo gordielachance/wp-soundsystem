@@ -96,7 +96,7 @@ class WPSSTM_Core_Wizard{
                 //this is not a community tracklist, abord wizard
                 if ( !wpsstm_is_community_post($wztr_id) ){
                     $link = get_permalink($wztr_id);
-                    wp_redirect($link);
+                    wp_safe_redirect($link);
                     exit();
                 }
             }
@@ -111,7 +111,7 @@ class WPSSTM_Core_Wizard{
                 if ( !$tracklist_action && $wpsstm_tracklist && wpsstm_is_community_post($wpsstm_tracklist->post_id) ){
                     $link = get_permalink(wpsstm()->get_options('frontend_scraper_page_id'));
                     $link = add_query_arg(array(self::$qvar_tracklist_wizard=>$wpsstm_tracklist->post_id),$link);
-                    wp_redirect($link);
+                    wp_safe_redirect($link);
                     exit();
                 }
             }
@@ -319,7 +319,7 @@ class WPSSTM_Core_Wizard{
             if ( $duplicate_query->have_posts() ){
                 $existing_id = $duplicate_query->posts[0];
                 $link = get_permalink($existing_id);
-                wp_redirect($link);
+                wp_safe_redirect($link);
                 exit();
             }
         }
@@ -336,7 +336,7 @@ class WPSSTM_Core_Wizard{
         if ( $duplicate_query->have_posts() ){
             $existing_id = $duplicate_query->posts[0];
             $link = get_permalink($existing_id);
-            wp_redirect($link);
+            wp_safe_redirect($link);
             exit();
         }
 
@@ -362,12 +362,12 @@ class WPSSTM_Core_Wizard{
         if ( is_wp_error($success) ){
             $link = get_permalink(wpsstm()->get_options('frontend_scraper_page_id'));
             $link = add_query_arg(array('wizard_error'=>$success->get_error_code()),$link);
-            wp_redirect($link);
+            wp_safe_redirect($link);
             exit();
         }else{
             $post_id = $success;
             $link = get_permalink($post_id);
-            wp_redirect($link);
+            wp_safe_redirect($link);
             exit();
         }
     }

@@ -230,7 +230,7 @@ class WPSSTM_Core_Tracks{
         //pass the redirect args now
         $track_url = add_query_arg($redirect_args,$track_url);
 
-        wp_redirect($track_url);
+        wp_safe_redirect($track_url);
         exit;
     }
 
@@ -261,7 +261,7 @@ class WPSSTM_Core_Tracks{
                 $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
             }
 
-            wp_redirect($redirect_url);
+            wp_safe_redirect($redirect_url);
             exit();
         }
 
@@ -327,7 +327,7 @@ class WPSSTM_Core_Tracks{
                         $redirect_url = add_query_arg( array('wpsstm_success_code'=>'new-source'),$redirect_url );
                     }
 
-                    wp_redirect($redirect_url);
+                    wp_safe_redirect($redirect_url);
                     exit();
                 }
                 
@@ -342,14 +342,14 @@ class WPSSTM_Core_Tracks{
                         $redirect_url = add_query_arg( array('wpsstm_success_code'=>'autosource'),$redirect_url );
                     }
 
-                    wp_redirect($redirect_url);
+                    wp_safe_redirect($redirect_url);
                     exit();
                 }
                 
                 //view backend
                 if ( isset($source_action['backend']) ){
                     $redirect_url = $track->get_backend_sources_url();
-                    wp_redirect($redirect_url);
+                    wp_safe_redirect($redirect_url);
                     exit();
                 }
                 
