@@ -235,7 +235,7 @@ class WPSSTM_Core_MusicBrainz {
         
     }
     
-    function metabox_mbdata_content($post){
+    public static function metabox_mbdata_content($post){
 
         $mbid = wpsstm_get_post_mbid($post->ID);
         $mbdata = wpsstm_get_post_mbdatas($post->ID);
@@ -301,7 +301,7 @@ class WPSSTM_Core_MusicBrainz {
                         <td>
                             <p>
                             <?php
-                            $fields = $this->get_fillable_fields();
+                            $fields = self::get_fillable_fields();
                             foreach ($fields as $slug=>$name){
                                 $input_el = sprintf('<input type="checkbox" name="wpsstm-mb-fill-fields[]" value="%s"/> %s<br/>',$slug,$name);
                                 echo $input_el;
@@ -708,7 +708,7 @@ class WPSSTM_Core_MusicBrainz {
     Fill current post with various informations from MusicBrainz
     **/
     
-    function get_fillable_fields(){
+    private static function get_fillable_fields(){
         $items = array();
         $post_type = get_post_type();
         switch($post_type){
