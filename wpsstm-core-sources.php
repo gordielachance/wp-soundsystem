@@ -27,8 +27,6 @@ class WPSSTM_Core_Sources{
         add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
 
-        add_action( 'add_meta_boxes', array($this, 'metabox_sources_register'));
-
         add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
         
@@ -335,28 +333,6 @@ class WPSSTM_Core_Sources{
         //CSS
         //JS
         wp_register_script( 'wpsstm-track-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-track-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
-    }
-
-    
-    function metabox_sources_register(){
-        
-        $metabox_post_types = array(
-            wpsstm()->post_type_track
-        );
-
-        add_meta_box( 
-            'wpsstm-track-sources', 
-            __('Track sources','wpsstm'),
-            array($this,'metabox_sources_content'),
-            $metabox_post_types, 
-            'normal', //context
-            'default' //priority
-        );
-        
-    }
-    
-    function metabox_sources_content( $post ){
-        wpsstm_locate_template( 'track-admin-sources.php',true );
     }
 
     function column_sources_register($defaults) {

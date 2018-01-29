@@ -614,6 +614,15 @@ class WPSSTM_Core_Tracks{
             'side', 
             'high' 
         );
+        
+        add_meta_box( 
+            'wpsstm-track-sources', 
+            __('Track sources','wpsstm'),
+            array($this,'metabox_track_sources_content'),
+            wpsstm()->post_type_track, 
+            'normal', //context
+            'default' //priority
+        );
 
     }
     
@@ -658,6 +667,10 @@ class WPSSTM_Core_Tracks{
     
     function metabox_track_options_content( $post ){
         
+    }
+    
+    function metabox_track_sources_content( $post ){
+        wpsstm_locate_template( 'track-admin-sources.php',true );
     }
 
     function mb_populate_trackid( $post_id ) {
