@@ -22,7 +22,7 @@ class WPSSTM_Core_Sources{
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         
         add_action( 'save_post', array($this,'metabox_parent_track_save')); 
-        add_action( 'save_post', array($this,'metabox_source_urls_save')); 
+        add_action( 'save_post', array($this,'metabox_source_url_save')); 
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
@@ -307,7 +307,7 @@ class WPSSTM_Core_Sources{
     Save source URL field for this post
     **/
     
-    function metabox_source_urls_save( $post_id ) {
+    function metabox_source_url_save( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );

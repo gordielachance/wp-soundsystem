@@ -743,16 +743,6 @@ class WPSSTM_Track{
             );
         }
 
-        //sources manager
-        if ($can_edit_track){
-            $actions['sources'] = array(
-                'text' =>       __('Sources manager','wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       get_edit_post_link( $this->post_id ) . '#wpsstm-track-sources'
-            );
-        }
-
         //delete track
         if ($can_delete_tracks){
             $actions['trash'] = array(
