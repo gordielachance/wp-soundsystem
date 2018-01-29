@@ -703,12 +703,19 @@ class WPSSTM_Core_Tracks{
             ?>
         </p>
         <p class="wpsstm-submit-wrapper">
-            <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
             <?php
+            //autosource
+            if ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
+                ?>
+                <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
+                <?php
+            }
+        
+            //list sources
             $post_sources_url = admin_url(sprintf('edit.php?post_type=%s&post_parent=%s',wpsstm()->post_type_source,$wpsstm_track->post_id));
             printf('<a href="%s" class="button">%s</a>',$post_sources_url,__('Backend listing','wpsstm'));
-            ?>
-            <?php
+
+            //add sources
             printf('<a id="wpsstm-add-source-url" href="#" class="button">%s</a>',__('Add source URL','wpsstm'));
             ?>
         </p>
