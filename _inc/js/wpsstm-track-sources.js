@@ -231,7 +231,7 @@ class WpsstmTrackSource {
 
                 //show more/less (sources actions)
                 var actions_lists = sources_list_el.find('.wpsstm-actions-list');
-                wpsstm.showMoreLessActions(actions_lists);
+                //TO FIX wpsstm.showMoreLessActions(actions_lists);
                 
                 //delete source
                 sources_list_el.find('#wpsstm-source-action-trash a').click(function(e) {
@@ -382,6 +382,19 @@ class WpsstmTrackSource {
             source_obj.track.play_track(source_obj.index);
         });
 
+    });
+    
+    /*
+    metabox
+    */
+    //new source container
+    $( ".postbox#wpsstm-track-sources #wpsstm-add-source-url" ).click(function(e) {
+        e.preventDefault();
+        var container = $(this).parents('.postbox');
+        var first_input_block = container.find('#wpsstm-new_track-sources').parent().first();
+        var cloned = first_input_block.clone().insertBefore(container);
+        cloned.find('input[type="text"]').val("");
+        cloned.insertBefore(first_input_block);
     });
     
 })(jQuery);
