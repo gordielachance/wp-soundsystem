@@ -3,6 +3,7 @@
 class WPSSTM_Core_Tracks{
 
     static $title_metakey = '_wpsstm_track';
+    static $length_metakey = '_wpsstm_length';
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
     static $qvar_track_admin = 'admin-track';
@@ -713,6 +714,7 @@ class WPSSTM_Core_Tracks{
         echo self::get_edit_track_title_input($post->ID);
         echo WPSSTM_Core_Artists::get_edit_artist_input($post->ID);
         echo WPSSTM_Core_Albums::get_edit_album_input($post->ID);
+        echo self::get_edit_track_length_input($post->ID);
 
         wp_nonce_field( 'wpsstm_track_settings_meta_box', 'wpsstm_track_settings_meta_box_nonce' );
 
@@ -728,6 +730,20 @@ class WPSSTM_Core_Tracks{
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
             'label' => __("Track title",'wpsstm'),
             'placeholder' => __("Enter track title here",'wpsstm')
+        );
+        return wpsstm_get_backend_form_input($input_attr);
+    }
+    
+    static function get_edit_track_length_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
+        $input_attr = array(
+            'id' => 'wpsstm-length',
+            'name' => 'wpsstm_length',
+            'value' => get_post_meta( $post_id, self::$length_metakey, true ),
+            'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
+            'label' => __("Length (seconds)",'wpsstm'),
+            'placeholder' => __("Enter length here",'wpsstm')
         );
         return wpsstm_get_backend_form_input($input_attr);
     }
@@ -796,7 +812,9 @@ class WPSSTM_Core_Tracks{
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
         WPSSTM_Core_Albums::save_meta_album($post_id, $album);
 
-
+        /*length*/
+        $length = ( isset($_POST[ 'wpsstm_length' ]) ) ? $_POST[ 'wpsstm_length' ] : null;
+        self::save_meta_track_length($post_id, $length);
 
     }
     
@@ -806,6 +824,15 @@ class WPSSTM_Core_Tracks{
             delete_post_meta( $post_id, self::$title_metakey );
         }else{
             update_post_meta( $post_id, self::$title_metakey, $value );
+        }
+    }
+    
+    static function save_meta_track_length($post_id, $value = null){
+        $value = trim($value);
+        if (!$value){
+            delete_post_meta( $post_id, self::$length_metakey );
+        }else{
+            update_post_meta( $post_id, self::$length_metakey, $value );
         }
     }
     

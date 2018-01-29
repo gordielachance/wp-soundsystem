@@ -526,6 +526,14 @@ class WPSSTM_Core_MusicBrainz {
                         }
                     }
                     
+                    //track length
+                    if ( in_array('track_length',$field_slugs) ){
+                        if ( $length_ms = wpsstm_get_array_value(array('length'), $mbdatas) ){
+                            $length = round($length_ms / 1000);
+                            $fields_success['track_length'] = update_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, $length );
+                        }
+                    }
+                    
                     //log
                     $fields_success['post_id'] = $post_id;
                     wpsstm()->debug_log( json_encode($fields_success),"metabox_mbid_save() - filled post with MB datas" ); 
@@ -720,6 +728,7 @@ class WPSSTM_Core_MusicBrainz {
                 $items['track'] = __('Title','wpsstm');
                 $items['track_artist'] = __('Artist','wpsstm');
                 $items['track_album'] = __('Album','wpsstm');
+                $items['track_length'] = __('Length','wpsstm');
             break;
         }
         return $items;
