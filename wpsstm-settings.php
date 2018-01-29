@@ -122,7 +122,6 @@ class WPSSTM_Settings {
             
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
             $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
-            $new_input['mb_suggest_bookmarks'] = ( isset($input['mb_suggest_bookmarks']) ) ? 'on' : 'off';
             
             /* 
             Last.fm 
@@ -261,17 +260,6 @@ class WPSSTM_Settings {
         );
 
         /*
-        Live Playlists
-        */
-        
-        add_settings_section(
-            'live_playlists_settings', // ID
-            __('Live Playlists','wpsstm'), // Title
-            array( $this, 'section_live_playlists_desc' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-
-        /*
         Frontend Wizard
         */
         
@@ -334,14 +322,6 @@ class WPSSTM_Settings {
             'settings-musicbrainz'//section
         );
 
-        add_settings_field(
-            'mb_suggest_bookmarks', 
-            __('Suggest links','wpsstm'), 
-            array( $this, 'mb_suggest_bookmarks_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-        
         /*
         Last.fm
         */
@@ -502,21 +482,7 @@ class WPSSTM_Settings {
             __("Enable MusicBrainz","wpsstm")
         );
     }
-    
-    function mb_suggest_bookmarks_callback(){
-        $option = ( wpsstm()->get_options('mb_suggest_bookmarks') == "on" );
-        $disabled = !class_exists( 'Post_Bookmarks' );
-        
-        printf(
-            '<input type="checkbox" name="%s[mb_suggest_bookmarks]" value="on" %s %s /> %s %s',
-            wpsstm()->meta_name_options,
-            checked( $option, true, false ),
-            disabled( $disabled, true, false ),
-            __("Suggest links from MusicBrainz","wpsstm"),
-            '— <small>'.sprintf(__("You'll need the %s plugin to enable this feature",'wpsstm'),'<a href="https://wordpress.org/plugins/post-bookmarks/" target="_blank">Custom Post Links</a>').'</small>'
-        );
-    }
-    
+
     function mb_auto_id_callback(){
         $option = wpsstm()->get_options('mb_auto_id');
         
@@ -711,14 +677,7 @@ class WPSSTM_Settings {
         //display settings errors
         settings_errors('lastfm_community_scrobble');
     }
-    
-    function section_live_playlists_desc(){
-        
-        _e('Live Playlists lets you grab a tracklist from a remote URL (eg. a radio station page); and will stay synchronized with its source : it will be updated each time someone access the Live Playlist post.','wppsm');
-        
-    }
 
-    
     function section_community_user_desc(){
         $desc = array();
         $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource, live playlists or frontend wizard.","wpsstm");

@@ -82,7 +82,6 @@ class WP_SoundSystem {
         $this->options_default = array(
             'musicbrainz_enabled'               => 'on',
             'mb_auto_id'                        => 'on',
-            'mb_suggest_bookmarks'              => 'on',
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
@@ -152,10 +151,6 @@ class WP_SoundSystem {
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';
-        }
-        
-        if ( class_exists( 'Post_Bookmarks' ) && ( wpsstm()->get_options('mb_suggest_bookmarks') == 'on' ) ) {
-            require wpsstm()->plugin_dir . 'wpsstm-post_bkmarks.php';
         }
     }
     function setup_actions(){
