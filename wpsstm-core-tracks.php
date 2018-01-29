@@ -707,7 +707,7 @@ class WPSSTM_Core_Tracks{
             //autosource
             if ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
                 ?>
-                <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_sources[action][autosource]" class="button" value="<?php _e('Autosource','wpsstm');?>">
+                <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_track_autosource" class="button" value="<?php _e('Autosource','wpsstm');?>">
                 <?php
             }
         
@@ -806,6 +806,7 @@ class WPSSTM_Core_Tracks{
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_sources_meta_box_nonce'], 'wpsstm_track_sources_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
+        //new source URLs
         $source_urls = isset($_POST['wpsstm_new_track_sources']) ? $_POST['wpsstm_new_track_sources'] : array();
         
         foreach((array)$source_urls as $url){
@@ -815,6 +816,11 @@ class WPSSTM_Core_Tracks{
             $source->save_source();
         }
         
+        //autosource
+        if ( isset($_POST['wpsstm_track_autosource']) ){
+            $track = new WPSSTM_Track($post_id);
+            $success = $track->autosource();
+        }
     }
     
     static function save_meta_track_title($post_id, $value = null){
