@@ -22,14 +22,6 @@ $track_admin = get_query_var( WPSSTM_Core_Tracks::$qvar_track_admin );
             <?php
 
         break;
-        case 'sources-manager':
-            ?>
-            <div id="wpsstm-track-admin-sources" class="wpsstm-track-admin">
-                <?php wpsstm_locate_template( 'track-admin-sources.php',true );?>
-            </div>
-            <?php
-
-        break;
         case 'trash':
             ?>
             <div id="wpsstm-track-admin-trash" class="wpsstm-track-admin">

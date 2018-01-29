@@ -30,7 +30,6 @@ class WPSSTM_Core_Tracks{
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
 
         add_action( 'template_redirect', array($this,'handle_track_action'));
-        add_action( 'template_redirect', array($this,'handle_track_popup_form'));
         add_filter( 'template_include', array($this,'new_track_redirect'));
 
         //post content
@@ -265,97 +264,6 @@ class WPSSTM_Core_Tracks{
             exit();
         }
 
-    }
-    
-    function handle_track_popup_form(){
-        global $post;
-        global $wp_query;
-
-        $post_type = get_post_type();
-        if ( $post_type != wpsstm()->post_type_track ) return;
-        
-        $track = new WPSSTM_Track($post->ID);
-        $popup_action = ( isset($_POST['wpsstm-track-popup-action']) ) ? $_POST['wpsstm-track-popup-action'] : null;
-        if ( !$popup_action ) return;
-        
-        $redirect_url = $track->get_track_admin_url($popup_action);
-
-        switch($popup_action){
-
-            case 'edit':
-                
-                //nonce check
-                if ( !isset($_POST['wpsstm_track_edit_nonce']) || !wp_verify_nonce($_POST['wpsstm_track_edit_nonce'], sprintf('wpsstm_track_edit_nonce',$wpsstm_track->post_id) ) ) {
-                    wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
-                    break;
-                }
-
-                $track->artist = ( isset($_POST[ 'wpsstm_track_artist' ]) ) ? $_POST[ 'wpsstm_track_artist' ] : null;
-                $track->title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
-                $track->album = ( isset($_POST[ 'wpsstm_track_album' ]) ) ? $_POST[ 'wpsstm_track_album' ] : null;
-                $track->mbid = ( isset($_POST[ 'wpsstm_track_mbid' ]) ) ? $_POST[ 'wpsstm_track_mbid' ] : null;
-
-                $track->save_track();
-                
-            break;
-            case 'sources-manager':
-
-                //nonce check
-                if ( !isset($_POST['wpsstm_track_new_source_nonce']) || !wp_verify_nonce($_POST['wpsstm_track_new_source_nonce'], sprintf('wpsstm_track_%s_new_source_nonce',$track->post_id) ) ) {
-                    wpsstm()->debug_log(array('track_id'=>$track->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
-                    break;
-                }
-                
-                $data = isset($_POST['wpsstm_sources']) ? $_POST['wpsstm_sources'] : null;
-                $track_id = isset($_POST['wpsstm-track-id']) ? $_POST['wpsstm-track-id'] : null;
-                $track = new WPSSTM_Track($track_id);
-                $source_action = isset($data['action']) ? $data['action'] : null;
-                
-                //new source
-                if ( isset($source_action['new-source']) ){
-                    $source = new WPSSTM_Source();
-                    $source_args = array(
-                        'url'   =>      isset($data['source-url']) ? $data['source-url'] : null,
-                        'track_id' =>   $track_id,
-                    );
-                    $source->from_array( $source_args );
-                    $source_id = $source->add_source();
-
-                    if ( is_wp_error($source_id) ){
-                        $redirect_url = add_query_arg( array('wpsstm_error_code'=>$source_id->get_error_code()),$redirect_url );
-                    }else{
-                        $redirect_url = add_query_arg( array('wpsstm_success_code'=>'new-source'),$redirect_url );
-                    }
-
-                    wp_safe_redirect($redirect_url);
-                    exit();
-                }
-                
-                //suggest sources
-                if ( isset($source_action['autosource']) ){
-                    
-                    $success = $track->autosource();
-
-                    if ( is_wp_error($success) ){
-                        $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
-                    }else{
-                        $redirect_url = add_query_arg( array('wpsstm_success_code'=>'autosource'),$redirect_url );
-                    }
-
-                    wp_safe_redirect($redirect_url);
-                    exit();
-                }
-                
-                //view backend
-                if ( isset($source_action['backend']) ){
-                    $redirect_url = $track->get_backend_sources_url();
-                    wp_safe_redirect($redirect_url);
-                    exit();
-                }
-                
-                
-            break;
-        }
     }
     
     /*

@@ -749,7 +749,7 @@ class WPSSTM_Track{
                 'text' =>       __('Sources manager','wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Sources manager','wpsstm'),
-                'href' =>       $this->get_track_admin_url('sources-manager'),
+                'href' =>       get_edit_post_link( $this->post_id ) . '#wpsstm-track-sources'
             );
         }
 
@@ -766,8 +766,8 @@ class WPSSTM_Track{
         //backend
         if ($can_edit_track){
             $actions['edit-backend'] = array(
-                'text' =>      __('Edit backend', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
+                'text' =>      __('Edit'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-link-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
