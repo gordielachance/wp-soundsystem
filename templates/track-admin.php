@@ -14,13 +14,6 @@ $track_admin = get_query_var( WPSSTM_Core_Tracks::$qvar_track_admin );
     $tab_content = null;
 
     switch ($track_admin){
-        case 'edit':
-            ?>
-            <form action="<?php echo esc_url($wpsstm_track->get_track_admin_url('edit'));?>" method="POST">
-                <?php wpsstm_locate_template( 'track-admin-edit.php',true );?>
-            </form>
-            <?php
-        break;
         case 'playlists':
             ?>
             <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">

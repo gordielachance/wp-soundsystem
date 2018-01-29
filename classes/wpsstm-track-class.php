@@ -292,7 +292,7 @@ class WPSSTM_Track{
             WPSSTM_Core_Artists::$artist_metakey    => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Albums::$album_metakey      => $this->album,
-            WPSSTM_Core_MusicBrainz::$mbid_metakey           => $this->mbid,
+            WPSSTM_Core_MusicBrainz::$mbid_metakey  => $this->mbid,
             WPSSTM_Core_Tracks::$image_url_metakey  => $this->image_url,
         );
         
@@ -722,15 +722,6 @@ class WPSSTM_Track{
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_admin_url('about'),
-                'classes' =>    array('wpsstm-link-popup'),
-            );
-        }
-
-        //track edit
-        if ($can_edit_track){
-            $actions['edit'] = array(
-                'text' =>      __('Track Details', 'wpsstm'),
-                'href' =>       $this->get_track_admin_url('edit'),
                 'classes' =>    array('wpsstm-link-popup'),
             );
         }

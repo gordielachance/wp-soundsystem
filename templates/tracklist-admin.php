@@ -22,17 +22,6 @@ $tracklist_admin = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_admin 
             $tab_content = sprintf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
 
         break;
-        case 'new-subtrack':
-            //TOFIXGGG : create subtrack then redirect to it ???
-            ?>
-            <form action="<?php echo esc_url($wpsstm_tracklist->get_tracklist_admin_url($tracklist_admin));?>" method="POST">
-                <?php wpsstm_locate_template( 'track-admin-edit.php',true );?>
-                <input type="hidden" name="wpsstm-tracklist-popup-action" value="<?php echo $tracklist_admin;?>" />
-                <input type="hidden" name="wpsstm-tracklist-id" value="<?php echo $wpsstm_tracklist->post_id;?>" />
-                <?php wp_nonce_field( sprintf('wpsstm_tracklist_%s_new_track_nonce',$wpsstm_tracklist->post_id), 'wpsstm_tracklist_new_track_nonce', true );?>
-            </form>
-            <?php
-        break;
     }
 
     if ($tab_content){

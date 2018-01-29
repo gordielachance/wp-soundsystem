@@ -553,7 +553,7 @@ class WPSSTM_Tracklist{
 
             $actions['new-subtrack'] = array(
                 'text'     =>   $track_post_type_obj->labels->add_new_item,
-                'href'      =>  $this->get_tracklist_admin_url('new-subtrack'),
+                'href'      =>  $this->get_tracklist_action_url('new-subtrack'),
                 'classes'   =>  array('wpsstm-link-popup'),
             );
         }

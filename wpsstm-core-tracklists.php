@@ -22,8 +22,6 @@ class WPSSTM_Core_Tracklists{
 
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
         add_filter( 'template_include', array($this,'tracklist_xspf_template'));
-        
-        add_action( 'template_redirect', array($this,'handle_tracklist_popup_form'));
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         
@@ -376,64 +374,7 @@ class WPSSTM_Core_Tracklists{
         return $output;
 
     }
-    
-    function handle_tracklist_popup_form(){
-        global $post;
-        $popup_action = ( isset($_POST['wpsstm-tracklist-popup-action']) ) ? $_POST['wpsstm-tracklist-popup-action'] : null;
-        if (!$popup_action) return;
-        
-        $success = null;
 
-        $tracklist = wpsstm_get_post_tracklist($post->ID);
-
-        switch($popup_action){
-                
-            case 'new-subtrack':
-
-                //nonce check
-                if ( !isset($_POST['wpsstm_tracklist_new_track_nonce']) || !wp_verify_nonce($_POST['wpsstm_tracklist_new_track_nonce'], sprintf('wpsstm_tracklist_%s_new_track_nonce',$tracklist->post_id) ) ) {
-                    wpsstm()->debug_log(array('track_id'=>$tracklist->post_id,'track_gui_action'=>$popup_action),"invalid nonce"); 
-                    break;
-                }
-                
-                $track = new WPSSTM_Track();
-
-                $track->artist = ( isset($_POST[ 'wpsstm_track_artist' ]) ) ? $_POST[ 'wpsstm_track_artist' ] : null;
-                $track->title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
-                $track->album = ( isset($_POST[ 'wpsstm_track_album' ]) ) ? $_POST[ 'wpsstm_track_album' ] : null;
-                $track->mbid = ( isset($_POST[ 'wpsstm_track_mbid' ]) ) ? $_POST[ 'wpsstm_track_mbid' ] : null;
-
-                $track_id = $success = $track->save_track();
-
-                if ( !is_wp_error($track_id) ){
-                    $success = $tracklist->append_subtrack_ids($track_id);
-                    if ($success){
-                        $track_admin_url = $track->get_track_admin_url('edit');
-                        wp_redirect($track_admin_url);
-                        exit();
-                    }
-                }
-
-                
-            break;
-                
-        }
-
-        if ($success){ //redirect with a success / error code
-            $redirect_url = $tracklist->get_tracklist_admin_url($popup_action);
-            if ( is_wp_error($success) ){
-                $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
-            }else{
-                $redirect_url = add_query_arg( array('wpsstm_success_code'=>$popup_action),$redirect_url );
-            }
-
-            wp_redirect($redirect_url);
-            exit();
-        }
-
-        
-        
-    }
 
     function tracklist_xspf_template($template){
         if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
@@ -452,6 +393,30 @@ class WPSSTM_Core_Tracklists{
         $success = null;
 
         switch($action){
+                
+            case 'new-subtrack':
+                //create auto draft & assign tracklist
+                $args = array(
+                    'post_status' =>    'auto-draft',
+                    'post_type' =>      wpsstm()->post_type_track
+                );
+                
+                $track_id = wp_insert_post( $args, true );
+                
+                if ( !is_wp_error($track_id) ){
+                    $success = $tracklist->append_subtrack_ids($track_id);
+                    
+                    //TO FIX TO CHECK redirection is not working when using get_edit_post_link()
+                    //$redirect_url = get_edit_post_link( $track_id );
+                    $redirect_url = admin_url( '/post.php?post=' . $track_id . '&action=edit' );
+                    
+                    wp_safe_redirect($redirect_url); //TOFIXKKK not working why ?
+                    exit();
+                }
+                
+                
+                //redirect to backend
+            break;
             case 'refresh':
                 $tracklist->is_expired = true; //will force tracklist refresh
                 $success = $tracklist->populate_subtracks(); //TO FIX query args ?
@@ -491,7 +456,7 @@ class WPSSTM_Core_Tracklists{
                 $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
             }
 
-            wp_redirect($redirect_url);
+            wp_safe_redirect($redirect_url);
             exit();
         }
 
