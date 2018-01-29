@@ -101,9 +101,7 @@ class WPSSTM_Settings {
             /*
             Live playlists
             */
-            
-            $new_input['live_playlists_enabled'] = ( isset($input['live_playlists_enabled']) ) ? 'on' : 'off';
-            
+
             //scraper wizard page ID
             if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
                 if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
@@ -272,15 +270,7 @@ class WPSSTM_Settings {
             array( $this, 'section_live_playlists_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        add_settings_field(
-            'live_playlists_enabled', 
-            __('Enabled','wpsstm'), 
-            array( $this, 'live_playlists_enabled_callback' ), 
-            'wpsstm-settings-page', 
-            'live_playlists_settings'
-        );
-        
+
         /*
         Frontend Wizard
         */
@@ -728,51 +718,6 @@ class WPSSTM_Settings {
         
     }
 
-    function live_playlists_enabled_callback(){
-        $enabled = ( wpsstm()->get_options('live_playlists_enabled') == 'on' );
-        
-        /*
-        form
-        */
-        
-        printf(
-            '<input type="checkbox" name="%s[live_playlists_enabled]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            __("Enable Live Playlists","wpsstm")
-        );
-        
-        /*
-        errors
-        */
-        
-        
-        
-        if ( $enabled ){
-
-            $can_live_playlists = WPSSTM_Core_Live_Playlists::can_live_playlists();
-            $live_playlist_post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-
-            if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
-
-                add_settings_error( 'live_playlists_enabled', 'community-user-id-required', __("A Community user ID is required if you want to enable the live playlists feature.",'wpsstm'), 'inline' );
-
-            }else{
-
-                //cap missing
-                if(!$can_live_playlists){
-                    $live_playlists_cap = $live_playlist_post_type_obj->cap->edit_posts;
-                    add_settings_error( 'live_playlists_enabled', 'community-user-cap-missing', sprintf(__("Live Playlists requires the community user to have the %s capability granted",'wpsstm'),'<em>'.$live_playlists_cap.'</em>') );
-                }
-
-            }
-            
-        }
-        
-        //display settings errors
-        settings_errors('live_playlists_enabled');
-        
-    }
     
     function section_community_user_desc(){
         $desc = array();

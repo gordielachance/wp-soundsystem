@@ -83,7 +83,6 @@ class WP_SoundSystem {
             'musicbrainz_enabled'               => 'on',
             'mb_auto_id'                        => 'on',
             'mb_suggest_bookmarks'              => 'on',
-            'live_playlists_enabled'            => 'on',
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),

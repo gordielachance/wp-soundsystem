@@ -13,8 +13,6 @@ class WPSSTM_Core_Live_Playlists{
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
         $this->include_preset_files(); //include files from presets folder
 
-        if ( wpsstm()->get_options('live_playlists_enabled') != 'on' ) return;
-
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
