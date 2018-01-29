@@ -790,7 +790,7 @@ class WPSSTM_Core_Tracks{
         
         /*artist*/
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
-        WPSSTM_Core_Artists::save_meta_album($post_id, $artist);
+        WPSSTM_Core_Artists::save_meta_artist($post_id, $artist);
         
         /*album*/
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
@@ -801,8 +801,8 @@ class WPSSTM_Core_Tracks{
     }
     
     static function save_meta_track_title($post_id, $value = null){
-        $album = trim($album);
-        if (!$album){
+        $value = trim($value);
+        if (!$value){
             delete_post_meta( $post_id, self::$title_metakey );
         }else{
             update_post_meta( $post_id, self::$title_metakey, $value );

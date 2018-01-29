@@ -5,20 +5,19 @@ class WPSSTM_Core_MusicBrainz {
     static $mb_api_sleep = 1;
     static $mb_api_errors_meta_name = '_wpsstm_mb_api_error';
     static $mbid_metakey = '_wpsstm_mbid'; //to store the musicbrainz ID
+    static $no_auto_mbid_metakey = '_wpsstm_no_auto_mbid';
     static $mbdata_metakey = '_wpsstm_mbdata'; //to store the musicbrainz datas
+    static $mbdata_time_metakey = '_wpsstm_mbdata_time'; //to store the musicbrainz datas
     static $mb_data_by_url_transient_prefix = 'wpsstm_mb_by_url_'; //to cache the musicbrainz API results
     static $qvar_mbid = 'mbid';
 
     function __construct(){
 
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
-        add_action( 'save_post', array($this,'metabox_mbid_save'), 5);
-        add_action( 'save_post', array($this,'auto_set_mbid'), 6);
-        add_action( 'save_post', array($this,'metabox_mbdata_save'), 7 ); //requires MBID to be set so be careful to hooks priorities
-        
-        add_action( 'wpsstm_updated_mbid', array($this,'update_mb_datas'), 9 );
-        add_action( 'wpsstm_updated_mbdatas', array($this,'fill_post_with_mbdatas'), 9);
-        
+        add_action( 'save_post', array($this,'metabox_mbid_save'), 7);
+        add_action( 'save_post', array($this,'auto_set_mbid'), 8);
+        add_action( 'save_post', array($this,'metabox_mbdata_save'), 9);
+
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_mbid') );
         
         add_filter('manage_posts_columns', array($this,'column_mbid_register'), 10, 2 ); 
@@ -27,13 +26,11 @@ class WPSSTM_Core_MusicBrainz {
         add_filter('wpsstm_column_artist',array($this,'column_mb_artist'),10,3);
         add_filter('wpsstm_column_track',array($this,'column_mb_track'),10,4);
         add_filter('wpsstm_column_album',array($this,'column_mb_album'),10,4);
-        
-        add_filter( 'redirect_post_location', array($this,'redirect_to_switch_entries') );
 
     }
     
     static function is_entries_switch(){
-        return  ( isset($_GET['mb-list-entries'])) ? true : false;
+        return ( isset($_GET['mb-list-entries'])) ? true : false;
     }
 
     
@@ -86,39 +83,42 @@ class WPSSTM_Core_MusicBrainz {
         global $post;
         if (!$post) return;
 
+        $post_link = get_edit_post_link($post->ID);
         $entries_post_types = array(
             wpsstm()->post_type_artist,
             wpsstm()->post_type_track,
             wpsstm()->post_type_album
         );
-        $autoguess_url = 'http://localhost:8888/la-bonne-toune/wordpress/wp-admin/post-new.php?post_type=wpsstm_track';
-        $autoguess_link = sprintf( '<a href="%s" class="page-title-action">%s</a>',$autoguess_url,__('Autoguess','wpsstm') );
-        $title = __('MusicBrainz','wpsstm') . $autoguess_link;
+
+        //MBID Metabox
+        $mbid_callback = array($this,'metabox_mbid_content');
+        if ( self::is_entries_switch() ){  
+            $mbid_callback = array($this,'metabox_mb_entries_content');
+        }
 
         add_meta_box( 
             'wpsstm-mbid', 
-            $title,
-            array($this,'metabox_mbid_content'),
+            __('MusicBrainz ID','wpsstm'),
+            $mbid_callback,
             $entries_post_types,
             'after_title', 
             'high' 
         );
-
-        /* 
-        MusicBrainz entry data 
-        */
+        
+        //MB datas Metabox
         if ( $mbid = wpsstm_get_post_mbid($post->ID) ){
-            
             add_meta_box( 
-                'wpsstm_mbdata', 
+                'wpsstm-mbdata', 
                 __('MusicBrainz Data','wpsstm'),
                 array($this,'metabox_mbdata_content'),
                 $entries_post_types,
-                'side'
+                'after_title', 
+                'high' 
             );
-            
         }
 
+        
+        
         
     }
     
@@ -140,13 +140,19 @@ class WPSSTM_Core_MusicBrainz {
         $input_el = wpsstm_get_backend_form_input($input_attr);
         
         if ( wpsstm()->get_options('mb_auto_id') == "on" ){
-            $desc_el = sprintf('<small>%s</small>',sprintf(__("If left empty, we'll try to guess it.  Set it to %s to disable auto ID.",'wpsstm'),'<code>-</code>'));
+            $is_ignore = ( get_post_meta( $post_id, self::$no_auto_mbid_metakey, true ) );
+            $input_auto_mbid_el = sprintf('<input type="checkbox" value="on" name="wpsstm-ignore-auto-mbid" %s/>',checked($is_ignore,true,false));
+            $desc_el .= sprintf(__("%s do not autoguess MBID.",'wpsstm'),$input_auto_mbid_el);
         }
         
         return $input_el . $desc_el;
     }
+    
+    /*
+    Checks if the post contains enough information to do an API lookup
+    */
 
-    static function can_lookup($post_id){
+    static function can_mb_search_entries($post_id){
         $post_type = get_post_type($post_id);
         
         $mbid = wpsstm_get_post_mbid($post_id);
@@ -174,141 +180,191 @@ class WPSSTM_Core_MusicBrainz {
     
     function metabox_mbid_content($post){
 
+        $mbid = wpsstm_get_post_mbid($post->ID);
+        $mbdata = wpsstm_get_post_mbdatas($post->ID);
+        $can_mb_search_entries = self::can_mb_search_entries($post->ID);
+
+        ?>
+        <p>
+            <?php echo self::get_edit_mbid_input($post->ID);?>
+        </p>
+        <table class="form-table">
+            <tbody>
+                <?php 
+                if ( $can_mb_search_entries ){
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('MBID Lookup','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <?php
+                            submit_button( __('MBID Lookup','wpsstm'), null, 'wpsstm-mb-mbid-lookup');
+                            _e('Search ID from track title, artist & album.','wpsstm');
+                            ?>
+
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+                <?php 
+                if ($can_mb_search_entries && $mbid) {
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Switch entry','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <?php
+                            $entries_url = get_edit_post_link();
+                            $entries_url = add_query_arg(array('mb-list-entries'=>true),$entries_url);
+                            printf('<a class="button" href="%s">%s</a>',$entries_url,__('Switch entry','wpsstm'));
+                            ?>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </tbody>
+        </table>
+        <?php
+
         /*
         form
         */
-        echo self::get_edit_mbid_input($post->ID);
+
+        wp_nonce_field( 'wpsstm_mbid_meta_box', 'wpsstm_mbid_meta_box_nonce' );
         
-        /*
-        entries
-        */
-        if ( self::is_entries_switch() ){
-
-            $this->load_api_errors($post);
-
-            $summary_url = get_edit_post_link($post->ID);
-            $summary_classes = $entries_classes = array("nav-tab");
-            $tablewrapper_classes = array('table-mbz');
-            $entries_url = add_query_arg(array('mb_metabox_action'=>'entries'),get_edit_post_link($post->ID));
-
-            if ( self::is_entries_switch() ){
-                $entries_classes[] = 'nav-tab-active';
-                $tablewrapper_classes[] = 'table-mbz-entries';
-            }else{
-                $summary_classes[] = 'nav-tab-active';
-                $tablewrapper_classes[] = 'table-mbz-summary';
-            }
-
-            settings_errors('wpsstm_musicbrainz');
-
-            ?>
-            <div id="wpsstm-metabox-content"<?php wpsstm_classes($tablewrapper_classes);?>>
-                <?php
-
-                switch($post->post_type){
-                    case wpsstm()->post_type_artist:
-                        $this->metabox_mb_entries_artist($post);
-                    break;
-                    case wpsstm()->post_type_track:
-                        $this->metabox_mb_entries_track($post);
-                    break;
-                    case wpsstm()->post_type_album:
-                        $this->metabox_mb_entries_release($post);
-                    break;
-
-                }
-
-
-                ?>
-            </div>
-            <?php
-        }
+        
     }
     
     function metabox_mbdata_content($post){
 
-        if ( $data = wpsstm_get_post_mbdatas($post->ID) ){
-            $list = wpsstm_get_list_from_array($data);
-            printf('<div>%s</div>',$list);
-        }
-        
+        $mbid = wpsstm_get_post_mbid($post->ID);
+        $mbdata = wpsstm_get_post_mbdatas($post->ID);
+
         ?>
-            <div id="wpsstm-metabox-mbdata-actions">
+        <table class="form-table">
+            <tbody>
                 <?php 
-                if ( self::can_lookup($post->ID) ){
-                    submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-mbdata-refresh');
-                    submit_button( __('Switch entry','wpsstm'), null, 'wpsstm-mbdata-switch');
-                    submit_button( __('Fill with data','wpsstm'), null, 'wpsstm-mbdata-fill');
+                if ($mbdata) {
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Data','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <p>
+                                <?php
+                                /* 
+                                MusicBrainz entry data 
+                                */
+                                if ( $mbid && ( $data = wpsstm_get_post_mbdatas($post->ID) ) ){
+                                    $list = wpsstm_get_list_from_array($data);
+                                    printf('<div id="wpsstm-mbdata">%s</div>',$list);
+                                }
+                                ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <?php
                 }
                 ?>
-            </div>
+                <?php 
+                if ($mbdata) {
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Refresh data','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <?php
+                            submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-mb-reload');
+                            _e('Reload data from MusicBrainz.','wpsstm');
+                    
+                            if ( $then = get_post_meta( $post->ID, self::$mbdata_time_metakey, true ) ){
+                                $now = current_time( 'timestamp' );
+                                $refreshed = human_time_diff( $now, $then );
+                                $refreshed = sprintf(__('It was last refreshed %s ago.','wpsstm'),$refreshed);
+                                echo '  ' . $refreshed;
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+                <?php 
+                if ($mbdata) {
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Fill post','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <p>
+                            <?php
+                            $fields = $this->get_fillable_fields();
+                            foreach ($fields as $slug=>$name){
+                                $input_el = sprintf('<input type="checkbox" name="wpsstm-mb-fill-fields[]" value="%s"/> %s<br/>',$slug,$name);
+                                echo $input_el;
+                            }
+                            submit_button( __('Fill with data','wpsstm'), null, 'wpsstm-mb-fill');
+                            ?>
+                            </p>
+                            <?php
+                            _e('Fill post with various datas from MusicBrainz (eg. artist, length, ...).','wpsstm');
+                            ?>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </tbody>
+        </table>
         <?php
-        
-        //nonce
+
+        /*
+        form
+        */
+
         wp_nonce_field( 'wpsstm_mbdata_meta_box', 'wpsstm_mbdata_meta_box_nonce' );
         
+        
     }
     
-    function metabox_mb_entries_artist($post){
+    function metabox_mb_entries_content($post){
+        $this->load_api_errors($post);
 
-        $entries = $this->get_mb_entries_for_post($post->ID);
-        if ( !$entries || is_wp_error($entries) ) return;
+        settings_errors('wpsstm_mb-entries');
 
-        ?>
+        $entries = null;
 
-        <div id="wpsstm-metabox-content">
-            
-            <?php
+        switch($post->post_type){
+            case wpsstm()->post_type_artist:
+                $entries = $this->get_mb_entries_for_post($post->ID);
+            break;
+            case wpsstm()->post_type_track:
+                $entries = $this->get_mb_entries_for_post($post->ID);
+            break;
+            case wpsstm()->post_type_album:
+                $entries = $this->get_mb_entries_for_post($post->ID);
+            break;
+        }
 
+        if ( is_wp_error($entries) ){
+            add_settings_error('wpsstm_mb-entries', 'api_error', $entries->get_error_message(),'inline');
+        }else{
             require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
             $entries_table = new WPSSTM_MB_Entries();
-
-            if ( is_wp_error($entries) ){
-                add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
-            }else{
-                $entries_table->items = $entries;
-                $entries_table->prepare_items();
-                $entries_table->display();
-            }
-
-            ?>
-        </div>
-        <?php
-    }
-        
-    function metabox_mb_entries_track($post){
-        
-        $entries = $this->get_mb_entries_for_post($post->ID);
-        if ( !$entries || is_wp_error($entries) ) return;
-
-        require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WPSSTM_MB_Entries();
-
-        if ( is_wp_error($entries) ){
-            add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
-        }else{
             $entries_table->items = $entries;
             $entries_table->prepare_items();
             $entries_table->display();
         }
 
-    }
-    
-    function metabox_mb_entries_release($post){
-        
-        $entries = $this->get_mb_entries_for_post($post->ID);
-        if ( !$entries || is_wp_error($entries) ) return;
-
-        require_once wpsstm()->plugin_dir . 'classes/wpsstm-mb-entries-table.php';
-        $entries_table = new WPSSTM_MB_Entries();
-
-        if ( is_wp_error($entries) ){
-            add_settings_error('wpsstm_musicbrainz', 'api_error', $entries->get_error_message(),'inline');
-        }else{
-            $entries_table->items = $entries;
-            $entries_table->prepare_items();
-            $entries_table->display();
-        }
+        //same nonce than in metabox_mbid_content()
+        wp_nonce_field( 'wpsstm_mbid_meta_box', 'wpsstm_mbid_meta_box_nonce' );
     }
 
     function metabox_mbid_save( $post_id ){
@@ -319,9 +375,10 @@ class WPSSTM_Core_MusicBrainz {
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
+        
         $is_metabox = isset($_POST['wpsstm_mbid_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
+
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
@@ -335,140 +392,65 @@ class WPSSTM_Core_MusicBrainz {
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_mbid_meta_box_nonce']);
 
-        //save MBID input
-        $mbid_db = wpsstm_get_post_mbid($post_id);
-        $mbid = ( isset($_POST['wpsstm_mbid']) ) ? $_POST['wpsstm_mbid'] : null;
-        
-        self::do_update_mbid($post_id,$mbid);
+        //clicked a musicbrainz action button
+        $action = null;
+        if ( isset($_POST['wpsstm-mb-mbid-lookup']) ){
+            $action = 'autoguess-id';
+        }elseif ( isset($_POST['wpsstm-mb-reload']) ){
+            $action = 'reload';
+        }elseif ( isset($_POST['wpsstm-mb-fill']) ){
+            $action = 'fill';
+        }
 
-    }
-    
-    static function do_update_mbid($post_id,$mbid=null){
-        
-        $mbid = trim($mbid);
-        
+        //update MBID
+        $old_mbid = wpsstm_get_post_mbid($post_id);
+        $mbid = ( isset($_POST['wpsstm_mbid']) ) ? trim($_POST['wpsstm_mbid']) : null;
+        $is_mbid_update = ($old_mbid != $mbid);
+
         if (!$mbid){
             delete_post_meta( $post_id, self::$mbid_metakey );
+            delete_post_meta( $post_id, self::$mbdata_metakey ); //delete mdbatas too
+            delete_post_meta( $post_id, self::$mbdata_time_metakey );
         }else{
             update_post_meta( $post_id, self::$mbid_metakey, $mbid );
-        }
-        do_action('wpsstm_updated_mbid',$post_id);
-    }
-    
-    /*
-    When saving an artist / track / album and that no MBID exists, guess it - if option enabled
-    */
-    
-    static function auto_set_mbid( $post_id ){
-        
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
-        $is_revision = wp_is_post_revision( $post_id );
-        if ( $is_autosave || $skip_status || $is_revision ) return;
-
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //ignore if option disabled
-        $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
-        if (!$auto_id) return;
-
-        $track = new WPSSTM_Track($post_id);
-        if ($track->mbid) return;
-        
-        if ( ( !$mbid = $this->guess_mbid( $post_id ) ) || is_wp_error($mbid) ) return;
-        
-        self::do_update_mbid($post_id,$mbid);
-
-        //TO FIX should this filter be here ?
-        add_filter( 'redirect_post_location', array($this,'redirect_to_switch_entries_after_new_mbid') );
-        
-        return $mbid;
-    }
-    
-    /**
-    Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
-    **/
-    
-    function guess_mbid( $post_id ){
-        
-        //TO FIX limit musicbrainz query to 1 entry max ?
-
-        $mbid = null;
-        $entries = array();
-
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return false;
-
-        $entries = $this->get_mb_entries_for_post($post_id);
-        if (!$entries) return;
-        if ( is_wp_error($entries) ) return $entries;
-        
-        //get MBID of first entry
-        $mbid = wpsstm_get_array_value(array(0,'id'), $entries);
-
-        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WPSSTM_Core_MusicBrainz::guess_mbid()" ); 
-        
-        return $mbid;
-        
-    }
-    
-    function update_mb_datas( $post_id ){
-        
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        $mbid = wpsstm_get_post_mbid($post_id);
-        $mbdatas = wpsstm_get_post_mbdatas($post_id);
-        if ($mbid == '-') $mbid = null;
-        
-        if (!$mbid){
-            if ($mbdatas){
-                delete_post_meta( $post_id, self::$mbdata_metakey );
-                wpsstm()->debug_log('WPSSTM_Core_MusicBrainz::update_mb_datas() : deleted mb datas'); 
+            if ($is_mbid_update){
+                $this->reload_mb_datas($post_id);
             }
-        }else{
-            
-            $mbdatas_id = wpsstm_get_post_mbdatas($post_id,'id');
-            if ($mbid == $mbdatas_id ) return; //nothing to update
-
-            //get API data
-            $mb_post_type = $this->get_musicbrainz_type_by_post_id($post_id);
-            $data = $this->get_musicbrainz_api_entry($mb_post_type,$mbid);
-
-            if ( is_wp_error($data) ){
-                wpsstm()->debug_log($data->get_error_message(),'WPSSTM_Core_MusicBrainz::update_mb_datas() error'); 
-                add_settings_error('wpsstm_musicbrainz', 'api_lookup', $data->get_error_message(),'inline');
-                return;
+        }
+        
+        //ignore auto MBID
+        if ( wpsstm()->get_options('mb_auto_id') == "on" ){
+            $do_ignore = ( isset($_POST['wpsstm-ignore-auto-mbid']) ) ? true : false;
+            if ($do_ignore){
+                update_post_meta( $post_id, self::$no_auto_mbid_metakey, true );
             }else{
-                $success = update_post_meta( $post_id, self::$mbdata_metakey, $data );
-                wpsstm()->debug_log($success,"WPSSTM_Core_MusicBrainz::update_mb_datas()" ); 
+                delete_post_meta( $post_id, self::$no_auto_mbid_metakey );
             }
-            
+        }
+
+        switch ($action){
+            case 'autoguess-id':
+                $mbid = $this->guess_mbid( $post_id );
+                if ( is_wp_error($mbid) ) break;
+                update_post_meta( $post_id, self::$mbid_metakey, $mbid );
+                $this->reload_mb_datas($post_id);
+            break;
         }
         
-        do_action('wpsstm_updated_mbdatas',$post_id);
-
     }
     
     function metabox_mbdata_save( $post_id ){
 
         $mbid = null;
         $mbdata = null;
-        $mbdatas_action = null;
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
+
         $is_metabox = isset($_POST['wpsstm_mbdata_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
+
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
@@ -477,197 +459,84 @@ class WPSSTM_Core_MusicBrainz {
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_mbdata_meta_box_nonce'], 'wpsstm_mbdata_meta_box' ) );
         if ( !$is_valid_nonce ) return;
-        
+
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_mbdata_meta_box_nonce']);
         
-        //get mbdatas action
-        if ( isset($_REQUEST['wpsstm-mbdata-refresh']) ){
-            $mbdatas_action = 'refresh';
-        }elseif ( isset($_REQUEST['wpsstm-mbdata-fill']) ){
-            $mbdatas_action = 'fill';
-        }elseif ( isset($_REQUEST['wpsstm-mbdata-switch']) ){
-            $mbdatas_action = 'switch';
-        }
         
-        if (!$mbdatas_action) return;
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'action'=>$mbdatas_action),"metabox_mbdata_save()" ); 
+        //clicked a musicbrainz action button
+        $action = null;
+        if ( isset($_POST['wpsstm-mb-reload']) ){
+            $action = 'reload';
+        }elseif ( isset($_POST['wpsstm-mb-fill']) ){
+            $action = 'fill';
+        }
 
-        if ( $mbid = wpsstm_get_post_mbid($post_id) ){
+        switch ($action){
 
-            if ( $mbdatas = wpsstm_get_post_mbdatas($post_id) ){
+            case 'reload':
+                $this->reload_mb_datas($post_id);
+            break;
+            case 'fill':
+                $field_slugs = isset($_POST['wpsstm-mb-fill-fields']) ? $_POST['wpsstm-mb-fill-fields'] : array();
+                $fields_success = array();
 
-                switch ($mbdatas_action){
-                    case 'refresh':
-                        if ( delete_post_meta( $post_id, self::$mbdata_metakey ) ){
-                            wpsstm()->debug_log('WPSSTM_Core_MusicBrainz::metabox_mbdata_save() : deleted mb datas'); 
-                            $this->update_mb_datas( $post_id );
+                if ( !empty($field_slugs) && $mbdatas = wpsstm_get_post_mbdatas($post_id) ){
+
+                    //artist
+                    if ( in_array('artist',$field_slugs) ){
+                        if ( $artist = wpsstm_get_array_value(array('name'), $mbdatas) ){
+                            $fields_success['artist'] = update_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, $artist );
                         }
 
-                    break;
-                    case 'fill':
-                        $this->fill_post_with_mbdatas($post_id);
-                    break;
-                    case 'switch':
-                        $_GET['mb-list-entries'] = true;
-                    break;
+                    }
+
+                    //album
+                    if ( in_array('album',$field_slugs) ){
+                        if ( $album = wpsstm_get_array_value(array('title'), $mbdatas) ){
+                            $fields_success['album'] = update_post_meta( $post_id, WPSSTM_Core_Albums::$album_metakey, $album );
+                        }
+                    }
+                    //album tracklist
+                    if ( in_array('album_tracklist',$field_slugs) ){
+                        $fields_success['album_tracklist'] = $this->fill_post_tracklist_with_mbdatas($post_id);
+                    }
+
+                    //track artist
+                    //album artist
+                    if ( in_array('track_artist',$field_slugs) || in_array('album_artist',$field_slugs) ){
+                        if ( $artist = wpsstm_get_array_value(array('artist-credit',0,'name'), $mbdatas) ){
+                            $fields_success['track_artist'] = update_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, $artist );
+                        }
+                    }
+
+                    //track title
+                    if ( in_array('track',$field_slugs) ){
+                        if ( $track = wpsstm_get_array_value(array('title'), $mbdatas) ){
+                            $fields_success['track'] = update_post_meta( $post_id, WPSSTM_Core_Tracks::$title_metakey, $track );
+                        }
+                    }
+
+                    //track album
+                    if ( in_array('track_album',$field_slugs) ){
+                        if ( $album = wpsstm_get_array_value(array('releases',0,'title'), $mbdatas) ){
+                            $fields_success['track_album'] = update_post_meta( $post_id, WPSSTM_Core_Albums::$album_metakey, $album );
+                        }
+                    }
+                    
+                    //log
+                    $fields_success['post_id'] = $post_id;
+                    wpsstm()->debug_log( json_encode($fields_success),"metabox_mbid_save() - filled post with MB datas" ); 
+                    
                 }
-                
-            }
 
-        }else{
-            //delete mdbata option 
-            delete_post_meta( $post_id, self::$mbdata_metakey );
-        }
-    }
-    
-    function load_api_errors($post){
-        $api_errors = get_post_meta( $post->ID,self::$mb_api_errors_meta_name);
-                            
-        foreach((array)$api_errors as $error){
-            add_settings_error('wpsstm_musicbrainz', 'mb_api_error', $error,'inline');
-        }
-        
-        delete_post_meta( $post->ID,self::$mb_api_errors_meta_name);
-    }
-
-
-    
-    /**
-    Fill current post with various informations from MusicBrainz
-    **/
-
-    function fill_post_with_mbdatas($post_id,$items=array()){
-
-        //get potential updatable items by post type
-        $post_type = get_post_type($post_id);
-        $post_type_items = array();
-        
-        switch($post_type){
-            //artist
-            case wpsstm()->post_type_artist:
-                $post_type_items = array('artist');
-            break;
-            //album
-            case wpsstm()->post_type_album:
-                $post_type_items = array('artist','album','tracklist');
-            break;
-            //track
-            case wpsstm()->post_type_track:
-                $post_type_items = array('artist','album','track');
-            break;
-
-        }
-        
-        if ( empty($post_type_items) ) return;
-
-        //what to update ?
-        if ( empty($items) ){ //not defined, auto guess what to update
-
-            if ( in_array('artist',$post_type_items) && ( !$artist = wpsstm_get_post_artist($post_id) ) ) $items[] = 'artist';
-            if ( in_array('album',$post_type_items) && ( !$album = wpsstm_get_post_album($post_id) ) ) $items[] = 'album';
-            if ( in_array('track',$post_type_items) && ( !$track = wpsstm_get_post_track($post_id) ) ) $items[] = 'track';
-
-            if ( in_array('tracklist',$post_type_items) ){
-                //TO FIX TO CHECK
-                $tracklist = wpsstm_get_post_tracklist($post_id);
-                $subtrack_ids = $tracklist->get_subtracks(array('fields' =>'ids'));
-                if ( empty($subtrack_ids) ) $items[] = 'tracklist';
-            }
-
-        }
-        
-        //filter only what is allowed by post type
-        $items = array_intersect($items, $post_type_items);
-        if ( empty($items) ) return;
-
-        wpsstm()->debug_log( array( 'post_id'=>$post_id,'post_type'=>get_post_type($post_id),'items'=>$items ), "fill_post_with_mbdatas()"); 
-        
-        if ( in_array('artist',$items) ){
-            $this->fill_post_artist_with_mbdatas($post_id);
-        }
-        
-        if ( in_array('album',$items) ){
-            $this->fill_post_album_with_mbdatas($post_id);
-        }
-        
-        if ( in_array('track',$items) ){
-            $this->fill_post_track_with_mbdatas($post_id);
-        }
-        
-        if ( in_array('tracklist',$items) ){
-            $this->fill_post_tracklist_with_mbdatas($post_id);
-        }
-
-        do_action('mb_filled_post_with_mbdatas',$post_id);
-
-    }
-    
-    function fill_post_artist_with_mbdatas($post_id){
-        $post_type = get_post_type($post_id);
-        $mbdatas = wpsstm_get_post_mbdatas($post_id);
-        $artist = null;
-        
-        switch($post_type){
-            //artist
-            case wpsstm()->post_type_artist:
-                $artist = wpsstm_get_array_value(array('name'), $mbdatas);
-            break;
-            //track & album
-            case wpsstm()->post_type_track:
-            case wpsstm()->post_type_album:
-                $artist = wpsstm_get_array_value(array('artist-credit',0,'name'), $mbdatas);
-            break;
-        }
-        
-        if ($artist){
-            update_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, $artist );
-            wpsstm()->debug_log( $artist, "fill_post_artist_with_mbdatas()"); 
-        }
-
-    }
-    
-    function fill_post_album_with_mbdatas($post_id){
-        $post_type = get_post_type($post_id);
-        $mbdatas = wpsstm_get_post_mbdatas($post_id);
-        $album = null;
-        
-        switch($post_type){
-                case wpsstm()->post_type_track:
-                    $album = wpsstm_get_array_value(array('releases',0,'title'), $mbdatas);
-                break;
-                case wpsstm()->post_type_album:
-                    $album = wpsstm_get_array_value(array('title'), $mbdatas);
                 break;
         }
         
-        if ($album){
-            update_post_meta( $post_id, WPSSTM_Core_Albums::$album_metakey, $album );
-            wpsstm()->debug_log( $album, "fill_post_album_with_mbdatas()"); 
-        }
-            
     }
     
-    function fill_post_track_with_mbdatas($post_id){
-        $post_type = get_post_type($post_id);
-        $mbdatas = wpsstm_get_post_mbdatas($post_id);
-        $track = null;
-        
-        switch($post_type){
-                case wpsstm()->post_type_track:
-                    $track = wpsstm_get_array_value(array('title'), $mbdatas);
-                break;
-        }
-        
-        if ($track){
-            update_post_meta( $post_id, WPSSTM_Core_Tracks::$title_metakey, $track );
-            wpsstm()->debug_log( $track, "fill_post_track_with_mbdatas()"); 
-        }
-            
-    }
-
     function fill_post_tracklist_with_mbdatas($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_album ) return;
@@ -722,19 +591,138 @@ class WPSSTM_Core_MusicBrainz {
         $tracklist->add_tracks($tracks_arr);
         return $tracklist->save_subtracks();
     }
+    
+    /*
+    Reload MusicBrainz entry data for an MBID.
+    If MBID is not set, try to guess it.
+    */
+    
+    function reload_mb_datas($post_id){
 
-    function redirect_to_switch_entries($location){
-        if ( isset( $_POST['wpsstm-mbdata-switch'] ) ){
-            $location = add_query_arg(array('mb-list-entries'=>true),$location);
+        //delete existing
+        delete_post_meta( $post_id, self::$mbdata_metakey );
+        delete_post_meta( $post_id, self::$mbdata_time_metakey );
+        wpsstm()->debug_log('WPSSTM_Core_MusicBrainz::reload_mb_datas() : deleted mb datas');
+
+        if ( $mbid = wpsstm_get_post_mbid($post_id) ){
+
+            //get API data
+            $mb_post_type = $this->get_musicbrainz_type_by_post_id($post_id);
+            $data = $this->get_musicbrainz_api_entry($mb_post_type,$mbid);
+
+            if ( is_wp_error($data) ) return $data;
+
+            $now = current_time('timestamp');
+            update_post_meta( $post_id, self::$mbdata_time_metakey, $now );
+            return update_post_meta( $post_id, self::$mbdata_metakey, $data );
         }
-        return $location;
+    }
+
+    /*
+    When saving an artist / track / album and that no MBID exists, guess it - if option enabled
+    */
+    
+    static function auto_set_mbid( $post_id ){
+        
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
+        $is_revision = wp_is_post_revision( $post_id );
+        if ( $is_autosave || $skip_status || $is_revision ) return;
+
+        //check post type
+        $post_type = get_post_type($post_id);
+        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
+        if ( !in_array($post_type,$allowed_post_types) ) return;
+        
+        //ignore if global option disabled
+        $auto_id = ( wpsstm()->get_options('mb_auto_id') == "on" );
+        if (!$auto_id) return false;
+
+        //ignore if option disabled
+        $is_ignore = ( get_post_meta( $post_id, self::$no_auto_mbid_metakey, true ) );
+        if ($is_ignore) return false;
+        
+        //ignore if value exists
+        $value = wpsstm_get_post_mbid($post_id);
+        if ($value) return;
+        
+        //get auto mbid
+        $mbid = $this->guess_mbid( $post_id );
+        if ( is_wp_error($mbid) ) return $mbid;
+
+        $mbid = update_post_meta( $post_id, self::$mbid_metakey, $mbid );
+        $this->reload_mb_datas($post_id);
+
+        return $mbid;
     }
     
-    function redirect_to_switch_entries_after_new_mbid($location){
-        if ( isset( $_POST['save'] ) ){
-            $location = add_query_arg(array('mb-list-entries'=>true),$location);
+    /**
+    Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
+    **/
+    
+    function guess_mbid( $post_id ){
+        
+        //TO FIX limit musicbrainz query to 1 entry max ?
+
+        $mbid = null;
+        $entries = array();
+
+        //check post type
+        $post_type = get_post_type($post_id);
+        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
+        if ( !in_array($post_type,$allowed_post_types) ) return false;
+
+        $entries = $this->get_mb_entries_for_post($post_id);
+        if (!$entries) return;
+        if ( is_wp_error($entries) ) return $entries;
+        
+        //get MBID of first entry
+        $mbid = wpsstm_get_array_value(array(0,'id'), $entries);
+
+        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WPSSTM_Core_MusicBrainz::guess_mbid()" ); 
+        
+        return $mbid;
+        
+    }
+    
+    function load_api_errors($post){
+        $api_errors = get_post_meta( $post->ID,self::$mb_api_errors_meta_name);
+                            
+        foreach((array)$api_errors as $error){
+            add_settings_error('wpsstm_musicbrainz', 'mb_api_error', $error,'inline');
         }
-        return $location;
+        
+        delete_post_meta( $post->ID,self::$mb_api_errors_meta_name);
+    }
+
+
+    
+    /**
+    Fill current post with various informations from MusicBrainz
+    **/
+    
+    function get_fillable_fields(){
+        $items = array();
+        $post_type = get_post_type();
+        switch($post_type){
+            //artist
+            case wpsstm()->post_type_artist:
+                $items['artist'] = __('Artist','wpsstm');
+            break;
+            //album
+            case wpsstm()->post_type_album:
+                $items['album'] = __('Album','wpsstm');
+                $items['album_artist'] = __('Artist','wpsstm');
+                $items['album_tracklist'] = __('Tracklist','wpsstm');
+            break;
+            //track
+            case wpsstm()->post_type_track:
+                $items['track'] = __('Title','wpsstm');
+                $items['track_artist'] = __('Artist','wpsstm');
+                $items['track_album'] = __('Album','wpsstm');
+            break;
+        }
+        return $items;
     }
 
     static function get_musicbrainz_api_entry($type,$mbid = null,$query = null,$offset = null){
