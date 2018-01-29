@@ -543,7 +543,7 @@ class WPSSTM_Track{
         $tuneefy_args = array(
             'q' =>          urlencode($this->artist . ' ' . $this->title),
             'mode' =>       'lazy',
-            'aggressive' => 'false',
+            'aggressive' => 'true', //merge tracks (ignore album)
             'include' =>    implode(',',$tuneefy_providers),
         );
 
