@@ -150,6 +150,14 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
+= 1.9.4 =
+* Better settings page errors
+* Improved metaboxes for artist/track/album/MusicBrainz
+* new track length meta
+* remove frontend edit functions for track (load backend in popup)
+* new playlist subtrack : create it and load backend in popup
+* save autosource time in meta '_wpsstm_autosource_time'
+
 = 1.9.3 =
 * Cleaned up a lot of code : https://github.com/gordielachance/wp-soundsystem/commit/9b2742e9e4fc0a021766c115dd81a58bd0b90073
 
