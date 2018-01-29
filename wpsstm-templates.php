@@ -246,12 +246,12 @@ function wpsstm_get_backend_form_input($options = null){
     );
 
     $attr_str = wpsstm_get_html_attr($input_attr);
-    $input_el = sprintf('<input "%s"/>',$attr_str);
+    $input_el = sprintf('<input %s/>',$attr_str);
 
     //icon el
-    $icon_el = (isset($options['label'])) ? sprintf('<span class="input-group-icon">%s</span>',$options['icon']) : null;
+    $icon_el = (isset($options['icon'])) ? sprintf('<span class="input-group-icon">%s</span>',$options['icon']) : null;
 
     //output
 
-    return sprintf('<div class="input-group">%s%s%s</div>',$label_el,$input_el,$icon_el);
+    return sprintf('%s<div class="input-group">%s%s</div>',$label_el,$input_el,$icon_el);
 }

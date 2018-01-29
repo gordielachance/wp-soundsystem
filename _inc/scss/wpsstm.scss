@@ -271,3 +271,57 @@ body.wpsstm-default,body.wp-admin{
         }
     }
 }
+
+.input-group{
+    position: relative;
+    display: table;
+    border: 1px solid #CCC;
+    padding: .5em;
+    margin: .5em 0;
+    border-collapse: separate;
+    .input-group-icon, .input-group-field {
+        display: table-cell;
+    }
+    .input-group-field {
+        background:transparent;
+        position: relative;
+        z-index: 2;
+        float: left;
+        width: 100%;
+        margin-bottom: 0;
+        line-height:40px;
+        padding: 0 10px; 
+        border:none;
+        box-shadow: none;
+        &:focus{
+            outline: none;
+            border:none;
+            box-shadow: none;
+        }
+    }
+    .input-group-icon{
+        padding:0 .5em;
+        font-size:1em;
+        color:#444;
+        width: 1%;
+        white-space: nowrap;
+        vertical-align: middle;
+        font-weight: normal;
+        line-height: 1;
+        text-align: center;
+    }
+    input,button {
+        background:transparent;
+        border:none;
+        color:#444;
+        &:hover{
+            background:transparent;
+        }
+    }
+    &:hover,&:focus-within{
+        background:rgba(0,0,0,0.01);
+    }
+    &:focus-within{
+        outline:medium;
+    }
+}

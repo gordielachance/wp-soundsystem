@@ -1233,80 +1233,70 @@ body.wpsstm-default .wpsstm-post-admin > ul.wpsstm-actions-list, body.wp-admin .
   margin: 0 0 3px;
   background-color: #fff;
 }
-/* line 116, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-track-sources .inside {
+/* line 117, ../scss/_wpsstm-backend.scss */
+.postbox#wpsstm-track-sources .wpsstm-submit-wrapper {
   text-align: center;
 }
-/* line 120, ../scss/_wpsstm-backend.scss */
+/* line 122, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm-metabox-scraper {
   position: relative;
 }
-/* line 122, ../scss/_wpsstm-backend.scss */
+/* line 124, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm-metabox-scraper .inside {
   overflow: auto;
 }
-/* line 126, ../scss/_wpsstm-backend.scss */
+/* line 128, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm-metabox-scraper .inside .wpsstm-tracklist #wpsstm-tracklist-actions #wpsstm-tracklist-action-status-switch {
   display: none;
 }
-/* line 131, ../scss/_wpsstm-backend.scss */
+/* line 133, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm-metabox-scraper .inside #wpsstm-wizard-preview-feed-url {
   font-size: 1.2em;
   text-align: center;
 }
-/* line 141, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-artist-settings .input-group label, .postbox#wpsstm-track-settings .input-group label, .postbox#wpsstm-album-settings .input-group label, .postbox#wpsstm-mbid .input-group label {
-  font-size: 1.2em;
-  margin-bottom: .25em;
-  display: block;
-}
-/* line 146, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-artist-settings .input-group .input-group-icon, .postbox#wpsstm-track-settings .input-group .input-group-icon, .postbox#wpsstm-album-settings .input-group .input-group-icon, .postbox#wpsstm-mbid .input-group .input-group-icon {
-  display: none;
-}
-/* line 156, ../scss/_wpsstm-backend.scss */
+/* line 143, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span {
   font-weight: bold;
 }
-/* line 158, ../scss/_wpsstm-backend.scss */
+/* line 145, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span:after {
   content: " ";
 }
-/* line 166, ../scss/_wpsstm-backend.scss */
+/* line 153, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions {
   margin-top: 1em;
   position: relative;
   text-align: center;
 }
-/* line 171, ../scss/_wpsstm-backend.scss */
+/* line 158, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions a {
   margin: .5em auto;
   display: block;
   max-width: 75%;
 }
-/* line 177, ../scss/_wpsstm-backend.scss */
+/* line 164, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions p.submit {
   text-align: center;
   margin: .5em 0;
   padding: 0;
 }
-/* line 193, ../scss/_wpsstm-backend.scss */
+/* line 180, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries > span {
   font-weight: bold;
 }
-/* line 197, ../scss/_wpsstm-backend.scss */
+/* line 184, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries #wpsstm-mb-section-data {
   display: none;
 }
-/* line 204, ../scss/_wpsstm-backend.scss */
+/* line 191, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table {
   border: none;
 }
-/* line 206, ../scss/_wpsstm-backend.scss */
+/* line 193, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table .column-score {
   width: 10%;
 }
-/* line 218, ../scss/_wpsstm-backend.scss */
+/* line 205, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
 }
@@ -1584,4 +1574,67 @@ body.wpsstm-default .wpsstm-tracks-list > .toggle-children-link, body.wp-admin .
   text-align: center;
   padding: .5em;
   font-size: 1.2em;
+}
+
+/* line 275, ../scss/wpsstm.scss */
+.input-group {
+  position: relative;
+  display: table;
+  border: 1px solid #CCC;
+  padding: .5em;
+  margin: .5em 0;
+  border-collapse: separate;
+}
+/* line 282, ../scss/wpsstm.scss */
+.input-group .input-group-icon, .input-group .input-group-field {
+  display: table-cell;
+}
+/* line 285, ../scss/wpsstm.scss */
+.input-group .input-group-field {
+  background: transparent;
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 100%;
+  margin-bottom: 0;
+  line-height: 40px;
+  padding: 0 10px;
+  border: none;
+  box-shadow: none;
+}
+/* line 296, ../scss/wpsstm.scss */
+.input-group .input-group-field:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+/* line 302, ../scss/wpsstm.scss */
+.input-group .input-group-icon {
+  padding: 0 .5em;
+  font-size: 1em;
+  color: #444;
+  width: 1%;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-weight: normal;
+  line-height: 1;
+  text-align: center;
+}
+/* line 313, ../scss/wpsstm.scss */
+.input-group input, .input-group button {
+  background: transparent;
+  border: none;
+  color: #444;
+}
+/* line 317, ../scss/wpsstm.scss */
+.input-group input:hover, .input-group button:hover {
+  background: transparent;
+}
+/* line 321, ../scss/wpsstm.scss */
+.input-group:hover, .input-group:focus-within {
+  background: rgba(0, 0, 0, 0.01);
+}
+/* line 324, ../scss/wpsstm.scss */
+.input-group:focus-within {
+  outline: medium;
 }

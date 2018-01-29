@@ -113,8 +113,10 @@
     }
     
     //sources metabox
-    &#wpsstm-track-sources .inside{
-        text-align:center;
+    &#wpsstm-track-sources{
+        .wpsstm-submit-wrapper{
+            text-align:center;
+        }
     }
     
     &#wpsstm-metabox-scraper{
@@ -133,21 +135,6 @@
                 text-align: center;
             }
         }
-    }
-    
-    &#wpsstm-artist-settings,&#wpsstm-track-settings,&#wpsstm-album-settings,&#wpsstm-mbid{
-
-        .input-group{
-            label{
-                font-size: 1.2em;
-                margin-bottom: .25em;
-                display: block;
-            }
-            .input-group-icon{
-                display:none;
-            }
-        }
-
     }
 
     &#wpsstm_mbdata{
