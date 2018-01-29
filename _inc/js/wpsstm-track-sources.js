@@ -210,8 +210,8 @@ class WpsstmTrackSource {
             var options =  $.extend(defaults, options);
 
             // FOR EACH MATCHED ELEMENT
-            $.each( this, function() {
-                
+            return this.each(function() {
+
                 var sources_list_el = $(this);
                 var track_id = $(this).attr('data-wpsstm-track-id');
 
@@ -277,7 +277,7 @@ class WpsstmTrackSource {
             var deferredList = [];
 
             // FOR EACH MATCHED ELEMENT
-            $.each( this, function() {
+            return this.each(function() {
 
                 var deferredSingle = $.Deferred();
                 deferredList.push(deferredSingle.promise());

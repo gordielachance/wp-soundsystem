@@ -607,8 +607,8 @@ class WPSSTM_Tracklist{
         //edit backend
         if ( $can_edit_tracklist ){
             $actions['edit-backend'] = array(
-                'text' =>      __('Edit backend', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
+                'text' =>       __('Edit'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-link-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
