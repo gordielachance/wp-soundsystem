@@ -534,9 +534,8 @@ class WPSSTM_Settings {
             '<input type="checkbox" name="%s[mb_auto_id]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Try to guess MusicBrainz ID if for items if user left the MusicBrainz ID field empty.","wpsstm")
+            __("Try to guess MusicBrainz ID when it is not defined.","wpsstm")
         );
-        echo '  <small> ' . sprintf(__('Can be ignored by setting %s for input value.','wpsstm'),'<code>-</code>') . '</small>';
     }
     
     function player_enabled_callback(){

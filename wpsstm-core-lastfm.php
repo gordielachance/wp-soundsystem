@@ -136,7 +136,7 @@ class WPSSTM_Core_LastFM{
     
     private static function get_basic_api_auth(){
         
-        //TO FIX KKK store temporary ?
+        //TO FIX store temporary ?
         $basic_auth = null;
         
         $api_key = wpsstm()->get_options('lastfm_client_id');
