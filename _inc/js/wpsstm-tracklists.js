@@ -579,7 +579,7 @@ class WpsstmTracklist {
 
         $(tracks_slice).each(function(index, track_to_preload) {
             if ( track_to_preload.sources.length > 0 ) return true; //continue;
-            track_to_preload.get_sources_auto();
+            track_to_preload.maybe_do_autosource();
         });
     }
 

@@ -597,6 +597,10 @@ class WPSSTM_Track{
 
         $new_source_ids = array();
         
+        //save time autosourced
+        $now = current_time('timestamp');
+        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
+        
         $new_sources = $this->get_sources_auto();
 
         if ( is_wp_error($new_sources) ) return $new_sources;
@@ -618,10 +622,6 @@ class WPSSTM_Track{
             
             $new_source_ids[] = $source_id;
         }
-        
-        //save time autosourced
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
 
         return $this->post_id;
 
@@ -786,6 +786,7 @@ class WPSSTM_Track{
             'itemprop' =>                       'track',
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
+            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, true )
         );
         
         if ($wpsstm_tracklist){

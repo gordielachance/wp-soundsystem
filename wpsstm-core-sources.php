@@ -505,6 +505,7 @@ class WPSSTM_Core_Sources{
         
         $result = array(
             'input'     => $ajax_data,
+            'timestamp' => current_time('timestamp'),
             'message'   => null,
             'new_html'  => null,
             'success'   => false

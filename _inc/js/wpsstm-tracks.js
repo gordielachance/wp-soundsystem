@@ -314,6 +314,7 @@ class WpsstmTrack {
         this.album =                this.track_el.find('[itemprop="inAlbum"]').text();
         this.post_id =              Number(this.track_el.attr('data-wpsstm-track-id'));
         this.sources_request =      null;
+        this.autosource_time =      Number(this.track_el.attr('data-wpsstm-autosource-time'));
         this.did_sources_request =  false;
         this.sources =              [];
         this.current_source_idx =   undefined;
@@ -337,25 +338,6 @@ class WpsstmTrack {
         }else{
             return $(selector);
         }
-    }
-
-    get_sources_auto(){
-
-        var self = this;
-
-        var deferredObject = $.Deferred();
-
-        var promise = self.maybe_load_sources();
-
-        promise.fail(function() {
-            deferredObject.reject();
-        })
-
-        promise.done(function(v) {
-            deferredObject.resolve();
-        })
-
-        return deferredObject.promise();
     }
 
     set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER ?
@@ -471,94 +453,89 @@ class WpsstmTrack {
         $('#wpsstm-player').html(media_wrapper);
     }
     
-    maybe_load_sources(){
+    maybe_do_autosource(){
 
         var self = this;
         var success = $.Deferred();
+        var can_autosource = self.tracklist.options.autosource;
+        
         if (self.sources.length > 0){
             success.resolve();
-        }else{
-            success = self.get_track_sources_request();
+        } else if ( !can_autosource ){
+            success.resolve("Autosource is disabled");
+        } else if ( self.did_sources_request ) {
+            success.resolve("already did sources auto request for track #" + self.index);
+        } else{
+            success = self.do_autosource();
         }
         return success.promise();
     }
 
-    get_track_sources_request() {
+    do_autosource() {
 
         var self = this;
         var deferredObject = $.Deferred();
         
         var track_el    = self.track_el;
         var track_instances = self.get_track_instances();
-        
-        var can_autosource = this.tracklist.options.autosource;
-        
-        if ( !can_autosource ){
-            
-            deferredObject.resolve("Autosource is disabled");
-            
-        } else if ( self.did_sources_request ) {
-            
-            deferredObject.resolve("already did sources auto request for track #" + self.index);
-            
-        } else{
-            
-            self.debug("get_track_sources_request");
-        
 
-            $(track_el).find('.wpsstm-track-sources').html('');
-            track_instances.addClass('track-loading');
+        self.debug("do_autosource");
 
-            var ajax_data = {
-                action:     'wpsstm_autosources_list',
-                track:      self.to_ajax(),   
-            };
-            
-            //self.debug(ajax_data);
 
-            self.sources_request = $.ajax({
-                type:       "post",
-                url:        wpsstmL10n.ajaxurl,
-                data:       ajax_data,
-                dataType:   'json',
-            });
+        $(track_el).find('.wpsstm-track-sources').html('');
+        track_instances.addClass('track-loading');
 
-            self.sources_request.done(function(data) {
+        var ajax_data = {
+            action:     'wpsstm_autosources_list',
+            track:      self.to_ajax(),   
+        };
 
-                self.did_sources_request = true;
+        //self.debug(ajax_data);
 
-                if (data.success === true){
-                    
-                    //set track ID if track has been created
-                    if (!ajax_data.track.post_id){
-                        track_instances.attr("data-wpsstm-track-id", data.track.post_id);
-                    }
-                    
-                    if ( data.new_html ){
-                        self.can_play = true;
-                        $(track_instances).find('.wpsstm-track-sources').html(data.new_html); //append new sources
-                        self.populate_html_sources();
-                    }
+        self.sources_request = $.ajax({
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+        });
 
-                    deferredObject.resolve();
+        self.sources_request.done(function(data) {
 
-                }else{
-                    self.can_play = false;
-                    track_instances.addClass('track-error');
-                    deferredObject.reject(data.message);
+            //update autosource time
+            self.autosource_time = data.timestamp;
+            track_instances.attr("data-wpsstm-autosource-time", self.autosource_time);
+
+            if (data.success === true){
+
+                //set track ID if track has been created
+                if (!ajax_data.track.post_id){
+                    track_instances.attr("data-wpsstm-track-id", data.track.post_id);
                 }
 
-            });
-            
-            self.sources_request.fail(function() {
+                if ( data.new_html ){
+                    self.can_play = true;
+                    $(track_instances).find('.wpsstm-track-sources').html(data.new_html); //append new sources
+                    self.populate_html_sources();
+                }
+
+                deferredObject.resolve();
+
+            }else{
+                self.can_play = false;
                 track_instances.addClass('track-error');
-            })
-            
-            self.sources_request.always(function() {
-                track_instances.removeClass('track-loading');
-            })
-            
-        }
+                deferredObject.reject(data.message);
+            }
+
+        });
+
+        self.sources_request.fail(function() {
+            track_instances.addClass('track-error');
+        })
+
+        self.sources_request.always(function() {
+            self.did_sources_request = true;
+            track_instances.removeClass('track-loading');
+        })
         
         return deferredObject.promise();
 
@@ -723,7 +700,7 @@ class WpsstmTrack {
 
             self.set_bottom_trackinfo(); //bottom track info
 
-            self.maybe_load_sources().then(
+            self.maybe_do_autosource().then(
                 function(success_msg){
 
                     var source_play = self.play_first_available_source(source_idx);
