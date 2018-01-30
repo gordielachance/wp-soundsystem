@@ -177,7 +177,6 @@ class WpsstmTracklist {
         this.unique_id =                this.tracklist_el.attr('data-wpsstm-tracklist-unique-id');
         this.tracklist_request =        undefined;
         this.is_expired =               undefined;
-        this.expiration_time =          undefined;
         this.options =                  {};
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
@@ -279,7 +278,6 @@ class WpsstmTracklist {
         
         ///
         
-        self.expiration_time = expiration_time;
         self.is_expired = is_expired;
         
         ///

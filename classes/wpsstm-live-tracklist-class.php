@@ -916,16 +916,9 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_attr($values_attr=null){
         
-        $values_default = array();
-        
-        $expiration_time = $this->get_expiration_time();
-        
-        if (!$expiration_time){ 
-            //
-            $expiration_time = current_time( 'timestamp', true );
-        }
-
-        $values_default['data-wpsstm-domain'] = wpsstm_get_url_domain( $this->feed_url );
+        $values_default = array(
+            'data-wpsstm-domain' => wpsstm_get_url_domain( $this->feed_url )
+        );
 
         $values_attr = array_merge($values_default,(array)$values_attr);
 
