@@ -560,21 +560,18 @@ class WPSSTM_Track{
             $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
             $first_provider =       reset($links_by_providers);
             $first_link =           reset($first_provider);
-
-            $raw = array(
-                'url'   =>      $first_link,
-                'title'   =>     wpsstm_get_array_value(array('musical_entity','title'),$item),
-            );
             
-            $auto_sources[] = $raw;
+            $source = new WPSSTM_Source();
+            $source->track_id = $this->post_id;
+            $source->url = $first_link;
+            $source->title = wpsstm_get_array_value(array('musical_entity','title'),$item);
+
+            $auto_sources[] = $source;
             
         }
 
         //allow plugins to filter this
-        $auto_sources = apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
-        $new_sources = $this->add_sources($auto_sources);
-        
-        return $new_sources;
+        return apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
         
     }
 
@@ -595,20 +592,19 @@ class WPSSTM_Track{
             if ( is_wp_error($success) ) return $success;
         }
 
-        $new_source_ids = array();
-        
         //save time autosourced
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
         
+        //fetch sources
         $new_sources = $this->get_sources_auto();
-
         if ( is_wp_error($new_sources) ) return $new_sources;
         
         $source_args = array(
             'post_author'   => wpsstm()->get_options('community_user_id')
         );
 
+        //insert sources
         foreach((array)$new_sources as $source){
             
             $source_id = $source->save_unique_source($source_args);
@@ -616,12 +612,13 @@ class WPSSTM_Track{
             if ( is_wp_error($source_id) ){
                 $code = $source_id->get_error_code();
                 $error_msg = $source_id->get_error_message($code);
-                wpsstm()->debug_log( $error_msg, "WPSSTM_Track::autosource - unable to save source");
+                wpsstm()->debug_log( $error_msg, "WPSSTM_Track::autosource");
                 continue;
             }
-            
-            $new_source_ids[] = $source_id;
         }
+        
+        //reload sources
+        $this->populate_sources();
 
         return $this->post_id;
 
