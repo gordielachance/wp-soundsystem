@@ -545,6 +545,7 @@ class WPSSTM_Track{
             'mode' =>       'lazy',
             'aggressive' => 'true', //merge tracks (ignore album)
             'include' =>    implode(',',$tuneefy_providers),
+            'limit' =>      5
         );
 
         $api = WPSSTM_Core_Sources::tuneefy_api_aggregate('track',$tuneefy_args);
