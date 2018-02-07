@@ -177,6 +177,7 @@ class WpsstmTracklist {
         this.unique_id =                this.tracklist_el.attr('data-wpsstm-tracklist-unique-id');
         this.tracklist_request =        undefined;
         this.is_expired =               undefined;
+        this.expiration_time =          undefined;
         this.options =                  {};
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
@@ -273,14 +274,13 @@ class WpsstmTracklist {
             }else{
                 console.log("tracklist will expire on: " + readable_date_str);
             }
+            
+            ///
+            self.expiration_time = expiration_time;
+            self.is_expired = is_expired;
+            ///
 
         }
-        
-        ///
-        
-        self.is_expired = is_expired;
-        
-        ///
 
         if (remaining_sec > 0){
             
@@ -565,7 +565,7 @@ class WpsstmTracklist {
     Init a sources request for this track and the X following ones (if not populated yet)
     */
     
-    get_next_tracks_sources_auto() {
+    maybe_load_queue_sources() {
 
         var self = this;
 
@@ -577,7 +577,7 @@ class WpsstmTracklist {
 
         $(tracks_slice).each(function(index, track_to_preload) {
             if ( track_to_preload.sources.length > 0 ) return true; //continue;
-            track_to_preload.maybe_do_autosource();
+            track_to_preload.maybe_load_sources();
         });
     }
 

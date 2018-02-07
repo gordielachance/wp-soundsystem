@@ -198,6 +198,7 @@ body.wpsstm-default,body.wp-admin{
                         @include flex-grow(1);
                         @include flex-shrink(1);
                         align-items:baseline;
+                        min-width:0; //fix problem when no-wrap & flexboxes (https://stackoverflow.com/a/36247448/782013)
                         > *{
                             display:block;
                             @extend .wpsstm-ellipsis;
