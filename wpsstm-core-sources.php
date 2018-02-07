@@ -337,7 +337,10 @@ class WPSSTM_Core_Sources{
         
         $after['source_url'] = __('URL','wpsstm');
         $after['track_match'] = __('Match','wpsstm');
-        $after['order'] = __('Order','wpsstm');
+        
+        if ( isset($_GET['post_parent']) ){
+            $after['order'] = __('Order','wpsstm');
+        }
         
         return array_merge($before,$defaults,$after);
     }
