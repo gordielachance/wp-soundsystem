@@ -17,10 +17,7 @@ class WPSSTM_Core_Artists{
 
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
         add_action( 'save_post', array($this,'metabox_artist_save'), 5); 
-        
-        //add_filter( 'manage_posts_columns', array($this,'column_artist_register'), 10, 2 ); 
-        //add_action( 'manage_posts_custom_column' , array($this,'column_artist_content'), 10, 2 );
-        
+
         add_filter( 'the_title', array($this, 'the_artist_post_title'), 9, 2 );
         
         /*
@@ -46,38 +43,6 @@ class WPSSTM_Core_Artists{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
-    }
-
-    function column_artist_register($defaults) {
-
-        $post_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_track,
-            wpsstm()->post_type_album
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            $after['artist'] = __('Artist','wpsstm');
-        }
-
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function column_artist_content($column,$post_id){
-        global $post;
-        
-        switch ( $column ) {
-                case 'artist':
-                    if (!$artist = wpsstm_get_post_artist($post_id) ){
-                        $artist = '—';
-                    }
-                    echo $artist;
-                break;
-        }
     }
 
     function pre_get_posts_by_artist( $query ) {

@@ -20,8 +20,15 @@ class WPSSTM_Core_MusicBrainz {
 
         add_filter( 'pre_get_posts', array(__class__,'pre_get_posts_mbid') );
         
-        add_filter('manage_posts_columns', array(__class__,'column_mbid_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column', array(__class__,'column_mbid_content'), 10, 2 );
+        //backend columns
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_artist), array(__class__,'mb_columns_register'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'mb_columns_register'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'mb_columns_register'), 10, 2 );
+        
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_artist), array(__class__,'mb_columns_content'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'mb_columns_content'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'mb_columns_content'), 10, 2 );
+        
 
     }
     
@@ -47,19 +54,12 @@ class WPSSTM_Core_MusicBrainz {
         return $query;
     }
 
-    public static function column_mbid_register($defaults) {
-        $post_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_track,
-            wpsstm()->post_type_album
-        );
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            $defaults['mbid'] = __('MBID','wpsstm');
-        }
+    public static function mb_columns_register($defaults) {
+        $defaults['mbid'] = __('MBID','wpsstm');
         return $defaults;
     }
     
-    public static function column_mbid_content($column,$post_id){
+    public static function mb_columns_content($column,$post_id){
         global $post;
         
         switch ( $column ) {

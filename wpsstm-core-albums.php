@@ -16,6 +16,7 @@ class WPSSTM_Core_Albums{
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
         add_action( 'save_post', array($this,'metabox_save_album_settings'), 5); 
         
+        //TO FIX TO CHECK used ? same as in tracklist ?
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
         

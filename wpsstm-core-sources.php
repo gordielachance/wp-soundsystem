@@ -27,16 +27,9 @@ class WPSSTM_Core_Sources{
         add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
 
-        add_filter('manage_posts_columns', array($this,'column_sources_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'column_sources_content'), 10, 2 );
-        
-        add_filter( 'manage_posts_columns', array($this,'column_source_url_register'), 10, 2 ); 
-        add_action( 'manage_pages_custom_column', array($this,'column_source_url_content'), 10, 2 );
-        
-        add_filter( 'manage_posts_columns', array($this,'column_track_match_register'), 10, 2 ); 
-        add_filter( 'manage_posts_columns', array($this,'column_order_register'), 10, 2 ); 
-        add_action( 'manage_pages_custom_column', array($this,'column_track_match_content'), 10, 2 );
-        
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_source), array(__class__,'source_columns_register'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_source), array(__class__,'source_columns_content'), 10, 2 );
+
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
         /*
@@ -335,69 +328,21 @@ class WPSSTM_Core_Sources{
         wp_register_script( 'wpsstm-track-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-track-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
     }
 
-    function column_sources_register($defaults) {
-        global $post;
-
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            $after['sources'] = __('Sources','wpsstm');
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-
-    function column_sources_content($column,$post_id){
-        global $post;
-        
-        switch ( $column ) {
-            case 'sources':
-                
-                $published_str = $pending_str = null;
-
-                $track = new WPSSTM_Track($post_id);
-                $sources_published_query = $track->query_sources();
-                $sources_pending_query = $track->query_sources(array('post_status'=>'pending'));
-
-                $url = admin_url('edit.php');
-                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'publish'),$url );
-                $published_str = sprintf('<a href="%s">%d</a>',$url,$sources_published_query->post_count);
-                
-                if ($sources_pending_query->post_count){
-                    $url = admin_url('edit.php');
-                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'pending'),$url );
-                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$sources_pending_query->post_count);
-                    $pending_str = sprintf('<small> +%s</small>',$pending_link);
-                }
-                
-                echo $published_str . $pending_str;
-                
-            break;
-        }
-    }
     
-    function column_source_url_register($defaults) {
+    public static function source_columns_register($defaults) {
         global $post;
 
         $before = array();
         $after = array();
         
-        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
-        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
-        
-        if ( $post_type == wpsstm()->post_type_source ){
-            $after['source_url'] = __('URL','wpsstm');
-        }
+        $after['source_url'] = __('URL','wpsstm');
+        $after['track_match'] = __('Match','wpsstm');
+        $after['order'] = __('Order','wpsstm');
         
         return array_merge($before,$defaults,$after);
     }
 
-    function column_source_url_content($column,$post_id){
+    public static function source_columns_content($column,$post_id){
         global $post;
         global $wpsstm_source;
         
@@ -409,46 +354,6 @@ class WPSSTM_Core_Sources{
                 echo $link;
                 
             break;
-        }
-    }
-    
-    function column_track_match_register($defaults) {
-        global $post;
-
-        $before = array();
-        $after = array();
-        
-        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
-        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
-        
-        if ( $post_type == wpsstm()->post_type_source ){
-            $after['track_match'] = __('Match','wpsstm');
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function column_order_register($defaults) {
-        global $post;
-
-        $before = array();
-        $after = array();
-        
-        $post_type = isset($_GET['post_type']) ? $_GET['post_type'] : null;
-        if ( $post_type != wpsstm()->post_type_source ) return $defaults;
-        
-        if ( $post_type == wpsstm()->post_type_source ){
-            $after['order'] = __('Order','wpsstm');
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-
-    function column_track_match_content($column,$post_id){
-        global $post;
-        global $wpsstm_source;
-
-        switch ( $column ) {
             case 'order':
                 if ($wpsstm_source->index != -1){
                     echo $wpsstm_source->index;
@@ -485,7 +390,7 @@ class WPSSTM_Core_Sources{
             break;
         }
     }
-    
+
     //TO FIX TO enable somewhere
     function sort_sources_by_track_match($sources,WPSSTM_Track $track){
 

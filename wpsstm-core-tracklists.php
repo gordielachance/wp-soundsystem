@@ -30,10 +30,10 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_frontend' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_backend' ) );
 
-        add_filter( 'manage_posts_columns', array($this,'column_tracklist_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column', array($this,'column_tracklist_content'), 10, 2 );
-        add_filter('manage_posts_columns', array($this,'tracks_column_playlist_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'tracks_column_playlist_content'), 10, 2 );
+        add_filter( 'manage_posts_columns', array(__class__,'column_tracklist_register'), 10, 2 ); 
+        add_action( 'manage_posts_custom_column', array(__class__,'column_tracklist_content'), 10, 2 );
+
+        //TO FIX use sprintf here like other occurences of this hook ?
         add_filter( 'manage_posts_columns', array($this,'tracklist_column_lovedby_register'), 10, 2 ); 
         add_action( 'manage_posts_custom_column', array($this,'tracklist_column_lovedby_content'), 10, 2 );
         
@@ -215,7 +215,7 @@ class WPSSTM_Core_Tracklists{
         wp_send_json( $result ); 
     }
     
-    function column_tracklist_register($defaults) {
+    static public function column_tracklist_register($defaults) {
         global $post;
 
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],wpsstm()->tracklist_post_types) ){
@@ -226,7 +226,7 @@ class WPSSTM_Core_Tracklists{
     }
     
     
-    function column_tracklist_content($column,$post_id){
+    static public function column_tracklist_content($column,$post_id){
         global $post;
         global $wpsstm_tracklist;
         
@@ -241,49 +241,6 @@ class WPSSTM_Core_Tracklists{
         }
         
         echo $output;
-    }
-    
-    function tracks_column_playlist_register($defaults) {
-        global $post;
-        global $wp_query;
-
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-
-        if ( !$wp_query->get('exclude_subtracks') ){
-            $after['playlist'] = __('In playlists:','wpsstm');
-        }
-            
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-
-    
-    function tracks_column_playlist_content($column,$post_id){
-        global $post;
-
-        switch ( $column ) {
-            case 'playlist':
-                
-                $track = new WPSSTM_Track($post_id);
-
-                if ( $list = $track->get_parents_list() ){
-                    echo $list;
-                }else{
-                    echo '—';
-                }
-
-                
-            break;
-        }
     }
     
     function tracklist_column_lovedby_register($defaults) {

@@ -48,8 +48,8 @@ class WPSSTM_Core_Tracks{
         add_action( 'save_post', array($this,'metabox_save_track_settings'), 5);
         add_action( 'save_post', array($this,'metabox_save_track_sources') );
         
-        add_filter('manage_posts_columns', array($this,'tracks_column_lovedby_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'tracks_column_lovedby_content'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'track_columns_register'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content'), 10, 2 );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
 
         //tracklist shortcode
@@ -342,37 +342,65 @@ class WPSSTM_Core_Tracks{
 
         return $query;
     }
-    
-    function tracks_column_lovedby_register($defaults) {
+
+    static public function track_columns_register($defaults) {
         global $post;
 
-        $allowed_post_types = array(
-            wpsstm()->post_type_track
-        );
-        
         $before = array();
         $after = array();
         
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$allowed_post_types) ){
-            $after['track-lovedby'] = __('Loved by:','wpsstm');
-        }
+        $after['sources'] = __('Sources','wpsstm');
+        $after['track-playlists'] = __('Playlists','wpsstm');
+        $after['track-lovedby'] = __('Favorited','wpsstm');
         
         return array_merge($before,$defaults,$after);
     }
     
 
     
-    function tracks_column_lovedby_content($column,$post_id){
+    static public function tracks_columns_content($column,$post_id){
         global $post;
+        global $wpsstm_track;
         
         switch ( $column ) {
+            case 'track-playlists':
+                
+                if ( $list = $wpsstm_track->get_parents_list() ){
+                    echo $list;
+                }else{
+                    echo '—';
+                }
+
+                
+            break;
             case 'track-lovedby':
                 $output = '—';
-                $track = new WPSSTM_Track($post_id);
-                if ( $list = $track->get_loved_by_list() ){
+                
+                if ( $list = $wpsstm_track->get_loved_by_list() ){
                     $output = $list;
                 }
                 echo $output;
+            break;
+            case 'sources':
+                
+                $published_str = $pending_str = null;
+
+                $sources_published_query = $wpsstm_track->query_sources();
+                $sources_pending_query = $wpsstm_track->query_sources(array('post_status'=>'pending'));
+
+                $url = admin_url('edit.php');
+                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'publish'),$url );
+                $published_str = sprintf('<a href="%s">%d</a>',$url,$sources_published_query->post_count);
+                
+                if ($sources_pending_query->post_count){
+                    $url = admin_url('edit.php');
+                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'pending'),$url );
+                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$sources_pending_query->post_count);
+                    $pending_str = sprintf('<small> +%s</small>',$pending_link);
+                }
+                
+                echo $published_str . $pending_str;
+                
             break;
         }
     }
