@@ -314,7 +314,7 @@ class WpsstmTrack {
         this.album =                this.track_el.find('[itemprop="inAlbum"]').text();
         this.post_id =              Number(this.track_el.attr('data-wpsstm-track-id'));
         this.sources_request =      null;
-        this.autosource_time =      Number(this.track_el.attr('data-wpsstm-autosource-time'));
+        //this.autosource_time =      Number(this.track_el.attr('data-wpsstm-autosource-time'));
         this.did_sources_request =  false;
         this.sources =              [];
         this.current_source_idx =   undefined;
@@ -453,25 +453,33 @@ class WpsstmTrack {
         $('#wpsstm-player').html(media_wrapper);
     }
     
-    maybe_do_autosource(){
+    maybe_load_sources(){
 
         var self = this;
         var success = $.Deferred();
-        var can_autosource = self.tracklist.options.autosource;
+        var can_tracklist_autosource = this.tracklist.options.autosource;
         
         if (self.sources.length > 0){
+            
             success.resolve();
-        } else if ( !can_autosource ){
-            success.resolve("Autosource is disabled");
+            
+        }else if ( !can_tracklist_autosource ){
+            
+            success.resolve("Autosource is disabled for this tracklist");
+            
         } else if ( self.did_sources_request ) {
+            
             success.resolve("already did sources auto request for track #" + self.index);
+            
         } else{
-            success = self.do_autosource();
+            
+            success = self.get_track_sources_request();
+            
         }
         return success.promise();
     }
 
-    do_autosource() {
+    get_track_sources_request() {
 
         var self = this;
         var deferredObject = $.Deferred();
@@ -479,8 +487,7 @@ class WpsstmTrack {
         var track_el    = self.track_el;
         var track_instances = self.get_track_instances();
 
-        self.debug("do_autosource");
-
+        self.debug("get_track_sources_request");
 
         $(track_el).find('.wpsstm-track-sources').html('');
         track_instances.addClass('track-loading');
@@ -502,8 +509,9 @@ class WpsstmTrack {
         self.sources_request.done(function(data) {
 
             //update autosource time
-            self.autosource_time = data.timestamp;
-            track_instances.attr("data-wpsstm-autosource-time", self.autosource_time);
+            //self.autosource_time = data.timestamp;
+            //track_instances.attr("data-wpsstm-autosource-time", self.autosource_time);
+            self.did_sources_request = true;
 
             if (data.success === true){
 
@@ -533,7 +541,6 @@ class WpsstmTrack {
         })
 
         self.sources_request.always(function() {
-            self.did_sources_request = true;
             track_instances.removeClass('track-loading');
         })
         
@@ -700,13 +707,13 @@ class WpsstmTrack {
 
             self.set_bottom_trackinfo(); //bottom track info
 
-            self.maybe_do_autosource().then(
+            self.maybe_load_sources().then(
                 function(success_msg){
 
                     var source_play = self.play_first_available_source(source_idx);
 
                     source_play.done(function(v) { //fetch sources for next tracks
-                        self.tracklist.get_next_tracks_sources_auto();
+                        self.tracklist.maybe_load_queue_sources();
                         success.resolve();
                     })
                     source_play.fail(function(reason) {
