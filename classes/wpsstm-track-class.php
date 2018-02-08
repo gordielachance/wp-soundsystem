@@ -510,7 +510,8 @@ class WPSSTM_Track{
         return new WP_Query($args);
     }
     
-    function populate_sources($args=null){
+    function populate_sources(){
+
         if ($this->post_id){
             $query = $this->query_sources(array('fields'=>'ids'));
             $source_ids = $query->posts;
@@ -839,8 +840,9 @@ class WPSSTM_Track{
 
         //allow users to alter the input sources.
         $add_sources = apply_filters('wpsstm_input_sources',$add_sources,$this);
+        //$this->sources = $this->validate_sources($add_sources);
         
-        $this->sources = $add_sources; //$this->sources = $this->validate_sources($add_sources);
+        $this->sources = array_merge((array)$this->sources,$add_sources);
         $this->source_count = count($this->sources);
         
         return $add_sources;
