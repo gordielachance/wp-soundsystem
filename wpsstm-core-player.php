@@ -18,8 +18,7 @@ class WPSSTM_Core_Player{
         $slugs = array(
             'WPSSTM_Player_Provider_Native',
             'WPSSTM_Player_Provider_Youtube',
-            'WPSSTM_Player_Provider_Soundcloud',
-            //'WPSSTM_Player_Provider_Mixcloud'
+            'WPSSTM_Player_Provider_Soundcloud'
         );
         //$slugs = null;
         
@@ -96,19 +95,22 @@ class WPSSTM_Core_Player{
 class WPSSTM_Player_Provider{
     
     var $name;
-    var $slug = 'default';
+    static $slug = 'default';
     var $tuneefy_slug = ''; //slug used for the 'include' parameter when searching tracks on Tuneefy (see https://data.tuneefy.com)
     
     function __construct(){
     }
 
-    
     /*
-    Check if the provider can handle the source by returning a cleaned URL
+    Check if the provider is able to play this URL
     */
     
+    public static function can_play_source($url){
+        return false;
+    }
+
     public function get_stream_url($url){
-        
+        return $url;
     }
 
     /*
@@ -129,30 +131,29 @@ class WPSSTM_Player_Provider{
 class WPSSTM_Player_Provider_Native extends WPSSTM_Player_Provider{
     
     var $name = 'Audio';
-    var $slug = 'audio';
+    static $slug = 'audio';
     var $icon = '<i class="fa fa-file-audio-o" aria-hidden="true"></i>';
     
+    public static function can_play_source($url){
+        if ( !$ext = self::get_file_url_ext($url) ) return false;
+        
+        //check file is supported
+        $audio_extensions = wp_get_audio_extensions();
+        if ( !in_array($ext,$audio_extensions) ) return false;
+        
+        return true;
+    }
+    
     //get file URL extension
-    function get_file_url_ext($url){
+    private static function get_file_url_ext($url){
         $filetype = wp_check_filetype($url);
         if ( !$ext = $filetype['ext'] ) return;
         return $ext;
     }
-    
-    function get_stream_url($url){
-        
-        if ( !$ext = $this->get_file_url_ext($url) ) return;
-        
-        //check file is supported
-        $audio_extensions = wp_get_audio_extensions();
-        if ( !in_array($ext,$audio_extensions) ) return;
-        
-        return $url;
-    }
-    
+
     function get_source_type($url){
         
-        if ( !$ext = $this->get_file_url_ext($url) ) return;
+        if ( !$ext = self::get_file_url_ext($url) ) return;
         
         return sprintf('audio/%s',$ext);//$filetype['type'],
         
@@ -163,10 +164,14 @@ class WPSSTM_Player_Provider_Native extends WPSSTM_Player_Provider{
 class WPSSTM_Player_Provider_Youtube extends WPSSTM_Player_Provider{
     
     var $name = 'Youtube';
-    var $slug = 'youtube';
+    static $slug = 'youtube';
     var $tuneefy_slug = 'youtube';
     
-    function get_youtube_id($url){
+    public static function can_play_source($url){
+        return ( self::get_youtube_id($url) );
+    }
+    
+    public static function get_youtube_id($url){
         //youtube
         $pattern = '~http(?:s?)://(?:www.)?youtu(?:be.com/watch\?v=|.be/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?~i';
         preg_match($pattern, $url, $url_matches);
@@ -177,7 +182,7 @@ class WPSSTM_Player_Provider_Youtube extends WPSSTM_Player_Provider{
     }
     
     function get_stream_url($url){
-        if ( !$yt_id = $this->get_youtube_id($url) ) return;
+        if ( !$yt_id = self::get_youtube_id($url) ) return;
         return sprintf('https://youtube.com/watch?v=%s',$yt_id);
     }
     
@@ -191,11 +196,12 @@ class WPSSTM_Player_Provider_Youtube extends WPSSTM_Player_Provider{
 The Soundcloud Provider reacts differently if we've got a soundcloud client ID or not : either it will stream a mp3, or load the soundcloud widget and use medialement's widget renderer.
 */
 
-
+//TO FIX always use the video/soundcloud type; use audio/mp3 only to DOWNLOAD the track.
+//This would avoid an extra API call when streaming a SC track.
 class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
     
     var $name = 'Soundcloud';
-    var $slug = 'soundcloud';
+    static $slug = 'soundcloud';
     var $tuneefy_slug = 'soundcloud';
     var $client_id;
     
@@ -207,6 +213,10 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
         add_action( 'wp_enqueue_scripts',array($this,'provider_scripts_styles') );
     }
     
+    public static function can_play_source($url){
+        return ( self::get_sc_track_id($url) );
+    }
+    
     /*
     Scripts/Styles to load
     */
@@ -216,7 +226,7 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
         }
     }
 
-    private function get_sc_track_id($url){
+    private static function get_sc_track_id($url){
 
         /*
         check for souncloud API track URL
@@ -254,7 +264,7 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
         preg_match($pattern, $url, $url_matches);
         
         if ( isset($url_matches) ){
-            return $this->request_sc_track_id($url);
+            return self::request_sc_track_id($url);
         }
 
     }
@@ -266,9 +276,10 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
     //TO FIX IMPORTANT slows down the website on page load.  Rather should run when source is saved ?
     */
     
-    private function request_sc_track_id($url){
+    private static function request_sc_track_id($url){
         
-        if ( !$this->client_id ) return;
+        $client_id = wpsstm()->get_options('soundcloud_client_id');
+        if ( !$client_id ) return;
         
         $transient_name = 'wpsstm_sc_track_id_' . md5($url);
 
@@ -276,7 +287,7 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
 
             $api_args = array(
                 'url' =>        urlencode ($url),
-                'client_id' =>  $this->client_id
+                'client_id' =>  $client_id
             );
 
             $api_url = 'https://api.soundcloud.com/resolve.json';
@@ -296,7 +307,7 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
 
     function get_stream_url($url){
 
-        if ( !$track_id = $this->get_sc_track_id($url) ) return;
+        if ( !$track_id = self::get_sc_track_id($url) ) return;
 
         if ( $this->client_id ){ //stream url
             return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$this->client_id);
@@ -321,24 +332,4 @@ class WPSSTM_Player_Provider_Soundcloud extends WPSSTM_Player_Provider{
         }
     }
 
-}
-
-class WPSSTM_Player_Provider_Mixcloud extends WPSSTM_Player_Provider{
-    
-    var $name = 'Mixcloud';
-    var $slug = 'mixcloud';
-    var $tuneefy_slug = 'mixcloud';
-    var $icon = '<i class="fa fa-mixcloud" aria-hidden="true"></i>';
-    
-    function get_stream_url($url){
-        //mixcloud
-        $pattern = '~https?://(?:www\.)?mixcloud\.com/\S*~i';
-        preg_match($pattern, $url, $url_matches);
-
-        if (!$url_matches) return;
-    }
-    
-    function get_source_type($url){
-        return 'audio/mixcloud';
-    }
 }

@@ -192,22 +192,9 @@ class WPSSTM_Source{
                 $args['post_status'] = 'pending';
             }
         }
-
-        //provider
-        $this->populate_source_provider();
-
+        
         $meta_input = array(
-            WPSSTM_Core_Sources::$source_url_metakey        => $this->url,
-            WPSSTM_Core_Sources::$source_stream_metakey     => $this->stream_url,
-            WPSSTM_Core_Sources::$source_provider_metakey   => ($this->provider) ? $this->provider->slug : null,
-            
-            //also save "track" information so we can query this source even if the track has been deleted (TO FIX TO CHECK required ?)
-            /*
-            WPSSTM_Core_Artists::$artist_metakey    => $this-track->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this-track->title,
-            WPSSTM_Core_Albums::$album_metakey      => $this-track->album,
-            WPSSTM_Core_MusicBrainz::$mbid_metakey           => $this-track->mbid,
-            */
+            WPSSTM_Core_Sources::$source_url_metakey        => $this->url
         );
         
         $meta_input = array_filter($meta_input);
@@ -234,6 +221,8 @@ class WPSSTM_Source{
         
         return $this->post_id;
     }
+    
+
     
     function trash_source(){
         
@@ -312,53 +301,33 @@ class WPSSTM_Source{
     */
 
     function populate_source_provider(){
-
-        if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_stream_metakey,true) ){
-            $this->stream_url = $meta;
-        }
-
-        //try to populate it from the stored value
-        if ( $provider_slug = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_provider_metakey,true) ){
-            
-            foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
-                if ($provider_slug != $provider->slug) continue;
-                $this->provider = $provider;
-                if (!$this->stream_url && $this->url){
-                    $this->stream_url = $this->provider->get_stream_url($this->url);
-                }
-                
-                break;
-            }
-            
+        
+        if (!$this->url) return;
+        
+        //populate provider
+        $source_provider = null;
+        foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
+            if ( !$provider::can_play_source($this->url) ) continue;
+            $source_provider = $provider;
+            break;
         }
         
-        //try to find a match using the input URL
-        if ( ($this->provider->slug == 'default') && $this->url){
-            
-            foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
-
-                if ( !$match_url = $provider->get_stream_url($this->url) ) continue;
-
-                $this->provider = $provider;
-                $this->stream_url = $match_url;
-            }
-
-        }
         
-        //populate things
-        if ( $this->provider ){
-            
-            $this->type = $this->provider->get_source_type($this->stream_url);
+        if ($source_provider){
+
+            //populate stream URL
+            $this->stream_url = $source_provider->get_stream_url($this->url);
+            $this->type = $source_provider->get_source_type($this->stream_url);
             
             //set provider as title if no title set
-            if ( $this->provider && !$this->title){
-                $this->title = $this->provider->name;
+            if ( $source_provider && !$this->title){
+                $this->title = $source_provider->name;
             }
+            
+            $this->provider = $source_provider; //populate it
+            return $source_provider;
         }
-        
 
-
-        return $this->provider;
 
     }
     
@@ -391,7 +360,7 @@ class WPSSTM_Source{
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
             'data-wpsstm-track-id' =>               $this->track_id,
-            'data-wpsstm-source-provider' =>        $this->provider->slug,
+            'data-wpsstm-source-provider' =>        $this->provider::$slug,
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-type' =>            $this->type,
             'data-wpsstm-source-src' =>             $this->stream_url,

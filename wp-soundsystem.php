@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '155';
+    public $db_version = '156';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -229,10 +229,13 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
 
         }else{
+            
+            if($current_version < 151){ //rename old source URL metakeys
 
-            if ($current_version < 155){
-                $this->setup_subtracks_table();
-                $this->migrate_subtracks();
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Sources::$source_url_metakey, '_wpsstm_source' );
+
+                $result = $wpdb->get_results ( $querystr );
+                
             }
             
             if($current_version < 154){ //delete artist/album/track post title (we don't use them anymore)
@@ -242,11 +245,20 @@ class WP_SoundSystem {
                 $result = $wpdb->get_results ( $querystr );
                 
             }
+
+            if ($current_version < 155){
+                $this->setup_subtracks_table();
+                $this->migrate_subtracks();
+            }
             
-            if($current_version < 151){ //rename old source URL metakeys
-
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Sources::$source_url_metakey, '_wpsstm_source' );
-
+            if ($current_version < 156){
+                
+                //delete source provider slug metakey, now computed dynamically
+                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", '_wpsstm_source_provider' );
+                $result = $wpdb->get_results ( $querystr );
+                
+                //delete source stream URL metakey, now computed dynamically
+                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", '_wpsstm_source_stream' );
                 $result = $wpdb->get_results ( $querystr );
                 
             }

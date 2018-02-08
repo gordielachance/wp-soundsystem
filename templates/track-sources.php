@@ -12,9 +12,10 @@ if ( $wpsstm_track->have_sources() ) { ?>
             $wpsstm_track->the_source();
             global $wpsstm_source;
             
-            
-            $wpsstm_source->populate_source_provider();
-            if (!$wpsstm_source->url) continue;
+            $provider = $wpsstm_source->populate_source_provider();
+
+            if ( !$wpsstm_source->populate_source_provider() ) continue;
+
             $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
 
             ?>

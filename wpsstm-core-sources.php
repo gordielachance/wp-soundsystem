@@ -4,8 +4,6 @@ class WPSSTM_Core_Sources{
 
     var $providers = array();
     static $source_url_metakey = '_wpsstm_source_url';
-    static $source_stream_metakey = '_wpsstm_source_stream';
-    static $source_provider_metakey = '_wpsstm_source_provider';
     static $qvar_source_action = 'source-action';
 
     function __construct() {
@@ -22,7 +20,7 @@ class WPSSTM_Core_Sources{
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
         
         add_action( 'save_post', array($this,'metabox_parent_track_save')); 
-        add_action( 'save_post', array($this,'metabox_source_url_save')); 
+        add_action( 'save_post', array($this,'metabox_source_url_save'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
