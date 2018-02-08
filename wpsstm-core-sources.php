@@ -455,7 +455,7 @@ class WPSSTM_Core_Sources{
         );
 
         $source = new WPSSTM_Source($ajax_data['post_id']);
-        $success = $source->delete_source();
+        $success = $source->trash_source();
         
         if ( is_wp_error($success) ){
             

@@ -238,7 +238,7 @@ class WpsstmTrackSource {
                     
                     e.preventDefault();
                     var source_el = $(this).parents('[data-wpsstm-source-idx]');
-                    source_el.deleteSources();
+                    source_el.trashSources();
 
                 });
                 
@@ -266,7 +266,7 @@ class WpsstmTrackSource {
                 
             });
         },
-        deleteSources: function(options){
+        trashSources: function(options){
             
             // OPTIONS
             var defaults = {};

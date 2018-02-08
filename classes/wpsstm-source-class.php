@@ -99,14 +99,11 @@ class WPSSTM_Source{
             'post_type'         => array(wpsstm()->post_type_source),
 
             'meta_query'        => array(
-                'relation' => 'OR',
                 //by source URL
                 'source_url' => array(
                     'key'     => WPSSTM_Core_Sources::$source_url_metakey,
                     'value'   => $this->url
-                ),
-                //by track info, TO FIX TO CHECK required ?
-                //$query_meta_trackinfo,
+                )
             )
         );
         
@@ -148,6 +145,7 @@ class WPSSTM_Source{
 
         //check for duplicates
         $duplicates = $this->get_source_duplicates_ids();
+
         if ( !empty($duplicates) ){
             $source_id = $duplicates[0];
         }else{
@@ -237,7 +235,7 @@ class WPSSTM_Source{
         return $this->post_id;
     }
     
-    function delete_source(){
+    function trash_source(){
         
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
@@ -251,7 +249,7 @@ class WPSSTM_Source{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
         }
         
-        return wp_delete_post( $this->post_id );
+        return wp_trash_post( $this->post_id );
     }
     
     /*
