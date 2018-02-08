@@ -520,62 +520,6 @@ class WPSSTM_Track{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
     }
-    
-    protected function get_sources_auto(){
-
-        if ( !$this->artist ){
-            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
-        }
-        
-        if ( !$this->title ){
-            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing.','wpsstm') );
-        }
-
-        $auto_sources = array();
-        $tuneefy_providers = array();
-
-        //tuneefy providers slugs
-        foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
-            $tuneefy_providers[] = $provider->tuneefy_slug;
-        }
-        
-        $tuneefy_providers = array_filter($tuneefy_providers);
-        
-        $tuneefy_args = array(
-            'q' =>          urlencode($this->artist . ' ' . $this->title),
-            'mode' =>       'lazy',
-            'aggressive' => 'true', //merge tracks (ignore album)
-            'include' =>    implode(',',$tuneefy_providers),
-            'limit' =>      5
-        );
-
-        $api = WPSSTM_Core_Sources::tuneefy_api_aggregate('track',$tuneefy_args);
-        if ( is_wp_error($api) ) return $api;
-
-        $items = wpsstm_get_array_value(array('results'),$api);
-        
-        //wpsstm()->debug_log( json_encode($items), "get_sources_auto");
-
-        //TO FIX have a more consistent extraction of datas ?
-        foreach( (array)$items as $item ){
-            
-            $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
-            $first_provider =       reset($links_by_providers);
-            $first_link =           reset($first_provider);
-            
-            $source = new WPSSTM_Source();
-            $source->track_id = $this->post_id;
-            $source->url = $first_link;
-            $source->title = wpsstm_get_array_value(array('musical_entity','title'),$item);
-
-            $auto_sources[] = $source;
-            
-        }
-
-        //allow plugins to filter this
-        return apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
-        
-    }
 
     function autosource(){
 
@@ -586,6 +530,14 @@ class WPSSTM_Track{
         $can_autosource = WPSSTM_Core_Sources::can_autosource();
         if ( is_wp_error($can_autosource) ){
             return $can_autosource;
+        }
+        
+        if ( !$this->artist ){
+            return new WP_Error( 'wpsstm_track_no_artist', __('Autosourcing requires track artist.','wpsstm') );
+        }
+        
+        if ( !$this->title ){
+            return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
         }
 
         //track does not exists yet, create it
@@ -598,29 +550,32 @@ class WPSSTM_Track{
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
         
-        //fetch sources
-        $new_sources = $this->get_sources_auto();
-        if ( is_wp_error($new_sources) ) return $new_sources;
-        
-        $source_args = array(
-            'post_author'   => wpsstm()->get_options('community_user_id')
-        );
+        //hook so resolvers can populate their sources here
+        $new_sources = array();
+        $new_sources = apply_filters('wpsstm_get_track_sources_auto',$new_sources,$this);
 
-        //insert sources
-        foreach((array)$new_sources as $source){
+        if ($new_sources){
             
-            $source_id = $source->save_unique_source($source_args);
+            //limit autosource results
+            $max_autosource_items = 5; //TO FIX as option
+            $new_sources = array_slice($new_sources, 0, $max_autosource_items);
 
-            if ( is_wp_error($source_id) ){
-                $code = $source_id->get_error_code();
-                $error_msg = $source_id->get_error_message($code);
-                wpsstm()->debug_log( $error_msg, "WPSSTM_Track::autosource");
-                continue;
+            //insert sources
+            foreach($new_sources as $source){
+
+                $source_id = $source->save_unique_source();
+
+                if ( is_wp_error($source_id) ){
+                    $code = $source_id->get_error_code();
+                    $error_msg = $source_id->get_error_message($code);
+                    wpsstm()->debug_log( $error_msg, "WPSSTM_Track::autosource - error while saving source");
+                    continue;
+                }
             }
+
+            //reload sources
+            $this->populate_sources();
         }
-        
-        //reload sources
-        $this->populate_sources();
 
         return $this->post_id;
 

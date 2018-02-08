@@ -33,7 +33,6 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 = Track Sources =
 
 If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
-This requires a [Tuneefy account](https://data.tuneefy.com).
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
@@ -91,7 +90,6 @@ This would be very appreciated — Thanks !
 
 = Dependencies =
 
-* [Tuneefy](https://data.tuneefy.com/) - API used to autosource
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
@@ -163,7 +161,6 @@ There is an option in the plugin settings to flush those community tracks : they
 
 = 1.9.2 =
 * Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
-* Autosource : use Tuneefy API (https://data.tuneefy.com/).
 
 = 1.9.1 =
 * Improve popup template

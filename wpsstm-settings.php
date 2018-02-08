@@ -137,11 +137,7 @@ class WPSSTM_Settings {
             
             //youtube
             $new_input['youtube_api_key'] = ( isset($input['youtube_api_key']) ) ? trim($input['youtube_api_key']) : null;
-            
-            //tuneefy
-            $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
-            $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
-            
+
             //spotify
             $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
             $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
@@ -386,15 +382,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'settings_apis'
         );
-        
-        add_settings_field(
-            'tuneefy_client', 
-            __('Tuneefy'), 
-            array( $this, 'tuneefy_client_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_apis'
-        );
-        
+
         add_settings_field(
             'spotify_client', 
             __('Spotify'), 
@@ -566,7 +554,7 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
             __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
-            __("This requires a Tuneefy client ID & secret (see below); and the community user ID to be set.","wpsstm")
+            __("This requires a community user ID to be set.","wpsstm")
         );
         
         /*
@@ -811,32 +799,7 @@ class WPSSTM_Settings {
         );
 
     }
-    
-    function tuneefy_client_callback(){
-        $client_id = wpsstm()->get_options('tuneefy_client_id');
-        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
-        $new_app_link = 'https://data.tuneefy.com/#header-oauth';
-        
-        $desc = sprintf(__('Required for autosourcing. Request your Tuneefy credentials %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
-        printf('<p><small>%s</small></p>',$desc);
-        
-        //client ID
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_id]" value="%s" /></p>',
-            __('Client ID:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_id
-        );
-        
-        //client secret
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_secret
-        );
-    }
-    
+
     function spotify_client_callback(){
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');

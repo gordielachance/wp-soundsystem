@@ -134,7 +134,7 @@ class WPSSTM_Source{
     /*
     Save source only if it does not exists yet
     */
-    function save_unique_source($args = null){
+    function save_unique_source(){
         
         //sanitize
         $sanitized = $this->sanitize_source();
@@ -149,61 +149,37 @@ class WPSSTM_Source{
         if ( !empty($duplicates) ){
             $source_id = $duplicates[0];
         }else{
-            $source_id = $this->save_source($args);
+            $source_id = $this->save_source();
         }
         return $source_id;
     }
 
-    function save_source($args = null){
+    function save_source(){
         $sanitized = $this->sanitize_source();
         if ( is_wp_error($sanitized) ) return $sanitized;
-
-        $default_args = array(
-            'post_author' =>    get_current_user_id(),
-            'post_status' =>    'publish',
-        );
-
-        $args = wp_parse_args((array)$args,$default_args);
+        
+        $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
         $required_cap = $post_type_obj->cap->edit_posts;
 
-        if ( !user_can($args['post_author'],$required_cap) ){
+        if ( !user_can($post_author,$required_cap) ){
             return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit sources.",'wpsstm') );
         }
-        
-        //specific checks for community sources
-        
-        if ( $args['post_author'] == wpsstm()->get_options('community_user_id') ){
-            
-            $has_banned_word = $lacks_artist = false;
-            
-            if ( wpsstm()->get_options('autosource_filter_ban_words') == 'on' ){
-                $has_banned_word = $this->source_has_banned_word();
-            }
-            
-            if ( wpsstm()->get_options('autosource_filter_requires_artist') == 'on' ){
-                $lacks_artist = $this->source_lacks_track_artist();
-            }
-            
-            //this is not a good source.  Set it as pending.
-            if ( $has_banned_word || $lacks_artist ){
-                $args['post_status'] = 'pending';
-            }
-        }
-        
-        $meta_input = array(
-            WPSSTM_Core_Sources::$source_url_metakey        => $this->url
-        );
-        
-        $meta_input = array_filter($meta_input);
 
+        $args = array(
+            'post_author' =>    $post_author,
+            'post_status' =>    'publish',
+        );
+ 
         $required_args = array(
             'post_title' =>     $this->title,
             'post_type' =>      wpsstm()->post_type_source,
             'post_parent' =>    $this->track_id,
-            'meta_input' =>     $meta_input,
+            'meta_input' =>     array(
+                WPSSTM_Core_Sources::$source_url_metakey => $this->url
+            )
         );
             
         $args = wp_parse_args($required_args,$args);
@@ -239,60 +215,6 @@ class WPSSTM_Source{
         }
         
         return wp_trash_post( $this->post_id );
-    }
-    
-    /*
-    Source have one word of the banned words list in their titles (eg 'cover').
-    */
-    
-    function source_has_banned_word(){
-        
-        $track = new WPSSTM_Track($this->track_id);
-        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
-
-        foreach((array)$ban_words as $word){
-            
-            //this track HAS the word in its title; (the cover IS a cover), abord
-            $ignore_this_word = stripos($track->title, $word);//case insensitive
-            if ( $ignore_this_word ) continue;
-            
-            //check source for the word
-            $source_has_word = stripos($this->title, $word);//case insensitive
-            if ( !$source_has_word ) continue;
-            
-            wpsstm()->debug_log( json_encode( array('source_title'=>$this->title,'word'=>$word),JSON_UNESCAPED_UNICODE ), "WPSSTM_Source::source_has_banned_word()");
-            
-            return true;
-        }
-
-        return false;
-    }
-    
-    /*
-    The track artist is not contained in the source title
-    https://stackoverflow.com/questions/44791191/how-to-use-similar-text-in-a-difficult-context
-    */
-    
-    function source_lacks_track_artist(){
-        
-        $track = new WPSSTM_Track($this->track_id);
-
-        /*TO FIX check if it works when artist has special characters like / or &
-        What if the artist is written a little differently ?
-        We should compare text somehow here and accept a certain percent match.
-        */
-
-        //sanitize data so it is easier to compare
-        $source_sanitized = sanitize_title($this->title);
-        $artist_sanitized = sanitize_title($track->artist);
-
-        if (strpos($source_sanitized, $artist_sanitized) === false) {
-            wpsstm()->debug_log( json_encode( array('artist'=>$track->artist,'artist_sanitized'=>$artist_sanitized,'title'=>$track->title,'source_title'=>$this->title,'source_title_sanitized'=>$source_sanitized),JSON_UNESCAPED_UNICODE ), "WPSSTM_Source::source_lacks_track_artist()");
-            return true;
-        }
-
-        return false;
-
     }
     
     /*

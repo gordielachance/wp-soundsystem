@@ -97,8 +97,6 @@ class WP_SoundSystem {
             'spotify_client_secret'             => null,
             'soundcloud_client_id'              => null,
             'soundcloud_client_secret'          => null,
-            'tuneefy_client_id'                 => null,
-            'tuneefy_client_secret'             => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
@@ -136,6 +134,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
         require $this->plugin_dir . 'wpsstm-core-sources.php';
+        require $this->plugin_dir . 'wpsstm-core-autosource.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
@@ -166,6 +165,7 @@ class WP_SoundSystem {
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
         new WPSSTM_Core_Sources();
+        new WPSSTM_Core_Autosource();
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
@@ -193,6 +193,15 @@ class WP_SoundSystem {
         
         add_filter( 'template_include', array($this,'popup_template'));
 
+        //TOFIXKKK
+        //add_action( 'wp', array($this,'autosource_test'));
+
+    }
+    
+    function autosource_test(){
+        if ( is_admin() ) return;
+        $track = new WPSSTM_Track(55724);
+        $track->autosource();
     }
     
     function add_wpsstm_query_vars($vars){
