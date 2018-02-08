@@ -1076,6 +1076,20 @@ class WPSSTM_Tracklist{
             printf('<meta itemprop="%s" content="%s"/>',$key,$value);
         }
     }
+    
+    function get_loved_by_list(){
+        $links = array();
+        $output = null;
+        if ( $user_ids = $this->get_tracklist_loved_by() ){
+            foreach($user_ids as $user_id){
+                $user_info = get_userdata($user_id);
+                $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
+            }
+            $output = implode(', ',$links);
+        }
+        return $output;
+    }
+    
 }
 
 class WPSSTM_Single_Track_Tracklist extends WPSSTM_Tracklist{

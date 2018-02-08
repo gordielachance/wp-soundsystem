@@ -48,8 +48,8 @@ class WPSSTM_Core_Tracks{
         add_action( 'save_post', array($this,'metabox_save_track_settings'), 5);
         add_action( 'save_post', array($this,'metabox_save_track_sources') );
         
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'track_columns_register'), 10, 2 );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
 
         //tracklist shortcode
@@ -343,7 +343,7 @@ class WPSSTM_Core_Tracks{
         return $query;
     }
 
-    static public function track_columns_register($defaults) {
+    static public function tracks_columns_register($defaults) {
         global $post;
 
         $before = array();
@@ -358,7 +358,7 @@ class WPSSTM_Core_Tracks{
     
 
     
-    static public function tracks_columns_content($column,$post_id){
+    static public function tracks_columns_content($column){
         global $post;
         global $wpsstm_track;
         
@@ -389,12 +389,12 @@ class WPSSTM_Core_Tracks{
                 $sources_pending_query = $wpsstm_track->query_sources(array('post_status'=>'pending'));
 
                 $url = admin_url('edit.php');
-                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'publish'),$url );
+                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'publish'),$url );
                 $published_str = sprintf('<a href="%s">%d</a>',$url,$sources_published_query->post_count);
                 
                 if ($sources_pending_query->post_count){
                     $url = admin_url('edit.php');
-                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$post_id,'post_status'=>'pending'),$url );
+                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'pending'),$url );
                     $pending_link = sprintf('<a href="%s">%d</a>',$url,$sources_pending_query->post_count);
                     $pending_str = sprintf('<small> +%s</small>',$pending_link);
                 }

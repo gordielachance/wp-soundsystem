@@ -18,9 +18,9 @@ class WPSSTM_Core_Live_Playlists{
 
         //listing
         add_filter( 'pre_get_posts', array($this, 'sort_live_playlists'));
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 5);
-        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 5);
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 5, 2);
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 11 );
+        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 11 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 11 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
         
@@ -185,13 +185,16 @@ class WPSSTM_Core_Live_Playlists{
         return $columns;
     }
     
-    function post_column_content($column_name, $post_id){
+    function post_column_content($column){
         
-        if ( !in_array($column_name,array('health','requests-month','requests-total')) ) return;
+        global $wpsstm_tracklist;
+        $post_id = $wpsstm_tracklist->post_id;
+        
+        if ( !in_array($column,array('health','requests-month','requests-total')) ) return;
         
         $output = '—';
         
-        switch($column_name){
+        switch($column){
             //health
             case 'health':
 

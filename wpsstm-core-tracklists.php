@@ -30,13 +30,17 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_frontend' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_backend' ) );
 
-        add_filter( 'manage_posts_columns', array(__class__,'column_tracklist_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column', array(__class__,'column_tracklist_content'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
 
-        //TO FIX use sprintf here like other occurences of this hook ?
-        add_filter( 'manage_posts_columns', array($this,'tracklist_column_lovedby_register'), 10, 2 ); 
-        add_action( 'manage_posts_custom_column', array($this,'tracklist_column_lovedby_content'), 10, 2 );
-        
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'favorited_tracklist_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'favorited_tracklist_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
+
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(__class__,'tracklists_columns_content') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
+
         //tracklist queries
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
         add_action( 'current_screen',  array($this, 'the_single_backend_tracklist'));
@@ -214,64 +218,45 @@ class WPSSTM_Core_Tracklists{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
-    
-    static public function column_tracklist_register($defaults) {
-        global $post;
 
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],wpsstm()->tracklist_post_types) ){
-            $defaults['tracklist'] = __('Tracklist','wpsstm');
-        }
-        
-        return $defaults;
-    }
-    
-    
-    static public function column_tracklist_content($column,$post_id){
-        global $post;
-        global $wpsstm_tracklist;
-        
-        if ($column != 'tracklist') return;
-
-        $wpsstm_tracklist->options['autoplay'] =    false;
-        $wpsstm_tracklist->options['autosource'] =  false;
-        $wpsstm_tracklist->options['can_play'] =    false;
-
-        if ( !$output = $wpsstm_tracklist->get_tracklist_html() ){
-            $output = '—';
-        }
-        
-        echo $output;
-    }
-    
-    function tracklist_column_lovedby_register($defaults) {
+    public static function tracks_count_column_register($defaults) {
         global $post;
 
         $before = array();
         $after = array();
         
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],wpsstm()->tracklist_post_types) ){
-            $after['tracklist-lovedby'] = __('Loved by:','wpsstm');
-        }
+        $after['tracks-count'] = __('Tracks','wpsstm');
         
         return array_merge($before,$defaults,$after);
     }
     
-    function tracklist_column_lovedby_content($column,$post_id){
+    public static function favorited_tracklist_column_register($defaults) {
         global $post;
 
+        $before = array();
+        $after = array();
+        
+        $after['tracklist-favorited'] = __('Favorited','wpsstm');
+        
+        return array_merge($before,$defaults,$after);
+    }
+    
+    public static function tracklists_columns_content($column){
+        global $wpsstm_tracklist;
+
         switch ( $column ) {
-            case 'tracklist-lovedby':
+            case 'tracks-count':
+                $wpsstm_tracklist->populate_subtracks();
+                echo $wpsstm_tracklist->track_count;
+                
+            break;
+            case 'tracklist-favorited':
                 $output = '—';
-                $tracklist = wpsstm_get_post_tracklist( $post_id );
-                $links = array();
-                if ( $user_ids = $tracklist->get_tracklist_loved_by() ){
-                    foreach($user_ids as $user_id){
-                        $user_info = get_userdata($user_id);
-                        $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
-                    }
-                    $output = implode(', ',$links);
+                if ($list = $wpsstm_tracklist->get_loved_by_list() ){
+                    $output = $list;
                 }
                 echo $output;
+
             break;
         }
 
