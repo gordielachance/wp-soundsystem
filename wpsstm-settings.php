@@ -135,6 +135,9 @@ class WPSSTM_Settings {
             Other APIs
             */
             
+            //youtube
+            $new_input['youtube_api_key'] = ( isset($input['youtube_api_key']) ) ? trim($input['youtube_api_key']) : null;
+            
             //tuneefy
             $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
             $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
@@ -374,6 +377,14 @@ class WPSSTM_Settings {
             __('Other APIs','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'youtube_api', 
+            __('Youtube API key'), 
+            array( $this, 'youtube_api_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
         );
         
         add_settings_field(
@@ -781,6 +792,22 @@ class WPSSTM_Settings {
             __('Shared secret:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
+        );
+
+    }
+    
+    function youtube_api_callback(){
+        $api_key = wpsstm()->get_options('youtube_api_key');
+        $new_app_link = 'https://console.developers.google.com';
+        
+        $desc = sprintf(__('Required for autosourcing. Request your Youtube API key %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[youtube_api_key]" value="%s" /></p>',
+            __('API key:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $api_key
         );
 
     }
