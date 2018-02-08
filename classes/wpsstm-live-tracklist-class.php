@@ -386,6 +386,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         $response_type = $this->get_response_type();
         $response_body = $this->get_response_body();
+        
+        if ( is_wp_error($response_body) ) return $response_body;
 
         libxml_use_internal_errors(true); //TO FIX TO CHECK should be in the XML part only ?
         
@@ -464,7 +466,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 try{
                     $result = qp( $response_body, 'body', self::$querypath_options );
                 }catch(Exception $e){
-                    return WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
                 }
                 
             break;

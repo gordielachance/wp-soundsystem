@@ -347,12 +347,11 @@ class WPSSTM_Core_Tracklists{
                 
                 if ( !is_wp_error($track_id) ){
                     $success = $tracklist->append_subtrack_ids($track_id);
-                    
-                    //TO FIX TO CHECK redirection is not working when using get_edit_post_link()
-                    //$redirect_url = get_edit_post_link( $track_id );
+
+                    //$redirect_url = get_edit_post_link( $track_id ); //NOT WORKING; see https://stackoverflow.com/a/47038586/782013
                     $redirect_url = admin_url( '/post.php?post=' . $track_id . '&action=edit' );
                     
-                    wp_safe_redirect($redirect_url); //TOFIXKKK not working why ?
+                    wp_safe_redirect($redirect_url);
                     exit();
                 }
                 
