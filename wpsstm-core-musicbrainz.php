@@ -330,8 +330,8 @@ class WPSSTM_Core_MusicBrainz {
         
     }
     
-    function metabox_mb_entries_content($post){
-        $this->load_api_errors($post);
+    public static function metabox_mb_entries_content($post){
+        self::load_api_errors($post);
 
         settings_errors('wpsstm_mb-entries');
 
@@ -692,7 +692,7 @@ class WPSSTM_Core_MusicBrainz {
         
     }
     
-    function load_api_errors($post){
+    private static function load_api_errors($post){
         $api_errors = get_post_meta( $post->ID,self::$mb_api_errors_meta_name);
                             
         foreach((array)$api_errors as $error){

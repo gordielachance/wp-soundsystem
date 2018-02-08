@@ -843,12 +843,14 @@ class WPSSTM_Core_Tracks{
         
         //new source URLs
         $source_urls = isset($_POST['wpsstm_new_track_sources']) ? $_POST['wpsstm_new_track_sources'] : array();
+        $new_sources = array();
         
         foreach((array)$source_urls as $url){
             $source = new WPSSTM_Source();
             $source->track_id = $post_id;
             $source->url = $url;
             $source->save_unique_source();//save only if it does not exists yet
+            $new_sources[] = $source;
         }
         
         //autosource
