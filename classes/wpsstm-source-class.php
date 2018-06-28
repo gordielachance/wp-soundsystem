@@ -1,37 +1,45 @@
 <?php
 class WPSSTM_Source{
     var $post_id;
-    var $track_id;
+    
     var $index = -1;
-    var $title;
+    
+    var $title; //source title (as they might appear on Youtube or Soundcloud, for example; when there is no artist + track title)
+    var $title_artist; //if available, the artist name
+    var $title_track; //if available, the track name
+    
     var $is_community; //TRUE if source was populated automatically
-    var $url; //source link
+    var $permalink_url; //source link
     var $stream_url;
-    var $provider;
-    var $type;
-    var $match;
+    var $download_url;
+    var $mime_type;
+    var $duration; //in seconds
+    var $match;  //weight
+    var $tags = array(); //array of tags that we could use to filter the sources, eg. remix,official,live,cover,acoustic,demo, ...
+    var $weights = array();
+    var $weight = 1;
+    
+    var $track_id;
 
     function __construct($post_id = null){
-        
-        $this->provider = new WPSSTM_Player_Provider(); //default
 
         if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
             $this->post_id = (int)$post_id;
             $this->title = get_the_title($post_id);
-            $this->track_id = wp_get_post_parent_id( $post_id );
 
-            $this->url = get_post_meta($post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
+            $this->permalink_url = get_post_meta($post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
 
-            $this->match = $this->get_track_match();
-            
             if ($this->index == -1){ //if not set yet
                 $this->index = get_post_field('menu_order', $this->post_id);
             }
-
+            
+            $this->track_id = wp_get_post_parent_id( $this->post_id );
         }
 
     }
+
     
+    //TOFIXKKK
     function get_default(){
         return array(
             'post_id'       => null,
@@ -71,15 +79,13 @@ class WPSSTM_Source{
     Get the sources that have the same URL or track informations than the current one
     */
     function get_source_duplicates_ids($args=null){
-        
-        $track = new WPSSTM_Track($this->track_id);
-        
+
         /*
         $query_meta_trackinfo = array(
             'relation' => 'AND',
-            WPSSTM_Core_Artists::$artist_metakey    => $track->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $track->title,
-            WPSSTM_Core_Albums::$album_metakey      => $track->album,
+            WPSSTM_Core_Artists::$artist_metakey    => $this->track->artist,
+            WPSSTM_Core_Tracks::$title_metakey      => $this->track->title,
+            WPSSTM_Core_Albums::$album_metakey      => $this->track->album,
         );
         $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         */
@@ -95,14 +101,14 @@ class WPSSTM_Source{
 
         $required = array(
             'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current source
-            'post_parent'       => $track->post_id,
+            'post_parent'       => $this->track_id,
             'post_type'         => array(wpsstm()->post_type_source),
 
             'meta_query'        => array(
                 //by source URL
                 'source_url' => array(
                     'key'     => WPSSTM_Core_Sources::$source_url_metakey,
-                    'value'   => $this->url
+                    'value'   => $this->permalink_url
                 )
             )
         );
@@ -114,17 +120,18 @@ class WPSSTM_Source{
     }
     
     function sanitize_source(){
+        
         if (!$this->track_id){
             return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
         }
         
-        $this->url = trim($this->url);
+        $this->permalink_url = trim($this->permalink_url);
         
-        if (!$this->url){
+        if (!$this->permalink_url){
             return new WP_Error( 'no_url', __('Unable to save source : missing URL','wpsstm') );
         }
         
-        if ( !filter_var($this->url, FILTER_VALIDATE_URL) ){
+        if ( !filter_var($this->permalink_url, FILTER_VALIDATE_URL) ){
             return new WP_Error( 'no_valid_url', __('Unable to save source : bad URL','wpsstm') );
         }
 
@@ -178,7 +185,7 @@ class WPSSTM_Source{
             'post_type' =>      wpsstm()->post_type_source,
             'post_parent' =>    $this->track_id,
             'meta_input' =>     array(
-                WPSSTM_Core_Sources::$source_url_metakey => $this->url
+                WPSSTM_Core_Sources::$source_url_metakey => $this->permalink_url
             )
         );
             
@@ -216,66 +223,7 @@ class WPSSTM_Source{
         
         return wp_trash_post( $this->post_id );
     }
-    
-    /*
-    Populate provider and stream URL.
-    This should be called only when necessary since provider could do API requests to get the stream URL.
-    */
 
-    function populate_source_provider(){
-        
-        if (!$this->url) return;
-        
-        //populate provider
-        $source_provider = null;
-        foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
-            if ( !$provider::can_play_source($this->url) ) continue;
-            $source_provider = $provider;
-            break;
-        }
-        
-        
-        if ($source_provider){
-
-            //populate stream URL
-            $this->stream_url = $source_provider->get_stream_url($this->url);
-            $this->type = $source_provider->get_source_type($this->stream_url);
-            
-            //set provider as title if no title set
-            if ( $source_provider && !$this->title){
-                $this->title = $source_provider->name;
-            }
-            
-            $this->provider = $source_provider; //populate it
-            return $source_provider;
-        }
-
-
-    }
-    
-    function get_track_match(){
-        
-        $track = new WPSSTM_Track($this->track_id);
-        
-        //TO FIX what if source has been populated at tracklist request ? Should be 100% ?
-
-        //sanitize data so it is easier to compare
-        $source_title_sanitized = sanitize_title($this->title);
-        $track_artist_sanitized = sanitize_title($track->artist);
-        $track_title_sanitized = sanitize_title($track->title);
-
-        //remove artist from source title so the string to compare is shorter
-        $maybe_remove_artist = str_replace($track_artist_sanitized,"", $source_title_sanitized,$count);
-        if ($count){
-            $source_title_sanitized = $maybe_remove_artist;
-        }
-        
-        //TO FIX remove banned words from source title and track title before compare ?
-
-        similar_text($source_title_sanitized, $track_title_sanitized, $similarity_pc);
-        return round($similarity_pc);
-    }
-    
     function get_single_source_attributes(){
         global $wpsstm_track;
         
@@ -284,10 +232,10 @@ class WPSSTM_Source{
             'data-wpsstm-track-id' =>               $this->track_id,
             'data-wpsstm-source-provider' =>        $this->provider::$slug,
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
-            'data-wpsstm-source-type' =>            $this->type,
             'data-wpsstm-source-src' =>             $this->stream_url,
+            'data-wpsstm-source-type' =>            $this->get_source_mimetype(),
             'data-wpsstm-community-source' =>       (int)wpsstm_is_community_post($this->post_id),
-            'class'                 =>              implode( ' ',$this->get_source_class() ),
+            'class' =>                              implode( ' ',$this->get_source_class() ),
         );
         return $attr;
     }
@@ -325,7 +273,7 @@ class WPSSTM_Source{
         
         $actions['provider'] = array(
             'text' =>       $this->provider->name,
-            'href' =>       $this->url,
+            'href' =>       $this->permalink_url,
             'target' =>     '_blank',
         );
 
@@ -354,7 +302,29 @@ class WPSSTM_Source{
 
         return apply_filters('wpsstm_source_actions',$actions,$context);
     }
-    
-    
+
+    function get_source_mimetype(){
+        if ($this->mime_type !== null) return $this->mime_type; //already populated
+        $mime = false;
+        
+        //audio file
+        $filetype = wp_check_filetype($this->permalink_url);
+        if ( $ext = $filetype['ext'] ){
+            $audio_extensions = wp_get_audio_extensions();
+            if ( in_array($ext,$audio_extensions) ){
+                $mime = sprintf('audio/%s',$ext);
+            }
+        }
+
+        $this->mime_type = apply_filters('wpsstm_get_source_mimetype',$mime,$this);
+        return $this->mime_type;
+    }
+
+    function get_source_icon(){
+        if ($this->icon !== null) return $this->icon;
+        $icon = '<i class="fa fa-file-audio-o" aria-hidden="true"></i>';
+        $this->icon = apply_filters('wpsstm_get_source_icon',$icon,$this);
+        return $this->icon;
+    }
 
 }

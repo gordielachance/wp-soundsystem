@@ -38,7 +38,7 @@ class WPSSTM_Track{
             $this->album        = wpsstm_get_post_album($post_id);
             $this->mbid         = wpsstm_get_post_mbid($post_id);
             $this->image_url    = wpsstm_get_post_image_url($post_id);
-
+            $this->duration     = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
         }
 
         
@@ -330,7 +330,7 @@ class WPSSTM_Track{
         foreach ((array)$this->sources as $source_raw){
             
             $source = new WPSSTM_Source();
-            $source->track = $this;
+            $source->track_id = $this->post_id;
             
             $source->from_array($source_raw);         
         }
@@ -519,66 +519,6 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
-    }
-
-    function autosource(){
-
-        if ( wpsstm()->get_options('autosource') != 'on' ){
-            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
-        }
-        
-        $can_autosource = WPSSTM_Core_Sources::can_autosource();
-        if ( is_wp_error($can_autosource) ){
-            return $can_autosource;
-        }
-        
-        if ( !$this->artist ){
-            return new WP_Error( 'wpsstm_track_no_artist', __('Autosourcing requires track artist.','wpsstm') );
-        }
-        
-        if ( !$this->title ){
-            return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
-        }
-
-        //track does not exists yet, create it
-        if ( !$this->post_id ){
-            $success = $this->save_track();
-            if ( is_wp_error($success) ) return $success;
-        }
-
-        //save time autosourced
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
-        
-        //hook so resolvers can populate their sources here
-        $new_sources = array();
-        $new_sources = apply_filters('wpsstm_get_track_sources_auto',$new_sources,$this);
-
-        if ($new_sources){
-            
-            //limit autosource results
-            $max_autosource_items = 5; //TO FIX as option
-            $new_sources = array_slice($new_sources, 0, $max_autosource_items);
-
-            //insert sources
-            foreach($new_sources as $source){
-
-                $source_id = $source->save_unique_source();
-
-                if ( is_wp_error($source_id) ){
-                    $code = $source_id->get_error_code();
-                    $error_msg = $source_id->get_error_message($code);
-                    wpsstm()->debug_log( $error_msg, "WPSSTM_Track::autosource - error while saving source");
-                    continue;
-                }
-            }
-
-            //reload sources
-            $this->populate_sources();
-        }
-
-        return $this->post_id;
-
     }
     
     private function get_new_track_url(){

@@ -301,7 +301,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Improved wizard backend & frontend
 * Removed class 'WPSSTM_Subtrack': cleaner to handle everything with WPSSTM_Track
 * removed WPSSTM_TracksList_Admin_Table, now everything is handled by WPSSTM_Tracklist_Table
-* Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
+* Abord auto_auto_mbid() for tracks when saving subtracks (too slow); or if post is trashed
 * improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)

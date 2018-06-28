@@ -15,7 +15,7 @@ class WPSSTM_Core_MusicBrainz {
 
         add_action( 'add_meta_boxes', array(__class__, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array(__class__,'metabox_mbid_save'), 7);
-        add_action( 'save_post', array(__class__,'auto_set_mbid'), 8);
+        add_action( 'save_post', array(__class__,'auto_mbid_on_post_save'), 8);
         add_action( 'save_post', array(__class__,'metabox_mbdata_save'), 9);
 
         add_filter( 'pre_get_posts', array(__class__,'pre_get_posts_mbid') );
@@ -442,10 +442,8 @@ class WPSSTM_Core_MusicBrainz {
 
         switch ($action){
             case 'autoguess-id':
-                $mbid = self::guess_mbid( $post_id );
+                $mbid = self::auto_mbid( $post_id );
                 if ( is_wp_error($mbid) ) break;
-                update_post_meta( $post_id, self::$mbid_metakey, $mbid );
-                self::reload_mb_datas($post_id);
             break;
         }
         
@@ -640,7 +638,7 @@ class WPSSTM_Core_MusicBrainz {
     When saving an artist / track / album and that no MBID exists, guess it - if option enabled
     */
     
-    public static function auto_set_mbid( $post_id ){
+    public static function auto_mbid_on_post_save( $post_id ){
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
@@ -666,21 +664,17 @@ class WPSSTM_Core_MusicBrainz {
         if ($value) return;
         
         //get auto mbid
-        $mbid = self::guess_mbid( $post_id );
+        $mbid = self::auto_mbid( $post_id );
         if ( is_wp_error($mbid) ) return $mbid;
         
         if($mbid){
-            $mbid = update_post_meta( $post_id, self::$mbid_metakey, $mbid );
-            add_filter( 'redirect_post_location', array(__class__,'after_auto_set_mbid_redirect') );
+            add_filter( 'redirect_post_location', array(__class__,'after_auto_mbid_redirect') );
         }
-        
-        //update (or delete) mbdatas
-        self::reload_mb_datas($post_id);
 
         return $mbid;
     }
     
-    public static function after_auto_set_mbid_redirect($location){
+    public static function after_auto_mbid_redirect($location){
         $location = add_query_arg(array('mb-list-entries'=>true),$location);
         return $location;
     }
@@ -689,7 +683,7 @@ class WPSSTM_Core_MusicBrainz {
     Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
     **/
     
-    private static function guess_mbid( $post_id ){
+    public static function auto_mbid( $post_id ){
         
         //TO FIX limit musicbrainz query to 1 entry max ?
 
@@ -714,9 +708,13 @@ class WPSSTM_Core_MusicBrainz {
         //get MBID of first entry
         $mbid = $first_entry['id'];
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WPSSTM_Core_MusicBrainz::guess_mbid()" ); 
+        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"WPSSTM_Core_MusicBrainz::auto_mbid()" ); 
         
-        return $mbid;
+        if ($mbid){
+            update_post_meta( $post_id, self::$mbid_metakey, $mbid );
+            self::reload_mb_datas($post_id);
+            return $mbid;
+        }
         
     }
     

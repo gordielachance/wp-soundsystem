@@ -287,7 +287,7 @@ class WPSSTM_Core_Sources{
         ?>
         <p>
             <h2><?php _e('URL','wpsstm');?></h2>
-            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->url;?>" />
+            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->permalink_url;?>" />
         </p>
         <?php
         wp_nonce_field( 'wpsstm_source_meta_box', 'wpsstm_source_meta_box_nonce' );
@@ -334,7 +334,7 @@ class WPSSTM_Core_Sources{
         $after = array();
         
         $after['source_url'] = __('URL','wpsstm');
-        $after['track_match'] = __('Match','wpsstm');
+        $after['parent_track'] = __('Track','wpsstm');
         
         if ( isset($_GET['post_parent']) ){
             $after['order'] = __('Order','wpsstm');
@@ -350,7 +350,7 @@ class WPSSTM_Core_Sources{
         switch ( $column ) {
             case 'source_url':
                 
-                $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->url,$wpsstm_source->title,$wpsstm_source->url);
+                $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->permalink_url,$wpsstm_source->title,$wpsstm_source->permalink_url);
                 
                 echo $link;
                 
@@ -362,11 +362,10 @@ class WPSSTM_Core_Sources{
                     echo '—';
                 }
             break;
-            case 'track_match':
+            case 'parent_track':
 
-                if ( $match = $wpsstm_source->match ){
+                if ( $track = new WPSSTM_Track($post->post_parent) ){
                     
-                    $track = new WPSSTM_Track($post->post_parent);
                     if ($track->artist && $track->artist){
                         
                         $sources_url = $track->get_backend_sources_url();
@@ -380,11 +379,7 @@ class WPSSTM_Core_Sources{
 
                         printf('<p>%s %s</p>',$track_edit_link,$track_sources_link);
                     }
-                    
-                    $percent_bar = wpsstm_get_percent_bar($match);
-                    printf('<p>%s</p>',$percent_bar);
-                    
-                    
+
                 }else{
                     echo '—';
                 }
@@ -392,18 +387,6 @@ class WPSSTM_Core_Sources{
         }
     }
 
-    //TO FIX TO enable somewhere
-    function sort_sources_by_track_match($sources,WPSSTM_Track $track){
-
-        //reorder by similarity
-        usort($sources, function ($a, $b){
-            return $a->match === $b->match ? 0 : ($a->match > $b->match ? -1 : 1);
-        });
-        
-        return $sources;
-        
-    }
-    
     function ajax_track_autosource(){
         global $wpsstm_track;
         
@@ -420,7 +403,7 @@ class WPSSTM_Core_Sources{
         //set global $wpsstm_track
         $wpsstm_track = new WPSSTM_Track();
         $wpsstm_track->from_array($ajax_data['track']);
-        $success = $wpsstm_track->autosource();
+        $success = WPSSTM_Core_Autosource::set_track_autosource($wpsstm_track);
         
         $result['track'] = $wpsstm_track;
 

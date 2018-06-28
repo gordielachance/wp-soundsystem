@@ -1,9 +1,8 @@
 <?php
-
 class WPSSTM_Core_Tracks{
 
     static $title_metakey = '_wpsstm_track';
-    static $length_metakey = '_wpsstm_length';
+    static $length_metakey = '_wpsstm_length'; //track length, in s
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
     static $qvar_track_admin = 'admin-track';
@@ -846,9 +845,9 @@ class WPSSTM_Core_Tracks{
         $new_sources = array();
         
         foreach((array)$source_urls as $url){
+            //TOFIXKKK where is track ?
             $source = new WPSSTM_Source();
-            $source->track_id = $post_id;
-            $source->url = $url;
+            $source->permalink_url = $url;
             $source->save_unique_source();//save only if it does not exists yet
             $new_sources[] = $source;
         }
@@ -856,7 +855,7 @@ class WPSSTM_Core_Tracks{
         //autosource
         if ( isset($_POST['wpsstm_track_autosource']) ){
             $track = new WPSSTM_Track($post_id);
-            $success = $track->autosource();
+            $success = WPSSTM_Core_Autosource::set_track_autosource($track);
         }
     }
     

@@ -95,9 +95,6 @@ class WPSSTM_Settings {
                 $new_input['autosource_filter_ban_words'] = $ban_words;
             }
 
-            
-            $new_input['autosource_filter_requires_artist'] = ( isset($input['autosource_filter_requires_artist']) ) ? 'on' : 'off';
-
             /*
             Live playlists
             */
@@ -246,14 +243,6 @@ class WPSSTM_Settings {
             'autosource_filter_ban_words', 
             __('Ban words filter','wpsstm'), 
             array( $this, 'autosource_filter_ban_words_callback' ), 
-            'wpsstm-settings-page', 
-            'sources'
-        );
-        
-        add_settings_field(
-            'autosource_filter_requires_artist', 
-            __('Artist filter','wpsstm'),
-            array( $this, 'autosource_filter_requires_artist_callback' ), 
             'wpsstm-settings-page', 
             'sources'
         );
@@ -592,18 +581,7 @@ class WPSSTM_Settings {
             $help
         );
     }
-    
-    function autosource_filter_requires_artist_callback(){
-        $option = wpsstm()->get_options('autosource_filter_requires_artist');
 
-        printf(
-            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an autosource when the track artist is not contained in its title and isn't in the track title.","wpsstm")
-        );
-    }
-    
     function section_lastfm_desc(){
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
         printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );            

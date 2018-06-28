@@ -102,7 +102,6 @@ class WP_SoundSystem {
             'autosource'                        => 'on',
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
             'autosource_filter_ban_words'       => array('cover'),
-            'autosource_filter_requires_artist' => 'off',
             'playable_opacity_class'            => 'on',
             'minimal_css'                       => 'off',
         );
@@ -127,6 +126,10 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
+        
+        require $this->plugin_dir . 'classes/services/default.php';
+        require $this->plugin_dir . 'classes/services/soundcloud.php';
+        require $this->plugin_dir . 'classes/services/youtube.php';
         
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
@@ -193,15 +196,6 @@ class WP_SoundSystem {
         
         add_filter( 'template_include', array($this,'popup_template'));
 
-        //TOFIXKKK
-        //add_action( 'wp', array($this,'autosource_test'));
-
-    }
-    
-    function autosource_test(){
-        if ( is_admin() ) return;
-        $track = new WPSSTM_Track(55724);
-        $track->autosource();
     }
     
     function add_wpsstm_query_vars($vars){
