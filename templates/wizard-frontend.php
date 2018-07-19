@@ -18,23 +18,16 @@ if ( !$can_wizard ){
     <div id="wizard-wrapper" <?php echo wpsstm_get_classes_attr('wizard-wrapper-frontend');?>>
 
         <?php
-    
-        //we must have the tracks populated before we output the notices
-        $wpsstm_tracklist->populate_subtracks();
-    
-        //wizard notices
-        if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
-            echo $notices_el;
-        }
-    
-        //we requested something through the wizard form
+
+        //TO FIX TO CHECK we requested something through the wizard form
         if ( $wztr_id = get_query_var(WPSSTM_Core_Wizard::$qvar_tracklist_wizard) ){
             echo $wpsstm_tracklist->get_tracklist_html();
         }
         ?>
 
         <form action="<?php the_permalink();?>" method="POST">
-            <div id="wpsstm-wizard-step-source-content" class="wpsstm-wizard-step-content">
+
+            <div id="wpsstm-wizard-step-profile-content" class="wpsstm-wizard-step-content">
                 <?php 
                 WPSSTM_Core_Wizard::feed_url_callback();
                 ?>

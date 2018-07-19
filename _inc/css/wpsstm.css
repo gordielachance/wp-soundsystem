@@ -859,10 +859,7 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   background: white;
   border-bottom: 0;
 }
-/* line 118, ../scss/_wpsstm-wizard.scss */
-#wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-source-content table.form-table > tbody th {
-  display: none;
-}
+
 /* line 123, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 50%;

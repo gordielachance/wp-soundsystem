@@ -3,6 +3,13 @@
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 
+
+//wizard notices
+if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
+    echo $notices_el;
+}
+
+
 $tracklist = $wpsstm_tracklist;
 
 //TO FIX move at a smarter place ?

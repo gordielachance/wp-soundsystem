@@ -27,9 +27,6 @@ class WPSSTM_Tracklist{
         'per_page'      => null,
         'current_page'  => null
     );
-    
-    var $tracks_strict = true; //requires a title AND an artist
-    public $ajax_refresh = false;//should we load the subtracks through ajax ? (enabled by default for live playlists).
 
     var $paged_var = 'tracklist_page';
     
@@ -46,7 +43,9 @@ class WPSSTM_Tracklist{
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
         
-        $this->options = $this->get_default_options();
+        $default_options = $this->get_default_options();
+        $url_options = $this->get_url_options();
+        $this->options = wp_parse_args($url_options,$default_options);
 
         $this->set_tracklist_pagination($pagination_args);
         
@@ -89,7 +88,14 @@ class WPSSTM_Tracklist{
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
+            'tracks_strict'             => true, //requires a title AND an artist
+            'ajax_refresh'              => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
         );
+    }
+    
+    protected function get_url_options(){
+        $url_options = isset( $_REQUEST['tracklist_options'] ) ? (array)$_REQUEST['tracklist_options'] : array();
+        return $url_options;
     }
     
     /*
@@ -232,9 +238,10 @@ class WPSSTM_Tracklist{
         $pending_tracks = array_unique($tracks, SORT_REGULAR);
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
+        $use_strict = $this->get_options('tracks_strict');
         
         foreach($pending_tracks as $track){
-            $valid = $track->validate_track($this->tracks_strict);
+            $valid = $track->validate_track($use_strict);
             if ( is_wp_error($valid) ){
                 
                 $error_codes[] = $valid->get_error_code();
@@ -750,8 +757,6 @@ class WPSSTM_Tracklist{
         $subtracks_success = $static_tracklist->set_subtrack_ids(); //unset static subtracks
         
         $converted = set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
-        
-        $this->toggle_enable_wizard();
 
         return $converted;
 
@@ -899,7 +904,7 @@ class WPSSTM_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
-            ( $this->ajax_refresh ) ? 'tracklist-ajaxed' : null,
+            ( $this->get_options('ajax_refresh') ) ? 'tracklist-ajaxed' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
             ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
@@ -913,9 +918,9 @@ class WPSSTM_Tracklist{
     
     //if the tracklist is ajaxed and that this is not an ajax request, 
     //pretend did_query_tracks is true so we don't try to populate them
-    //do not move under __construct since ->ajax_refresh value might have changed when we call this.
+    //do not move under __construct since option 'ajax_refresh' value might have changed when we call this.
     function wait_for_ajax(){
-        return ($this->ajax_refresh && !wpsstm_is_ajax());
+        return ($this->get_options('ajax_refresh') && !wpsstm_is_ajax());
     }
 
 
@@ -923,7 +928,7 @@ class WPSSTM_Tracklist{
 
         if ( $this->did_query_tracks ) return true;
 
-        if ( $this->ajax_refresh ){
+        if ( $this->get_options('ajax_refresh') ){
 
             if ( $this->wait_for_ajax() ){
                 $url = $this->get_tracklist_action_url('refresh');
@@ -1050,19 +1055,7 @@ class WPSSTM_Tracklist{
 			$this->track = $this->tracks[0];
 		}
 	}
-    
-    function is_wizard_disabled(){
-        return (bool)get_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey, true );
-    }
-    
-    function toggle_enable_wizard($enable=true){
-        if (!$enable){
-            return update_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey, true );
-        }else{
-            return delete_post_meta($this->post_id, WPSSTM_Core_Wizard::$wizard_disabled_metakey );
-        }
-    }
-    
+
     function get_html_metas(){
         $metas = array(
             'numTracks' => $this->track_count

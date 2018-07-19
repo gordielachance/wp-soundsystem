@@ -63,10 +63,18 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             }
 
         }
+
+    }
+    
+    protected function get_default_options(){
+        $options = parent::get_default_options();
         
-        //set expiration bool & time
-        $this->is_expired = $this->check_has_expired();
-        $this->ajax_refresh = $this->is_expired; //should we load the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
+        $live_options = array(
+            'is_expired' => $this->check_has_expired(),
+            'ajax_refresh' => $this->check_has_expired(),
+        );
+        
+        return wp_parse_args($live_options,$options);
     }
 
     protected function get_default_scraper_options(){
@@ -111,7 +119,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         return $diff;
     }
-    
+
     function populate_subtracks($args = null){
 
         if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
@@ -746,7 +754,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
 
         //force PHP tracks refresh
-        $this->ajax_refresh = false;
+        $this->options['ajax_refresh'] = false;
         
         //populate remote tracklist if not done yet
         $populated = $this->populate_subtracks();
@@ -768,8 +776,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($success) ) {
             return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
         }
-        
-        $this->toggle_enable_wizard(false);
         return $success;
 
     }
@@ -789,12 +795,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
-
-        $disable = (bool)isset($wizard_data['disable']);
-        $this->toggle_enable_wizard(!$disable);
-
-        //is disabled
-        if ( $this->is_wizard_disabled() ) return;
 
         return $this->save_wizard_settings($wizard_data);
 
