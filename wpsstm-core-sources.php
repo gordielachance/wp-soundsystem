@@ -403,7 +403,7 @@ class WPSSTM_Core_Sources{
         //set global $wpsstm_track
         $wpsstm_track = new WPSSTM_Track();
         $wpsstm_track->from_array($ajax_data['track']);
-        $success = WPSSTM_Core_Autosource::set_track_autosource($wpsstm_track);
+        $success = WPSSTM_Core_Autosource::store_sources_for_track($wpsstm_track);
         
         $result['track'] = $wpsstm_track;
 

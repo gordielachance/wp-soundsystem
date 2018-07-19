@@ -855,7 +855,7 @@ class WPSSTM_Core_Tracks{
         //autosource
         if ( isset($_POST['wpsstm_track_autosource']) ){
             $track = new WPSSTM_Track($post_id);
-            $success = WPSSTM_Core_Autosource::set_track_autosource($track);
+            $success = WPSSTM_Core_Autosource::store_sources_for_track($track);
         }
     }
     

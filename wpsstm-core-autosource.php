@@ -20,8 +20,8 @@ class WPSSTM_Core_Autosource{
         if (get_post_type($test_track_id) != wpsstm()->post_type_track ) return;
         if (!$test_track_id) return;
         $track = new WPSSTM_Track($test_track_id);
-        //$sources = $this->get_track_autosource($track);
-        $sources = WPSSTM_Core_Autosource::set_track_autosource($track);
+        //$sources = $this->find_sources_for_track($track);
+        $sources = WPSSTM_Core_Autosource::store_sources_for_track($track);
         print_r(json_encode($sources));die();
     }
 
@@ -29,7 +29,7 @@ class WPSSTM_Core_Autosource{
     Retrieve autosources for a track and populate each source weight
     */
     
-    private static function get_track_autosource(WPSSTM_Track $track){
+    private static function find_sources_for_track(WPSSTM_Track $track){
 
         if ( wpsstm()->get_options('autosource') != 'on' ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
@@ -63,7 +63,7 @@ class WPSSTM_Core_Autosource{
             $provider->populate_track_autosources();
             
             if ( is_wp_error($provider->sources) ){
-                wpsstm()->debug_log($sources->get_error_message(),'WPSSTM_Core_Autosource::get_track_autosource - unable to populate provider sources');
+                wpsstm()->debug_log($sources->get_error_message(),'WPSSTM_Core_Autosource::find_sources_for_track - unable to populate provider sources');
                 continue;
             }
                 
@@ -80,7 +80,7 @@ class WPSSTM_Core_Autosource{
 
     }
 
-    public static function set_track_autosource(WPSSTM_Track $track){
+    public static function store_sources_for_track(WPSSTM_Track $track){
         
         //track does not exists yet, create it
         if ( !$track->post_id ){
@@ -98,7 +98,7 @@ class WPSSTM_Core_Autosource{
         $now = current_time('timestamp');
         update_post_meta( $track->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
         
-        $sources = self::get_track_autosource($track);
+        $sources = self::find_sources_for_track($track);
         if ( is_wp_error($sources) ) return $sources;
         
         $sources_auto = array();
@@ -126,7 +126,7 @@ class WPSSTM_Core_Autosource{
                         'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
                         'errors'=>$errors)
                     ),
-                    "WPSSTM_Core_Autosource::set_track_autosource - source excluded");
+                    "WPSSTM_Core_Autosource::store_sources_for_track - source excluded");
                 continue;
             }
             
@@ -149,7 +149,7 @@ class WPSSTM_Core_Autosource{
                 if ( is_wp_error($source_id) ){
                     $code = $source_id->get_error_code();
                     $error_msg = $source_id->get_error_message($code);
-                    wpsstm()->debug_log( $error_msg, "WPSSTM_Core_Autosource::set_track_autosource - error while saving source");
+                    wpsstm()->debug_log( $error_msg, "WPSSTM_Core_Autosource::store_sources_for_track - error while saving source");
                     continue;
                 }
             }
