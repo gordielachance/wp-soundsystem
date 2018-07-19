@@ -289,6 +289,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
+        $cache_key = ($this->post_id) ? sprintf('wpsstm_remote_cache_%s',$this->post_id) : null;
 
         $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
         wpsstm()->debug_log($this->redirect_url,'get_remote_response url' );
@@ -296,9 +297,28 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($this->redirect_url) ){
             $response = $this->redirect_url;
         }else{
+            
+            //try cache
+            if ( $cache_key ){
+                $response = get_transient( $cache_key );
+            }
 
-            $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
+            //scrape
+            if ( !$response ) {
+                
+                $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
+                
+                if ( $cache_key ){
+                   //cache response
+                    $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
 
+                    if ( $cache_seconds ){
+                        set_transient( $cache_key, $response, $cache_seconds );
+                    }
+                }
+            }
+
+            //errors
             if ( !is_wp_error($response) ){
 
                 $response_code = wp_remote_retrieve_response_code( $response );
@@ -309,6 +329,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 }
 
             }
+            
         }
 
         $this->response = $response;
@@ -880,9 +901,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     //UTC
     function get_expiration_time(){
-        if ( !$cache_duration_min = $this->get_scraper_options('datas_cache_min') ) return false;
-        $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-        return $this->updated_time + $cache_duration_s;
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        return $this->updated_time + $cache_seconds;
     }
 
     
@@ -897,7 +917,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             return true;
         }else{
             $now = current_time( 'timestamp', true );
-            $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
             $expiration_time = $this->get_expiration_time(); //set expiration time
             return ( $now >= $expiration_time );
         }
@@ -906,11 +925,13 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     function get_time_before_refresh(){
 
-        if ( !$cachemin = $this->get_scraper_options('datas_cache_min') ) return false;
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        
+        if ( !$cache_seconds ) return false;
         if ( $this->is_expired ) return false;
         
         $time_refreshed = $this->updated_time;
-        $time_before = $time_refreshed + ($cachemin * MINUTE_IN_SECONDS);
+        $time_before = $time_refreshed + $cache_seconds;
         $now = current_time( 'timestamp', true );
 
         return $refresh_time_human = human_time_diff( $now, $time_before );
