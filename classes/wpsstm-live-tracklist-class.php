@@ -12,6 +12,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     var $scraper_options = array();
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
+    public $is_cached = false;
 
     //response
     var $request_pagination = array(
@@ -284,52 +285,135 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         return apply_filters('wpsstm_live_tracklist_request_args',$defaults);
     }
     
-    protected function get_remote_response(){
+    function remote_type_to_ext($content_type) {
+        $content_type = strtolower($content_type);
+
+        $mimes = array( 
+            'txt' => 'text/plain',
+            'html' => 'text/html',
+            'js' => 'application/javascript',
+            'json' => 'application/json',
+            'xml' => 'application/xml',
+            'xspf' => 'application/xspf+xml',
+        );
+        return array_search($content_type, $mimes);
+     }
+    
+    /*
+    Allow to upload files with new extensions when caching playlists
+    */
+
+    function uploads_custom_mimes($existing_mimes) {
+        $existing_mimes['xspf'] = 'application/xspf+xml';
+        return $existing_mimes;
+    }
+    
+    /*
+    Upload cached playlists to our custom 'uploads/wpsstm' path
+    */
+    
+    function uploads_custom_dir( $upload ) {
+        $log_dir = wpsstm_get_uploads_dir();
+        $upload['subdir'] = '/' . basename($log_dir);
+        $upload['path'] = $upload['basedir'] . $upload['subdir'];
+        $upload['url']  = $upload['baseurl'] . $upload['subdir'];
+        return $upload;
+    }
+    
+    function get_cached_file_key(){
+        return ($this->post_id) ? sprintf('wpsstm_cached_file_%s',$this->post_id) : null;
+    }
+    
+    function cache_tracklist_response($response){
+
+        $cache_key = $this->get_cached_file_key();
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        
+        if ( !$cache_key ) return;
+        if ( !$cache_seconds ) return;
+        if ( is_wp_error($response) ) return;
+
+        $ext = $this->remote_type_to_ext($response['headers']['content-type']);
+        $time = current_time( 'mysql' );
+        $filename = sprintf('%s-%s.%s',$this->post_id,$time,$ext);
+
+        add_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
+        add_filter( 'upload_dir', array($this,'uploads_custom_dir') );
+
+        $ghost = wp_upload_bits($filename, null, wp_remote_retrieve_body($response));
+
+        remove_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
+        remove_filter( 'upload_dir', array($this,'uploads_custom_dir') );
+
+        if ( $ghost['error'] ){
+            $error_msg = sprintf('Error while creating cache file: %s',$ghost['error']);
+            $this->tracklist_log( $error_msg );
+            return new WP_Error( 'cannot_cache_tracklist', $error_msg );
+        }else{
+            $this->tracklist_log( sprintf('Created cache file: %s',$ghost['url']) );
+            set_transient( $cache_key, $ghost['url'], $cache_seconds );
+            return $ghost;
+        }
+
+    }
+    
+    function delete_cached_file(){
+        
+    }
+    
+    protected function get_remote_response($can_cache = true){
 
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
-        $cache_key = ($this->post_id) ? sprintf('wpsstm_remote_cache_%s',$this->post_id) : null;
+        $cached_url = null;
+        
+        $this->tracklist_log( sprintf('Reaching remote url...: %s',$this->feed_url) );
 
         $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
-        wpsstm()->debug_log($this->redirect_url,'get_remote_response url' );
-
+        
         if ( is_wp_error($this->redirect_url) ){
-            $response = $this->redirect_url;
-        }else{
+            return $this->redirect_url;
+        }
+
+        if ( $this->feed_url != $this->redirect_url){
+            $this->tracklist_log( sprintf('Reaching remote url (filtered)...: %s',$this->redirect_url) );
+        }
+
+        //try cache
+        if ( $can_cache && ( $cache_key = $this->get_cached_file_key() ) ){                
+            $cached_url = get_transient( $cache_key );
+        }
+
+        if ( !$cached_url ) { //fetch remote
+            $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
+            $this->cache_tracklist_response($response);
+        }else{ //fetch cache
+            $this->tracklist_log( sprintf('Found cache: %s',$cached_url) );
+            $response = wp_remote_get( $cached_url );
+            $response_code = wp_remote_retrieve_response_code( $response );
             
-            //try cache
-            if ( $cache_key ){
-                $response = get_transient( $cache_key );
-            }
-
-            //scrape
-            if ( !$response ) {
-                
-                $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
-                
-                if ( $cache_key ){
-                   //cache response
-                    $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-
-                    if ( $cache_seconds ){
-                        set_transient( $cache_key, $response, $cache_seconds );
-                    }
-                }
-            }
-
-            //errors
-            if ( !is_wp_error($response) ){
-
-                $response_code = wp_remote_retrieve_response_code( $response );
-
-                if ($response_code && $response_code != 200){
-                    $response_message = wp_remote_retrieve_response_message( $response );
-                    $response = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
-                }
-
+            //if cached file has been deleted or something
+            if ( is_wp_error($response) || ($response_code != 200) ){
+                $this->tracklist_log( 'Unable to get cached file,deleting transient, retrying...' );
+                delete_transient( $cache_key );
+                return $this->get_remote_response(false);
             }
             
+            $this->is_cached = true;
+            
+        }
+
+        //errors
+        if ( !is_wp_error($response) ){
+
+            $response_code = wp_remote_retrieve_response_code( $response );
+
+            if ($response_code && $response_code != 200){
+                $response_message = wp_remote_retrieve_response_message( $response );
+                $response = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
+            }
+
         }
 
         $this->response = $response;

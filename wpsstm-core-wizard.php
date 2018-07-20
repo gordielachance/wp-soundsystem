@@ -530,41 +530,6 @@ class WPSSTM_Core_Wizard{
             );
         }
 
-        /*
-        Debug
-        */
-
-        add_settings_section(
-             'wizard_section_feedback', //id
-             __('Feedback','wpsstm'), //title
-             array( $this, 'section_desc_debug' ), //callback
-             'wpsstm-wizard-step-debug' //page
-        );
-
-        add_settings_field(
-            'feedback_source_content', 
-            __('Tracklist','wpsstm'), 
-            array( $this, 'feedback_source_content_callback' ), 
-            'wpsstm-wizard-step-debug', 
-            'wizard_section_feedback'
-        );
-
-        add_settings_field(
-            'feedback_data_type', 
-            __('Tracklist Type','wpsstm'), 
-            array( $this, 'feedback_data_type_callback' ), 
-            'wpsstm-wizard-step-debug', 
-            'wizard_section_feedback'
-        );
-
-        add_settings_field(
-            'feedback_tracklist_content', 
-            __('Tracks','wpsstm'), 
-            array( $this, 'feedback_tracks_callback' ), 
-            'wpsstm-wizard-step-debug', 
-            'wizard_section_feedback'
-        );
-
     }
 
     function regex_link(){
@@ -696,26 +661,7 @@ class WPSSTM_Core_Wizard{
     
     function section_desc_empty(){
     }
-    
-    function section_desc_debug(){
-        global $wpsstm_tracklist;
-        if ( !$wpsstm_tracklist->body_node ){
-            echo "NOTHING FOUND TO FIX ";
-        }else{
-            if ( !$wpsstm_tracklist->track_nodes ){
-                echo "TO FIX NO TRACK NODES";
-            }
-            if ( !$wpsstm_tracklist->tracks ){
-                echo "TO FIX NO TRACKS";
-            }
-        }
-    
-        //wizard notices
-        if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
-            echo $notices_el;
-        }
-        
-    }
+
 
     public static function feed_url_callback(){
         global $wpsstm_tracklist;
@@ -931,7 +877,7 @@ class WPSSTM_Core_Wizard{
         $idle_class   = 'nav-tab';
         $active_class = 'nav-tab nav-tab-active';
         
-        $input_tab = $profile_tab = $options_tab = $results_tab = $debug_tab = array();
+        $input_tab = $profile_tab = $options_tab = $results_tab = array();
 
         $input_tab = array(
             'title'     => __('Input','spiff'),
@@ -960,18 +906,12 @@ class WPSSTM_Core_Wizard{
             'title'  => $results_title,
             'href'  => '#wpsstm-wizard-step-results-content'
         );
-        
-        $debug_tab = array(
-            'title'  => __('Debug','spiff'),
-            'href'  => '#wpsstm-wizard-step-debug-content'
-        );
 
         $tabs = array(
             $input_tab,
             $profile_tab,
             $options_tab,
             $results_tab,
-            $debug_tab,
         );
         
         $tabs = array_filter($tabs);

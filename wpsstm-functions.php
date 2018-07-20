@@ -221,6 +221,13 @@ function wpsstm_get_post_tracklist($post_id=null){
     }
 
     //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist");
-    return $tracklist;
-    
+    return $tracklist;   
+}
+
+function wpsstm_get_uploads_dir(){
+    $dir = WP_CONTENT_DIR . '/uploads/wpsstm';
+    if (!file_exists($dir)) {
+        wp_mkdir_p($dir);
+    }
+    return trailingslashit($dir);
 }

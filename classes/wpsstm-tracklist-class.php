@@ -2,7 +2,7 @@
 
 class WPSSTM_Tracklist{
     
-    var $unique_id = null;
+    var $unique_id = null; //TO FIX useful ?
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
     var $index = -1;
     var $tracklist_type = 'static';
@@ -53,6 +53,26 @@ class WPSSTM_Tracklist{
         $this->unique_id = uniqid(); //in case we don't have a post ID; useful for JS
         $this->populate_tracklist_post();
         
+    }
+    
+    function get_tracklist_log_path(){
+        if ( !$this->post_id ) return;
+        $log_dir = wpsstm_get_uploads_dir();
+        return $log_dir . sprintf('%s-debug.log',$this->post_id);
+    }
+
+    function tracklist_log($str){
+        $log_file = $this->get_tracklist_log_path();
+        
+        $blogtime = current_time( 'mysql' ); 
+        $message = sprintf('%s: %s',$blogtime,$str);
+
+        error_log($message.PHP_EOL,3,$log_file);
+    }
+    
+    function delete_log(){
+        $log_file = $this->get_tracklist_log_path();
+        wp_delete_file($log_file);
     }
     
     function populate_tracklist_post(){
@@ -630,6 +650,16 @@ class WPSSTM_Tracklist{
             );
         }
         
+        //log
+        if ( $can_edit_tracklist ){
+            $actions['debug'] = array(
+                'text' =>      __('Log'),
+                'classes' =>    array('wpsstm-advanced-action'),
+                'desc' =>       __('View debug log','wpsstm'),
+                'href' =>       $this->get_tracklist_admin_url('debug'),
+            );
+        }
+        
         //context
         switch($context){
             case 'page':
@@ -957,7 +987,7 @@ class WPSSTM_Tracklist{
     }
     
     public function get_subtracks($args = null){
-        
+
         $default = array(
             'post_status'   => 'any',
             'posts_per_page'=> -1,

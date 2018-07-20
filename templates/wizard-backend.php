@@ -34,14 +34,6 @@ $post_type = get_post_type();
         <div id="wpsstm-wizard-step-results-content" class="wpsstm-wizard-step-content">
             <?php do_settings_sections( 'wpsstm-wizard-step-results' );?>
         </div>
-        
-        <?php if ( WPSSTM_Core_Wizard::is_advanced_wizard() ){ ?>
-
-            <div id="wpsstm-wizard-step-debug-content" class="wpsstm-wizard-step-content">
-                <?php do_settings_sections( 'wpsstm-wizard-step-debug' );?>
-            </div>
-        
-        <?php } ?>
 
     </div>
 
