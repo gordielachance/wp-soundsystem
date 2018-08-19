@@ -149,7 +149,7 @@ class WPSSTM_Tracklist{
             $ordered_ids = array_unique($ordered_ids);
         }
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::set_subtrack_ids()"); 
+        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::set_subtrack_ids()"); 
         
         //delete actual subtracks
         $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
@@ -188,7 +188,7 @@ class WPSSTM_Tracklist{
 
         $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Tracklist::append_subtrack_ids()");
+        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Tracklist::append_subtrack_ids()");
         
         $updated_ids = array_merge($subtrack_ids,$append_ids);
         
@@ -209,7 +209,7 @@ class WPSSTM_Tracklist{
         
         $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
 
-        wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Tracklist::remove_subtrack_ids()");
+        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Tracklist::remove_subtrack_ids()");
 
         $updated_ids = array_diff($subtrack_ids,$remove_ids);
         
@@ -266,7 +266,7 @@ class WPSSTM_Tracklist{
                 
                 $error_codes[] = $valid->get_error_code();
                 /*
-                wpsstm()->debug_log($valid->get_error_message(), "WPSSTM_Tracklist::validate_tracks - rejected");
+                $this->tracklist_log($valid->get_error_message(), "WPSSTM_Tracklist::validate_tracks - rejected");
                 */
                 $rejected_tracks[] = $track;
                 continue;
@@ -276,7 +276,7 @@ class WPSSTM_Tracklist{
         
         if ( $rejected_tracks ){
             $error_codes = array_unique($error_codes);
-            wpsstm()->debug_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WPSSTM_Tracklist::validate_tracks");
+            $this->tracklist_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WPSSTM_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
@@ -346,7 +346,7 @@ class WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Tracklist::save_playlist() - post playlist inserted"); 
+            $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Tracklist::save_playlist() - post playlist inserted"); 
 
         }else{ //is a playlist update
             
@@ -360,7 +360,7 @@ class WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            wpsstm()->debug_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Tracklist::save_playlist() - post track updated"); 
+           $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Tracklist::save_playlist() - post track updated"); 
         }
 
         $this->post_id = $post_playlist_id;
@@ -386,7 +386,7 @@ class WPSSTM_Tracklist{
         foreach($new_tracks as $key=>$track){
             $success = $track->save_track($args);
             if ( is_wp_error($success) ){
-                wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Tracklist::save_subtracks' );
+                $this->tracklist_log($success->get_error_code(),'WPSSTM_Tracklist::save_subtracks' );
                 continue;
             }
         }
@@ -429,7 +429,7 @@ class WPSSTM_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        //wpsstm()->debug_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Tracklist notice]: ' . $message ); 
+        //$this->tracklist_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -707,7 +707,7 @@ class WPSSTM_Tracklist{
         $this->tracklist_type = 'static';
         $this->append_subtrack_ids($live_ids);
 
-        wpsstm()->debug_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WPSSTM_Tracklist::append_wizard_tracks()");
+        $this->tracklist_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WPSSTM_Tracklist::append_wizard_tracks()");
     }
     
     function switch_status(){
@@ -1007,7 +1007,7 @@ class WPSSTM_Tracklist{
         $query = new WP_Query( $args );
         $subtracks = $query->posts;
 
-        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
+        //$this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
 
         return $subtracks;
     }
@@ -1112,7 +1112,7 @@ class WPSSTM_Tracklist{
         }
         return $output;
     }
-    
+
 }
 
 class WPSSTM_Single_Track_Tracklist extends WPSSTM_Tracklist{
@@ -1137,7 +1137,7 @@ class WPSSTM_Single_Track_Tracklist extends WPSSTM_Tracklist{
         $query = new WP_Query( $args );
         $subtracks = $query->posts;
 
-        //wpsstm()->debug_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
+        //$this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Tracklist::get_subtracks"); 
 
         return $subtracks;
         

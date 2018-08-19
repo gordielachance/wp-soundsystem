@@ -905,7 +905,7 @@ class WPSSTM_Core_Tracks{
         
         $ajax_data = wp_unslash($_POST);
         
-        wpsstm()->debug_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
+        $this->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
 
         $result = array(
             'input'     => $ajax_data,
@@ -1008,7 +1008,7 @@ class WPSSTM_Core_Tracks{
 
                 $success = $track->love_track($do_love);
                 $result['track'] = $track;
-                wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
+                $this->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
 
                 if( is_wp_error($success) ){
                     $code = $success->get_error_code();
@@ -1102,7 +1102,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Tracklist::trash_track_sources()");
+            $this->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Tracklist::trash_track_sources()");
         }
 
     }
@@ -1172,7 +1172,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        wpsstm()->debug_log(json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Tracklist::flush_community_tracks()");
+        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Tracklist::flush_community_tracks()");
 
         return $flushed_ids;
 

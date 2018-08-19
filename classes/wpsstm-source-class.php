@@ -200,7 +200,7 @@ class WPSSTM_Source{
         if ( is_wp_error($success) ) return $success;
         $this->post_id = $success;
 
-        wpsstm()->debug_log(json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WPSSTM_Source::save_source()");
+        $this->source_log( json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WPSSTM_Source::save_source()");
         
         return $this->post_id;
     }
@@ -230,7 +230,7 @@ class WPSSTM_Source{
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
             'data-wpsstm-track-id' =>               $this->track_id,
-            'data-wpsstm-source-provider' =>        $this->provider::$slug,
+            //TOFIXUSEFUL? 'data-wpsstm-source-provider' =>        $this->provider::$slug,
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-src' =>             $this->stream_url,
             'data-wpsstm-source-type' =>            $this->get_source_mimetype(),

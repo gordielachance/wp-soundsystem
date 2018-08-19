@@ -63,7 +63,7 @@ class WPSSTM_Core_Autosource{
             $provider->populate_track_autosources();
             
             if ( is_wp_error($provider->sources) ){
-                wpsstm()->debug_log($sources->get_error_message(),'WPSSTM_Core_Autosource::find_sources_for_track - unable to populate provider sources');
+                $track->track_log($sources->get_error_message(),'WPSSTM_Core_Autosource::find_sources_for_track - unable to populate provider sources');
                 continue;
             }
                 
@@ -120,7 +120,7 @@ class WPSSTM_Core_Autosource{
             }
             
             if($errors){
-                wpsstm()->debug_log(json_encode(
+                $source->source_log(json_encode(
                     array(
                         'track'=>sprintf('%s - %s',$track->artist,$track->title),
                         'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
@@ -149,7 +149,7 @@ class WPSSTM_Core_Autosource{
                 if ( is_wp_error($source_id) ){
                     $code = $source_id->get_error_code();
                     $error_msg = $source_id->get_error_message($code);
-                    wpsstm()->debug_log( $error_msg, "WPSSTM_Core_Autosource::store_sources_for_track - error while saving source");
+                    $track->track_log( $error_msg,"WPSSTM_Core_Autosource::store_sources_for_track - error while saving source");
                     continue;
                 }
             }

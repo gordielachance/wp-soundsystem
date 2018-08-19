@@ -110,7 +110,7 @@ class WPSSTM_Track{
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
             
-            wpsstm()->debug_log(json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_track_post_auto()');
+            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_track_post_auto()');
             
         }
 
@@ -156,7 +156,7 @@ class WPSSTM_Track{
 
         $args = wp_parse_args((array)$args,$default_args);
 
-        //wpsstm()->debug_log($args,'WPSSTM_Track::get_parent_ids()');
+        //$this->track_log($args,'WPSSTM_Track::get_parent_ids()');
 
         $query = new WP_Query( $args );
 
@@ -323,7 +323,7 @@ class WPSSTM_Track{
         if ( is_wp_error($success) ) return $success;
         $this->post_id = $success;
         
-        wpsstm()->debug_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WPSSTM_Track::save_track()" ); 
+        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WPSSTM_Track::save_track()" ); 
 
         //save sources if any set
         //TO FIX TO CHECK how often this runs; and when ?
@@ -351,7 +351,7 @@ class WPSSTM_Track{
         
         $success = wp_trash_post($this->post_id);
         
-        //wpsstm()->debug_log( array('post_id',$this->post_id,'success'=>$success), "WPSSTM_Track::trash_track()"); 
+        //$this->track_log( array('post_id',$this->post_id,'success'=>$success), "WPSSTM_Track::trash_track()"); 
         
         return $success;
         

@@ -236,7 +236,7 @@ class WPSSTM_Core_Wizard{
         //set global $wpsstm_tracklist
         $wpsstm_tracklist = new WPSSTM_Remote_Tracklist($post_id);
         
-        wpsstm()->debug_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
+        $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
         $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;
 

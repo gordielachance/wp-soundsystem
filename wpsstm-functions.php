@@ -220,7 +220,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         break;
     }
 
-    //wpsstm()->debug_log( $tracklist, "wpsstm_get_post_tracklist");
+    //$tracklist->tracklist_log($tracklist, "wpsstm_get_post_tracklist");
     return $tracklist;   
 }
 

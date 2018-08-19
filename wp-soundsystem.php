@@ -405,17 +405,23 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($message,$title = null) {
+    public function debug_log($message,$title = null, $file = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 
         $prefix = '[wpsstm] ';
         if($title) $prefix.=$title.': ';
+        
+        $output = null;
 
         if (is_array($message) || is_object($message)) {
-            error_log($prefix.print_r($message, true));
+            $output = $prefix.sprint_r($message, true);
         } else {
-            error_log($prefix.$message);
+            $output = $prefix.$message;
+        }
+        
+        if ($output){
+            error_log($output);
         }
     }
     

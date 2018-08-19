@@ -161,13 +161,13 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     function update_live_tracklist($save_subtracks = null){
 
         if (!$this->post_id){
-            wpsstm()->debug_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
         //capability check
         if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
-            wpsstm()->debug_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
@@ -193,7 +193,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $success = $this->save_subtracks($subtracks_args);
             
             if( is_wp_error($success) ){
-                wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
+                $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
                 return $success;
             }
 
@@ -208,7 +208,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $success = wp_update_post( $tracklist_post, true );
         
         if( is_wp_error($success) ){
-            wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return $success;
         }
         
@@ -248,11 +248,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         $body_node = $this->get_body_node();
         if ( is_wp_error($body_node) ){
-            wpsstm()->debug_log($body_node->get_error_message(),'get_remote_page_tracks' );
+            $this->tracklist_log($body_node->get_error_message(),'get_remote_page_tracks' );
             return $body_node;
         }
         
-        wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
+        $this->tracklist_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
         $this->body_node = $body_node;
         
@@ -266,7 +266,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
         
-        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
+        $this->tracklist_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
 
         return $tracks;
     }
@@ -521,7 +521,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 }
                 
                 if ($xml){
-                    wpsstm()->debug_log("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log(("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
@@ -543,11 +543,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 if ($xml_errors){
                     $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
                     $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
-                    wpsstm()->debug_log($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log(($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     /*
                     foreach( $xml_errors as $xml_error_obj ) {
-                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
+                        $this->tracklist_log((sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
                     }
                     */
                 }
@@ -920,7 +920,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         
         //settings have been updated, clear tracklist cache
         if ($old_settings != $wizard_settings){
-            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
+            $this->tracklist_log(('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
             delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         }
 
