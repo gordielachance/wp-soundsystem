@@ -1112,6 +1112,10 @@ class WPSSTM_Tracklist{
         }
         return $output;
     }
+    
+    function tracklist_log($message,$title = null){
+        return wpsstm()->debug_log($message,$title,null);
+    }
 
 }
 

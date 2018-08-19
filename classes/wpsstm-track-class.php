@@ -917,4 +917,8 @@ class WPSSTM_Track{
         return true;
     }
     
+    function track_log($message,$title = null){
+        return wpsstm()->debug_log($message,$title,null);
+    }
+    
 }

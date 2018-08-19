@@ -326,5 +326,9 @@ class WPSSTM_Source{
         $this->icon = apply_filters('wpsstm_get_source_icon',$icon,$this);
         return $this->icon;
     }
+    
+    function source_log($message,$title = null){
+        return wpsstm()->debug_log($message,$title,null);
+    }
 
 }
