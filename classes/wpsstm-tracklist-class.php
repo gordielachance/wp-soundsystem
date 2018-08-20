@@ -55,26 +55,6 @@ class WPSSTM_Tracklist{
         
     }
     
-    function get_tracklist_log_path(){
-        if ( !$this->post_id ) return;
-        $log_dir = wpsstm_get_uploads_dir();
-        return $log_dir . sprintf('%s-debug.log',$this->post_id);
-    }
-
-    function tracklist_log($str){
-        $log_file = $this->get_tracklist_log_path();
-        
-        $blogtime = current_time( 'mysql' ); 
-        $message = sprintf('%s: %s',$blogtime,$str);
-
-        error_log($message.PHP_EOL,3,$log_file);
-    }
-    
-    function delete_log(){
-        $log_file = $this->get_tracklist_log_path();
-        wp_delete_file($log_file);
-    }
-    
     function populate_tracklist_post(){
 
         if (!$this->post_id) return;
@@ -1115,6 +1095,27 @@ class WPSSTM_Tracklist{
     
     function tracklist_log($message,$title = null){
         return wpsstm()->debug_log($message,$title,null);
+    }
+    /*
+    function tracklist_log($str){
+        $log_file = $this->get_tracklist_log_path();
+        
+        $blogtime = current_time( 'mysql' ); 
+        $message = sprintf('%s: %s',$blogtime,$str);
+
+        error_log($message.PHP_EOL,3,$log_file);
+    }
+    */
+    
+    function get_tracklist_log_path(){
+        if ( !$this->post_id ) return;
+        $log_dir = wpsstm_get_uploads_dir();
+        return $log_dir . sprintf('%s-debug.log',$this->post_id);
+    }
+    
+    function delete_log(){
+        $log_file = $this->get_tracklist_log_path();
+        wp_delete_file($log_file);
     }
 
 }

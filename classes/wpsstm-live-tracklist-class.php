@@ -521,7 +521,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 }
                 
                 if ($xml){
-                    $this->tracklist_log(("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
@@ -543,11 +543,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 if ($xml_errors){
                     $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
                     $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
-                    $this->tracklist_log(($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
                     
                     /*
                     foreach( $xml_errors as $xml_error_obj ) {
-                        $this->tracklist_log((sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
+                        $this->tracklist_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
                     }
                     */
                 }
@@ -920,7 +920,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         
         //settings have been updated, clear tracklist cache
         if ($old_settings != $wizard_settings){
-            $this->tracklist_log(('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
+            $this->tracklist_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
             delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         }
 
