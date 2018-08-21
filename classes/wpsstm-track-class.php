@@ -101,7 +101,7 @@ class WPSSTM_Track{
     }
     
     /*
-    Get the post ID for this track, if it already exists in the database; and populate its data
+    Get the post ID for this track if it already exists in the database; and populate its data
     */
     
     function populate_track_post_auto(){

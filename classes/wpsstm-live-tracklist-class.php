@@ -305,6 +305,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     function uploads_custom_mimes($existing_mimes) {
         $existing_mimes['xspf'] = 'application/xspf+xml';
+        $existing_mimes['json'] = 'application/javascript';
         return $existing_mimes;
     }
     
@@ -334,8 +335,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($response) ) return;
 
         $ext = $this->remote_type_to_ext($response['headers']['content-type']);
-        $time = current_time( 'mysql' );
-        $filename = sprintf('%s-%s.%s',$this->post_id,$time,$ext);
+        $time = current_time( 'timestamp' );
+        $filename = sprintf('%s-source-%s.%s',$this->post_id,$time,$ext);
 
         add_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
         add_filter( 'upload_dir', array($this,'uploads_custom_dir') );
@@ -346,7 +347,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         remove_filter( 'upload_dir', array($this,'uploads_custom_dir') );
 
         if ( $ghost['error'] ){
-            $error_msg = sprintf('Error while creating cache file: %s',$ghost['error']);
+            $error_msg = sprintf('Error while creating cache file "%s": %s',$filename,$ghost['error']);
             $this->tracklist_log( $error_msg );
             return new WP_Error( 'cannot_cache_tracklist', $error_msg );
         }else{

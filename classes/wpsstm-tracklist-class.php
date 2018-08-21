@@ -1094,6 +1094,10 @@ class WPSSTM_Tracklist{
     }
     
     function tracklist_log($message,$title = null){
+        if ($this->post_id){
+            $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
+        }
+        
         return wpsstm()->debug_log($message,$title,null);
     }
     /*

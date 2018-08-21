@@ -415,9 +415,9 @@ class WP_SoundSystem {
         $output = null;
 
         if (is_array($message) || is_object($message)) {
-            $output = $prefix.sprint_r($message, true);
+            $output = $prefix . implode("\n", $message);
         } else {
-            $output = $prefix.$message;
+            $output = $prefix . $message;
         }
         
         if ($output){
