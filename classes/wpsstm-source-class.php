@@ -230,7 +230,7 @@ class WPSSTM_Source{
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
             'data-wpsstm-track-id' =>               $this->track_id,
-            //TOFIXUSEFUL? 'data-wpsstm-source-provider' =>        $this->provider::$slug,
+            'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-src' =>             $this->stream_url,
             'data-wpsstm-source-type' =>            $this->get_source_mimetype(),
@@ -272,7 +272,7 @@ class WPSSTM_Source{
         $can_reorder_sources = $wpsstm_track->user_can_reorder_sources();
         
         $actions['provider'] = array(
-            'text' =>       $this->provider->name,
+            'text' =>       wpsstm_get_url_domain($this->permalink_url),
             'href' =>       $this->permalink_url,
             'target' =>     '_blank',
         );

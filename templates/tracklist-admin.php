@@ -29,11 +29,13 @@ $tracklist_admin = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_admin 
             $log_file = $wpsstm_tracklist->get_tracklist_log_path();
             
             if ( file_exists($log_file) ){
-                printf('<p><small>%s</small></p>',$log_file);
+                $log_file_el = sprintf('<small>%s</small>',$log_file);
 
                 //delete log
                 $url = add_query_arg(array('delete_log'=>1),$wpsstm_tracklist->get_tracklist_admin_url('debug'));
-                printf('<p><a class="button" href="%s">%s</a></p>',$url,__('Delete log','wpsstm'));
+                $del_icon_el = sprintf('<a class="button" href="%s">%s</a>',$url,__('Delete log','wpsstm'));
+                
+                printf('<p id="tracklist-log-url">%s %s</p>',$log_file_el,$del_icon_el);
 
                 $debug = file_get_contents($log_file);
                 printf('<xmp>%s</xmp>',$debug);

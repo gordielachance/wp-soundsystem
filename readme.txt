@@ -148,6 +148,11 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
+= XXX =
+* Tracklist log
+* Cache remote HTML file
+* Improved wizard
+
 = 1.9.4 =
 * Better settings page errors
 * Improved metaboxes for artist/track/album/MusicBrainz

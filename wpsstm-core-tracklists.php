@@ -201,7 +201,7 @@ class WPSSTM_Core_Tracklists{
             'new_html'  => null
         );
         
-        $this->tracklist_log($ajax_data,"ajax_refresh_tracklist()");
+        $wpsstm_tracklist->tracklist_log($ajax_data,"ajax_refresh_tracklist()");
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ? $ajax_data['post_id'] : null;
 

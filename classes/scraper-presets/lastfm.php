@@ -50,7 +50,7 @@ class WPSSTM_LastFM_URL{
     
     function is_station(){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?player/station~i';
-        preg_match($pattern,$this->tracklist->redirect_url, $matches);
+        preg_match($pattern,$this->tracklist->feed_url, $matches);
         if ( !empty($matches) ) return true;
     }
                    

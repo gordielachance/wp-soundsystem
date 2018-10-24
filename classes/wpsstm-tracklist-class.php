@@ -90,6 +90,7 @@ class WPSSTM_Tracklist{
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_refresh'              => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
+            'cache_source'              => true, //make a cache copy of the remote source
         );
     }
     
@@ -634,7 +635,7 @@ class WPSSTM_Tracklist{
         if ( $can_edit_tracklist ){
             $actions['debug'] = array(
                 'text' =>      __('Log'),
-                'classes' =>    array('wpsstm-advanced-action'),
+                'classes'   =>  array('wpsstm-link-popup','wpsstm-advanced-action'),
                 'desc' =>       __('View debug log','wpsstm'),
                 'href' =>       $this->get_tracklist_admin_url('debug'),
             );
@@ -1093,6 +1094,7 @@ class WPSSTM_Tracklist{
         return $output;
     }
     
+    /*
     function tracklist_log($message,$title = null){
         if ($this->post_id){
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
@@ -1100,16 +1102,26 @@ class WPSSTM_Tracklist{
         
         return wpsstm()->debug_log($message,$title,null);
     }
-    /*
-    function tracklist_log($str){
+    */
+    
+    function tracklist_log($message,$title = null){
         $log_file = $this->get_tracklist_log_path();
         
         $blogtime = current_time( 'mysql' ); 
-        $message = sprintf('%s: %s',$blogtime,$str);
+        
+        if ($this->post_id){
+            $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
+        }
+        
+        if (is_array($message) || is_object($message)) {
+            $message = implode("\n", $message);
+        }
+        
+        $output = sprintf('%s - %s',$title,$message);
 
-        error_log($message.PHP_EOL,3,$log_file);
+        error_log($output.PHP_EOL,3,$log_file);
     }
-    */
+    
     
     function get_tracklist_log_path(){
         if ( !$this->post_id ) return;
