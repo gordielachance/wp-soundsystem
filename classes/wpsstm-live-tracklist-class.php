@@ -369,7 +369,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $response = null;
         $cached_url = null;
         
-        $this->tracklist_log( sprintf('Reaching remote url...: %s',$this->feed_url) );
+        $this->tracklist_log( sprintf('Live playlist url...: %s',$this->feed_url) );
 
         $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
         
@@ -378,7 +378,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
 
         if ( $this->feed_url != $this->redirect_url){
-            $this->tracklist_log( sprintf('Reaching remote url (filtered)...: %s',$this->redirect_url) );
+            $this->tracklist_log( sprintf('Live playlist url (filtered)...: %s',$this->redirect_url) );
         }
 
         //try cache
