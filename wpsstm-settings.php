@@ -132,6 +132,10 @@ class WPSSTM_Settings {
             Other APIs
             */
             
+            //tuneefy
+            $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
+            $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
+            
             //youtube
             $new_input['youtube_api_key'] = ( isset($input['youtube_api_key']) ) ? trim($input['youtube_api_key']) : null;
 
@@ -368,6 +372,14 @@ class WPSSTM_Settings {
             'youtube_api', 
             __('Youtube API key'), 
             array( $this, 'youtube_api_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_apis'
+        );
+        
+        add_settings_field(
+            'tuneefy_client', 
+            __('Tuneefy'), 
+            array( $this, 'tuneefy_client_callback' ), 
             'wpsstm-settings-page', 
             'settings_apis'
         );
@@ -776,6 +788,31 @@ class WPSSTM_Settings {
             $api_key
         );
 
+    }
+    
+    function tuneefy_client_callback(){
+        $client_id = wpsstm()->get_options('tuneefy_client_id');
+        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
+        $new_app_link = 'https://data.tuneefy.com/#header-oauth';
+        
+        $desc = sprintf(__('Required for autosourcing. Request your Tuneefy credentials %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf('<p><small>%s</small></p>',$desc);
+        
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_id]" value="%s" /></p>',
+            __('Client ID:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_secret]" value="%s" /></p>',
+            __('Client Secret:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
     }
 
     function spotify_client_callback(){
