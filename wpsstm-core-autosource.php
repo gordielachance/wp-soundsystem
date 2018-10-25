@@ -178,5 +178,64 @@ class WPSSTM_Source_Digger{
     
 }
 
+class WPSSTM_Tuneefy_Source_Digger{
+    
+    protected function get_sources_auto(){
+
+        if ( !$this->artist ){
+            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
+        }
+        
+        if ( !$this->title ){
+            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing.','wpsstm') );
+        }
+
+        $auto_sources = array();
+        $tuneefy_providers = array();
+
+        //tuneefy providers slugs
+        foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
+            $tuneefy_providers[] = $provider->tuneefy_slug;
+        }
+        
+        $tuneefy_providers = array_filter($tuneefy_providers);
+        
+        $tuneefy_args = array(
+            'q' =>          urlencode($this->artist . ' ' . $this->title),
+            'mode' =>       'lazy',
+            'aggressive' => 'true', //merge tracks (ignore album)
+            'include' =>    implode(',',$tuneefy_providers),
+            'limit' =>      5
+        );
+
+        $api = WPSSTM_Core_Sources::tuneefy_api_aggregate('track',$tuneefy_args);
+        if ( is_wp_error($api) ) return $api;
+
+        $items = wpsstm_get_array_value(array('results'),$api);
+        
+        //wpsstm()->debug_log( json_encode($items), "get_sources_auto");
+
+        //TO FIX have a more consistent extraction of datas ?
+        foreach( (array)$items as $item ){
+            
+            $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
+            $first_provider =       reset($links_by_providers);
+            $first_link =           reset($first_provider);
+            
+            $source = new WPSSTM_Source();
+            $source->track_id = $this->post_id;
+            $source->url = $first_link;
+            $source->title = wpsstm_get_array_value(array('musical_entity','title'),$item);
+
+            $auto_sources[] = $source;
+            
+        }
+
+        //allow plugins to filter this
+        return apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
+        
+    }
+}
+
 /*
 */
