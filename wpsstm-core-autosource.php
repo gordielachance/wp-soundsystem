@@ -46,6 +46,7 @@ class WPSSTM_Core_Autosource{
         
         //if track does not have a duration, try to find it using MusicBrainz.
         //Being able to compare track & source duration will improve the way we compute the source weight.
+        //TOUFIX useful ?
         
         if ($track->post_id && !$track->duration && !$track->mbid){
             if ( $mbid = WPSSTM_Core_MusicBrainz::auto_mbid($track->post_id) ){
@@ -54,27 +55,33 @@ class WPSSTM_Core_Autosource{
             }
         }
         
-        $sources = array();
-        foreach((array)self::$providers as $slug=>$provider){
-            
-            $provider->track = $track;
-            $provider->populate_track_autosources();
-            
-            if ( is_wp_error($provider->sources) ){
-                $track->track_log($sources->get_error_message(),'WPSSTM_Core_Autosource::find_sources_for_track - unable to populate provider sources');
-                continue;
-            }
-                
-            foreach((array)$provider->sources as $source){
-                //compute source weight
-                $provider->populate_weight($source);
-            }
+        $source_engine = new WPSSTM_Tuneefy_Source_Digger($track);
+        $autosources = $source_engine->sources;
+        if ( is_wp_error($autosources) ) return $autosources;
 
-            $sources = array_merge($sources,(array)$provider->sources);
+        //remove some bad sources
+        foreach((array)$autosources as $key=>$source){
+
+            //cannot play this source, skip it.
+            if ( !$source->get_source_mimetype() ){
+
+                $source->source_log(json_encode(
+                    array(
+                        'track'=>sprintf('%s - %s',$track->artist,$track->title),
+                        'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
+                        'error'=>__('Source excluded because it has no mime type','wpsstm'))
+                    )
+                );
+                unset($autosources[$key]);
+                
+            }
 
         }
-
-        return $sources;
+        
+        //limit autosource results
+        $autosources = array_slice($autosources, 0, self::$max_autosource);
+        
+        return apply_filters('find_sources_for_track',$autosources);
 
     }
 
@@ -96,77 +103,30 @@ class WPSSTM_Core_Autosource{
         $now = current_time('timestamp');
         update_post_meta( $track->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
         
-        $sources = self::find_sources_for_track($track);
-        if ( is_wp_error($sources) ) return $sources;
+        $autosources = self::find_sources_for_track($track);
         
-        $sources_auto = array();
-        
-        //remove some bad sources
-        foreach((array)$sources as $source){
-            
-            $errors = array();
+        if ( is_wp_error($autosources) ) return $autosources;
+        if (!$autosources ) return $autosources;
 
-            //cannot play this source, skip it.
-            if ( !$source->get_source_mimetype() ){
-                $errors[] = new WP_Error('autosource_no_mimetype','Source excluded because it has no mime type');
-            }
 
-            //negative tags
-            $negative_tags = array_intersect(WPSSTM_Track_Autosource::$negative_tags,$source->tags);
-            if ($negative_tags){
-                $errors[] = new WP_Error('autosource_negative_tags','Source excluded because it has negative tags',$negative_tags);
-            }
-            
-            if($errors){
-                $source->source_log(json_encode(
-                    array(
-                        'track'=>sprintf('%s - %s',$track->artist,$track->title),
-                        'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
-                        'errors'=>$errors)
-                    ),
-                    "WPSSTM_Core_Autosource::store_sources_for_track - source excluded");
+        //insert sources
+        foreach($autosources as $source){
+
+            $source_id = $source->save_unique_source();
+
+            if ( is_wp_error($source_id) ){
+                $code = $source_id->get_error_code();
+                $error_msg = $source_id->get_error_message($code);
+                $track->track_log( $error_msg,"WPSSTM_Core_Autosource::store_sources_for_track - error while saving source");
                 continue;
             }
-            
-            $sources_auto[] = $source;
         }
 
-        $sources_auto = self::sort_sources_by_weight($sources_auto);
-        $sources_auto = array_values($sources_auto); //reindex
+        //reload sources
+        $track->populate_sources();
 
-        if ($sources_auto){
-            
-            //limit autosource results
-            $sources_auto = array_slice($sources_auto, 0, self::$max_autosource);
-
-            //insert sources
-            foreach($sources_auto as $source){
-
-                $source_id = $source->save_unique_source();
-
-                if ( is_wp_error($source_id) ){
-                    $code = $source_id->get_error_code();
-                    $error_msg = $source_id->get_error_message($code);
-                    $track->track_log( $error_msg,"WPSSTM_Core_Autosource::store_sources_for_track - error while saving source");
-                    continue;
-                }
-            }
-
-            //reload sources
-            $track->populate_sources();
-        }
-
-        return $sources_auto;
+        return $autosources;
         
-    }
-
-    public static function sort_sources_by_weight($sources){
-        function sort_weight($a, $b) {
-            if($a->weight == $b->weight){ return 0 ; }
-            return ($a->weight > $b->weight) ? -1 : 1;
-        }
-        usort($sources, 'sort_weight');
-        return $sources;
     }
 
 }
@@ -199,7 +159,7 @@ class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
     var $tuneefy_providers = array('youtube','soundcloud');
     
     function __construct(WPSSTM_Track $track){
-        parent::__construct();        
+        parent::__construct($track);        
         $this->sources = $this->find_sources();
     }
     
@@ -272,26 +232,29 @@ class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
 
         $api = self::tuneefy_api_aggregate('track',$tuneefy_args);
         if ( is_wp_error($api) ) return $api;
-
         $items = wpsstm_get_array_value(array('results'),$api);
         
-        //wpsstm()->debug_log( json_encode($items), "get_sources_auto");
+        if ($items){
+            //wpsstm()->debug_log( json_encode($items), "get_sources_auto");
 
-        //TO FIX have a more consistent extraction of datas ?
-        foreach( (array)$items as $item ){
-            
-            $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
-            $first_provider =       reset($links_by_providers);
-            $first_link =           reset($first_provider);
-            
-            $source = new WPSSTM_Source();
-            $source->track_id = $this->post_id;
-            $source->url = $first_link;
-            $source->title = wpsstm_get_array_value(array('musical_entity','title'),$item);
+            //TO FIX have a more consistent extraction of datas ?
+            foreach( (array)$items as $item ){
 
-            $auto_sources[] = $source;
-            
+                $links_by_providers =   wpsstm_get_array_value(array('musical_entity','links'),$item);
+                $first_provider =       reset($links_by_providers);
+                $first_link =           reset($first_provider);
+
+                $source = new WPSSTM_Source();
+                $source->track_id = $this->track->post_id;
+                $source->permalink_url = $first_link;
+                $source->title = wpsstm_get_array_value(array('musical_entity','title'),$item);
+
+                $auto_sources[] = $source;
+
+            }
         }
+        
+
 
         //allow plugins to filter this
         return $auto_sources;

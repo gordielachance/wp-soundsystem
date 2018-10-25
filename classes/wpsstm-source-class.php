@@ -16,8 +16,6 @@ class WPSSTM_Source{
     var $duration; //in seconds
     var $match;  //weight
     var $tags = array(); //array of tags that we could use to filter the sources, eg. remix,official,live,cover,acoustic,demo, ...
-    var $weights = array();
-    var $weight = 1;
     
     var $track_id;
 

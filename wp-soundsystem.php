@@ -128,7 +128,6 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         
-        require $this->plugin_dir . 'classes/services/default.php';
         require $this->plugin_dir . 'classes/services/soundcloud.php';
         require $this->plugin_dir . 'classes/services/youtube.php';
         
