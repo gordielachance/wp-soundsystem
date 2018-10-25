@@ -191,15 +191,8 @@ class WPSSTM_Tuneefy_Source_Digger{
         }
 
         $auto_sources = array();
-        $tuneefy_providers = array();
+        $tuneefy_providers = array('youtube','soundcloud');
 
-        //tuneefy providers slugs
-        foreach( (array)WPSSTM_Core_Player::get_providers() as $provider ){
-            $tuneefy_providers[] = $provider->tuneefy_slug;
-        }
-        
-        $tuneefy_providers = array_filter($tuneefy_providers);
-        
         $tuneefy_args = array(
             'q' =>          urlencode($this->artist . ' ' . $this->title),
             'mode' =>       'lazy',
