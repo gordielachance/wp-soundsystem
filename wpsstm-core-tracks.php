@@ -877,7 +877,7 @@ class WPSSTM_Core_Tracks{
             $new_sources[] = $source;
         }
         
-        //autosource
+        //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
             $track = new WPSSTM_Track($post_id);
             $track->autosource();

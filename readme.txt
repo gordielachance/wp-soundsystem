@@ -152,6 +152,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Tracklist log
 * Cache remote HTML file
 * Improved wizard
+* Tracks : new function populate_spotify_track_id()
 
 = 1.9.4 =
 * Better settings page errors
