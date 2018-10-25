@@ -939,17 +939,6 @@ class WPSSTM_Tracklist{
 
         if ( $this->did_query_tracks ) return true;
 
-        if ( $this->get_options('ajax_refresh') ){
-
-            if ( $this->wait_for_ajax() ){
-                $url = $this->get_tracklist_action_url('refresh');
-                $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
-                $error = new WP_Error( 'requires-refresh', $link );
-                $this->tracks_error = $error;
-                return $error;
-            }
-        }
-
         $required = array('fields' => 'ids',);
         $args = wp_parse_args($required,(array)$args);
         

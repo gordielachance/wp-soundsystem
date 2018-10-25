@@ -127,7 +127,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     function populate_subtracks($args = null){
 
-        if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
+        if ( $this->did_query_tracks || !$this->is_expired ){
             return parent::populate_subtracks($args);
         }
         
@@ -141,6 +141,15 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }else{ //allow plugins to filter the URL
             $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
         }
+        
+        if ( !$is_cached && $this->get_options('ajax_refresh') && $this->wait_for_ajax() ){
+            $url = $this->get_tracklist_action_url('refresh');
+            $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
+            $error = new WP_Error( 'requires-refresh', $link );
+            $this->tracks_error = $error;
+            return $error;
+        }
+        
         
         if ( $this->feed_url != $this->feed_url_no_filters){
             $this->tracklist_log($this->feed_url_no_filters,'original URL' );
