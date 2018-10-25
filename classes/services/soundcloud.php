@@ -1,16 +1,11 @@
 <?php
 
-class WPSSTM_Soundcloud_Platform extends WPSSTM_Provider_Platform{
+class WPSSTM_Soundcloud_Platform{
     
     static $mimetype = 'video/soundcloud';
     
     function __construct(){
         add_filter('wpsstm_get_source_mimetype',array(__class__,'get_soundcloud_source_type'),10,2);
-        add_filter('wpsstm_get_autosource_providers',array(__class__,'register_soundcloud_autosource'));
-    }
-    public static function register_soundcloud_autosource($providers){
-        $providers['soundcloud'] = new WPSSTM_Soundcloud_Track_Autosource();
-        return $providers;
     }
     public static function get_soundcloud_source_type($type,WPSSTM_Source $source){
         if ( self::get_sc_track_id($source->permalink_url) ){
@@ -127,98 +122,6 @@ class WPSSTM_Soundcloud_Platform extends WPSSTM_Provider_Platform{
         }
         return $sc_id;
     }
-}
-
-class WPSSTM_Soundcloud_Track_Autosource extends WPSSTM_Track_Autosource{
-
-    private static function can_search_sources(){
-        if ( !$client_id = wpsstm()->get_options('soundcloud_client_id') ){
-            return new WP_Error( 'wpsstm_missing_soundcloud_client_id', __('Required Soundcloud client ID missing.','wpsstm') );
-        }
-        return true;
-    }
-
-    public function search_track(){
-        
-        $can_search = self::can_search_sources();
-        if( is_wp_error($can_search) ) return $can_search;
-        
-        $terms = urlencode($this->track->artist . ' ' . $this->track->title);
-
-        $search_args = array(
-            'q' =>          $terms,
-            'limit' =>      50,
-            'client_id' =>  wpsstm()->get_options('soundcloud_client_id')
-        );
-        
-        $api_url = 'http://api.soundcloud.com/tracks.json';
-        $api_url = add_query_arg($search_args,$api_url);
-
-        wpsstm()->debug_log($api_url,'WPSSTM_Player_Provider_Soundcloud::search_sources');
-        
-        $response = wp_remote_get( $api_url );
-        $json = wp_remote_retrieve_body( $response );
-        if ( is_wp_error($json) ) return $json;
-        $items = json_decode($json,true);
-        return $items;
-    }
-    
-    private function get_soundcloud_tags($item){
-        $tags = array();
-        
-        //track type
-        if ( $track_type = $item['track_type'] ){
-            $avoid_tags = array('other');
-            if ( !in_array($track_type,$avoid_tags) ){
-                $tags[] = $track_type;
-            }
-        }
-        
-        //source title
-        $title_tags = $this->parse_source_title_tags($item['title']);
-        $tags = array_merge($tags,(array)$title_tags);
-        
-        return $tags;
-    }
-    
-    function populate_track_autosources(){
-        
-        $items = $this->search_track();
-        if ( is_wp_error($items) ) return $items;
-        
-        $sources = array();
-
-        foreach((array)$items as $key=>$item){
-            
-            //define autosource
-            $source = new WPSSTM_Source();
-            $source->track_id = $this->track->post_id;
-            $source->is_community = true;
-            
-            $source->index = $key;
-            
-            $source->autosource_data = $item;
-            ///
-            $source->permalink_url = $item['permalink_url'];
-            $source->stream_url = $item['stream_url'];
-            $source->duration = round($item['duration'] / 1000);
-            $source->title = $item['title'];
-            $source->tags = $this->get_soundcloud_tags($item);
-
-            if($item['download_url']){
-                $source->download_url = $item['download_url'];
-            }
-            $sources[] = $source;
-
-        }
-
-        $this->sources = $sources;
-    }
-    
-    static function get_provider_weight(){
-        return .85;
-    }
-
 }
 
 new WPSSTM_Soundcloud_Platform();

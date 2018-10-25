@@ -1,13 +1,9 @@
 <?php
 
 class WPSSTM_Core_Autosource{
-    
-    static private $providers = array();
     public static $max_autosource = 5;
 
     function __construct(){
-        //hook autosource providers
-        self::$providers = apply_filters('wpsstm_get_autosource_providers',self::$providers);
         add_action( 'wp', array($this,'debug_autosource'));
     }
 
@@ -16,6 +12,8 @@ class WPSSTM_Core_Autosource{
     */
     function debug_autosource(){
         if ( is_admin() ) return;
+        
+        //TOUFIX TOREMOVE
         $test_track_id = isset($_GET['debug_autosource']) ? $_GET['debug_autosource'] : null;
         if (get_post_type($test_track_id) != wpsstm()->post_type_track ) return;
         if (!$test_track_id) return;
@@ -171,6 +169,13 @@ class WPSSTM_Core_Autosource{
         return $sources;
     }
 
+}
+
+/*
+Engine used to discover sources
+*/
+class WPSSTM_Source_Digger{
+    
 }
 
 /*

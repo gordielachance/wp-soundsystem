@@ -100,7 +100,3 @@ abstract class WPSSTM_Track_Autosource{
     }
     
 }
-
-class WPSSTM_Provider_Platform{
-    
-}
