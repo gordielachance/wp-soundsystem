@@ -930,8 +930,6 @@ class WPSSTM_Core_Tracks{
     function ajax_toggle_playlist_subtrack(){
         
         $ajax_data = wp_unslash($_POST);
-        
-        $this->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
 
         $result = array(
             'input'     => $ajax_data,
@@ -941,6 +939,7 @@ class WPSSTM_Core_Tracks{
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
         $track = $result['track'] = new WPSSTM_Track($track_id);
+        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
         $tracklist = $result['tracklist'] = new WPSSTM_Tracklist($tracklist_id);

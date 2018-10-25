@@ -726,6 +726,8 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
             );
         }
+        
+        //TOUFIX add unlink (playlist) action
 
         //delete track
         if ($can_delete_tracks){
