@@ -92,7 +92,6 @@ class WP_SoundSystem {
             'lastfm_scrobbling'                 => 'on',
             'lastfm_favorites'                  => 'on',
             'lastfm_community_scrobble'         => 'off',
-            'youtube_api_key'                   => null,
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
             'tuneefy_client_id'                 => null,
