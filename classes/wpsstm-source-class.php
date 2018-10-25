@@ -135,34 +135,19 @@ class WPSSTM_Source{
 
         $this->title = trim($this->title);
     }
-    
-    /*
-    Save source only if it does not exists yet
-    */
-    function save_unique_source(){
-        
-        //sanitize
-        $sanitized = $this->sanitize_source();
-
-        if ( is_wp_error($sanitized) ){
-            return $sanitized;
-        }
-
-        //check for duplicates
-        $duplicates = $this->get_source_duplicates_ids();
-
-        if ( !empty($duplicates) ){
-            $source_id = $duplicates[0];
-        }else{
-            $source_id = $this->save_source();
-        }
-        return $source_id;
-    }
 
     function save_source(){
         $sanitized = $this->sanitize_source();
         if ( is_wp_error($sanitized) ) return $sanitized;
         
+        //check for duplicates
+        $duplicates = $this->get_source_duplicates_ids();
+        if ( !empty($duplicates) ){
+            $source_id = $duplicates[0];
+            $this->post_id = $source_id;
+            return new WP_Error( 'wpsstm_source_duplicate', sprintf(__("This source already exists as post #%s",'wpsstm'),$source_id) );
+        }
+
         $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
         
         //capability check

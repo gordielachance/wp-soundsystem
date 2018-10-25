@@ -101,6 +101,7 @@ class WP_SoundSystem {
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
+            'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
             'autosource_filter_ban_words'       => array('cover'),
             'playable_opacity_class'            => 'on',
@@ -168,7 +169,6 @@ class WP_SoundSystem {
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
         new WPSSTM_Core_Sources();
-        new WPSSTM_Core_Autosource();
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();

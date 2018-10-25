@@ -403,15 +403,17 @@ class WPSSTM_Core_Sources{
         //set global $wpsstm_track
         $wpsstm_track = new WPSSTM_Track();
         $wpsstm_track->from_array($ajax_data['track']);
-        $success = WPSSTM_Core_Autosource::store_sources_for_track($wpsstm_track);
+        
+        $wpsstm_track->autosource();
+        $new_ids = $wpsstm_track->save_new_sources();
         
         $result['track'] = $wpsstm_track;
 
-        if ( is_wp_error($success) ){
+        if ( is_wp_error($new_ids) ){
             
-            $result['message'] = $success->get_error_message();
+            $result['message'] = $new_ids->get_error_message();
             
-        }elseif( $success ){
+        }elseif( $new_ids ){
 
             ob_start();
             wpsstm_locate_template( 'track-sources.php', true, false );

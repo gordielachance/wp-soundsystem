@@ -119,7 +119,6 @@ class WPSSTM_Track{
 
     }
 
-    
     function get_default(){
         return array(
             'post_id'       =>null,
@@ -165,9 +164,7 @@ class WPSSTM_Track{
 
         return $this->parent_ids;
     }
-    
 
-    
     function get_parents_list(){
 
         $tracklist_ids = $this->get_parent_ids();
@@ -356,8 +353,7 @@ class WPSSTM_Track{
         return $success;
         
     }
-
-    
+  
     function musicbrainz(){
         //abord
         if( !$this->artist || !$this->title ) return;
@@ -470,7 +466,6 @@ class WPSSTM_Track{
         return in_array($user_id,(array)$loved_by);
     }
     
-    
     function get_loved_by_list(){
         $list = null;
         if ( !$user_ids = $this->get_track_loved_by() ) return;
@@ -519,6 +514,105 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
+    }
+    
+    /*
+    Retrieve autosources for a track
+    */
+    
+    function autosource(){
+
+        if ( wpsstm()->get_options('autosource') != 'on' ){
+            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        }
+        
+        $can_autosource = WPSSTM_Core_Sources::can_autosource();
+        if ( $can_autosource !== true ) return $can_autosource;
+
+        if ( !$this->artist ){
+            return new WP_Error( 'wpsstm_track_no_artist', __('Autosourcing requires track artist.','wpsstm') );
+        }
+        
+        if ( !$this->title ){
+            return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
+        }
+        
+        //if track does not have a duration, try to find it using MusicBrainz.
+        //Being able to compare track & source duration will improve the way we compute the source weight.
+        //TOUFIX useful ?
+        
+        if ($this->post_id && !$this->duration && !$this->mbid){
+            if ( $mbid = WPSSTM_Core_MusicBrainz::auto_mbid($this->post_id) ){
+                //repopulate track to load the new datas
+                $this->__construct($this->post_id);
+            }
+        }
+        
+        $source_engine = new WPSSTM_Tuneefy_Source_Digger($this);
+        $autosources = $source_engine->sources;
+        if ( is_wp_error($autosources) ) return $autosources;
+
+        //sanitize sources
+        foreach((array)$autosources as $key=>$source){
+
+            //cannot play this source, skip it.
+            if ( !$source->get_source_mimetype() ){
+
+                $source->source_log(json_encode(
+                    array(
+                        'track'=>sprintf('%s - %s',$this->artist,$this->title),
+                        'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
+                        'error'=>__('Source excluded because it has no mime type','wpsstm'))
+                    )
+                );
+                unset($autosources[$key]);
+                continue;
+            }
+            
+            $source->track_id = $this->post_id;
+            $source->is_community = true;
+
+        }
+        
+        //limit autosource results
+        $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
+        $autosources = array_slice($autosources, 0, $limit_autosources);
+        $autosources = apply_filters('wpsstm_track_autosources',$autosources);
+        $this->add_sources($autosources);
+        return $autosources;
+
+    }
+    
+    function save_new_sources(){
+        
+        if ( !$this->post_id ){
+            return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );
+        }
+        
+        //save time autosourced
+        $now = current_time('timestamp');
+        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
+
+        //insert sources
+        $inserted = array();
+        foreach((array)$this->sources as $source){
+            
+            if ($source->post_id) continue;
+            $source_id = $source->save_source();
+
+            if ( is_wp_error($source_id) ){
+                $code = $source_id->get_error_code();
+                $error_msg = $source_id->get_error_message($code);
+                $source->source_log( $error_msg,"store autosources - error while saving source");
+                continue;
+            }else{
+                $inserted[] = $source_id;
+            }
+
+        }
+        
+        return $inserted;
+        
     }
     
     private function get_new_track_url(){
@@ -803,8 +897,6 @@ class WPSSTM_Track{
 		$this->in_source_loop = false;
 		return false;
 	}
-    
-
 
 	/**
 	 * Rewind the sources and reset source index.
