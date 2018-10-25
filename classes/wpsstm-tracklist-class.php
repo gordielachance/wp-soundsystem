@@ -1106,25 +1106,25 @@ class WPSSTM_Tracklist{
     
     function tracklist_log($message,$title = null){
         
-        //global debug
-        $globaltitle = $title;
-        if ($this->post_id){
-            $globaltitle = sprintf('[tracklist:%s] ',$this->post_id) . $title;
-        }
-        wpsstm()->debug_log($message,$globaltitle,null);
-        
-        //
-        
-        if ( !$log_file = $this->get_tracklist_log_path() ) return;
-        
-        $blogtime = current_time( 'mysql' ); 
         if (is_array($message) || is_object($message)) {
             $message = implode("\n", $message);
         }
         
-        $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
+        //tracklist log
+        if ( $log_file = $this->get_tracklist_log_path() ){
+            $blogtime = current_time( 'mysql' );
+            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
 
-        error_log($output.PHP_EOL,3,$log_file);
+            error_log($output.PHP_EOL,3,$log_file);
+        }
+        
+        //global log
+        if ($this->post_id){
+            $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
+        }
+        wpsstm()->debug_log($message,$title,null);
+        
+
     }
     
     

@@ -12,7 +12,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     var $scraper_options = array();
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
-    public $is_cached = null;
     public $cache_source_key = null;
     public $cache_source_url = null;
 
@@ -66,8 +65,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             }
             
             $this->cache_source_key = sprintf('wpsstm_cached_source_%s',$this->post_id);
-            $this->cache_source_url = ( $this->get_options('cache_source') ) ? get_transient( $this->cache_source_key ) : null;
-            $this->is_cached = ( $this->cache_source_url );
+            $this->cache_source_url = get_transient( $this->cache_source_key );
 
         }
 
@@ -132,10 +130,13 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
             return parent::populate_subtracks($args);
         }
+        
+        $is_cached = false;
 
         //try cache
-        if ( $this->is_cached ){
+        if ( $this->get_options('cache_source') && $this->cache_source_url ){
             $this->feed_url = $this->cache_source_url;
+            $is_cached = true;
             $this->tracklist_log('found HTML cache' );
         }else{ //allow plugins to filter the URL
             $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
@@ -149,11 +150,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $response = $this->populate_remote_response($this->feed_url);
         $response_code = wp_remote_retrieve_response_code( $response );
         
-        if ( $this->is_cached ) {
+        if ( $is_cached ) {
             if ( is_wp_error($response) || ($response_code != 200) ){ //if cached file has been deleted or something
                 $this->tracklist_log( 'Unable to get cached file,deleting transient, retrying...' );
                 delete_transient( $this->cache_source_key );
-                $this->is_cached = false;
+                $this->cache_source_url = null;
                 $response = $this->populate_subtracks();
             }
         }
@@ -169,8 +170,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
         
-        if ( !$this->is_cached ) {
-           $this->cache_tracklist_response($response); 
+        if ( !$is_cached && $this->get_options('cache_source') ) {
+           $this->cache_tracklist_source($response); 
         }
 
         $tracks = $this->get_remote_tracks();
@@ -356,7 +357,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         return $upload;
     }
 
-    function cache_tracklist_response($response){
+    function cache_tracklist_source($response){
 
         $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
         
@@ -365,8 +366,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($response) ) return;
 
         $ext = $this->remote_type_to_ext($response['headers']['content-type']);
-        $time = current_time( 'timestamp' );
-        $filename = sprintf('%s-source-%s.%s',$this->post_id,$time,$ext);
+        $filename = sprintf('%s-source.%s',$this->post_id,$ext);
 
         add_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
         add_filter( 'upload_dir', array($this,'uploads_custom_dir') );
