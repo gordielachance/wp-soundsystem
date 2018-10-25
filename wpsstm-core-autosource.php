@@ -180,6 +180,8 @@ class WPSSTM_Source_Digger{
 
 class WPSSTM_Tuneefy_Source_Digger{
     
+    var $tuneefy_providers = array('youtube','soundcloud');
+    
     protected function get_sources_auto(){
 
         if ( !$this->artist ){
@@ -191,17 +193,16 @@ class WPSSTM_Tuneefy_Source_Digger{
         }
 
         $auto_sources = array();
-        $tuneefy_providers = array('youtube','soundcloud');
 
         $tuneefy_args = array(
             'q' =>          urlencode($this->artist . ' ' . $this->title),
             'mode' =>       'lazy',
             'aggressive' => 'true', //merge tracks (ignore album)
-            'include' =>    implode(',',$tuneefy_providers),
+            'include' =>    implode(',',$this->tuneefy_providers),
             'limit' =>      5
         );
 
-        $api = WPSSTM_Core_Sources::tuneefy_api_aggregate('track',$tuneefy_args);
+        $api = self::tuneefy_api_aggregate('track',$tuneefy_args);
         if ( is_wp_error($api) ) return $api;
 
         $items = wpsstm_get_array_value(array('results'),$api);
@@ -225,9 +226,67 @@ class WPSSTM_Tuneefy_Source_Digger{
         }
 
         //allow plugins to filter this
-        return apply_filters('wpsstm_get_track_sources_auto',$auto_sources,$this);
+        return $auto_sources;
         
     }
+    
+    /*
+    Get track/album informations using Tuneefy API
+    See https://data.tuneefy.com/#search-aggregate-get
+    */
+    
+    static function tuneefy_api_aggregate($type,$url_args){
+        
+        $error = null;
+        $url = null;
+        $request_args = null;
+        $api_response = null;
+        
+        //TO FIX use a transient to store results for a certain time ?
+
+        $token = self::get_tuneefy_token();
+        
+        if ( is_wp_error($token) ){
+            $error = $token;
+        }else{
+            $request_args = array(
+                'headers' => array(
+                    'Accept' => 'application/json',
+                    'Authorization' => sprintf('Bearer %s',$token),
+                ),
+            );
+
+
+            $url = sprintf('https://data.tuneefy.com/v2/aggregate/%s',$type);
+            $url = add_query_arg($url_args,$url);
+
+
+            wpsstm()->debug_log( json_encode(array('url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
+
+            $response = wp_remote_get($url,$request_args);
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ){
+                $error = $body;
+            }else{
+
+                $api_response = json_decode( $body, true );
+
+                if( !empty($api_response['errors']) ){
+                    $errors = $api_response['errors'];
+                    $error = new WP_Error( 'wpsstm_tuneefy_aggregate', sprintf( __('Unable to aggregate using Tuneefy : %s','wpsstm'),json_encode($errors) ) );
+                }
+            }
+        }
+
+        if($error){
+            wpsstm()->debug_log( json_encode(array('error'=>$error->get_error_message(),'url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
+            return $error;
+        }
+
+        return $api_response;
+    }
+    
 }
 
 /*
