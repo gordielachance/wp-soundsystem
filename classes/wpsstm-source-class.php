@@ -215,7 +215,7 @@ class WPSSTM_Source{
             'data-wpsstm-track-id' =>               $this->track_id,
             'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
-            'data-wpsstm-source-src' =>             $this->stream_url,
+            'data-wpsstm-source-src' =>             $this->get_stream_url(),
             'data-wpsstm-source-type' =>            $this->get_source_mimetype(),
             'data-wpsstm-community-source' =>       (int)wpsstm_is_community_post($this->post_id),
             'class' =>                              implode( ' ',$this->get_source_class() ),
@@ -227,6 +227,11 @@ class WPSSTM_Source{
         $classes = array('wpsstm-source');
         $classes = apply_filters('wpsstm_source_classes',$classes,$this);
         return array_filter(array_unique($classes));
+    }
+    
+    function get_stream_url(){
+        if ($this->stream_url) return $this->stream_url;
+        return $this->stream_url = apply_filters('wpsstm_get_source_stream_url',$this->permalink_url,$this);
     }
     
     function get_source_action_url($action = null){

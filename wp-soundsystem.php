@@ -172,6 +172,10 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
+        new WPSSTM_Soundcloud_Platform();
+        new WPSSTM_Youtube_Platform();
+        
+        //TOFIX should be better to hook this on a wpsstm_ready action
         
         ////
 
@@ -338,13 +342,13 @@ class WP_SoundSystem {
         
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-        wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
+        wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome'),wpsstm()->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
         
         //js
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version, true);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
 
         $datas = array(
             'debug'             => (WP_DEBUG),

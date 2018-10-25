@@ -6,6 +6,7 @@ class WPSSTM_Soundcloud_Platform{
     
     function __construct(){
         add_filter('wpsstm_get_source_mimetype',array(__class__,'get_soundcloud_source_type'),10,2);
+        add_filter('wpsstm_get_source_stream_url',array(__class__,'get_soundcloud_stream_url'),10,2);
     }
     public static function get_soundcloud_source_type($type,WPSSTM_Source $source){
         if ( self::get_sc_track_id($source->permalink_url) ){
@@ -46,34 +47,40 @@ class WPSSTM_Soundcloud_Platform{
         
         https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou
         */
-        
-        //TOFIXKKK
 
         $pattern = '~https?://(?:www.)?soundcloud.com/([^/]+)/([^/]+)~';
         preg_match($pattern, $url, $url_matches);
         
         if ( isset($url_matches[1]) && isset($url_matches[2]) ){
-            return sprintf('%s/%s',$url_matches[1],$url_matches[2]);
+            return self::request_sc_track_id($url);
         }
 
     }
     
-    public static function get_stream_url($url){
+    public static function get_soundcloud_stream_url($url,WPSSTM_Source $source){
 
-        if ( !$track_id = self::get_sc_track_id($url) ) return;
+        $client_id = wpsstm()->get_options('soundcloud_client_id');
+        $sc_track_id = self::get_sc_track_id($url);
 
-        if ( $this->client_id ){ //stream url
-            return sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$track_id,$this->client_id);
-        }else{ //widget url
+        if ($sc_track_id){
+            //widget URL
             $widget_url = 'https://w.soundcloud.com/player/';
-            $track_url = sprintf('http://api.soundcloud.com/tracks/%s',$track_id);
+            $track_url = sprintf('http://api.soundcloud.com/tracks/%s',$sc_track_id);
             $widget_args = array(
                 'url' =>        urlencode ($track_url),
-                'autoplay' =>   false,
-                'client_id' =>  $this->client_id
+                'autoplay' =>   false
             );
-            return add_query_arg($widget_args,$widget_url);
+            $url = add_query_arg($widget_args,$widget_url);
+            
+            if ( $client_id ){ //stream url
+                $url = sprintf('https://api.soundcloud.com/tracks/%s/stream?client_id=%s',$sc_track_id,$client_id);
+            }
+            
         }
+        
+
+
+        return $url;
 
     }
     /*
@@ -123,5 +130,3 @@ class WPSSTM_Soundcloud_Platform{
         return $sc_id;
     }
 }
-
-new WPSSTM_Soundcloud_Platform();

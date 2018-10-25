@@ -27,5 +27,3 @@ class WPSSTM_Youtube_Platform{
         return sprintf('https://youtube.com/watch?v=%s',$id);
     }
 }
-
-new WPSSTM_Youtube_Platform();

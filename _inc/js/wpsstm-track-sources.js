@@ -8,7 +8,7 @@ class WpsstmTrackSource {
         this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
         this.src =              this.source_el.attr('data-wpsstm-source-src');
         this.type =             this.source_el.attr('data-wpsstm-source-type');
-        this.can_play =         Boolean(this.type);
+        this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
         this.media =            undefined;
         
         //this.debug("new WpsstmTrackSource");
@@ -16,7 +16,6 @@ class WpsstmTrackSource {
         if (!this.can_play){
             this.source_el.addClass('source-error');
         }
-        
 
     }
     
@@ -73,8 +72,7 @@ class WpsstmTrackSource {
                 debug:          wpsstmL10n.debug,
                 autoStartLoad:  true
             },
-            // Do not forget to put a final slash (/)
-            pluginPath: 'https://cdnjs.com/libraries/mediaelement/',
+            pluginPath: wpsstmPlayer.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
             //audioWidth: '100%',
             stretching: 'responsive',
             features: ['playpause','loop','progress','current','duration','volume'],
