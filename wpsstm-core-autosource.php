@@ -23,13 +23,66 @@ class WPSSTM_Source_Digger{
     }
 }
 
+class WPSSTM_SongLink_Source_Digger extends WPSSTM_Source_Digger{
+    function __construct(WPSSTM_Track $track){
+        parent::__construct($track);        
+        $this->populate_sources();
+    }
+
+    function populate_sources(){
+        $auto_sources = array();
+        $spotify_id = $this->track->populate_spotify_track_id();
+        if ( is_wp_error($spotify_id) ) return $spotify_id;
+        
+        $url = sprintf('https://song.link/s/%s',$spotify_id);
+
+        $response = wp_remote_get($url);
+        $body = wp_remote_retrieve_body($response);
+        if ( is_wp_error($body) ) return $body;
+        
+        /*
+        parse HTML elements
+        */
+        
+        $dom = new DOMDocument();
+        
+        $internalErrors = libxml_use_internal_errors(true);//set error level
+        $dom->loadHTML($body);
+        libxml_use_internal_errors($internalErrors);//restore error level
+        
+        $xpath = new DOMXPath($dom);
+        $listen_links = $xpath->query("//a[starts-with(@data-nemo, 'listen:')]");
+        
+        foreach ($listen_links as $link) {
+            
+            $provider_attr = $link->getAttribute('data-nemo');
+            $provider = preg_replace('/^' . preg_quote('listen:', '/') . '/', '', $provider_attr); //remove 'listen:' prefix
+            
+            $url = $link->getAttribute('href');
+            $title = $link->getAttribute('aria-label');
+            $title = preg_replace('/^' . preg_quote('Listen to ', '/') . '/', '', $title); //remove 'Listen to' prefix
+            
+            $source = new WPSSTM_Source();
+
+            $source->permalink_url = $url;
+            $source->title = $title;
+            
+            $auto_sources[] = $source;
+            
+        }
+        
+        return $this->sources = $auto_sources;
+        
+    }
+}
+
 class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
     
     var $tuneefy_providers = array('youtube','soundcloud');
     
     function __construct(WPSSTM_Track $track){
         parent::__construct($track);        
-        $this->sources = $this->find_sources();
+        $this->populate_sources();
     }
     
     static function can_tuneefy(){
@@ -84,7 +137,7 @@ class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
         
     }
     
-    private function find_sources(){
+    private function populate_sources(){
 
         $is_valid_track = $this->is_valid_track();
         if ( is_wp_error($is_valid_track) ) return $is_valid_track;
@@ -121,11 +174,8 @@ class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
 
             }
         }
-        
 
-
-        //allow plugins to filter this
-        return $auto_sources;
+        return $this->sources = $auto_sources;
         
     }
     

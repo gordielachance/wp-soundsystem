@@ -9,6 +9,7 @@ class WPSSTM_Track{
     public $album;
     public $duration; //in seconds
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
+    public $spotify_id = null;
     
     public $image_url;
     public $location;
@@ -536,19 +537,9 @@ class WPSSTM_Track{
         if ( !$this->title ){
             return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
         }
-        
-        //if track does not have a duration, try to find it using MusicBrainz.
-        //Being able to compare track & source duration will improve the way we compute the source weight.
-        //TOUFIX useful ?
-        
-        if ($this->post_id && !$this->duration && !$this->mbid){
-            if ( $mbid = WPSSTM_Core_MusicBrainz::auto_mbid($this->post_id) ){
-                //repopulate track to load the new datas
-                $this->__construct($this->post_id);
-            }
-        }
-        
-        $source_engine = new WPSSTM_Tuneefy_Source_Digger($this);
+
+        //$source_engine = new WPSSTM_Tuneefy_Source_Digger($this);
+        $source_engine = new WPSSTM_SongLink_Source_Digger($this);
         $autosources = $source_engine->sources;
         if ( is_wp_error($autosources) ) return $autosources;
 
@@ -578,6 +569,7 @@ class WPSSTM_Track{
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
         $autosources = array_slice($autosources, 0, $limit_autosources);
         $autosources = apply_filters('wpsstm_track_autosources',$autosources);
+
         $this->add_sources($autosources);
         return $autosources;
 
@@ -1011,6 +1003,50 @@ class WPSSTM_Track{
     
     function track_log($message,$title = null){
         return wpsstm()->debug_log($message,$title,null);
+    }
+    
+    /*
+    Use songWhip.com to search the Spotify ID.
+    Used to find audio sources on song.link.
+    */
+    
+    function populate_spotify_track_id(){
+        
+        if ($this->spotify_id) return $this->spotify_id;
+        
+        $spotify_id = null;
+        
+        $url_args = array(
+            'q'=>urlencode($this->artist . ' ' . $this->title)
+        );
+        
+        //$url = 'https://api.songwhip.com/?country=BE&q=test';
+        $url = add_query_arg($url_args,'https://songwhip.com/search');
+
+        $response = wp_remote_get($url);
+        $body = wp_remote_retrieve_body($response);
+
+        if ( is_wp_error($body) ) return $body;
+        
+        $json = json_decode($body,true);
+        
+        if ($json['status'] != 'success'){
+            return new WP_Error( 'wpsstm_songwhip_search', __('Error while searching on SongWhip.','wpsstm') );
+        }
+        
+        $tracks = wpsstm_get_array_value(array('data','tracks'),$json);
+        $first_track = reset($tracks);
+        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$first_track);
+        $spotify_title = wpsstm_get_array_value(array('name'),$first_track);
+
+        $pattern = '~https?://open.spotify.com/track/([^/]+)~';
+        preg_match($pattern, $spotify_url, $url_matches);
+
+        if ( isset($url_matches[1]) ){
+            $spotify_id = $url_matches[1];
+        }
+
+        return $this->spotify_id = $spotify_id;
     }
     
 }
