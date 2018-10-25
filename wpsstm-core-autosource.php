@@ -175,27 +175,95 @@ class WPSSTM_Core_Autosource{
 Engine used to discover sources
 */
 class WPSSTM_Source_Digger{
+    var $track;
+    var $sources = array();
     
+    function __construct(WPSSTM_Track $track){
+        $this->track = $track;
+    }
+    
+    function is_valid_track(){
+        if ( !$this->track->artist ){
+            return new WP_Error( 'wpsstm_track_no_artist', __('Autosourcing requires track artist.','wpsstm') );
+        }
+
+        if ( !$this->track->title ){
+            return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
+        }
+        return true;
+    }
 }
 
-class WPSSTM_Tuneefy_Source_Digger{
+class WPSSTM_Tuneefy_Source_Digger extends WPSSTM_Source_Digger{
     
     var $tuneefy_providers = array('youtube','soundcloud');
     
-    protected function get_sources_auto(){
+    function __construct(WPSSTM_Track $track){
+        parent::__construct();        
+        $this->sources = $this->find_sources();
+    }
+    
+    static function can_tuneefy(){
+        if ( !wpsstm()->get_options('tuneefy_client_id') ){
+            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client id missing.','wpsstm') );
+        }
+        if ( !wpsstm()->get_options('tuneefy_client_secret') ){
+            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client secret missing.','wpsstm') );
+        }
+        return true;
+    }
+    
+    static function get_tuneefy_token(){
+        
+        $can_tuneefy = self::can_tuneefy();
+        if( is_wp_error($can_tuneefy) ) return $can_tuneefy;
+        
+        $transient_name = 'tuneefy_token';
+        
+        $client_id = wpsstm()->get_options('tuneefy_client_id');
+        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
 
-        if ( !$this->artist ){
-            return new WP_Error( 'wpsstm_track_no_artist', __('Required track artist missing.','wpsstm') );
+        if ( false === ( $token = get_transient($transient_name ) ) ) {
+            
+            $args = array(
+                'headers' => array(
+                    'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8',
+                ),
+                'body' => sprintf('client_id=%s&client_secret=%s&grant_type=client_credentials',$client_id,$client_secret),
+            );
+            $response = wp_remote_post('https://data.tuneefy.com/v2/auth/token', $args );
+            $body = wp_remote_retrieve_body($response);
+
+            if ( is_wp_error($body) ) return $body;
+            $api_response = json_decode( $body, true );
+            
+            wpsstm()->debug_log( json_encode($api_response), "WPSSTM_Core_Sources::get_tuneefy_token"); 
+
+            if ( isset($api_response['access_token']) &&  isset($api_response['expires_in']) ) {
+                $token = $api_response['access_token'];
+                $time = $api_response['expires_in']; //TO FIX TO CHECK is seconds ?
+                set_transient( $transient_name, $token, $time );
+            }elseif( isset($api_response['error_description']) ){
+                return new WP_Error( 'wpsstm_tuneefy_auth', sprintf(__('Unable to get Tuneefy Token: %s','wpsstm'),$data['error_description']) );
+            }else{
+                return new WP_Error( 'wpsstm_tuneefy_auth', __('Unable to get Tuneefy Token.','wpsstm') );
+            }
+            
         }
         
-        if ( !$this->title ){
-            return new WP_Error( 'wpsstm_track_no_title', __('Required track title missing.','wpsstm') );
-        }
+        return $token;
+        
+    }
+    
+    private function find_sources(){
+
+        $is_valid_track = $this->is_valid_track();
+        if ( is_wp_error($is_valid_track) ) return $is_valid_track;
 
         $auto_sources = array();
 
         $tuneefy_args = array(
-            'q' =>          urlencode($this->artist . ' ' . $this->title),
+            'q' =>          urlencode($this->track->artist . ' ' . $this->track->title),
             'mode' =>       'lazy',
             'aggressive' => 'true', //merge tracks (ignore album)
             'include' =>    implode(',',$this->tuneefy_providers),
