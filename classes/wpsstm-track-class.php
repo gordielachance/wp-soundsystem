@@ -1015,7 +1015,7 @@ class WPSSTM_Track{
     
     function populate_spotify_track_id(){
         if ($this->spotify_id) return $this->spotify_id;
-        $spotify_id = WPSSTM_Spotify::get_spotify_track_id($track);
+        $spotify_id = WPSSTM_Spotify::get_spotify_track_id($this);
         return $this->spotify_id = $spotify_id;
     }
     
