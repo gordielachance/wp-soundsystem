@@ -661,7 +661,7 @@ class WPSSTM_Track{
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') ); //TO FIX if tracklist has tracks
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') && ($tracklist->track_count > 1) );
         $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
         
         /*
@@ -726,8 +726,6 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
             );
         }
-        
-        //TOUFIX add unlink (playlist) action
 
         //delete track
         if ($can_delete_tracks){
