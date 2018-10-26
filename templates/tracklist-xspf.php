@@ -20,7 +20,7 @@ require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 $xspf = new mptre\Xspf();
 
 //playlist
-if ( $title = $tracklist->title ){
+if ( $title = $tracklist->get_title() ){
     $xspf->addPlaylistInfo('title', $title);
 }
 

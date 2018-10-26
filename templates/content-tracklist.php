@@ -23,8 +23,8 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
     <?php $tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
-        <strong class="wpsstm-tracklist-title" itemprop="name">
-            <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->title;?></a>
+        <strong class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $tracklist->get_title();?>">
+            <a href="<?php echo get_permalink($tracklist->post_id);?>"><?php echo $tracklist->get_title();?></a>
         </strong>
         <small class="wpsstm-tracklist-time">
             <?php
@@ -50,7 +50,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         </small>
         <?php
             //original link
-            if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url) ){
+            if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url_no_filters) ){
                 ?> 
                 <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $tracklist_url;?>">
                     <i class="fa fa-link" aria-hidden="true"></i> 
@@ -132,9 +132,9 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                             <span itemprop="position"><?php echo $tracklist->current_track + 1;?></span>
                         </span>
                         <span class="wpsstm-track-info">
-                            <span class="wpsstm-track-artist" itemprop="byArtist"><?php echo $track->artist;?></span>
-                            <span class="wpsstm-track-title" itemprop="name"><?php echo $track->title;?></span>
-                            <span class="wpsstm-track-album" itemprop="inAlbum"><?php echo $track->album;?></span>
+                            <span class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $track->artist;?>"><?php echo $track->artist;?></span>
+                            <span class="wpsstm-track-title" itemprop="name" title="<?php echo $track->title;?>"><?php echo $track->title;?></span>
+                            <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $track->album;?>"><?php echo $track->album;?></span>
                         </span>
                         <span class="wpsstm-track-actions">
                             <?php

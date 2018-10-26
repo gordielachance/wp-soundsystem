@@ -99,6 +99,14 @@ class WPSSTM_Tracklist{
         return $url_options;
     }
     
+    public function get_title(){
+        $title = $this->title;
+        if (!$title && $this->post_id){
+            $title = sprintf(__('(playlist #%d)','wpsstm'),$this->post_id);
+        }
+        return $title;
+    }
+    
     /*
     Assign subtracks IDs to a tracklist.
     */
