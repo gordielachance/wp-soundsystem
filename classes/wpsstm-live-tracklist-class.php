@@ -125,11 +125,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         return $diff;
     }
 
-    function populate_subtracks($args = null){
-
-        if ( $this->did_query_tracks || !$this->is_expired ){
-            return parent::populate_subtracks($args);
-        }
+    protected function get_live_subtracks($args = null){
         
         $is_cached = false;
 
@@ -197,14 +193,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             $tracks = array_reverse($tracks);
         }
 
-        $this->tracks = $this->add_tracks($tracks);
-        $this->track_count = count($this->tracks);
-
-        /*
-        UPDATE TRACKLIST
-        */
-        $post_id = $this->update_live_tracklist();
-        return $post_id;
+        return $tracks;
     }
 
     /*

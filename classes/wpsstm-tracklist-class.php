@@ -162,7 +162,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
 
-        $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = (array)$this->get_static_subtracks(array('fields' =>'ids'));
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Static_Tracklist::append_subtrack_ids()");
         
@@ -183,7 +183,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
         
-        $subtrack_ids = (array)$this->get_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = (array)$this->get_static_subtracks(array('fields' =>'ids'));
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Static_Tracklist::remove_subtrack_ids()");
 
@@ -601,8 +601,9 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
 
         //get live IDs
+        //TOUFIX TO CHECK whole fn
         $this->tracklist_type = 'live';
-        $live_ids = $this->get_subtracks(array('fields' =>'ids'));
+        $live_ids = $this->get_static_subtracks(array('fields' =>'ids'));
 
         //switch to static
         $this->tracklist_type = 'static';
@@ -717,7 +718,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
-        $subtrack_ids = $this->get_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = $this->get_static_subtracks(array('fields' =>'ids'));
         
         //delete current
         if(($key = array_search($track_id, $subtrack_ids)) !== false) {
@@ -854,29 +855,57 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         return ($this->get_options('ajax_tracklist') && !wpsstm_is_ajax());
     }
 
-
     function populate_subtracks($args = null){
 
         if ( $this->did_query_tracks ) return true;
-
-        $required = array('fields' => 'ids',);
-        $args = wp_parse_args($required,(array)$args);
         
-        $tracks_ids = $this->get_subtracks($args);
+        switch($this->tracklist_type){
+            case 'static':
+                $tracks = $this->get_static_subtracks($args);
+            break;
+            case 'live':
+                $tracks = $this->get_live_subtracks($args);
+                //TOUFIX
+                /*
+                if ( !$this->is_expired ){
+                    return $this->get_static_subtracks($args);
+                }else{
+                    $tracks = $this->get_live_subtracks($args);
+                }
+                */
+                
+                /*
+                UPDATE TRACKLIST
+                TOUFIX
+                */
+                $post_id = $this->update_live_tracklist();
+            break;
+        }
+        
+        
+        
+        if ( is_wp_error($tracks) ) return $tracks;
 
         $this->did_query_tracks = true;
-
-        if ( is_wp_error($tracks_ids) ){
-            $this->tracks_error = $tracks_ids;
-            return $tracks;
-        }
-
-        $this->tracks = $this->add_tracks($tracks_ids);
+        $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
+
+        if ( !$this->get_options('ajax_tracklist') ){
+            $this->tracklist_autosource();
+        }
+        
         return true;
     }
     
-    public function get_subtracks($args = null){
+    function tracklist_autosource(){
+        $this->tracklist_log('tracklist autosource'); 
+        foreach((array)$this->tracks as $track){
+            $success = $track->autosource();
+            die("AUTOSOURCE");
+        }
+    }
+    
+    protected function get_static_subtracks($args = null){
 
         $default = array(
             'post_status'   => 'any',
@@ -977,7 +1006,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 }
 
 class WPSSTM_Single_Track_Tracklist extends WPSSTM_Static_Tracklist{
-    function get_subtracks($args = null){
+    function get_static_subtracks($args = null){
         
         $default = array(
             'post_status'   => 'any',
