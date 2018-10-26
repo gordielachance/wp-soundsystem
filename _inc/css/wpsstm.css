@@ -397,86 +397,90 @@ body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-acti
   content: "\f1f8";
 }
 /* line 71, ../scss/_wpsstm-tracks.scss */
+body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unlink a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-unlink a:before {
+  content: "\f127";
+}
+/* line 74, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-sources a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-sources a:before {
   content: "\f0c2";
 }
-/* line 74, ../scss/_wpsstm-tracks.scss */
+/* line 77, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-move a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-move a:before {
   content: "\f07d";
 }
-/* line 77, ../scss/_wpsstm-tracks.scss */
+/* line 80, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-playlists a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-playlists a:before {
   content: "\f03a";
 }
-/* line 80, ../scss/_wpsstm-tracks.scss */
+/* line 83, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-edit a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-edit a:before {
   content: "\f040";
 }
-/* line 83, ../scss/_wpsstm-tracks.scss */
+/* line 86, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-edit-backend a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-edit-backend a:before {
   content: "\f084";
 }
-/* line 86, ../scss/_wpsstm-tracks.scss */
+/* line 89, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-about a:before, body.wp-admin #wpsstm-track-actions .wpsstm-track-action#wpsstm-track-action-about a:before {
   content: "\f05a";
 }
-/* line 96, ../scss/_wpsstm-tracks.scss */
+/* line 99, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] #wpsstm-track-actions, body.wp-admin .wpsstm-tracks-list [itemprop="track"] #wpsstm-track-actions {
   width: 100%;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
   opacity: 0;
 }
-/* line 99, ../scss/_wpsstm-tracks.scss */
+/* line 102, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] #wpsstm-track-actions li.wpsstm-action, body.wp-admin .wpsstm-tracks-list [itemprop="track"] #wpsstm-track-actions li.wpsstm-action {
   display: inline;
 }
-/* line 106, ../scss/_wpsstm-tracks.scss */
+/* line 109, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"]:hover ul#wpsstm-track-actions, body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].track-active ul#wpsstm-track-actions, body.wp-admin .wpsstm-tracks-list [itemprop="track"]:hover ul#wpsstm-track-actions, body.wp-admin .wpsstm-tracks-list [itemprop="track"].track-active ul#wpsstm-track-actions {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
 }
-/* line 120, ../scss/_wpsstm-tracks.scss */
+/* line 123, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"]:not(.track-playing) .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"]:not(.track-playing) .wpsstm-track-icon:before {
   content: "\f04b";
 }
-/* line 124, ../scss/_wpsstm-tracks.scss */
+/* line 127, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].track-playing .wpsstm-track-icon:before, body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .track-pause .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"].track-playing .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .track-pause .wpsstm-track-icon:before {
   content: "\f04c";
 }
-/* line 128, ../scss/_wpsstm-tracks.scss */
+/* line 131, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].track-error .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"].track-error .wpsstm-track-icon:before {
   content: "\f071";
 }
-/* line 132, ../scss/_wpsstm-tracks.scss */
+/* line 135, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].wpsstm-invalid-track, body.wp-admin .wpsstm-tracks-list [itemprop="track"].wpsstm-invalid-track {
   background: rgba(255, 0, 0, 0.1);
 }
-/* line 137, ../scss/_wpsstm-tracks.scss */
+/* line 140, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-image img, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-image img {
   height: 2em;
   width: auto;
   vertical-align: middle;
 }
-/* line 147, ../scss/_wpsstm-tracks.scss */
+/* line 150, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-position .wpsstm-player-icon-loading, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-position .wpsstm-player-icon-loading {
   display: none;
 }
-/* line 150, ../scss/_wpsstm-tracks.scss */
+/* line 153, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-position span, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-position span {
   display: initial;
 }
-/* line 156, ../scss/_wpsstm-tracks.scss */
+/* line 159, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-actions ul, body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-sources ul, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-actions ul, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-sources ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 163, ../scss/_wpsstm-tracks.scss */
+/* line 166, ../scss/_wpsstm-tracks.scss */
 body.wpsstm-default .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-unique-value, body.wp-admin .wpsstm-tracks-list [itemprop="track"] .wpsstm-track-unique-value {
   display: none !important;
 }
 
-/* line 176, ../scss/_wpsstm-tracks.scss */
+/* line 179, ../scss/_wpsstm-tracks.scss */
 #wpsstm-track-tracklists #wpsstm-new-playlist-add {
   display: none;
 }
@@ -543,23 +547,19 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-p
   font-weight: bold;
 }
 /* line 79, ../scss/_wpsstm-sources.scss */
-body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="soundcloud"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="soundcloud"] #wpsstm-source-action-provider a:before {
+body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before {
   content: "\f1be";
 }
 /* line 82, ../scss/_wpsstm-sources.scss */
-body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="youtube"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="youtube"] #wpsstm-source-action-provider a:before {
+body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before {
   content: "\f167";
 }
-/* line 85, ../scss/_wpsstm-sources.scss */
-body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="mixcloud"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-provider="mixcloud"] #wpsstm-source-action-provider a:before {
-  content: "\f289";
-}
-/* line 100, ../scss/_wpsstm-sources.scss */
+/* line 97, ../scss/_wpsstm-sources.scss */
 body.wpsstm-default [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading), body.wp-admin [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
-/* line 102, ../scss/_wpsstm-sources.scss */
+/* line 99, ../scss/_wpsstm-sources.scss */
 body.wpsstm-default [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading):hover, body.wp-admin [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading):hover {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
@@ -859,78 +859,77 @@ body.wpsstm-default :not(#wpsstm-bottom-track-wrapper) .wpsstm-tracklist.trackli
   background: white;
   border-bottom: 0;
 }
-
-/* line 123, ../scss/_wpsstm-wizard.scss */
+/* line 119, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 50%;
 }
-/* line 126, ../scss/_wpsstm-wizard.scss */
+/* line 122, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced {
   display: none;
 }
-/* line 128, ../scss/_wpsstm-wizard.scss */
+/* line 124, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced.active {
   display: block;
 }
-/* line 131, ../scss/_wpsstm-wizard.scss */
+/* line 127, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc {
   padding: 1em;
   font-style: italic;
 }
-/* line 134, ../scss/_wpsstm-wizard.scss */
+/* line 130, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc code {
   font-style: normal;
 }
-/* line 139, ../scss/_wpsstm-wizard.scss */
+/* line 135, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table td {
   color: #999;
   padding: 5px;
   font-family: Consolas, Monaco, monospace;
 }
-/* line 145, ../scss/_wpsstm-wizard.scss */
+/* line 141, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:before {
   text-align: center;
   width: 20px;
   content: '~';
 }
-/* line 150, ../scss/_wpsstm-wizard.scss */
+/* line 146, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:after {
   text-align: center;
   width: 20px;
   content: '~m';
 }
-/* line 155, ../scss/_wpsstm-wizard.scss */
+/* line 151, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex input {
   width: 90%;
   color: #999;
 }
-/* line 165, ../scss/_wpsstm-wizard.scss */
+/* line 161, ../scss/_wpsstm-wizard.scss */
 #wpsstm-wizard-sections .wpsstm-wizard-step-content#wpsstm-wizard-step-tracks-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 100%;
 }
 
-/* line 173, ../scss/_wpsstm-wizard.scss */
+/* line 169, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard-recent {
   font-size: .8em;
 }
-/* line 175, ../scss/_wpsstm-wizard.scss */
+/* line 171, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard-recent > ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 179, ../scss/_wpsstm-wizard.scss */
+/* line 175, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard-recent > ul li {
   position: relative;
   line-height: 1em;
   line-height: 1.5em;
 }
-/* line 183, ../scss/_wpsstm-wizard.scss */
+/* line 179, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard-recent > ul li a {
   display: -webkit-flex;
   display: flex;
 }
-/* line 185, ../scss/_wpsstm-wizard.scss */
+/* line 181, ../scss/_wpsstm-wizard.scss */
 #wpsstm-frontend-wizard-recent > ul li a strong {
   margin-right: .25em;
 }
@@ -1355,7 +1354,7 @@ body.wpsstm-default .wpsstm-post-admin > ul.wpsstm-actions-list, body.wp-admin .
 }
 
 /* line 48, ../scss/wpsstm.scss */
-.wpsstm-can-click, body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources [data-wpsstm-source-idx] label, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources [data-wpsstm-source-idx] label, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wpsstm-default #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-bottom-track-info [itemprop="track"] > *.wpsstm-track-position, body.wp-admin #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-bottom-track-info [itemprop="track"] > *.wpsstm-track-position, body.wpsstm-default .wpsstm-icon-input [type="submit"], body.wp-admin .wpsstm-icon-input [type="submit"], body.wpsstm-default .toggle-children-link, body.wp-admin .toggle-children-link {
+.wpsstm-can-click, body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources [data-wpsstm-source-idx] label, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-sources [data-wpsstm-source-idx] label, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > .wpsstm-source-title, body.wpsstm-default #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-bottom-track-info [itemprop="track"] > .wpsstm-track-position, body.wp-admin #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-bottom-track-info [itemprop="track"] > .wpsstm-track-position, body.wpsstm-default .wpsstm-icon-input [type="submit"], body.wp-admin .wpsstm-icon-input [type="submit"], body.wpsstm-default .toggle-children-link, body.wp-admin .toggle-children-link {
   cursor: pointer;
   cursor: hand;
 }
@@ -1388,7 +1387,7 @@ MINIMAL STYLES
 DEFAULT STYLES
 */
 /* line 87, ../scss/wpsstm.scss */
-body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"] > *.wpsstm-track-info > *, body.wpsstm-default #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wpsstm-default a, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list body.wpsstm-default [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wpsstm-default #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wpsstm-default a > *, body.wp-admin .wpsstm-ellipsis, body.wp-admin .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wp-admin .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wp-admin a, body.wpsstm-default .wpsstm-track-sources-list body.wp-admin [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > *.wpsstm-source-title, body.wp-admin #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wp-admin a > * {
+body.wpsstm-default .wpsstm-ellipsis, body.wpsstm-default .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list body.wpsstm-default [itemprop="track"] > *.wpsstm-track-info > *, body.wpsstm-default #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wpsstm-default a, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] > .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list body.wpsstm-default [data-wpsstm-source-idx] > .wpsstm-source-title, body.wpsstm-default #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wpsstm-default a > *, body.wp-admin .wpsstm-ellipsis, body.wp-admin .tracklist-list .wpsstm-tracks-list [itemprop="track"], .tracklist-list .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wp-admin .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"], .wp-list-table .column-tracklist .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"], body.wpsstm-default .wpsstm-tracklist .wpsstm-tracks-list body.wp-admin [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin .wpsstm-tracklist .wpsstm-tracks-list [itemprop="track"] > *.wpsstm-track-info > *, body.wp-admin #tracklists-manager > li > *.wpsstm-tracklist-title a, #tracklists-manager > li > *.wpsstm-tracklist-title body.wp-admin a, body.wpsstm-default .wpsstm-track-sources-list body.wp-admin [data-wpsstm-source-idx] > .wpsstm-source-title, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] > .wpsstm-source-title, body.wp-admin #wpsstm-frontend-wizard-recent > ul li a > *, #wpsstm-frontend-wizard-recent > ul li body.wp-admin a > * {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;

@@ -558,7 +558,7 @@ class WPSSTM_Tracklist{
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unfavorite'),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
+                'desc' =>       __('Remove from favorites','wpsstm'),
             );
         }
         
