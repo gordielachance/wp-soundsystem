@@ -76,7 +76,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         
         $live_options = array(
             'is_expired' => $this->check_has_expired(),
-            'ajax_refresh' => $this->check_has_expired(),
+            'ajax_tracklist' => $this->check_has_expired(),
         );
         
         return wp_parse_args($live_options,$options);
@@ -143,7 +143,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
         }
         
-        if ( !$is_cached && $this->get_options('ajax_refresh') && $this->wait_for_ajax() ){
+        if ( !$is_cached && $this->get_options('ajax_tracklist') && $this->wait_for_ajax() ){
             $url = $this->get_tracklist_action_url('refresh');
             $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
             $error = new WP_Error( 'requires-refresh', $link );
@@ -865,7 +865,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
 
         //force PHP tracks refresh
-        $this->options['ajax_refresh'] = false;
+        $this->options['ajax_tracklist'] = false;
         
         //populate remote tracklist if not done yet
         $populated = $this->populate_subtracks();

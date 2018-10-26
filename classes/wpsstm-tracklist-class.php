@@ -89,7 +89,7 @@ class WPSSTM_Tracklist{
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_refresh'              => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
+            'ajax_tracklist'       => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'cache_source'              => true, //make a cache copy of the remote source
         );
     }
@@ -923,7 +923,7 @@ class WPSSTM_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
-            ( $this->get_options('ajax_refresh') ) ? 'tracklist-ajaxed' : null,
+            ( $this->get_options('ajax_tracklist') ) ? 'ajax-tracklist' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
             ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
@@ -937,9 +937,9 @@ class WPSSTM_Tracklist{
     
     //if the tracklist is ajaxed and that this is not an ajax request, 
     //pretend did_query_tracks is true so we don't try to populate them
-    //do not move under __construct since option 'ajax_refresh' value might have changed when we call this.
+    //do not move under __construct since option 'ajax_tracklist' value might have changed when we call this.
     function wait_for_ajax(){
-        return ($this->get_options('ajax_refresh') && !wpsstm_is_ajax());
+        return ($this->get_options('ajax_tracklist') && !wpsstm_is_ajax());
     }
 
 
