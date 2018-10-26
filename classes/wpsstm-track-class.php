@@ -649,7 +649,7 @@ class WPSSTM_Track{
         return $url;
     }
     
-    function get_track_links($tracklist,$context = null){
+    function get_track_links($tracklist){
         
         $actions = array();
 
@@ -747,15 +747,8 @@ class WPSSTM_Track{
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
-        
-        //context
-        switch($context){
-            case 'page':
-                unset($actions['edit'],$actions['sources'],$actions['trash'],$actions['edit-backend']);
-            break;
-        }
-        
-        return apply_filters('wpsstm_track_actions',$actions,$context);
+
+        return apply_filters('wpsstm_track_actions',$actions);
 
     }
     

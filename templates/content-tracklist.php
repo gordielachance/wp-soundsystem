@@ -138,7 +138,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                         </span>
                         <span class="wpsstm-track-actions">
                             <?php
-                            if ( $actions = $track->get_track_links($tracklist,'page') ){
+                            if ( $actions = $track->get_track_links($tracklist) ){
                                 echo get_actions_list($actions,'track');
                             }
                             ?>
