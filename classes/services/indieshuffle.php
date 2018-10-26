@@ -1,12 +1,32 @@
 <?php
 
+class WPSSTM_IndieShuffle{
+    function __construct(){
+        add_action('wpsstm_init_presets',array(__class__,'register_indieshuffle_preset'));
+        add_filter('wpsstm_wizard_services_links',array(__class__,'register_indieshuffle_service_links'));
+    }
+    //register preset
+    static function register_indieshuffle_preset($tracklist){
+        new WPSSTM_IndieShuffle_Preset($tracklist);
+    }
+
+    static function register_indieshuffle_service_links($links){
+        $links[] = array(
+            'slug'      => 'indieshuffle',
+            'name'      => 'indie shuffle',
+            'url'       => 'https://www.indieshuffle.com/',
+        );
+        return $links;
+    }
+}
+
 /*
 Should try to support playlists and songs, eg.
 https://www.indieshuffle.com/playlists/best-songs-of-april-2017/
 https://www.indieshuffle.com/songs/hip-hop/
 */
 
-class WPSSTM_IndieShuffle_Scraper{
+class WPSSTM_IndieShuffle_Preset{
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -35,19 +55,8 @@ class WPSSTM_IndieShuffle_Scraper{
 
 }
 
-//register preset
-function register_indieshuffle_preset($tracklist){
-    new WPSSTM_IndieShuffle_Scraper($tracklist);
+function wpsstm_indieshuffle(){
+    new WPSSTM_IndieShuffle();
 }
 
-function register_indieshuffle_service_links($links){
-    $links[] = array(
-        'slug'      => 'indieshuffle',
-        'name'      => 'indie shuffle',
-        'url'       => 'https://www.indieshuffle.com/',
-    );
-    return $links;
-}
-
-add_action('wpsstm_get_remote_tracks','register_indieshuffle_preset');
-add_filter('wpsstm_wizard_services_links','register_indieshuffle_service_links');
+add_action('wpsstm_init','wpsstm_hypem');

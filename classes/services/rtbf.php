@@ -1,5 +1,15 @@
 <?php
-class WPSSTM_RTBF_Stations{
+class WPSSTM_RTBF{
+    function __construct(){
+        add_action('wpsstm_init_presets',array($this,'register_rtbf_preset'));
+    }
+    //register preset
+    function register_rtbf_preset($tracklist){
+        new WPSSTM_RTBF_Preset($tracklist);
+    }
+    
+}
+class WPSSTM_RTBF_Preset{
 
     private $station_slug;
 
@@ -45,9 +55,8 @@ class WPSSTM_RTBF_Stations{
     
 }
 
-//register preset
-function register_rtbf_preset($tracklist){
-    new WPSSTM_RTBF_Stations($tracklist);
+function wpsstm_rtbf_init(){
+    new WPSSTM_RTBF();
 }
 
-add_action('wpsstm_get_remote_tracks','register_rtbf_preset');
+add_action('wpsstm_init','wpsstm_reddit_init');

@@ -31,7 +31,7 @@ $track_admin = get_query_var( WPSSTM_Core_Tracks::$qvar_track_admin );
         break;
         default: //about
             $text_el = null;
-            $bio = WPSSTM_Core_LastFM::get_artist_bio($wpsstm_track->artist);
+            $bio = WPSSTM_LastFM::get_artist_bio($wpsstm_track->artist);
 
             //artist
             if ( !is_wp_error($bio) && isset($bio['summary']) ){

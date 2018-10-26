@@ -1,6 +1,34 @@
 <?php
 
-class WPSSTM_Radionomy_Playlists_API{
+class WPSSTM_Radionomy{
+    function __construct(){
+        add_filter('wpsstm_wizard_services_links',array($this,'register_radionomy_service_links'));
+        add_action('wpsstm_init_presets',array($this,'register_radionomy_preset'));
+    }
+    
+    //register preset
+    function register_radionomy_preset($tracklist){
+        new WPSSTM_Radionomy_API_Preset($tracklist);
+    }
+    function register_radionomy_service_links($links){
+        $links[] = array(
+            'slug'      => 'radionomy',
+            'name'      => 'Radionomy',
+            'url'       => 'https://www.radionomy.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'stations',
+                    'name'      => __('stations','wpsstm'),
+                    'example'   => 'https://www.radionomy.com/LANG/radio/RADIO_SLUG',
+                ),
+            )
+        );
+        return $links;
+    }
+    
+}
+
+class WPSSTM_Radionomy_API_Preset{
     var $tracklist;
     private $station_slug;
     private $station_id;
@@ -106,24 +134,8 @@ class WPSSTM_Radionomy_Playlists_API{
 
 }
 
-//register preset
-function register_radionomy_preset($tracklist){
-    new WPSSTM_Radionomy_Playlists_API($tracklist);
+function wpsstm_radionomy_init(){
+    new WPSSTM_Radionomy();
 }
-function register_radionomy_service_links($links){
-    $links[] = array(
-        'slug'      => 'radionomy',
-        'name'      => 'Radionomy',
-        'url'       => 'https://www.radionomy.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'stations',
-                'name'      => __('stations','wpsstm'),
-                'example'   => 'https://www.radionomy.com/LANG/radio/RADIO_SLUG',
-            ),
-        )
-    );
-    return $links;
-}
-add_filter('wpsstm_wizard_services_links','register_radionomy_service_links');
-add_action('wpsstm_get_remote_tracks','register_radionomy_preset');
+
+add_action('wpsstm_init','wpsstm_radionomy_init');

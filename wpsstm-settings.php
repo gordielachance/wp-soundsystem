@@ -643,7 +643,7 @@ class WPSSTM_Settings {
             }else{
 
                 //cap missing
-                if ( !$can_community_scrobble = WPSSTM_Core_LastFM::can_community_scrobble() ){
+                if ( !$can_community_scrobble = WPSSTM_LastFM::can_community_scrobble() ){
 
                     add_settings_error( 'lastfm_community_scrobble', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm'), 'inline' );
                 }

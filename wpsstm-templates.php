@@ -49,12 +49,12 @@ function wpsstm_get_percent_bar($percent){
 function wpsstm_get_post_mbid($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, WPSSTM_Core_MusicBrainz::$mbid_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbid_metakey, true );
 }
 function wpsstm_get_post_mbdata($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, WPSSTM_Core_MusicBrainz::$mbdata_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbdata_metakey, true );
 }
 
 function wpsstm_get_post_image_url($post_id = null){
@@ -80,7 +80,7 @@ function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
     
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, WPSSTM_Core_MusicBrainz::$mbdata_metakey, true );
+    $data = get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbdata_metakey, true );
     
     if ($keys){
         return wpsstm_get_array_value($keys, $data);
@@ -137,7 +137,7 @@ function wpsstm_get_post_mb_link_for_post($post_id){
 
         }
 
-        if ( $url = WPSSTM_Core_MusicBrainz::get_mb_url($mbtype,$mbid) ){
+        if ( $url = WPSSTM_MusicBrainz::get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
         }
     }

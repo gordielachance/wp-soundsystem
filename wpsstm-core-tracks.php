@@ -105,11 +105,12 @@ class WPSSTM_Core_Tracks{
     
     /*
     ?debug_autosource=XXX
+    //TOUFIX TOREMOVE
     */
     function debug_autosource(){
         if ( is_admin() ) return;
         
-        //TOUFIX TOREMOVE
+        
         $test_track_id = isset($_GET['debug_autosource']) ? $_GET['debug_autosource'] : null;
         if (get_post_type($test_track_id) != wpsstm()->post_type_track ) return;
         if (!$test_track_id) return;

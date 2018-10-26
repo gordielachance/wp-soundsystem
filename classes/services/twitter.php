@@ -1,5 +1,15 @@
 <?php
-class WPSSTM_Twitter_Timeline{
+class WPSSTM_Twitter{
+    function __construct(){
+        add_action('wpsstm_init_presets',array($this,'register_twitter_preset'));
+    }
+    //register preset
+    function register_twitter_preset($tracklist){
+        new WPSSTM_Twitter_Timeline_Preset($tracklist);
+    }
+
+}
+class WPSSTM_Twitter_Timeline_Preset{
     private $user_slug;
 
     function __construct($tracklist){
@@ -50,8 +60,8 @@ class WPSSTM_Twitter_Timeline{
 
 }
 
-//register preset
-function register_twitter_preset($tracklist){
-    new WPSSTM_Twitter_Timeline($tracklist);
+function wpsstm_twitter_init(){
+    new WPSSTM_Twitter();
 }
-add_action('wpsstm_get_remote_tracks','register_twitter_preset');
+
+add_action('wpsstm_init','wpsstm_twitter_init');

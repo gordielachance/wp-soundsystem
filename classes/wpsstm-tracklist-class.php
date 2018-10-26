@@ -312,7 +312,7 @@ class WPSSTM_Tracklist{
             WPSSTM_Core_Artists::$artist_metakey    => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Albums::$album_metakey      => $this->album,
-            WPSSTM_Core_MusicBrainz::$mbid_metakey           => $this->mbid,
+            WPSSTM_MusicBrainz::$mbid_metakey           => $this->mbid,
             //sources is more specific, will be saved below
         );
         */
@@ -361,7 +361,7 @@ class WPSSTM_Tracklist{
     function save_subtracks($args = null){
         
         //do not auto guess MBID while saving subtracks
-        remove_action( 'save_post', array('WPSSTM_Core_MusicBrainz','auto_mbid_on_post_save'), 8);
+        remove_action( 'save_post', array('WPSSTM_MusicBrainz','auto_mbid_on_post_save'), 8);
         
         $new_ids = array();
 

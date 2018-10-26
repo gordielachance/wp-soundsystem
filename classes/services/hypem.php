@@ -1,5 +1,25 @@
 <?php
-class WPSSTM_Hypem_Scraper{
+class WPSSTM_Hypem{
+    function __construct(){
+        add_action('wpsstm_init_presets',array($this,'register_hypem_preset'));
+        add_filter('wpsstm_wizard_services_links',array($this,'register_hypem_service_links'));
+    }
+    //register preset
+    function register_hypem_preset($tracklist){
+        new WPSSTM_Hypem_Preset($tracklist);
+    }
+
+    function register_hypem_service_links($links){
+        $links[] = array(
+            'slug'      => 'hypem',
+            'name'      => 'Hypem',
+            'url'       => 'https://www.hypem.com',
+        );
+        return $links;
+    }
+}
+
+class WPSSTM_Hypem_Preset{
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
@@ -27,19 +47,9 @@ class WPSSTM_Hypem_Scraper{
 
 }
 
-//register preset
-function register_hypem_preset($tracklist){
-    new WPSSTM_Hypem_Scraper($tracklist);
+
+function wpsstm_hypem(){
+    new WPSSTM_Hypem();
 }
 
-function register_hypem_service_links($links){
-    $links[] = array(
-        'slug'      => 'hypem',
-        'name'      => 'Hypem',
-        'url'       => 'https://www.hypem.com',
-    );
-    return $links;
-}
-
-add_action('wpsstm_get_remote_tracks','register_hypem_preset');
-add_filter('wpsstm_wizard_services_links','register_hypem_service_links');
+add_action('wpsstm_init','wpsstm_hypem');

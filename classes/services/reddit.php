@@ -1,5 +1,33 @@
 <?php
-class WPSSTM_Reddit_Api{
+
+class WPSSTM_Reddit{
+    function __construct(){
+        add_filter('wpsstm_wizard_services_links',array($this,'register_reddit_service_links'));
+        add_action('wpsstm_init_presets',array($this,'register_reddit_preset'));
+    }
+    //register preset
+    function register_reddit_preset($tracklist){
+        new WPSSTM_Reddit_Api_Preset($tracklist);
+    }
+    function register_reddit_service_links($links){
+        $links[] = array(
+            'slug'      => 'reddit',
+            'name'      => 'Reddit',
+            'url'       => 'https://www.reddit.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'subreddit',
+                    'name'      => __('Music subreddit','wpsstm'),
+                    'example'   => 'https://www.reddit.com/r/SUBREDDIT',
+                ),
+            )
+        );
+        return $links;
+    }
+
+}
+
+class WPSSTM_Reddit_Api_Preset{
 
     private $subreddit_slug;
     private $subreddit_title;
@@ -177,24 +205,8 @@ class WPSSTM_Reddit_Api{
 
 }
 
-//register preset
-function register_reddit_preset($tracklist){
-    new WPSSTM_Reddit_Api($tracklist);
+function wpsstm_reddit_init(){
+    new WPSSTM_Reddit();
 }
-function register_reddit_service_links($links){
-    $links[] = array(
-        'slug'      => 'reddit',
-        'name'      => 'Reddit',
-        'url'       => 'https://www.reddit.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'subreddit',
-                'name'      => __('Music subreddit','wpsstm'),
-                'example'   => 'https://www.reddit.com/r/SUBREDDIT',
-            ),
-        )
-    );
-    return $links;
-}
-add_filter('wpsstm_wizard_services_links','register_reddit_service_links');
-add_action('wpsstm_get_remote_tracks','register_reddit_preset');
+
+add_action('wpsstm_init','wpsstm_reddit_init');

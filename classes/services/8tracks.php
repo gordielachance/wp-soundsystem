@@ -1,5 +1,34 @@
 <?php
-class WPSSTM_8Tracks_Playlists{
+
+class WPSSTM_8tracks{
+    function __construct(){
+        add_action('wpsstm_init_presets',array(__class__,'register_8tracks_playlists_preset'));
+        add_filter('wpsstm_wizard_services_links',array(__class__,'register_8tracks_service_link'));
+    }
+    
+    //register preset
+    static function register_8tracks_playlists_preset($tracklist){
+        new WPSSTM_8Tracks_Preset($tracklist);
+    }
+
+    static function register_8tracks_service_link($links){
+        $links[] = array(
+            'slug'      => '8tracks',
+            'name'      => '8tracks',
+            'url'       => 'https://8tracks.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'playlists',
+                    'name'      => __('playlists','wpsstm'),
+                    'example'   => 'https://8tracks.com/USER/PLAYLIST',
+                ),
+            )
+        );
+        return $links;
+    }
+}
+
+class WPSSTM_8Tracks_Preset{
     private $user_slug;
     private $playlist_slug;
     private $mix_data;
@@ -108,26 +137,8 @@ class WPSSTM_8Tracks_Playlists{
     }
 }
 
-//register preset
-function register_8tracks_playlists_preset($tracklist){
-    new WPSSTM_8Tracks_Playlists($tracklist);
+function wpsstm_8tracks_init(){
+    new WPSSTM_8tracks();
 }
 
-function register_8tracks_service_link($links){
-    $links[] = array(
-        'slug'      => '8tracks',
-        'name'      => '8tracks',
-        'url'       => 'https://8tracks.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'playlists',
-                'name'      => __('playlists','wpsstm'),
-                'example'   => 'https://8tracks.com/USER/PLAYLIST',
-            ),
-        )
-    );
-    return $links;
-}
-
-add_action('wpsstm_get_remote_tracks','register_8tracks_playlists_preset');
-add_filter('wpsstm_wizard_services_links','register_8tracks_service_link');
+add_action('wpsstm_init','wpsstm_8tracks_init');

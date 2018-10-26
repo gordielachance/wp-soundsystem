@@ -1,6 +1,6 @@
 <?php
 
-class WPSSTM_Youtube_Platform{
+class WPSSTM_Youtube{
     
     static $mimetype = 'video/youtube';
     
@@ -27,3 +27,9 @@ class WPSSTM_Youtube_Platform{
         return sprintf('https://youtube.com/watch?v=%s',$id);
     }
 }
+
+function wpsstm_youtube_init(){
+    new WPSSTM_Youtube();
+}
+
+add_action('wpsstm_init','wpsstm_youtube_init');

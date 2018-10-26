@@ -129,9 +129,6 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         
-        require $this->plugin_dir . 'classes/services/soundcloud.php';
-        require $this->plugin_dir . 'classes/services/youtube.php';
-        
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
         require $this->plugin_dir . 'wpsstm-settings.php';
@@ -142,29 +139,40 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
-        require $this->plugin_dir . 'classes/wpsstm-lastfm-user.php';
-        require $this->plugin_dir . 'wpsstm-core-lastfm.php';
-        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
-
-        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
-        }
-        
-        
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';
         }
+        
+        //include APIs/services stuff (lastfm,youtube,spotify,etc.)
+        $this->include_apis();
     }
+    
+    /*
+    Register scraper presets.
+    */
+    private function include_apis(){
+        
+        $presets = array();
+
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/services' );
+
+        //get all files in /presets directory
+        $preset_files = glob( $presets_path . '*.php' ); 
+
+        foreach ($preset_files as $file) {
+            require_once($file);
+        }
+    }
+    
     function setup_actions(){
         
         /* Now that files have been loaded, init all core classes */
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
         new WPSSTM_Core_BuddyPress();
-        new WPSSTM_Core_LastFM();
-        new WPSSTM_Core_MusicBrainz();
         new WPSSTM_Core_Player();
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
@@ -172,11 +180,9 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
-        new WPSSTM_Soundcloud_Platform();
-        new WPSSTM_Youtube_Platform();
         
-        //TOFIX should be better to hook this on a wpsstm_ready action
-        
+        //TOUFIX should be better to hook this on a wpsstm_ready action
+        do_action('wpsstm_init');
         ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));

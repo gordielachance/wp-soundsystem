@@ -290,7 +290,7 @@ class WPSSTM_Track{
             WPSSTM_Core_Artists::$artist_metakey    => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Albums::$album_metakey      => $this->album,
-            WPSSTM_Core_MusicBrainz::$mbid_metakey  => $this->mbid,
+            WPSSTM_MusicBrainz::$mbid_metakey  => $this->mbid,
             WPSSTM_Core_Tracks::$image_url_metakey  => $this->image_url,
         );
         
@@ -373,7 +373,7 @@ class WPSSTM_Track{
         }
         */
         $api_type = WPSSTM_Core_Tracks::$track_mbtype;
-        $api_response = WPSSTM_Core_MusicBrainz::get_musicbrainz_api_entry($api_type,null,$mzb_args);
+        $api_response = WPSSTM_MusicBrainz::get_musicbrainz_api_entry($api_type,null,$mzb_args);
 
         if (is_wp_error($api_response)) return;
 
@@ -1014,42 +1014,8 @@ class WPSSTM_Track{
     */
     
     function populate_spotify_track_id(){
-        
         if ($this->spotify_id) return $this->spotify_id;
-        
-        $spotify_id = null;
-        
-        $url_args = array(
-            'q'=>urlencode($this->artist . ' ' . $this->title)
-        );
-        
-        //$url = 'https://api.songwhip.com/?country=BE&q=test';
-        $url = add_query_arg($url_args,'https://songwhip.com/search');
-
-        $response = wp_remote_get($url);
-        $body = wp_remote_retrieve_body($response);
-
-        if ( is_wp_error($body) ) return $body;
-        
-        $json = json_decode($body,true);
-        
-        if ($json['status'] != 'success'){
-            return new WP_Error( 'wpsstm_songwhip_search', __('Error while searching on SongWhip.','wpsstm') );
-        }
-        
-        $tracks = wpsstm_get_array_value(array('data','tracks'),$json);
-        $first_track = reset($tracks);
-        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$first_track);
-        $spotify_title = wpsstm_get_array_value(array('name'),$first_track);
-
-        $pattern = '~https?://open.spotify.com/track/([^/]+)~';
-        preg_match($pattern, $spotify_url, $url_matches);
-
-        if ( !isset($url_matches[1]) ) return;
-        
-            $spotify_id = $url_matches[1];
-            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'spotify_id'=>$spotify_id,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
-
+        $spotify_id = WPSSTM_Spotify::get_spotify_track_id($track);
         return $this->spotify_id = $spotify_id;
     }
     

@@ -1,5 +1,32 @@
 <?php
-class WPSSTM_OnlineRadioBox_Scraper{
+
+class WPSSTM_OnlineRadioBox{
+    function __construct(){
+        add_filter('wpsstm_wizard_services_links',array(__class__,'register_onlineradiobox_service_link'));
+        add_action('wpsstm_init_presets',array(__class__,'register_onlineradiobox_preset'));
+    }
+    //register preset
+    static function register_onlineradiobox_preset($tracklist){
+        new WPSSTM_OnlineRadioBox_Preset($tracklist);
+    }
+    static function register_onlineradiobox_service_link($links){
+        $links[] = array(
+            'slug'      => 'onlineradiobox',
+            'name'      => 'Online Radio Box',
+            'url'       => 'http://onlineradiobox.com/',
+            'pages'     => array(
+                array(
+                    'slug'      => 'playlists',
+                    'name'      => __('playlists','wpsstm'),
+                    'example'   => 'http://onlineradiobox.com/COUNTRY/RADIO_SLUG',
+                ),
+            )
+        );
+        return $links;
+    }
+}
+
+class WPSSTM_OnlineRadioBox_Preset{
     private $station_slug;
 
     function __construct($tracklist){
@@ -44,24 +71,9 @@ class WPSSTM_OnlineRadioBox_Scraper{
 
 }
 
-//register preset
-function register_onlineradiobox_preset($tracklist){
-    new WPSSTM_OnlineRadioBox_Scraper($tracklist);
+
+function wpsstm_onlineradiobox_init(){
+    new WPSSTM_OnlineRadioBox();
 }
-function register_onlineradiobox_service_link($links){
-    $links[] = array(
-        'slug'      => 'onlineradiobox',
-        'name'      => 'Online Radio Box',
-        'url'       => 'http://onlineradiobox.com/',
-        'pages'     => array(
-            array(
-                'slug'      => 'playlists',
-                'name'      => __('playlists','wpsstm'),
-                'example'   => 'http://onlineradiobox.com/COUNTRY/RADIO_SLUG',
-            ),
-        )
-    );
-    return $links;
-}
-add_filter('wpsstm_wizard_services_links','register_onlineradiobox_service_link');
-add_action('wpsstm_get_remote_tracks','register_onlineradiobox_preset');
+
+add_action('wpsstm_init','wpsstm_onlineradiobox_init');
