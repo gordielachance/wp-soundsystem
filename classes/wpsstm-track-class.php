@@ -68,7 +68,7 @@ class WPSSTM_Track{
 
         //populate post ID if track already exists in the DB
         //TO FIX check if this doesn't slow the page rendering
-        $this->populate_track_post_auto();
+        $this->populate_local_track();
     }
     
     /*
@@ -105,13 +105,13 @@ class WPSSTM_Track{
     Get the post ID for this track if it already exists in the database; and populate its data
     */
     
-    function populate_track_post_auto(){
-        if ( $this->post_id || $this->did_post_id_lookup || (!$this->artist || !$this->title) ) return;
+    function populate_local_track(){
+        if ( $this->post_id || $this->did_post_id_lookup ) return;
+        if (!$this->artist || !$this->title) return;
 
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
-            
-            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_track_post_auto()');
+            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
             
         }
 
@@ -305,7 +305,7 @@ class WPSSTM_Track{
 
         //check if this track already exists
         if (!$this->post_id){
-            $this->populate_track_post_auto();
+            $this->populate_local_track();
         }
         
         if (!$this->post_id){
