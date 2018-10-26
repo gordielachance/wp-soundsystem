@@ -306,9 +306,7 @@ class WPSSTM_Core_BuddyPress{
         if ( $user_datas = get_userdata( $user_id ) ) {
 
             $display_name = $user_datas->display_name;
-            $tracklist_title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
-
-            $tracklist->title = $tracklist_title;
+            $tracklist->title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
             $tracklist->author = $display_name;
 
             $subtracks_qargs = array(

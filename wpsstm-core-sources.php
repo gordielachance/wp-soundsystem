@@ -404,7 +404,7 @@ class WPSSTM_Core_Sources{
         $wpsstm_track = new WPSSTM_Track();
         $wpsstm_track->from_array($ajax_data['track']);
         
-        //track does not exists yet, create it
+        //if track does not exists yet, create it
         //TOUFIX we should not create tracks here.
         
         if ( !$wpsstm_track->post_id ){	
@@ -430,9 +430,7 @@ class WPSSTM_Core_Sources{
         $result['track'] = $wpsstm_track;
 
         if ( is_wp_error($new_ids) ){
-            
             $result['message'] = $new_ids->get_error_message();
-            
         }elseif( $new_ids ){
 
             ob_start();
