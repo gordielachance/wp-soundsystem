@@ -1132,7 +1132,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            $this->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Tracklist::trash_track_sources()");
+            $this->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Static_Tracklist::trash_track_sources()");
         }
 
     }
@@ -1202,7 +1202,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Tracklist::flush_community_tracks()");
+        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Static_Tracklist::flush_community_tracks()");
 
         return $flushed_ids;
 

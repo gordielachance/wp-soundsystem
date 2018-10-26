@@ -2,7 +2,7 @@
 
 use \ForceUTF8\Encoding;
 
-class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
+class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     
     var $tracklist_type = 'live';
 
