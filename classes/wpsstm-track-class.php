@@ -726,7 +726,7 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
             );
         }
-        
+
         //unlink track
         if ($can_edit_tracklist){
             $actions['unlink'] = array(
@@ -1045,9 +1045,10 @@ class WPSSTM_Track{
         $pattern = '~https?://open.spotify.com/track/([^/]+)~';
         preg_match($pattern, $spotify_url, $url_matches);
 
-        if ( isset($url_matches[1]) ){
+        if ( !isset($url_matches[1]) ) return;
+        
             $spotify_id = $url_matches[1];
-        }
+            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'spotify_id'=>$spotify_id,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
 
         return $this->spotify_id = $spotify_id;
     }
