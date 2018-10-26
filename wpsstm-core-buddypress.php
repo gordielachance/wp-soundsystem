@@ -300,7 +300,7 @@ class WPSSTM_Core_BuddyPress{
 
     public function member_get_favorite_tracks_playlist(){
         
-        $tracklist = new WPSSTM_Tracklist();
+        $tracklist = wpsstm_get_tracklist();
         $user_id = bp_displayed_user_id();
         
         if ( $user_datas = get_userdata( $user_id ) ) {

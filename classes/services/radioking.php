@@ -3,7 +3,7 @@
 class WPSSTM_RadioKing{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_radioking_service_link'));
-        add_action('wpsstm_init_presets',array($this,'register_radioking_preset'));
+        add_action('wpsstm_tracklist_populated',array($this,'register_radioking_preset'));
     }
     //register preset
     function register_radioking_preset($tracklist){

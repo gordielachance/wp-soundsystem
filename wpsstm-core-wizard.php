@@ -103,7 +103,7 @@ class WPSSTM_Core_Wizard{
 
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
-            $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
+            $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
                 $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
@@ -160,7 +160,7 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist($post_id);
+        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
         
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
@@ -234,7 +234,7 @@ class WPSSTM_Core_Wizard{
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist($post_id);
+        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
         
         $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 

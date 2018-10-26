@@ -2,7 +2,7 @@
 
 class WPSSTM_Deezer{
     function __construct(){
-        add_action('wpsstm_init_presets',array(__class__,'register_deezer_preset'));
+        add_action('wpsstm_tracklist_populated',array(__class__,'register_deezer_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_deezer_service_links'));
     }
     //register preset

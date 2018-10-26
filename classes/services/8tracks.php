@@ -2,7 +2,7 @@
 
 class WPSSTM_8tracks{
     function __construct(){
-        add_action('wpsstm_init_presets',array(__class__,'register_8tracks_playlists_preset'));
+        add_action('wpsstm_tracklist_populated',array(__class__,'register_8tracks_playlists_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_8tracks_service_link'));
     }
     

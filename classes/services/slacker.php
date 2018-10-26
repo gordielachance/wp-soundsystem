@@ -2,7 +2,7 @@
 class WPSSTM_Slacker{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_slacker_service_links'));
-        add_action('wpsstm_init_presets',array($this,'register_slacker_preset'));
+        add_action('wpsstm_tracklist_populated',array($this,'register_slacker_preset'));
     }
     //register preset
     function register_slacker_preset($tracklist){

@@ -132,7 +132,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
         
         $is_cached = false;
-        do_action('wpsstm_init_presets',$this);
 
         //try cache
         if ( $this->get_options('cache_source') && $this->cache_source_url ){

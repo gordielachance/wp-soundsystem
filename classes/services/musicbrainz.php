@@ -597,7 +597,7 @@ class WPSSTM_MusicBrainz {
 
         if (!$tracks_arr) return;
         
-        $tracklist = wpsstm_get_post_tracklist($post_id);
+        $tracklist = wpsstm_get_tracklist($post_id);
         $tracklist->add_tracks($tracks_arr);
         return $tracklist->save_subtracks();
     }

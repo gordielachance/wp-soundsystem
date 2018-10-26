@@ -204,7 +204,7 @@ function wpsstm_is_ajax(){
 Get a post tracklist.
 Use this instead of 'new WPSSTM_Tracklist' or 'new WPSSTM_Remote_Tracklist' since it will load the right class (preset, live tracklist, etc.)
 */
-function wpsstm_get_post_tracklist($post_id=null){
+function wpsstm_get_tracklist($post_id=null){
     global $post;
 
     $tracklist = new WPSSTM_Tracklist(); //default
@@ -220,7 +220,7 @@ function wpsstm_get_post_tracklist($post_id=null){
         break;
     }
 
-    //$tracklist->tracklist_log($tracklist, "wpsstm_get_post_tracklist");
+    do_action('wpsstm_tracklist_populated',$tracklist);
     return $tracklist;   
 }
 

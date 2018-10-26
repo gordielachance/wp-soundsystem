@@ -947,7 +947,7 @@ class WPSSTM_Core_Tracks{
         $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = new WPSSTM_Tracklist($tracklist_id);
+        $tracklist = $result['tracklist'] = wpsstm_get_tracklist($tracklist_id);
         
         $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
         $success = false;
@@ -1064,7 +1064,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
+        $tracklist = wpsstm_get_tracklist($tracklist_id);
         
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);

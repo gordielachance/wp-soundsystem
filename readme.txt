@@ -123,7 +123,7 @@ Here's [how to fix it](https://github.com/gordielachance/wp-soundsystem/issues/1
 Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
 
 `<?php
-$tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
+$tracklist = wpsstm_get_tracklist(); //optionally accepts a post_id as argument
 echo $tracklist->get_tracklist_html();
 ?>`
 
