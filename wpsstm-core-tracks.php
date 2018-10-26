@@ -275,6 +275,10 @@ class WPSSTM_Core_Tracks{
             case 'unfavorite':
                 $success = $track->love_track(false);
             break;
+            case 'unlink':
+                //TOUFIX we need a way to retrieve the tracklist, here.
+                //$success = $tracklist->remove_subtrack_ids($track->post_id);
+            break;
         }
         
         if ($success){ //redirect with a success / error code

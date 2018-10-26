@@ -726,6 +726,16 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
             );
         }
+        
+        //unlink track
+        if ($can_edit_tracklist){
+            $actions['unlink'] = array(
+                'text' =>      __('Remove'),
+                'classes' =>    array('wpsstm-advanced-action'),
+                'desc' =>       __('Remove from playlist','wpsstm'),
+                'href' =>       $this->get_track_action_url('unlink'),
+            );
+        }
 
         //delete track
         if ($can_delete_tracks){
