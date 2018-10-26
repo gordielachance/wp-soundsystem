@@ -132,6 +132,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
         
         $is_cached = false;
+        do_action('wpsstm_get_remote_tracks',$this);
 
         //try cache
         if ( $this->get_options('cache_source') && $this->cache_source_url ){
@@ -139,7 +140,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $is_cached = true;
             $this->tracklist_log('found HTML cache' );
         }else{ //allow plugins to filter the URL
-            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
+            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
         }
         
         if ( !$is_cached && $this->get_options('ajax_refresh') && $this->wait_for_ajax() ){
@@ -274,8 +275,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     protected function get_remote_tracks(){
 
         $raw_tracks = array();
-
-        do_action('wpsstm_get_remote_tracks',$this);
 
         //count total pages
         $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination);
