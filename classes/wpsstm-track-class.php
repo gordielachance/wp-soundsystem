@@ -38,6 +38,7 @@ class WPSSTM_Track{
             $this->artist       = wpsstm_get_post_artist($post_id);
             $this->album        = wpsstm_get_post_album($post_id);
             $this->mbid         = wpsstm_get_post_mbid($post_id);
+            $this->spotify_id   = get_post_meta( $post_id,WPSSTM_Core_Tracks::$spotify_id_meta_key,true );
             $this->image_url    = wpsstm_get_post_image_url($post_id);
             $this->duration     = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
         }
@@ -111,7 +112,7 @@ class WPSSTM_Track{
 
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
-            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album),'post_id'=>$this->post_id),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
+            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
             
         }
 
@@ -1005,7 +1006,27 @@ class WPSSTM_Track{
     }
     
     function track_log($message,$title = null){
-        return wpsstm()->debug_log($message,$title,null);
+        
+        if (is_array($message) || is_object($message)) {
+            $message = implode("\n", $message);
+        }
+        
+        //tracklist log
+        /*
+        if ( $log_file = $this->get_tracklist_log_path() ){
+            $blogtime = current_time( 'mysql' );
+            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
+
+            error_log($output.PHP_EOL,3,$log_file);
+        }
+        */
+        
+        //global log
+        if ($this->post_id){
+            $title = sprintf('[track:%s] ',$this->post_id) . $title;
+        }
+        wpsstm()->debug_log($message,$title,null);
+
     }
     
     /*
@@ -1016,8 +1037,10 @@ class WPSSTM_Track{
     function populate_spotify_track_id(){
         if ($this->spotify_id) return $this->spotify_id;
         
-        if (!$spotify_id = get_post_meta($this->post_id, WPSSTM_Core_Tracks::$spotify_id_meta_key,true)){
-            $spotify_id = WPSSTM_Spotify::get_spotify_track_id($this);
+        $spotify_id = WPSSTM_Spotify::get_spotify_track_id($this);
+        if ( $this->post_id && $spotify_id && !is_wp_error($spotify_id) ){
+            $success = update_post_meta($this->post_id,WPSSTM_Core_Tracks::$spotify_id_meta_key,$spotify_id);
+            $this->track_log($success,'Stored Spotify track ID');
         }
 
         return $this->spotify_id = $spotify_id;
