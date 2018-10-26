@@ -116,8 +116,13 @@ class WPSSTM_Core_Tracks{
         if (get_post_type($test_track_id) != wpsstm()->post_type_track ) return;
         if (!$test_track_id) return;
         $track = new WPSSTM_Track($test_track_id);
+        
+        print_r(json_encode($track));
+        echo"<br/>";
+        
         $auto_sources = $track->autosource();
         $new_ids = $track->save_new_sources();
+        
         
         printf("auto found sources: %s",count($auto_sources));
         echo"<br/>";

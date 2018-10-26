@@ -27,6 +27,9 @@ class WPSSTM_Spotify{
         );
         return $links;
     }
+    /*
+    Use SongWhip.com to get Spotify track ID
+    */
     static function get_spotify_track_id(WPSSTM_Track $track){
 
         $spotify_id = null;
@@ -53,6 +56,7 @@ class WPSSTM_Spotify{
         $first_track = reset($tracks);
         $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$first_track);
         $spotify_title = wpsstm_get_array_value(array('name'),$first_track);
+        $spotify_artist = wpsstm_get_array_value(array('artists',0,'name'),$first_track);
 
         $pattern = '~https?://open.spotify.com/track/([^/]+)~';
         preg_match($pattern, $spotify_url, $url_matches);
@@ -60,7 +64,7 @@ class WPSSTM_Spotify{
         if ( !isset($url_matches[1]) ) return;
         
             $spotify_id = $url_matches[1];
-            $track->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$track->artist,$track->title,$track->album),'spotify_id'=>$spotify_id,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
+            $track->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$track->artist,$track->title,$track->album),'spotify_id'=>$spotify_id,'spotify_artist'=>$spotify_artist,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
 
         return $spotify_id;
     }

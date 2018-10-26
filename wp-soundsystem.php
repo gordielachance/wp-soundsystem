@@ -170,6 +170,7 @@ class WP_SoundSystem {
     function setup_actions(){
         
         /* Now that files have been loaded, init all core classes */
+        //TOUFIX should be better to hook this on a wpsstm_init action
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
         new WPSSTM_Core_BuddyPress();
@@ -181,7 +182,7 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
         
-        //TOUFIX should be better to hook this on a wpsstm_ready action
+        
         do_action('wpsstm_init');
         ////
 
