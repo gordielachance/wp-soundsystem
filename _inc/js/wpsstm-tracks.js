@@ -129,6 +129,7 @@
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
+                checkbox.prop("checked", !checkbox.prop("checked")); //restore previous state
             },
             complete: function() {
                 $(li_el).removeClass('wpsstm-freeze');

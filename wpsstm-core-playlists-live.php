@@ -11,7 +11,6 @@ class WPSSTM_Core_Live_Playlists{
     function __construct() {
         
         require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
-        $this->include_preset_files(); //include files from presets folder
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
@@ -150,23 +149,6 @@ class WPSSTM_Core_Live_Playlists{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
-    }
-
-    /*
-    Register scraper presets.
-    */
-    private function include_preset_files(){
-        
-        $presets = array();
-
-        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/scraper-presets' );
-
-        //get all files in /presets directory
-        $preset_files = glob( $presets_path . '*.php' ); 
-
-        foreach ($preset_files as $file) {
-            require_once($file);
-        }
     }
 
     function post_column_register($columns){

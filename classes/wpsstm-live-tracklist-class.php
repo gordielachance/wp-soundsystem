@@ -2,16 +2,18 @@
 
 use \ForceUTF8\Encoding;
 
-class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
+class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     
     var $tracklist_type = 'live';
 
     //url stuff
     public $feed_url = null;
-    public $redirect_url = null;
+    public $feed_url_no_filters = null;
     var $scraper_options = array();
     
     public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
+    public $cache_source_key = null;
+    public $cache_source_url = null;
 
     //response
     var $request_pagination = array(
@@ -49,7 +51,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         if ($this->post_id){
 
-            $this->feed_url = wpsstm_get_live_tracklist_url($this->post_id);
+            $this->feed_url = $this->feed_url_no_filters = wpsstm_get_live_tracklist_url($this->post_id);
             
             $db_options = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$scraper_meta_name,true);
             $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$db_options); //last one has priority
@@ -61,12 +63,23 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
                 $this->updated_time = $meta;
             }
+            
+            $this->cache_source_key = sprintf('wpsstm_cached_source_%s',$this->post_id);
+            $this->cache_source_url = get_transient( $this->cache_source_key );
 
         }
+
+    }
+    
+    protected function get_default_options(){
+        $options = parent::get_default_options();
         
-        //set expiration bool & time
-        $this->is_expired = $this->check_has_expired();
-        $this->ajax_refresh = $this->is_expired; //should we load the subtracks through ajax ?   By default, only when tracklist is not cached. false = good for debug.
+        $live_options = array(
+            'is_expired' => $this->check_has_expired(),
+            'ajax_tracklist' => $this->check_has_expired(),
+        );
+        
+        return wp_parse_args($live_options,$options);
     }
 
     protected function get_default_scraper_options(){
@@ -111,15 +124,60 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         return $diff;
     }
-    
-    function populate_subtracks($args = null){
 
-        if ( $this->did_query_tracks || $this->wait_for_ajax() || !$this->is_expired ){
-            return parent::populate_subtracks($args);
+    protected function get_live_subtracks($args = null){
+        
+        $is_cached = false;
+
+        //try cache
+        if ( $this->get_options('cache_source') && $this->cache_source_url ){
+            $this->feed_url = $this->cache_source_url;
+            $is_cached = true;
+            $this->tracklist_log('found HTML cache' );
+        }else{ //allow plugins to filter the URL
+            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
         }
-
-        //abord if we don't have a feed URL yet.
-        if( !$this->feed_url) return;
+        
+        if ( !$is_cached && $this->get_options('ajax_tracklist') && $this->wait_for_ajax() ){
+            $url = $this->get_tracklist_action_url('refresh');
+            $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
+            $error = new WP_Error( 'requires-refresh', $link );
+            $this->tracks_error = $error;
+            return $error;
+        }
+        
+        
+        if ( $this->feed_url != $this->feed_url_no_filters){
+            $this->tracklist_log($this->feed_url_no_filters,'original URL' );
+        }
+        
+        /* POPULATE PAGE */
+        $response = $this->populate_remote_response($this->feed_url);
+        $response_code = wp_remote_retrieve_response_code( $response );
+        
+        if ( $is_cached ) {
+            if ( is_wp_error($response) || ($response_code != 200) ){ //if cached file has been deleted or something
+                $this->tracklist_log( 'Unable to get cached file,deleting transient, retrying...' );
+                delete_transient( $this->cache_source_key );
+                $this->cache_source_url = null;
+                $response = $this->populate_subtracks();
+            }
+        }
+        
+        if ( is_wp_error($response) ) return $response;
+        
+        $response_type = $this->populate_response_type();
+        if ( is_wp_error($response_type) ) return $response_type;
+        
+        $response_body = $this->populate_response_body();
+        if ( is_wp_error($response_body) ) return $response_body;
+        
+        $body_node = $this->populate_body_node();
+        if ( is_wp_error($body_node) ) return $body_node;
+        
+        if ( !$is_cached && $this->get_options('cache_source') ) {
+           $this->cache_tracklist_source($response); 
+        }
 
         $tracks = $this->get_remote_tracks();
 
@@ -135,14 +193,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $tracks = array_reverse($tracks);
         }
 
-        $this->tracks = $this->add_tracks($tracks);
-        $this->track_count = count($this->tracks);
-
-        /*
-        UPDATE TRACKLIST
-        */
-        $post_id = $this->update_live_tracklist();
-        return $post_id;
+        return $tracks;
     }
 
     /*
@@ -152,13 +203,13 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     function update_live_tracklist($save_subtracks = null){
 
         if (!$this->post_id){
-            wpsstm()->debug_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
         //capability check
         if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
-            wpsstm()->debug_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
@@ -184,7 +235,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $success = $this->save_subtracks($subtracks_args);
             
             if( is_wp_error($success) ){
-                wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
+                $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
                 return $success;
             }
 
@@ -199,7 +250,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         $success = wp_update_post( $tracklist_post, true );
         
         if( is_wp_error($success) ){
-            wpsstm()->debug_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
+            $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
             return $success;
         }
         
@@ -212,8 +263,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     protected function get_remote_tracks(){
 
         $raw_tracks = array();
-
-        do_action('wpsstm_get_remote_tracks',$this);
 
         //count total pages
         $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination);
@@ -237,16 +286,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     private function get_remote_page_tracks(){
 
-        $body_node = $this->get_body_node();
-        if ( is_wp_error($body_node) ){
-            wpsstm()->debug_log($body_node->get_error_message(),'get_remote_page_tracks' );
-            return $body_node;
-        }
-        
-        wpsstm()->debug_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
+        $this->tracklist_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
-        $this->body_node = $body_node;
-        
         do_action('wpsstm_after_get_remote_body',$this);
 
         //tracks HTML
@@ -256,8 +297,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
-        
-        wpsstm()->debug_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
+        $this->tracklist_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
 
         return $tracks;
     }
@@ -276,31 +316,97 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         return apply_filters('wpsstm_live_tracklist_request_args',$defaults);
     }
     
-    protected function get_remote_response(){
+    function remote_type_to_ext($content_type) {
+        $content_type = strtolower($content_type);
+
+        $mimes = array( 
+            'txt' => 'text/plain',
+            'html' => 'text/html',
+            'js' => 'application/javascript',
+            'json' => 'application/json',
+            'xml' => 'application/xml',
+            'xspf' => 'application/xspf+xml',
+        );
+        return array_search($content_type, $mimes);
+     }
+    
+    /*
+    Allow to upload files with new extensions when caching playlists
+    */
+
+    function uploads_custom_mimes($existing_mimes) {
+        $existing_mimes['xspf'] = 'application/xspf+xml';
+        $existing_mimes['json'] = 'application/javascript';
+        return $existing_mimes;
+    }
+    
+    /*
+    Upload cached playlists to our custom 'uploads/wpsstm' path
+    */
+    
+    function uploads_custom_dir( $upload ) {
+        $log_dir = wpsstm_get_uploads_dir();
+        $upload['subdir'] = '/' . basename($log_dir);
+        $upload['path'] = $upload['basedir'] . $upload['subdir'];
+        $upload['url']  = $upload['baseurl'] . $upload['subdir'];
+        return $upload;
+    }
+
+    function cache_tracklist_source($response){
+
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        
+        if ( !$this->post_id ) return;
+        if ( !$cache_seconds ) return;
+        if ( is_wp_error($response) ) return;
+
+        $ext = $this->remote_type_to_ext($response['headers']['content-type']);
+        $filename = sprintf('%s-source.%s',$this->post_id,$ext);
+
+        add_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
+        add_filter( 'upload_dir', array($this,'uploads_custom_dir') );
+
+        $ghost = wp_upload_bits($filename, null, wp_remote_retrieve_body($response));
+
+        remove_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
+        remove_filter( 'upload_dir', array($this,'uploads_custom_dir') );
+
+        if ( $ghost['error'] ){
+            $error_msg = sprintf('Error while creating cache file "%s": %s',$filename,$ghost['error']);
+            $this->tracklist_log( $error_msg );
+            return new WP_Error( 'cannot_cache_tracklist', $error_msg );
+        }else{
+            $this->tracklist_log( sprintf('Created HTML file: %s',$ghost['url']) );
+            set_transient( $this->cache_source_key, $ghost['url'], $cache_seconds );
+            return $ghost;
+        }
+
+    }
+    
+    function delete_cached_file(){
+        
+    }
+    
+    private function populate_remote_response($url){
 
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
+        $cached_url = null;
+        
+        $this->tracklist_log($url,'get page' );
+        $response = wp_remote_get( $url, $this->get_request_args() );
 
-        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url); //override in your preset if you need to add args, etc. (eg. API) - in the URL to reach
-        wpsstm()->debug_log($this->redirect_url,'get_remote_response url' );
+        //errors
+        if ( !is_wp_error($response) ){
 
-        if ( is_wp_error($this->redirect_url) ){
-            $response = $this->redirect_url;
-        }else{
+            $response_code = wp_remote_retrieve_response_code( $response );
 
-            $response = wp_remote_get( $this->redirect_url, $this->get_request_args() );
-
-            if ( !is_wp_error($response) ){
-
-                $response_code = wp_remote_retrieve_response_code( $response );
-
-                if ($response_code && $response_code != 200){
-                    $response_message = wp_remote_retrieve_response_message( $response );
-                    $response = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
-                }
-
+            if ($response_code && $response_code != 200){
+                $response_message = wp_remote_retrieve_response_message( $response );
+                $response = new WP_Error( 'http_response_code', sprintf('[%1$s] %2$s',$response_code,$response_message ) );
             }
+
         }
 
         $this->response = $response;
@@ -308,12 +414,12 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function get_response_type(){
+    private function populate_response_type(){
         
         if ( $this->response_type !== null ) return $this->response_type; //already populated
 
         $type = null;
-        $response = $this->get_remote_response();
+        $response = $this->response;
         
         if ( $response && !is_wp_error($response) ){
             $content_type = wp_remote_retrieve_header( $response, 'content-type' );
@@ -356,18 +462,18 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    protected function get_response_body(){
+    protected function populate_response_body(){
         
         if ( $this->response_body !== null ) return $this->response_body; //already populated
         
         $content = null;
 
         //response
-        $response = $this->get_remote_response();
+        $response = $this->response;
         if ( is_wp_error($response) ) return $response;
         
         //response type
-        $response_type = $this->get_response_type();
+        $response_type = $this->response_type;
         if ( is_wp_error($response_type) ) return $response_type;
 
         //response body
@@ -380,12 +486,14 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         return $this->response_body;
     }
     
-    protected function get_body_node(){
+    protected function populate_body_node(){
+        
+        if ( $this->body_node !== null ) return $this->body_node; //already populated
 
         $result = null;
 
-        $response_type = $this->get_response_type();
-        $response_body = $this->get_response_body();
+        $response_type = $this->response_type;
+        $response_body = $this->response_body;
         
         if ( is_wp_error($response_body) ) return $response_body;
 
@@ -408,12 +516,12 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 }
                 
                 if ($xml){
-                    wpsstm()->debug_log("The json input has been converted to XML.",'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log("The json input has been converted to XML.");
                     
                     //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
                     $this->response_body = $xml;
-                    return $this->get_body_node();
+                    return $this->populate_body_node();
                 }
             break;
 
@@ -428,13 +536,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
                 $xml_errors = libxml_get_errors();
                 
                 if ($xml_errors){
-                    $notice = __("There has been some errors while parsing the input XML.",'wpsstm');
-                    $this->add_notice( 'wizard-header', 'xml_errors', $notice, true );
-                    wpsstm()->debug_log($notice,'WPSSTM_Remote_Tracklist::get_body_node' );
+                    $this->tracklist_log("There has been some errors while parsing the input XML.");
                     
                     /*
                     foreach( $xml_errors as $xml_error_obj ) {
-                        wpsstm()->debug_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message),'WPSSTM_Remote_Tracklist::get_body_node' );
+                        $this->tracklist_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message) );
                     }
                     */
                 }
@@ -478,8 +584,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( (!$result || ($result->length == 0)) ){
             return new WP_Error( 'querypath', __('We were unable to populate the page node') );
         }
-
-        return $result;
+        
+        return $this->body_node = $result;
 
     }
     
@@ -545,6 +651,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     }
 
     protected function parse_track_nodes($track_nodes){
+        
+        if (!$track_nodes) return new WP_Error( 'no_track_nodes', __('No track nodes found.','wpsstm') );
 
         $selector_artist = $this->get_selectors( array('track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing.','wpsstm') );
@@ -560,13 +668,23 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $artist =   $this->get_track_artist($single_track_node);
             $title =    $this->get_track_title($single_track_node);
             $album =    $this->get_track_album($single_track_node);
+            
+            $sources = array();
+            if ( $sources_urls = $this->get_track_source_urls($single_track_node) ){
+                foreach((array)$sources_urls as $source_url){
+                    $source = array(
+                        'permalink_url' => $source_url,
+                    );
+                    $sources[] = $source;
+                }
+            }
 
             $args = array(
                 'artist'        => $artist,
                 'title'         => $title,
                 'album'         => $album,
                 'image_url'     => $this->get_track_image($single_track_node),
-                'source_urls'   => $this->get_track_sources($single_track_node),
+                'sources'       => $sources,
             );
 
             $tracks_arr[] = array_filter($args);
@@ -619,25 +737,15 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         return $source_urls;
         
     }
-    
-    protected function get_track_sources($track_node){
-        $sources = array();
-        $source_urls = $this->get_track_source_urls($track_node);
-        
-        foreach((array)$source_urls as $source_url){
-            $source = new WPSSTM_Source();
-            $source_args = array('url'=>$source_url);
-            $source->from_array($source_args);
-            $sources[] = $source;
-        }
-        
-        return $sources;
-    }
 
     public function parse_node($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
+        
+        if (!$track_node){
+            return new WP_Error( 'wpsstm_empty_node', 'Unable to parse empty node' );
+        }
 
         $selector_css   = wpsstm_get_array_value('path',$selectors);
         $selector_regex = wpsstm_get_array_value('regex',$selectors);
@@ -746,7 +854,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         }
 
         //force PHP tracks refresh
-        $this->ajax_refresh = false;
+        $this->options['ajax_tracklist'] = false;
         
         //populate remote tracklist if not done yet
         $populated = $this->populate_subtracks();
@@ -768,8 +876,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($success) ) {
             return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
         }
-        
-        $this->toggle_enable_wizard(false);
         return $success;
 
     }
@@ -790,12 +896,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
 
-        $disable = (bool)isset($wizard_data['disable']);
-        $this->toggle_enable_wizard(!$disable);
-
-        //is disabled
-        if ( $this->is_wizard_disabled() ) return;
-
         return $this->save_wizard_settings($wizard_data);
 
     }
@@ -815,7 +915,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
         
         //settings have been updated, clear tracklist cache
         if ($old_settings != $wizard_settings){
-            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
+            $this->tracklist_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
             delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         }
 
@@ -880,9 +980,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     //UTC
     function get_expiration_time(){
-        if ( !$cache_duration_min = $this->get_scraper_options('datas_cache_min') ) return false;
-        $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
-        return $this->updated_time + $cache_duration_s;
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        return $this->updated_time + $cache_seconds;
     }
 
     
@@ -897,7 +996,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             return true;
         }else{
             $now = current_time( 'timestamp', true );
-            $cache_duration_s = $cache_duration_min * MINUTE_IN_SECONDS;
             $expiration_time = $this->get_expiration_time(); //set expiration time
             return ( $now >= $expiration_time );
         }
@@ -906,11 +1004,13 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     function get_time_before_refresh(){
 
-        if ( !$cachemin = $this->get_scraper_options('datas_cache_min') ) return false;
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        
+        if ( !$cache_seconds ) return false;
         if ( $this->is_expired ) return false;
         
         $time_refreshed = $this->updated_time;
-        $time_before = $time_refreshed + ($cachemin * MINUTE_IN_SECONDS);
+        $time_before = $time_refreshed + $cache_seconds;
         $now = current_time( 'timestamp', true );
 
         return $refresh_time_human = human_time_diff( $now, $time_before );

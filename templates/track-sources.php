@@ -11,12 +11,10 @@ if ( $wpsstm_track->have_sources() ) { ?>
             
             $wpsstm_track->the_source();
             global $wpsstm_source;
-            
-            $provider = $wpsstm_source->populate_source_provider();
 
-            if ( !$wpsstm_source->populate_source_provider() ) continue;
+            if ( !$wpsstm_source->get_source_mimetype() ) continue;
 
-            $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->url);
+            $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->permalink_url);
 
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >

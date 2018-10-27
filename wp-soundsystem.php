@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.9.4
+Version: 1.9.5
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.9.4';
+    public $version = '1.9.5';
     /**
     * @public string plugin DB version
     */
@@ -94,16 +94,16 @@ class WP_SoundSystem {
             'lastfm_community_scrobble'         => 'off',
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
-            'soundcloud_client_id'              => null,
-            'soundcloud_client_secret'          => null,
             'tuneefy_client_id'                 => null,
             'tuneefy_client_secret'             => null,
+            'soundcloud_client_id'              => null,
+            'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
+            'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
             'autosource_filter_ban_words'       => array('cover'),
-            'autosource_filter_requires_artist' => 'off',
             'playable_opacity_class'            => 'on',
             'minimal_css'                       => 'off',
         );
@@ -138,29 +138,41 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
-        require $this->plugin_dir . 'classes/wpsstm-lastfm-user.php';
-        require $this->plugin_dir . 'wpsstm-core-lastfm.php';
-        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
-
-        if ( wpsstm()->get_options('musicbrainz_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-musicbrainz.php';
-        }
-        
-        
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             require $this->plugin_dir . 'wpsstm-core-player.php';
         }
+        
+        //include APIs/services stuff (lastfm,youtube,spotify,etc.)
+        $this->include_apis();
     }
+    
+    /*
+    Register scraper presets.
+    */
+    private function include_apis(){
+        
+        $presets = array();
+
+        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/services' );
+
+        //get all files in /presets directory
+        $preset_files = glob( $presets_path . '*.php' ); 
+
+        foreach ($preset_files as $file) {
+            require_once($file);
+        }
+    }
+    
     function setup_actions(){
         
         /* Now that files have been loaded, init all core classes */
+        //TOUFIX should be better to hook this on a wpsstm_init action
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
         new WPSSTM_Core_BuddyPress();
-        new WPSSTM_Core_LastFM();
-        new WPSSTM_Core_MusicBrainz();
         new WPSSTM_Core_Player();
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
@@ -169,6 +181,8 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
         
+        
+        do_action('wpsstm_init');
         ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
@@ -334,13 +348,13 @@ class WP_SoundSystem {
         
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
-        wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
+        wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome'),wpsstm()->version );
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
         
         //js
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wp-mediaelement','wpsstm-tracklists'),$this->version, true);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
 
         $datas = array(
             'debug'             => (WP_DEBUG),
@@ -401,17 +415,23 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($message,$title = null) {
+    public function debug_log($message,$title = null, $file = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 
         $prefix = '[wpsstm] ';
         if($title) $prefix.=$title.': ';
+        
+        $output = null;
 
         if (is_array($message) || is_object($message)) {
-            error_log($prefix.print_r($message, true));
+            $output = $prefix . implode("\n", $message);
         } else {
-            error_log($prefix.$message);
+            $output = $prefix . $message;
+        }
+        
+        if ($output){
+            error_log($output);
         }
     }
     

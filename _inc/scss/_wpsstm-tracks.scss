@@ -68,6 +68,9 @@ body.wpsstm-default,body.wp-admin{
             &#wpsstm-track-action-trash a:before{
                 content: "\f1f8";//.fa-trash;
             }
+            &#wpsstm-track-action-unlink a:before{
+                content: "\f127";//.fa-chain-broken;
+            }
             &#wpsstm-track-action-sources a:before{
                 content: "\f0c2";//.fa-cloud;
             }

@@ -1,9 +1,8 @@
 <?php
-
 class WPSSTM_Core_Tracks{
 
     static $title_metakey = '_wpsstm_track';
-    static $length_metakey = '_wpsstm_length';
+    static $length_metakey = '_wpsstm_length'; //track length, in s
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
     static $qvar_track_admin = 'admin-track';
@@ -11,6 +10,7 @@ class WPSSTM_Core_Tracks{
     static $qvar_loved_tracks = 'loved-tracks';
     static $track_mbtype = 'recording'; //musicbrainz type, for lookups
     static $loved_track_meta_key = '_wpsstm_user_favorite';
+    static $spotify_id_meta_key = '_wpsstm_spotify_id';
     static $autosource_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
     
     var $subtracks_hide = null; //default hide subtracks in track listings
@@ -99,7 +99,6 @@ class WPSSTM_Core_Tracks{
         */
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         add_action( 'delete_post', array($this,'delete_subtracks_track_entry') );
-
     }
 
     //add custom admin submenu under WPSSTM
@@ -250,6 +249,10 @@ class WPSSTM_Core_Tracks{
             break;
             case 'unfavorite':
                 $success = $track->love_track(false);
+            break;
+            case 'unlink':
+                //TOUFIX we need a way to retrieve the tracklist, here.
+                //$success = $tracklist->remove_subtrack_ids($track->post_id);
             break;
         }
         
@@ -846,14 +849,14 @@ class WPSSTM_Core_Tracks{
         $new_sources = array();
         
         foreach((array)$source_urls as $url){
+            //TOFIXKKK where is track ?
             $source = new WPSSTM_Source();
-            $source->track_id = $post_id;
-            $source->url = $url;
-            $source->save_unique_source();//save only if it does not exists yet
+            $source->permalink_url = $url;
+            $source->save_source();//save only if it does not exists yet
             $new_sources[] = $source;
         }
         
-        //autosource
+        //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
             $track = new WPSSTM_Track($post_id);
             $success = $track->autosource();
@@ -905,8 +908,6 @@ class WPSSTM_Core_Tracks{
     function ajax_toggle_playlist_subtrack(){
         
         $ajax_data = wp_unslash($_POST);
-        
-        wpsstm()->debug_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
 
         $result = array(
             'input'     => $ajax_data,
@@ -916,9 +917,10 @@ class WPSSTM_Core_Tracks{
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
         $track = $result['track'] = new WPSSTM_Track($track_id);
+        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = new WPSSTM_Tracklist($tracklist_id);
+        $tracklist = $result['tracklist'] = wpsstm_get_tracklist($tracklist_id);
         
         $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
         $success = false;
@@ -1009,7 +1011,7 @@ class WPSSTM_Core_Tracks{
 
                 $success = $track->love_track($do_love);
                 $result['track'] = $track;
-                wpsstm()->debug_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
+                $this->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
 
                 if( is_wp_error($success) ){
                     $code = $success->get_error_code();
@@ -1035,7 +1037,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = wpsstm_get_post_tracklist($tracklist_id);
+        $tracklist = wpsstm_get_tracklist($tracklist_id);
         
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);
@@ -1103,7 +1105,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            wpsstm()->debug_log(json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Tracklist::trash_track_sources()");
+            $this->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Static_Tracklist::trash_track_sources()");
         }
 
     }
@@ -1173,7 +1175,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        wpsstm()->debug_log(json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Tracklist::flush_community_tracks()");
+        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Static_Tracklist::flush_community_tracks()");
 
         return $flushed_ids;
 

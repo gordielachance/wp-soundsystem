@@ -1,5 +1,39 @@
 <?php
-class WPSSTM_BBC_Stations{
+
+class WPSSTM_BBC{
+    function __construct(){
+        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_bbc_presets'));
+        add_filter('wpsstm_wizard_services_links',array(__class__,'register_bbc_service_links'));
+    }
+    static function register_bbc_presets($tracklist){
+        new WPSSTM_BBC_Station_Preset($tracklist);
+        new WPSSTM_BBC_Playlist_Preset($tracklist);
+    }
+
+    static function register_bbc_service_links($links){
+        $links[] = array(
+            'slug'      => 'bbc',
+            'name'      => 'BBC',
+            'url'       => 'https://www.bbc.co.uk',
+            'pages'     => array(
+                array(
+                    'slug'          => 'stations',
+                    'name'          => __('stations','wpsstm'),
+                    'example'       => 'https://www.bbc.co.uk/STATION',
+                ),
+                array(
+                    'slug'          => 'playlists',
+                    'name'          => __('playlists','wpsstm'),
+                    'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
+                ),
+            )
+        );
+
+        return $links;
+    }
+}
+
+class WPSSTM_BBC_Station_Preset{
     private $station_slug;
 
     function __construct($tracklist){
@@ -43,8 +77,7 @@ class WPSSTM_BBC_Stations{
     
 
 }
-
-class WPSSTM_BBC_Playlists{
+class WPSSTM_BBC_Playlist_Preset{
     private $playlist_id;
     
     function __construct($tracklist){
@@ -81,32 +114,8 @@ class WPSSTM_BBC_Playlists{
 
 }
 
-function register_bbc_presets($tracklist){
-    new WPSSTM_BBC_Stations($tracklist);
-    new WPSSTM_BBC_Playlists($tracklist);
+function wpsstm_BBC_init(){
+    new WPSSTM_BBC();
 }
 
-function register_bbc_service_links($links){
-    $links[] = array(
-        'slug'      => 'bbc',
-        'name'      => 'BBC',
-        'url'       => 'https://www.bbc.co.uk',
-        'pages'     => array(
-            array(
-                'slug'          => 'stations',
-                'name'          => __('stations','wpsstm'),
-                'example'       => 'https://www.bbc.co.uk/STATION',
-            ),
-            array(
-                'slug'          => 'playlists',
-                'name'          => __('playlists','wpsstm'),
-                'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
-            ),
-        )
-    );
-
-    return $links;
-}
-
-add_action('wpsstm_get_remote_tracks','register_bbc_presets');
-add_filter('wpsstm_wizard_services_links','register_bbc_service_links');
+add_action('wpsstm_init','wpsstm_BBC_init');

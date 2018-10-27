@@ -6,7 +6,6 @@ class WPSSTM_Core_Wizard{
     var $wizard_fields = array();
 
     static $qvar_tracklist_wizard = 'wztr';
-    static $wizard_disabled_metakey = '_wpsstm_wizard_disabled';
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
 
     
@@ -104,7 +103,7 @@ class WPSSTM_Core_Wizard{
 
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
-            $wpsstm_tracklist = wpsstm_get_post_tracklist($post->ID);
+            $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
                 $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
@@ -161,14 +160,10 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist($post_id);
+        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
         
-        if ( self::is_advanced_wizard() ){
-            //force remote request (so we can get the remote playlist details - content; etc.)
-            $wpsstm_tracklist->ajax_refresh = false;
-            $wpsstm_tracklist->is_expired = true;
-            $wpsstm_tracklist->tracks_strict = false;
-        }
+        //wizard specific options
+        $wpsstm_tracklist->options['tracks_strict'] = false;
 
         if (wpsstm_is_backend() ){
             $wpsstm_tracklist->options['autoplay'] = false;
@@ -197,7 +192,7 @@ class WPSSTM_Core_Wizard{
 
         return true;
     }
-    
+
     /*
     Register the global $wpsstm_tracklist obj backend + enqueue scripts & styles
     */
@@ -239,9 +234,9 @@ class WPSSTM_Core_Wizard{
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Remote_Tracklist($post_id);
+        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
         
-        wpsstm()->debug_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
+        $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
         $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;
 
@@ -254,9 +249,6 @@ class WPSSTM_Core_Wizard{
             $success = $wpsstm_tracklist->save_wizard($wizard_data);
         }elseif ( isset($wizard_data['import-tracks']) ){
             $wpsstm_tracklist->append_wizard_tracks();
-        }elseif( isset($wizard_data['toggle-wizard']) ){
-            $enable = ( isset($wizard_data['toggle-wizard']['enable']) );
-            $wpsstm_tracklist->toggle_enable_wizard($enable);
         }elseif( isset($wizard_data['restore-scraper']) ){
 
             $check_keys = array('selectors', 'tracks_order');
@@ -377,7 +369,7 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //populate backend tracklist
-        $this->populate_wizard_tracklist($post->ID); 
+        $this->populate_wizard_tracklist($post->ID);
 
         /*
         TOFIXGGG TO CHECK is this useful ? should we re-enable it ?
@@ -388,185 +380,142 @@ class WPSSTM_Core_Wizard{
             $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
         }
         */
-
+        
         /*
-        Source
+        Input
         */
-
+        
         add_settings_section(
-             'wizard_section_source', //id
-             __('Source','wpsstm'), //title
+             'wizard_section_input', //id
+             __('Input','wpsstm'), //title
              array( $this, 'section_desc_empty' ), //callback
-             'wpsstm-wizard-step-source' //page
+             'wpsstm-wizard-step-input' //page
         );
 
         add_settings_field(
             'wpsstm_wizard', //id
-            __('URL','wpsstm'), //title
+            __('Remote URL','wpsstm'), //title
             array( $this, 'feed_url_callback' ), //callback
-            'wpsstm-wizard-step-source', //page
-            'wizard_section_source', //section
+            'wpsstm-wizard-step-input', //page
+            'wizard_section_input', //section
             null //args
         );
-        
+
         /*
-        Source feedback
+        Profile
+        */
+
+        /*
+        Tracks
         */
 
         add_settings_section(
-             'wizard_section_source_feedback', //id
-             __('Feedback','wpsstm'), //title
-             array( $this, 'section_desc_empty' ), //callback
-             'wpsstm-wizard-step-source' //page
+            'wizard_section_tracks', //id
+            __('Tracks','wpsstm'), //title
+            array( $this, 'section_tracks_desc' ), //callback
+            'wpsstm-wizard-step-profile' //page
         );
 
-        if ( self::is_advanced_wizard() ){
+        add_settings_field(
+            'tracks_selector', 
+            __('Tracks Selector','wpsstm'), 
+            array( $this, 'selector_tracks_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard_section_tracks'
+        );
 
-            /*
-            Tracks
-            */
+        add_settings_field(
+            'tracks_order', 
+            __('Tracks Order','wpsstm'), 
+            array( $this, 'tracks_order_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard_section_tracks'
+        );
 
-            add_settings_section(
-                'wizard_section_tracks', //id
-                __('Tracks','wpsstm'), //title
-                array( $this, 'section_tracks_desc' ), //callback
-                'wpsstm-wizard-step-tracks' //page
-            );
-            
-            add_settings_field(
-                'feedback_source_content', 
-                __('Input','wpsstm'), 
-                array( $this, 'feedback_source_content_callback' ), 
-                'wpsstm-wizard-step-tracks', 
-                'wizard_section_tracks'
-            );
-            
-            add_settings_field(
-                'feedback_data_type', 
-                __('Input type','wpsstm'), 
-                array( $this, 'feedback_data_type_callback' ), 
-                'wpsstm-wizard-step-tracks', 
-                'wizard_section_tracks'
-            );
 
-            add_settings_field(
-                'tracks_selector', 
-                __('Tracks Selector','wpsstm'), 
-                array( $this, 'selector_tracks_callback' ), 
-                'wpsstm-wizard-step-tracks', 
-                'wizard_section_tracks'
-            );
 
-            add_settings_field(
-                'tracks_order', 
-                __('Tracks Order','wpsstm'), 
-                array( $this, 'tracks_order_callback' ), 
-                'wpsstm-wizard-step-tracks', 
-                'wizard_section_tracks'
-            );
+        /*
+        Track Details
+        */
 
-            /*
-            Tracks feedback
-            */
+        add_settings_section(
+            'wizard-section-single-track', //id
+            __('Track Details','wpsstm'),
+            array( $this, 'section_single_track_desc' ),
+            'wpsstm-wizard-step-profile' //page
+        );
 
-            add_settings_section(
-                 'wizard_section_tracks_feedback', //id
-                 __('Feedback','wpsstm'), //title
-                 array( $this, 'section_desc_empty' ), //callback
-                 'wpsstm-wizard-step-tracks' //page
-            );
+        add_settings_field(
+            'track_artist_selector', 
+            __('Artist Selector','wpsstm').' '.$this->regex_link(),
+            array( $this, 'track_artist_selector_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard-section-single-track'
+        );
 
-            /*
-            Single track
-            */
+        add_settings_field(
+            'track_title_selector', 
+            __('Title Selector','wpsstm').' '.$this->regex_link(), 
+            array( $this, 'track_title_selector_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard-section-single-track'
+        );
 
-            add_settings_section(
-                'wizard-section-single-track', //id
-                __('Track Details','wpsstm'),
-                array( $this, 'section_single_track_desc' ),
-                'wpsstm-wizard-step-single-track' //page
-            );
-            
-            add_settings_field(
-                'feedback_tracklist_content', 
-                __('Input','wpsstm'), 
-                array( $this, 'feedback_tracks_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
+        add_settings_field(
+            'track_album_selector', 
+            __('Album Selector','wpsstm').' '.$this->regex_link(), 
+            array( $this, 'track_album_selector_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard-section-single-track'
+        );
 
-            add_settings_field(
-                'track_artist_selector', 
-                __('Artist Selector','wpsstm').' '.$this->regex_link(),
-                array( $this, 'track_artist_selector_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
+        add_settings_field(
+            'track_image_selector', 
+            __('Image Selector','wpsstm').' '.$this->regex_link(), 
+            array( $this, 'track_image_selector_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard-section-single-track'
+        );
 
-            add_settings_field(
-                'track_title_selector', 
-                __('Title Selector','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_title_selector_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
+        add_settings_field(
+            'track_source_urls', 
+            __('Source URL','wpsstm').' '.$this->regex_link(), 
+            array( $this, 'track_sources_selector_callback' ), 
+            'wpsstm-wizard-step-profile', 
+            'wizard-section-single-track'
+        );
 
-            add_settings_field(
-                'track_album_selector', 
-                __('Album Selector','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_album_selector_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
-            
-            add_settings_field(
-                'track_image_selector', 
-                __('Image Selector','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_image_selector_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
+        /*
+        Options
+        */
 
-            add_settings_field(
-                'track_source_urls', 
-                __('Source URL','wpsstm').' '.$this->regex_link(), 
-                array( $this, 'track_sources_selector_callback' ), 
-                'wpsstm-wizard-step-single-track',
-                'wizard-section-single-track'
-            );
+        add_settings_section(
+            'wizard-section-options', //id
+            __('Options','wpsstm'),
+            array( $this, 'section_desc_empty' ),
+            'wpsstm-wizard-step-options' //page
+        );
 
-            /*
-            Single track feedback
-            */
-
-            add_settings_section(
-                 'wizard_section_single_track_feedback', //id
-                 __('Feedback','wpsstm'), //title
-                 array( $this, 'section_desc_empty' ), //callback
-                 'wpsstm-wizard-step-single-track' //page
-            );
-
-            /*
-            Options
-            */
-
-            add_settings_section(
-                'wizard-section-options', //id
-                __('Options','wpsstm'),
-                array( $this, 'section_desc_empty' ),
-                'wpsstm-wizard-step-options' //page
-            );
-
-            add_settings_field(
-                'datas_cache_min', 
-                __('Cache duration','wpsstm'), 
-                array( $this, 'cache_callback' ), 
-                'wpsstm-wizard-step-options',
-                'wizard-section-options'
-            );
-            
-        }
+        add_settings_field(
+            'datas_cache_min', 
+            __('Cache duration','wpsstm'), 
+            array( $this, 'cache_callback' ), 
+            'wpsstm-wizard-step-options',
+            'wizard-section-options'
+        );
         
+
+        /*
+        Results
+        */
+
+        add_settings_section(
+             'wizard_section_results', //id
+             __('Results','wpsstm'), //title
+             array( $this, 'section_desc_empty' ), //callback
+             'wpsstm-wizard-step-results' //page
+        );
+
         /*
         display tracklist if available.  
         Do not show this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
@@ -576,8 +525,8 @@ class WPSSTM_Core_Wizard{
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
                 array( $this, 'feedback_tracklist_callback' ), 
-                'wpsstm-wizard-step-source', 
-                'wizard_section_source_feedback'
+                'wpsstm-wizard-step-results', 
+                'wizard_section_results'
             );
         }
 
@@ -712,6 +661,7 @@ class WPSSTM_Core_Wizard{
     
     function section_desc_empty(){
     }
+
 
     public static function feed_url_callback(){
         global $wpsstm_tracklist;
@@ -927,57 +877,41 @@ class WPSSTM_Core_Wizard{
         $idle_class   = 'nav-tab';
         $active_class = 'nav-tab nav-tab-active';
         
-        $source_tab = $tracks_selector_tab = $track_details_tab = $options_tab = $tracklist_tab = array();
-        
-        $status_icons = array(
-            '<i class="fa fa-times-circle" aria-hidden="true"></i>',
-            '<i class="fa fa-check-circle" aria-hidden="true"></i>'
+        $input_tab = $profile_tab = $options_tab = $results_tab = array();
+
+        $input_tab = array(
+            'title'     => __('Input','spiff'),
+            'href'      => '#wpsstm-wizard-step-input-content'
         );
 
-        $icon_source_tab = $status_icons[0];
-        if ( $wpsstm_tracklist->body_node ){
-            $icon_source_tab = $status_icons[1];
-        }
-
-        $source_tab = array(
-            'icon'    => $icon_source_tab,
-            'title'     => __('Source','spiff'),
-            'href'      => '#wpsstm-wizard-step-source-content'
-        );
-
-        $icon_tracks_tab = $status_icons[0];
-        if ( $wpsstm_tracklist->track_nodes ){
-            $icon_tracks_tab = $status_icons[1];
-        }
-
-        $tracks_selector_tab = array(
-            'icon'    => $icon_tracks_tab,
-            'title'  => __('Tracks','spiff'),
-            'href'  => '#wpsstm-wizard-step-tracks-content'
-        );
-
-        $icon_track_details_tab = $status_icons[0];
-
-        if ( $wpsstm_tracklist->tracks ){
-            $icon_track_details_tab = $status_icons[1];
-        }
-
-        $track_details_tab = array(
-            'icon'    => $icon_track_details_tab,
-            'title'  => __('Track Details','spiff'),
-            'href'  => '#wpsstm-wizard-step-single-track-content'
+        $profile_tab = array(
+            'title'     => __('Profile','spiff'),
+            'href'      => '#wpsstm-wizard-step-profile-content'
         );
 
         $options_tab = array(
             'title'  => __('Options','spiff'),
-            'href'  => '#wpsstm-wizard-step-options'
+            'href'  => '#wpsstm-wizard-step-options-content'
+        );
+
+        $results_title = __('Results','spiff');
+          
+        if ( $wpsstm_tracklist->did_query_tracks ){
+            $tracks_count = count($wpsstm_tracklist->tracks);
+            $results_title .= ' '.$tracks_count;
+            //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $tracks_count, 'wpsstm' ) );
+        }
+        
+        $results_tab = array(
+            'title'  => $results_title,
+            'href'  => '#wpsstm-wizard-step-results-content'
         );
 
         $tabs = array(
-            $source_tab,
-            $tracks_selector_tab,
-            $track_details_tab,
-            $options_tab
+            $input_tab,
+            $profile_tab,
+            $options_tab,
+            $results_tab,
         );
         
         $tabs = array_filter($tabs);
@@ -1055,7 +989,7 @@ class WPSSTM_Core_Wizard{
     
     public static function is_advanced_wizard(){
         global $wpsstm_tracklist;
-        return ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url && !$wpsstm_tracklist->is_wizard_disabled() );
+        return ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
     }
 
 }

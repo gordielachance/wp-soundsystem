@@ -1,5 +1,30 @@
 <?php
-class WPSSTM_Slacker_Stations{
+class WPSSTM_Slacker{
+    function __construct(){
+        add_filter('wpsstm_wizard_services_links',array($this,'register_slacker_service_links'));
+        add_action('wpsstm_live_tracklist_populated',array($this,'register_slacker_preset'));
+    }
+    //register preset
+    function register_slacker_preset($tracklist){
+        new WPSSTM_Slacker_Preset($tracklist);
+    }
+    function register_slacker_service_links($links){
+        $links[] = array(
+            'slug'      => 'slacker',
+            'name'      => 'Slacker',
+            'url'       => 'http://www.slacker.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'stations',
+                    'name'      => __('stations','wpsstm'),
+                    'example'   => 'http://www.slacker.com/station/STATION_SLUG',
+                ),
+            )
+        );
+        return $links;
+    }
+}
+class WPSSTM_Slacker_Preset{
 
     private $station_slug;
 
@@ -36,24 +61,9 @@ class WPSSTM_Slacker_Stations{
 
 }
 
-//register preset
-function register_slacker_preset($tracklist){
-    new WPSSTM_Slacker_Stations($tracklist);
+
+function wpsstm_slacker_init(){
+    new WPSSTM_Slacker();
 }
-function register_slacker_service_links($links){
-    $links[] = array(
-        'slug'      => 'slacker',
-        'name'      => 'Slacker',
-        'url'       => 'http://www.slacker.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'stations',
-                'name'      => __('stations','wpsstm'),
-                'example'   => 'http://www.slacker.com/station/STATION_SLUG',
-            ),
-        )
-    );
-    return $links;
-}
-//add_filter('wpsstm_wizard_services_links','register_slacker_service_links');
-//TO FIX TO REPAIR add_action('wpsstm_get_remote_tracks','register_slacker_preset');
+
+//TO FIX TO REPAIR add_action('wpsstm_init','wpsstm_reddit_init');

@@ -262,7 +262,7 @@ class WPSSTM_Core_Artists{
         
         $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
         if ($search){
-            $results = WPSSTM_Core_MusicBrainz::get_musicbrainz_api_entry('artist',null,$search);
+            $results = WPSSTM_MusicBrainz::get_musicbrainz_api_entry('artist',null,$search);
             if ( is_wp_error($results) ){
                 $result['message'] = $results->get_error_message();
             }else{

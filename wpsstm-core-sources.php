@@ -287,7 +287,7 @@ class WPSSTM_Core_Sources{
         ?>
         <p>
             <h2><?php _e('URL','wpsstm');?></h2>
-            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->url;?>" />
+            <input type="text" name="wpsstm_source_url" class="wpsstm-fullwidth" value="<?php echo $source->permalink_url;?>" />
         </p>
         <?php
         wp_nonce_field( 'wpsstm_source_meta_box', 'wpsstm_source_meta_box_nonce' );
@@ -334,7 +334,7 @@ class WPSSTM_Core_Sources{
         $after = array();
         
         $after['source_url'] = __('URL','wpsstm');
-        $after['track_match'] = __('Match','wpsstm');
+        $after['parent_track'] = __('Track','wpsstm');
         
         if ( isset($_GET['post_parent']) ){
             $after['order'] = __('Order','wpsstm');
@@ -350,7 +350,7 @@ class WPSSTM_Core_Sources{
         switch ( $column ) {
             case 'source_url':
                 
-                $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->url,$wpsstm_source->title,$wpsstm_source->url);
+                $link  = sprintf('<a class="wpsstm-source-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_source->permalink_url,$wpsstm_source->title,$wpsstm_source->permalink_url);
                 
                 echo $link;
                 
@@ -362,11 +362,10 @@ class WPSSTM_Core_Sources{
                     echo '—';
                 }
             break;
-            case 'track_match':
+            case 'parent_track':
 
-                if ( $match = $wpsstm_source->match ){
+                if ( $track = new WPSSTM_Track($post->post_parent) ){
                     
-                    $track = new WPSSTM_Track($post->post_parent);
                     if ($track->artist && $track->artist){
                         
                         $sources_url = $track->get_backend_sources_url();
@@ -380,11 +379,7 @@ class WPSSTM_Core_Sources{
 
                         printf('<p>%s %s</p>',$track_edit_link,$track_sources_link);
                     }
-                    
-                    $percent_bar = wpsstm_get_percent_bar($match);
-                    printf('<p>%s</p>',$percent_bar);
-                    
-                    
+
                 }else{
                     echo '—';
                 }
@@ -392,18 +387,6 @@ class WPSSTM_Core_Sources{
         }
     }
 
-    //TO FIX TO enable somewhere
-    function sort_sources_by_track_match($sources,WPSSTM_Track $track){
-
-        //reorder by similarity
-        usort($sources, function ($a, $b){
-            return $a->match === $b->match ? 0 : ($a->match > $b->match ? -1 : 1);
-        });
-        
-        return $sources;
-        
-    }
-    
     function ajax_track_autosource(){
         global $wpsstm_track;
         
@@ -419,17 +402,15 @@ class WPSSTM_Core_Sources{
 
         //set global $wpsstm_track
         $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
-        $success = $wpsstm_track->autosource();
+        $wpsstm_track->from_array($ajax_data['track']);        
         
+        //autosource
+        $success = $wpsstm_track->autosource();
         $result['track'] = $wpsstm_track;
 
         if ( is_wp_error($success) ){
-            
             $result['message'] = $success->get_error_message();
-            
         }elseif( $success ){
-
             ob_start();
             wpsstm_locate_template( 'track-sources.php', true, false );
             $sources_list = ob_get_clean();
@@ -469,122 +450,8 @@ class WPSSTM_Core_Sources{
         wp_send_json( $result ); 
     }
     
-    static function can_tuneefy(){
-        if ( !wpsstm()->get_options('tuneefy_client_id') ){
-            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client id missing.','wpsstm') );
-        }
-        if ( !wpsstm()->get_options('tuneefy_client_secret') ){
-            return new WP_Error( 'wpsstm_tuneefy_auth', __('Required Tuneefy client secret missing.','wpsstm') );
-        }
-        return true;
-    }
-    
-    static function get_tuneefy_token(){
-        
-        $can_tuneefy = self::can_tuneefy();
-        if( is_wp_error($can_tuneefy) ) return $can_tuneefy;
-        
-        $transient_name = 'tuneefy_token';
-        
-        $client_id = wpsstm()->get_options('tuneefy_client_id');
-        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
-
-        if ( false === ( $token = get_transient($transient_name ) ) ) {
-            
-            $args = array(
-                'headers' => array(
-                    'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8',
-                ),
-                'body' => sprintf('client_id=%s&client_secret=%s&grant_type=client_credentials',$client_id,$client_secret),
-            );
-            $response = wp_remote_post('https://data.tuneefy.com/v2/auth/token', $args );
-            $body = wp_remote_retrieve_body($response);
-
-            if ( is_wp_error($body) ) return $body;
-            $api_response = json_decode( $body, true );
-            
-            wpsstm()->debug_log( json_encode($api_response), "WPSSTM_Core_Sources::get_tuneefy_token"); 
-
-            if ( isset($api_response['access_token']) &&  isset($api_response['expires_in']) ) {
-                $token = $api_response['access_token'];
-                $time = $api_response['expires_in']; //TO FIX TO CHECK is seconds ?
-                set_transient( $transient_name, $token, $time );
-            }elseif( isset($api_response['error_description']) ){
-                return new WP_Error( 'wpsstm_tuneefy_auth', sprintf(__('Unable to get Tuneefy Token: %s','wpsstm'),$data['error_description']) );
-            }else{
-                return new WP_Error( 'wpsstm_tuneefy_auth', __('Unable to get Tuneefy Token.','wpsstm') );
-            }
-            
-        }
-        
-        return $token;
-        
-    }
-    
-    /*
-    Get track/album informations using Tuneefy API
-    See https://data.tuneefy.com/#search-aggregate-get
-    */
-    
-    static function tuneefy_api_aggregate($type,$url_args){
-        
-        $error = null;
-        $url = null;
-        $request_args = null;
-        $api_response = null;
-        
-        //TO FIX use a transient to store results for a certain time ?
-
-        $token = self::get_tuneefy_token();
-        
-        if ( is_wp_error($token) ){
-            $error = $token;
-        }else{
-            $request_args = array(
-                'headers' => array(
-                    'Accept' => 'application/json',
-                    'Authorization' => sprintf('Bearer %s',$token),
-                ),
-            );
-
-
-            $url = sprintf('https://data.tuneefy.com/v2/aggregate/%s',$type);
-            $url = add_query_arg($url_args,$url);
-
-
-            wpsstm()->debug_log( json_encode(array('url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
-
-            $response = wp_remote_get($url,$request_args);
-            $body = wp_remote_retrieve_body($response);
-
-            if ( is_wp_error($body) ){
-                $error = $body;
-            }else{
-
-                $api_response = json_decode( $body, true );
-
-                if( !empty($api_response['errors']) ){
-                    $errors = $api_response['errors'];
-                    $error = new WP_Error( 'wpsstm_tuneefy_aggregate', sprintf( __('Unable to aggregate using Tuneefy : %s','wpsstm'),json_encode($errors) ) );
-                }
-            }
-        }
-
-        if($error){
-            wpsstm()->debug_log( json_encode(array('error'=>$error->get_error_message(),'url'=>$url,'request_args'=>$request_args)), "WPSSTM_Core_Sources::tuneefy_api_aggregate"); 
-            return $error;
-        }
-
-        return $api_response;
-    }
-
-    
     static function can_autosource(){
-        
-        //tuneefy
-        $can_tuneefy = self::can_tuneefy();
-        if ( is_wp_error($can_tuneefy) ) return $can_tuneefy;
-        
+
         //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
         if (!$community_user_id){
@@ -600,9 +467,10 @@ class WPSSTM_Core_Sources{
                 return new WP_Error( 'wpsstm_autosource',$error );
             }
         }
+        
+        //TOFIXKKK TO CHECK has sources providers ?
 
         return true;
         
     }
-
 }

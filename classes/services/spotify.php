@@ -1,6 +1,79 @@
 <?php
 
-class WPSSTM_Spotify_URL_Playlists_Api{
+class WPSSTM_Spotify{
+    function __construct(){
+        if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
+            add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
+            add_action('wpsstm_live_tracklist_populated',array($this,'register_spotify_presets'));
+        }
+    }
+    //register presets
+    function register_spotify_presets($tracklist){
+        new WPSSTM_Spotify_URL_Api_Preset($tracklist);
+        new WPSSTM_Spotify_URI_Api_Preset($tracklist);
+    }
+    function register_spotify_service_links($links){
+        $links[] = array(
+            'slug'      => 'spotify',
+            'name'      => 'Spotify',
+            'url'       => 'https://www.spotify.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'playlists',
+                    'name'      => __('playlists','wpsstm'),
+                    'example'   => 'https://open.spotify.com/user/USER_SLUG/playlist/PLAYLIST_ID',
+                ),
+            )
+        );
+        return $links;
+    }
+    /*
+    Use SongWhip.com to get Spotify track ID
+    */
+    static function get_spotify_track_id(WPSSTM_Track $track){
+        
+        $valid = $track->validate_track();
+        if ( is_wp_error( $valid ) ) return $valid;
+
+        $spotify_id = null;
+        
+        $url_args = array(
+            'q'=>urlencode($track->artist . ' ' . $track->title)
+        );
+        
+        //$url = 'https://api.songwhip.com/?country=BE&q=test';
+        $url = add_query_arg($url_args,'https://songwhip.com/search');
+
+        $response = wp_remote_get($url);
+        $body = wp_remote_retrieve_body($response);
+
+        if ( is_wp_error($body) ) return $body;
+        
+        $json = json_decode($body,true);
+        
+        if ($json['status'] != 'success'){
+            return new WP_Error( 'wpsstm_songwhip_search', __('Error while searching on SongWhip.','wpsstm') );
+        }
+        
+        $tracks = wpsstm_get_array_value(array('data','tracks'),$json);
+        $first_track = reset($tracks);
+        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$first_track);
+        $spotify_title = wpsstm_get_array_value(array('name'),$first_track);
+        $spotify_artist = wpsstm_get_array_value(array('artists',0,'name'),$first_track);
+
+        $pattern = '~https?://open.spotify.com/track/([^/]+)~';
+        preg_match($pattern, $spotify_url, $url_matches);
+
+        if ( !isset($url_matches[1]) ) return;
+        
+            $spotify_id = $url_matches[1];
+            $track->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$track->artist,$track->title,$track->album),'spotify_id'=>$spotify_id,'spotify_artist'=>$spotify_artist,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
+
+        return $spotify_id;
+    }
+}
+
+class WPSSTM_Spotify_URL_Api_Preset{
     var $tracklist;
 
     private $token = null;
@@ -182,7 +255,7 @@ class WPSSTM_Spotify_URL_Playlists_Api{
 }
 
 //Spotify Playlists URIs
-class WPSSTM_Spotify_URI_Playlists_Api extends WPSSTM_Spotify_URL_Playlists_Api{
+class WPSSTM_Spotify_URI_Api_Preset extends WPSSTM_Spotify_URL_Api_Preset{
 
     function get_user_slug(){
         $pattern = '~^spotify:user:([^:]+)~i';
@@ -198,27 +271,8 @@ class WPSSTM_Spotify_URI_Playlists_Api extends WPSSTM_Spotify_URL_Playlists_Api{
     
 }
 
-//register presets
-function register_spotify_presets($tracklist){
-    new WPSSTM_Spotify_URL_Playlists_Api($tracklist);
-    new WPSSTM_Spotify_URI_Playlists_Api($tracklist);
+function wpsstm_spotify_init(){
+    new WPSSTM_Spotify();
 }
-function register_spotify_service_links($links){
-    $links[] = array(
-        'slug'      => 'spotify',
-        'name'      => 'Spotify',
-        'url'       => 'https://www.spotify.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'playlists',
-                'name'      => __('playlists','wpsstm'),
-                'example'   => 'https://open.spotify.com/user/USER_SLUG/playlist/PLAYLIST_ID',
-            ),
-        )
-    );
-    return $links;
-}
-if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
-    add_filter('wpsstm_wizard_services_links','register_spotify_service_links');
-    add_action('wpsstm_get_remote_tracks','register_spotify_presets');
-}
+
+add_action('wpsstm_init','wpsstm_spotify_init');

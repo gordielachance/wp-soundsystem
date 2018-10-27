@@ -95,9 +95,6 @@ class WPSSTM_Settings {
                 $new_input['autosource_filter_ban_words'] = $ban_words;
             }
 
-            
-            $new_input['autosource_filter_requires_artist'] = ( isset($input['autosource_filter_requires_artist']) ) ? 'on' : 'off';
-
             /*
             Live playlists
             */
@@ -138,7 +135,7 @@ class WPSSTM_Settings {
             //tuneefy
             $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
             $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
-            
+
             //spotify
             $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
             $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
@@ -247,14 +244,6 @@ class WPSSTM_Settings {
             'autosource_filter_ban_words', 
             __('Ban words filter','wpsstm'), 
             array( $this, 'autosource_filter_ban_words_callback' ), 
-            'wpsstm-settings-page', 
-            'sources'
-        );
-        
-        add_settings_field(
-            'autosource_filter_requires_artist', 
-            __('Artist filter','wpsstm'),
-            array( $this, 'autosource_filter_requires_artist_callback' ), 
             'wpsstm-settings-page', 
             'sources'
         );
@@ -375,7 +364,7 @@ class WPSSTM_Settings {
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
+
         add_settings_field(
             'tuneefy_client', 
             __('Tuneefy'), 
@@ -383,7 +372,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'settings_apis'
         );
-        
+
         add_settings_field(
             'spotify_client', 
             __('Spotify'), 
@@ -555,7 +544,7 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
             __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
-            __("This requires a Tuneefy client ID & secret (see below); and the community user ID to be set.","wpsstm")
+            __("This requires a community user ID to be set.","wpsstm")
         );
         
         /*
@@ -593,18 +582,7 @@ class WPSSTM_Settings {
             $help
         );
     }
-    
-    function autosource_filter_requires_artist_callback(){
-        $option = wpsstm()->get_options('autosource_filter_requires_artist');
 
-        printf(
-            '<input type="checkbox" name="%s[autosource_filter_requires_artist]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an autosource when the track artist is not contained in its title and isn't in the track title.","wpsstm")
-        );
-    }
-    
     function section_lastfm_desc(){
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
         printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );            
@@ -665,7 +643,7 @@ class WPSSTM_Settings {
             }else{
 
                 //cap missing
-                if ( !$can_community_scrobble = WPSSTM_Core_LastFM::can_community_scrobble() ){
+                if ( !$can_community_scrobble = WPSSTM_LastFM::can_community_scrobble() ){
 
                     add_settings_error( 'lastfm_community_scrobble', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm'), 'inline' );
                 }
@@ -809,7 +787,7 @@ class WPSSTM_Settings {
             $client_secret
         );
     }
-    
+
     function spotify_client_callback(){
         $client_id = wpsstm()->get_options('spotify_client_id');
         $client_secret = wpsstm()->get_options('spotify_client_secret');

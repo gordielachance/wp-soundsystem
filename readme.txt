@@ -33,7 +33,6 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 = Track Sources =
 
 If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
-This requires a [Tuneefy account](https://data.tuneefy.com).
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
@@ -91,7 +90,6 @@ This would be very appreciated — Thanks !
 
 = Dependencies =
 
-* [Tuneefy](https://data.tuneefy.com/) - API used to autosource
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
@@ -125,7 +123,7 @@ Here's [how to fix it](https://github.com/gordielachance/wp-soundsystem/issues/1
 Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
 
 `<?php
-$tracklist = wpsstm_get_post_tracklist(); //optionally accepts a post_id as argument
+$tracklist = wpsstm_get_tracklist(); //optionally accepts a post_id as argument
 echo $tracklist->get_tracklist_html();
 ?>`
 
@@ -150,6 +148,13 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
+= 1.9.5 =
+* Tracklist log
+* Cache remote HTML file
+* Improved wizard
+* Better autosource
+* Tracks : new function populate_spotify_track_id()
+
 = 1.9.4 =
 * Better settings page errors
 * Improved metaboxes for artist/track/album/MusicBrainz
@@ -163,7 +168,6 @@ There is an option in the plugin settings to flush those community tracks : they
 
 = 1.9.2 =
 * Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
-* Autosource : use Tuneefy API (https://data.tuneefy.com/).
 
 = 1.9.1 =
 * Improve popup template
@@ -304,7 +308,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Improved wizard backend & frontend
 * Removed class 'WPSSTM_Subtrack': cleaner to handle everything with WPSSTM_Track
 * removed WPSSTM_TracksList_Admin_Table, now everything is handled by WPSSTM_Tracklist_Table
-* Abord auto_guess_mbid() for tracks when saving subtracks (too slow); or if post is trashed
+* Abord auto_auto_mbid() for tracks when saving subtracks (too slow); or if post is trashed
 * improved actions for tracks & tracklists; according to the logged user capabilities, and with popups.
 * new option autosource_filter_ban_words (experimental)
 * new option autosource_filter_requires_artist (experimental)

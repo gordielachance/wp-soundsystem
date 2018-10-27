@@ -1,12 +1,44 @@
 <?php
-class WPSSTM_Soundsgood_Playlists_Api{
+
+class WPSSTM_SoundsGood{
+    function __construct(){
+        if ( self::get_client_id() ){
+            add_action('wpsstm_live_tracklist_populated',array($this,'register_soundsgood_preset'));
+            add_filter('wpsstm_wizard_services_links',array($this,'register_soundsgood_service_links'));
+        }
+    }
+    //register preset
+    function register_soundsgood_preset($tracklist){
+        new WPSSTM_Soundsgood_Api_Preset($tracklist);
+    }
+    function register_soundsgood_service_links($links){
+        $links[] = array(
+            'slug'      => 'soundsgood',
+            'name'      => 'Soundsgood',
+            'url'       => 'https://soundsgood.co/',
+            'pages'     => array(
+                array(
+                    'slug'      => 'playlists',
+                    'name'      => __('playlists','wpsstm'),
+                    'example'   => 'https://play.soundsgood.co/playlist/TRACKLIST_SLUG',
+                ),
+            )
+        );
+        return $links;
+    }
+    static function get_client_id(){
+        return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
+    }
+}
+
+class WPSSTM_Soundsgood_Api_Preset{
 
     private $client_id;
     private $station_slug;
     
     function __construct($tracklist){
         $this->tracklist = $tracklist;
-        $this->client_id = $this->get_client_id();
+        $this->client_id = WPSSTM_SoundsGood::get_client_id();
         $this->station_slug = $this->get_station_slug();
 
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
@@ -56,10 +88,6 @@ class WPSSTM_Soundsgood_Playlists_Api{
         }
         return $args;
     }
-
-    static function get_client_id(){
-        return '529b7cb3350c687d99000027:dW6PMNeDIJlgqy09T4GIMypQsZ4cN3IoCVXIyPzJYVrzkag5';
-    }
     
     function get_remote_title($title){
         if ( $this->can_handle_url() ){
@@ -70,28 +98,8 @@ class WPSSTM_Soundsgood_Playlists_Api{
     
 }
 
-//register preset
-function register_soundsgood_preset($tracklist){
-    new WPSSTM_Soundsgood_Playlists_Api($tracklist);
-}
-function register_soundsgood_service_links($links){
-    $links[] = array(
-        'slug'      => 'soundsgood',
-        'name'      => 'Soundsgood',
-        'url'       => 'https://soundsgood.co/',
-        'pages'     => array(
-            array(
-                'slug'      => 'playlists',
-                'name'      => __('playlists','wpsstm'),
-                'example'   => 'https://play.soundsgood.co/playlist/TRACKLIST_SLUG',
-            ),
-        )
-    );
-    return $links;
+function wpsstm_soundsgood_init(){
+    new WPSSTM_SoundsGood();
 }
 
-if ( WPSSTM_Soundsgood_Playlists_Api::get_client_id() ){
-    add_action('wpsstm_get_remote_tracks','register_soundsgood_preset');
-    add_filter('wpsstm_wizard_services_links','register_soundsgood_service_links');
-}
-
+add_action('wpsstm_init','wpsstm_soundsgood_init');

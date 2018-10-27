@@ -76,16 +76,17 @@ body.wpsstm-default,body.wp-admin{
                 font-weight: bold;
             }
             
-            &[data-wpsstm-source-provider="soundcloud"] #wpsstm-source-action-provider a:before{
-                content:"\f1be";//fa-soundcloud
-            }
-            &[data-wpsstm-source-provider="youtube"] #wpsstm-source-action-provider a:before{
-                content:"\f167";//fa-youtube
-            }
-            &[data-wpsstm-source-provider="mixcloud"] #wpsstm-source-action-provider a:before{
-                content:"\f289";//fa-mixcloud
+            .wpsstm-source-title:before{
+                @extend .wpsstm-icon;
             }
             
+            &[data-wpsstm-source-domain="soundcloud.com"] .wpsstm-source-title:before{
+                content:"\f1be";//fa-soundcloud
+            }
+            &[data-wpsstm-source-domain="youtube.com"] .wpsstm-source-title:before{
+                content:"\f167";//fa-youtube
+            }
+
             &.provider-loading{
                 #wpsstm-source-action-provider a{
                      @extend .wpsstm-loading-icon;

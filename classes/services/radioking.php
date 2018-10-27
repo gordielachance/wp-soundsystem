@@ -1,5 +1,32 @@
 <?php
-class WPSSTM_RadioKing_Api{
+
+class WPSSTM_RadioKing{
+    function __construct(){
+        add_filter('wpsstm_wizard_services_links',array($this,'register_radioking_service_link'));
+        add_action('wpsstm_live_tracklist_populated',array($this,'register_radioking_preset'));
+    }
+    //register preset
+    function register_radioking_preset($tracklist){
+        new WPSSTM_RadioKing_Api_Preset($tracklist);
+    }
+    function register_radioking_service_link($links){
+        $links[] = array(
+            'slug'      => 'radioking',
+            'name'      => 'RadioKing',
+            'url'       => 'https://www.radioking.com',
+            'pages'     => array(
+                array(
+                    'slug'      => 'playlists',
+                    'name'      => __('playlists','wpsstm'),
+                    'example'   => 'https://www.radioking.com/radio/RADIO_SLUG',
+                ),
+            )
+        );
+        return $links;
+    }
+}
+
+class WPSSTM_RadioKing_Api_Preset{
     
     private $station_slug;
     private $station_data =     null;
@@ -103,24 +130,9 @@ class WPSSTM_RadioKing_Api{
 
 }
 
-//register preset
-function register_radioking_preset($tracklist){
-    new WPSSTM_RadioKing_Api($tracklist);
+
+function wpsstm_radioking_init(){
+    new WPSSTM_RadioKing();
 }
-function register_radioking_service_link($links){
-    $links[] = array(
-        'slug'      => 'radioking',
-        'name'      => 'RadioKing',
-        'url'       => 'https://www.radioking.com',
-        'pages'     => array(
-            array(
-                'slug'      => 'playlists',
-                'name'      => __('playlists','wpsstm'),
-                'example'   => 'https://www.radioking.com/radio/RADIO_SLUG',
-            ),
-        )
-    );
-    return $links;
-}
-add_filter('wpsstm_wizard_services_links','register_radioking_service_link');
-add_action('wpsstm_get_remote_tracks','register_radioking_preset');
+
+add_action('wpsstm_init','wpsstm_onlineradiobox_init');
