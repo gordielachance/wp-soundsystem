@@ -297,7 +297,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
-        
         $this->tracklist_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
 
         return $tracks;
@@ -652,6 +651,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     }
 
     protected function parse_track_nodes($track_nodes){
+        
+        if (!$track_nodes) return new WP_Error( 'no_track_nodes', __('No track nodes found.','wpsstm') );
 
         $selector_artist = $this->get_selectors( array('track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing.','wpsstm') );
@@ -667,13 +668,23 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             $artist =   $this->get_track_artist($single_track_node);
             $title =    $this->get_track_title($single_track_node);
             $album =    $this->get_track_album($single_track_node);
+            
+            $sources = array();
+            if ( $sources_urls = $this->get_track_source_urls($single_track_node) ){
+                foreach((array)$sources_urls as $source_url){
+                    $source = array(
+                        'permalink_url' => $source_url,
+                    );
+                    $sources[] = $source;
+                }
+            }
 
             $args = array(
                 'artist'        => $artist,
                 'title'         => $title,
                 'album'         => $album,
                 'image_url'     => $this->get_track_image($single_track_node),
-                'source_urls'   => $this->get_track_sources($single_track_node),
+                'sources'       => $sources,
             );
 
             $tracks_arr[] = array_filter($args);
@@ -726,25 +737,15 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         return $source_urls;
         
     }
-    
-    protected function get_track_sources($track_node){
-        $sources = array();
-        $source_urls = $this->get_track_source_urls($track_node);
-        
-        foreach((array)$source_urls as $source_url){
-            $source = new WPSSTM_Source();
-            $source_args = array('url'=>$source_url);
-            $source->from_array($source_args);
-            $sources[] = $source;
-        }
-        
-        return $sources;
-    }
 
     public function parse_node($track_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
+        
+        if (!$track_node){
+            return new WP_Error( 'wpsstm_empty_node', 'Unable to parse empty node' );
+        }
 
         $selector_css   = wpsstm_get_array_value('path',$selectors);
         $selector_regex = wpsstm_get_array_value('regex',$selectors);

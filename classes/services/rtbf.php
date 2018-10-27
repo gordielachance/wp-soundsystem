@@ -1,7 +1,7 @@
 <?php
 class WPSSTM_RTBF{
     function __construct(){
-        add_action('wpsstm_tracklist_populated',array($this,'register_rtbf_preset'));
+        add_action('wpsstm_live_tracklist_populated',array($this,'register_rtbf_preset'));
     }
     //register preset
     function register_rtbf_preset($tracklist){

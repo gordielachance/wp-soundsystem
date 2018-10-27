@@ -2,7 +2,7 @@
 
 class WPSSTM_IndieShuffle{
     function __construct(){
-        add_action('wpsstm_tracklist_populated',array(__class__,'register_indieshuffle_preset'));
+        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_indieshuffle_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_indieshuffle_service_links'));
     }
     //register preset

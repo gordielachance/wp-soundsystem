@@ -2,7 +2,7 @@
 
 class WPSSTM_BBC{
     function __construct(){
-        add_action('wpsstm_tracklist_populated',array(__class__,'register_bbc_presets'));
+        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_bbc_presets'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_bbc_service_links'));
     }
     static function register_bbc_presets($tracklist){

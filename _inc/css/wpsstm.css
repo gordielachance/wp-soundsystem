@@ -546,20 +546,20 @@ body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-e
 body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].source-playing, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx].source-playing, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading {
   font-weight: bold;
 }
-/* line 79, ../scss/_wpsstm-sources.scss */
-body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before {
+/* line 83, ../scss/_wpsstm-sources.scss */
+body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-domain="soundcloud.com"] .wpsstm-source-title:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-domain="soundcloud.com"] .wpsstm-source-title:before {
   content: "\f1be";
 }
-/* line 82, ../scss/_wpsstm-sources.scss */
-body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before {
+/* line 86, ../scss/_wpsstm-sources.scss */
+body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-domain="youtube.com"] .wpsstm-source-title:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx][data-wpsstm-source-domain="youtube.com"] .wpsstm-source-title:before {
   content: "\f167";
 }
-/* line 97, ../scss/_wpsstm-sources.scss */
+/* line 101, ../scss/_wpsstm-sources.scss */
 body.wpsstm-default [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading), body.wp-admin [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
-/* line 99, ../scss/_wpsstm-sources.scss */
+/* line 103, ../scss/_wpsstm-sources.scss */
 body.wpsstm-default [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading):hover, body.wp-admin [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]:not(.source-playing):not(.provider-loading):hover {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
@@ -1365,7 +1365,7 @@ body.wpsstm-default .wpsstm-post-admin > ul.wpsstm-actions-list, body.wp-admin .
 }
 
 /* line 58, ../scss/wpsstm.scss */
-.wpsstm-icon:before, body.wpsstm-default .wpsstm-tracklist.wpsstm-live-tracklist .wpsstm-tracklist-title:before, body.wp-admin .wpsstm-tracklist.wpsstm-live-tracklist .wpsstm-tracklist-title:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, body.wpsstm-default .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, body.wp-admin .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, .wpsstm-loading-icon:before, body.wpsstm-default .wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, body.wp-admin .wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].track-loading .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"].track-loading .wpsstm-track-icon:before, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading #wpsstm-source-action-provider a:before, body.wpsstm-default #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-player-actions .wpsstm-player-action#wpsstm-player-action-scrobbler.lastfm-loading a:before, body.wp-admin #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-player-actions .wpsstm-player-action#wpsstm-player-action-scrobbler.lastfm-loading a:before, body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, body.wpsstm-default .wpsstm-action a.action-loading:before, body.wp-admin .wpsstm-action a.action-loading:before, body.wpsstm-default .wpsstm-action a:before, body.wp-admin .wpsstm-action a:before {
+.wpsstm-icon:before, body.wpsstm-default .wpsstm-tracklist.wpsstm-live-tracklist .wpsstm-tracklist-title:before, body.wp-admin .wpsstm-tracklist.wpsstm-live-tracklist .wpsstm-tracklist-title:before, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx] .wpsstm-source-title:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, body.wpsstm-default .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, body.wp-admin .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, .wpsstm-loading-icon:before, body.wpsstm-default .wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, body.wp-admin .wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, body.wpsstm-default .wpsstm-tracks-list [itemprop="track"].track-loading .wpsstm-track-icon:before, body.wp-admin .wpsstm-tracks-list [itemprop="track"].track-loading .wpsstm-track-icon:before, body.wpsstm-default .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading #wpsstm-source-action-provider a:before, body.wp-admin .wpsstm-track-sources-list [data-wpsstm-source-idx].provider-loading #wpsstm-source-action-provider a:before, body.wpsstm-default #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-player-actions .wpsstm-player-action#wpsstm-player-action-scrobbler.lastfm-loading a:before, body.wp-admin #wpsstm-bottom-wrapper #wpsstm-bottom #wpsstm-bottom-track-wrapper > *#wpsstm-player-actions .wpsstm-player-action#wpsstm-player-action-scrobbler.lastfm-loading a:before, body.wpsstm-default .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, body.wp-admin .wpsstm-tracklist-notices #wpsstm-notice-ajax-refresh:before, body.wpsstm-default .wpsstm-action a.action-loading:before, body.wp-admin .wpsstm-action a.action-loading:before, body.wpsstm-default .wpsstm-action a:before, body.wp-admin .wpsstm-action a:before {
   font-weight: normal;
   font-style: normal;
   font-family: 'FontAwesome';

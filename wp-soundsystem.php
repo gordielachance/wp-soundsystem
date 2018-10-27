@@ -135,7 +135,6 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
         require $this->plugin_dir . 'wpsstm-core-sources.php';
-        require $this->plugin_dir . 'wpsstm-core-autosource.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';

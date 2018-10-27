@@ -99,38 +99,6 @@ class WPSSTM_Core_Tracks{
         */
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
         add_action( 'delete_post', array($this,'delete_subtracks_track_entry') );
-        
-        add_action( 'wp', array($this,'debug_autosource'));//TOUFIX
-
-    }
-    
-    /*
-    ?debug_autosource=XXX
-    //TOUFIX TOREMOVE
-    */
-    function debug_autosource(){
-        if ( is_admin() ) return;
-        
-        
-        $test_track_id = isset($_GET['debug_autosource']) ? $_GET['debug_autosource'] : null;
-        if (get_post_type($test_track_id) != wpsstm()->post_type_track ) return;
-        if (!$test_track_id) return;
-        $track = new WPSSTM_Track($test_track_id);
-        
-        print_r(json_encode($track));
-        echo"<br/>";
-        
-        $auto_sources = $track->autosource();
-        $new_ids = $track->save_new_sources();
-        
-        
-        printf("auto found sources: %s",count($auto_sources));
-        echo"<br/>";
-        printf("auto sources saved: %s",count($new_ids));
-        
-        die();
-        
-        
     }
 
     //add custom admin submenu under WPSSTM
@@ -891,8 +859,7 @@ class WPSSTM_Core_Tracks{
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
             $track = new WPSSTM_Track($post_id);
-            $track->autosource();
-            $new_ids = $track->save_new_sources();
+            $success = $track->autosource();
         }
     }
     

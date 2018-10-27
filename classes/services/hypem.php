@@ -1,7 +1,7 @@
 <?php
 class WPSSTM_Hypem{
     function __construct(){
-        add_action('wpsstm_tracklist_populated',array($this,'register_hypem_preset'));
+        add_action('wpsstm_live_tracklist_populated',array($this,'register_hypem_preset'));
         add_filter('wpsstm_wizard_services_links',array($this,'register_hypem_service_links'));
     }
     //register preset

@@ -55,8 +55,9 @@ class WPSSTM_Track{
         foreach ($args as $key=>$value){
             
             switch($key){
-                case 'source_urls':
-                    $this->add_sources($value); //TO FIX we should not need this line, but it does not work without - this should be done in populate_sources()
+                case 'sources':
+                    print_r($value);
+                    $this->add_sources($value);
                 break;
                 default:
                     if ( !array_key_exists($key,$args_default) ) continue;
@@ -113,7 +114,6 @@ class WPSSTM_Track{
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->__construct( $duplicates[0] );
             $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
-            
         }
 
         $this->did_post_id_lookup = true;
@@ -263,10 +263,7 @@ class WPSSTM_Track{
     function save_track($args = null){
         
         $valid = $this->validate_track();
-        
-        if ( is_wp_error( $valid ) ){
-            return new WP_Error( 'wpsstm_cannot_validate_track', sprintf(__("Error while validating the track: %s",'wpsstm'),$valid->get_error_message() ) );
-        }
+        if ( is_wp_error( $valid ) ) return $valid;
         
         $post_id = null;
 
@@ -291,7 +288,7 @@ class WPSSTM_Track{
             WPSSTM_Core_Artists::$artist_metakey    => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Albums::$album_metakey      => $this->album,
-            WPSSTM_MusicBrainz::$mbid_metakey  => $this->mbid,
+            WPSSTM_MusicBrainz::$mbid_metakey       => $this->mbid,
             WPSSTM_Core_Tracks::$image_url_metakey  => $this->image_url,
         );
         
@@ -523,6 +520,8 @@ class WPSSTM_Track{
     */
     
     function autosource(){
+        
+        $autosources = array();
 
         if ( wpsstm()->get_options('autosource') != 'on' ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
@@ -538,45 +537,78 @@ class WPSSTM_Track{
         if ( !$this->title ){
             return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
         }
-
-        //$source_engine = new WPSSTM_Tuneefy_Source_Digger($this);
-        $source_engine = new WPSSTM_SongLink_Source_Digger($this);
-        $autosources = $source_engine->sources;
-        if ( is_wp_error($autosources) ) return $autosources;
-
-        //sanitize sources
-        foreach((array)$autosources as $key=>$source){
-
-            //cannot play this source, skip it.
-            if ( !$source->get_source_mimetype() ){
-
-                $source->source_log(json_encode(
-                    array(
-                        'track'=>sprintf('%s - %s',$this->artist,$this->title),
-                        'source'=>array('title'=>$source->title,'url'=>$source->permalink_url),
-                        'error'=>__('Source excluded because it has no mime type','wpsstm'))
-                    )
-                );
-                unset($autosources[$key]);
-                continue;
+        
+        /*
+        Create community post :
+        if track does not exists yet, create it as a community track - we need a post ID to store various metadatas
+        */
+        
+        if ( !$this->post_id ){
+             $tracks_args = array( //as community tracks	
+                'post_author'   => wpsstm()->get_options('community_user_id'),	
+            );	
+            	
+            $success = $this->save_track($tracks_args);	
+            if ( is_wp_error($success) ){
+                $error_msg = $success->get_error_message();
+                $this->track_log($error_msg,'Error while creating track');
+                return $success;
+            }else{
+                $this->track_log($success,'Track created');
             }
+            	
+        }
+
+        //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);
+        $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
+        if ( is_wp_error($autosources_arr) ) return $autosources_arr;
+
+        foreach((array)$autosources_arr as $key=>$source_arr){
             
+            $source = new WPSSTM_Source();
+            $source->from_array($source_arr);
             $source->track_id = $this->post_id;
             $source->is_community = true;
+            
+            //validate
+            $valid_source = $source->validate_source();
+            if ( is_wp_error($valid_source) ){
+                    $code = $valid_source->get_error_code();
+                    $error_msg = $valid_source->get_error_message($code);
+                    $source->source_log($error_msg,__('Autosource rejected','wpsstm'));
+                    continue;
+            }
+
+            //cannot play this source, skip it. 
+            //TOUFIX should be elsewhere or done differently
+            if ( !$source->get_source_mimetype() ){
+
+                $source->source_log(
+                    json_encode(array('track'=>sprintf('%s - %s',$this->artist,$this->title),'source'=>array('title'=>$source->title,'url'=>$source->permalink_url))),
+                    __('Source excluded because it has no mime type','wpsstm')
+                );
+                continue;
+            }
+            $autosources[] = $source;
 
         }
-        
+
         //limit autosource results
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
         $autosources = array_slice($autosources, 0, $limit_autosources);
         $autosources = apply_filters('wpsstm_track_autosources',$autosources);
 
         $this->add_sources($autosources);
-        return $autosources;
+        
+        //save new sources
+        $new_ids = $this->save_new_sources();
+        $this->track_log(json_encode(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids))),'autosource results');
+
+        return $new_ids;
 
     }
     
-    function save_new_sources(){
+    private function save_new_sources(){
         
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );
@@ -729,7 +761,7 @@ class WPSSTM_Track{
         }
 
         //unlink track
-        if ($can_edit_tracklist){
+        if ($can_remove_track){
             $actions['unlink'] = array(
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
@@ -800,11 +832,9 @@ class WPSSTM_Track{
     function add_sources($input_sources){
         
         $add_sources = array();
+        if(!$input_sources) return;
 
-        //force array
-        if ( !is_array($input_sources) ) $input_sources = array($input_sources);
-
-        foreach ($input_sources as $source){
+        foreach ((array)$input_sources as $source){
 
             if ( !is_a($source, 'WPSSTM_Source') ){
                 
@@ -818,9 +848,19 @@ class WPSSTM_Track{
                     $source = new WPSSTM_Source($source_id);
                 }
             }
-            
+
             $source->track_id = $this->post_id;
-            $add_sources[] = $source;
+            $valid = $source->validate_source();
+            
+            if ( is_wp_error($valid) ){
+                $code = $valid->get_error_code();
+                $error_msg = $valid->get_error_message($code);
+                $source->source_log(json_encode(array('error'=>$error_msg,'source'=>$source)),"Unable to add source");
+                continue;
+            }else{
+                $add_sources[] = $source;
+            }
+            
         }
 
         //allow users to alter the input sources.
@@ -829,7 +869,7 @@ class WPSSTM_Track{
         
         $this->sources = array_merge((array)$this->sources,$add_sources);
         $this->source_count = count($this->sources);
-        
+
         return $add_sources;
     }
     

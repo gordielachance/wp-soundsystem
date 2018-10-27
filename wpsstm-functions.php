@@ -214,9 +214,11 @@ function wpsstm_get_tracklist($post_id=null){
         case wpsstm()->post_type_playlist:
         case wpsstm()->post_type_album:
             $tracklist = new WPSSTM_Static_Tracklist($post_id);
-            break;
+             do_action('wpsstm_static_tracklist_populated',$tracklist);
+        break;
         default:
             $tracklist = new WPSSTM_Remote_Tracklist($post_id);
+             do_action('wpsstm_live_tracklist_populated',$tracklist);
         break;
     }
 

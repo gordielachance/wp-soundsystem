@@ -3,7 +3,7 @@
 class WPSSTM_Radionomy{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_radionomy_service_links'));
-        add_action('wpsstm_tracklist_populated',array($this,'register_radionomy_preset'));
+        add_action('wpsstm_live_tracklist_populated',array($this,'register_radionomy_preset'));
     }
     
     //register preset

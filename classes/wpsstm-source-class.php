@@ -43,7 +43,7 @@ class WPSSTM_Source{
             'post_id'       => null,
             'index'         => -1,
             'track_id'      => null,
-            'url'           => null,
+            'permalink_url' => null,
             'title'         => null,
             'is_community'  => null,
             'match'         => null,
@@ -117,28 +117,28 @@ class WPSSTM_Source{
         return $query->posts;
     }
     
-    function sanitize_source(){
-        
-        if (!$this->track_id){
-            return new WP_Error( 'no_post_id', __('Unable to save source : missing track ID','wpsstm') );
-        }
+    function validate_source(){
         
         $this->permalink_url = trim($this->permalink_url);
         
         if (!$this->permalink_url){
-            return new WP_Error( 'no_url', __('Unable to save source : missing URL','wpsstm') );
+            return new WP_Error( 'wpsstm_souce_missing_url', __('Unable to validate source: missing URL','wpsstm') );
         }
         
         if ( !filter_var($this->permalink_url, FILTER_VALIDATE_URL) ){
-            return new WP_Error( 'no_valid_url', __('Unable to save source : bad URL','wpsstm') );
+            return new WP_Error( 'wpsstm_souce_missing_valid_url', __('Unable to validate source: bad URL','wpsstm') );
         }
 
         $this->title = trim($this->title);
     }
 
     function save_source(){
-        $sanitized = $this->sanitize_source();
-        if ( is_wp_error($sanitized) ) return $sanitized;
+        $validated = $this->validate_source();
+        if ( is_wp_error($validated) ) return $validated;
+        
+        if (!$this->track_id){
+            return new WP_Error( 'wpsstm_souce_missing_post_id', __('Unable to validate source: missing track ID','wpsstm') );
+        }
         
         //check for duplicates
         $duplicates = $this->get_source_duplicates_ids();
@@ -183,7 +183,10 @@ class WPSSTM_Source{
         if ( is_wp_error($success) ) return $success;
         $this->post_id = $success;
 
-        $this->source_log( json_encode(array('args'=>$args,'post_id'=>$this->post_id)),"WPSSTM_Source::save_source()");
+        $this->source_log(
+            json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
+            "WPSSTM_Source::save_source()
+        ");
         
         return $this->post_id;
     }
@@ -316,7 +319,27 @@ class WPSSTM_Source{
     }
     
     function source_log($message,$title = null){
-        return wpsstm()->debug_log($message,$title,null);
+        
+        if (is_array($message) || is_object($message)) {
+            $message = implode("\n", $message);
+        }
+        
+        //tracklist log
+        /*
+        if ( $log_file = $this->get_tracklist_log_path() ){
+            $blogtime = current_time( 'mysql' );
+            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
+
+            error_log($output.PHP_EOL,3,$log_file);
+        }
+        */
+        
+        //global log
+        if ($this->post_id){
+            $title = sprintf('[source:%s] ',$this->post_id) . $title;
+        }
+        wpsstm()->debug_log($message,$title,null);
+
     }
 
 }

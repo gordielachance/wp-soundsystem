@@ -3,7 +3,7 @@
 class WPSSTM_OnlineRadioBox{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_onlineradiobox_service_link'));
-        add_action('wpsstm_tracklist_populated',array(__class__,'register_onlineradiobox_preset'));
+        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_onlineradiobox_preset'));
     }
     //register preset
     static function register_onlineradiobox_preset($tracklist){

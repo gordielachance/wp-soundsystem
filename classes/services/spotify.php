@@ -4,7 +4,7 @@ class WPSSTM_Spotify{
     function __construct(){
         if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
             add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
-            add_action('wpsstm_tracklist_populated',array($this,'register_spotify_presets'));
+            add_action('wpsstm_live_tracklist_populated',array($this,'register_spotify_presets'));
         }
     }
     //register presets
@@ -31,6 +31,9 @@ class WPSSTM_Spotify{
     Use SongWhip.com to get Spotify track ID
     */
     static function get_spotify_track_id(WPSSTM_Track $track){
+        
+        $valid = $track->validate_track();
+        if ( is_wp_error( $valid ) ) return $valid;
 
         $spotify_id = null;
         

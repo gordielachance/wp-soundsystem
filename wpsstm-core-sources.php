@@ -402,37 +402,15 @@ class WPSSTM_Core_Sources{
 
         //set global $wpsstm_track
         $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
+        $wpsstm_track->from_array($ajax_data['track']);        
         
-        //if track does not exists yet, create it
-        //TOUFIX we should not create tracks here.
-        
-        if ( !$wpsstm_track->post_id ){	
-             $tracks_args = array( //as community tracks	
-                'post_author'   => wpsstm()->get_options('community_user_id'),	
-            );	
-            	
-            $success = $wpsstm_track->save_track($tracks_args);	
-            if ( is_wp_error($success) ){
-                $error_msg = $success->get_error_message();
-                $this->track_log($ajax_data,sprintf("ajax track autosource - error while creating track: %s",$error_msg)); 
-            }else{
-                $this->track_log($ajax_data,sprintf("ajax track autosource - track #%s created",$success)); 
-            }
-            	
-        }
-        
-        
-        //autosource & save
-        $wpsstm_track->autosource();
-        $new_ids = $wpsstm_track->save_new_sources();
-        
+        //autosource
+        $success = $wpsstm_track->autosource();
         $result['track'] = $wpsstm_track;
 
-        if ( is_wp_error($new_ids) ){
-            $result['message'] = $new_ids->get_error_message();
-        }elseif( $new_ids ){
-
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }elseif( $success ){
             ob_start();
             wpsstm_locate_template( 'track-sources.php', true, false );
             $sources_list = ob_get_clean();

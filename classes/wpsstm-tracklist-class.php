@@ -162,7 +162,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
 
-        $subtrack_ids = (array)$this->get_static_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = (array)$this->get_static_subtracks();
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Static_Tracklist::append_subtrack_ids()");
         
@@ -183,7 +183,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
         
-        $subtrack_ids = (array)$this->get_static_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = (array)$this->get_static_subtracks();
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Static_Tracklist::remove_subtrack_ids()");
 
@@ -603,7 +603,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         //get live IDs
         //TOUFIX TO CHECK whole fn
         $this->tracklist_type = 'live';
-        $live_ids = $this->get_static_subtracks(array('fields' =>'ids'));
+        $live_ids = $this->get_static_subtracks();
 
         //switch to static
         $this->tracklist_type = 'static';
@@ -718,7 +718,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
-        $subtrack_ids = $this->get_static_subtracks(array('fields' =>'ids'));
+        $subtrack_ids = $this->get_static_subtracks();
         
         //delete current
         if(($key = array_search($track_id, $subtrack_ids)) !== false) {
@@ -865,6 +865,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             break;
             case 'live':
                 $tracks = $this->get_live_subtracks($args);
+                
                 //TOUFIX
                 /*
                 if ( !$this->is_expired ){
@@ -881,33 +882,34 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
                 $post_id = $this->update_live_tracklist();
             break;
         }
-        
-        
-        
+
         if ( is_wp_error($tracks) ) return $tracks;
 
         $this->did_query_tracks = true;
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
 
-        if ( !$this->get_options('ajax_tracklist') ){
+        if ( !$this->get_options('ajax_autosource') ){
             $this->tracklist_autosource();
         }
         
         return true;
     }
     
-    function tracklist_autosource(){
+    private function tracklist_autosource(){
         $this->tracklist_log('tracklist autosource'); 
         foreach((array)$this->tracks as $track){
-            $success = $track->autosource();
-            die("AUTOSOURCE");
+
+            if (!$track->sources){
+                $success = $track->autosource();
+            }
         }
     }
     
     protected function get_static_subtracks($args = null){
 
         $default = array(
+            'fields'        => 'ids',
             'post_status'   => 'any',
             'posts_per_page'=> -1,
             'orderby'       => 'track_order',
@@ -1007,29 +1009,14 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 
 class WPSSTM_Single_Track_Tracklist extends WPSSTM_Static_Tracklist{
     function get_static_subtracks($args = null){
-        
-        $default = array(
-            'post_status'   => 'any',
-            'posts_per_page'=> -1,
-            'orderby'       => 'track_order',
-            'order'         => 'ASC',
-        );
 
-        $args = wp_parse_args((array)$args,$default);
-        
         $required = array(
             'post_type'         => wpsstm()->post_type_track,
             'post__in' => array($this->post_id),
         );
-        
+
         $args = wp_parse_args($required,(array)$args);
-
-        $query = new WP_Query( $args );
-        $subtracks = $query->posts;
-
-        //$this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Static_Tracklist::get_subtracks"); 
-
-        return $subtracks;
+        return parent::get_static_subtracks($args);
         
     }
 }
