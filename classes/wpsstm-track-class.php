@@ -56,7 +56,6 @@ class WPSSTM_Track{
             
             switch($key){
                 case 'sources':
-                    print_r($value);
                     $this->add_sources($value);
                 break;
                 default:
