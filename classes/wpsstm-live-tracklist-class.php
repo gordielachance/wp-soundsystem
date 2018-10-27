@@ -743,9 +743,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         $strings = array();
         $result = array();
         
-        if (!$track_node){
-            return new WP_Error( 'wpsstm_empty_node', 'Unable to parse empty node' );
-        }
+        if (!$track_node) return;
 
         $selector_css   = wpsstm_get_array_value('path',$selectors);
         $selector_regex = wpsstm_get_array_value('regex',$selectors);
