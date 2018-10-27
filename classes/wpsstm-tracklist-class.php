@@ -959,19 +959,9 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
         return $output;
     }
-    
-    /*
+
     function tracklist_log($message,$title = null){
-        if ($this->post_id){
-            $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
-        }
-        
-        return wpsstm()->debug_log($message,$title,null);
-    }
-    */
-    
-    function tracklist_log($message,$title = null){
-        
+
         if (is_array($message) || is_object($message)) {
             $message = implode("\n", $message);
         }
