@@ -16,7 +16,7 @@ class WPSSTM_Youtube{
     }
     public static function get_youtube_id($url){
         //youtube
-        $pattern = '~http(?:s?)://(?:[a-z0-9]+[.])?youtu(?:be.com/watch\?v=|.be/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?~i';
+        $pattern = '~http(?:s?)://(?:www.)?youtu(?:be.com/watch\?v=|.be/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?~i';
         preg_match($pattern, $url, $url_matches);
         
         if ( !isset($url_matches[1]) ) return;
