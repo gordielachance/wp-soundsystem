@@ -11,7 +11,6 @@ body.wpsstm-default,body.wp-admin{
     .wpsstm-track-sources-list{
         display:grid;
         position:relative;
-        
         a{
             @extend .wpsstm-no-underline;
         }
@@ -72,7 +71,7 @@ body.wpsstm-default,body.wp-admin{
                     text-decoration: line-through;
                 }
             }
-            &.source-playing,&.provider-loading{
+            &.source-playing,&.source-loading{
                 font-weight: bold;
             }
             
@@ -87,7 +86,7 @@ body.wpsstm-default,body.wp-admin{
                 content:"\f167";//fa-youtube
             }
 
-            &.provider-loading{
+            &.source-loading{
                 #wpsstm-source-action-provider a{
                      @extend .wpsstm-loading-icon;
                 }
@@ -96,14 +95,6 @@ body.wpsstm-default,body.wp-admin{
 
         }
     }
-    
-    [itemprop="track"] .wpsstm-track-sources-list [data-wpsstm-source-idx]{
-        &:not(.source-playing):not(.provider-loading){
-            @include opacity(.25);
-            &:hover{
-                @include opacity(.5);
-            }
-        }
-    }
+
 
 }

@@ -11,7 +11,7 @@ class WpsstmPagePlayer {
         this.bottom_wrapper_el =         $('#wpsstm-bottom-wrapper');
         this.bottom_el =                 this.bottom_wrapper_el.find('#wpsstm-bottom');
         this.bottom_track_wraper_el =    this.bottom_el.find('#wpsstm-bottom-track-wrapper');
-        this.bottom_trackinfo_el =       this.bottom_track_wraper_el.find('#wpsstm-bottom-track-info');
+        this.bottom_trackinfo_el =       this.bottom_track_wraper_el.find('#wpsstm-bottom-track');
         this.wpsstm_player_shuffle_el =  $('#wpsstm-player-shuffle');
         this.wpsstm_player_loop_el =     $('#wpsstm-player-loop');
         

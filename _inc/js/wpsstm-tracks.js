@@ -352,16 +352,19 @@ class WpsstmTrack {
         $.each(attributes, function() {
             wpsstm.bottom_trackinfo_el.attr(this.name, this.value);
         });
+        
+        //switch type
+        wpsstm.bottom_trackinfo_el.removeClass('wpsstm-post-tracklist');
+        wpsstm.bottom_trackinfo_el.addClass('wpsstm-player-tracklist');
 
         var list = $('<ul class="wpsstm-tracks-list" />'); 
 
         var row = self.track_el.clone(true,true);
-        row.show(); //be sure it will be displayed
+        row.removeClass('wpsstm-toggle-sources');
 
         $(list).append(row);
 
         wpsstm.bottom_trackinfo_el.html(list);
-        
         wpsstm.bottom_el.show();//show in not done yet
     }
     

@@ -118,7 +118,7 @@ class WpsstmTrackSource {
         var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
         var source_instances = self.get_source_instances();
-        source_instances.addClass('provider-loading');
+        source_instances.addClass('source-loading');
 
         //TO FIX check if same source playing already ?
         //if (self.track.current_source_idx === self.index){
@@ -189,7 +189,7 @@ class WpsstmTrackSource {
         )
         
         success.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('provider-loading');
+            source_instances.removeClass('source-loading');
         })
 
         return success.promise();
@@ -365,11 +365,24 @@ class WpsstmTrackSource {
 
         }
     });
-    
-    $('.wpsstm-track-sources-list').sourceManager();
+
+    //hide sources add toggle icon.
+    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
+
+        var sources_row = track_obj.track_el.find('.wpsstm-track-sources');
+
+        var link = sources_row.find('#wpsstm-track-toggle-sources a');
+        //click on bt
+        link.click(function(e) {
+            e.preventDefault();
+            var track_el = $(this).parents('[data-wpsstm-track-idx]');
+            track_el.toggleClass('wpsstm-toggle-sources');
+        });
+    });
 
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-        track_obj.track_el.find('.wpsstm-track-sources-list').sourceManager();
+        var sources_list = track_obj.track_el.find('.wpsstm-track-sources-list');
+        sources_list.sourceManager();
     });
 
     $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
@@ -378,6 +391,8 @@ class WpsstmTrackSource {
         source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
             e.preventDefault();
             source_obj.track.play_track(source_obj.index);
+            //toggle tracklist sources
+            source_obj.track.track_el.removeClass('wpsstm-toggle-sources');
         });
 
     });

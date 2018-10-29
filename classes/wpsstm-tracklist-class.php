@@ -832,7 +832,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         return wpsstm_get_html_attr($values_attr);
     }
 
-    function get_tracklist_class(){
+    function get_tracklist_class($extra_classes = null){
 
         $classes = array(
             'wpsstm-tracklist',
@@ -842,6 +842,10 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
         );
+        
+        if($extra_classes){
+            $classes = array_merge($classes,(array)$extra_classes);
+        }
 
         $classes = apply_filters('wpsstm_tracklist_classes',$classes,$this);
 

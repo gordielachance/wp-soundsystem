@@ -31,5 +31,8 @@ if ( $wpsstm_track->have_sources() ) { ?>
         }
         ?>
     </ul>
+    <span id="wpsstm-track-toggle-sources">
+        <a href="#"><span><?php _e('Source Switch','wpsstm');?></span></a>
+    </span>
     <?php 
 }

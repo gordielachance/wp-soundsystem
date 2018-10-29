@@ -20,7 +20,7 @@ class WPSSTM_Core_Player{
         <div id="wpsstm-bottom-wrapper">
             <div id="wpsstm-bottom">
                 <div id="wpsstm-bottom-track-wrapper">
-                    <span id="wpsstm-bottom-track-info"></span>
+                    <span id="wpsstm-bottom-track"></span>
                     <?php
                     //player actions
                     if ( $actions = $this->get_player_links() ){

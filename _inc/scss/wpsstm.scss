@@ -90,7 +90,7 @@ body.wpsstm-default,body.wp-admin{
     .wpsstm-freeze{
         @include opacity(.5);
     }
-    
+
     input{
         &.wpsstm-fullwidth{
             width:100%;
@@ -187,6 +187,10 @@ body.wpsstm-default,body.wp-admin{
             margin:0;
             padding:0;
             list-style: none;
+            align-items:center;
+            @include flex-grow(0);
+            @include flex-shrink(0);
+            @include display-flex();
         }
         &.ui-autocomplete {
             position: absolute;
@@ -247,6 +251,7 @@ body.wpsstm-default,body.wp-admin{
         }
         &.wpsstm-action-icon{
             a{
+                @extend .wpsstm-icon;
                 &:before{
                     margin-right:0;
                 }

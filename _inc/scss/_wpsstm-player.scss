@@ -31,7 +31,6 @@ body.wpsstm-default,body.wp-admin{
                 color:$player-text-color;
             }
             #wpsstm-bottom-track-wrapper{
-
                 width:100%;
                 padding:0;
                 margin:0;
@@ -41,71 +40,13 @@ body.wpsstm-default,body.wp-admin{
                     margin:0;
                     border:none;
                     @include display-flex();
-                    @include align-items(center);
+                    @include flex-grow(1);
                     @include justify-content(center);
-                    &#wpsstm-bottom-track-info{
-                        @include flex-grow(1);
-                        @include justify-content(flex-start);
-                        [itemprop="track"]{
-                            @include display-flex(flex!important);//overwrite jQuery default
-                            > *{
-                                &.wpsstm-track-position{
-                                    @extend .wpsstm-can-click;
-                                }
-                                &.wpsstm-track-play-bt{
-                                    display:none;
-                                }
-                                &.wpsstm-track-info{
-                                    @include flex-grow(0);
-                                    .wpsstm-track-album{
-                                        display:none!important;
-                                    }
-                                }
-
-                                &.wpsstm-track-sources{
-                                    position:relative;
-                                    display:grid;
-                                    @include opacity(.25);
-                                    .wpsstm-track-sources-list{
-                                        padding:0;
-                                        line-height: 2em;
-                                    }
-
-                                    &:hover{
-                                        @include opacity(1);
-                                        .wpsstm-track-sources-list{
-                                            position:absolute;
-                                            bottom:0;
-                                            background: $player-bg-color;
-                                            [data-wpsstm-source-idx]{
-                                                line-height:2.5em;
-                                            }
-                                        }
-                                    }
-
-                                    &:not(:hover){
-                                        [data-wpsstm-source-idx]{
-                                            &:not(.source-playing){
-                                                display:none;
-                                            }
-                                            .wpsstm-actions-list > *{
-                                                &:not(#wpsstm-source-action-provider){
-                                                    display:none;
-                                                }
-                                            }
-
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
-                    }
                     
                     &#wpsstm-player-actions{
                         margin-right:.5em;
-                        @include justify-content(flex-end);
                         @include flex-shrink(0);
+                        @include flex-grow(0);
                         .wpsstm-player-action{
 
                             a{

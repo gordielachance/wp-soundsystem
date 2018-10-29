@@ -88,6 +88,7 @@ body.wpsstm-default,body.wp-admin{
                 display:block;
                 text-align: center;
                 .wpsstm-action{
+                    margin:auto;
                     @extend .wpsstm-action-bt;
                     font-size:.8em;
                 }
@@ -164,80 +165,105 @@ body.wpsstm-default,body.wp-admin{
                 padding:0;
                 margin:0;
                 line-height: 3em;
-                @include display-flex();
-                @include flex-direction(row);
-                text-align:center;
                 @include transition-property(background);
                 @include transition-duration(.4s);
-                > * {
-                    
-                    vertical-align: middle;
-                    padding: 0 .25em;
-                    box-sizing:border-box;
+                .wpsstm-track-row.wpsstm-track-sources{                        
                     @include display-flex();
-                    text-align:center;
-
-                    &.wpsstm-track-image,
-                    &.wpsstm-track-position,
-                    &.wpsstm-track-play-bt{
-                        @include display-flex();
-                        @include flex-grow(0);
-                        @include flex-shrink(0);
-                        @include flex-basis(2em);
-                    }
-
-                    &.wpsstm-track-image{
-                        padding: 0;
-                        text-align: center;
-                        display: inline-block;
-                        box-sizing: content-box;
-                    }
-                    &.wpsstm-track-info{
-                        @include display-flex();
-                        @include flex-basis(0);
-                        @include flex-grow(1);
-                        @include flex-shrink(1);
-                        align-items:baseline;
-                        min-width:0; //fix problem when no-wrap & flexboxes (https://stackoverflow.com/a/36247448/782013)
-                        > *{
-                            display:block;
-                            @extend .wpsstm-ellipsis;
-                            text-align:left;
-                            margin-right:.5em;
-                            &[itemprop="byArtist"]{
-                                font-weight: bold;
-                            }
-                            &[itemprop="name"]{
-                                &:before{
-                                    content: "—";
-                                    margin-right:.5em;
-                                }
-                            }
-                            &[itemprop="inAlbum"]{
-                                font-size:.8em;
-                            }
-                        }
-
-                    }
-
-                    &.wpsstm-track-actions{
-                        @include justify-content(flex-end);
-                        @include flex-shrink(0);
-                        align-items:center;
-                    }
+                }
+                .wpsstm-track-row {
+                    @include display-flex();
+                    @include flex-grow(1);
+                    
                     &.wpsstm-track-sources{
-                        display:none; //hide by default
-                        max-width:50%;
-                        align-items: center;
-                        flex: 1 1 auto;
+                        font-size:.8em;
+                        margin-left: auto;
+                        @include flex-grow(0);
                         [data-wpsstm-source-idx]{
                             label{
                                 @extend .wpsstm-can-click;
                             }
                         }
+                        #wpsstm-track-toggle-sources{
+                            @include flex-grow(0);
+                            a{
+                                @extend .wpsstm-icon;
+                                span{
+                                    display:none;
+                                }
+                            }
+                        }
                     }
+                    
+                    > * {
 
+                        vertical-align: middle;
+                        padding: 0 .25em;
+                        box-sizing:border-box;
+                        text-align:center;
+
+                        &.wpsstm-track-pre{
+                            @include flex-grow(0);
+                            @include flex-shrink(0);
+                            > * {
+
+                            }
+                        }
+
+                        &.wpsstm-track-image{
+                            padding: 0;
+                            text-align: center;
+                            display: inline-block;
+                            box-sizing: content-box;
+                        }
+                        &.wpsstm-track-info{
+                            @include display-flex();
+                            > *{
+                                @extend .wpsstm-ellipsis;
+                                text-align:left;
+                                margin-right:.5em;
+                                &[itemprop="byArtist"]{
+                                    font-weight: bold;
+                                }
+                                &[itemprop="name"]{
+                                    &:before{
+                                        content: "—";
+                                        margin-right:.5em;
+                                    }
+                                }
+                                &[itemprop="inAlbum"]{
+                                    font-size:.8em;
+                                }
+                            }
+
+                        }
+
+                    }
                 }
+                .wpsstm-track-sources-list{
+                    @include transition-property(margin-bottom);
+                    @include transition-duration(.2s);
+                }
+                &:not(.wpsstm-toggle-sources){
+                    
+                    #wpsstm-track-toggle-sources a:before{
+                        content: "\f078";//.fa-chevron-down;
+                    }
+                    [data-wpsstm-source-idx]{
+                        display:none;
+                    }
+                    #wpsstm-source-actions{
+                        display:none;
+                    }
+                }
+                &.wpsstm-toggle-sources{
+                    #wpsstm-track-toggle-sources a:before{
+                        content: "\f077";//.fa-chevron-up;
+                    }
+                    .wpsstm-track-sources-list{
+                        margin-bottom:.5em;
+                    }
+                }
+                
                 &:hover{
                     background: rgba(0,0,0,0.02);
                 }
@@ -246,7 +272,54 @@ body.wpsstm-default,body.wp-admin{
                     border-bottom: 1px solid #eee;
                 }
 
-
+            }
+        }
+    }
+    
+    .wpsstm-tracklist.wpsstm-post-tracklist{
+        .wpsstm-track{
+            #wpsstm-track-toggle-sources{
+                display:none;
+            }
+            &:not(.wpsstm-toggle-sources){
+                @include display-flex();
+            }
+            &.wpsstm-toggle-sources{
+                display:block!important;
+            }
+            #wpsstm-track-actions{
+                margin-left: auto;
+            }
+            .wpsstm-track-sources-list{
+                @include flex-grow(1);
+            }
+            #wpsstm-track-toggle-sources{
+                margin-left: auto;
+            }
+        }
+    }
+    
+    .wpsstm-tracklist.wpsstm-player-tracklist{
+        .wpsstm-track{
+            display:block!important;
+            .wpsstm-track-actions{
+                margin-left:inherit;
+            }
+            .wpsstm-track-sources{
+                @include opacity(.6);
+                [data-wpsstm-source-idx]{
+                    &.source-playing,
+                    &.source-loading{
+                        @include display-flex();
+                    }
+                    @include opacity(.6);
+                    &.source-playing{
+                        @include opacity(.8);
+                    }
+                    &:hover{
+                        @include opacity(1);
+                    }
+                }
             }
         }
     }
