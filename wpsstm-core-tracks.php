@@ -11,7 +11,6 @@ class WPSSTM_Core_Tracks{
     static $track_mbtype = 'recording'; //musicbrainz type, for lookups
     static $loved_track_meta_key = '_wpsstm_user_favorite';
     static $spotify_id_meta_key = '_wpsstm_spotify_id';
-    static $autosource_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
     
     var $subtracks_hide = null; //default hide subtracks in track listings
 
@@ -46,7 +45,6 @@ class WPSSTM_Core_Tracks{
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
         add_action( 'save_post', array($this,'metabox_save_track_settings'), 5);
-        add_action( 'save_post', array($this,'metabox_save_track_sources') );
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
@@ -647,15 +645,6 @@ class WPSSTM_Core_Tracks{
             'side', 
             'high' 
         );
-        
-        add_meta_box( 
-            'wpsstm-track-sources', 
-            __('Track sources','wpsstm'),
-            array($this,'metabox_track_sources_content'),
-            wpsstm()->post_type_track, 
-            'normal', //context
-            'default' //priority
-        );
 
     }
     
@@ -700,65 +689,6 @@ class WPSSTM_Core_Tracks{
     
     function metabox_track_options_content( $post ){
         
-    }
-    
-    function metabox_track_sources_content( $post ){
-        global $wpsstm_track;
-        $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
-        ?>
-
-        <p>
-            <?php _e('Add sources to this track.  It could be a local audio file or a link to a music service.','wpsstm');?>
-        </p>
-        <p>
-            <?php _e("If no sources are set and that the 'Auto-Source' setting is enabled, We'll try to find a source automatically when the tracklist is played.",'wpsstm');?>
-        </p>
-
-        <?php
-        
-        if ( $then = get_post_meta( $post->ID, self::$autosource_time_metakey, true ) ){
-            $now = current_time( 'timestamp' );
-            $refreshed = human_time_diff( $now, $then );
-            $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);
-            echo '  ' . $refreshed;
-        }
-
-        //track sources
-        $wpsstm_track->populate_sources();
-        wpsstm_locate_template( 'track-sources.php', true, false );
-
-        ?>
-        <p class="wpsstm-new-track-sources-container">
-            <?php
-            $input_attr = array(
-                'id' => 'wpsstm-new_track-sources',
-                'name' => 'wpsstm_new_track_sources[]',
-                'icon' => '<i class="fa fa-link" aria-hidden="true"></i>',
-                'placeholder' => __("Enter a source URL",'wpsstm')
-            );
-            echo $input = wpsstm_get_backend_form_input($input_attr);
-            ?>
-        </p>
-        <p class="wpsstm-submit-wrapper">
-            <?php
-            //autosource
-            if ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
-                ?>
-                <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_track_autosource" class="button" value="<?php _e('Autosource','wpsstm');?>">
-                <?php
-            }
-        
-            //list sources
-            $post_sources_url = admin_url(sprintf('edit.php?post_type=%s&post_parent=%s',wpsstm()->post_type_source,$wpsstm_track->post_id));
-            printf('<a href="%s" class="button">%s</a>',$post_sources_url,__('Backend listing','wpsstm'));
-
-            //add sources
-            printf('<a id="wpsstm-add-source-url" href="#" class="button">%s</a>',__('Add source URL','wpsstm'));
-            ?>
-        </p>
-        <?php
-        wp_nonce_field( 'wpsstm_track_sources_meta_box', 'wpsstm_track_sources_meta_box_nonce' );
     }
 
     function mb_populate_trackid( $post_id ) {
@@ -825,42 +755,6 @@ class WPSSTM_Core_Tracks{
         $length = ( isset($_POST[ 'wpsstm_length' ]) ) ? $_POST[ 'wpsstm_length' ] : null;
         self::save_meta_track_length($post_id, $length);
 
-    }
-    
-    function metabox_save_track_sources( $post_id ) {
-        //check save status
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_track_sources_meta_box_nonce']);
-        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_track);
-        if ( $post_type != wpsstm()->post_type_track ) return;
-
-        //nonce
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_sources_meta_box_nonce'], 'wpsstm_track_sources_meta_box' ) );
-        if ( !$is_valid_nonce ) return;
-        
-        //new source URLs
-        $source_urls = isset($_POST['wpsstm_new_track_sources']) ? $_POST['wpsstm_new_track_sources'] : array();
-        $new_sources = array();
-        
-        foreach((array)$source_urls as $url){
-            //TOFIXKKK where is track ?
-            $source = new WPSSTM_Source();
-            $source->permalink_url = $url;
-            $source->save_source();//save only if it does not exists yet
-            $new_sources[] = $source;
-        }
-        
-        //autosource & save
-        if ( isset($_POST['wpsstm_track_autosource']) ){
-            $track = new WPSSTM_Track($post_id);
-            $success = $track->autosource();
-        }
     }
     
     static function save_meta_track_title($post_id, $value = null){

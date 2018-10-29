@@ -5,6 +5,8 @@ class WPSSTM_Spotify{
         if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
             add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
             add_action('wpsstm_live_tracklist_populated',array($this,'register_spotify_presets'));
+            add_action( 'add_meta_boxes', array($this, 'metabox_spotify_register'));
+            add_action( 'save_post', array($this,'metabox_spotify_save')); 
         }
     }
     //register presets
@@ -30,7 +32,7 @@ class WPSSTM_Spotify{
     /*
     Use SongWhip.com to get Spotify track ID
     */
-    static function get_spotify_track_id(WPSSTM_Track $track){
+    static function get_spotify_track(WPSSTM_Track $track){
         
         $valid = $track->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
@@ -56,10 +58,13 @@ class WPSSTM_Spotify{
         }
         
         $tracks = wpsstm_get_array_value(array('data','tracks'),$json);
-        $first_track = reset($tracks);
-        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$first_track);
-        $spotify_title = wpsstm_get_array_value(array('name'),$first_track);
-        $spotify_artist = wpsstm_get_array_value(array('artists',0,'name'),$first_track);
+        
+        //TOUFIX TO CHECK
+        //I think that this API returns the last result as best match, but i'm not sure of this.
+        $last_track = array_values(array_slice($tracks, -1))[0];
+        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$last_track);
+        $spotify_title = wpsstm_get_array_value(array('name'),$last_track);
+        $spotify_artist = wpsstm_get_array_value(array('artists',0,'name'),$last_track);
 
         $pattern = '~https?://open.spotify.com/track/([^/]+)~';
         preg_match($pattern, $spotify_url, $url_matches);
@@ -69,7 +74,57 @@ class WPSSTM_Spotify{
             $spotify_id = $url_matches[1];
             $track->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$track->artist,$track->title,$track->album),'spotify_id'=>$spotify_id,'spotify_artist'=>$spotify_artist,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
 
-        return $spotify_id;
+        
+        $spotify = array(
+            'id' =>     $spotify_id,
+            'url' =>    $spotify_url,
+            'artist' => $spotify_artist,
+            'title' =>  $spotify_title,
+        );
+        
+        return $spotify;
+    }
+    
+    function metabox_spotify_register(){
+        global $post;
+
+        add_meta_box(
+            'wpsstm-parent-track', 
+            'Spotify', 
+            array($this,'track_spotify_id_content'),
+            wpsstm()->post_type_track, 
+            'side', 
+            'core'
+        );
+    }
+    
+    function track_spotify_id_content( $post ){
+        $track = new WPSSTM_Track($post->ID);
+        ?>
+        <div style="text-align:center">
+            <label class="screen-reader-text" for="wpsstm_spotify_id"><?php _e('Spotify ID','wpsstm') ?></label>
+            <input name="wpsstm_spotify_id" value="<?php echo $track->spotify_id;?>" placeholder="<?php _e('Spotify ID','wpsstm') ?>" />
+        </div>
+        <?php
+        wp_nonce_field( 'wpsstm_spotify_meta_box', 'wpsstm_spotify_meta_box_nonce' );
+    }
+    
+    function metabox_spotify_save( $post_id ) {
+
+        //check save status
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $is_revision = wp_is_post_revision( $post_id );
+        $is_valid_nonce = ( isset($_POST['wpsstm_spotify_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_spotify_meta_box_nonce'], 'wpsstm_spotify_meta_box' ) );
+        if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
+        
+        unset($_POST['wpsstm_spotify_meta_box_nonce']); //so we avoid the infinite loop
+
+        $spotify_id = ( isset($_POST[ 'wpsstm_spotify_id' ]) ) ? $_POST[ 'wpsstm_spotify_id' ] : null;
+        //TO FIX TO CHECK validate spotify ID ?
+        
+        update_post_meta( $post_id, WPSSTM_Core_Tracks::$spotify_id_meta_key, $spotify_id );
+
     }
 }
 

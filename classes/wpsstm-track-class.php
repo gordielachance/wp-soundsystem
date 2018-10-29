@@ -615,7 +615,7 @@ class WPSSTM_Track{
         
         //save time autosourced
         $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, $now );
+        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
 
         //insert sources
         $inserted = array();
@@ -801,7 +801,7 @@ class WPSSTM_Track{
             'itemprop' =>                       'track',
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
-            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Tracks::$autosource_time_metakey, true )
+            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true )
         );
         
         if ($wpsstm_tracklist){
@@ -1076,7 +1076,8 @@ class WPSSTM_Track{
     function populate_spotify_track_id(){
         if ($this->spotify_id) return $this->spotify_id;
         
-        $spotify_id = WPSSTM_Spotify::get_spotify_track_id($this);
+        $spotify = WPSSTM_Spotify::get_spotify_track($this);
+        $spotify_id = isset($spotify['id']) ? $spotify['id'] : null;
         if ( $this->post_id && $spotify_id && !is_wp_error($spotify_id) ){
             $success = update_post_meta($this->post_id,WPSSTM_Core_Tracks::$spotify_id_meta_key,$spotify_id);
             $this->track_log($success,'Stored Spotify track ID');
