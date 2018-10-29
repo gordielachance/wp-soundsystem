@@ -13,9 +13,6 @@ if ( $wpsstm_track->have_sources() ) { ?>
             global $wpsstm_source;
 
             if ( !$wpsstm_source->get_source_mimetype() ) continue;
-
-            $title = ($title = $wpsstm_source->title ) ? $title : sprintf('<em>%s</em>',$wpsstm_source->permalink_url);
-
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
                 <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>
@@ -24,7 +21,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
                     echo get_actions_list($actions,'source');
                 }
                 ?>
-                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $title;?></label>
+                <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->get_source_title();?></label>
             </li>
             <?php
 

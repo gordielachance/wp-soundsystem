@@ -164,7 +164,7 @@ class WPSSTM_Source{
         );
  
         $required_args = array(
-            'post_title' =>     $this->title,
+            'post_title' =>     $this->get_source_title(),
             'post_type' =>      wpsstm()->post_type_source,
             'post_parent' =>    $this->track_id,
             'meta_input' =>     array(
@@ -309,6 +309,14 @@ class WPSSTM_Source{
 
         $this->mime_type = apply_filters('wpsstm_get_source_mimetype',$mime,$this);
         return $this->mime_type;
+    }
+    
+    function get_source_title(){
+        $title = $this->title;
+        if (!$title){
+            $title = wpsstm_get_url_domain($this->permalink_url);
+        }
+        return $title;
     }
 
     function get_source_icon(){
