@@ -252,7 +252,9 @@ body.wpsstm-default,body.wp-admin{
                         display:none;
                     }
                     #wpsstm-source-actions{
-                        display:none;
+                        .wpsstm-action:not(#wpsstm-source-action-provider){
+                            display:none;
+                        }
                     }
                 }
                 &.wpsstm-toggle-sources{

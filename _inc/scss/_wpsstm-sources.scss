@@ -79,10 +79,14 @@ body.wpsstm-default,body.wp-admin{
                 @extend .wpsstm-icon;
             }
             
-            &[data-wpsstm-source-domain="soundcloud.com"] .wpsstm-source-title:before{
+            #wpsstm-source-action-provider a:before{
+                content:"\f0c1";//fa-link
+            }
+            
+            &[data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before{
                 content:"\f1be";//fa-soundcloud
             }
-            &[data-wpsstm-source-domain="youtube.com"] .wpsstm-source-title:before{
+            &[data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before{
                 content:"\f167";//fa-youtube
             }
 
