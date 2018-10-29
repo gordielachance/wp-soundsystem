@@ -164,7 +164,7 @@ class WPSSTM_Source{
         );
  
         $required_args = array(
-            'post_title' =>     $this->get_source_title(),
+            'post_title' =>     $this->title,
             'post_type' =>      wpsstm()->post_type_source,
             'post_parent' =>    $this->track_id,
             'meta_input' =>     array(
