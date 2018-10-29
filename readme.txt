@@ -154,6 +154,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Improved wizard
 * Better autosource
 * Tracks : new function populate_spotify_track_id()
+* Better tracks source GUI
 
 = 1.9.4 =
 * Better settings page errors

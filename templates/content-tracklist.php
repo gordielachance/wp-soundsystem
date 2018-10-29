@@ -116,6 +116,14 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                     <li class="<?php echo implode(' ',$track->get_track_class());?>" <?php echo $track->get_track_attr();?>>
                         <div class="wpsstm-track-row">
                             <div class="wpsstm-track-pre">
+                                <?php if ( $wpsstm_tracklist->get_options('can_play') ){ ?>
+                                    <span class="wpsstm-track-play-bt">
+                                        <a class="wpsstm-track-icon wpsstm-icon" href="#"></a>
+                                    </span>
+                                <?php } ?>
+                                <span class="wpsstm-track-position">
+                                    <span itemprop="position"><?php echo $tracklist->current_track + 1;?></span>
+                                </span>
                                 <span class="wpsstm-track-image" itemprop="image">
                                     <?php 
                                     if ($track->image_url){
@@ -124,14 +132,6 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                                         <?php
                                     }
                                     ?>
-                                </span>
-                                <?php if ( $wpsstm_tracklist->get_options('can_play') ){ ?>
-                                    <span class="wpsstm-track-play-bt">
-                                        <a class="wpsstm-track-icon wpsstm-icon" href="#"></a>
-                                    </span>
-                                <?php } ?>
-                                <span class="wpsstm-track-position">
-                                    <span itemprop="position"><?php echo $tracklist->current_track + 1;?></span>
                                 </span>
                             </div>
                             <div class="wpsstm-track-info">
