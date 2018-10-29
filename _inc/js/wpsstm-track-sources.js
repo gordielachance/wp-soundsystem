@@ -388,8 +388,10 @@ class WpsstmTrackSource {
 
     $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
+        var track_instances = source_obj.track.get_track_instances();
+        
         //click on source trigger
-        source_obj.source_el.find('.wpsstm-source-title').click(function(e) {
+        track_instances.find('[data-wpsstm-source-idx] .wpsstm-source-title').click(function(e) {
             e.preventDefault();
             source_obj.track.play_track(source_obj.index);
             //toggle tracklist sources
