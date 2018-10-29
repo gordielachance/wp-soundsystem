@@ -103,7 +103,6 @@ class WP_SoundSystem {
             'autosource'                        => 'on',
             'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
-            'autosource_filter_ban_words'       => array('cover'),
             'playable_opacity_class'            => 'on',
             'minimal_css'                       => 'off',
         );

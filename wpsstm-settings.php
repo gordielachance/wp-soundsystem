@@ -85,15 +85,7 @@ class WPSSTM_Settings {
             /*
             Sources
             */
-            
-            
-            if( isset($input['autosource_filter_ban_words']) ){
-                $ban_words = explode(',',$input['autosource_filter_ban_words']);
-                foreach($ban_words as $key=>$word){
-                    $ban_words[$key] = trim($word);
-                }
-                $new_input['autosource_filter_ban_words'] = $ban_words;
-            }
+
 
             /*
             Live playlists
@@ -236,14 +228,6 @@ class WPSSTM_Settings {
             'autosource', 
             __('Autosource','wpsstm'), 
             array( $this, 'autosource_callback' ), 
-            'wpsstm-settings-page', 
-            'sources'
-        );
-
-        add_settings_field(
-            'autosource_filter_ban_words', 
-            __('Ban words filter','wpsstm'), 
-            array( $this, 'autosource_filter_ban_words_callback' ), 
             'wpsstm-settings-page', 
             'sources'
         );
@@ -505,32 +489,7 @@ class WPSSTM_Settings {
             __("Autoplay the first track displayed.","wpsstm")
         );
     }
-    
-    function autosource_filter_ban_words_callback(){
 
-        $desc = array();
-        $desc[]= sprintf(
-            '<strong>'.__("Experimental","wpsstm").'</strong> '.__("Ignore an autosource when one of those words is contained in its title and isn't in the track title.","wpsstm")
-        );
-        
-        $desc[]= sprintf('<small>%s</small>',__('List of comma-separated words'));
-        
-        $ban_words = wpsstm()->get_options('autosource_filter_ban_words');
-        $ban_words_str = implode(',',$ban_words);
-        $desc[]= sprintf('<input type="text" name="%s[autosource_filter_ban_words]" value="%s" />',wpsstm()->meta_name_options,$ban_words_str);
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        echo implode("\n",$desc);
-        
-    }
-    
     function autosource_callback(){
         
         $enabled = ( wpsstm()->get_options('autosource') == 'on' );
