@@ -146,11 +146,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             return $error;
         }
         
-        
-        if ( $this->feed_url != $this->feed_url_no_filters){
-            $this->tracklist_log($this->feed_url_no_filters,'original URL' );
-        }
-        
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->feed_url);
         $response_code = wp_remote_retrieve_response_code( $response );
@@ -393,9 +388,17 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         $response = null;
         $cached_url = null;
+        $url_args = $this->get_request_args();
         
         $this->tracklist_log($url,'get page' );
-        $response = wp_remote_get( $url, $this->get_request_args() );
+        $response = wp_remote_get( $url, $url_args );
+        
+        $this->tracklist_log( $url,'Get remote URL' );
+        $this->tracklist_log( json_encode($url_args),'URL args' );
+        
+        if ( $this->feed_url != $this->feed_url_no_filters){
+            $this->tracklist_log($this->feed_url_no_filters,'original URL' );
+        }
 
         //errors
         if ( !is_wp_error($response) ){

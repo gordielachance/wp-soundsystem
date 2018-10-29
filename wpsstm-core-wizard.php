@@ -666,7 +666,7 @@ class WPSSTM_Core_Wizard{
     public static function feed_url_callback(){
         global $wpsstm_tracklist;
         
-        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url : null;
+        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url_no_filters : null;
 
         $text_input = sprintf(
             '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',

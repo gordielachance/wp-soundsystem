@@ -1067,12 +1067,7 @@ class WPSSTM_Track{
         wpsstm()->debug_log($message,$title,null);
 
     }
-    
-    /*
-    Use songWhip.com to search the Spotify ID.
-    Used to find audio sources on song.link.
-    */
-    
+
     function populate_spotify_track_id(){
         if ($this->spotify_id) return $this->spotify_id;
         

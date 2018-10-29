@@ -540,11 +540,10 @@ class WPSSTM_Settings {
         */
         
         printf(
-            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s <small>%s</small>',
+            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
-            __("If no source is set for a track, try to find an online source automatically.","wpsstm"),
-            __("This requires a community user ID to be set.","wpsstm")
+            __("If no source is set for a track, try to find an online source automatically.","wpsstm")
         );
         
         /*
