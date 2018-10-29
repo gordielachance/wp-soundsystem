@@ -1,5 +1,4 @@
 <?php
-
 class WPSSTM_Spotify{
     function __construct(){
         if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
@@ -29,60 +28,89 @@ class WPSSTM_Spotify{
         );
         return $links;
     }
-    /*
-    Use SongWhip.com to get Spotify track ID
-    */
-    static function get_spotify_track(WPSSTM_Track $track){
+    
+    static function get_access_token(){
         
+        $client_id = wpsstm()->get_options('spotify_client_id');
+        $client_secret = wpsstm()->get_options('spotify_client_secret');
+
+
+        $token = false;
+
+        $args = array(
+            'headers'   => array(
+                'Authorization' => 'Basic '.base64_encode($client_id.':'.$client_secret)
+            ),
+            'body'      => array(
+                'grant_type'    => 'client_credentials'
+            )
+        );
+
+
+        $response = wp_remote_post( 'https://accounts.spotify.com/api/token', $args );
+
+        if ( is_wp_error($response) ){
+            wpsstm()->debug_log($response->get_error_message(),'Error getting Spotify Token' ); 
+            return $response;
+        }
+        $body = wp_remote_retrieve_body($response);
+        $body = json_decode($body);
+        $token = $body->access_token;
+
+        return $token;
+
+    }
+    
+    static function get_spotify_request_args(){
+        $token = self::get_access_token();
+        if ( is_wp_error( $token ) ) return $token;
+        
+        $request_args = array(
+            'headers'=>array(
+                'Authorization' =>  'Bearer ' . $token,
+                'Accept' =>         'application/json',
+            )
+        );
+        return $request_args;
+        
+    }
+    
+    static function get_spotify_track(WPSSTM_Track $track){
         $valid = $track->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
 
         $spotify_id = null;
+        $spotify_request_args = self::get_spotify_request_args();
+        if ( is_wp_error( $spotify_request_args ) ) return $spotify_request_args;
+        //
+        
+        $querystr = sprintf('track:%s artist:%s',$track->title,$track->artist);
         
         $url_args = array(
-            'q'=>urlencode($track->artist . ' ' . $track->title)
+            'q' =>      urlencode($querystr),
+            'type'=>    'track',
+            'limit'=>   10
         );
         
-        //$url = 'https://api.songwhip.com/?country=BE&q=test';
-        $url = add_query_arg($url_args,'https://songwhip.com/search');
-
-        $response = wp_remote_get($url);
+        $url = add_query_arg($url_args,'https://api.spotify.com/v1/search');
+        
+        $response = wp_remote_get($url,$spotify_request_args);
         $body = wp_remote_retrieve_body($response);
-
         if ( is_wp_error($body) ) return $body;
-        
         $json = json_decode($body,true);
-        
-        if ($json['status'] != 'success'){
-            return new WP_Error( 'wpsstm_songwhip_search', __('Error while searching on SongWhip.','wpsstm') );
-        }
-        
-        $tracks = wpsstm_get_array_value(array('data','tracks'),$json);
-        
-        //TOUFIX TO CHECK
-        //I think that this API returns the last result as best match, but i'm not sure of this.
-        $last_track = array_values(array_slice($tracks, -1))[0];
-        $spotify_url = wpsstm_get_array_value(array('sourceUrl'),$last_track);
-        $spotify_title = wpsstm_get_array_value(array('name'),$last_track);
-        $spotify_artist = wpsstm_get_array_value(array('artists',0,'name'),$last_track);
+        $match = wpsstm_get_array_value(array('tracks','items',0),$json);
 
-        $pattern = '~https?://open.spotify.com/track/([^/]+)~';
-        preg_match($pattern, $spotify_url, $url_matches);
-
-        if ( !isset($url_matches[1]) ) return;
-        
-            $spotify_id = $url_matches[1];
-            $track->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$track->artist,$track->title,$track->album),'spotify_id'=>$spotify_id,'spotify_artist'=>$spotify_artist,'spotify_title'=>$spotify_title),JSON_UNESCAPED_UNICODE),'Found Spotify track ID');
-
-        
         $spotify = array(
-            'id' =>     $spotify_id,
-            'url' =>    $spotify_url,
-            'artist' => $spotify_artist,
-            'title' =>  $spotify_title,
+            'id' =>     wpsstm_get_array_value(array('id'),$match),
+            'artist' => wpsstm_get_array_value(array('artists',0,'name'),$match),
+            'title' =>  wpsstm_get_array_value(array('name'),$match),
+            'album' =>  wpsstm_get_array_value(array('album','name'),$match),
         );
+        
+        $track->track_log(json_encode($spotify),'Spotify Track match');
         
         return $spotify;
+        
     }
     
     function metabox_spotify_register(){
@@ -138,17 +166,11 @@ class WPSSTM_Spotify{
 
 class WPSSTM_Spotify_URL_Api_Preset{
     var $tracklist;
-
-    private $token = null;
-    private $client_id;
-    private $client_secret;
     private $user_slug;
     private $playlist_slug;
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
-        $this->client_id = wpsstm()->get_options('spotify_client_id');
-        $this->client_secret = wpsstm()->get_options('spotify_client_secret');
         
         $this->user_slug = $this->get_user_slug();
         $this->playlist_slug = $this->get_playlist_slug();
@@ -272,48 +294,18 @@ class WPSSTM_Spotify_URL_Api_Preset{
     function remote_request_args($args){
         
         if ( $this->can_handle_url() ){
-        
-            if ( $token = $this->get_access_token() ){
-                $args['headers']['Authorization'] = 'Bearer ' . $token;           
+            
+            $spotify_args = WPSSTM_Spotify::get_spotify_request_args();
+            if ( !is_wp_error($spotify_args) ){
+                $args = array_merge($args,$spotify_args);
             }
-
-            $args['headers']['Accept'] = 'application/json';
             
         }
 
         return $args;
     }
 
-    function get_access_token(){
-        
-        if ($this->token === null){
-            
-            $this->token = false;
 
-            $args = array(
-                'headers'   => array(
-                    'Authorization' => 'Basic '.base64_encode($this->client_id.':'.$this->client_secret)
-                ),
-                'body'      => array(
-                    'grant_type'    => 'client_credentials'
-                )
-            );
-
-
-            $response = wp_remote_post( 'https://accounts.spotify.com/api/token', $args );
-
-            if ( is_wp_error($response) ){
-                wpsstm()->debug_log($response->get_error_message(),'Spotify preset error' ); 
-            }
-            $body = wp_remote_retrieve_body($response);
-            $body = json_decode($body);
-            $this->token = $body->access_token;
-            
-        }
-        
-        return $this->token;
-
-    }
 
 }
 

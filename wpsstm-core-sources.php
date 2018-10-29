@@ -565,6 +565,13 @@ class WPSSTM_Core_Sources{
         if (!$community_user_id){
             return new WP_Error( 'wpsstm_autosource',__('Autosource requires a community user to be set.','wpsstm') );   
         }
+        
+        //spotify API
+        $client_id = wpsstm()->get_options('spotify_client_id');
+        $client_secret = wpsstm()->get_options('spotify_client_secret');
+        if (!$client_id || !$client_secret){
+            return new WP_Error( 'wpsstm_autosource',__('Autosource requires access to the Spotify API.','wpsstm') );   
+        }
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
