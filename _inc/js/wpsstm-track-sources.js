@@ -369,7 +369,8 @@ class WpsstmTrackSource {
     //hide sources add toggle icon.
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
 
-        var sources_row = track_obj.track_el.find('.wpsstm-track-sources');
+        var track_instances = track_obj.get_track_instances();
+        var sources_row = track_instances.find('.wpsstm-track-sources');
 
         var link = sources_row.find('#wpsstm-track-toggle-sources a');
         //click on bt
