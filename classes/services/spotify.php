@@ -97,7 +97,7 @@ class WPSSTM_Spotify{
             'core'
         );
     }
-    
+
     function track_spotify_id_content( $post ){
         $track = new WPSSTM_Track($post->ID);
         ?>
@@ -105,7 +105,15 @@ class WPSSTM_Spotify{
             <label class="screen-reader-text" for="wpsstm_spotify_id"><?php _e('Spotify ID','wpsstm') ?></label>
             <input name="wpsstm_spotify_id" value="<?php echo $track->spotify_id;?>" placeholder="<?php _e('Spotify ID','wpsstm') ?>" />
         </div>
-        <?php
+        <?php 
+            if($track->spotify_id){
+                $uri = sprintf('spotify:track:%s',$track->spotify_id);
+                ?>
+                <div align="center">
+                    <?php printf('<a href="%s">%s</a>',$uri,$uri); ?>
+                </div>
+            <?php
+        }
         wp_nonce_field( 'wpsstm_spotify_meta_box', 'wpsstm_spotify_meta_box_nonce' );
     }
     
