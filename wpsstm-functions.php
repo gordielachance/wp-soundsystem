@@ -211,14 +211,14 @@ function wpsstm_get_tracklist($post_id=null){
     $post_type = get_post_type($post_id);
 
     switch ($post_type){
-        case wpsstm()->post_type_playlist:
-        case wpsstm()->post_type_album:
-            $tracklist = new WPSSTM_Static_Tracklist($post_id);
-             do_action('wpsstm_static_tracklist_populated',$tracklist);
+        case wpsstm()->post_type_live_playlist:
+            $tracklist = new WPSSTM_Remote_Tracklist($post_id);
+            do_action('wpsstm_live_tracklist_populated',$tracklist);
+
         break;
         default:
-            $tracklist = new WPSSTM_Remote_Tracklist($post_id);
-             do_action('wpsstm_live_tracklist_populated',$tracklist);
+            $tracklist = new WPSSTM_Static_Tracklist($post_id);
+            do_action('wpsstm_static_tracklist_populated',$tracklist);
         break;
     }
 
