@@ -13,7 +13,7 @@ class WPSSTM_LastFM{
 
     function __construct(){
         add_filter( 'wpsstm_wizard_input',array(__class__,'wizard_no_url_input'));
-        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_lastfm_preset'));
+        add_action('wpsstm_live_tracklist_init',array(__class__,'register_lastfm_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_lastfm_service_links'));
         
         add_action( 'wp', array($this,'after_app_auth') );

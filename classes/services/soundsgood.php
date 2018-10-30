@@ -3,7 +3,7 @@
 class WPSSTM_SoundsGood{
     function __construct(){
         if ( self::get_client_id() ){
-            add_action('wpsstm_live_tracklist_populated',array($this,'register_soundsgood_preset'));
+            add_action('wpsstm_live_tracklist_init',array($this,'register_soundsgood_preset'));
             add_filter('wpsstm_wizard_services_links',array($this,'register_soundsgood_service_links'));
         }
     }

@@ -3,7 +3,7 @@
 class WPSSTM_OnlineRadioBox{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_onlineradiobox_service_link'));
-        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_onlineradiobox_preset'));
+        add_action('wpsstm_live_tracklist_init',array(__class__,'register_onlineradiobox_preset'));
     }
     //register preset
     static function register_onlineradiobox_preset($tracklist){
@@ -63,9 +63,8 @@ class WPSSTM_OnlineRadioBox_Preset{
     }
 
     function get_station_slug(){
-        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)/~i';
-        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 

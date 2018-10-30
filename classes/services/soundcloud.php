@@ -7,7 +7,7 @@ class WPSSTM_Souncloud{
         add_filter('wpsstm_get_source_stream_url',array(__class__,'get_soundcloud_stream_url'),10,2);
         if ( wpsstm()->get_options('soundcloud_client_id') ){
             add_filter('wpsstm_wizard_services_links',array($this,'register_soundcloud_service_links'));
-            add_action('wpsstm_live_tracklist_populated',array($this,'register_soundcloud_preset'));
+            add_action('wpsstm_live_tracklist_init',array($this,'register_soundcloud_preset'));
         }
     }
     //register preset

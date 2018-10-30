@@ -10,9 +10,16 @@ class WPSSTM_SongLink{
         if ( is_wp_error( $valid ) ) return $valid;
         
         $auto_sources = array();
-        $spotify_id = WPSSTM_Spotify::update_spotify_track_id($track);
-        if ( is_wp_error($spotify_id) ) return $spotify_id;
-        $track->spotify_id = $spotify_id;
+        
+        if (!$track->spotify_id){
+            $spotify_id = WPSSTM_Spotify::auto_spotify_id( $track->post_id );
+            if ( is_wp_error($spotify_id) ) return $spotify_id;
+            $track->spotify_id = $spotify_id;
+        }
+        
+        if (!$track->spotify_id){
+            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify ID for the track','wpsstm'));
+        }
 
         $sources = array();
         $url = sprintf('https://song.link/s/%s',$spotify_id);

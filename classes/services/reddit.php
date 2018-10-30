@@ -3,7 +3,7 @@
 class WPSSTM_Reddit{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_reddit_service_links'));
-        add_action('wpsstm_live_tracklist_populated',array($this,'register_reddit_preset'));
+        add_action('wpsstm_live_tracklist_init',array($this,'register_reddit_preset'));
     }
     //register preset
     function register_reddit_preset($tracklist){

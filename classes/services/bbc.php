@@ -2,7 +2,7 @@
 
 class WPSSTM_BBC{
     function __construct(){
-        add_action('wpsstm_live_tracklist_populated',array(__class__,'register_bbc_presets'));
+        add_action('wpsstm_live_tracklist_init',array(__class__,'register_bbc_presets'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_bbc_service_links'));
     }
     static function register_bbc_presets($tracklist){
@@ -106,9 +106,8 @@ class WPSSTM_BBC_Playlist_Preset{
     
 
     function get_playlist_id(){
-        global $wpsstm_tracklist;
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';
-        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
+        preg_match($pattern, $this->tracklist->feed_url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 

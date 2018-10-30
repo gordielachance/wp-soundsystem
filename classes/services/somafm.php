@@ -3,7 +3,7 @@
 class WPSSTM_SomaFM{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_somafm_service_link'));
-        add_action('wpsstm_live_tracklist_populated',array($this,'register_somafm_preset'));
+        add_action('wpsstm_live_tracklist_init',array($this,'register_somafm_preset'));
     }
     //register preset
     function register_somafm_preset($tracklist){
