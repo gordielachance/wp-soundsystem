@@ -10,8 +10,9 @@ class WPSSTM_SongLink{
         if ( is_wp_error( $valid ) ) return $valid;
         
         $auto_sources = array();
-        $spotify_id = $track->populate_spotify_track_id();
+        $spotify_id = WPSSTM_Spotify::update_spotify_track_id($track);
         if ( is_wp_error($spotify_id) ) return $spotify_id;
+        $track->spotify_id = $spotify_id;
 
         $sources = array();
         $url = sprintf('https://song.link/s/%s',$spotify_id);

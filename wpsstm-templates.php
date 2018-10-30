@@ -56,6 +56,16 @@ function wpsstm_get_post_mbdata($post_id = null){
     if (!$post_id) $post_id = $post->ID;
     return get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbdata_metakey, true );
 }
+function wpsstm_get_post_spotify_id($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    return get_post_meta( $post_id,WPSSTM_Spotify::$spotify_id_meta_key,true );
+}
+function wpsstm_get_spotify_data($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    return get_post_meta( $post_id, WPSSTM_MusicBrainz::$spotify_data_meta_key, true );
+}
 
 function wpsstm_get_post_image_url($post_id = null){
     global $post;
@@ -142,6 +152,39 @@ function wpsstm_get_post_mb_link_for_post($post_id){
         }
     }
     return $mbid;
+}
+
+/**
+Get the Spotify link of an item (artist/track/album).
+**/
+function wpsstm_get_post_spotify_link_for_post($post_id){
+    $id = null;
+    $link = null;
+    if ($id = wpsstm_get_post_spotify_id($post_id) ){
+
+        $post_type = get_post_type($post_id);
+        
+        switch($post_type){
+
+            case wpsstm()->post_type_artist:
+                $url = sprintf('https://open.spotify.com/artist/%s',$id);
+            break;
+
+            case wpsstm()->post_type_track:
+                $url = sprintf('https://open.spotify.com/track/%s',$id);
+            break;
+
+            case wpsstm()->post_type_album:
+                $url = sprintf('https://open.spotify.com/album/%s',$id);
+            break;
+
+        }
+
+        if ( $url ){
+            $link = sprintf('<a class="spotify_id" href="%s" target="_blank">%s</a>',$url,$id);
+        }
+    }
+    return $link;
 }
 
 function wpsstm_get_blank_action(){

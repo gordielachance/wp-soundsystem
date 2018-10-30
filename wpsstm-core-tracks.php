@@ -10,7 +10,6 @@ class WPSSTM_Core_Tracks{
     static $qvar_loved_tracks = 'loved-tracks';
     static $track_mbtype = 'recording'; //musicbrainz type, for lookups
     static $loved_track_meta_key = '_wpsstm_user_favorite';
-    static $spotify_id_meta_key = '_wpsstm_spotify_id';
     
     var $subtracks_hide = null; //default hide subtracks in track listings
 

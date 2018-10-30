@@ -1,11 +1,23 @@
 <?php
 class WPSSTM_Spotify{
+    static $spotify_id_meta_key = '_wpsstm_spotify_id';
+    static $spotify_data_meta_key = '_wpsstm_spotify_data';
     function __construct(){
         if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
             add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
             add_action('wpsstm_live_tracklist_populated',array($this,'register_spotify_presets'));
             add_action( 'add_meta_boxes', array($this, 'metabox_spotify_register'));
             add_action( 'save_post', array($this,'metabox_spotify_save')); 
+            
+        //backend columns
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_artist), array(__class__,'spotify_columns_register'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'spotify_columns_register'), 10, 2 );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'spotify_columns_register'), 10, 2 );
+        
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_artist), array(__class__,'spotify_columns_content'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'spotify_columns_content'), 10, 2 );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'spotify_columns_content'), 10, 2 );
+            
         }
     }
     //register presets
@@ -113,6 +125,18 @@ class WPSSTM_Spotify{
         
     }
     
+    function update_spotify_track_id(WPSSTM_Track $track){
+
+        $spotify = self::get_spotify_track($track);
+        $spotify_id = isset($spotify['id']) ? $spotify['id'] : null;
+        if ( $track->post_id && $spotify_id && !is_wp_error($spotify_id) ){
+            $success = update_post_meta($track->post_id,self::$spotify_id_meta_key,$spotify_id);
+            $track->track_log($success,'Stored Spotify track ID');
+        }
+
+        return $track->spotify_id = $spotify_id;
+    }
+    
     function metabox_spotify_register(){
         global $post;
 
@@ -159,9 +183,27 @@ class WPSSTM_Spotify{
         $spotify_id = ( isset($_POST[ 'wpsstm_spotify_id' ]) ) ? $_POST[ 'wpsstm_spotify_id' ] : null;
         //TO FIX TO CHECK validate spotify ID ?
         
-        update_post_meta( $post_id, WPSSTM_Core_Tracks::$spotify_id_meta_key, $spotify_id );
+        update_post_meta( $post_id, self::$spotify_id_meta_key, $spotify_id );
 
     }
+    
+    public static function spotify_columns_register($defaults) {
+        $defaults['spotifyid'] = __('Spotify ID','wpsstm');
+        return $defaults;
+    }
+    
+    public static function spotify_columns_content($column,$post_id){
+        global $post;
+        
+        switch ( $column ) {
+            case 'spotifyid':
+                $link = ($link = wpsstm_get_post_spotify_link_for_post($post_id)) ? $link : '-';
+                echo $link;
+                
+            break;
+        }
+    }
+    
 }
 
 class WPSSTM_Spotify_URL_Api_Preset{

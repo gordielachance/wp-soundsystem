@@ -38,7 +38,7 @@ class WPSSTM_Track{
             $this->artist       = wpsstm_get_post_artist($post_id);
             $this->album        = wpsstm_get_post_album($post_id);
             $this->mbid         = wpsstm_get_post_mbid($post_id);
-            $this->spotify_id   = get_post_meta( $post_id,WPSSTM_Core_Tracks::$spotify_id_meta_key,true );
+            $this->spotify_id   = wpsstm_get_post_spotify_id($post_id);
             $this->image_url    = wpsstm_get_post_image_url($post_id);
             $this->duration     = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
         }
@@ -1066,19 +1066,6 @@ class WPSSTM_Track{
         }
         wpsstm()->debug_log($message,$title,null);
 
-    }
-
-    function populate_spotify_track_id(){
-        if ($this->spotify_id) return $this->spotify_id;
-        
-        $spotify = WPSSTM_Spotify::get_spotify_track($this);
-        $spotify_id = isset($spotify['id']) ? $spotify['id'] : null;
-        if ( $this->post_id && $spotify_id && !is_wp_error($spotify_id) ){
-            $success = update_post_meta($this->post_id,WPSSTM_Core_Tracks::$spotify_id_meta_key,$spotify_id);
-            $this->track_log($success,'Stored Spotify track ID');
-        }
-
-        return $this->spotify_id = $spotify_id;
     }
     
 }
