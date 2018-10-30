@@ -54,7 +54,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
                 ?> 
                 <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $tracklist_url;?>">
                     <i class="fa fa-link" aria-hidden="true"></i> 
-                    <?php _e('Source','wpsstm');?>
+                    <?php echo $tracklist_url;?>
                 </a>
                 <?php
             }

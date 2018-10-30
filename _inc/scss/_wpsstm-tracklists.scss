@@ -80,7 +80,8 @@ body.wpsstm-default,body.wp-admin{
             }
             
             .wpsstm-live-tracklist-link{
-                float:right;
+                display:block;
+                margin: .5em 0;
                 @extend .wpsstm-no-underline;
             }
             
@@ -207,34 +208,6 @@ body.wpsstm-default,body.wp-admin{
                             > * {
 
                             }
-                        }
-
-                        &.wpsstm-track-image{
-                            padding: 0;
-                            text-align: center;
-                            display: inline-block;
-                            box-sizing: content-box;
-                        }
-                        &.wpsstm-track-info{
-                            @include display-flex();
-                            > *{
-                                @extend .wpsstm-ellipsis;
-                                text-align:left;
-                                margin-right:.5em;
-                                &[itemprop="byArtist"]{
-                                    font-weight: bold;
-                                }
-                                &[itemprop="name"]{
-                                    &:before{
-                                        content: "—";
-                                        margin-right:.5em;
-                                    }
-                                }
-                                &[itemprop="inAlbum"]{
-                                    font-size:.8em;
-                                }
-                            }
-
                         }
 
                     }

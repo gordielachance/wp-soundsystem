@@ -139,12 +139,39 @@ body.wpsstm-default,body.wp-admin{
             }
 
             .wpsstm-track-image{
+                width:2em;
+                height:2em;
+                background:#DDD;
+                padding: 0;
+                text-align: center;
+                display: inline-block;
+                box-sizing: content-box;
+                vertical-align: middle;
                 img{
-                    height:2em;
+                    height:auto;
                     width: auto;
-                    vertical-align: middle;
                 }
-
+                
+            }
+            .wpsstm-track-info{
+                @include display-flex();
+                > *{
+                    @extend .wpsstm-ellipsis;
+                    text-align:left;
+                    margin-right:.5em;
+                    &[itemprop="byArtist"]{
+                        font-weight: bold;
+                    }
+                    &[itemprop="name"]{
+                        &:before{
+                            content: "—";
+                            margin-right:.5em;
+                        }
+                    }
+                    &[itemprop="inAlbum"]{
+                        font-size:.8em;
+                    }
+                }
             }
 
            .wpsstm-track-position{
