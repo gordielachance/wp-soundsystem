@@ -118,7 +118,7 @@ class WpsstmTrackSource {
         var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
         var source_instances = self.get_source_instances();
-        source_instances.addClass('source-loading');
+        source_instances.addClass('source-loading source-active');
 
         //TO FIX check if same source playing already ?
         //if (self.track.current_source_idx === self.index){
@@ -133,8 +133,6 @@ class WpsstmTrackSource {
                 $(self.media).on('error', function(error) {
 
                     self.can_play = false;
-
-                    var source_instances = self.get_source_instances();
 
                     self.debug('media - error');
 
@@ -173,7 +171,7 @@ class WpsstmTrackSource {
                     self.debug('media - ended');
                     tracklist_instances.removeClass('tracklist-playing');
                     track_instances.removeClass('track-playing track-active');
-                    source_instances.removeClass('source-playing track-active');
+                    source_instances.removeClass('source-playing source-active');
 
                     //Play next song if any
                     self.track.tracklist.next_track_jump();
@@ -193,6 +191,18 @@ class WpsstmTrackSource {
         })
 
         return success.promise();
+
+    }
+    
+    end_source(){
+        var self = this;
+        if (!self.media) return;
+
+        self.debug("end_source #" + self.index);
+        self.media.pause();
+        wpsstm.current_media = undefined;
+        
+        self.get_source_instances().removeClass('source-playing source-active');
 
     }
 

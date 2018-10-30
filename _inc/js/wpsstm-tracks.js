@@ -655,18 +655,11 @@ class WpsstmTrack {
     
     end_current_source(){
         var self = this;
-        var source = self.get_source_obj();
         
-        if (source === undefined) return;
-
-        self.debug("end_current_source");
+        var source_obj = self.get_source_obj();
+        if (source_obj === undefined) return;
         
-        if (self.media){
-            self.media.pause();
-        }
-        
-        source.get_source_instances().removeClass('source-playing');
-        wpsstm.current_media = undefined;
+        source_obj.end_source();
         self.current_source_idx = undefined;
 
     }

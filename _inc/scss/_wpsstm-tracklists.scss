@@ -283,11 +283,10 @@ body.wpsstm-default,body.wp-admin{
             .wpsstm-track-sources{
                 @include opacity(.6);
                 [data-wpsstm-source-idx]{
-                    &.source-playing,
-                    &.source-loading{
+                    @include opacity(.6);
+                    &.source-active{
                         @include display-flex();
                     }
-                    @include opacity(.6);
                     &.source-playing{
                         @include opacity(.8);
                     }
