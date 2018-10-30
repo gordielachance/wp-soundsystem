@@ -51,10 +51,13 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         <?php
             //original link
             if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url_no_filters) ){
+                
+                //$tracklist_url = substr($tracklist_url, 0, strrpos($tracklist_url, ' ')) . " ...";
+                
                 ?> 
                 <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $tracklist_url;?>">
                     <i class="fa fa-link" aria-hidden="true"></i> 
-                    <?php echo $tracklist_url;?>
+                    <?php echo wpsstm_get_short_url($tracklist_url);?>
                 </a>
                 <?php
             }

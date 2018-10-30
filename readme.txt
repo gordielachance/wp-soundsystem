@@ -155,6 +155,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Better autosource
 * Tracks : new function update_spotify_track_id()
 * Better tracks source GUI
+* TOFIX remote request pagination
 
 = 1.9.4 =
 * Better settings page errors

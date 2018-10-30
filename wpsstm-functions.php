@@ -233,3 +233,16 @@ function wpsstm_get_uploads_dir(){
     }
     return trailingslashit($dir);
 }
+
+function wpsstm_get_short_url($url,$skiptext = ' ... '){
+    $length = strlen($url);
+    if($length > 45){
+        $length = $length - 30;
+        $first = substr($url, 0, -$length);
+        $last = substr($url, -15);
+        $new = $first.$skiptext.$last;
+        return $new;
+    }else{
+        return $url;
+    }
+}

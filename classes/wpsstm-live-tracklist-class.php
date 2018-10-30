@@ -261,7 +261,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         //count total pages
         $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination);
-        
+
         if ( $this->request_pagination['page_items_limit'] > 0 ){
             $this->request_pagination['total_pages'] = ceil( $this->track_count / $this->request_pagination['page_items_limit'] );
         }
