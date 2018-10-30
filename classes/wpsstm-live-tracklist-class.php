@@ -411,6 +411,10 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             }
 
         }
+        
+        if ( is_wp_error($response) ){
+            $this->tracklist_log( $response->get_error_message(),'Get remote URL error' );
+        }
 
         $this->response = $response;
         return $this->response;

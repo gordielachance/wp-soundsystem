@@ -887,7 +887,10 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             break;
         }
 
-        if ( is_wp_error($tracks) ) return $tracks;
+        if ( is_wp_error($tracks) ){
+            $this->tracks_error = $tracks;
+            return $tracks;
+        }
 
         $this->did_query_tracks = true;
         $this->tracks = $this->add_tracks($tracks);
