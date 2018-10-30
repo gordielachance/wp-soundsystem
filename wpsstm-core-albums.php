@@ -4,7 +4,6 @@ class WPSSTM_Core_Albums{
 
     static $album_metakey = '_wpsstm_release';
     static $qvar_album_lookup = 'lookup_release';
-    static $album_mbtype = 'release'; //musicbrainz type, for lookups
 
     
     function __construct() {

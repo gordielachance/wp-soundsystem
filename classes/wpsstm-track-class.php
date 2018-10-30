@@ -351,60 +351,6 @@ class WPSSTM_Track{
         return $success;
         
     }
-  
-    function musicbrainz(){
-        //abord
-        if( !$this->artist || !$this->title ) return;
-        if( $this->mbid !== null ) return;
-        
-        //query
-        $mzb_args = '"'.rawurlencode($this->title).'"';
-        $mzb_args .= rawurlencode(' AND artist:');
-        $mzb_args .= '"'.rawurlencode($this->artist).'"';
-
-        //TO FIX album is ignored for the moment.
-        /*
-        if(!empty($this->album)){
-            $mzb_args .= rawurlencode(' AND release:');
-            $mzb_args .= '"'.rawurlencode($this->album).'"';
-        }
-        */
-        $api_type = WPSSTM_Core_Tracks::$track_mbtype;
-        $api_response = WPSSTM_MusicBrainz::get_musicbrainz_api_entry($api_type,null,$mzb_args);
-
-        if (is_wp_error($api_response)) return;
-
-        if ( $api_response['count'] && ($match = wpsstm_get_array_value(array('recordings',0),$api_response) ) ){ //WE'VE GOT A MATCH !!!
-
-            //check score is high enough
-            if($match['score']=70){
-
-                $this->mbid = $match['id'];
-                $this->title = $match['title'];
-                $this->duration = wpsstm_get_array_value('length',$match);
-
-                //artist
-                $artists = wpsstm_get_array_value('artist-credit',$match);
-                $artists_names_arr = array();
-
-                foreach((array)$artists as $artist){
-                    $obj = $artist['artist'];
-                    $artists_names_arr[]=$obj['name'];
-                }
-                $this->artist = implode(' & ',$artists_names_arr);
-
-                //album
-                if ( $album = wpsstm_get_array_value('releases',0,$match) ){
-                    $this->album = $album['title'];
-                }
-
-            }
-
-        }
-        
-        return $api_response;
-        
-    }
 
     function love_track($do_love){
         

@@ -4,7 +4,6 @@ class WPSSTM_Core_Artists{
 
     static $artist_metakey = '_wpsstm_artist';
     static $qvar_artist_lookup = 'lookup_artist';
-    static $artist_mbtype = 'artist'; //musicbrainz type, for lookups
 
     function __construct(){
 

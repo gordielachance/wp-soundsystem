@@ -94,6 +94,7 @@ class WP_SoundSystem {
             'lastfm_community_scrobble'         => 'off',
             'spotify_client_id'                 => null,
             'spotify_client_secret'             => null,
+            'spotify_auto_id'                   => 'on',
             'tuneefy_client_id'                 => null,
             'tuneefy_client_secret'             => null,
             'soundcloud_client_id'              => null,

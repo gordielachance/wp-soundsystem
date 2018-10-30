@@ -64,7 +64,7 @@ function wpsstm_get_post_spotify_id($post_id = null){
 function wpsstm_get_spotify_data($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, WPSSTM_MusicBrainz::$spotify_data_meta_key, true );
+    return get_post_meta( $post_id, WPSSTM_Spotify::$spotify_data_meta_key, true );
 }
 
 function wpsstm_get_post_image_url($post_id = null){
@@ -128,24 +128,8 @@ function wpsstm_get_post_mb_link_for_post($post_id){
     $mbid = null;
     if ($mbid = wpsstm_get_post_mbid($post_id) ){
 
-        $post_type = get_post_type($post_id);
-        $mbtype = null;
-        
-        switch($post_type){
-
-            case wpsstm()->post_type_artist:
-                $mbtype = WPSSTM_Core_Artists::$artist_mbtype;
-            break;
-
-            case wpsstm()->post_type_track:
-                $mbtype = WPSSTM_Core_Tracks::$track_mbtype;
-            break;
-
-            case wpsstm()->post_type_album:
-                $mbtype = WPSSTM_Core_Albums::$album_mbtype;
-            break;
-
-        }
+        $mbtype = WPSSTM_MusicBrainz::get_musicbrainz_type_by_post_id($post_id);
+        $url = sprintf('https://musicbrainz.org/%s/%s',$mbtype,$mbid);
 
         if ( $url = WPSSTM_MusicBrainz::get_mb_url($mbtype,$mbid) ){
             $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
