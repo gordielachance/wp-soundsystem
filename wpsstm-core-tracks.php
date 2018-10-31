@@ -430,7 +430,7 @@ class WPSSTM_Core_Tracks{
         if ( $query->get('post_type') == wpsstm()->post_type_track ){
             //set global $wpsstm_track
             $this->setup_global_track($post->ID);
-            $wpsstm_tracklist->index = $query->current_post + 1;
+            $wpsstm_tracklist->index = $query->current_post;
         }
 
 

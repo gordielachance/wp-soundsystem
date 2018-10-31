@@ -99,7 +99,7 @@ class WPSSTM_Core_Tracklists{
         if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
-            $wpsstm_tracklist->index = $query->current_post + 1;
+            $wpsstm_tracklist->index = $query->current_post;
         }else{
             //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
             //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
