@@ -709,11 +709,13 @@ class WPSSTM_Track{
 
         //unlink track
         if ($can_remove_track){
+            $tracklist_action_url = $this->tracklist->get_tracklist_action_url('unlink');
+            $unlink_action_url = add_query_arg(array('track_id'=>$this->post_id),$tracklist_action_url);
             $actions['unlink'] = array(
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $this->get_track_action_url('unlink'),
+                'href' =>       $unlink_action_url,
             );
         }
 

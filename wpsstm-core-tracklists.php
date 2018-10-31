@@ -386,6 +386,14 @@ class WPSSTM_Core_Tracklists{
             case 'trash':
                 $success = $tracklist->trash_tracklist();
             break;
+            case 'unlink':
+                $track_id = isset($_GET['track_id']) ? $_GET['track_id'] : null;
+                if ($track_id){
+                    $track = new WPSSTM_Track($track_id);
+                    $success = $tracklist->remove_subtrack_ids($track->post_id);
+                }
+
+            break;
         }
         
         if ($success){ //redirect with a success / error code
