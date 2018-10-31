@@ -1059,7 +1059,6 @@ class WPSSTM_Tracklist{
                     $track_args = $track;
                     $track = new WPSSTM_Track(null);
                     $track->from_array($track_args);
-                    $track->index = $current_index;
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
@@ -1068,6 +1067,7 @@ class WPSSTM_Tracklist{
             }
             
             $track->tracklist = $this;
+            $track->index = $current_index;
             $add_tracks[] = $track;
             $current_index++;
         }
