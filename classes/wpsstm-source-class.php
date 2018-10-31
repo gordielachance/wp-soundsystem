@@ -16,10 +16,9 @@ class WPSSTM_Source{
     var $duration; //in seconds
     var $match;  //weight
     var $tags = array(); //array of tags that we could use to filter the sources, eg. remix,official,live,cover,acoustic,demo, ...
-    
-    var $track_id;
+    var $track;
 
-    function __construct($post_id = null){
+    function __construct($post_id = null,$track = null){
 
         if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
             $this->post_id = (int)$post_id;
@@ -31,12 +30,22 @@ class WPSSTM_Source{
                 $this->index = get_post_field('menu_order', $this->post_id);
             }
             
-            $this->track_id = wp_get_post_parent_id( $this->post_id );
+            $track = wp_get_post_parent_id( $this->post_id );
         }
+
+        if ($track){
+            if ( is_a($track, 'WPSSTM_Track') ){
+                $this->track = $track;
+            }elseif( is_int($track) ){
+                $this->track = new WPSSTM_Track($track);
+            }
+        }else{
+            $track = new WPSSTM_Track(); //default
+        }
+        
 
     }
 
-    
     //TOFIXKKK
     function get_default(){
         return array(
@@ -99,7 +108,7 @@ class WPSSTM_Source{
 
         $required = array(
             'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current source
-            'post_parent'       => $this->track_id,
+            'post_parent'       => $this->track->post_id,
             'post_type'         => array(wpsstm()->post_type_source),
 
             'meta_query'        => array(
@@ -136,7 +145,7 @@ class WPSSTM_Source{
         $validated = $this->validate_source();
         if ( is_wp_error($validated) ) return $validated;
         
-        if (!$this->track_id){
+        if (!$this->track->post_id){
             return new WP_Error( 'wpsstm_souce_missing_post_id', __('Unable to validate source: missing track ID','wpsstm') );
         }
         
@@ -166,7 +175,7 @@ class WPSSTM_Source{
         $required_args = array(
             'post_title' =>     $this->title,
             'post_type' =>      wpsstm()->post_type_source,
-            'post_parent' =>    $this->track_id,
+            'post_parent' =>    $this->track->post_id,
             'meta_input' =>     array(
                 WPSSTM_Core_Sources::$source_url_metakey => $this->permalink_url
             )
@@ -215,7 +224,7 @@ class WPSSTM_Source{
         
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
-            'data-wpsstm-track-id' =>               $this->track_id,
+            'data-wpsstm-track-id' =>               $this->track->post_id,
             'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
             'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
             'data-wpsstm-source-src' =>             $this->get_stream_url(),

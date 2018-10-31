@@ -414,9 +414,8 @@ class WPSSTM_Core_Sources{
 
         foreach((array)$source_urls as $url){
             //TOFIXKKK where is track ?
-            $source = new WPSSTM_Source();
+            $source = new WPSSTM_Source(null,$track);
             $source->permalink_url = $url;
-            $source->track_id = $track->post_id;
             $source->save_source();//save only if it does not exists yet
             $new_sources[] = $source;
         }

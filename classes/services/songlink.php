@@ -22,7 +22,7 @@ class WPSSTM_SongLink{
         }
 
         $sources = array();
-        $url = sprintf('https://song.link/s/%s',$spotify_id);
+        $url = sprintf('https://song.link/s/%s',$track->spotify_id);
         $track->track_log($url, "Getting SongLink page..." ); 
 
         $response = wp_remote_get($url);

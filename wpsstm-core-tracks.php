@@ -452,11 +452,10 @@ class WPSSTM_Core_Tracks{
     private function setup_global_track($track_id){
         global $wpsstm_tracklist;
         global $wpsstm_track;
-        
-        $wpsstm_track = new WPSSTM_Track( $track_id );
 
         //set global $wpsstm_tracklist (a tracklists with this single track)
         $wpsstm_tracklist = new WPSSTM_Single_Track_Tracklist($track_id);
+        $wpsstm_track = new WPSSTM_Track( $track_id, $wpsstm_tracklist );
     }
 
     function pre_get_posts_by_track_title( $query ) {
@@ -807,12 +806,12 @@ class WPSSTM_Core_Tracks{
             'success'   => false
         );
         
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = $result['track'] = new WPSSTM_Track($track_id);
-        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
-        
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
         $tracklist = $result['tracklist'] = wpsstm_get_tracklist($tracklist_id);
+        
+        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
+        $track = $result['track'] = new WPSSTM_Track($track_id,$tracklist);
+        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
         
         $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
         $success = false;
@@ -931,7 +930,7 @@ class WPSSTM_Core_Tracks{
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
         $tracklist = wpsstm_get_tracklist($tracklist_id);
         
-        $track = new WPSSTM_Track();
+        $track = new WPSSTM_Track(null,$tracklist);
         $track->from_array($ajax_data['track']);
         $result['track'] = $track;
 
@@ -997,7 +996,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            $this->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Static_Tracklist::trash_track_sources()");
+            $track->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Static_Tracklist::trash_track_sources()");
         }
 
     }

@@ -1056,12 +1056,12 @@ class WPSSTM_Tracklist{
                 
                 if ( is_array($track) ){
                     $track_args = $track;
-                    $track = new WPSSTM_Track();
+                    $track = new WPSSTM_Track(null,$this);
                     $track->from_array($track_args);
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
-                    $track = new WPSSTM_Track($track_id);
+                    $track = new WPSSTM_Track($track_id,$this);
                 }
             }
             

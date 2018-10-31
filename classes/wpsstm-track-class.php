@@ -24,8 +24,10 @@ class WPSSTM_Track{
     var $current_source = -1;
     var $source_count = 0;
     var $in_source_loop = false;
+    
+    var $tracklist;
 
-    function __construct( $post_id = null ){
+    function __construct( $post_id = null, $tracklist = null ){
 
         //has track ID
         if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_track ) ){
@@ -41,6 +43,16 @@ class WPSSTM_Track{
             $this->spotify_id   = wpsstm_get_post_spotify_id($post_id);
             $this->image_url    = wpsstm_get_post_image_url($post_id);
             $this->duration     = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
+        }
+        
+        if ($tracklist){
+            if ( is_object($tracklist) ){
+                $this->tracklist = $tracklist;
+            }elseif( is_int($tracklist) ){
+                $this->tracklist = wpsstm_get_tracklist($track);
+            }
+        }else{
+            $this->tracklist = wpsstm_get_tracklist(); //default
         }
 
         
@@ -320,16 +332,6 @@ class WPSSTM_Track{
         
         $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WPSSTM_Track::save_track()" ); 
 
-        //save sources if any set
-        //TO FIX TO CHECK how often this runs; and when ?
-        foreach ((array)$this->sources as $source_raw){
-            
-            $source = new WPSSTM_Source();
-            $source->track_id = $this->post_id;
-            
-            $source->from_array($source_raw);         
-        }
-
         return $this->post_id;
         
     }
@@ -458,6 +460,8 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
+        
+        
     }
     
     /*
@@ -509,10 +513,8 @@ class WPSSTM_Track{
         if ( is_wp_error($autosources_arr) ) return $autosources_arr;
 
         foreach((array)$autosources_arr as $key=>$source_arr){
-            
-            $source = new WPSSTM_Source();
+            $source = new WPSSTM_Source(null,$this);
             $source->from_array($source_arr);
-            $source->track_id = $this->post_id;
             $source->is_community = true;
             
             //validate
@@ -785,18 +787,17 @@ class WPSSTM_Track{
                 
                 if ( is_array($source) ){
                     $source_args = $source;
-                    $source = new WPSSTM_Source();
+                    $source = new WPSSTM_Source(null,$this);
                     $source->from_array($source_args);
                 }else{ //source ID
                     $source_id = $source;
                     //TO FIX check for int ?
-                    $source = new WPSSTM_Source($source_id);
+                    $source = new WPSSTM_Source($source_id,$this);
                 }
             }
 
-            $source->track_id = $this->post_id;
             $valid = $source->validate_source();
-            
+
             if ( is_wp_error($valid) ){
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
