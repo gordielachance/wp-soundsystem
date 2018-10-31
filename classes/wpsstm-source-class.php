@@ -18,7 +18,7 @@ class WPSSTM_Source{
     var $tags = array(); //array of tags that we could use to filter the sources, eg. remix,official,live,cover,acoustic,demo, ...
     var $track;
 
-    function __construct($post_id = null,$track = null){
+    function __construct($post_id = null){
 
         if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
             $this->post_id = (int)$post_id;
@@ -33,16 +33,7 @@ class WPSSTM_Source{
             $track = wp_get_post_parent_id( $this->post_id );
         }
 
-        if ($track){
-            if ( is_a($track, 'WPSSTM_Track') ){
-                $this->track = $track;
-            }elseif( is_int($track) ){
-                $this->track = new WPSSTM_Track($track);
-            }
-        }else{
-            $track = new WPSSTM_Track(); //default
-        }
-        
+        $this->track = new WPSSTM_Track(); //default
 
     }
 
@@ -142,7 +133,9 @@ class WPSSTM_Source{
     }
 
     function save_source(){
+        
         $validated = $this->validate_source();
+
         if ( is_wp_error($validated) ) return $validated;
         
         if (!$this->track->post_id){
@@ -341,16 +334,9 @@ class WPSSTM_Source{
             $message = implode("\n", $message);
         }
         
-        //tracklist log
-        /*
-        if ( $log_file = $this->get_tracklist_log_path() ){
-            $blogtime = current_time( 'mysql' );
-            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
+        //track log
+        $this->track->track_log($message,$title);
 
-            error_log($output.PHP_EOL,3,$log_file);
-        }
-        */
-        
         //global log
         if ($this->post_id){
             $title = sprintf('[source:%s] ',$this->post_id) . $title;

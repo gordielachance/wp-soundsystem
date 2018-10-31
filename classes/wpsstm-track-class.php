@@ -491,21 +491,23 @@ class WPSSTM_Track{
         Create community post :
         if track does not exists yet, create it as a community track - we need a post ID to store various metadatas
         */
-        
+
         if ( !$this->post_id ){
-             $tracks_args = array( //as community tracks	
+            $this->track_log('Creating community track','autosource');
+            $tracks_args = array( //as community tracks	
                 'post_author'   => wpsstm()->get_options('community_user_id'),	
             );	
             	
             $success = $this->save_track($tracks_args);	
             if ( is_wp_error($success) ){
                 $error_msg = $success->get_error_message();
-                $this->track_log($error_msg,'Error while creating track');
+                $this->track_log($error_msg,'Error while creating community track');
                 return $success;
             }else{
-                $this->track_log($success,'Track created');
+                $this->track_log($success,'Community track created');
             }
-            	
+        }else{
+            $this->track_log($this->post_id,'TOUFIX track has ID');
         }
 
         //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);
@@ -513,8 +515,9 @@ class WPSSTM_Track{
         if ( is_wp_error($autosources_arr) ) return $autosources_arr;
 
         foreach((array)$autosources_arr as $key=>$source_arr){
-            $source = new WPSSTM_Source(null,$this);
+            $source = new WPSSTM_Source(null);
             $source->from_array($source_arr);
+            $source->track = $this;
             $source->is_community = true;
             
             //validate
@@ -545,18 +548,19 @@ class WPSSTM_Track{
         $autosources = array_slice($autosources, 0, $limit_autosources);
         $autosources = apply_filters('wpsstm_track_autosources',$autosources);
 
+        //save new sources
         $this->add_sources($autosources);
         
-        //save new sources
         $new_ids = $this->save_new_sources();
+        
         $this->track_log(json_encode(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids))),'autosource results');
-
+        
         return $new_ids;
 
     }
     
     private function save_new_sources(){
-        
+
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );
         }
@@ -568,8 +572,9 @@ class WPSSTM_Track{
         //insert sources
         $inserted = array();
         foreach((array)$this->sources as $source){
-            
+
             if ($source->post_id) continue;
+            $source->track = $this;
             $source_id = $source->save_source();
 
             if ( is_wp_error($source_id) ){
@@ -582,7 +587,7 @@ class WPSSTM_Track{
             }
 
         }
-        
+
         return $inserted;
         
     }
@@ -629,7 +634,7 @@ class WPSSTM_Track{
         return $url;
     }
     
-    function get_track_links($tracklist){
+    function get_track_links(){
         
         $actions = array();
 
@@ -637,12 +642,12 @@ class WPSSTM_Track{
         Tracklist
         //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
         */
-        $tracklist_id = $tracklist->post_id;
+        $tracklist_id = $this->tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') && ($tracklist->track_count > 1) );
-        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($tracklist->tracklist_type == 'static') );
+        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($this->tracklist->tracklist_type == 'static') && ($this->tracklist->track_count > 1) );
+        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($this->tracklist->tracklist_type == 'static') );
         
         /*
         Track
@@ -751,12 +756,9 @@ class WPSSTM_Track{
             'itemprop' =>                       'track',
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
-            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true )
+            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true ),
+            'data-wpsstm-track-idx' =>          $this->index
         );
-        
-        if ($wpsstm_tracklist){
-            $attr['data-wpsstm-track-idx'] = $wpsstm_tracklist->current_track;
-        }
 
         return wpsstm_get_html_attr($attr);
     }
@@ -783,39 +785,41 @@ class WPSSTM_Track{
         $add_sources = array();
         if(!$input_sources) return;
 
+        
         foreach ((array)$input_sources as $source){
 
-            if ( !is_a($source, 'WPSSTM_Source') ){
-                
+            if ( is_a($source, 'WPSSTM_Source') ){
+                $source_obj = $source;
+            }else{
                 if ( is_array($source) ){
                     $source_args = $source;
-                    $source = new WPSSTM_Source(null,$this);
-                    $source->from_array($source_args);
+                    $source_obj = new WPSSTM_Source(null);
+                    $source_obj->from_array($source_args);
                 }else{ //source ID
                     $source_id = $source;
                     //TO FIX check for int ?
-                    $source = new WPSSTM_Source($source_id,$this);
+                    $source_obj = new WPSSTM_Source($source_id);
                 }
             }
 
-            $valid = $source->validate_source();
+            $valid = $source_obj->validate_source();
 
             if ( is_wp_error($valid) ){
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
-                $source->source_log(json_encode(array('error'=>$error_msg,'source'=>$source)),"Unable to add source");
+                $source_obj->source_log(json_encode(array('error'=>$error_msg,'source'=>$source_obj)),"Unable to add source");
                 continue;
-            }else{
-                $add_sources[] = $source;
             }
+
+            $source_obj->track = $this;
+            $add_sources[] = $source_obj;
             
         }
 
         //allow users to alter the input sources.
         $add_sources = apply_filters('wpsstm_input_sources',$add_sources,$this);
-        //$this->sources = $this->validate_sources($add_sources);
-        
-        $this->sources = array_merge((array)$this->sources,$add_sources);
+
+        $this->sources = array_merge((array)$this->sources,(array)$add_sources);
         $this->source_count = count($this->sources);
 
         return $add_sources;
@@ -1000,20 +1004,12 @@ class WPSSTM_Track{
         }
         
         //tracklist log
-        /*
-        if ( $log_file = $this->get_tracklist_log_path() ){
-            $blogtime = current_time( 'mysql' );
-            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
-
-            error_log($output.PHP_EOL,3,$log_file);
-        }
-        */
+        $this->tracklist->tracklist_log($message,$title);
         
         //global log
         if ($this->post_id){
             $title = sprintf('[track:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($message,$title,null);
 
     }
     

@@ -14,7 +14,7 @@ $track->populate_sources();
                 </span>
             <?php } ?>
             <span class="wpsstm-track-position">
-                <span itemprop="position"><?php echo $track->tracklist->current_track + 1;?></span>
+                <span itemprop="position"><?php echo $track->index + 1;?></span>
             </span>
             <span class="wpsstm-track-image" itemprop="image">
                 <?php 

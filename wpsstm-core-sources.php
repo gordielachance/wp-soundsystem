@@ -1,8 +1,6 @@
 <?php
 
 class WPSSTM_Core_Sources{
-
-    var $providers = array();
     static $source_url_metakey = '_wpsstm_source_url';
     static $qvar_source_action = 'source-action';
     static $autosource_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
@@ -50,6 +48,20 @@ class WPSSTM_Core_Sources{
         //delete source
         add_action('wp_ajax_wpsstm_trash_source', array($this,'ajax_trash_source'));
 
+        //add_action('wp', array($this,'test_autosource_ajax') );
+    }
+    
+    function test_autosource_ajax(){
+        
+        if ( is_admin() ) return;
+    
+        $_POST = array(
+            'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
+        );
+        
+        wpsstm()->debug_log(json_encode($_POST),'testing autosource AJAX');
+        
+        $this->ajax_track_autosource();
     }
     
     function add_query_vars_source( $qvars ) {
@@ -329,7 +341,7 @@ class WPSSTM_Core_Sources{
 
         //track sources
         $wpsstm_track->populate_sources();
-        wpsstm_locate_template( 'track-sources.php', true, false );
+        wpsstm_locate_template( 'content-source.php', true, false );
 
         ?>
         <p class="wpsstm-new-track-sources-container">
@@ -414,11 +426,13 @@ class WPSSTM_Core_Sources{
 
         foreach((array)$source_urls as $url){
             //TOFIXKKK where is track ?
-            $source = new WPSSTM_Source(null,$track);
+            $source = new WPSSTM_Source(null);
             $source->permalink_url = $url;
-            $source->save_source();//save only if it does not exists yet
             $new_sources[] = $source;
         }
+        
+        $track->add_sources($new_sources);
+        $track->save_new_sources();//save only if it does not exists yet
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
@@ -497,8 +511,11 @@ class WPSSTM_Core_Sources{
     function ajax_track_autosource(){
         global $wpsstm_track;
         
+        //set global $wpsstm_track
         $ajax_data = wp_unslash($_POST);
-        
+        $wpsstm_track = new WPSSTM_Track();
+        $wpsstm_track->from_array($ajax_data['track']);
+
         $result = array(
             'input'     => $ajax_data,
             'timestamp' => current_time('timestamp'),
@@ -506,28 +523,30 @@ class WPSSTM_Core_Sources{
             'new_html'  => null,
             'success'   => false
         );
-
-        //set global $wpsstm_track
-        $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);        
-        
+            
         //autosource
-        $success = $wpsstm_track->autosource();
-        $result['track'] = $wpsstm_track;
+        $new_ids = array();
+        
+        $new_ids = $wpsstm_track->autosource();
+        $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
 
-        if ( is_wp_error($success) ){
-            $result['message'] = $success->get_error_message();
-        }elseif( $success ){
-            ob_start();
-            wpsstm_locate_template( 'track-sources.php', true, false );
-            $sources_list = ob_get_clean();
-            $result['new_html'] = $sources_list;
+        if ( is_wp_error($new_ids) ){
+            $result['message'] = $new_ids->get_error_message();
+        }else{
+            $result['new_ids'] = $new_ids;
             $result['success'] = true;
-
         }
+        
+        //repopulate track (may have been created and thus have a post_id, etc.)
+        //TO FIX TO CHECK maybe it is not necessary to repopulate the track here?
+        ob_start();
+        wpsstm_locate_template( 'content-track.php', true, false );
+        $updated_track = ob_get_clean();
+        $result['new_html'] = $updated_track;
+        $result['success'] = true;
 
         header('Content-type: application/json');
-        wp_send_json( $result ); 
+        wp_send_json( $result );
 
     }
     

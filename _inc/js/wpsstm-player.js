@@ -31,7 +31,7 @@ class WpsstmPagePlayer {
         self.debug("init_page_tracklists()");
 
         all_tracklists.each(function(index,tracklist_el) {
-            var tracklist = new WpsstmTracklist(tracklist_el,index);
+            var tracklist = new WpsstmTracklist(tracklist_el);
             self.tracklists.push(tracklist);
         });
 

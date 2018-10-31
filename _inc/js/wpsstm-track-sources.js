@@ -1,15 +1,30 @@
 class WpsstmTrackSource {
     constructor(source_html,track) {
-
-        this.track =            track;
-        this.source_el =        $(source_html);
         
-        this.index =            Number(this.source_el.attr('data-wpsstm-source-idx'));
-        this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
-        this.src =              this.source_el.attr('data-wpsstm-source-src');
-        this.type =             this.source_el.attr('data-wpsstm-source-type');
-        this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
+        this.source_el =        $([]);
+        this.track =            new WpsstmTrack();
+        
+        this.index =            null;
+        this.post_id =          null;
+        this.src =              null;
+        this.type =             null;
+        this.can_play =         false;
         this.media =            undefined;
+        
+        //tracklist
+        if ( track !== undefined ){
+            this.track =        track;
+        }
+        
+        //track
+        if ( source_html !== undefined ){
+            this.source_el =        $(source_html);
+            this.index =            Number(this.source_el.attr('data-wpsstm-source-idx'));
+            this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
+            this.src =              this.source_el.attr('data-wpsstm-source-src');
+            this.type =             this.source_el.attr('data-wpsstm-source-type');
+            this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
+        }
         
         //this.debug("new WpsstmTrackSource");
         

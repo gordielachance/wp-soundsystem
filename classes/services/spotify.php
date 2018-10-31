@@ -554,7 +554,7 @@ class WPSSTM_Spotify{
         //get ID of first entry
         $sid = $first_entry['id'];
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'spotify_'=>$sid),"Auto Spotify ID" ); 
+        wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'spotify_'=>$sid)),"Auto Spotify ID" ); 
         
         if ($sid){
             update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );

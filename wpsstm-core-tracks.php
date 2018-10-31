@@ -451,7 +451,8 @@ class WPSSTM_Core_Tracks{
 
         //set global $wpsstm_tracklist (a tracklists with this single track)
         $wpsstm_tracklist = new WPSSTM_Single_Track_Tracklist($track_id);
-        $wpsstm_track = new WPSSTM_Track( $track_id, $wpsstm_tracklist );
+        $wpsstm_track = new WPSSTM_Track( $track_id );
+        $wpsstm_track->tracklist = $wpsstm_tracklist;
     }
 
     function pre_get_posts_by_track_title( $query ) {
@@ -806,7 +807,8 @@ class WPSSTM_Core_Tracks{
         $tracklist = $result['tracklist'] = wpsstm_get_tracklist($tracklist_id);
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = $result['track'] = new WPSSTM_Track($track_id,$tracklist);
+        $track = $result['track'] = new WPSSTM_Track($track_id);
+        $track->tracklist = $tracklist;
         $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
         
         $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
@@ -926,7 +928,8 @@ class WPSSTM_Core_Tracks{
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
         $tracklist = wpsstm_get_tracklist($tracklist_id);
         
-        $track = new WPSSTM_Track(null,$tracklist);
+        $track = new WPSSTM_Track();
+        $track->tracklist = $tracklist;
         $track->from_array($ajax_data['track']);
         $result['track'] = $track;
 

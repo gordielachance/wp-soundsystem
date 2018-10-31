@@ -1046,6 +1046,7 @@ class WPSSTM_Tracklist{
     function add_tracks($input_tracks){
         
         $add_tracks = array();
+        $current_index = count($this->tracks);
 
         //force array
         if ( !is_array($input_tracks) ) $input_tracks = array($input_tracks);
@@ -1056,16 +1057,19 @@ class WPSSTM_Tracklist{
                 
                 if ( is_array($track) ){
                     $track_args = $track;
-                    $track = new WPSSTM_Track(null,$this);
+                    $track = new WPSSTM_Track(null);
                     $track->from_array($track_args);
+                    $track->index = $current_index;
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
-                    $track = new WPSSTM_Track($track_id,$this);
+                    $track = new WPSSTM_Track($track_id);
                 }
             }
             
+            $track->tracklist = $this;
             $add_tracks[] = $track;
+            $current_index++;
         }
 
         //allow users to alter the input tracks.
