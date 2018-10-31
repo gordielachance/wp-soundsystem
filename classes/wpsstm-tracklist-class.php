@@ -29,7 +29,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
         
-        $default_options = $this->get_default_options();
+        $default_options = self::get_default_options();
         $url_options = $this->get_url_options();
         $this->options = wp_parse_args($url_options,$default_options);
 
@@ -66,7 +66,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    protected function get_default_options(){
+    public static function get_default_options(){
         return array(
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),

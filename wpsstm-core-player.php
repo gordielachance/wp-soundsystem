@@ -54,8 +54,9 @@ class WPSSTM_Core_Player{
         
         //localize vars
         $localize_vars=array(
-            'leave_page_text'       => __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
-            'plugin_path'           => trailingslashit( get_bloginfo('url') ) . WPINC . '/js/mediaelement/', //do not forget final slash here
+            'leave_page_text'       =>      __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
+            'plugin_path'           =>      trailingslashit( get_bloginfo('url') ) . WPINC . '/js/mediaelement/', //do not forget final slash here
+            'default_tracklist_options' =>  WPSSTM_Static_Tracklist::get_default_options(),
         );
 
         wp_localize_script('wpsstm-player','wpsstmPlayer', $localize_vars);

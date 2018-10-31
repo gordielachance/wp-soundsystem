@@ -18,7 +18,7 @@ class WPSSTM_SongLink{
         }
         
         if (!$track->spotify_id){
-            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify ID for the track','wpsstm'));
+            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify ID','wpsstm'));
         }
 
         $sources = array();
@@ -27,6 +27,11 @@ class WPSSTM_SongLink{
 
         $response = wp_remote_get($url);
         $body = wp_remote_retrieve_body($response);
+        
+        if (!$body){
+            $body = new WP_Error('empty_songlink_response',__('Empty SongLink response','wpsstm'));
+        }
+        
         if ( is_wp_error($body) ) return $body;
         
         /*
