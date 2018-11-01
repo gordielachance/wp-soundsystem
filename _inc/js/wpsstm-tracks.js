@@ -139,6 +139,7 @@
     });
 
     $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
+
         var track_instances = track_obj.get_track_instances();
 
         //play button
@@ -338,21 +339,23 @@ class WpsstmTrack {
     }
     
     init_html(track_html){
+        
+        var self = this;
 
         if ( track_html === undefined ) return;
         
-        this.track_el =             $(track_html);
-        this.index =                Number(this.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
-        this.artist =               this.track_el.find('[itemprop="byArtist"]').text();
-        this.title =                this.track_el.find('[itemprop="name"]').text();
-        this.album =                this.track_el.find('[itemprop="inAlbum"]').text();
-        this.post_id =              Number(this.track_el.attr('data-wpsstm-track-id'));
-        //this.autosource_time =      Number(this.track_el.attr('data-wpsstm-autosource-time'));
+        self.track_el =             $(track_html);
+        self.index =                Number(self.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
+        self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
+        self.title =                self.track_el.find('[itemprop="name"]').text();
+        self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
+        self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
+        //self.autosource_time =      Number(self.track_el.attr('data-wpsstm-autosource-time'));
 
         //populate existing sources
-        this.populate_html_sources();
+        self.populate_html_sources();
         
-        $(document).trigger("wpsstmTrackDomReady",[this]); //custom event
+        $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
         
     }
 
@@ -549,8 +552,8 @@ class WpsstmTrack {
 
                 //update HTML & repopulate track
                 self.debug("repopulate HTML");
-                self.init_html(data.new_html);
                 track_instances.replaceWith( data.new_html );
+                self.init_html(data.new_html);
                 
             }
 
@@ -580,9 +583,10 @@ class WpsstmTrack {
     }
     
     populate_html_sources(){
-        this.sources =              [];
-        this.current_source_idx =   undefined;
         var self =      this;
+        
+        self.sources =              [];
+        self.current_source_idx =   undefined;
         var track_el =  self.track_el; //page track
 
         var source_els = $(track_el).find('[data-wpsstm-source-idx]');
