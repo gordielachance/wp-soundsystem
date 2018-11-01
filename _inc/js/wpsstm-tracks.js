@@ -139,20 +139,19 @@
     });
 
     $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
-        var track_el = track_obj.track_el;
+        var track_instances = track_obj.get_track_instances();
 
         //play button
-        $(track_el).find('.wpsstm-track-icon').click(function(e) {
-            console.log("CLICK");
+        track_instances.find('.wpsstm-track-icon').click(function(e) {
             e.preventDefault();
 
-            if ( wpsstm.current_media && $(track_el).hasClass('track-active') ){
-                if ( $(track_el).hasClass('track-playing') ){
+            if ( wpsstm.current_media && (wpsstm.current_track == track_obj) ){
+                if ( track_instances.hasClass('track-playing') ){
                     wpsstm.current_media.pause();
                 }else{
                     wpsstm.current_media.play();
                 }
-                $(track_el).toggleClass('track-playing');
+                track_instances.toggleClass('track-playing');
             }else{
                 track_obj.play_track();
             }
@@ -160,7 +159,7 @@
         });
         
         //favorite track
-        $(track_el).find('#wpsstm-track-action-favorite a').click(function(e) {
+        track_instances.find('#wpsstm-track-action-favorite a').click(function(e) {
 
             e.preventDefault();
 
@@ -220,7 +219,7 @@
         });
 
         //unfavorite track
-        $(track_el).find('#wpsstm-track-action-unfavorite a').click(function(e) {
+        track_instances.find('#wpsstm-track-action-unfavorite a').click(function(e) {
 
             e.preventDefault();
 
@@ -269,13 +268,13 @@
         });
         
         //remove
-        $(track_el).find('#wpsstm-track-action-remove a').click(function(e) {
+        track_instances.find('#wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
             track_obj.tracklist.remove_tracklist_track(track_obj);
         });
         
         //delete
-        $(track_el).find('#wpsstm-track-action-trash a').click(function(e) {
+        track_instances.find('#wpsstm-track-action-trash a').click(function(e) {
             e.preventDefault();
             track_obj.delete_track();
         });
@@ -328,7 +327,9 @@ class WpsstmTrack {
         }
         
         //track
-        this.init_html(track_html);
+        if ( track_html !== undefined ){
+            this.init_html(track_html);
+        }
     }
 
     debug(msg){
@@ -548,8 +549,8 @@ class WpsstmTrack {
 
                 //update HTML & repopulate track
                 self.debug("repopulate HTML");
-                track_instances.replaceWith( data.new_html );
                 self.init_html(data.new_html);
+                track_instances.replaceWith( data.new_html );
                 
             }
 
@@ -579,6 +580,8 @@ class WpsstmTrack {
     }
     
     populate_html_sources(){
+        this.sources =              [];
+        this.current_source_idx =   undefined;
         var self =      this;
         var track_el =  self.track_el; //page track
 
