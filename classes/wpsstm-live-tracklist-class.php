@@ -71,7 +71,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
     }
     
-    protected function get_default_options(){
+    public static function get_default_options(){
         $options = parent::get_default_options();
         
         $live_options = array(

@@ -163,35 +163,40 @@
         var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
         wpsstm.showMoreLessActions(actions_lists);
     });
-    
-    
 
-    
 })(jQuery);
 
 class WpsstmTracklist {
-    constructor(tracklist_el,tracklist_index) {
-        this.index =                    tracklist_index; //index in page
-        this.tracklist_el =             $(tracklist_el);
-        this.post_id =                  Number( this.tracklist_el.attr('data-wpsstm-tracklist-id') );
-        this.unique_id =                this.tracklist_el.attr('data-wpsstm-tracklist-unique-id');
+    constructor(tracklist_html) {
+        
+        this.index =                    undefined;
+        this.post_id =                  undefined;
+        this.unique_id =                undefined;
+        this.tracklist_el =             $([]);
         this.tracklist_request =        undefined;
         this.is_expired =               undefined;
         this.expiration_time =          undefined;
-        this.options =                  {};
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
         this.tracks_shuffle_order =     undefined;
+        this.options =                  wpsstmPlayer.default_tracklist_options;
+        this.can_play =                 undefined;
+
+        //track
+        if ( tracklist_html !== undefined ){
+            this.tracklist_el =             $(tracklist_html);
+            this.index =                    Number( this.tracklist_el.attr('data-wpsstm-tracklist-idx') );
+            this.post_id =                  Number( this.tracklist_el.attr('data-wpsstm-tracklist-id') );
+            this.unique_id =                this.tracklist_el.attr('data-wpsstm-tracklist-unique-id');
+        }
 
         /*
         options
         */
-        var options_var_name = 'wpsstm_tracklist_' + this.unique_id + '_options';
-        this.options = window[options_var_name];
-        
-        ///
-        this.tracklist_el.attr('data-wpsstm-tracklist-idx',this.index);
-
+        if (this.unique_id !== undefined ){
+            var options_var_name = 'wpsstm_tracklist_' + this.unique_id + '_options';
+            this.options = window[options_var_name];
+        }
         ///
         this.load_tracklist_tracks();
         
@@ -222,20 +227,19 @@ class WpsstmTracklist {
         self.tracks = [];
         self.tracks_shuffle_order = [];
         
-        if ( tracks_html.length > 0 ){
-            $.each(tracks_html, function( index, track_html ) {
-                var new_track = new WpsstmTrack(track_html,self,index);
-                self.tracks.push(new_track);
-            });
-
-            self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
-
-        }
+        if ( !tracks_html.length) return;
         
+        $.each(tracks_html, function( index, track_html ) {
+            var new_track = new WpsstmTrack(track_html,self);
+            self.tracks.push(new_track);
+        });
+
+        self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
+
         /* tracks count */
         self.tracks_count = Number( self.tracklist_el.find('[itemprop="numTracks"]').attr('content') ); //if value > -1, tracks have been populated with PHP
         self.can_play =     (self.tracks_count < 0) ? undefined : (self.tracks_count); //if -1:not yet populated
-        
+
         /*
         autoload
         Wheter or not populate the tracks through ajax at initialization, if not done yet (depends of self.can_play)
@@ -355,12 +359,12 @@ class WpsstmTracklist {
             dataType: 'json'
         });
 
-
         self.tracklist_request.done(function(data) {
             if (data.success === false) {
-                self.tracklist_el.addClass('tracklist-error');
-                self.debug("get_tracklist_request did NOT succeed: no data");
                 self.can_play = false;
+                self.tracklist_el.addClass('tracklist-error');
+                self.debug("get_tracklist_request did NOT succeed:");
+                self.debug(data);
             }else{
                 var new_tracklist_inner = $(data.new_html).html();
                 self.tracklist_el.html(new_tracklist_inner);

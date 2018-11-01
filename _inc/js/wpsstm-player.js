@@ -31,7 +31,7 @@ class WpsstmPagePlayer {
         self.debug("init_page_tracklists()");
 
         all_tracklists.each(function(index,tracklist_el) {
-            var tracklist = new WpsstmTracklist(tracklist_el,index);
+            var tracklist = new WpsstmTracklist(tracklist_el);
             self.tracklists.push(tracklist);
         });
 
@@ -56,8 +56,7 @@ class WpsstmPagePlayer {
         $(document).trigger("PageTracklistsInit"); //custom event
 
     }
-
-
+    
     get_maybe_shuffle_tracklist_idx(idx){
         var self = this;
         if ( !self.is_shuffle ) return idx;

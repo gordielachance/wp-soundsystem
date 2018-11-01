@@ -681,11 +681,12 @@ class WPSSTM_MusicBrainz {
         //get MBID of first entry
         $mbid = $first_entry['id'];
 
-        wpsstm()->debug_log( array('post_id'=>$post_id,'mbid'=>$mbid),"Auto Musicbrainz ID" ); 
-        
         if ($mbid){
-            update_post_meta( $post_id, self::$mbid_metakey, $mbid );
-            self::reload_mb_datas($post_id);
+            if ( $success = update_post_meta( $post_id, self::$mbid_metakey, $mbid ) ){
+                wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'mbid'=>$mbid)),"Updated MBID" ); 
+                self::reload_mb_datas($post_id);
+            }
+            
             return $mbid;
         }
         

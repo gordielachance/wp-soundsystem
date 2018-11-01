@@ -29,7 +29,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
         
-        $default_options = $this->get_default_options();
+        $default_options = self::get_default_options();
         $url_options = $this->get_url_options();
         $this->options = wp_parse_args($url_options,$default_options);
 
@@ -66,7 +66,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    protected function get_default_options(){
+    public static function get_default_options(){
         return array(
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
@@ -1046,6 +1046,7 @@ class WPSSTM_Tracklist{
     function add_tracks($input_tracks){
         
         $add_tracks = array();
+        $current_index = count($this->tracks);
 
         //force array
         if ( !is_array($input_tracks) ) $input_tracks = array($input_tracks);
@@ -1056,7 +1057,7 @@ class WPSSTM_Tracklist{
                 
                 if ( is_array($track) ){
                     $track_args = $track;
-                    $track = new WPSSTM_Track();
+                    $track = new WPSSTM_Track(null);
                     $track->from_array($track_args);
                 }else{ //track ID
                     $track_id = $track;
@@ -1065,7 +1066,10 @@ class WPSSTM_Tracklist{
                 }
             }
             
+            $track->tracklist = $this;
+            $track->index = $current_index;
             $add_tracks[] = $track;
+            $current_index++;
         }
 
         //allow users to alter the input tracks.
