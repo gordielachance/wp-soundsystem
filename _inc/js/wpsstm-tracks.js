@@ -196,8 +196,7 @@
                             wpsstm_dialog_notice(data.notice);
                         }
                     }else{
-                        var track_instances = track_obj.get_track_instances();
-                        
+
                         //set track ID if track has been created
                         if (!track_ajax.post_id){
                             track_instances.attr("data-wpsstm-track-id", data.track.post_id);

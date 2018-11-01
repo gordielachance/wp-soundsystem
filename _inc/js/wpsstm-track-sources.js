@@ -407,7 +407,8 @@ class WpsstmTrackSource {
     });
 
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-        var sources_list = track_obj.track_el.find('.wpsstm-track-sources-list');
+        var track_instances = track_obj.get_track_instances();
+        var sources_list = track_instances.find('.wpsstm-track-sources-list');
         sources_list.sourceManager();
     });
 
