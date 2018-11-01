@@ -521,7 +521,8 @@ class WPSSTM_Core_Sources{
             'timestamp' => current_time('timestamp'),
             'message'   => null,
             'new_html'  => null,
-            'success'   => false
+            'success'   => false,
+            'track'     => $wpsstm_track->to_array(), //TO FIX TO CHECK - sending the whole PHP object makes the fn crash, so pass it as an array
         );
             
         //autosource
