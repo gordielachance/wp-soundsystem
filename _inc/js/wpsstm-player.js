@@ -56,8 +56,7 @@ class WpsstmPagePlayer {
         $(document).trigger("PageTracklistsInit"); //custom event
 
     }
-
-
+    
     get_maybe_shuffle_tracklist_idx(idx){
         var self = this;
         if ( !self.is_shuffle ) return idx;

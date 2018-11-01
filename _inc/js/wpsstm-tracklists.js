@@ -163,10 +163,7 @@
         var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
         wpsstm.showMoreLessActions(actions_lists);
     });
-    
-    
 
-    
 })(jQuery);
 
 class WpsstmTracklist {
