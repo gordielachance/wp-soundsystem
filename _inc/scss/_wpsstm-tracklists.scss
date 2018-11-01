@@ -253,6 +253,13 @@ body.wpsstm-default,body.wp-admin{
     
     .wpsstm-tracklist.wpsstm-post-tracklist{
         .wpsstm-track{
+            
+            &[data-wpsstm-track-id]:not([data-wpsstm-track-id=""]){ //highlight animation
+                animation-name: highlight;
+                animation-duration: 1s;
+                animation-timing-function: ease-in;
+            }
+            
             #wpsstm-track-toggle-sources{
                 display:none;
             }

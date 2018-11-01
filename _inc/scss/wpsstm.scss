@@ -25,6 +25,29 @@
     to {transform:rotate(360deg);}
 }
 
+@keyframes highlight {
+    0% {background-color: rgba(224,255,226,0);}
+    25% {background-color: rgba(224,255,226,1);}
+    100% {background-color: rgba(224,255,226,0);}
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
 @mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
     background-size: 30px 30px;
     background-image: linear-gradient(
