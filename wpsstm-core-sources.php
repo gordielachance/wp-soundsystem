@@ -514,7 +514,7 @@ class WPSSTM_Core_Sources{
         
         //autosource
         $success = $wpsstm_track->autosource();
-        $result['track'] = $wpsstm_track;
+        $result['track'] = $wpsstm_track->to_array(); //TO FIX TO CHECK sending the whole object crashes the thing ?
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();
