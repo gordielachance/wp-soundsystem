@@ -261,7 +261,7 @@ class WpsstmTrackSource {
                 //TO FIX wpsstm.showMoreLessActions(actions_lists);
                 
                 //delete source
-                sources_list_el.find('#wpsstm-source-action-trash a').click(function(e) {
+                sources_list_el.find('.wpsstm-source-action-trash a').click(function(e) {
                     
                     e.preventDefault();
                     var source_el = $(this).parents('[data-wpsstm-source-idx]');
@@ -273,7 +273,7 @@ class WpsstmTrackSource {
                 sources_list_el.sortable({
                     axis: "y",
                     items : "[data-wpsstm-source-id]",
-                    handle: '#wpsstm-source-action-move a',
+                    handle: '.wpsstm-source-action-move a',
                     update: function(event, ui) {
                         
                         var sourceOrder = sources_list_el.sortable('toArray', {
@@ -329,7 +329,7 @@ class WpsstmTrackSource {
                 }
 
                 var source_instances = $('[data-wpsstm-source-idx][data-wpsstm-track-id="'+track_id+'"][data-wpsstm-source-id="'+source_id+'"]');
-                var source_action_links = source_instances.find('#wpsstm-source-action-trash a');
+                var source_action_links = source_instances.find('.wpsstm-source-action-trash a');
 
                 var ajax_data = {
                     action:         'wpsstm_trash_source',
@@ -401,7 +401,7 @@ class WpsstmTrackSource {
         var track_instances = track_obj.get_track_instances();
         var sources_row = track_instances.find('.wpsstm-track-sources');
 
-        var link = sources_row.find('#wpsstm-track-toggle-sources a');
+        var link = sources_row.find('.wpsstm-track-toggle-sources a');
         //click on bt
         link.click(function(e) {
             e.preventDefault();

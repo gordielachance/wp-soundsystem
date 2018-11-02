@@ -48,7 +48,7 @@ DEFAULT STYLES
 
 body.wpsstm-default,body.wp-admin{
 
-    #wpsstm-track-actions{
+    .wpsstm-track-actions{
         > * {
             @include opacity(.5);
             &:hover{
@@ -99,7 +99,7 @@ body.wpsstm-default,body.wp-admin{
         width:100%;
         [itemprop="track"]{
 
-            #wpsstm-track-actions{
+            .wpsstm-track-actions{
                 @include opacity(0);
                 li.wpsstm-action{
                     display:inline;
@@ -108,7 +108,7 @@ body.wpsstm-default,body.wp-admin{
             }
 
             &:hover,&.track-active{
-                ul#wpsstm-track-actions{
+                ul.wpsstm-track-actions{
                      @include opacity(1);
                 }
             }

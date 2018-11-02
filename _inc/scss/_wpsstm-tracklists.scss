@@ -184,7 +184,7 @@ body.wpsstm-default,body.wp-admin{
                                 @extend .wpsstm-can-click;
                             }
                         }
-                        #wpsstm-track-toggle-sources{
+                        .wpsstm-track-toggle-sources{
                             @include flex-grow(0);
                             a{
                                 @extend .wpsstm-icon;
@@ -218,20 +218,20 @@ body.wpsstm-default,body.wp-admin{
                 }
                 &:not(.wpsstm-toggle-sources){
                     
-                    #wpsstm-track-toggle-sources a:before{
+                    .wpsstm-track-toggle-sources a:before{
                         content: "\f078";//.fa-chevron-down;
                     }
                     [data-wpsstm-source-idx]{
                         display:none;
                     }
-                    #wpsstm-source-actions{
+                    .wpsstm-source-actions{
                         .wpsstm-action:not(#wpsstm-source-action-provider){
                             display:none;
                         }
                     }
                 }
                 &.wpsstm-toggle-sources{
-                    #wpsstm-track-toggle-sources a:before{
+                    .wpsstm-track-toggle-sources a:before{
                         content: "\f077";//.fa-chevron-up;
                     }
                     .wpsstm-track-sources-list{
@@ -260,8 +260,9 @@ body.wpsstm-default,body.wp-admin{
                 animation-timing-function: ease-in;
             }
             
-            #wpsstm-track-toggle-sources{
+            .wpsstm-track-toggle-sources{
                 display:none;
+                margin-left: auto;
             }
             &:not(.wpsstm-toggle-sources){
                 @include display-flex();
@@ -269,14 +270,11 @@ body.wpsstm-default,body.wp-admin{
             &.wpsstm-toggle-sources{
                 display:block!important;
             }
-            #wpsstm-track-actions{
+            .wpsstm-track-actions{
                 margin-left: auto;
             }
             .wpsstm-track-sources-list{
                 @include flex-grow(1);
-            }
-            #wpsstm-track-toggle-sources{
-                margin-left: auto;
             }
         }
     }

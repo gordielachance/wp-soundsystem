@@ -27,7 +27,7 @@ body.wpsstm-default,body.wp-admin{
 
                 }
 
-                &#wpsstm-source-actions{
+                &.wpsstm-source-actions{
                     padding-right: .5em;
                     @include flex-shrink(0);
                     
@@ -45,13 +45,13 @@ body.wpsstm-default,body.wp-admin{
                                 display:none;
                             }
                         }
-                        &#wpsstm-source-action-trash a:before{
+                        &.wpsstm-source-action-trash a:before{
                             content: "\f1f8";//.fa-trash;
                         }
-                        &#wpsstm-source-action-move a:before{
+                        &.wpsstm-source-action-move a:before{
                             content: "\f07d";//.fa-arrows-v;
                         }
-                        &#wpsstm-source-action-edit-backend a:before{
+                        &.wpsstm-source-action-edit-backend a:before{
                             content:"\f084";//.fa-key;
                         }
                     }
