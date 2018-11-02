@@ -906,7 +906,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     private function tracklist_autosource(){
         $this->tracklist_log('tracklist autosource'); 
         foreach((array)$this->tracks as $track){
-
+            $track->populate_sources();
             if (!$track->sources){
                 $success = $track->autosource();
             }
