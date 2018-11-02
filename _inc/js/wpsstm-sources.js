@@ -206,7 +206,6 @@ class WpsstmTrackSource {
             source_instances.removeClass('source-loading');
         })
         success.fail(function() {
-            alert("toto");
             source_instances.removeClass('source-active');
         })
 
