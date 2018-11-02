@@ -113,7 +113,7 @@
     }
     
     //sources metabox
-    &#wpsstm-track-sources{
+    &#wpsstm-metabox-sources{
         .wpsstm-submit-wrapper{
             text-align:center;
         }
@@ -124,8 +124,8 @@
         .inside{
             overflow:auto;
             .wpsstm-tracklist{
-                #wpsstm-tracklist-actions{
-                    #wpsstm-tracklist-action-status-switch{
+                .wpsstm-tracklist-actions{
+                    .wpsstm-tracklist-action-status-switch{
                         display:none;
                     }
                 }

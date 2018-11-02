@@ -2,6 +2,84 @@
 MINIMAL STYLES
 */
 
+[data-wpsstm-source-idx]{
+    @include display-flex();
+    label{
+        @extend .wpsstm-can-click;
+    }
+    .wpsstm-source-actions{
+        margin-left:.5em;
+        > *{
+            display:inline-block;
+        }
+    }
+}
+
+.wpsstm-track-sources{
+    font-size:.8em;
+    margin-left: auto;
+    @include display-flex();
+    @include flex-grow(0);
+
+    .wpsstm-track-sources-list{
+        position:relative;
+        @include flex-grow(0);
+        @include transition-property(margin-bottom);
+        @include transition-duration(.2s);
+    }
+
+    .wpsstm-expand-sources{
+        
+        @include flex-grow(0);
+        a{
+            @extend .wpsstm-icon;
+            &:before{
+                content: "\f078";//.fa-chevron-down;
+            }
+            span{
+                display:none;
+            }
+        }
+    }
+    
+    &.wpsstm-sources-toggle{
+        [data-wpsstm-source-idx]{
+            display:none;
+            .wpsstm-source-actions{
+                > *{
+                    &:not(.wpsstm-source-action-provider){
+                        display:none;
+                    }
+                }
+            }
+            &.source-active{
+                @include display-flex();
+            }
+        }
+        &.wpsstm-sources-expanded{
+            .wpsstm-track-sources-list{
+                margin-bottom:.5em!important;
+            }
+            [data-wpsstm-source-idx]{
+                @include display-flex();
+                .wpsstm-source-actions{
+                    .wpsstm-action{
+                        display:inline-block;
+                    }
+                }
+            }
+            .wpsstm-expand-sources{
+                a:before{
+                    content: "\f077";//.fa-chevron-up;
+                }
+            }
+        }
+    }
+
+
+
+}
+
 /*
 DEFAULT STYLES
 */
@@ -9,8 +87,6 @@ DEFAULT STYLES
 body.wpsstm-default,body.wp-admin{
 
     .wpsstm-track-sources-list{
-        display:grid;
-        position:relative;
         a{
             @extend .wpsstm-no-underline;
         }
@@ -20,20 +96,12 @@ body.wpsstm-default,body.wp-admin{
             position:relative;
             padding: 0 .75em;
             box-sizing: border-box;
-            @include display-flex();
             
             > *{
-                &.wpsstm-source-icon wpsstm-icon{
-
-                }
 
                 &.wpsstm-source-actions{
                     padding-right: .5em;
                     @include flex-shrink(0);
-                    
-                    > *{
-                        display:inline-block;
-                    }
                     
                     .wpsstm-source-action{
                         
@@ -71,7 +139,7 @@ body.wpsstm-default,body.wp-admin{
                     text-decoration: line-through;
                 }
             }
-            &.source-playing,&.source-loading{
+            &.source-active{
                 font-weight: bold;
             }
             
@@ -79,19 +147,19 @@ body.wpsstm-default,body.wp-admin{
                 @extend .wpsstm-icon;
             }
             
-            #wpsstm-source-action-provider a:before{
+            .wpsstm-source-action-provider a:before{
                 content:"\f0c1";//fa-link
             }
             
-            &[data-wpsstm-source-type="video/soundcloud"] #wpsstm-source-action-provider a:before{
+            &[data-wpsstm-source-type="video/soundcloud"] .wpsstm-source-action-provider a:before{
                 content:"\f1be";//fa-soundcloud
             }
-            &[data-wpsstm-source-type="video/youtube"] #wpsstm-source-action-provider a:before{
+            &[data-wpsstm-source-type="video/youtube"] .wpsstm-source-action-provider a:before{
                 content:"\f167";//fa-youtube
             }
 
             &.source-loading{
-                #wpsstm-source-action-provider a{
+                .wpsstm-source-action-provider a{
                      @extend .wpsstm-loading-icon;
                 }
             }

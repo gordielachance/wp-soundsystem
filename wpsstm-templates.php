@@ -205,10 +205,10 @@ function get_actions_list($actions,$prefix){
         $classes = $action['classes'];
         $classes[] = 'wpsstm-action';
         $classes[] = sprintf('wpsstm-%s-action',$prefix);
+        $classes[] = sprintf('wpsstm-%s-action-%s',$prefix,$slug);
         $classes = array_unique($classes);
 
         $action_attr = array(
-            'id'        => sprintf('wpsstm-%s-action-%s',$prefix,$slug),
             'class'     => implode(" ",$classes),
         );
 
@@ -225,7 +225,7 @@ function get_actions_list($actions,$prefix){
     }
 
     if ( !empty($track_actions_list) ){
-        return sprintf('<ul id="wpsstm-%s-actions" class="wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_list));
+        return sprintf('<ul class="wpsstm-%s-actions wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_list));
     }
 }
 

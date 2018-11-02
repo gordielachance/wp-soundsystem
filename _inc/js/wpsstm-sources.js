@@ -115,6 +115,7 @@ class WpsstmTrackSource {
                 console.log("mediaElement error");
                 var source_instances = self.get_source_instances();
                 source_instances.addClass('source-error');
+                source_instances.removeClass('source-active');
                 success.reject();
             }
         });
@@ -137,14 +138,9 @@ class WpsstmTrackSource {
         var tracklist_instances = self.track.tracklist.get_tracklist_instances();
         var track_instances = self.track.get_track_instances();
         var source_instances = self.get_source_instances();
-        source_instances.addClass('source-loading source-active');
-
-        //TO FIX check if same source playing already ?
-        //if (self.track.current_source_idx === self.index){
-        //}
+        source_instances.addClass('source-loading');
 
         var promise = self.init_source();
-        
 
         promise.then(
             function(success_msg){
@@ -156,6 +152,7 @@ class WpsstmTrackSource {
                     self.debug('media - error');
 
                     source_instances.addClass('source-error');
+                    source_instances.removeClass('source-active source-loading');
 
                     success.reject(error);
 
@@ -171,7 +168,7 @@ class WpsstmTrackSource {
 
                     tracklist_instances.addClass('tracklist-playing tracklist-has-played');
                     track_instances.addClass('track-playing track-has-played');
-                    source_instances.addClass('source-playing source-has-played');
+                    source_instances.addClass('source-active source-playing source-has-played');
 
                     self.debug('media - play');
 
@@ -208,6 +205,10 @@ class WpsstmTrackSource {
         success.always(function(data, textStatus, jqXHR) {
             source_instances.removeClass('source-loading');
         })
+        success.fail(function() {
+            alert("toto");
+            source_instances.removeClass('source-active');
+        })
 
         return success.promise();
 
@@ -221,7 +222,7 @@ class WpsstmTrackSource {
         self.media.pause();
         wpsstm.current_media = undefined;
         
-        self.get_source_instances().removeClass('source-playing source-active');
+        self.get_source_instances().removeClass('source-playing source-active source-loading');
 
     }
 
@@ -238,31 +239,29 @@ class WpsstmTrackSource {
 
             // FOR EACH MATCHED ELEMENT
             return this.each(function() {
-
-                var sources_list_el = $(this);
+                var sources_container = $(this);
+                var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
                 var track_id = $(this).attr('data-wpsstm-track-id');
 
-                //not a sources manager
-                if ( !sources_list_el.hasClass('wpsstm-track-sources-list') ){
+                //no sources list
+                if ( !sources_container.hasClass('wpsstm-track-sources') ){
                     wpsstm_debug("missing class .wpsstm-track-sources-list:",'sourceManager');
-                    wpsstm_debug(sources_list_el,'sourceManager');
-                    return false;
-                }
-                
-                //no track ID
-                if ( !track_id ){
-                    wpsstm_debug("missing attr data-wpsstm-track-id:",'sourceManager');
-                    wpsstm_debug(sources_list_el,'sourceManager');
+                    wpsstm_debug(sources_container,'sourceManager');
                     return false;
                 }
 
+                //click expand sources
+                sources_container.find('.wpsstm-expand-sources a').click(function(e) {
+                    e.preventDefault();
+                    $(this).parents('.wpsstm-track-sources').toggleClass('wpsstm-sources-expanded');
+                });
+
                 //show more/less (sources actions)
-                var actions_lists = sources_list_el.find('.wpsstm-actions-list');
+                var actions_lists = sources_container.find('.wpsstm-actions-list');
                 //TO FIX wpsstm.showMoreLessActions(actions_lists);
                 
                 //delete source
-                sources_list_el.find('.wpsstm-source-action-trash a').click(function(e) {
-                    
+                sources_container.find('.wpsstm-source-action-trash a').click(function(e) {
                     e.preventDefault();
                     var source_el = $(this).parents('[data-wpsstm-source-idx]');
                     source_el.trashSources();
@@ -395,25 +394,10 @@ class WpsstmTrackSource {
         }
     });
 
-    //hide sources add toggle icon.
-    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-
-        var track_instances = track_obj.get_track_instances();
-        var sources_row = track_instances.find('.wpsstm-track-sources');
-
-        var link = sources_row.find('.wpsstm-track-toggle-sources a');
-        //click on bt
-        link.click(function(e) {
-            e.preventDefault();
-            var track_el = $(this).parents('[data-wpsstm-track-idx]');
-            track_el.toggleClass('wpsstm-toggle-sources');
-        });
-    });
-
     $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
         var track_instances = track_obj.get_track_instances();
-        var sources_list = track_instances.find('.wpsstm-track-sources-list');
-        sources_list.sourceManager();
+        var sources_container = track_instances.find('.wpsstm-track-sources');
+        sources_container.sourceManager();
     });
 
     $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
@@ -425,7 +409,7 @@ class WpsstmTrackSource {
             e.preventDefault();
             source_obj.track.play_track(source_obj.index);
             //toggle tracklist sources
-            source_obj.track.track_el.removeClass('wpsstm-toggle-sources');
+            source_obj.track.track_el.removeClass('wpsstm-sources-expanded');
         });
 
     });
@@ -433,8 +417,10 @@ class WpsstmTrackSource {
     /*
     metabox
     */
+    var track_sources_row = $( ".postbox#wpsstm-metabox-sources .wpsstm-track-sources");
+    track_sources_row.sourceManager();
     //new source container
-    $( ".postbox#wpsstm-track-sources #wpsstm-add-source-url" ).click(function(e) {
+    $( ".postbox#wpsstm-metabox-sources #wpsstm-add-source-url" ).click(function(e) {
         e.preventDefault();
         var container = $(this).parents('.postbox');
         var first_input_block = container.find('#wpsstm-new_track-sources').parent().first();

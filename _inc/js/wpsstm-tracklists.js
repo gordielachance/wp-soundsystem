@@ -15,7 +15,7 @@
         */
 
         //refresh
-        var refresh_bts = tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
+        var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
         refresh_bts.click(function(e) {
             e.preventDefault();
             tracklist_obj.debug("clicked 'refresh' link");
@@ -24,7 +24,7 @@
         });
 
         //favorite
-        var favorite_bt = tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-favorite a');
+        var favorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-favorite a');
         favorite_bt.click(function(e) {
             e.preventDefault();
 
@@ -72,7 +72,7 @@
         });
         
         //unfavorite
-        var unfavorite_bt = tracklist_obj.tracklist_el.find('#wpsstm-tracklist-action-unfavorite a');
+        var unfavorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-unfavorite a');
         unfavorite_bt.click(function(e) {
             e.preventDefault();
 
@@ -119,7 +119,7 @@
         });
         
         //switch status
-        var switch_bt = tracklist_obj.tracklist_el.find("#wpsstm-tracklist-action-status-switch a");
+        var switch_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-status-switch a");
         switch_bt.click(function(e) {
             e.preventDefault();
             $(this).closest('li').toggleClass('expanded');
@@ -134,7 +134,7 @@
         // sort tracks
         tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
             axis: "y",
-            handle: '#wpsstm-track-action-move',
+            handle: '.wpsstm-track-action-move',
             update: function(event, ui) {
                 console.log('update: '+ui.item.index())
                 //get track
@@ -334,7 +334,7 @@ class WpsstmTracklist {
     get_tracklist_request(){
 
         var self = this;
-        var link = self.tracklist_el.find("#wpsstm-tracklist-action-refresh a");
+        var link = self.tracklist_el.find(".wpsstm-tracklist-action-refresh a");
 
         //already requested
         if (self.tracklist_request) return self.tracklist_request.promise();
@@ -376,7 +376,7 @@ class WpsstmTracklist {
         self.tracklist_request.fail(function(jqXHR, textStatus, errorThrown) {
             self.can_play = false;
             self.tracklist_el.addClass('tracklist-error');
-            self.tracklist_el.find('#wpsstm-tracklist-action-refresh').addClass('error');
+            self.tracklist_el.find('.wpsstm-tracklist-action-refresh').addClass('error');
             self.debug("get_tracklist_request did NOT succeed");
         });  
 
@@ -596,7 +596,7 @@ class WpsstmTracklist {
 
     update_track_index(track_obj){
         var self = this;
-        var link = track_obj.track_el.find('#wpsstm-track-action-move a');
+        var link = track_obj.track_el.find('.wpsstm-track-action-move a');
 
         //ajax update order
         var ajax_data = {
@@ -637,7 +637,7 @@ class WpsstmTracklist {
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link = track_el.find('#wpsstm-track-action-remove a');
+        var link = track_el.find('.wpsstm-track-action-remove a');
 
         var ajax_data = {
             action            : 'wpsstm_remove_from_tracklist',

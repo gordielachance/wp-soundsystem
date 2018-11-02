@@ -30,6 +30,8 @@ class WPSSTM_Core_Sources{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
+        add_filter( 'wpsstm_pre_save_autosources', array( $this, 'filter_sources_to_save' ) );
+        
         /*
         QUERIES
         */
@@ -251,7 +253,7 @@ class WPSSTM_Core_Sources{
         );
         
         add_meta_box( 
-            'wpsstm-track-sources', 
+            'wpsstm-metabox-sources', 
             __('Track sources','wpsstm'),
             array($this,'metabox_track_sources_content'),
             wpsstm()->post_type_track, 
@@ -341,9 +343,10 @@ class WPSSTM_Core_Sources{
 
         //track sources
         $wpsstm_track->populate_sources();
-        wpsstm_locate_template( 'content-source.php', true, false );
-
         ?>
+        <div class="wpsstm-track-sources">
+            <?php wpsstm_locate_template( 'content-source.php', true, false );?>
+        </div>
         <p class="wpsstm-new-track-sources-container">
             <?php
             $input_attr = array(
@@ -444,7 +447,7 @@ class WPSSTM_Core_Sources{
     function register_sources_scripts_styles_shared(){
         //CSS
         //JS
-        wp_register_script( 'wpsstm-track-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-track-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
     }
 
     
@@ -606,5 +609,50 @@ class WPSSTM_Core_Sources{
 
         return true;
         
+    }
+    
+    /*
+    Remove some of the sources before saving them as metas
+    */
+    public function filter_sources_to_save($sources){
+
+        foreach((array)$sources as $key=>$source){
+            $permalink = $source->permalink_url;
+            
+            if (strpos($permalink, 'spotify.com') !== false) { //we already store the spotify ID, no need to store this URL.
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'itunes.apple.com') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'music.youtube') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'pandora.com') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'play.google.com') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'tidal.com') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'napster.com') !== false) {
+                unset($sources[$key]);
+            }
+            
+            if (strpos($permalink, 'yandex.ru') !== false) {
+                unset($sources[$key]);
+            }
+            
+        }
+
+        return $sources;
     }
 }

@@ -9,7 +9,7 @@ class WpsstmLastFM {
         
         var self = this;
         
-        self.scrobble_icon =     $('#wpsstm-player-action-scrobbler');
+        self.scrobble_icon =     $('.wpsstm-player-action-scrobbler');
 
         //enable scrobbler at init
         if (self.scrobbler_enabled){
@@ -17,7 +17,7 @@ class WpsstmLastFM {
         }
 
         //click toggle scrobbling
-        $('#wpsstm-player-action-scrobbler').find('a').click(function(e) {
+        $('.wpsstm-player-action-scrobbler').find('a').click(function(e) {
             e.preventDefault();
             self.enable_scrobbler(!self.scrobbler_enabled,true);
         });

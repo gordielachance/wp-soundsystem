@@ -148,13 +148,18 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
-= 1.9.5 =
-* Tracklist log
-* Cache remote HTML file
+= 1.9.8 =
 * Improved wizard
-* Better autosource
-* Tracks : new function update_spotify_track_id()
+* Improved autosource
+* Improved templates
 * Better tracks source GUI
+* Spotify metabox
+* Static track unlink action
+* Cache remote HTML file
+* PHP : pass tracklist object  to the track object / pass track object  to the source object
+* tracklist_log, track_log, source_log
+* store durations as milliseconds instead of seconds
+* new filter 'wpsstm_pre_save_autosources'
 * TOFIX remote request pagination
 
 = 1.9.4 =

@@ -160,7 +160,7 @@
         });
         
         //favorite track
-        track_instances.find('#wpsstm-track-action-favorite a').click(function(e) {
+        track_instances.find('.wpsstm-track-action-favorite a').click(function(e) {
 
             e.preventDefault();
 
@@ -219,7 +219,7 @@
         });
 
         //unfavorite track
-        track_instances.find('#wpsstm-track-action-unfavorite a').click(function(e) {
+        track_instances.find('.wpsstm-track-action-unfavorite a').click(function(e) {
 
             e.preventDefault();
 
@@ -268,13 +268,13 @@
         });
         
         //remove
-        track_instances.find('#wpsstm-track-action-remove a').click(function(e) {
+        track_instances.find('.wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
             track_obj.tracklist.remove_tracklist_track(track_obj);
         });
         
         //delete
-        track_instances.find('#wpsstm-track-action-trash a').click(function(e) {
+        track_instances.find('.wpsstm-track-action-trash a').click(function(e) {
             e.preventDefault();
             track_obj.delete_track();
         });
@@ -387,7 +387,7 @@ class WpsstmTrack {
         var list = $('<ul class="wpsstm-tracks-list" />'); 
 
         var row = self.track_el.clone(true,true);
-        row.removeClass('wpsstm-toggle-sources');
+        row.find('.wpsstm-track-sources').removeClass('wpsstm-sources-expanded');
 
         $(list).append(row);
 
@@ -427,7 +427,6 @@ class WpsstmTrack {
         (function iterateSources(index) {
 
             if (index >= sources_playable.length) {
-                
                 success.reject();
                 return;
             }
@@ -619,7 +618,7 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['post_id','artist', 'title','album','duration'];
+        var allowed = ['index','post_id','artist', 'title','album','duration'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
@@ -637,7 +636,7 @@ class WpsstmTrack {
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link = $(track_el).find('#wpsstm-track-action-trash a');
+        var link = $(track_el).find('.wpsstm-track-action-trash a');
 
         var ajax_data = {
             action:     'wpsstm_trash_track',

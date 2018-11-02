@@ -43,7 +43,7 @@ body.wpsstm-default,body.wp-admin{
                     @include flex-grow(1);
                     @include justify-content(center);
                     
-                    &#wpsstm-player-actions{
+                    &.wpsstm-player-actions{
                         margin-right:.5em;
                         @include flex-shrink(0);
                         @include flex-grow(0);
@@ -55,7 +55,7 @@ body.wpsstm-default,body.wp-admin{
                                 }
                             }
 
-                            &#wpsstm-player-action-scrobbler{
+                            &.wpsstm-player-action-scrobbler{
                                 @include opacity(.25);
                                 a:before{
                                     content:"\f202"; //.fa-lastfm

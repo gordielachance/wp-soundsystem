@@ -211,13 +211,12 @@ class WPSSTM_Source{
     }
 
     function get_single_source_attributes(){
-        global $wpsstm_track;
         
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
             'data-wpsstm-track-id' =>               $this->track->post_id,
             'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
-            'data-wpsstm-source-idx' =>             $wpsstm_track->current_source,
+            'data-wpsstm-source-idx' =>             $this->track->current_source,
             'data-wpsstm-source-src' =>             $this->get_stream_url(),
             'data-wpsstm-source-type' =>            $this->get_source_mimetype(),
             'data-wpsstm-community-source' =>       (int)wpsstm_is_community_post($this->post_id),
@@ -252,7 +251,6 @@ class WPSSTM_Source{
     }
     
     function get_source_links($context = null){
-        global $wpsstm_track;
         $actions = array();
         
         $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
@@ -260,7 +258,7 @@ class WPSSTM_Source{
         //caps
         $can_edit_source = current_user_can($source_type_obj->cap->edit_post,$this->post_id);
         $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$this->post_id);
-        $can_reorder_sources = $wpsstm_track->user_can_reorder_sources();
+        $can_reorder_sources = $this->track->user_can_reorder_sources();
         
         $actions['provider'] = array(
             'text' =>       wpsstm_get_url_domain($this->permalink_url),

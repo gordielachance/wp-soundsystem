@@ -37,10 +37,13 @@ $track->populate_sources();
         }
         ?>
     </div>
-    <div class="wpsstm-track-row wpsstm-track-sources">
+    <div class="wpsstm-track-row wpsstm-track-sources wpsstm-sources-toggle">
         <?php
         //track sources
         wpsstm_locate_template( 'content-source.php', true, false );
         ?>
+        <span class="wpsstm-expand-sources">
+            <a href="#"><span><?php _e('Source Switch','wpsstm');?></span></a>
+        </span>
     </div>
 </li>
