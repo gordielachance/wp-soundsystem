@@ -14,8 +14,6 @@ class WPSSTM_Source{
     var $download_url;
     var $mime_type;
     var $duration; //in seconds
-    var $match;  //weight
-    var $tags = array(); //array of tags that we could use to filter the sources, eg. remix,official,live,cover,acoustic,demo, ...
     var $track;
 
     function __construct($post_id = null){

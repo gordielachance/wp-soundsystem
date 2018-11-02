@@ -584,15 +584,12 @@ class WpsstmTrack {
     populate_html_sources(){
         var self =      this;
         
-        self.sources =              [];
+        self.sources =              [];//reset array
         self.current_source_idx =   undefined;
         var track_el =  self.track_el; //page track
 
         var source_els = $(track_el).find('[data-wpsstm-source-idx]');
 
-        //self.debug("found "+source_els.length +" sources");
-        
-        self.sources = []; //reset array
         $.each(source_els, function( index, source_el ) {
             var source_obj = new WpsstmTrackSource(source_el,self);
             self.sources.push(source_obj);
@@ -622,13 +619,17 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['index','artist', 'title','album','post_id','duration'];
+        var allowed = ['post_id','artist', 'title','album','duration'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
-        obj[key] = self[key];
-        return obj;
+            obj[key] = self[key];
+            return obj;
         }, {});
+        
+        //tracklist
+        filtered.tracklist = self.tracklist.to_ajax();
+        
         return filtered;
     }
     

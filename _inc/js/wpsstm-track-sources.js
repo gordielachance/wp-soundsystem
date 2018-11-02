@@ -65,6 +65,10 @@ class WpsstmTrackSource {
         obj[key] = self[key];
         return obj;
         }, {});
+        
+        //track
+        filtered.track = self.track.to_ajax();
+
         return filtered;
     }
 

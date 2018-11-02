@@ -610,10 +610,6 @@ class WPSSTM_Spotify{
         $action = null;
         if ( isset($_POST['wpsstm-spotify-id-lookup']) ){
             $action = 'autoguess-id';
-        }elseif ( isset($_POST['wpsstm-spotify-reload']) ){
-            $action = 'reload';
-        }elseif ( isset($_POST['wpsstm-spotify-fill']) ){
-            $action = 'fill';
         }
         
         

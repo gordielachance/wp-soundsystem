@@ -734,6 +734,18 @@ class WpsstmTracklist {
         
     }
     
+    //reduce object for communication between JS & PHP
+    to_ajax(){
 
+        var self = this;
+        var allowed = ['post_id'];
+        var filtered = Object.keys(self)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = self[key];
+            return obj;
+        }, {});
+        return filtered;
+    }
     
 }
