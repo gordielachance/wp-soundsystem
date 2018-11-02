@@ -206,6 +206,7 @@ class WpsstmTrackSource {
             source_instances.removeClass('source-loading');
         })
         success.fail(function() {
+            source_instances.addClass('source-error');
             source_instances.removeClass('source-active');
         })
 
