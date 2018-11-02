@@ -42,7 +42,7 @@ class WPSSTM_Track{
             $this->mbid         = wpsstm_get_post_mbid($post_id);
             $this->spotify_id   = wpsstm_get_post_spotify_id($post_id);
             $this->image_url    = wpsstm_get_post_image_url($post_id);
-            $this->duration     = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
+            $this->duration     = wpsstm_get_post_length($post_id);
         }
         
         if ($tracklist){
@@ -559,7 +559,7 @@ class WPSSTM_Track{
 
     }
     
-    private function save_new_sources(){
+    public function save_new_sources(){
 
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );

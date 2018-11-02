@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.9.6
+Version: 1.9.7
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.9.6';
+    public $version = '1.9.7';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '156';
+    public $db_version = '157';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -275,6 +275,13 @@ class WP_SoundSystem {
                 $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", '_wpsstm_source_stream' );
                 $result = $wpdb->get_results ( $querystr );
                 
+            }
+            
+            //tracks seconds > milliseconds
+            if ($current_version < 157){
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s', meta_value = meta_value * 1000 WHERE meta_key = '%s'", WPSSTM_Core_Tracks::$length_metakey, '_wpsstm_length' );
+
+                $result = $wpdb->get_results ( $querystr );
             }
 
         }

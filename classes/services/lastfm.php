@@ -970,7 +970,7 @@ class WPSSTM_LastFM_User{
         );
         
         if ($track->duration){ //we NEED a duration to set this argument; or scrobble won't work.
-            $api_args['duration'] = $track->duration;
+            $api_args['duration'] = round($track->duration / 1000); //seconds
         }
         
         $debug_args = $api_args;

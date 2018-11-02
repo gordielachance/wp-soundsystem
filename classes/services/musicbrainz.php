@@ -298,11 +298,6 @@ class WPSSTM_MusicBrainz {
                                 
                                 $meta = get_post_meta($post->ID,$field['metaname'],true);
                                 $mb = wpsstm_get_array_value($field['mbpath'], $mbdata);
-                                
-                                //exceptions
-                                if($slug=='track_length'){
-                                   $mb = round($mb / 1000);
-                                }
 
                                 $mismatch_icon = ($meta != $mb) ? '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' : null;
 
@@ -381,10 +376,6 @@ class WPSSTM_MusicBrainz {
         $action = null;
         if ( isset($_POST['wpsstm-mb-id-lookup']) ){
             $action = 'autoguess-id';
-        }elseif ( isset($_POST['wpsstm-mb-reload']) ){
-            $action = 'reload';
-        }elseif ( isset($_POST['wpsstm-mb-fill']) ){
-            $action = 'fill';
         }
 
         //update MBID
@@ -494,12 +485,7 @@ class WPSSTM_MusicBrainz {
             
             $meta_value = get_post_meta($post_id,$field['metaname'],true);
             $mb_value = wpsstm_get_array_value($field['mbpath'], $mbdatas);
-            
-            //exceptions
-            if ($slug == 'track_length'){
-                $mb_value = round($mb_value / 1000);
-            }
-            
+
             if ( !$meta_value || $override ){
                 if ($mb_value){
                     $fields_success[$slug] = update_post_meta( $post_id,$field['metaname'],$mb_value);

@@ -1,8 +1,9 @@
 <?php
+
 class WPSSTM_Core_Tracks{
 
     static $title_metakey = '_wpsstm_track';
-    static $length_metakey = '_wpsstm_length'; //track length, in s
+    static $length_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
     static $qvar_track_admin = 'admin-track';
@@ -670,10 +671,11 @@ class WPSSTM_Core_Tracks{
     static function get_edit_track_length_input($post_id = null){
         global $post;
         if (!$post) $post_id = $post->ID;
+
         $input_attr = array(
             'id' => 'wpsstm-length',
             'name' => 'wpsstm_length',
-            'value' => get_post_meta( $post_id, self::$length_metakey, true ),
+            'value' => wpsstm_get_post_length($post_id,true),
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
             'label' => __("Length (seconds)",'wpsstm'),
             'placeholder' => __("Enter length here",'wpsstm')
@@ -746,7 +748,7 @@ class WPSSTM_Core_Tracks{
         WPSSTM_Core_Albums::save_meta_album($post_id, $album);
 
         /*length*/
-        $length = ( isset($_POST[ 'wpsstm_length' ]) ) ? $_POST[ 'wpsstm_length' ] : null;
+        $length = ( isset($_POST[ 'wpsstm_length' ]) ) ? ( $_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
         self::save_meta_track_length($post_id, $length);
 
     }
