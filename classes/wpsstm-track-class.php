@@ -460,8 +460,6 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
-        
-        
     }
     
     /*
@@ -512,6 +510,7 @@ class WPSSTM_Track{
 
         //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);
         $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
+        
         if ( is_wp_error($autosources_arr) ) return $autosources_arr;
 
         foreach((array)$autosources_arr as $key=>$source_arr){
@@ -529,19 +528,11 @@ class WPSSTM_Track{
                     continue;
             }
 
-            //cannot play this source, skip it. 
-            //TOUFIX should be elsewhere or done differently
-            if ( !$source->get_source_mimetype() ){
-
-                $source->source_log(
-                    json_encode(array('track'=>sprintf('%s - %s',$this->artist,$this->title),'source'=>array('title'=>$source->title,'url'=>$source->permalink_url))),
-                    __('Source excluded because it has no mime type','wpsstm')
-                );
-                continue;
-            }
             $autosources[] = $source;
 
         }
+        
+        $autosources = apply_filters('wpsstm_pre_save_autosources',$autosources,$this);
 
         //limit autosource results
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
