@@ -240,16 +240,16 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $(document).on( "wpsstmMediaLoaded", function( event, media,source_obj ) {
+    $(document).on( "wpsstmMediaLoaded", function( event,source_obj ) {
 
-        $(media).on('play', function() {
+        $(wpsstm.current_media).on('play', function() {
             if (wpsstm_lastfm.scrobbler_enabled){
                 wpsstm_lastfm.updateNowPlaying(source_obj.track);
             }
         });
         
-        $(media).on('ended', function() {
-            if ( media.duration > 30) { //scrobble
+        $(wpsstm.current_media).on('ended', function() {
+            if ( wpsstm.current_media.duration > 30) { //scrobble
                 if (wpsstm_lastfm.scrobbler_enabled){
                     wpsstm_lastfm.user_scrobble(source_obj.track);
                 }
