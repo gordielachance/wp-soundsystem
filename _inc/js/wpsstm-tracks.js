@@ -368,10 +368,14 @@ class WpsstmTrack {
         }
     }
 
-    set_bottom_trackinfo(){ //TO FIX SHOULD BE IN PLAYER ?
+    load_player_track(){ //TO FIX SHOULD BE IN PLAYER ?
         var self = this;
-        //track infos
         
+        self.debug("load_player_track");
+        
+        wpsstm.set_audio_sources(self.sources);
+        
+        //track infos
         var tracklist_el = self.tracklist.tracklist_el;
 
         //copy attributes from the original playlist 
@@ -392,7 +396,7 @@ class WpsstmTrack {
         $(list).append(row);
 
         wpsstm.bottom_trackinfo_el.html(list);
-        wpsstm.bottom_el.show();//show in not done yet
+        wpsstm.player_el.show();//show in not done yet
     }
     
     play_first_available_source(source_idx){
@@ -452,35 +456,6 @@ class WpsstmTrack {
         
         return success.promise();
         
-    }
-
-    set_bottom_audio_el(){
-        
-        var self = this;
-        
-        var media_wrapper = $('<audio />');
-        media_wrapper.attr({
-            id:     'wpsstm-player-audio'
-        });
-
-        media_wrapper.prop({
-            //autoplay:     true,
-            //muted:        true
-        });
-
-        $( self.sources ).each(function(i, source_attr) {
-            //media
-            var source_el = $('<source />');
-            source_el.attr({
-                src:    source_attr.src,
-                type:   source_attr.type
-            });
-
-            media_wrapper.append(source_el);
-
-        });
-        
-        $('#wpsstm-player').html(media_wrapper);
     }
     
     maybe_load_sources(){
@@ -733,7 +708,7 @@ class WpsstmTrack {
             var track_instances = self.get_track_instances();
             track_instances.addClass('track-loading track-active');
 
-            self.set_bottom_trackinfo(); //bottom track info
+            self.load_player_track(); //bottom track info
 
             self.maybe_load_sources().then(
                 function(success_msg){

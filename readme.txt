@@ -148,7 +148,8 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
-= 1.9.8 =
+= 1.9.9 =
+* now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
 * Improved wizard
 * Improved autosource
 * Improved templates

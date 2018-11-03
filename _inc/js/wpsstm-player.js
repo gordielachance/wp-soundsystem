@@ -8,12 +8,11 @@ class WpsstmPagePlayer {
         this.is_shuffle =               ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         this.can_repeat =               ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
         
-        this.bottom_wrapper_el =         $('#wpsstm-bottom-wrapper');
-        this.bottom_el =                 this.bottom_wrapper_el.find('#wpsstm-bottom');
-        this.bottom_track_wraper_el =    this.bottom_el.find('#wpsstm-bottom-track-wrapper');
-        this.bottom_trackinfo_el =       this.bottom_track_wraper_el.find('#wpsstm-bottom-track');
-        this.wpsstm_player_shuffle_el =  $('#wpsstm-player-shuffle');
-        this.wpsstm_player_loop_el =     $('#wpsstm-player-loop');
+        this.player_el =                $('#wpsstm-player');
+        this.bottom_trackinfo_el =      this.player_el.find('#wpsstm-player-track');
+        this.player_audio_el =          this.player_el.find('#wpsstm-audio-container audio');
+        this.wpsstm_player_shuffle_el = $('#wpsstm-player-shuffle');
+        this.wpsstm_player_loop_el =    $('#wpsstm-player-loop');
         
     }
 
@@ -21,11 +20,50 @@ class WpsstmPagePlayer {
         var prefix = "WpsstmPagePlayer";
         wpsstm_debug(msg,prefix);
     }
+    
+    init_player(){
+        var self = this;
+        var success = $.Deferred();
+        self.debug("init player");
+        
+        wpsstm.player_audio_el.mediaelementplayer({
+            classPrefix: 'mejs-',
+            // All the config related to HLS
+            hls: {
+                debug:          wpsstmL10n.debug,
+                autoStartLoad:  true
+            },
+            pluginPath: wpsstmPlayer.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
+            //audioWidth: '100%',
+            stretching: 'responsive',
+            features: ['playpause','loop','progress','current','duration','volume'],
+            loop: false,
+            success: function(mediaElement, originalNode, player) {
+                wpsstm.current_media = mediaElement;
+            },error(mediaElement) {
+                // Your action when mediaElement had an error loading
+                //TO FIX is this required ?
+                console.log("mediaElement error");
+                /*
+                var source_instances = self.get_source_instances();
+                source_instances.addClass('source-error');
+                source_instances.removeClass('source-active');
+                success.reject();
+                */
+            }
+        });
+        return success.promise();
+    }
+    
+    init(){
+        var self = this;
+        self.init_player();
+        self.init_page_tracklists();
+    }
 
     init_page_tracklists(){
 
         var self = this;
-        
         var all_tracklists = $( ".wpsstm-tracklist" );
 
         self.debug("init_page_tracklists()");
@@ -55,6 +93,34 @@ class WpsstmPagePlayer {
         
         $(document).trigger("PageTracklistsInit"); //custom event
 
+    }
+    
+    set_audio_sources(sources){
+        
+        var self = this;
+        
+        
+        var old_sources = this.player_audio_el.find('source');
+        
+        //remove old sources
+        old_sources.each(function(i) {
+            $(this).remove();
+        });
+        
+        if ( sources === undefined) return;
+        
+        //append new sources
+        var new_sources = [];
+        $( sources ).each(function(i, source_attr) {
+            //create source element
+            var source_el = $('<source />');
+            source_el.attr({
+                src:    source_attr.src,
+                type:   source_attr.type
+            });
+            new_sources.push(source_el);
+        });
+        this.player_audio_el.append(new_sources);
     }
     
     get_maybe_shuffle_tracklist_idx(idx){
@@ -219,7 +285,7 @@ class WpsstmPagePlayer {
         /*
         Scroll to playlist track when clicking the player's track number
         */
-        wpsstm.bottom_el.on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
+        wpsstm.player_el.on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
             e.preventDefault();
             var player_track_el = $(this).parents('[itemprop="track"]');
             var track_idx = Number(player_track_el.attr('data-wpsstm-track-idx'));
@@ -304,4 +370,4 @@ class WpsstmPagePlayer {
 })(jQuery);
 
 var wpsstm = new WpsstmPagePlayer();
-wpsstm.init_page_tracklists();
+wpsstm.init();
