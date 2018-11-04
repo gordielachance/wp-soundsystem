@@ -520,7 +520,7 @@ class WPSSTM_Core_Wizard{
         display tracklist if available.  
         Do not show this in a separate metabox since we'll already have the Tracklist metabox for playlists and albums.
         */
-        if ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url ){
+        if ( $this->is_advanced_wizard() ){
             add_settings_field(
                 'feedback_tracklist_content', 
                 __('Tracklist','wpsstm'), 
@@ -989,7 +989,7 @@ class WPSSTM_Core_Wizard{
     
     public static function is_advanced_wizard(){
         global $wpsstm_tracklist;
-        return ( wpsstm_is_backend() && $wpsstm_tracklist->feed_url );
+        return ( wpsstm_is_backend() && ($wpsstm_tracklist->tracklist_type == 'live') );
     }
 
 }
