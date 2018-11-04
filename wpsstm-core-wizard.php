@@ -156,7 +156,7 @@ class WPSSTM_Core_Wizard{
         return $content . $wizard;
     }
 
-    private function populate_wizard_tracklist($post_id=null,$input=null){
+    private function populate_wizard_tracklist($post_id=null,$feed_url=null){
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
@@ -169,18 +169,16 @@ class WPSSTM_Core_Wizard{
             $wpsstm_tracklist->options['autoplay'] = false;
         }
 
-        if ( !$post_id && $input ){ //is wizard input
-            $input = trim($input);
-            $input = apply_filters('wpsstm_wizard_input',$input);
+        if ( !$post_id && $feed_url ){ //is wizard input
+            $feed_url = trim($feed_url);
+            $feed_url = apply_filters('wpsstm_wizard_input',$feed_url);
 
-            if( !$input ){
+            if( !$feed_url ){
                 $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_input', __('Missing wizard input.','wpsstm') );
                 return false;
             }
 
-            $feed_url = apply_filters('wpsstm_live_tracklist_raw_url',$input);
-            
-            $url_parsed = parse_url($input); //check this is an URL
+            $url_parsed = parse_url($feed_url); //check this is an URL
             if( empty($url_parsed['scheme']) ){
                 $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_url_input', __('Missing wizard URL input.','wpsstm') );
                 return false;
