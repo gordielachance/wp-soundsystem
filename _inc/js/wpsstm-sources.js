@@ -4,11 +4,12 @@ class WpsstmTrackSource {
         this.source_el =        $([]);
         this.track =            new WpsstmTrack();
         
-        this.index =            null;
-        this.post_id =          null;
-        this.src =              null;
-        this.type =             null;
-        this.can_play =         false;
+        this.index =            undefined;
+        this.post_id =          undefined;
+        this.src =              undefined;
+        this.type =             undefined;
+        this.can_play =         undefined;
+        this.duration =         undefined;
         
         //tracklist
         if ( track !== undefined ){
@@ -96,6 +97,7 @@ class WpsstmTrackSource {
             $(document).trigger( "wpsstmMediaLoaded",[self] ); //custom event
             self.can_play = true;
             self.debug('source loaded: ' + self.src);
+            self.duration = wpsstm.current_media.duration;
             wpsstm.current_media.play();
         });
 
