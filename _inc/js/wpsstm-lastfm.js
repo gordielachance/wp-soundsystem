@@ -119,7 +119,7 @@ class WpsstmLastFM {
     */
 
     user_scrobble(track_obj){
-        
+
         var self = this;
 
         var ajax_data = {
@@ -245,11 +245,12 @@ class WpsstmLastFM {
         $(wpsstm.current_media).on('play', function() {
             if (wpsstm_lastfm.scrobbler_enabled){
                 wpsstm_lastfm.updateNowPlaying(source_obj.track);
+                
             }
         });
         
         $(wpsstm.current_media).on('ended', function() {
-            if ( wpsstm.current_media.duration > 30) { //scrobble
+            if ( source_obj.duration > 30) { //scrobble
                 if (wpsstm_lastfm.scrobbler_enabled){
                     wpsstm_lastfm.user_scrobble(source_obj.track);
                 }
