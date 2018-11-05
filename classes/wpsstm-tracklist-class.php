@@ -142,7 +142,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             ));
             $subtrack_pos++;
         }
-        
+
         //TO FIX handle errors ?
         
         return true;
@@ -879,11 +879,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
                 }
                 */
                 
-                /*
-                UPDATE TRACKLIST
-                TOUFIX
-                */
-                $post_id = $this->update_live_tracklist();
+
+                
             break;
         }
 
@@ -895,6 +892,15 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $this->did_query_tracks = true;
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
+        
+        //update tracklist
+
+        if ( $this->tracklist_type == 'live' ){
+            $post_id = $this->update_live_tracklist(); //TOUFIX TOCHECK
+            if ( !is_wp_error($post_id) ){
+                $this->post_id = $post_id;
+            }
+        }
 
         if ( !$this->get_options('ajax_autosource') ){
             $this->tracklist_autosource();
@@ -965,6 +971,13 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             $output = implode(', ',$links);
         }
         return $output;
+    }
+    
+    function get_subtracks_count(){
+        global $wpdb;
+        if (!$this->post_id) return false;
+        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        return $wpdb->get_var("SELECT COUNT(*) FROM $subtracks_table_name WHERE tracklist_id = $this->post_id");
     }
 
     function tracklist_log($message,$title = null){

@@ -243,22 +243,25 @@ class WPSSTM_Core_Tracklists{
     
     public static function tracklists_columns_content($column){
         global $wpsstm_tracklist;
+        
+        $output = '—';
 
         switch ( $column ) {
             case 'tracks-count':
-                $wpsstm_tracklist->populate_subtracks();
-                echo $wpsstm_tracklist->track_count;
-                
+                if ($tracks_count = $wpsstm_tracklist->get_subtracks_count() ){
+                    $output = $tracks_count;
+                }
             break;
             case 'tracklist-favorited':
-                $output = '—';
+                
                 if ($list = $wpsstm_tracklist->get_loved_by_list() ){
                     $output = $list;
                 }
-                echo $output;
 
             break;
         }
+        
+         echo $output;
 
     }
 
