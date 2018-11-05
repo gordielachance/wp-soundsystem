@@ -438,8 +438,8 @@ class WPSSTM_Core_Tracklists{
         //TO FIX add post type check ?
 
         if ( $query->get('subtrack_id') ) {
-            $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
-            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table_name,$wpdb->posts);
+            $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
         }
         return $join;
     }
@@ -463,10 +463,10 @@ class WPSSTM_Core_Tracklists{
 
         if ( !in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ) return;
 
-        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         return $wpdb->delete( 
-            $subtracks_table_name, //table
+            $subtracks_table, //table
             array('tracklist_id'=>$post_id) //where
         );
     }

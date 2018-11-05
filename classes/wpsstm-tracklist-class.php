@@ -128,14 +128,14 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Static_Tracklist::set_subtrack_ids()"); 
         
         //delete actual subtracks
-        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table_name WHERE tracklist_id = '%s'", $this->post_id );
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
         
         //set new subtracks
         $subtrack_pos = 0;
         foreach((array)$ordered_ids as $subtrack_id){
-            $wpdb->insert($subtracks_table_name, array(
+            $wpdb->insert($subtracks_table, array(
                 'track_id' =>       $subtrack_id,
                 'tracklist_id' =>   $this->post_id,
                 'track_order' =>    $subtrack_pos
@@ -976,8 +976,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     function get_subtracks_count(){
         global $wpdb;
         if (!$this->post_id) return false;
-        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        return $wpdb->get_var("SELECT COUNT(*) FROM $subtracks_table_name WHERE tracklist_id = $this->post_id");
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        return $wpdb->get_var("SELECT COUNT(*) FROM $subtracks_table WHERE tracklist_id = $this->post_id");
     }
 
     function tracklist_log($message,$title = null){

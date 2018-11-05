@@ -478,8 +478,8 @@ class WPSSTM_Core_Tracks{
         global $wpdb;
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
         if ( $query->get('tracklist_id') ){
-            $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
-            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table_name,$wpdb->posts);
+            $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table,$wpdb->posts);
         }
         return $join;
     }
@@ -1011,10 +1011,10 @@ class WPSSTM_Core_Tracks{
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
 
-        $subtracks_table_name = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         return $wpdb->delete( 
-            $subtracks_table_name, //table
+            $subtracks_table, //table
             array('track_id'=>$post_id) //where
         );
     }

@@ -293,10 +293,10 @@ class WP_SoundSystem {
     function setup_subtracks_table(){
         global $wpdb;
 
-        $subtracks_table_name = $wpdb->prefix . $this->subtracks_table_name;
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE $subtracks_table_name (
+        $sql = "CREATE TABLE $subtracks_table (
             ID bigint(20) NOT NULL AUTO_INCREMENT,
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
@@ -315,7 +315,7 @@ class WP_SoundSystem {
     function migrate_subtracks(){
         global $wpdb;
         
-        $subtracks_table_name = $wpdb->prefix . $this->subtracks_table_name;
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         
         //get all subtracks metas
         $querystr = $wpdb->prepare( "SELECT * FROM $wpdb->postmeta WHERE meta_key = '%s' OR meta_key = '%s'", 'wpsstm_subtrack_ids','wpsstm_live_subtrack_ids' );
@@ -325,7 +325,7 @@ class WP_SoundSystem {
             $subtrack_ids = maybe_unserialize( $meta->meta_value );
             $subtrack_pos = 0;
             foreach((array)$subtrack_ids as $subtrack_id){
-                $wpdb->insert($subtracks_table_name, array(
+                $wpdb->insert($subtracks_table, array(
                     'track_id' =>       $subtrack_id,
                     'tracklist_id' =>   $meta->post_id,
                     'track_order' =>    $subtrack_pos
