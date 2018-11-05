@@ -95,7 +95,7 @@ class WPSSTM_Core_Tracks{
         DB relationships
         */
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
-        add_action( 'delete_post', array($this,'delete_subtracks_track_entry') );
+        add_action( 'before_delete_post', array($this,'update_subtrack_entries') );
     }
 
     //add custom admin submenu under WPSSTM
@@ -1001,22 +1001,30 @@ class WPSSTM_Core_Tracks{
         }
 
     }
-    
-    /*
-    Delete the track related entries from the subtracks table when a track post is deleted.
-    */
-    
-    function delete_subtracks_track_entry($post_id){
+
+    function update_subtrack_entries($post_id){
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
 
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        return $wpdb->delete( 
-            $subtracks_table, //table
-            array('track_id'=>$post_id) //where
-        );
+        $track = new WPSSTM_Track($post_id);
+        $valid = $track->validate_track();
+        
+        if ( $valid && !is_wp_error($valid) ){ //convert to a raw track
+            return $wpdb->update( 
+                $subtracks_table, //table
+                array('track_id'=>'','artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album), //data
+                array('track_id'=>$post_id) //where
+            );
+        }else{
+            return $wpdb->delete( 
+                $subtracks_table, //table
+                array('track_id'=>$post_id) //where
+            );
+        }
+
     }
     
     //TO FIX TO IMPROVE have a query that directly selects the flushable tracks without having to populate them all ?

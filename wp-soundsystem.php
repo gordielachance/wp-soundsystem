@@ -290,23 +290,6 @@ class WP_SoundSystem {
                 $wpdb->query("ALTER TABLE $subtracks_table ADD artist longtext NOT NULL");
                 $wpdb->query("ALTER TABLE $subtracks_table ADD title longtext NOT NULL");
                 $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext");
-
-                //add track artist/title/album in the subtracks table
-                $processed_ids = array();
-                $subtracks = $wpdb->get_results ( "SELECT * FROM $subtracks_table WHERE track_id IS NOT NULL AND (artist='' OR  title='')" );
-
-                foreach((array)$subtracks as $subtrack){
-                    if (in_array($subtrack->track_id,$processed_ids)) continue;
-                    
-                    $track = new WPSSTM_Track($subtrack->track_id);
-                    if (!$track->artist && !$track->title && !$track->album) continue;
-                    
-                    //update track
-                    $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET artist = '%s', title = '%s', album = '%s'  WHERE track_id = '%s'", $track->artist, $track->title, $track->album, $track->post_id );
-                    if ( $track_updated = $wpdb->get_results ( $querystr ) ){
-                        $processed_ids[] = $track->post_id;
-                    }
-                }
                 
             }
 
