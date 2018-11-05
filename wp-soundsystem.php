@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '157';
+    public $db_version = '158';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -282,6 +282,32 @@ class WP_SoundSystem {
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s', meta_value = meta_value * 1000 WHERE meta_key = '%s'", WPSSTM_Core_Tracks::$length_metakey, '_wpsstm_length' );
 
                 $result = $wpdb->get_results ( $querystr );
+            }
+            
+            if ($current_version < 158){
+                //update subtracks table
+                $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+                $wpdb->query("ALTER TABLE $subtracks_table ADD artist longtext NOT NULL");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD title longtext NOT NULL");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext");
+
+                //add track artist/title/album in the subtracks table
+                $processed_ids = array();
+                $subtracks = $wpdb->get_results ( "SELECT * FROM $subtracks_table WHERE track_id IS NOT NULL AND (artist='' OR  title='')" );
+
+                foreach((array)$subtracks as $subtrack){
+                    if (in_array($subtrack->track_id,$processed_ids)) continue;
+                    
+                    $track = new WPSSTM_Track($subtrack->track_id);
+                    if (!$track->artist && !$track->title && !$track->album) continue;
+                    
+                    //update track
+                    $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET artist = '%s', title = '%s', album = '%s'  WHERE track_id = '%s'", $track->artist, $track->title, $track->album, $track->post_id );
+                    if ( $track_updated = $wpdb->get_results ( $querystr ) ){
+                        $processed_ids[] = $track->post_id;
+                    }
+                }
+                
             }
 
         }
