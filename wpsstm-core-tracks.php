@@ -72,8 +72,6 @@ class WPSSTM_Core_Tracks{
         add_filter( 'pre_get_posts', array($this,'default_exclude_subtracks') );
         */
 
-        
-        
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
         
         /*
@@ -94,8 +92,9 @@ class WPSSTM_Core_Tracks{
         /*
         DB relationships
         */
+        add_action( 'save_post', array($this,'set_subtrack_post_id'), 6);
+        add_action( 'before_delete_post', array($this,'remove_subtrack_post_id') );
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
-        add_action( 'before_delete_post', array($this,'update_subtrack_entries') );
     }
 
     //add custom admin submenu under WPSSTM
@@ -1001,8 +1000,55 @@ class WPSSTM_Core_Tracks{
         }
 
     }
+    
+    /*
+    After track post is updated, check for data occurences in the subtracks table and eventally set the post ID instead
+    */
+    
+    function set_subtrack_post_id( $post_id ) {
+        global $wpdb;
+        
+        //check save status
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $is_revision = wp_is_post_revision( $post_id );
+        if ( $is_autosave || $is_autodraft || $is_revision ) return;
+        
+        //check post type
+        $post_type = get_post_type($post_id);
+        $allowed_post_types = array(wpsstm()->post_type_track);
+        if ( $post_type != wpsstm()->post_type_track ) return;
+        
+        $track = new WPSSTM_Track($post_id);
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        //update subtracks : delete track datas and set post ID
 
-    function update_subtrack_entries($post_id){
+        $where_sql = array(
+            'artist'=>  $track->artist,
+            'title'=>   $track->title,
+            'album'=>   $track->album
+        );
+        
+        $where_sql = array_filter($where_sql);
+        
+        $success = $wpdb->update( 
+            $subtracks_table, //table
+            array(
+                'track_id'=>$track->post_id,
+                'artist'=>null,
+                'title'=>null,
+                'album'=>null), //data
+            $where_sql //where
+        );
+        
+    }
+    
+    /*
+    Just before a track post is removed, remove post its post ID from the subtracks table and replace it by the track artist / title / album
+    */
+
+    function remove_subtrack_post_id($post_id){
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
@@ -1010,20 +1056,13 @@ class WPSSTM_Core_Tracks{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         $track = new WPSSTM_Track($post_id);
-        $valid = $track->validate_track();
         
-        if ( $valid && !is_wp_error($valid) ){ //convert to a raw track
-            return $wpdb->update( 
-                $subtracks_table, //table
-                array('track_id'=>'','artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album), //data
-                array('track_id'=>$post_id) //where
-            );
-        }else{
-            return $wpdb->delete( 
-                $subtracks_table, //table
-                array('track_id'=>$post_id) //where
-            );
-        }
+        return $wpdb->update( 
+            $subtracks_table, //table
+            array('track_id'=>'','artist'=>$track->artist,'title'=>$track->title,'album'=>$track->album), //data
+            array('track_id'=>$post_id) //where
+        );
+
 
     }
     
