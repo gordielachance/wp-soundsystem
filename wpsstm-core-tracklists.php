@@ -362,8 +362,10 @@ class WPSSTM_Core_Tracklists{
                 //redirect to backend
             break;
             case 'refresh':
-                $tracklist->is_expired = true; //will force tracklist refresh
-                $success = $tracklist->populate_subtracks(); //TO FIX query args ?
+                //TOUFIX TOCHECK is working ?
+                //maybe better to just delete the time updated meta so we force de tracklist update ?
+                $tracklist->is_expired = true;
+                $success = $tracklist->populate_subtracks();
             break;
             case 'favorite':
                 $success = $tracklist->love_tracklist(true);

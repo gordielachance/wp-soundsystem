@@ -450,9 +450,11 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
 
         //set global $wpsstm_tracklist (a tracklists with this single track)
-        $wpsstm_tracklist = new WPSSTM_Single_Track_Tracklist($track_id);
-        $wpsstm_track = new WPSSTM_Track( $track_id );
-        $wpsstm_track->tracklist = $wpsstm_tracklist;
+        //TOUFIX TOCHECK
+        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($track_id);
+        $track = new WPSSTM_Track( $track_id );
+        $wpsstm_tracklist->add_tracks($track);
+        $wpsstm_track = $wpsstm_tracklist->tracks[0];
     }
 
     function pre_get_posts_by_track_title( $query ) {

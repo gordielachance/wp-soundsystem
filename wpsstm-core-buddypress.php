@@ -298,9 +298,10 @@ class WPSSTM_Core_BuddyPress{
     TO FIX in the end, this should be part of core-playlists.php
     */
 
+    //TOUFIX check is working
     public function member_get_favorite_tracks_playlist(){
         
-        $tracklist = wpsstm_get_tracklist();
+        $tracklist = new WPSSTM_Static_Tracklist();
         $user_id = bp_displayed_user_id();
         
         if ( $user_datas = get_userdata( $user_id ) ) {
@@ -309,12 +310,17 @@ class WPSSTM_Core_BuddyPress{
             $tracklist->title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
             $tracklist->author = $display_name;
 
-            $subtracks_qargs = array(
+            $args = array(
+                'post_type'         => wpsstm()->post_type_track,
                 WPSSTM_Core_Tracks::$qvar_loved_tracks =>   $user_id,
+                'fields'        => 'ids',
+                'post_status'   => 'any',
+                'posts_per_page'=> -1,
             );
-            $tracklist->populate_subtracks($subtracks_qargs);
-        }else{
-            $tracklist->did_query_tracks = true; //so it's not requested later
+            $query = new WP_Query( $args );
+            $post_ids = (array)$query->posts;
+            $tracklist->add_tracks($tracklist);
+
         }
 
         return $tracklist;

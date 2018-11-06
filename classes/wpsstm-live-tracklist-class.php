@@ -11,9 +11,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     public $feed_url_no_filters = null;
     var $scraper_options = array();
     
-    public $is_expired = true; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
-    public $cache_source_key = null;
-    public $cache_source_url = null;
+    public $is_expired = null; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
 
     //response
     var $request_pagination = array(
@@ -63,9 +61,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
                 $this->updated_time = $meta;
             }
-            
-            $this->cache_source_key = sprintf('wpsstm_cached_source_%s',$this->post_id);
-            $this->cache_source_url = get_transient( $this->cache_source_key );
 
         }
 
@@ -124,41 +119,20 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         return $diff;
     }
+    /*
+    Populate the remote subtracks, store them, and update post data.
+    */
 
-    protected function get_live_subtracks($args = null){
+    protected function populate_remote_datas(){
         
-        $is_cached = false;
-
-        //try cache
-        if ( $this->get_options('cache_source') && $this->cache_source_url ){
-            $this->feed_url = $this->cache_source_url;
-            $is_cached = true;
-            $this->tracklist_log('found HTML cache' );
-        }else{ //allow plugins to filter the URL
-            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
-        }
-        
-        if ( !$is_cached && $this->get_options('ajax_tracklist') && $this->wait_for_ajax() ){
-            $url = $this->get_tracklist_action_url('refresh');
-            $link = sprintf( '<a class="wpsstm-refresh-tracklist" href="%s">%s</a>',$url,__('Click to load the tracklist.','wpsstm') );
-            $error = new WP_Error( 'requires-refresh', $link );
-            $this->tracks_error = $error;
-            return $error;
-        }
+        //set updated time
+        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
+        update_post_meta( $this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name, $this->updated_time );
         
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->feed_url);
         $response_code = wp_remote_retrieve_response_code( $response );
-        
-        if ( $is_cached ) {
-            if ( is_wp_error($response) || ($response_code != 200) ){ //if cached file has been deleted or something
-                $this->tracklist_log( 'Unable to get cached file,deleting transient, retrying...' );
-                delete_transient( $this->cache_source_key );
-                $this->cache_source_url = null;
-                $response = $this->populate_subtracks();
-            }
-        }
-        
+
         if ( is_wp_error($response) ) return $response;
         
         $response_type = $this->populate_response_type();
@@ -169,15 +143,10 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
-        
-        if ( !$is_cached && $this->get_options('cache_source') ) {
-           $this->cache_tracklist_source($response); 
-        }
 
         $tracks = $this->get_remote_tracks();
 
-        $this->did_query_tracks = true;
-
+        //TOUFIX TOCHECK
         if ( is_wp_error($tracks) ){
             $this->tracks_error = $tracks;
             return $tracks;
@@ -187,72 +156,44 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         if ($this->get_scraper_options('tracks_order') == 'asc'){
             $tracks = array_reverse($tracks);
         }
-
-        return $tracks;
-    }
-
-    /*
-    Update WP post and eventually update subtracks.
-    */
-    
-    function update_live_tracklist($save_subtracks = null){
-
-        if (!$this->post_id){
-            $this->tracklist_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
         
-        //capability check
-        if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
-            $this->tracklist_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
+        $this->tracks = $this->add_tracks($tracks);
+        $this->track_count = count($this->tracks);
         
-        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
-        
-        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
+        //update stuff
+        if ($this->post_id){
+            //capability check
+            if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
+                $this->tracklist_log('Cannot update playlist - missing caps' );
+            }else{
+                
+                //post
+                $tracklist_post = array(
+                    'ID' =>         $this->post_id,
+                    'meta_input' => array(
+                        WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
+                        WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
+                    )
+                );
 
-        $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
-        );
-        
-        //should we save subtracks too ? By default, only if cache is enabled.
-        if ($save_subtracks === null) $save_subtracks = (bool)$this->get_scraper_options('datas_cache_min');
+                $post_updated = wp_update_post( $tracklist_post, true );
 
-        if ($this->tracks && $save_subtracks){
-
-            //save new subtracks as community tracks
-            $subtracks_args = array(
-                'post_author'   => wpsstm()->get_options('community_user_id'),
-            );
-            $success = $this->save_subtracks($subtracks_args);
-            
-            if( is_wp_error($success) ){
-                $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
-                return $success;
+                if( is_wp_error($post_updated) ){
+                    $this->tracklist_log($post_updated->get_error_code(),'Unable to update live tracklist post' );
+                }
+                
+                //subtracks
+                //TOUFIX is it OK below this capability check ? since everyone should be able to update subtracks...
+                $subtracks_updated = $this->update_subtracks();
+                if( is_wp_error($subtracks_updated) ){
+                    $this->tracklist_log($subtracks_updated->get_error_code(),'Unable to update subtracks' );
+                }
+                
             }
-
         }
-        
-        //update tracklist post
-        $tracklist_post = array(
-            'ID' =>         $this->post_id,
-            'meta_input' => $meta_input,
-        );
 
-        $success = wp_update_post( $tracklist_post, true );
+        return true;
         
-        if( is_wp_error($success) ){
-            $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return $success;
-        }
-        
-       //repopulate post
-        $this->populate_tracklist_post();
-        
-        return $this->post_id;
     }
 
     protected function get_remote_tracks(){
@@ -370,10 +311,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             $error_msg = sprintf('Error while creating cache file "%s": %s',$filename,$ghost['error']);
             $this->tracklist_log( $error_msg );
             return new WP_Error( 'cannot_cache_tracklist', $error_msg );
-        }else{
-            $this->tracklist_log( sprintf('Created HTML file: %s',$ghost['url']) );
-            set_transient( $this->cache_source_key, $ghost['url'], $cache_seconds );
-            return $ghost;
         }
 
     }
@@ -858,21 +795,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
-        //force PHP tracks refresh
-        $this->options['ajax_tracklist'] = false;
-        
-        //populate remote tracklist if not done yet
-        $populated = $this->populate_subtracks();
-        
-        $updated = $this->update_live_tracklist(true);
-
-        if ( is_wp_error($updated) ){
-            return $updated;
-        }
-        
         $args = array(
             'ID'            => $this->post_id,
-            'post_title'    => $this->title,
             'post_type'     => wpsstm()->post_type_playlist,
         );
 

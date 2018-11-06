@@ -893,12 +893,9 @@ class WPSSTM_Core_Wizard{
         );
 
         $results_title = __('Results','spiff');
-          
-        if ( $wpsstm_tracklist->did_query_tracks ){
-            $tracks_count = count($wpsstm_tracklist->tracks);
-            $results_title .= ' '.$tracks_count;
-            //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $tracks_count, 'wpsstm' ) );
-        }
+
+        $results_title .= ' '.$wpsstm_tracklist->track_count;
+        //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $wpsstm_tracklist->track_count, 'wpsstm' ) );
         
         $results_tab = array(
             'title'  => $results_title,

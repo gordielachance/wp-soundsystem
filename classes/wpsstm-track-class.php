@@ -2,6 +2,7 @@
 
 class WPSSTM_Track{
     public $post_id = null;
+    public $subtrack_id = null;
     public $index = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
     
     public $title;
@@ -504,8 +505,6 @@ class WPSSTM_Track{
             }else{
                 $this->track_log($success,'Community track created');
             }
-        }else{
-            $this->track_log($this->post_id,'TOUFIX track has ID');
         }
 
         //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);

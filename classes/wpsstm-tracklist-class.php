@@ -35,10 +35,13 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 
         $this->set_tracklist_pagination($pagination_args);
         
-        $this->post_id = $post_id;
-        $this->unique_id = uniqid(); //in case we don't have a post ID; useful for JS
-        $this->populate_tracklist_post();
         
+        $this->unique_id = uniqid(); //in case we don't have a post ID; useful for JS
+        
+        if ($post_id){
+            $this->post_id = $post_id;
+            $this->populate_tracklist_post();
+        }
     }
     
     function populate_tracklist_post(){
@@ -132,7 +135,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
         
-        //set new subtracks
+        //set new subtracks //TOUFIX TOUCHECK
         $subtrack_pos = 0;
         foreach((array)$ordered_ids as $subtrack_id){
             $wpdb->insert($subtracks_table, array(
@@ -154,6 +157,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     */
     
     function append_subtrack_ids($append_ids){
+        return;//TOUFIX
         
         //force array
         if ( !is_array($append_ids) ) $append_ids = array($append_ids);
@@ -162,7 +166,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
 
-        $subtrack_ids = (array)$this->get_static_subtracks();
+        $subtrack_ids = (array)$this->populate_static_subtracks();//TOUFIX
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Static_Tracklist::append_subtrack_ids()");
         
@@ -176,6 +180,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     */
     
     function remove_subtrack_ids($remove_ids){
+        return;//TOUFIX
+        
         //force array
         if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
         
@@ -183,7 +189,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
         }
         
-        $subtrack_ids = (array)$this->get_static_subtracks();
+        $subtrack_ids = (array)$this->populate_static_subtracks();//TOUFIX
 
         $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Static_Tracklist::remove_subtrack_ids()");
 
@@ -596,6 +602,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     }
 
     function append_wizard_tracks(){
+        return;//TOUFIX
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
@@ -603,7 +610,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         //get live IDs
         //TOUFIX TO CHECK whole fn
         $this->tracklist_type = 'live';
-        $live_ids = $this->get_static_subtracks();
+        $live_ids = $this->populate_static_subtracks();//TOUFIX
 
         //switch to static
         $this->tracklist_type = 'static';
@@ -713,12 +720,12 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     }
     
     function save_track_position($track_id,$index){
-        
+        return;//TOUFIX
         if ( !$this->user_can_reorder_tracks() ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
-        $subtrack_ids = $this->get_static_subtracks();
+        $subtrack_ids = $this->populate_static_subtracks();//TOUFIX
         
         //delete current
         if(($key = array_search($track_id, $subtrack_ids)) !== false) {
@@ -859,54 +866,75 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         return ($this->get_options('ajax_tracklist') && !wpsstm_is_ajax());
     }
 
-    function populate_subtracks($args = null){
+    function populate_subtracks(){
+        global $wpdb;
 
         if ( $this->did_query_tracks ) return true;
         
-        switch($this->tracklist_type){
-            case 'static':
-                $tracks = $this->get_static_subtracks($args);
-            break;
-            case 'live':
-                $tracks = $this->get_live_subtracks($args);
-                
-                //TOUFIX
-                /*
-                if ( !$this->is_expired ){
-                    return $this->get_static_subtracks($args);
-                }else{
-                    $tracks = $this->get_live_subtracks($args);
-                }
-                */
-                
+        $success = null;
 
-                
-            break;
+        if ( ($this->tracklist_type == 'live') && ( $this->is_expired ) && !$this->wait_for_ajax() ){
+            $success = $this->populate_remote_datas();
+            new WPSSTM_Live_Playlist_Stats($this); //TOUFIX TOCHECK is this the right place ? Should we not count stats for any tracklist ?
+        }else{
+            $success = $this->populate_static_subtracks();
         }
-
-        if ( is_wp_error($tracks) ){
-            $this->tracks_error = $tracks;
-            return $tracks;
-        }
-
-        $this->did_query_tracks = true;
-        $this->tracks = $this->add_tracks($tracks);
-        $this->track_count = count($this->tracks);
         
-        //update tracklist
+        $this->did_query_tracks = true;
 
-        if ( $this->tracklist_type == 'live' ){
-            $post_id = $this->update_live_tracklist(); //TOUFIX TOCHECK
-            if ( !is_wp_error($post_id) ){
-                $this->post_id = $post_id;
-            }
+        if ( is_wp_error($success) ){
+            $this->tracks_error = $success;
+            return $success;
         }
 
+        //TOUFIX TOCHECK should be elsewhere ?
         if ( !$this->get_options('ajax_autosource') ){
             $this->tracklist_autosource();
         }
         
         return true;
+
+    }
+    
+    /*
+    Clear the stored subtracks and add the new ones
+    */
+
+    protected function update_subtracks(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        //delete actual subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
+        $success = $wpdb->get_results ( $querystr );
+
+        $subtrack_pos = 0;
+        foreach((array)$this->tracks as $track){
+            //check for a track ID
+            $track->populate_local_track();
+
+            $subtrack_arr = array(
+                'tracklist_id' =>   $this->post_id,
+                'track_order' =>    $this->index
+            );
+
+            if($track->post_id){
+                $subtrack_arr['track_id'] = $track->post_id;
+            }else{
+                $subtrack_arr['artist'] = $track->artist;
+                $subtrack_arr['title'] = $track->title;
+                $subtrack_arr['album'] = $track->album;
+            }
+
+            $success = $wpdb->insert($subtracks_table,$subtrack_arr);
+            
+            //populate subtrack ID
+            if($success){
+                $track->subtrack_id = $wpdb->insert_id;
+            }
+            $subtrack_pos++;
+        }
     }
     
     private function tracklist_autosource(){
@@ -919,31 +947,39 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    protected function get_static_subtracks($args = null){
-
-        $default = array(
-            'fields'        => 'ids',
-            'post_status'   => 'any',
-            'posts_per_page'=> -1,
-            'orderby'       => 'track_order',
-            'order'         => 'ASC',
-        );
-
-        $args = wp_parse_args((array)$args,$default);
+    protected function populate_static_subtracks(){
+        global $wpdb;
+        //get subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "SELECT * FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
+        $subtracks = $wpdb->get_results ( $querystr );
         
-        $required = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'tracklist_id'      => $this->post_id, //fetch only subtracks for this tracklist
-        );
+        $tracks = array();
+        foreach((array)$subtracks as $subtrack){
+
+            $track = new WPSSTM_Track(); //default
+            
+            if ($subtrack->track_id){
+                $track = new WPSSTM_Track($subtrack->track_id);
+            }else{
+                $track_arr = array(
+                    'artist' => $subtrack->artist,
+                    'title' =>  $subtrack->title,
+                    'album' =>  $subtrack->album,
+                    //TOUFIX playlist id ?
+                );
+                $track->from_array($track_arr);
+            }
+            
+            $track->subtrack_id = $subtrack->ID;
+            
+            $tracks[] = $track;
+        }
         
-        $args = wp_parse_args($required,(array)$args);
-
-        $query = new WP_Query( $args );
-        $subtracks = $query->posts;
-
-        //$this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'args'=>$args,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Static_Tracklist::get_subtracks"); 
-
-        return $subtracks;
+        $this->tracks = $this->add_tracks($tracks);
+        $this->track_count = count($this->tracks);
+        
+        return true;
     }
 
     function get_html_metas(){
@@ -1015,20 +1051,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         wp_delete_file($log_file);
     }
 
-}
-
-class WPSSTM_Single_Track_Tracklist extends WPSSTM_Static_Tracklist{
-    function get_static_subtracks($args = null){
-
-        $required = array(
-            'post_type'         => wpsstm()->post_type_track,
-            'post__in' => array($this->post_id),
-        );
-
-        $args = wp_parse_args($required,(array)$args);
-        return parent::get_static_subtracks($args);
-        
-    }
 }
 
 class WPSSTM_Tracklist{
