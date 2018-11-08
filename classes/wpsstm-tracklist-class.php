@@ -70,7 +70,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     }
     
     public static function get_default_options(){
-        return array(
+        
+        $options = array(
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
@@ -80,8 +81,20 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'ajax_autosource'           => true,
-            'cache_source'              => true, //make a cache copy of the remote source
         );
+        
+        if ( $this->tracklist_type == 'live'){
+            $live_options = array(
+                'is_expired' => $this->check_has_expired(),
+                'ajax_tracklist' => $this->check_has_expired(),
+            );
+
+            return wp_parse_args($live_options,$options);
+        }
+        
+        return $options;
+        
+        
     }
     
     protected function get_url_options(){
@@ -693,11 +706,24 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         Existing playlist
         */
         $static_tracklist = $this;
-        $subtracks_success = $static_tracklist->set_subtrack_ids(); //unset static subtracks
+        $subtracks_success = $static_tracklist->set_subtrack_ids(); //unset static subtracks //TOUFIX instead of this, clear update time meta ?
         
-        $converted = set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
+        return set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
 
-        return $converted;
+    }
+    
+    function convert_to_static_playlist(){
+        
+        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ){
+            return new WP_Error( 'wpsstm_wrong_post_type', __("This is not a live tracklist.",'wpsstm') );
+        }
+
+        //capability check
+        if ( !$this->user_can_lock_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+
+        return set_post_type( $this->post_id, wpsstm()->post_type_playlist );
 
     }
     
@@ -832,6 +858,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             'data-wpsstm-tracklist-unique-id' =>    $this->unique_id,
             'data-wpsstm-tracklist-idx' =>          $this->index,
             'data-wpsstm-toggle-tracklist' =>       $this->get_options('toggle_tracklist'),
+            'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
@@ -872,6 +899,9 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
         
         $success = null;
+        
+        //TOUFIX
+        $this->is_expired = true;
 
         if ( ($this->tracklist_type == 'live') && ( $this->is_expired ) && !$this->wait_for_ajax() ){
             $success = $this->populate_remote_datas();
@@ -893,6 +923,43 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
         
         return true;
+
+    }
+    
+    function get_time_before_refresh(){
+
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        
+        if ( !$cache_seconds ) return false;
+        if ( $this->is_expired ) return false;
+        
+        $time_refreshed = $this->updated_time;
+        $time_before = $time_refreshed + $cache_seconds;
+        $now = current_time( 'timestamp', true );
+
+        return $refresh_time_human = human_time_diff( $now, $time_before );
+    }
+    
+    //UTC
+    function get_expiration_time(){
+        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        return $this->updated_time + $cache_seconds;
+    }
+
+    // checks if the playlist has expired (and thus should be refreshed)
+    // set 'expiration_time'
+    private function check_has_expired(){
+        
+        $cache_duration_min = $this->get_scraper_options('datas_cache_min');
+        $has_cache = (bool)$cache_duration_min;
+        
+        if (!$has_cache){
+            return true;
+        }else{
+            $now = current_time( 'timestamp', true );
+            $expiration_time = $this->get_expiration_time(); //set expiration time
+            return ( $now >= $expiration_time );
+        }
 
     }
     
@@ -986,6 +1053,16 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $metas = array(
             'numTracks' => $this->track_count
         );
+        
+        if ( $this->tracklist_type == 'live'){
+            /*
+            expiration time
+            */
+            //if no real cache is set; let's say tracklist is already expired at load!
+            $expiration_time = ($expiration = $this->get_expiration_time() ) ? $expiration : current_time( 'timestamp', true );
+            $metas['wpsstmExpiration'] = $expiration_time;
+        }
+        
         return $metas;
     }
     

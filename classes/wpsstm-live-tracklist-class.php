@@ -65,17 +65,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         }
 
     }
-    
-    public static function get_default_options(){
-        $options = parent::get_default_options();
-        
-        $live_options = array(
-            'is_expired' => $this->check_has_expired(),
-            'ajax_tracklist' => $this->check_has_expired(),
-        );
-        
-        return wp_parse_args($live_options,$options);
-    }
 
     protected function get_default_scraper_options(){
         $live_options = array(
@@ -251,74 +240,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         );
         return apply_filters('wpsstm_live_tracklist_request_args',$defaults);
     }
-    
-    function remote_type_to_ext($content_type) {
-        $content_type = strtolower($content_type);
 
-        $mimes = array( 
-            'txt' => 'text/plain',
-            'html' => 'text/html',
-            'js' => 'application/javascript',
-            'json' => 'application/json',
-            'xml' => 'application/xml',
-            'xspf' => 'application/xspf+xml',
-        );
-        return array_search($content_type, $mimes);
-     }
-    
-    /*
-    Allow to upload files with new extensions when caching playlists
-    */
-
-    function uploads_custom_mimes($existing_mimes) {
-        $existing_mimes['xspf'] = 'application/xspf+xml';
-        $existing_mimes['json'] = 'application/javascript';
-        return $existing_mimes;
-    }
-    
-    /*
-    Upload cached playlists to our custom 'uploads/wpsstm' path
-    */
-    
-    function uploads_custom_dir( $upload ) {
-        $log_dir = wpsstm_get_uploads_dir();
-        $upload['subdir'] = '/' . basename($log_dir);
-        $upload['path'] = $upload['basedir'] . $upload['subdir'];
-        $upload['url']  = $upload['baseurl'] . $upload['subdir'];
-        return $upload;
-    }
-
-    function cache_tracklist_source($response){
-
-        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-        
-        if ( !$this->post_id ) return;
-        if ( !$cache_seconds ) return;
-        if ( is_wp_error($response) ) return;
-
-        $ext = $this->remote_type_to_ext($response['headers']['content-type']);
-        $filename = sprintf('%s-source.%s',$this->post_id,$ext);
-
-        add_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
-        add_filter( 'upload_dir', array($this,'uploads_custom_dir') );
-
-        $ghost = wp_upload_bits($filename, null, wp_remote_retrieve_body($response));
-
-        remove_filter( 'upload_mimes', array($this,'uploads_custom_mimes') );
-        remove_filter( 'upload_dir', array($this,'uploads_custom_dir') );
-
-        if ( $ghost['error'] ){
-            $error_msg = sprintf('Error while creating cache file "%s": %s',$filename,$ghost['error']);
-            $this->tracklist_log( $error_msg );
-            return new WP_Error( 'cannot_cache_tracklist', $error_msg );
-        }
-
-    }
-    
-    function delete_cached_file(){
-        
-    }
-    
     private function populate_remote_response($url){
 
         if( $this->response !== null ) return $this->response; //already populated
@@ -784,31 +706,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         return $string;
     }
 
-    function convert_to_static_playlist(){
-        
-        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ){
-            return new WP_Error( 'wpsstm_wrong_post_type', __("This is not a live tracklist.",'wpsstm') );
-        }
-
-        //capability check
-        if ( !$this->user_can_lock_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-
-        $args = array(
-            'ID'            => $this->post_id,
-            'post_type'     => wpsstm()->post_type_playlist,
-        );
-
-        $success = wp_update_post( $args, true );
-
-        if ( is_wp_error($success) ) {
-            return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
-        }
-        return $success;
-
-    }
-
     function save_feed_url(){
 
         if (!$this->feed_url){
@@ -906,70 +803,5 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         return $new_input;
     }
-    
-    //UTC
-    function get_expiration_time(){
-        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-        return $this->updated_time + $cache_seconds;
-    }
 
-    
-    // checks if the playlist has expired (and thus should be refreshed)
-    // set 'expiration_time'
-    private function check_has_expired(){
-        
-        $cache_duration_min = $this->get_scraper_options('datas_cache_min');
-        $has_cache = (bool)$cache_duration_min;
-        
-        if (!$has_cache){
-            return true;
-        }else{
-            $now = current_time( 'timestamp', true );
-            $expiration_time = $this->get_expiration_time(); //set expiration time
-            return ( $now >= $expiration_time );
-        }
-
-    }
-    
-    function get_time_before_refresh(){
-
-        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-        
-        if ( !$cache_seconds ) return false;
-        if ( $this->is_expired ) return false;
-        
-        $time_refreshed = $this->updated_time;
-        $time_before = $time_refreshed + $cache_seconds;
-        $now = current_time( 'timestamp', true );
-
-        return $refresh_time_human = human_time_diff( $now, $time_before );
-    }
-
-    function get_tracklist_attr($values_attr=null){
-        
-        $values_default = array(
-            'data-wpsstm-domain' => wpsstm_get_url_domain( $this->feed_url )
-        );
-
-        $values_attr = array_merge($values_default,(array)$values_attr);
-
-        return parent::get_tracklist_attr($values_attr);
-    }
-    
-    function get_html_metas(){
-        $metas = parent::get_html_metas();
-        
-        /*
-        expiration time
-        */
-        //if no real cache is set; let's say tracklist is already expired at load!
-        $expiration_time = ($expiration = $this->get_expiration_time() ) ? $expiration : current_time( 'timestamp', true );
-        
-        $metas['wpsstmExpiration'] = $expiration_time;
-        
-        return $metas;
-    }
-    
-
-    
 }

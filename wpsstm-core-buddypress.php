@@ -298,7 +298,8 @@ class WPSSTM_Core_BuddyPress{
     TO FIX in the end, this should be part of core-playlists.php
     */
 
-    //TOUFIX check is working
+    //TOUFIX
+    //instead of this, we should have a true tracklist post to store the user favorite tracks, would be easier to handle.
     public function member_get_favorite_tracks_playlist(){
         
         $tracklist = new WPSSTM_Static_Tracklist();
