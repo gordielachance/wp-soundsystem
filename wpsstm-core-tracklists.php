@@ -338,29 +338,6 @@ class WPSSTM_Core_Tracklists{
         $success = null;
 
         switch($action){
-                
-            case 'new-subtrack':
-                //create auto draft & assign tracklist
-                $args = array(
-                    'post_status' =>    'auto-draft',
-                    'post_type' =>      wpsstm()->post_type_track
-                );
-                
-                $track_id = wp_insert_post( $args, true );
-                
-                if ( !is_wp_error($track_id) ){
-                    $success = $tracklist->append_subtrack_ids($track_id);
-
-                    //$redirect_url = get_edit_post_link( $track_id ); //NOT WORKING; see https://stackoverflow.com/a/47038586/782013
-                    $redirect_url = admin_url( '/post.php?post=' . $track_id . '&action=edit' );
-                    
-                    wp_safe_redirect($redirect_url);
-                    exit();
-                }
-                
-                
-                //redirect to backend
-            break;
             case 'refresh':
                 //TOUFIX TOCHECK is working ?
                 //maybe better to just delete the time updated meta so we force de tracklist update ?

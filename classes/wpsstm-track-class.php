@@ -272,8 +272,68 @@ class WPSSTM_Track{
         return true;
     }
     
-    function save_subtrack($args = null){
+    function validate_subtrack($strict = true){
+        if (!$this->tracklist->post_id){
+            return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
+        }
+        return $this->validate_track($strict);
+    }
+    
+    function save_subtrack(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         
+        $valid = $this->validate_subtrack();
+        if ( is_wp_error( $valid ) ) return $valid;
+        
+        //check for a track ID
+        if (!$this->post_id){
+            $track->populate_local_track();
+        }
+
+        $subtrack_data = array(
+            'tracklist_id' =>   $this->tracklist->post_id,
+            'track_order' =>    $this->index
+        );
+        
+        //TOUFIX logic when switching track order ?
+
+        //basic data
+        if($this->post_id){
+            $subtrack_data['track_id'] = $track->post_id;
+        }else{
+            $subtrack_data['artist'] = $track->artist;
+            $subtrack_data['title'] = $track->title;
+            $subtrack_data['album'] = $track->album;
+        }
+        
+        //update or insert ?
+        if ($this->subtrack_id){
+            
+            $success = $wpdb->update( 
+                $subtracks_table, //table
+                $subtrack_data, //data
+                array(
+                    'ID'=>$this->subtrack_id
+                )
+            );
+
+        }else{
+            $success = $wpdb->insert($subtracks_table,$subtrack_data);
+            
+            if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
+                $this->subtrack_id = $wpdb->insert_id;
+                $this->track_log($wpdb->insert_id,"Subtrack inserted" ); 
+            }
+        }
+        
+        if ( is_wp_error($success) ){
+            $error_msg = $success->get_error_message();
+            $this->track_log(array('track'=>$track->to_array(),'error'=>$error_msg), "Error while saving subtrack" ); 
+        }
+        
+        return $success;
+
     }
 
     function save_track_post($args = null){

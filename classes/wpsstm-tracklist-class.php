@@ -93,15 +93,14 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
         
         return $options;
-        
-        
+
     }
     
     protected function get_url_options(){
         $url_options = isset( $_REQUEST['tracklist_options'] ) ? (array)$_REQUEST['tracklist_options'] : array();
         return $url_options;
     }
-    
+
     public function get_title(){
         $title = $this->title;
         if (!$title && $this->post_id){
@@ -289,32 +288,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function save_subtracks($args = null){
-        
-        //do not auto guess MBID while saving subtracks
-        remove_action( 'save_post', array('WPSSTM_MusicBrainz','auto_mbid_on_post_save'), 8);
-        
-        $new_ids = array();
-
-        //save those new subtracks
-        $errors = array();
-        foreach((array)$this->tracks as $key=>$track){
-            $success = $track->save_subtrack($args);
-            if ( is_wp_error($success) ){
-                $errors[] = $success;
-                $error_msg = $success->get_error_message();
-                $this->track_log(array('track'=>$track->to_array(),'error'=>$error_msg), "Error while saving subtrack" ); 
-                continue;
-            }
-        }
-        
-        if($errors){
-            $this->track_log(sprintf('%s errors occured when saving subtracks',count($errors))); 
-        }
-        
-        return true;
-    }
-
     function get_tracklist_html(){
         $this->register_tracklist_inline_js();
         ob_start();
@@ -482,18 +455,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unfavorite'),
                 'desc' =>       __('Remove from favorites','wpsstm'),
-            );
-        }
-        
-        //add track
-        if ( $this->user_can_reorder_tracks() ){
-            
-            $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-
-            $actions['new-subtrack'] = array(
-                'text'     =>   $track_post_type_obj->labels->add_new_item,
-                'href'      =>  $this->get_tracklist_action_url('new-subtrack'),
-                'classes'   =>  array('wpsstm-link-popup'),
             );
         }
         
@@ -880,11 +841,11 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
                 return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
             }
             
-            $tracks = $this->get_remote_datas($args);
-            if ( is_wp_error($tracks) ) return $tracks;
+            $remote = $this->get_remote_datas();
+            if ( is_wp_error($remote) ) return $remote;
             //
-            $success = $this->set_live_datas();
-            if ( is_wp_error($tracks) ) return $tracks;
+            $updated = $this->set_live_datas();
+            if ( is_wp_error($updated) ) return $updated;
             
         }else{
             
@@ -917,7 +878,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 
         //save subtracks
         if ($this->tracks){
-            $success = $this->save_subtracks($subtracks_args);
+            $success = $this->update_subtracks();
             if( is_wp_error($success) ) return $success;
         }
                
@@ -989,42 +950,28 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
 
-        $subtrack_pos = 0;
+        $errors = array();
+        $no_updates = 0;
         foreach((array)$this->tracks as $track){
-            //check for a track ID
-            $track->populate_local_track();
-
-            $subtrack_arr = array(
-                'tracklist_id' =>   $this->post_id,
-                'track_order' =>    $this->index
-            );
-
-            if($track->post_id){
-                $subtrack_arr['track_id'] = $track->post_id;
-            }else{
-                $subtrack_arr['artist'] = $track->artist;
-                $subtrack_arr['title'] = $track->title;
-                $subtrack_arr['album'] = $track->album;
-            }
-
-            $success = $wpdb->insert($subtracks_table,$subtrack_arr);
+            $success = $track->save_subtrack();
             
             //populate subtrack ID
-            if($success){
-                $track->subtrack_id = $wpdb->insert_id;
+            if( is_wp_error($success) ){
+                $errors[] = $success;
+            }elseif ($success === false){ //no rows updated, but no errors either
+                $no_updates++;
             }
-            $subtrack_pos++;
-        }
-=======
-        $success = wp_update_post( $tracklist_post, true );
-        
-        if( is_wp_error($success) ){
-            $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::set_live_datas' );
-            return $success;
         }
         
-        return $this->post_id = $success;
->>>>>>> master
+        if($errors){
+            $this->track_log(sprintf('%s errors occured when updating subtracks',count($errors))); 
+        }
+        if($no_updates){
+            $this->track_log(sprintf('%s subtracks remained identical',count($errors))); 
+        }
+        
+        return true;
+        
     }
     
     private function tracklist_autosource(){

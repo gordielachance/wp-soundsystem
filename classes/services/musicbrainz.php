@@ -503,13 +503,12 @@ class WPSSTM_MusicBrainz {
 
     }
     
-    //TOUFIX URGENT What is this for ? not clear
-    function fill_tracklist_with_mbdatas($post_id){
+    //TO FIX not used
+    function fill_album_tracklist(WPSSTM_Static_Tracklist $tracklist){
         
-        if ( get_post_type($post_id) != wpsstm()->post_type_album ) return;
+        if ( get_post_type($tracklist->post_id) != wpsstm()->post_type_album ) return;
         
-        $tracks_arr = array();
-        
+        $tracklist = new WPSSTM_Static_Tracklist($post_id);
         $mbdatas = wpsstm_get_post_mbdatas($post_id);
 
         //check MusicBrainz datas has media(s)
@@ -521,9 +520,11 @@ class WPSSTM_MusicBrainz {
         // Fetch last array key
         $media_last_key = array_pop($media_keys);
 
-        foreach ($medias as $media_key => $media){
-            if ( !isset($media['tracks']) ) continue;
+        
+        $tracks_arr = array();
+        foreach ((array)$medias as $media_key => $media){
             
+            if ( !isset($media['tracks']) ) continue;
             $media_tracks = $media['tracks'];
             
             // Get array keys
@@ -531,32 +532,21 @@ class WPSSTM_MusicBrainz {
             // Fetch last array key
             $media_tracks_last_key = array_pop($media_tracks_keys);
 
-            foreach($media_tracks as $track_key=>$track){
+            foreach((array)$media_tracks as $track_key=>$raw_track){
                 
-                $tracks_arr[] = array(
-                    'artist'    => $track['artist-credit'][0]['name'], //TO FIX what if multiple artists ?
-                    'title'     => $track['title'],
-                    'mbid'      => $track['id']
-                );
+                $track = new WPSSTM_Track();
+                $track->artist = $raw_track['artist-credit'][0]['name']; //TO FIX what if multiple artists ?
+                $track->title = $raw_track['title'];
+                $track->mbid = $raw_track['id'];
+                //TOUFIX album ?
                 
-                //add media separator
-                /*
-                if ( ($track_key == $media_tracks_last_key) && ($media_key != $media_last_key) ){
-                    $tracks_arr[] = array(
-                        'artist'    => '---',
-                        'title'     => '---',
-                        'mbid'      => '---'
-                    );
-                }
-                */
+                $tracks_arr[] = $track;
+
             }
         }
 
-        if (!$tracks_arr) return;
-        
-        $tracklist = wpsstm_get_tracklist($post_id);
         $tracklist->add_tracks($tracks_arr);
-        return $tracklist->save_subtracks();
+        return $tracklist->update_subtracks();
     }
     
     /*

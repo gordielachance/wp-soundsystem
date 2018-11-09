@@ -112,7 +112,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     Populate the remote subtracks, store them, and update post data.
     */
 
-    protected function get_remote_datas($args = null){
+    protected function get_remote_datas(){
         
         new WPSSTM_Live_Playlist_Stats($this); //remote request stats
 
