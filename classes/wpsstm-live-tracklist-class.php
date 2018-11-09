@@ -127,6 +127,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
     protected function get_live_subtracks($args = null){
         
+        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
+        
         $is_cached = false;
 
         //try cache

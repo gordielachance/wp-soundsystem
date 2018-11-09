@@ -245,7 +245,7 @@ class WPSSTM_Core_Live_Playlists{
         
     }
 
-    public static function can_live_playlists(){
+    public static function can_remote_request(){
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
         return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
