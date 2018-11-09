@@ -691,31 +691,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             $got_autorship = $this->get_autorship();
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
-<<<<<<< HEAD
-
-        /*
-        Existing playlist
-        */
-        $static_tracklist = $this;
-        $subtracks_success = $static_tracklist->set_subtrack_ids(); //unset static subtracks //TOUFIX instead of this, clear update time meta ?
-        
-        return set_post_type( $this->post_id, wpsstm()->post_type_live_playlist );
-
-    }
-    
-    function convert_to_static_playlist(){
-        
-        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ){
-            return new WP_Error( 'wpsstm_wrong_post_type', __("This is not a live tracklist.",'wpsstm') );
-        }
-
-        //capability check
-        if ( !$this->user_can_lock_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-
-        return set_post_type( $this->post_id, wpsstm()->post_type_playlist );
-=======
         
         //toggle
         $new_type = ($this->tracklist_type == 'static') ? wpsstm()->post_type_live_playlist : wpsstm()->post_type_playlist;
@@ -726,7 +701,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             $this->tracklist_log($success->get_error_message(),__("Error while toggling playlist type",'wpsstm')); 
         }
         return $success;
->>>>>>> master
 
     }
 
