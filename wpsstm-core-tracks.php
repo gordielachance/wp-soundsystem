@@ -214,7 +214,7 @@ class WPSSTM_Core_Tracks{
             $track_url = get_permalink($track->post_id);
             $track_url = add_query_arg( array('wpsstm_success_code'=>'track-exists'),$track_url );
         }else{
-            $success = $track->save_track();
+            $success = $track->save_track_post();
             if ( is_wp_error($success) ){
                 $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TO FIX TO CHECK or current URL ? more logical.
                 $track_url = add_query_arg(array('wpsstm_error_code'=>$success->get_error_code()),$track_url);

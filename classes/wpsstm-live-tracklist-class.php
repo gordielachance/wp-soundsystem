@@ -191,70 +191,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         return $tracks;
     }
 
-    /*
-    Update WP post and eventually update subtracks.
-    */
-    
-    function update_live_tracklist($save_subtracks = null){
-
-        if (!$this->post_id){
-            $this->tracklist_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-        
-        //capability check
-        if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
-            $this->tracklist_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-        
-        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
-        
-        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
-
-        $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
-        );
-        
-        //should we save subtracks too ? By default, only if cache is enabled.
-        if ($save_subtracks === null) $save_subtracks = (bool)$this->get_scraper_options('datas_cache_min');
-
-        if ($this->tracks && $save_subtracks){
-
-            //save new subtracks as community tracks
-            $subtracks_args = array(
-                'post_author'   => wpsstm()->get_options('community_user_id'),
-            );
-            $success = $this->save_subtracks($subtracks_args);
-            
-            if( is_wp_error($success) ){
-                $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
-                return $success;
-            }
-
-        }
-        
-        //update tracklist post
-        $tracklist_post = array(
-            'ID' =>         $this->post_id,
-            'meta_input' => $meta_input,
-        );
-
-        $success = wp_update_post( $tracklist_post, true );
-        
-        if( is_wp_error($success) ){
-            $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::update_live_tracklist' );
-            return $success;
-        }
-        
-       //repopulate post
-        $this->populate_tracklist_post();
-        
-        return $this->post_id;
-    }
-
     protected function get_remote_tracks(){
 
         $raw_tracks = array();
@@ -845,44 +781,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         $string = htmlspecialchars_decode($string);
         $string = trim($string);
         return $string;
-    }
-
-    function convert_to_static_playlist(){
-        
-        if ( get_post_type($this->post_id) != wpsstm()->post_type_live_playlist ){
-            return new WP_Error( 'wpsstm_wrong_post_type', __("This is not a live tracklist.",'wpsstm') );
-        }
-
-        //capability check
-        if ( !$this->user_can_lock_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-
-        //force PHP tracks refresh
-        $this->options['ajax_tracklist'] = false;
-        
-        //populate remote tracklist if not done yet
-        $populated = $this->populate_subtracks();
-        
-        $updated = $this->update_live_tracklist(true);
-
-        if ( is_wp_error($updated) ){
-            return $updated;
-        }
-        
-        $args = array(
-            'ID'            => $this->post_id,
-            'post_title'    => $this->title,
-            'post_type'     => wpsstm()->post_type_playlist,
-        );
-
-        $success = wp_update_post( $args, true );
-
-        if ( is_wp_error($success) ) {
-            return new WP_Error( 'wpsstm_convert_to_static', __("Error while converting the live tracklist status",'wpsstm') );
-        }
-        return $success;
-
     }
 
     function save_feed_url(){
