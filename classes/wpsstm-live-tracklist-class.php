@@ -112,7 +112,24 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     Populate the remote subtracks, store them, and update post data.
     */
 
+<<<<<<< HEAD
     protected function populate_remote_datas(){
+=======
+    protected function get_live_subtracks($args = null){
+        
+        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
+        
+        $is_cached = false;
+
+        //try cache
+        if ( $this->get_options('cache_source') && $this->cache_source_url ){
+            $this->feed_url = $this->cache_source_url;
+            $is_cached = true;
+            $this->tracklist_log('found HTML cache' );
+        }else{ //allow plugins to filter the URL
+            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
+        }
+>>>>>>> master
         
         //set updated time
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
@@ -145,6 +162,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         if ($this->get_scraper_options('tracks_order') == 'asc'){
             $tracks = array_reverse($tracks);
         }
+<<<<<<< HEAD
         
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
@@ -183,6 +201,10 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
         return true;
         
+=======
+
+        return $tracks;
+>>>>>>> master
     }
 
     protected function get_remote_tracks(){

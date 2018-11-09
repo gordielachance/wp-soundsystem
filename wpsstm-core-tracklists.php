@@ -383,10 +383,10 @@ class WPSSTM_Core_Tracklists{
                 $success = $tracklist->get_autorship();
             break;
             case 'lock-tracklist':
-                $success = $tracklist->convert_to_static_playlist();
+                $success = $tracklist->toggle_playlist_type();
             break;
             case 'unlock-tracklist':
-                $success = $tracklist->convert_to_live_playlist();
+                $success = $tracklist->toggle_playlist_type();
             break;
             case 'trash':
                 $success = $tracklist->trash_tracklist();

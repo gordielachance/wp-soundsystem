@@ -271,8 +271,12 @@ class WPSSTM_Track{
         }
         return true;
     }
+    
+    function save_subtrack($args = null){
+        
+    }
 
-    function save_track($args = null){
+    function save_track_post($args = null){
         
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
@@ -328,10 +332,13 @@ class WPSSTM_Track{
             $success = wp_update_post( $args, true );
         }
         
-        if ( is_wp_error($success) ) return $success;
+        if ( is_wp_error($success) ){
+            $error_msg = $success->get_error_message();
+            $this->track_log($error_msg, "Error while saving track details" ); 
+            return $success;
+        } 
         $this->post_id = $success;
-        
-        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WPSSTM_Track::save_track()" ); 
+        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "Saved track details" ); 
 
         return $this->post_id;
         
@@ -362,7 +369,7 @@ class WPSSTM_Track{
 
         //track does not exists yet, create it
         if ( !$this->post_id ){
-            $success = $this->save_track();
+            $success = $this->save_track_post();
             if ( is_wp_error($success) ) return $success;
         }
 
@@ -497,7 +504,7 @@ class WPSSTM_Track{
                 'post_author'   => wpsstm()->get_options('community_user_id'),	
             );	
             	
-            $success = $this->save_track($tracks_args);	
+            $success = $this->save_track_post($tracks_args);	
             if ( is_wp_error($success) ){
                 $error_msg = $success->get_error_message();
                 $this->track_log($error_msg,'Error while creating community track');

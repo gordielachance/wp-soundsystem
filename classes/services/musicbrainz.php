@@ -503,6 +503,7 @@ class WPSSTM_MusicBrainz {
 
     }
     
+    //TOUFIX URGENT What is this for ? not clear
     function fill_tracklist_with_mbdatas($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_album ) return;
