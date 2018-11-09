@@ -867,28 +867,10 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
 
         if ( $this->did_query_tracks ) return true;
-        
-<<<<<<< HEAD
-        $success = null;
-        
-        //TOUFIX
-        $this->is_expired = true;
 
-        if ( ($this->tracklist_type == 'live') && ( $this->is_expired ) && !$this->wait_for_ajax() ){
-            $success = $this->populate_remote_datas();
-            new WPSSTM_Live_Playlist_Stats($this); //TOUFIX TOCHECK is this the right place ? Should we not count stats for any tracklist ?
-        }else{
-            $success = $this->populate_static_subtracks();
-        }
-        
-        $this->did_query_tracks = true;
-
-        if ( is_wp_error($success) ){
-            $this->tracks_error = $success;
-            return $success;
-=======
         //TOUFIX check is expired
-        $live = ($this->tracklist_type == 'live') && this->is_expired);
+        $this->is_expired = true;
+        $live = ($this->tracklist_type == 'live') && this->is_expired && !$this->wait_for_ajax() ){
         
         if ($live){
             
@@ -898,7 +880,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
                 return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
             }
             
-            $tracks = $this->get_live_subtracks($args);
+            $tracks = $this->get_remote_datas($args);
             if ( is_wp_error($tracks) ) return $tracks;
             //
             $success = $this->set_live_datas();
@@ -933,6 +915,13 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
 
+        //save subtracks
+        if ($this->tracks){
+            $success = $this->save_subtracks($subtracks_args);
+            if( is_wp_error($success) ) return $success;
+        }
+               
+        //update tracklist
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
@@ -941,33 +930,10 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
         );
 
-        if ($this->tracks){
-
-            //save new subtracks as community tracks
-            $subtracks_args = array(
-                'post_author'   => wpsstm()->get_options('community_user_id'),
-            );
-            $success = $this->save_subtracks($subtracks_args);
-            
-            if( is_wp_error($success) ){
-                $this->tracklist_log($success->get_error_code(),'WPSSTM_Remote_Tracklist::set_live_datas' );
-                return $success;
-            }
-
->>>>>>> master
-        }
-        
-        //update tracklist post
         $tracklist_post = array(
             'ID' =>         $this->post_id,
             'meta_input' => $meta_input,
         );
-
-<<<<<<< HEAD
-        //TOUFIX TOCHECK should be elsewhere ?
-        if ( !$this->get_options('ajax_autosource') ){
-            $this->tracklist_autosource();
-        }
         
         return true;
 

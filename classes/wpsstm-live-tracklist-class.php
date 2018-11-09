@@ -112,29 +112,10 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
     Populate the remote subtracks, store them, and update post data.
     */
 
-<<<<<<< HEAD
-    protected function populate_remote_datas(){
-=======
-    protected function get_live_subtracks($args = null){
+    protected function get_remote_datas($args = null){
         
         new WPSSTM_Live_Playlist_Stats($this); //remote request stats
-        
-        $is_cached = false;
 
-        //try cache
-        if ( $this->get_options('cache_source') && $this->cache_source_url ){
-            $this->feed_url = $this->cache_source_url;
-            $is_cached = true;
-            $this->tracklist_log('found HTML cache' );
-        }else{ //allow plugins to filter the URL
-            $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);//presets can overwrite this with filters
-        }
->>>>>>> master
-        
-        //set updated time
-        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
-        update_post_meta( $this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name, $this->updated_time );
-        
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->feed_url);
         $response_code = wp_remote_retrieve_response_code( $response );
@@ -162,49 +143,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         if ($this->get_scraper_options('tracks_order') == 'asc'){
             $tracks = array_reverse($tracks);
         }
-<<<<<<< HEAD
         
-        $this->tracks = $this->add_tracks($tracks);
-        $this->track_count = count($this->tracks);
-        
-        //update stuff
-        if ($this->post_id){
-            //capability check
-            if ( !WPSSTM_Core_Live_Playlists::can_live_playlists() ){
-                $this->tracklist_log('Cannot update playlist - missing caps' );
-            }else{
-                
-                //post
-                $tracklist_post = array(
-                    'ID' =>         $this->post_id,
-                    'meta_input' => array(
-                        WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
-                        WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
-                    )
-                );
-
-                $post_updated = wp_update_post( $tracklist_post, true );
-
-                if( is_wp_error($post_updated) ){
-                    $this->tracklist_log($post_updated->get_error_code(),'Unable to update live tracklist post' );
-                }
-                
-                //subtracks
-                //TOUFIX is it OK below this capability check ? since everyone should be able to update subtracks...
-                $subtracks_updated = $this->update_subtracks();
-                if( is_wp_error($subtracks_updated) ){
-                    $this->tracklist_log($subtracks_updated->get_error_code(),'Unable to update subtracks' );
-                }
-                
-            }
-        }
-
-        return true;
-        
-=======
-
         return $tracks;
->>>>>>> master
     }
 
     protected function get_remote_tracks(){

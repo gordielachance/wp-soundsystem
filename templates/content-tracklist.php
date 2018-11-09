@@ -3,6 +3,11 @@
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 
+//TOUFIX TOCHECK should be elsewhere ?
+if ( !$this->get_options('ajax_autosource') ){
+    $this->tracklist_autosource();
+}
+
 
 //wizard notices
 if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
