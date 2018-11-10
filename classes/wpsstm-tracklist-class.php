@@ -719,9 +719,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ( $this->did_query_tracks ) return true;
 
-        $live = ( ($this->tracklist_type == 'live') && $this->check_has_expired() && !$this->wait_for_ajax() );
+        $has_expired = $this->check_has_expired();
+        $live = ( ($this->tracklist_type == 'live') && $has_expired && !$this->wait_for_ajax() );
         $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
-
+        $refresh_delay = $this->get_time_before_refresh();
+        
         if ($live){
             new WPSSTM_Live_Playlist_Stats($this); //remote request stats
             $tracks = $remote->get_remote_tracks();
@@ -736,7 +738,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
         
-        $this->tracklist_log(sprintf('%s tracks have been populated',$this->track_count));
+        $this->tracklist_log(json_encode(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay)),'Populated subtracks');
             
         //update live tracklist
         if ($live){
@@ -823,7 +825,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $expiration_time = $this->get_expiration_time(); //set expiration time
             $is_expired = ( $now >= $expiration_time );
             $time_before_refresh = $this->get_time_before_refresh();
-            $this->tracklist_log(json_encode(array('expired'=>(bool)$is_expired,'delay'=>$time_before_refresh)),'check has expired');
+            //$this->tracklist_log(json_encode(array('expired'=>(bool)$is_expired,'delay'=>$time_before_refresh)),'check has expired');
         }
         
         $this->is_expired = $is_expired;
