@@ -649,6 +649,21 @@ class WPSSTM_Settings {
             $option,
             $help
         );
+        
+        //register errors
+        if ( $option ){
+        
+            //can wizard
+             $can_frontend_wizard = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+            if ( is_wp_error($can_frontend_wizard) ){
+                add_settings_error('frontend_wizard', 'cannot_frontend_wizard',$can_frontend_wizard->get_error_message(),'inline');
+            }
+            
+        }
+        
+        //display errors
+        settings_errors('frontend_wizard');
+        
     }
     
     function visitors_wizard_callback(){

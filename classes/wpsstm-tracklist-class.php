@@ -333,7 +333,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $can_edit_tracklist = ($this->post_id && current_user_can($post_type_obj->cap->edit_post,$this->post_id) );
         $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
-        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && WPSSTM_Core_Live_Playlists::can_remote_request() );
+        $can_request = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && !is_wp_error($can_request) );
         $can_favorite = $this->post_id; //call to action TO FIX to CHECK
 
         $actions = array();

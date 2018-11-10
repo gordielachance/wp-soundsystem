@@ -52,10 +52,8 @@ class WPSSTM_Remote_Datas{
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
         
         //capability check
-        if ( !WPSSTM_Core_Live_Playlists::can_remote_request() ){
-            $this->remote_log('wpsstm_missing_cap','Get remote tracks error' );
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
-        }
+        $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+        if ( is_wp_error($can) ) return $can;
 
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->feed_url);

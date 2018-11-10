@@ -243,10 +243,19 @@ class WPSSTM_Core_Live_Playlists{
         
     }
 
-    public static function can_remote_request(){
+    public static function is_community_user_ready(){
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
-        return user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+        
+        if (!$community_user_id){
+            return new WP_Error( 'wpsstm_missing_community_user', __("A community user is required.",'wpsstm'));
+        }
+
+        $can = user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+        if (!$can){
+            return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));
+        }
+        return true;
     }
     
     //for live tracklists; if the WP post does not have a title, return the original tracklist title (stored in meta).

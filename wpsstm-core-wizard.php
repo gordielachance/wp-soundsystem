@@ -8,20 +8,15 @@ class WPSSTM_Core_Wizard{
     static $qvar_tracklist_wizard = 'wztr';
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
 
-    
     function __construct(){
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
+        
+        //shared
+        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
 
         //frontend
-        add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
-        add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
-        add_action( 'the_post', array($this,'populate_wizard_tracklist_input'), 11, 2); //after 'the_tracklist' priority
-        add_action( 'the_post', array($this,'populate_wizard_tracklist_id'), 12, 2); //after 'the_tracklist' priority
-        add_filter( 'the_content', array($this,'frontend_wizard_content'));
-
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
+        add_action('init', array( $this, 'frontend_wizard_init' ) );
 
         //backend
         add_action( 'admin_head', array($this, 'init_backend_wizard') );
@@ -29,9 +24,21 @@ class WPSSTM_Core_Wizard{
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register'), 11 );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_scripts_styles_backend' ) );
-        
+
     }
     
+    function frontend_wizard_init(){
+        $can_frontend_wizard = WPSSTM_Core_Wizard::can_frontend_wizard();
+        if( !is_wp_error($can_frontend_wizard) ){
+            add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
+            add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
+            add_action( 'the_post', array($this,'populate_wizard_tracklist_input'), 11, 2); //after 'the_tracklist' priority
+            add_action( 'the_post', array($this,'populate_wizard_tracklist_id'), 12, 2); //after 'the_tracklist' priority
+            add_filter( 'the_content', array($this,'frontend_wizard_content'));
+            add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
+        }
+    }
+
     /**
     *   Add the query variables for the Wizard
     */
@@ -147,7 +154,6 @@ class WPSSTM_Core_Wizard{
     */
     
     function frontend_wizard_content($content){
-
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
         
         ob_start();
@@ -272,7 +278,7 @@ class WPSSTM_Core_Wizard{
 
         if ( is_admin() ) return;
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return;
-        if ( !self::can_frontend_wizard() ) return;
+        if ( is_wp_error(self::can_frontend_wizard()) ) return;
 
         //wizard action
         $is_load_url = isset($_REQUEST[ 'wpsstm_wizard' ]['action']['load-url']);
@@ -920,17 +926,22 @@ class WPSSTM_Core_Wizard{
     }
 
     public static function can_frontend_wizard(){
-
-        if ( !$user_id = get_current_user_id() ){
-            $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') == 'on' );
-            if (!$can_wizard_unlogged) return false;
-        }
-
-        $community_user_id = wpsstm()->get_options('community_user_id');
         
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-        $required_cap = $post_type_obj->cap->edit_posts;
-        return user_can($community_user_id,$required_cap);
+        $page_id = wpsstm()->get_options('frontend_scraper_page_id');
+        
+        if (!$page_id){
+            return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
+        }
+        
+        $user_id = get_current_user_id(); 
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $can_wizard_unlogged = ( ( wpsstm()->get_options('visitors_wizard') == 'on' ) && $community_user_id );
+        
+        if ( !$user_id && !$can_wizard_unlogged ){
+            return new WP_Error( 'wpsstm_wizard_not_logged', __('You need to be logged to use the wizard.','wpsstm'));
+        }
+        
+        return WPSSTM_Core_Live_Playlists::is_community_user_ready();
     }
     
     private static function get_available_widgets(){
