@@ -491,7 +491,7 @@ class WPSSTM_Core_Wizard{
         );
 
         add_settings_field(
-            'datas_cache_min', 
+            'remote_delay_min', 
             __('Cache duration','wpsstm'), 
             array( $this, 'cache_callback' ), 
             'wpsstm-wizard-step-options',
@@ -822,7 +822,7 @@ class WPSSTM_Core_Wizard{
     function cache_callback(){
         global $wpsstm_tracklist;
         
-        $option = $wpsstm_tracklist->get_options('datas_cache_min');
+        $option = $wpsstm_tracklist->get_options('remote_delay_min');
 
         $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
         $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
@@ -830,7 +830,7 @@ class WPSSTM_Core_Wizard{
         $desc = implode("<br/>",$desc);
 
         printf(
-            '<input type="number" name="%s[datas_cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
+            '<input type="number" name="%s[remote_delay_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
             'wpsstm_wizard',
             $option,
             __('minutes','spiff'),
@@ -1029,8 +1029,8 @@ class WPSSTM_Core_Wizard{
         //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
         //cache
-        if ( isset($input['datas_cache_min']) && ctype_digit($input['datas_cache_min']) ){
-            $new_input['datas_cache_min'] = $input['datas_cache_min'];
+        if ( isset($input['remote_delay_min']) && ctype_digit($input['remote_delay_min']) ){
+            $new_input['remote_delay_min'] = $input['remote_delay_min'];
         }
 
         //selectors 

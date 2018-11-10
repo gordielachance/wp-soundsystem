@@ -53,7 +53,7 @@ class WPSSTM_RadioKing_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
@@ -96,8 +96,8 @@ class WPSSTM_RadioKing_Api_Preset{
     }
 
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $station_data = $this->get_station_data($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $station_data = $this->get_station_data($remote->url);
             if ( !is_wp_error($station_data) ){
                 $title = wpsstm_get_array_value(array('name'), $station_data);
             }

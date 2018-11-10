@@ -11,6 +11,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $options = array();
     
     var $updated_time = null;
+    private $is_expired = null;
     
     var $pagination = array(
         'total_pages'   => null,
@@ -58,12 +59,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
-        //tracklist time
+        //type
+        $post_type = get_post_type($this->post_id);
+        $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
+        //time updated
+        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+        if ( $this->tracklist_type == 'live' ){//TOUFIX what if not the 'live' type ?
+            $this->updated_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        }
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-        $this->is_expired = $this->check_has_expired();
         $this->ajax_tracklist = $this->check_has_expired();
         
         //scraper
@@ -76,13 +83,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type == 'live' ){
             $this->location = $this->feed_url;
         }
-        
-        //time updated
-        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
-        if ( $this->tracklist_type == 'live' ){
-            $this->updated_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        }
-        
+
     }
     
     function get_options($keys=null){
@@ -108,9 +109,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'ajax_autosource'           => true,
+            'remote_delay_min'          => 5,
             'is_expired'                => false,
             'ajax_tracklist'            => false,
-            'datas_cache_min'           => 0,
         );
 
         return $options;
@@ -728,15 +729,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ( $this->did_query_tracks ) return true;
 
-        //TOUFIX check is expired
-        $this->is_expired = true;
-        
-        $live = ( ($this->tracklist_type == 'live') && $this->is_expired && !$this->wait_for_ajax() );
+        $live = ( ($this->tracklist_type == 'live') && $this->check_has_expired() && !$this->wait_for_ajax() );
         $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
-        
-        //TOUFIX check is expired
-        $this->is_expired = true;
-        $live = true;
 
         if ($live){
             new WPSSTM_Live_Playlist_Stats($this); //remote request stats
@@ -798,16 +792,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'meta_input' => $meta_input,
         );
         
+        $success = wp_update_post( $tracklist_post, true );
+        
         return true;
 
     }
     
     function get_time_before_refresh(){
 
-        $cache_seconds = ( $cache_min = $this->get_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
         
         if ( !$cache_seconds ) return false;
-        if ( $this->is_expired ) return false;
         
         $time_refreshed = $this->updated_time;
         $time_before = $time_refreshed + $cache_seconds;
@@ -818,7 +813,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     //UTC
     function get_expiration_time(){
-        $cache_seconds = ( $cache_min = $this->get_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
         return $this->updated_time + $cache_seconds;
     }
 
@@ -826,16 +821,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     // set 'expiration_time'
     private function check_has_expired(){
         
-        $cache_duration_min = $this->get_options('datas_cache_min');
-        $has_cache = (bool)$cache_duration_min;
+        if ($this->is_expired !== null) return $this->is_expired;
         
+        $delay = $this->get_options('remote_delay_min');
+        $has_cache = (bool)$delay;
+
         if (!$has_cache){
-            return true;
+            $is_expired = true;
         }else{
             $now = current_time( 'timestamp', true );
             $expiration_time = $this->get_expiration_time(); //set expiration time
-            return ( $now >= $expiration_time );
+            $is_expired = ( $now >= $expiration_time );
+            $time_before_refresh = $this->get_time_before_refresh();
+            $this->tracklist_log(json_encode(array('expired'=>(bool)$is_expired,'delay'=>$time_before_refresh)),'check has expired');
         }
+        
+        $this->is_expired = $is_expired;
 
     }
     

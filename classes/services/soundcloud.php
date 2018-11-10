@@ -189,7 +189,7 @@ class WPSSTM_Soundcloud_User_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'element'),
@@ -246,10 +246,10 @@ class WPSSTM_Soundcloud_User_Api_Preset{
     
     function get_remote_title($title,$remote){
         
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+        if ( $this->can_handle_url($remote->url) ){
             
-            $user_slug = $this->get_user_slug($remote->feed_url_no_filters);
-            $page_slug = $this->get_user_page($remote->feed_url_no_filters);
+            $user_slug = $this->get_user_slug($remote->url);
+            $page_slug = $this->get_user_page($remote->url);
             $title = sprintf(__('%s on Soundcloud','wpsstm'),$user_slug);
             $subtitle = null;
 

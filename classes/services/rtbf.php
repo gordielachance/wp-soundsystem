@@ -32,7 +32,7 @@ class WPSSTM_RTBF_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),

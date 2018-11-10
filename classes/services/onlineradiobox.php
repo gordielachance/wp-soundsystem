@@ -49,7 +49,7 @@ class WPSSTM_OnlineRadioBox_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'.tablelist-schedule tr'),
             'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),

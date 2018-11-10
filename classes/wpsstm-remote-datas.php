@@ -7,11 +7,8 @@ class WPSSTM_Remote_Datas{
     var $options;
 
     //url stuff
-    var $feed_url = null;
-    var $feed_url_no_filters = null;
+    var $url = null;
     var $scraper_options = array();
-    
-    public $is_expired = null; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
 
     //response
     var $request_pagination = array(
@@ -38,11 +35,10 @@ class WPSSTM_Remote_Datas{
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
 
-    public function __construct($feed_url = null,$args = null) {
+    public function __construct($url = null,$args = null) {
         
-        $this->feed_url = $this->feed_url_no_filters = $feed_url;
+        $this->url = $url;
         do_action('wpsstm_before_remote_response',$this);
-        $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);
         
         $scraper_default = self::get_default_scraper_options();
         $this->options = array_replace_recursive($scraper_default,(array)$args); //last one has priority
@@ -57,7 +53,7 @@ class WPSSTM_Remote_Datas{
         if ( is_wp_error($can) ) return $can;
 
         /* POPULATE PAGE */
-        $response = $this->populate_remote_response($this->feed_url);
+        $response = $this->populate_remote_response($this->url);
         $response_code = wp_remote_retrieve_response_code( $response );
 
         if ( is_wp_error($response) ) return $response;
@@ -175,18 +171,18 @@ class WPSSTM_Remote_Datas{
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
-        $cached_url = null;
         $url_args = $this->get_request_args();
+        $remote_url = apply_filters('wpsstm_live_tracklist_url',$this->url);
         
-        $this->remote_log($url,'*** GET REMOTE URL ***' );
+        $this->remote_log($remote_url,'*** GET REMOTE URL ***' );
         //$this->remote_log( json_encode($url_args),'URL args' );
         
+        if ( $remote_url != $url){
+            $this->remote_log($url,'original URL' );
+        }       
+        
         //
-        $response = wp_remote_get( $url, $url_args );
-
-        if ( $this->feed_url != $this->feed_url_no_filters){
-            $this->remote_log($this->feed_url_no_filters,'original URL' );
-        }
+        $response = wp_remote_get( $remote_url, $url_args );
 
         //errors
         if ( !is_wp_error($response) ){

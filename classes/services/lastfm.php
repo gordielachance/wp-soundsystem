@@ -513,7 +513,7 @@ class WPSSTM_LastFM_URL_Preset{
                    
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
 
         $remote->options['selectors'] = array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
@@ -528,9 +528,9 @@ class WPSSTM_LastFM_URL_Preset{
     //on artists and album pages; artist is displayed in a header on the top of the page
     function artist_header_track_artist($artist,$track_node,$remote){
         
-        if ( $this->get_artist_slug($remote->feed_url_no_filters) && !$this->is_station($remote->feed_url_no_filters) ){
+        if ( $this->get_artist_slug($remote->url) && !$this->is_station($remote->url) ){
 
-            if ( $album_slug = $this->get_album_name($remote->feed_url_no_filters) ){
+            if ( $album_slug = $this->get_album_name($remote->url) ){
                 $selector = array('path'=>'[itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
             }else{
                 $selector = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
@@ -555,7 +555,7 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_LastFM_URL_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
 
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'>playlist'),
@@ -614,9 +614,9 @@ class WPSSTM_LastFM_User_Station_Preset extends WPSSTM_LastFM_Station_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $user_slug = $this->get_user_slug($remote->feed_url_no_filters);
-            $page_slug = $this->get_station_page($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $user_slug = $this->get_user_slug($remote->url);
+            $page_slug = $this->get_station_page($remote->url);
             $title = sprintf( __('Last.fm station for %s - %s','wpsstm'),$user_slug,$page_slug );
         }
         return $title;
@@ -650,8 +650,8 @@ class WPSSTM_LastFM_Artist_Station_Preset extends WPSSTM_LastFM_Station_Preset{
     }
 
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $artist_slug = $this->get_artist_slug($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $artist_slug = $this->get_artist_slug($remote->url);
             $title = sprintf( __('Last.fm stations (similar artist): %s','wpsstm'),$artist_slug );
         }
         return $title;

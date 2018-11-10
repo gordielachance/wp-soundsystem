@@ -210,7 +210,7 @@ class WPSSTM_Core_Tracklists{
             
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-            $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
+            $wpsstm_tracklist->options['remote_delay_min'] = 0; //will force tracklist refresh
             
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
             $result['success'] = true;
@@ -340,9 +340,7 @@ class WPSSTM_Core_Tracklists{
 
         switch($action){
             case 'refresh':
-                //TOUFIX TOCHECK is working ?
-                //maybe better to just delete the time updated meta so we force de tracklist update ?
-                $tracklist->is_expired = true;
+                $wpsstm_tracklist->options['remote_delay_min'] = 0; //will force tracklist refresh
                 $success = $tracklist->populate_subtracks();
             break;
             case 'favorite':

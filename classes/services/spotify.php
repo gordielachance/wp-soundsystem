@@ -820,7 +820,7 @@ class WPSSTM_Spotify_URL_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),
@@ -844,9 +844,9 @@ class WPSSTM_Spotify_URL_Api_Preset{
 
     function get_remote_pagination($pagination,$remote){
         
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+        if ( $this->can_handle_url($remote->url) ){
             
-            $playlist_id = $this->get_playlist_id($remote->feed_url_no_filters);
+            $playlist_id = $this->get_playlist_id($remote->url);
             
             $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
 
@@ -870,8 +870,8 @@ class WPSSTM_Spotify_URL_Api_Preset{
     
     function get_remote_title($title,$remote){
         
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $playlist_id = $this->get_playlist_id($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $playlist_id = $this->get_playlist_id($remote->url);
             $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
             if ( !is_wp_error($data) ){
                  $title = wpsstm_get_array_value('name', $data);
@@ -883,8 +883,8 @@ class WPSSTM_Spotify_URL_Api_Preset{
     }
     
     function get_remote_author($author,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $playlist_id = $this->get_playlist_id($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $playlist_id = $this->get_playlist_id($remote->url);
             $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
             if ( !is_wp_error($data) ){
                  $author = wpsstm_get_array_value(array('owner','id'), $data);
@@ -895,7 +895,7 @@ class WPSSTM_Spotify_URL_Api_Preset{
 
     function remote_request_args($args,$remote){
         
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+        if ( $this->can_handle_url($remote->url) ){
             
             $spotify_args = WPSSTM_Spotify::get_spotify_request_args();
             if ( !is_wp_error($spotify_args) ){

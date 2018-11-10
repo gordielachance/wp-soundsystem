@@ -76,7 +76,7 @@ class WPSSTM_8Tracks_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'>tracks'),
             'track_artist'      => array('path'=>'performer'),
@@ -118,8 +118,8 @@ class WPSSTM_8Tracks_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $mix_data = $this->get_mix_data($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $mix_data = $this->get_mix_data($remote->url);
             if ( !is_wp_error( $mix_data ) ){
                 $title = wpsstm_get_array_value('name', $mix_data);
             }

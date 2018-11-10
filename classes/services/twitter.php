@@ -36,7 +36,7 @@ class WPSSTM_Twitter_Timeline_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
     }
     
@@ -47,7 +47,7 @@ class WPSSTM_Twitter_Timeline_Preset{
     }
     
     function remote_request_args($args,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+        if ( $this->can_handle_url($remote->url) ){
             //it seems that the request fails with our default user agent, remove it.
             $args['headers']['User-Agent'] = '';
         }

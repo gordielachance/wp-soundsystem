@@ -56,7 +56,7 @@ class WPSSTM_Radionomy_API_Preset{
     }
     
     function set_selectors($remote){
-        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'tracks track'),
@@ -123,8 +123,8 @@ class WPSSTM_Radionomy_API_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
-            $station_slug = $this->get_station_slug($remote->feed_url_no_filters);
+        if ( $this->can_handle_url($remote->url) ){
+            $station_slug = $this->get_station_slug($remote->url);
             $title = sprintf('Radionomy: %s', $station_slug);
         }
         return $title;
