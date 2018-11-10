@@ -3,8 +3,12 @@
 use \ForceUTF8\Encoding;
 
 class WPSSTM_Remote_Datas{
+    
+    var $options;
 
     //url stuff
+    var $feed_url = null;
+    var $feed_url_no_filters = null;
     var $scraper_options = array();
     
     public $is_expired = null; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
@@ -36,11 +40,11 @@ class WPSSTM_Remote_Datas{
 
     public function __construct($feed_url = null,$args = null) {
         
-        $this->feed_url = $feed_url;
+        $this->feed_url = $this->feed_url_no_filters = $feed_url;
+        $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);
         
         $scraper_default = self::get_default_scraper_options();
-        $this->scraper_options = array_replace_recursive($scraper_default,(array)$args); //last one has priority
-
+        $this->options = array_replace_recursive($scraper_default,(array)$args); //last one has priority
     }
     
     function get_remote_tracks(){
@@ -49,11 +53,9 @@ class WPSSTM_Remote_Datas{
         
         //capability check
         if ( !WPSSTM_Core_Live_Playlists::can_remote_request() ){
-            $this->tracklist_log('wpsstm_missing_cap','Get remote tracks error' );
+            $this->remote_log('wpsstm_missing_cap','Get remote tracks error' );
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
         }
-        
-        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
 
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->feed_url);
@@ -66,6 +68,8 @@ class WPSSTM_Remote_Datas{
         
         $response_body = $this->populate_response_body();
         if ( is_wp_error($response_body) ) return $response_body;
+        
+        do_action('wpsstm_did_remote_response',$this);
         
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
@@ -86,18 +90,23 @@ class WPSSTM_Remote_Datas{
                 'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
                 'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
             ),
-            'tracks_order'              => 'desc',
-            /*
-            TRACKLIST CACHE
-            time (in minutes) a tracklist is cached.  
-            If enabled, a post will be temporary stored for each track fetched.
-            It will be deleted at next refresh; if the track is no more part of the tracklist; and does not belong to any user tracklist or likes.
-            */
-            'datas_cache_min'           => 0, 
+            'tracks_order'              => 'desc'
         );
         
         return $live_options;
         
+    }
+    
+    function get_scraper_options($keys=null){
+
+        $default_options = self::get_default_scraper_options();
+        $options = array_replace_recursive($default_options,(array)$this->options); //last one has priority
+
+        if ($keys){
+            return wpsstm_get_array_value($keys, $options);
+        }else{
+            return $options;
+        }
     }
 
     private function get_raw_tracks(){
@@ -131,19 +140,20 @@ class WPSSTM_Remote_Datas{
 
     private function get_remote_page_tracks(){
 
-        $this->tracklist_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
-
-        do_action('wpsstm_after_get_remote_body',$this);
+        //$this->remote_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
 
         //tracks HTML
         $track_nodes = $this->get_track_nodes($this->body_node);
-        if ( is_wp_error($track_nodes) ) return $track_nodes;
+        if ( is_wp_error($track_nodes) ){
+            $this->remote_log( $track_nodes->get_error_message(),'Track nodes error' );
+            return $track_nodes;
+        }
+        
         $this->track_nodes = $track_nodes;
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
-        $this->tracklist_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
-
+        $this->remote_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
         return $tracks;
     }
 
@@ -169,14 +179,14 @@ class WPSSTM_Remote_Datas{
         $cached_url = null;
         $url_args = $this->get_request_args();
         
-        $this->tracklist_log($url,'get page' );
+        $this->remote_log($url,'*** GET REMOTE URL ***' );
+        //$this->remote_log( json_encode($url_args),'URL args' );
+        
+        //
         $response = wp_remote_get( $url, $url_args );
-        
-        $this->tracklist_log( $url,'Get remote URL' );
-        $this->tracklist_log( json_encode($url_args),'URL args' );
-        
+
         if ( $this->feed_url != $this->feed_url_no_filters){
-            $this->tracklist_log($this->feed_url_no_filters,'original URL' );
+            $this->remote_log($this->feed_url_no_filters,'original URL' );
         }
 
         //errors
@@ -192,10 +202,13 @@ class WPSSTM_Remote_Datas{
         }
         
         if ( is_wp_error($response) ){
-            $this->tracklist_log( $response->get_error_message(),'Get remote URL error' );
+            $this->remote_log( $response->get_error_message(),'Get remote URL error' );
         }
 
         $this->response = $response;
+        
+        $this->remote_log('*** SUCCESS ***' );
+        
         return $this->response;
 
     }
@@ -302,7 +315,7 @@ class WPSSTM_Remote_Datas{
                 }
                 
                 if ($xml){
-                    $this->tracklist_log("The json input has been converted to XML.");
+                    $this->remote_log("The json input has been converted to XML.");
                     
                     //reload this functions with our updated type/body
                     $this->response_type = 'text/xml';
@@ -322,11 +335,11 @@ class WPSSTM_Remote_Datas{
                 $xml_errors = libxml_get_errors();
                 
                 if ($xml_errors){
-                    $this->tracklist_log("There has been some errors while parsing the input XML.");
+                    $this->remote_log("There has been some errors while parsing the input XML.");
                     
                     /*
                     foreach( $xml_errors as $xml_error_obj ) {
-                        $this->tracklist_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message) );
+                        $this->remote_log(sprintf(__('simplexml Error [%1$s] : %2$s','wpsstm'),$xml_error_obj->code,$xml_error_obj->message) );
                     }
                     */
                 }
@@ -612,4 +625,18 @@ class WPSSTM_Remote_Datas{
         $string = trim($string);
         return $string;
     }
+    
+    function remote_log($message,$title = null){
+
+        if (is_array($message) || is_object($message)) {
+            $message = implode("\n", $message);
+        }
+
+        $title = '[remote] ' . $title;
+        
+        wpsstm()->debug_log($message,$title,null);
+        
+
+    }
+    
 }

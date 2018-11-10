@@ -37,7 +37,7 @@ class WPSSTM_Reddit_Api_Preset{
         $this->subreddit_slug = self::get_subreddit_slug();
         
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
         
         add_filter('wpsstm_input_tracks', array($this,'filter_input_tracks'),10,2);
@@ -62,21 +62,20 @@ class WPSSTM_Reddit_Api_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                //in HTML
-                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-                //in JSON
-                'tracks'            => array('path'=>'>data >children'),
-                'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
-                'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
-                //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-                'track_source_urls' => array('path'=>'url'),
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        
+        $datas->options['selectors'] = array(
+            //in HTML
+            'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+            //in JSON
+            'tracks'            => array('path'=>'>data >children'),
+            'track_artist'     => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
+            'track_title'      => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
+            //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+            'track_source_urls' => array('path'=>'url'),
+        );
     }
 
     function get_subreddit_slug(){

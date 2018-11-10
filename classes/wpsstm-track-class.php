@@ -17,7 +17,6 @@ class WPSSTM_Track{
 
     public $parent_ids = array();
 
-    private $did_post_id_lookup = false;
     private $did_parents_query = false;
     
     var $source;
@@ -80,9 +79,6 @@ class WPSSTM_Track{
 
         }
 
-        //populate post ID if track already exists in the DB
-        //TO FIX check if this doesn't slow the page rendering
-        $this->populate_local_track();
     }
     
     /*
@@ -119,16 +115,15 @@ class WPSSTM_Track{
     Get the post ID for this track if it already exists in the database; and populate its data
     */
     
-    function populate_local_track(){
-        if ( $this->post_id || $this->did_post_id_lookup ) return;
-        if (!$this->artist || !$this->title) return;
+    function local_track_lookup(){
+        if ( $this->post_id ) return;
+        if ( !$this->validate_track() ) return;
 
         if ( $duplicates = $this->get_track_duplicates() ){
-            $this->__construct( $duplicates[0] );
-            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
+            $this->post_id = $duplicates[0];
+            //$this->track_log( json_encode($this->to_array(),JSON_UNESCAPED_UNICODE),'Track found in the local database');
         }
-
-        $this->did_post_id_lookup = true;
+        
         return $this->post_id;
 
     }
@@ -136,6 +131,7 @@ class WPSSTM_Track{
     function get_default(){
         return array(
             'post_id'       =>null,
+            'subtrack_id'   => null,
             'index'         => -1,
             'title'         =>null,
             'artist'        =>null,
@@ -281,30 +277,30 @@ class WPSSTM_Track{
     
     function save_subtrack(){
         global $wpdb;
-        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         $valid = $this->validate_subtrack();
         if ( is_wp_error( $valid ) ) return $valid;
         
         //check for a track ID
         if (!$this->post_id){
-            $track->populate_local_track();
+            $this->local_track_lookup();
         }
 
         $subtrack_data = array(
             'tracklist_id' =>   $this->tracklist->post_id,
-            'track_order' =>    $this->index
+            'track_order' =>    (int)$this->index
         );
         
         //TOUFIX logic when switching track order ?
 
         //basic data
         if($this->post_id){
-            $subtrack_data['track_id'] = $track->post_id;
+            $subtrack_data['track_id'] = $this->post_id;
         }else{
-            $subtrack_data['artist'] = $track->artist;
-            $subtrack_data['title'] = $track->title;
-            $subtrack_data['album'] = $track->album;
+            $subtrack_data['artist'] = $this->artist;
+            $subtrack_data['title'] = $this->title;
+            $subtrack_data['album'] = $this->album;
         }
         
         //update or insert ?
@@ -317,21 +313,23 @@ class WPSSTM_Track{
                     'ID'=>$this->subtrack_id
                 )
             );
+            
+            if ( is_wp_error($success) ){
+                $this->track_log(json_encode($this->to_array()),"Error while updating subtrack" ); 
+            }
 
         }else{
             $success = $wpdb->insert($subtracks_table,$subtrack_data);
             
             if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
                 $this->subtrack_id = $wpdb->insert_id;
-                $this->track_log($wpdb->insert_id,"Subtrack inserted" ); 
+                //$this->track_log(json_encode($this->to_array()),"Subtrack inserted" ); 
+            }else{
+                $error_msg = $success->get_error_message();
+                $this->track_log(array('track'=>json_encode($this->to_array()),'error'=>$error_msg), "Error while saving subtrack" ); 
             }
         }
-        
-        if ( is_wp_error($success) ){
-            $error_msg = $success->get_error_message();
-            $this->track_log(array('track'=>$track->to_array(),'error'=>$error_msg), "Error while saving subtrack" ); 
-        }
-        
+
         return $success;
 
     }
@@ -379,7 +377,7 @@ class WPSSTM_Track{
 
         //check if this track already exists
         if (!$this->post_id){
-            $this->populate_local_track();
+            $this->local_track_lookup();
         }
         
         if (!$this->post_id){

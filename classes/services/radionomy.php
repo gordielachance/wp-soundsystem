@@ -37,7 +37,7 @@ class WPSSTM_Radionomy_API_Preset{
         $this->tracklist = $tracklist;
         $this->station_slug = $this->get_station_slug();
         
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title') );
 
@@ -58,17 +58,16 @@ class WPSSTM_Radionomy_API_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'tracks track'),
-                'track_artist'      => array('path'=>'artists'),
-                'track_title'       => array('path'=>'title'),
-                'track_image'       => array('path'=>'cover'),
-                //playduration
-            );
-        }
-        return $options;
+    function set_selectors($datas){
+        
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'tracks track'),
+            'track_artist'      => array('path'=>'artists'),
+            'track_title'       => array('path'=>'title'),
+            'track_image'       => array('path'=>'cover'),
+            //playduration
+        );
     }
 
     function get_station_slug(){

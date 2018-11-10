@@ -3,16 +3,16 @@
 class WPSSTM_XSPF{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_xspf_service_link'));
-        add_filter('wpsstm_live_tracklist_scraper_options',array($this,'wpsstm_xspf_tracklist_options'),20,2); //priority after presets
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors'),20); //lower priority
     }
-    function wpsstm_xspf_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
 
-        if ( !$tracklist->response_type ) return $options; // remote content not yet fetched
+        if ( !$datas->response_type ) return; // remote content not yet fetched
 
-        $split = explode('/',$tracklist->response_type);
+        $split = explode('/',$datas->response_type);
 
         if ( isset($split[1]) && ($split[1]=='xspf+xml') ){
-            $options['selectors'] = array(
+            $datas->options['selectors'] = array(
                 'tracklist_title'   => array('path'=>'title'),
                 'tracks'            => array('path'=>'trackList track'),
                 'track_artist'      => array('path'=>'creator'),
@@ -22,8 +22,6 @@ class WPSSTM_XSPF{
                 'track_image'       => array('path'=>'image')
             );
         }
-
-        return $options;
     }
 
     function register_xspf_service_link($links){

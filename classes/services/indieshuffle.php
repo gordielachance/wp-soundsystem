@@ -30,7 +30,7 @@ class WPSSTM_IndieShuffle_Preset{
 
     function __construct($tracklist){
         $this->tracklist = $tracklist;
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
     function can_handle_url(){
@@ -39,18 +39,16 @@ class WPSSTM_IndieShuffle_Preset{
         return true;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),
             'track_artist'     => array('attr'=>'data-track-artist'),
             'track_title'      => array('attr'=>'data-track-title'),
             'track_image'      => array('path'=>'img','attr'=>'src'),
             'track_source_urls' => array('attr'=>'data-source'),
         );
-        }
-        return $options;
     }
 
 }

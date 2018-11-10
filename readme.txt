@@ -157,6 +157,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * store durations as milliseconds instead of seconds
 * new filter 'wpsstm_pre_save_autosources'
 * TOFIX remote request pagination
+* merged all playlists classes; and new class WPSSTM_Remote_Datas
 
 = 1.9.4 =
 * Better settings page errors

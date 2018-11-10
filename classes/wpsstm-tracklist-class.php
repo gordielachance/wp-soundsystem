@@ -26,7 +26,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $scraper_meta_name = '_wpsstm_scraper_options';
     public $feed_url = null;
-    public $feed_url_no_filters = null;
+    var $scraper_options = array();
 
     function __construct($post_id = null ){
         
@@ -62,7 +62,9 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         
 
         //live
-        $this->feed_url = $this->feed_url_no_filters = get_post_meta($post_id, self::$feed_url_meta_name, true );
+        $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
+        $this->is_expired = $this->check_has_expired();
+        $this->ajax_tracklist = $this->check_has_expired();
         
         //scraper
         $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
@@ -106,32 +108,13 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'ajax_autosource'           => true,
+            'is_expired'                => false,
+            'ajax_tracklist'            => false,
+            'datas_cache_min'           => 0,
         );
-        
-        if ( $this->tracklist_type == 'live'){
-            $live_options = array(
-                'is_expired' => $this->check_has_expired(),
-                'ajax_tracklist' => $this->check_has_expired(),
-            );
 
-            return wp_parse_args($live_options,$options);
-        }
-        
         return $options;
 
-    }
-    
-    function get_scraper_options($keys=null){
-
-        $options = apply_filters('wpsstm_live_tracklist_scraper_options',$this->scraper_options,$this);//TOUFIX TOMOVE ?
-        $default_options = WPSSTM_Remote_Datas::get_default_scraper_options();
-        $options = array_replace_recursive($default_options,(array)$options); //last one has priority
-
-        if ($keys){
-            return wpsstm_get_array_value($keys, $options);
-        }else{
-            return $options;
-        }
     }
 
     protected function get_url_options(){
@@ -145,107 +128,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             $title = sprintf(__('(playlist #%d)','wpsstm'),$this->post_id);
         }
         return $title;
-    }
-    
-    /*
-    Assign subtracks IDs to a tracklist.
-    */
-
-    function set_subtrack_ids($ordered_ids = null){
-        global $wpdb;
-        
-        $success = false;
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-
-        //capability check
-        if ($this->tracklist_type == 'live'){
-            $can_set_subtracks = WPSSTM_Core_Live_Playlists::can_remote_request();
-        }else{
-            $can_set_subtracks = $this->user_can_reorder_tracks();
-            
-        }
-
-        if ( !$can_set_subtracks ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
-        
-        if ($ordered_ids){
-            $ordered_ids = array_map('intval', $ordered_ids); //make sure every array item is an int - required for WPSSTM_Track::get_parent_ids()
-            $ordered_ids = array_filter($ordered_ids, function($var){return !is_null($var);} ); //remove nuls if any
-            $ordered_ids = array_unique($ordered_ids);
-        }
-
-        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'type'=>$this->tracklist_type,'subtrack_ids'=>$ordered_ids)), "WPSSTM_Static_Tracklist::set_subtrack_ids()"); 
-        
-        //delete actual subtracks
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
-        $success = $wpdb->get_results ( $querystr );
-        
-        //set new subtracks //TOUFIX TOUCHECK
-        $subtrack_pos = 0;
-        foreach((array)$ordered_ids as $subtrack_id){
-            $wpdb->insert($subtracks_table, array(
-                'track_id' =>       $subtrack_id,
-                'tracklist_id' =>   $this->post_id,
-                'track_order' =>    $subtrack_pos
-            ));
-            $subtrack_pos++;
-        }
-
-        //TO FIX handle errors ?
-        
-        return true;
-
-    }
-    
-    /*
-    Append subtracks IDs to a tracklist.
-    */
-    
-    function append_subtrack_ids($append_ids){
-        return;//TOUFIX
-        
-        //force array
-        if ( !is_array($append_ids) ) $append_ids = array($append_ids);
-        
-        if ( empty($append_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
-        }
-
-        $subtrack_ids = (array)$this->populate_static_subtracks();//TOUFIX
-
-        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'append_ids'=>$append_ids)), "WPSSTM_Static_Tracklist::append_subtrack_ids()");
-        
-        $updated_ids = array_merge($subtrack_ids,$append_ids);
-        
-        return $this->set_subtrack_ids($updated_ids);
-    }
-    
-    /*
-    Remove subtracks IDs from a tracklist.
-    */
-    
-    function remove_subtrack_ids($remove_ids){
-        return;//TOUFIX
-        
-        //force array
-        if ( !is_array($remove_ids) ) $remove_ids = array($remove_ids);
-        
-        if ( empty($remove_ids) ){
-            return new WP_Error( 'wpsstm_tracks_no_post_ids', __('Required tracks IDs missing.','wpsstm') );
-        }
-        
-        $subtrack_ids = (array)$this->populate_static_subtracks();//TOUFIX
-
-        $this->tracklist_log( json_encode(array('tracklist_id'=>$this->post_id,'current_ids'=>$subtrack_ids,'remove_ids'=>$remove_ids)), "WPSSTM_Static_Tracklist::remove_subtrack_ids()");
-
-        $updated_ids = array_diff($subtrack_ids,$remove_ids);
-        
-        return $this->set_subtrack_ids($updated_ids);
     }
 
     function validate_playlist(){
@@ -723,19 +605,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         if ( !$this->user_can_reorder_tracks() ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
-
-        $subtrack_ids = $this->populate_static_subtracks();//TOUFIX
-        
-        //delete current
-        if(($key = array_search($track_id, $subtrack_ids)) !== false) {
-            unset($subtrack_ids[$key]);
-        }
-        
-        //insert at position
-        array_splice( $subtrack_ids, $index, 0, $track_id );
-        
-        //save
-        return $this->set_subtrack_ids($subtrack_ids);
     }
     
     function can_get_tracklist_authorship(){
@@ -861,25 +730,28 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         //TOUFIX check is expired
         $this->is_expired = true;
         
-        $live = ( ($this->tracklist_type == 'live') && this->is_expired && !$this->wait_for_ajax() );
+        $live = ( ($this->tracklist_type == 'live') && $this->is_expired && !$this->wait_for_ajax() );
         $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
         
+        //TOUFIX check is expired
+        $this->is_expired = true;
+        $live = true;
+
         if ($live){
-            
+            new WPSSTM_Live_Playlist_Stats($this); //remote request stats
             $tracks = $remote->get_remote_tracks();
             if ( is_wp_error($tracks) ) return $tracks;
             
         }else{
-            
-            $tracks = $this->get_static_subtracks($args);
-            if ( is_wp_error($tracks) ) return $tracks;
-            
+            $tracks = $this->get_static_subtracks();
         }
 
         //populate tracks
         $this->did_query_tracks = true;
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
+        
+        $this->tracklist_log(sprintf('%s tracks have been populated',$this->track_count));
             
         //update live tracklist
         if ($live){
@@ -931,7 +803,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     
     function get_time_before_refresh(){
 
-        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        $cache_seconds = ( $cache_min = $this->get_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
         
         if ( !$cache_seconds ) return false;
         if ( $this->is_expired ) return false;
@@ -945,7 +817,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     
     //UTC
     function get_expiration_time(){
-        $cache_seconds = ( $cache_min = $this->get_scraper_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        $cache_seconds = ( $cache_min = $this->get_options('datas_cache_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
         return $this->updated_time + $cache_seconds;
     }
 
@@ -953,7 +825,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     // set 'expiration_time'
     private function check_has_expired(){
         
-        $cache_duration_min = $this->get_scraper_options('datas_cache_min');
+        $cache_duration_min = $this->get_options('datas_cache_min');
         $has_cache = (bool)$cache_duration_min;
         
         if (!$has_cache){
@@ -975,28 +847,37 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         //delete actual subtracks
+        $this->tracklist_log('delete current tracklist subtracks'); 
+        
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
+        
 
         $errors = array();
         $no_updates = 0;
+        $saved = 0;
         foreach((array)$this->tracks as $track){
             $success = $track->save_subtrack();
             
             //populate subtrack ID
             if( is_wp_error($success) ){
                 $errors[] = $success;
-            }elseif ($success === false){ //no rows updated, but no errors either
-                $no_updates++;
+            }else{
+                $saved++;
+                if ($success === false){ //no rows updated, but no errors either
+                    $no_updates++;
+                }
             }
         }
         
+        $this->tracklist_log(sprintf('%s subtracks saved',$saved)); 
+        
         if($errors){
-            $this->track_log(sprintf('%s errors occured when updating subtracks',count($errors))); 
+            $this->tracklist_log(sprintf('%s errors occured when updating subtracks',count($errors))); 
         }
         if($no_updates){
-            $this->track_log(sprintf('%s subtracks remained identical',count($errors))); 
+            $this->tracklist_log(sprintf('%s subtracks remained identical',count($errors))); 
         }
         
         return true;
@@ -1013,7 +894,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    protected function populate_static_subtracks(){
+    private function get_static_subtracks(){
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
@@ -1041,11 +922,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             
             $tracks[] = $track;
         }
-        
-        $this->tracks = $this->add_tracks($tracks);
-        $this->track_count = count($this->tracks);
-        
-        return true;
+
+        return $tracks;
     }
 
     function get_html_metas(){
@@ -1201,7 +1079,7 @@ class WPSSTM_Tracklist{
         foreach($pending_tracks as $track){
             $valid = $track->validate_track($use_strict);
             if ( is_wp_error($valid) ){
-                
+
                 $error_codes[] = $valid->get_error_code();
                 /*
                 $this->tracklist_log($valid->get_error_message(), "WPSSTM_Tracklist::validate_tracks - rejected");

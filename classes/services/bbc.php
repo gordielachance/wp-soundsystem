@@ -41,7 +41,7 @@ class WPSSTM_BBC_Station_Preset{
         $this->station_slug = $this->get_station_slug();
         
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         
     }
     
@@ -62,17 +62,15 @@ class WPSSTM_BBC_Station_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'.music-track'),
-                'track_artist'      => array('path'=>'.music-track__artist'),
-                'track_title'       => array('path'=>'.music-track__title'),
-                'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'.music-track'),
+            'track_artist'      => array('path'=>'.music-track__artist'),
+            'track_title'       => array('path'=>'.music-track__title'),
+            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+        );
     }
     
 
@@ -84,7 +82,7 @@ class WPSSTM_BBC_Playlist_Preset{
         $this->tracklist = $tracklist;
         $this->playlist_id = $this->get_playlist_id();
         
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
     function can_handle_url(){
@@ -92,16 +90,14 @@ class WPSSTM_BBC_Playlist_Preset{
         return true;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
-                'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
-                'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
+            'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
+            'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
+        );
     }
     
 

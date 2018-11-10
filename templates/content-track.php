@@ -2,6 +2,7 @@
 
 global $wpsstm_track;
 $track = $wpsstm_track;
+$track->local_track_lookup(); //check for this track in the database (if it has no ID)
 $track->populate_sources();
 
 ?>

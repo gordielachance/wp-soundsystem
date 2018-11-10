@@ -36,7 +36,7 @@ class WPSSTM_Deezer_Preset{
         $this->tracklist = $tracklist;
         $this->playlist_id = $this->get_playlist_id();
         
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
     function can_handle_url(){
@@ -44,16 +44,15 @@ class WPSSTM_Deezer_Preset{
         return true;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
-                'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
-                'track_title'       => array('path'=>'span[itemprop="name"]'),
-                'track_album'       => array('path'=>'[itemprop="inAlbum"]')
-            );
-        }
-        return $options;
+    function set_selectors($datas){
+        
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
+            'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
+            'track_title'       => array('path'=>'span[itemprop="name"]'),
+            'track_album'       => array('path'=>'[itemprop="inAlbum"]')
+        );
     }
 
     function get_playlist_id(){

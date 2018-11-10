@@ -18,7 +18,7 @@ class WPSSTM_RTBF_Preset{
         $this->station_slug = $this->get_station_slug();
         
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
     function can_handle_url(){
@@ -33,17 +33,15 @@ class WPSSTM_RTBF_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'li.radio-thread__entry'),
-                'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
-                'track_title'       => array('path'=>'span[itemprop="name"]'),
-                'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'li.radio-thread__entry'),
+            'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
+            'track_title'       => array('path'=>'span[itemprop="name"]'),
+            'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
+        );
     }
 
     

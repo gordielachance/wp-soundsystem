@@ -16,7 +16,7 @@ class WPSSTM_Twitter_Timeline_Preset{
         $this->tracklist = $tracklist;
         $this->user_slug = $this->get_user_slug();
 
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args') );
@@ -35,12 +35,10 @@ class WPSSTM_Twitter_Timeline_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
     }
     
     function get_user_slug(){

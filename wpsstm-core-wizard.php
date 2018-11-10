@@ -654,7 +654,7 @@ class WPSSTM_Core_Wizard{
     public static function feed_url_callback(){
         global $wpsstm_tracklist;
         
-        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url_no_filters : null;
+        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url : null;
 
         $text_input = sprintf(
             '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
@@ -816,7 +816,7 @@ class WPSSTM_Core_Wizard{
     function cache_callback(){
         global $wpsstm_tracklist;
         
-        $option = $wpsstm_tracklist->get_scraper_options('datas_cache_min');
+        $option = $wpsstm_tracklist->get_options('datas_cache_min');
 
         $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
         $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');

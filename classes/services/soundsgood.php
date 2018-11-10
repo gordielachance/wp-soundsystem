@@ -45,7 +45,7 @@ class WPSSTM_Soundsgood_Api_Preset{
         
         add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args') );
         
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
         
@@ -63,17 +63,15 @@ class WPSSTM_Soundsgood_Api_Preset{
         return $url;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'root > element'),
-                'track_artist'      => array('path'=>'artist'),
-                'track_title'       => array('path'=>'title'),
-                'track_source_urls' => array('path'=>'sources permalink')
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'root > element'),
+            'track_artist'      => array('path'=>'artist'),
+            'track_title'       => array('path'=>'title'),
+            'track_source_urls' => array('path'=>'sources permalink')
+        );
     }
 
     function get_station_slug(){

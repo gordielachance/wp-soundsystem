@@ -39,7 +39,7 @@ class WPSSTM_8Tracks_Preset{
         $this->playlist_slug = $this->get_tracklist_slug();
 
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
     }
     
@@ -81,16 +81,14 @@ class WPSSTM_8Tracks_Preset{
 
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'>tracks'),
-                'track_artist'      => array('path'=>'performer'),
-                'track_title'       => array('path'=>'name')
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url() ) return;
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'>tracks'),
+            'track_artist'      => array('path'=>'performer'),
+            'track_title'       => array('path'=>'name')
+        );
     }
     
     function get_mix_data(){

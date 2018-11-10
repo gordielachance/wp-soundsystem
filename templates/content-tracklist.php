@@ -4,8 +4,8 @@ global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 
 //TOUFIX TOCHECK should be elsewhere ?
-if ( !$this->get_options('ajax_autosource') ){
-    $this->tracklist_autosource();
+if ( !$wpsstm_tracklist->get_options('ajax_autosource') ){
+    $wpsstm_tracklist->tracklist_autosource();
 }
 
 
@@ -55,7 +55,7 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
         </small>
         <?php
             //original link
-            if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url_no_filters) ){
+            if ( ($tracklist->tracklist_type == 'live') && ($tracklist_url = $tracklist->feed_url) ){
                 
                 //$tracklist_url = substr($tracklist_url, 0, strrpos($tracklist_url, ' ')) . " ...";
                 

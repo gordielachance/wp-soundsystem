@@ -467,7 +467,7 @@ class WPSSTM_LastFM_URL_Preset{
         
         $this->tracklist = $tracklist;
 
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_track_artist',array($this,'artist_header_track_artist'), 10, 3 );
 
     }
@@ -514,21 +514,17 @@ class WPSSTM_LastFM_URL_Preset{
         if ( !empty($matches) ) return true;
     }
                    
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
+        if ( !$this->can_handle_url() ) return;
 
-            $options['selectors'] = array(
-                'tracks'           => array('path'=>'table.chartlist tbody tr'),
-                'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
-                'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-                'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-                'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
-            );
-            
-        }
-        
-        return $options;
+        $datas->options['selectors'] = array(
+            'tracks'           => array('path'=>'table.chartlist tbody tr'),
+            'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
+            'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
+            'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+            'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
+        );
         
     }
     
@@ -557,23 +553,20 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_LastFM_URL_Preset{
 
     function __construct($tracklist){
         parent::__construct($tracklist);
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($datas){
         
-        if ( $this->can_handle_url() ){
+        if ( !$this->can_handle_url() ) return;
 
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'>playlist'),
-                'track_artist'      => array('path'=>'artists > name'),
-                'track_title'       => array('path'=>'playlist > name'),
-                'track_source_urls' => array('path'=>'playlinks url'),
-            );
+        $datas->options['selectors'] = array(
+            'tracks'            => array('path'=>'>playlist'),
+            'track_artist'      => array('path'=>'artists > name'),
+            'track_title'       => array('path'=>'playlist > name'),
+            'track_source_urls' => array('path'=>'playlinks url'),
+        );
             
-        }
-
-        return $options;
     }
     
 
