@@ -451,7 +451,7 @@ class WPSSTM_Core_Tracks{
 
         //set global $wpsstm_tracklist (a tracklists with this single track)
         //TOUFIX TOCHECK
-        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($track_id);
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($track_id);
         $track = new WPSSTM_Track( $track_id );
         $wpsstm_tracklist->add_tracks($track);
         $wpsstm_track = $wpsstm_tracklist->tracks[0];
@@ -807,7 +807,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = new WPSSTM_Static_Tracklist($tracklist_id);
+        $tracklist = $result['tracklist'] = new WPSSTM_Post_Tracklist($tracklist_id);
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
         $track = $result['track'] = new WPSSTM_Track($track_id);
@@ -929,7 +929,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = new WPSSTM_Static_Tracklist($tracklist_id);
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         
         $track = new WPSSTM_Track();
         $track->tracklist = $tracklist;
@@ -998,7 +998,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            $track->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Static_Tracklist::trash_track_sources()");
+            $track->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_sources()");
         }
 
     }
@@ -1116,7 +1116,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Static_Tracklist::flush_community_tracks()");
+        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Post_Tracklist::flush_community_tracks()");
 
         return $flushed_ids;
 

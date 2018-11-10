@@ -504,11 +504,11 @@ class WPSSTM_MusicBrainz {
     }
     
     //TO FIX not used
-    function fill_album_tracklist(WPSSTM_Static_Tracklist $tracklist){
+    function fill_album_tracklist(WPSSTM_Post_Tracklist $tracklist){
         
         if ( get_post_type($tracklist->post_id) != wpsstm()->post_type_album ) return;
         
-        $tracklist = new WPSSTM_Static_Tracklist($post_id);
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
         $mbdatas = wpsstm_get_post_mbdatas($post_id);
 
         //check MusicBrainz datas has media(s)

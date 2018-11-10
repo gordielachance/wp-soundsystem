@@ -29,7 +29,6 @@ function wpsstm_get_html_attr($arr=null){
     return $str;
 }
 
-
 function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
         $text_bar = $bar_width = null;

@@ -302,7 +302,7 @@ class WPSSTM_Core_BuddyPress{
     //instead of this, we should have a true tracklist post to store the user favorite tracks, would be easier to handle.
     public function member_get_favorite_tracks_playlist(){
         
-        $tracklist = new WPSSTM_Static_Tracklist();
+        $tracklist = new WPSSTM_Post_Tracklist();
         $user_id = bp_displayed_user_id();
         
         if ( $user_datas = get_userdata( $user_id ) ) {

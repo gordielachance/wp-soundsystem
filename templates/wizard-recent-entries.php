@@ -14,7 +14,7 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
         <h2><?php _e('Recently');?></h2>
         <ul>
             <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post();
-                $tracklist = new WPSSTM_Static_Tracklist(get_the_ID());
+                $tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
                 ?>
                 <li>
                     <a href="<?php echo get_permalink();?>">

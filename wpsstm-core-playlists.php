@@ -151,7 +151,7 @@ class WPSSTM_Core_Playlists{
             'new_html'  => null
         );
 
-        $playlist = new WPSSTM_Static_Tracklist();
+        $playlist = new WPSSTM_Post_Tracklist();
         $playlist->title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
         $playlist_id = $playlist->save_playlist();
 

@@ -118,7 +118,7 @@ This plugin requires PHP Version 5.4 or later.
 Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
 
 `<?php
-$tracklist = new WPSSTM_Static_Tracklist(); //optionally accepts a post_id as argument
+$tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
 echo $tracklist->get_tracklist_html();
 ?>`
 

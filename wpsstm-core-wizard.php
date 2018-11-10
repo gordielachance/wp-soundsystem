@@ -103,7 +103,7 @@ class WPSSTM_Core_Wizard{
 
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
-            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post->ID);
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
                 $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
@@ -160,7 +160,7 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
@@ -232,7 +232,7 @@ class WPSSTM_Core_Wizard{
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         
         $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
@@ -291,7 +291,7 @@ class WPSSTM_Core_Wizard{
             'fields'            => 'ids',
             'meta_query' => array(
                 array(
-                    'key' => WPSSTM_Static_Tracklist::$feed_url_meta_name,
+                    'key' => WPSSTM_Post_Tracklist::$feed_url_meta_name,
                     'value' => $wpsstm_tracklist->feed_url
                 )
             )
@@ -342,7 +342,7 @@ class WPSSTM_Core_Wizard{
             'post_status'   => 'publish',
             'post_author'   => wpsstm()->get_options('community_user_id'),
             'meta_input'   => array(
-                WPSSTM_Static_Tracklist::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
+                WPSSTM_Post_Tracklist::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
                 self::$is_wizard_tracklist_metakey  => true,
             )
         );
@@ -985,7 +985,7 @@ class WPSSTM_Core_Wizard{
         if (!$wizard_data) return;
 
         $default_settings = WPSSTM_Remote_Datas::get_default_scraper_options();
-        $old_settings = get_post_meta($post_id, WPSSTM_Static_Tracklist::$scraper_meta_name,true);
+        $old_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
         
         $wizard_data = $this->sanitize_wizard_settings($wizard_data);
 

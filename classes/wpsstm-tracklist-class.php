@@ -1,6 +1,6 @@
 <?php
 
-class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
+class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $unique_id = null; //TO FIX useful ?
     var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
@@ -185,7 +185,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Static_Tracklist::save_playlist() - post playlist inserted"); 
+            $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Post_Tracklist::save_playlist() - post playlist inserted"); 
 
         }else{ //is a playlist update
             
@@ -199,7 +199,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-           $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Static_Tracklist::save_playlist() - post track updated"); 
+           $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Post_Tracklist::save_playlist() - post track updated"); 
         }
 
         $this->post_id = $post_playlist_id;
@@ -234,7 +234,7 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        //$this->tracklist_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Static_Tracklist notice]: ' . $message ); 
+        //$this->tracklist_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Post_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,

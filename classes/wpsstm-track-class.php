@@ -49,10 +49,10 @@ class WPSSTM_Track{
             if ( is_object($tracklist) ){
                 $this->tracklist = $tracklist;
             }elseif( is_int($tracklist) ){
-                $this->tracklist = new WPSSTM_Static_Tracklist($track);
+                $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
         }else{
-            $this->tracklist = new WPSSTM_Static_Tracklist(); //default
+            $this->tracklist = new WPSSTM_Post_Tracklist(); //default
         }
 
         
