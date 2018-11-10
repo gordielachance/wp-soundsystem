@@ -1,8 +1,6 @@
 <?php
 class WPSSTM_Core_Live_Playlists{
 
-    static $feed_url_meta_name = '_wpsstm_scraper_url';
-    static $scraper_meta_name = '_wpsstm_scraper_options';
     static $remote_title_meta_name = 'wpsstm_remote_title';
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_updated_meta_name = 'wpsstm_remote_query_time';

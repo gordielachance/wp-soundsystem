@@ -103,7 +103,7 @@ class WPSSTM_Core_Wizard{
 
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
-            $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
                 $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
@@ -160,7 +160,7 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post_id);
         
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
@@ -232,7 +232,7 @@ class WPSSTM_Core_Wizard{
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post_id);
         
         $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
@@ -244,7 +244,7 @@ class WPSSTM_Core_Wizard{
             $wpsstm_tracklist->feed_url = trim($input);
             $success = $wpsstm_tracklist->save_feed_url(); //TO FIX input not filtered. Should we rather use populate_wizard_tracklist(null,$input) here ?
             //save wizard settings
-            $success = $wpsstm_tracklist->save_wizard($wizard_data);
+            $success = $this->save_wizard($post_id,$wizard_data);
         }elseif ( isset($wizard_data['import-tracks']) ){
             $wpsstm_tracklist->append_wizard_tracks();
         }elseif( isset($wizard_data['restore-scraper']) ){
@@ -256,7 +256,7 @@ class WPSSTM_Core_Wizard{
                 }
             }
 
-            $success = $wpsstm_tracklist->save_wizard($wizard_data);
+            $success = $this->save_wizard($post_id,$wizard_data);
         }
 
     }
@@ -291,7 +291,7 @@ class WPSSTM_Core_Wizard{
             'fields'            => 'ids',
             'meta_query' => array(
                 array(
-                    'key' => WPSSTM_Core_Live_Playlists::$feed_url_meta_name,
+                    'key' => WPSSTM_Static_Tracklist::$feed_url_meta_name,
                     'value' => $wpsstm_tracklist->feed_url
                 )
             )
@@ -342,7 +342,7 @@ class WPSSTM_Core_Wizard{
             'post_status'   => 'publish',
             'post_author'   => wpsstm()->get_options('community_user_id'),
             'meta_input'   => array(
-                WPSSTM_Core_Live_Playlists::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
+                WPSSTM_Static_Tracklist::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
                 self::$is_wizard_tracklist_metakey  => true,
             )
         );
@@ -369,16 +369,6 @@ class WPSSTM_Core_Wizard{
         //populate backend tracklist
         $this->populate_wizard_tracklist($post->ID);
 
-        /*
-        TOFIXGGG TO CHECK is this useful ? should we re-enable it ?
-        if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
-            $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
-            $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
-            $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
-            $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
-        }
-        */
-        
         /*
         Input
         */
@@ -985,6 +975,87 @@ class WPSSTM_Core_Wizard{
     public static function is_advanced_wizard(){
         global $wpsstm_tracklist;
         return ( wpsstm_is_backend() && ($wpsstm_tracklist->tracklist_type == 'live') );
+    }
+    
+    function save_wizard($post_id,$wizard_data = null){
+        
+        $post_type = get_post_type($post_id);
+
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
+        if (!$wizard_data) return;
+
+        $default_settings = WPSSTM_Remote_Datas::get_default_scraper_options();
+        $old_settings = get_post_meta($post_id, WPSSTM_Static_Tracklist::$scraper_meta_name,true);
+        
+        $wizard_data = $this->sanitize_wizard_settings($wizard_data);
+
+        //remove all default values so we store only user-edited stuff
+        $wizard_data = wpsstm_array_recursive_diff($wizard_data,$default_settings);
+        
+        //settings have been updated, clear tracklist cache
+        if ($old_settings != $wizard_data){
+            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
+            delete_post_meta($post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+        }
+
+        if (!$wizard_data){
+            delete_post_meta($post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name);
+        }else{
+            update_post_meta($post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name, $wizard_data);
+        }
+
+    }
+
+    
+    /*
+     * Sanitize wizard data
+     */
+    
+    function sanitize_wizard_settings($input){
+
+        $new_input = array();
+
+        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
+
+        //cache
+        if ( isset($input['datas_cache_min']) && ctype_digit($input['datas_cache_min']) ){
+            $new_input['datas_cache_min'] = $input['datas_cache_min'];
+        }
+
+        //selectors 
+        if ( isset($input['selectors']) && !empty($input['selectors']) ){
+            
+            foreach ($input['selectors'] as $selector_slug=>$value){
+
+                //path
+                if ( isset($value['path']) ) {
+                    $value['path'] = trim($value['path']);
+                }
+
+                //attr
+                if ( isset($value['attr']) ) {
+                    $value['attr'] = trim($value['attr']);
+                }
+
+                //regex
+                if ( isset($value['regex']) ) {
+                    $value['regex'] = trim($value['regex']);
+                }
+
+                $new_input['selectors'][$selector_slug] = array_filter($value);
+
+            }
+        }
+
+        //order
+        if ( isset($input['tracks_order']) ){
+            $new_input['tracks_order'] = $input['tracks_order'];
+        }
+
+        $default_args = $this->get_default_scraper_options();
+        $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
+
+        return $new_input;
     }
 
 }

@@ -2,13 +2,9 @@
 
 use \ForceUTF8\Encoding;
 
-class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
-    
-    var $tracklist_type = 'live';
+class WPSSTM_Remote_Datas{
 
     //url stuff
-    public $feed_url = null;
-    public $feed_url_no_filters = null;
     var $scraper_options = array();
     
     public $is_expired = null; //if option 'datas_cache_min' is defined; we'll compare the current time to check if the tracklist is expired or not with check_has_expired()
@@ -38,35 +34,48 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
 
-    public function __construct($post_id = null) {
+    public function __construct($feed_url = null,$args = null) {
         
-        parent::__construct($post_id);
+        $this->feed_url = $feed_url;
         
-        require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
-        $this->preset_name = __('HTML Scraper','wpsstm');
-        
-        $this->scraper_options = $this->get_default_scraper_options();
-
-        if ($this->post_id){
-
-            $this->feed_url = $this->feed_url_no_filters = wpsstm_get_live_tracklist_url($this->post_id);
-            
-            $db_options = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$scraper_meta_name,true);
-            $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$db_options); //last one has priority
-
-            if ($this->feed_url){
-                $this->location = $this->feed_url;
-            }
-            
-            if ( $meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
-                $this->updated_time = $meta;
-            }
-
-        }
+        $scraper_default = self::get_default_scraper_options();
+        $this->scraper_options = array_replace_recursive($scraper_default,(array)$args); //last one has priority
 
     }
+    
+    function get_remote_tracks(){
+        
+        require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
+        
+        //capability check
+        if ( !WPSSTM_Core_Live_Playlists::can_remote_request() ){
+            $this->tracklist_log('wpsstm_missing_cap','Get remote tracks error' );
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
+        }
+        
+        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
 
-    protected function get_default_scraper_options(){
+        /* POPULATE PAGE */
+        $response = $this->populate_remote_response($this->feed_url);
+        $response_code = wp_remote_retrieve_response_code( $response );
+
+        if ( is_wp_error($response) ) return $response;
+        
+        $response_type = $this->populate_response_type();
+        if ( is_wp_error($response_type) ) return $response_type;
+        
+        $response_body = $this->populate_response_body();
+        if ( is_wp_error($response_body) ) return $response_body;
+        
+        $body_node = $this->populate_body_node();
+        if ( is_wp_error($body_node) ) return $body_node;
+
+        $this->tracks = $this->get_raw_tracks();
+        
+        return $this->tracks;
+    }
+
+    static function get_default_scraper_options(){
         $live_options = array(
             'selectors' => array(
                 'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
@@ -91,63 +100,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         
     }
 
-    /*
-    Compare Tracks / Tracks Details wizard options to check if the user settings match the default preset settings.
-    */
-    function get_user_edited_scraper_options(){
-
-        $default_options = $this->get_default_scraper_options();
-        $options = $this->get_scraper_options();
-
-        //compare multi-dimensionnal array
-        $diff = wpsstm_array_recursive_diff($options,$default_options);
-        
-        //keep only scraper options
-        $check_keys = array('selectors', 'tracks_order');
-        $diff = array_intersect_key($diff, array_flip($check_keys));
-
-        return $diff;
-    }
-    /*
-    Populate the remote subtracks, store them, and update post data.
-    */
-
-    protected function get_remote_datas(){
-        
-        new WPSSTM_Live_Playlist_Stats($this); //remote request stats
-
-        /* POPULATE PAGE */
-        $response = $this->populate_remote_response($this->feed_url);
-        $response_code = wp_remote_retrieve_response_code( $response );
-
-        if ( is_wp_error($response) ) return $response;
-        
-        $response_type = $this->populate_response_type();
-        if ( is_wp_error($response_type) ) return $response_type;
-        
-        $response_body = $this->populate_response_body();
-        if ( is_wp_error($response_body) ) return $response_body;
-        
-        $body_node = $this->populate_body_node();
-        if ( is_wp_error($body_node) ) return $body_node;
-
-        $tracks = $this->get_remote_tracks();
-
-        //TOUFIX TOCHECK
-        if ( is_wp_error($tracks) ){
-            $this->tracks_error = $tracks;
-            return $tracks;
-        }
-        
-        //sort
-        if ($this->get_scraper_options('tracks_order') == 'asc'){
-            $tracks = array_reverse($tracks);
-        }
-        
-        return $tracks;
-    }
-
-    protected function get_remote_tracks(){
+    private function get_raw_tracks(){
 
         $raw_tracks = array();
 
@@ -165,6 +118,11 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
                 
             }
             $this->request_pagination['current_page']++;
+        }
+        
+        //sort
+        if ($this->get_scraper_options('tracks_order') == 'asc'){
+            $raw_tracks = array_reverse($raw_tracks);
         }
         
         return $raw_tracks;
@@ -417,19 +375,6 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
 
     }
     
-    function get_scraper_options($keys=null){
-
-        $options = apply_filters('wpsstm_live_tracklist_scraper_options',$this->scraper_options,$this);
-        $default_options = $this->get_default_scraper_options();
-        $options = array_replace_recursive($default_options,(array)$options); //last one has priority
-
-        if ($keys){
-            return wpsstm_get_array_value($keys, $options);
-        }else{
-            return $options;
-        }
-    }
-    
     public function get_selectors($keys=null){
         $keys = (array)$keys;
         array_unshift($keys, 'selectors'); //add at beginning
@@ -667,103 +612,4 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Static_Tracklist{
         $string = trim($string);
         return $string;
     }
-
-    function save_feed_url(){
-
-        if (!$this->feed_url){
-            return delete_post_meta( $this->post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name );
-        }else{
-            return update_post_meta( $this->post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name, $this->feed_url );
-        }
-    }
-    
-    function save_wizard($wizard_data = null){
-        
-        $post_type = get_post_type($this->post_id);
-
-        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
-        if (!$wizard_data) return;
-
-        return $this->save_wizard_settings($wizard_data);
-
-    }
-    
-    function save_wizard_settings($wizard_settings){
-
-        if ( !$wizard_settings ) return;
-        if ( !$this->post_id ) return;
-
-        $default_settings = $this->get_default_scraper_options();
-        $old_settings = get_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name,true);
-        
-        $wizard_settings = $this->sanitize_wizard_settings($wizard_settings);
-
-        //remove all default values so we store only user-edited stuff
-        $wizard_settings = wpsstm_array_recursive_diff($wizard_settings,$default_settings);
-        
-        //settings have been updated, clear tracklist cache
-        if ($old_settings != $wizard_settings){
-            $this->tracklist_log('scraper settings have been updated, clear tracklist cache','WPSSTM_Remote_Tracklist::save_wizard_settings' );
-            delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
-        }
-
-        if (!$wizard_settings){
-            delete_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name);
-        }else{
-            update_post_meta($this->post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name, $wizard_settings);
-        }
-
-    }
-    
-    /*
-     * Sanitize wizard data
-     */
-    
-    function sanitize_wizard_settings($input){
-
-        $new_input = array();
-
-        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
-
-        //cache
-        if ( isset($input['datas_cache_min']) && ctype_digit($input['datas_cache_min']) ){
-            $new_input['datas_cache_min'] = $input['datas_cache_min'];
-        }
-
-        //selectors 
-        if ( isset($input['selectors']) && !empty($input['selectors']) ){
-            
-            foreach ($input['selectors'] as $selector_slug=>$value){
-
-                //path
-                if ( isset($value['path']) ) {
-                    $value['path'] = trim($value['path']);
-                }
-
-                //attr
-                if ( isset($value['attr']) ) {
-                    $value['attr'] = trim($value['attr']);
-                }
-
-                //regex
-                if ( isset($value['regex']) ) {
-                    $value['regex'] = trim($value['regex']);
-                }
-
-                $new_input['selectors'][$selector_slug] = array_filter($value);
-
-            }
-        }
-
-        //order
-        if ( isset($input['tracks_order']) ){
-            $new_input['tracks_order'] = $input['tracks_order'];
-        }
-
-        $default_args = $this->get_default_scraper_options();
-        $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
-
-        return $new_input;
-    }
-
 }

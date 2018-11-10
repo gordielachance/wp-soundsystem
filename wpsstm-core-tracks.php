@@ -807,7 +807,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = wpsstm_get_tracklist($tracklist_id);
+        $tracklist = $result['tracklist'] = new WPSSTM_Static_Tracklist($tracklist_id);
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
         $track = $result['track'] = new WPSSTM_Track($track_id);
@@ -929,7 +929,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = wpsstm_get_tracklist($tracklist_id);
+        $tracklist = new WPSSTM_Static_Tracklist($tracklist_id);
         
         $track = new WPSSTM_Track();
         $track->tracklist = $tracklist;

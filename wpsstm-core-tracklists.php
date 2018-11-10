@@ -16,7 +16,7 @@ class WPSSTM_Core_Tracklists{
         require_once(wpsstm()->plugin_dir . 'wpsstm-core-wizard.php');
 
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
-        $wpsstm_tracklist = wpsstm_get_tracklist();
+        $wpsstm_tracklist = new WPSSTM_Static_Tracklist();
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
@@ -98,12 +98,12 @@ class WPSSTM_Core_Tracklists{
 
         if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
             //set global $wpsstm_tracklist
-            $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post;
         }else{
             //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
             //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
-            $wpsstm_tracklist = wpsstm_get_tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     
@@ -115,7 +115,7 @@ class WPSSTM_Core_Tracklists{
         if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
             //set global $wpsstm_source
-            $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($post_id);
             $wpsstm_tracklist->options['autoplay'] = false;
         }
     }
@@ -154,7 +154,7 @@ class WPSSTM_Core_Tracklists{
         
         
         $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ?     $ajax_data['post_id'] : null;
-        $tracklist = wpsstm_get_tracklist($tracklist_id);
+        $tracklist = new WPSSTM_Static_Tracklist($tracklist_id);
         $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null;
 
         if ( !get_current_user_id() ){
@@ -208,7 +208,7 @@ class WPSSTM_Core_Tracklists{
         if ($tracklist_id){
             
             //set global $wpsstm_tracklist
-            $wpsstm_tracklist = wpsstm_get_tracklist($tracklist_id);
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($tracklist_id);
             $wpsstm_tracklist->is_expired = true; //will force tracklist refresh
             
             $result['new_html'] = $wpsstm_tracklist->get_tracklist_html();
@@ -311,7 +311,7 @@ class WPSSTM_Core_Tracklists{
         if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,wpsstm()->tracklist_post_types) ){ //check that the post exists
             
             //set global $wpsstm_tracklist
-            $wpsstm_tracklist = wpsstm_get_tracklist($atts['post_id']);
+            $wpsstm_tracklist = new WPSSTM_Static_Tracklist($atts['post_id']);
             
             $output = $wpsstm_tracklist->get_tracklist_html();
         }
@@ -334,7 +334,7 @@ class WPSSTM_Core_Tracklists{
         
         if( !$action = get_query_var( self::$qvar_tracklist_action ) ) return;
         
-        $tracklist = wpsstm_get_tracklist($post->ID);
+        $tracklist = new WPSSTM_Static_Tracklist($post->ID);
         $success = null;
 
         switch($action){

@@ -107,7 +107,7 @@ class WPSSTM_Reddit_Api_Preset{
 
                     //QueryPath
                     try{
-                        $remote_title = htmlqp( $content, 'title', WPSSTM_Remote_Tracklist::$querypath_options )->innerHTML();
+                        $remote_title = htmlqp( $content, 'title', WPSSTM_Remote_Datas::$querypath_options )->innerHTML();
                     }catch(Exception $e){
                         return $title;
                     }

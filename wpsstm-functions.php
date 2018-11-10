@@ -200,32 +200,6 @@ function wpsstm_is_ajax(){
     return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 }
 
-/*
-Get a post tracklist.
-Use this instead of 'new WPSSTM_Static_Tracklist' or 'new WPSSTM_Remote_Tracklist' since it will load the right class (preset, live tracklist, etc.)
-*/
-function wpsstm_get_tracklist($post_id=null){
-    global $post;
-
-    $tracklist = new WPSSTM_Static_Tracklist(); //default
-    $post_type = get_post_type($post_id);
-
-    switch ($post_type){
-        case wpsstm()->post_type_live_playlist:
-            $tracklist = new WPSSTM_Remote_Tracklist($post_id);
-            do_action('wpsstm_live_tracklist_init',$tracklist);
-
-        break;
-        default:
-            $tracklist = new WPSSTM_Static_Tracklist($post_id);
-            do_action('wpsstm_static_tracklist_init',$tracklist);
-        break;
-    }
-
-    do_action('wpsstm_tracklist_init',$tracklist);
-    return $tracklist;   
-}
-
 function wpsstm_get_uploads_dir(){
     $dir = WP_CONTENT_DIR . '/uploads/wpsstm';
     if (!file_exists($dir)) {

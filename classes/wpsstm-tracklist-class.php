@@ -21,6 +21,12 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     var $paged_var = 'tracklist_page';
     
     var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
+    
+    //live
+    static $feed_url_meta_name = '_wpsstm_scraper_url';
+    static $scraper_meta_name = '_wpsstm_scraper_options';
+    public $feed_url = null;
+    public $feed_url_no_filters = null;
 
     function __construct($post_id = null ){
         
@@ -53,9 +59,28 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
         //tracklist time
-        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+        
 
+        //live
+        $this->feed_url = $this->feed_url_no_filters = get_post_meta($post_id, self::$feed_url_meta_name, true );
+        
+        //scraper
+        $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        $scraper_default = WPSSTM_Remote_Datas::get_default_scraper_options();
+        $this->scraper_options = array_replace_recursive($scraper_default,(array)$scraper_db); //last one has priority
+        
+        //location
         $this->location = get_permalink($this->post_id);
+        if ( $this->tracklist_type == 'live' ){
+            $this->location = $this->feed_url;
+        }
+        
+        //time updated
+        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+        if ( $this->tracklist_type == 'live' ){
+            $this->updated_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        }
+        
     }
     
     function get_options($keys=null){
@@ -96,6 +121,19 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 
     }
     
+    function get_scraper_options($keys=null){
+
+        $options = apply_filters('wpsstm_live_tracklist_scraper_options',$this->scraper_options,$this);//TOUFIX TOMOVE ?
+        $default_options = WPSSTM_Remote_Datas::get_default_scraper_options();
+        $options = array_replace_recursive($default_options,(array)$options); //last one has priority
+
+        if ($keys){
+            return wpsstm_get_array_value($keys, $options);
+        }else{
+            return $options;
+        }
+    }
+
     protected function get_url_options(){
         $url_options = isset( $_REQUEST['tracklist_options'] ) ? (array)$_REQUEST['tracklist_options'] : array();
         return $url_options;
@@ -563,24 +601,6 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         return $url;
     }
 
-    function append_wizard_tracks(){
-        return;//TOUFIX
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-
-        //get live IDs
-        //TOUFIX TO CHECK whole fn
-        $this->tracklist_type = 'live';
-        $live_ids = $this->populate_static_subtracks();//TOUFIX
-
-        //switch to static
-        $this->tracklist_type = 'static';
-        $this->append_subtrack_ids($live_ids);
-
-        $this->tracklist_log( array('tracklist_id'=>$this->post_id, 'live_ids'=>json_encode($live_ids)), "WPSSTM_Static_Tracklist::append_wizard_tracks()");
-    }
-    
     function switch_status(){
         //capability check
         $post_type =        get_post_type($this->post_id);
@@ -687,6 +707,15 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         }
         return $success;
         
+    }
+    
+    function save_feed_url(){
+
+        if (!$this->feed_url){
+            return delete_post_meta( $this->post_id, self::$feed_url_meta_name );
+        }else{
+            return update_post_meta( $this->post_id, self::$feed_url_meta_name, $this->feed_url );
+        }
     }
     
     function save_track_position($track_id,$index){
@@ -831,21 +860,14 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
 
         //TOUFIX check is expired
         $this->is_expired = true;
-        $live = ($this->tracklist_type == 'live') && this->is_expired && !$this->wait_for_ajax() ){
+        
+        $live = ( ($this->tracklist_type == 'live') && this->is_expired && !$this->wait_for_ajax() );
+        $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
         
         if ($live){
             
-            //capability check
-            if ( !WPSSTM_Core_Live_Playlists::can_remote_request() ){
-                $this->tracklist_log('wpsstm_missing_cap','WPSSTM_Remote_Tracklist::set_live_datas' );
-                return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to populate the remote tracklist.",'wpsstm') );
-            }
-            
-            $remote = $this->get_remote_datas();
-            if ( is_wp_error($remote) ) return $remote;
-            //
-            $updated = $this->set_live_datas();
-            if ( is_wp_error($updated) ) return $updated;
+            $tracks = $remote->get_remote_tracks();
+            if ( is_wp_error($tracks) ) return $tracks;
             
         }else{
             
@@ -854,9 +876,16 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
             
         }
 
+        //populate tracks
         $this->did_query_tracks = true;
         $this->tracks = $this->add_tracks($tracks);
         $this->track_count = count($this->tracks);
+            
+        //update live tracklist
+        if ($live){
+            $updated = $this->set_live_datas($remote);
+            if ( is_wp_error($updated) ) return $updated;
+        }
  
         if ( !$this->get_options('ajax_autosource') ){ //TOUFIX MOVE ELSEWHERE ?
             $this->tracklist_autosource();
@@ -869,10 +898,10 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
     Update WP post and eventually update subtracks.
     */
     
-    function set_live_datas(){
+    function set_live_datas(WPSSTM_Remote_Datas $datas){
 
         if (!$this->post_id){
-            $this->tracklist_log('wpsstm_missing_post_id','WPSSTM_Remote_Tracklist::set_live_datas' );
+            $this->tracklist_log('wpsstm_missing_post_id','Set live datas error' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
 
@@ -886,8 +915,8 @@ class WPSSTM_Static_Tracklist extends WPSSTM_Tracklist{
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->get_remote_title(),
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->get_remote_author(),
+            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $datas->get_remote_title(),
+            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $datas->get_remote_author(),
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
         );
 

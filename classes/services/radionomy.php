@@ -98,7 +98,7 @@ class WPSSTM_Radionomy_API_Preset{
 
                 //QueryPath
                 try{
-                    $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Tracklist::$querypath_options )->attr('content');
+                    $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Datas::$querypath_options )->attr('content');
                 }catch(Exception $e){
                     return false;
                 }
