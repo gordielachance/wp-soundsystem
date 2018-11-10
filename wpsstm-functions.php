@@ -200,14 +200,6 @@ function wpsstm_is_ajax(){
     return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 }
 
-function wpsstm_get_uploads_dir(){
-    $dir = WP_CONTENT_DIR . '/uploads/wpsstm';
-    if (!file_exists($dir)) {
-        wp_mkdir_p($dir);
-    }
-    return trailingslashit($dir);
-}
-
 function wpsstm_get_short_url($url,$skiptext = ' ... '){
     $length = strlen($url);
     if($length > 45){

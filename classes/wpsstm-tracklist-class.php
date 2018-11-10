@@ -440,17 +440,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'href' =>       $this->get_tracklist_action_url('trash'),
             );
         }
-        
-        //log
-        if ( $can_edit_tracklist ){
-            $actions['debug'] = array(
-                'text' =>      __('Log'),
-                'classes'   =>  array('wpsstm-link-popup','wpsstm-advanced-action'),
-                'desc' =>       __('View debug log','wpsstm'),
-                'href' =>       $this->get_tracklist_admin_url('debug'),
-            );
-        }
-        
+
         //context
         switch($context){
             case 'page':
@@ -977,15 +967,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (is_array($message) || is_object($message)) {
             $message = implode("\n", $message);
         }
-        
-        //tracklist log
-        if ( $log_file = $this->get_tracklist_log_path() ){
-            $blogtime = current_time( 'mysql' );
-            $output = sprintf('[%s] %s - %s',$blogtime,$title,$message);
 
-            error_log($output.PHP_EOL,3,$log_file);
-        }
-        
         //global log
         if ($this->post_id){
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
@@ -993,18 +975,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         wpsstm()->debug_log($message,$title,null);
         
 
-    }
-    
-    
-    function get_tracklist_log_path(){
-        if ( !$this->post_id ) return;
-        $log_dir = wpsstm_get_uploads_dir();
-        return $log_dir . sprintf('%s-debug.log',$this->post_id);
-    }
-    
-    function delete_log(){
-        $log_file = $this->get_tracklist_log_path();
-        wp_delete_file($log_file);
     }
 
 }
