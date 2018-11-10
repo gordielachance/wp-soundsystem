@@ -41,6 +41,7 @@ class WPSSTM_Remote_Datas{
     public function __construct($feed_url = null,$args = null) {
         
         $this->feed_url = $this->feed_url_no_filters = $feed_url;
+        do_action('wpsstm_before_remote_response',$this);
         $this->feed_url = apply_filters('wpsstm_live_tracklist_url',$this->feed_url);
         
         $scraper_default = self::get_default_scraper_options();
@@ -112,7 +113,7 @@ class WPSSTM_Remote_Datas{
         $raw_tracks = array();
 
         //count total pages
-        $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination);
+        $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination, $this);
 
         if ( $this->request_pagination['page_items_limit'] > 0 ){
             $this->request_pagination['total_pages'] = ceil( $this->track_count / $this->request_pagination['page_items_limit'] );
@@ -132,7 +133,7 @@ class WPSSTM_Remote_Datas{
             $raw_tracks = array_reverse($raw_tracks);
         }
         
-        return $raw_tracks;
+        return apply_filters('wpsstm_remote_tracks',$raw_tracks,$this);
         
     }
 
@@ -166,7 +167,7 @@ class WPSSTM_Remote_Datas{
                 'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
             )
         );
-        return apply_filters('wpsstm_live_tracklist_request_args',$defaults);
+        return apply_filters('wpsstm_live_tracklist_request_args',$defaults,$this);
     }
 
     private function populate_remote_response($url){

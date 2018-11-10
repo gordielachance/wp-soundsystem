@@ -3,11 +3,11 @@
 class WPSSTM_RadioKing{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_radioking_service_link'));
-        add_action('wpsstm_live_tracklist_init',array($this,'register_radioking_preset'));
+        add_action('wpsstm_before_remote_response',array($this,'register_radioking_preset'));
     }
     //register preset
-    function register_radioking_preset($tracklist){
-        new WPSSTM_RadioKing_Api_Preset($tracklist);
+    function register_radioking_preset($remote){
+        new WPSSTM_RadioKing_Api_Preset($remote);
     }
     function register_radioking_service_link($links){
         $links[] = array(
@@ -27,29 +27,22 @@ class WPSSTM_RadioKing{
 }
 
 class WPSSTM_RadioKing_Api_Preset{
-    
-    private $station_slug;
-    private $station_data =     null;
 
-    function __construct($tracklist){
-        $this->tracklist = $tracklist;
-        $this->station_slug = $this->get_station_slug();
-        
+    function __construct($remote){
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title') );
-        
+        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
     }
     
-    function can_handle_url(){
-        if ( !$this->station_slug ) return;
+    function can_handle_url($url){
+        if ( !$this->get_station_slug($url) ) return;
         return true;
     }
 
     function get_remote_url($url){
         
-        if ( $this->can_handle_url() ){
-            $station_id = $this->get_station_id();
+        if ( $this->can_handle_url($url) ){
+            $station_id = $this->get_station_id($url);
             if ( is_wp_error($station_id) ) return $station_id;
 
             $url = sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
@@ -58,10 +51,10 @@ class WPSSTM_RadioKing_Api_Preset{
 
     }
     
-    function set_selectors($datas){
+    function set_selectors($remote){
         
-        if ( !$this->can_handle_url() ) return;
-        $datas->options['selectors'] = array(
+        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
+        $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
             'track_album'       => array('path'=>'album'),
@@ -71,44 +64,40 @@ class WPSSTM_RadioKing_Api_Preset{
     }
 
 
-    function get_station_slug(){
-        global $wpsstm_tracklist;
+    function get_station_slug($url){
         $pattern = '~^https?://(?:.*\.)?radioking.com/radio/([^/]+)~i';
-        preg_match($pattern, $wpsstm_tracklist->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_station_data(){
-        
-        if ( !$this->station_data ){
-            $transient_name = 'wpsstm-radioking-' . $this->station_slug . '-data';
+    function get_station_data($url){
 
-            if ( false === ( $station_data = get_transient($transient_name ) ) ) {
-                $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$this->station_slug) );
-                $json = wp_remote_retrieve_body($response);
-                if ( is_wp_error($json) ) return $json;
-                $api = json_decode($json,true);
-                if ( $station_data = wpsstm_get_array_value(array('data'), $api) ){
-                    set_transient( $transient_name, $station_data, 1 * DAY_IN_SECONDS );
-                }
+        $station_slug = $this->get_station_slug($url);
+        $transient_name = 'wpsstm-radioking-' . $station_slug . '-data';
+
+        if ( false === ( $station_data = get_transient($transient_name ) ) ) {
+            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$station_slug) );
+            $json = wp_remote_retrieve_body($response);
+            if ( is_wp_error($json) ) return $json;
+            $api = json_decode($json,true);
+            if ( $station_data = wpsstm_get_array_value(array('data'), $api) ){
+                set_transient( $transient_name, $station_data, 1 * DAY_IN_SECONDS );
             }
-            $this->station_data = $station_data;
         }
+        return $station_data;
 
-        return $this->station_data;
-        
     }
     
-    function get_station_id(){
-        $station_data = $this->get_station_data();
+    function get_station_id($url){
+        $station_data = $this->get_station_data($url);
         if ( is_wp_error($station_data) ) return $station_data;
         
         return wpsstm_get_array_value(array('idradio'),$station_data);
     }
 
-    function get_remote_title($title){
-        if ( $this->can_handle_url() ){
-            $station_data = $this->get_station_data();
+    function get_remote_title($title,$remote){
+        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+            $station_data = $this->get_station_data($remote->feed_url_no_filters);
             if ( !is_wp_error($station_data) ){
                 $title = wpsstm_get_array_value(array('name'), $station_data);
             }

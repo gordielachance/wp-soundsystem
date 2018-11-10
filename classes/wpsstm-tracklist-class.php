@@ -1062,8 +1062,6 @@ class WPSSTM_Tracklist{
             $current_index++;
         }
 
-        //allow users to alter the input tracks.
-        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         $add_tracks = $this->validate_tracks($add_tracks);
         
         return $add_tracks;

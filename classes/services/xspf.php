@@ -5,14 +5,14 @@ class WPSSTM_XSPF{
         add_filter('wpsstm_wizard_services_links',array($this,'register_xspf_service_link'));
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors'),20); //lower priority
     }
-    function set_selectors($datas){
+    function set_selectors($remote){
 
-        if ( !$datas->response_type ) return; // remote content not yet fetched
+        if ( !$remote->response_type ) return; // remote content not yet fetched
 
-        $split = explode('/',$datas->response_type);
+        $split = explode('/',$remote->response_type);
 
         if ( isset($split[1]) && ($split[1]=='xspf+xml') ){
-            $datas->options['selectors'] = array(
+            $remote->options['selectors'] = array(
                 'tracklist_title'   => array('path'=>'title'),
                 'tracks'            => array('path'=>'trackList track'),
                 'track_artist'      => array('path'=>'creator'),

@@ -3,7 +3,7 @@
 class WPSSTM_Radionomy{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_radionomy_service_links'));
-        add_action('wpsstm_live_tracklist_init',array($this,'register_radionomy_preset'));
+        add_action('wpsstm_before_remote_response',array($this,'register_radionomy_preset'));
     }
     
     //register preset
@@ -29,28 +29,25 @@ class WPSSTM_Radionomy{
 }
 
 class WPSSTM_Radionomy_API_Preset{
-    var $tracklist;
-    private $station_slug;
-    private $station_id;
     
-    function __construct($tracklist){
-        $this->tracklist = $tracklist;
-        $this->station_slug = $this->get_station_slug();
+    function __construct($remote){
         
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title') );
+        add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
 
     }
 
-    function can_handle_url(){
-        if ( !$this->station_slug ) return;
+    function can_handle_url($url){
+        $station_slug = $this->get_station_slug($url);
+        if ( !$station_slug ) return;
         return true;
     }
 
     function get_remote_url($url){
-        if ( $this->can_handle_url() ){
-            $station_id = $this->get_station_id();
+        if ( $this->can_handle_url($url) ){
+            
+            $station_id = $this->get_station_id($url);
             if ( is_wp_error($station_id) ) return $station_id;
 
             $url = sprintf('http://api.radionomy.com/tracklist.cfm?radiouid=%s&apikey=XXX&amount=20&type=xml&cover=true',$station_id);
@@ -58,75 +55,77 @@ class WPSSTM_Radionomy_API_Preset{
         return $url;
     }
     
-    function set_selectors($datas){
+    function set_selectors($remote){
+        if ( !$this->can_handle_url($remote->feed_url_no_filters) ) return;
         
-        if ( !$this->can_handle_url() ) return;
-        $datas->options['selectors'] = array(
+        $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'tracks track'),
             'track_artist'      => array('path'=>'artists'),
             'track_title'       => array('path'=>'title'),
             'track_image'       => array('path'=>'cover'),
             //playduration
         );
+
     }
 
-    function get_station_slug(){
+    function get_station_slug($url){
         $pattern = '~^https?://(?:www.)?radionomy.com/.*?/radio/([^/]+)~i';
-        preg_match($pattern, $this->tracklist->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_station_id(){
-        
-        if (!$this->station_id){
-            $transient_name = 'wpsstm-radionomy-' . $this->station_slug . '-id';
+    function get_station_id($url){
 
-            if ( false === ( $station_id = get_transient($transient_name ) ) ) {
+        $station_slug = $this->get_station_slug($url);
+        if (!$station_slug) return;
 
-                $station_url = sprintf('http://www.radionomy.com/en/radio/%1$s',$this->station_slug);
-                $response = wp_remote_get( $station_url );
+        $transient_name = 'wpsstm-radionomy-' . $station_slug . '-id';
 
-                if ( is_wp_error($response) ) return;
+        if ( false === ( $station_id = get_transient($transient_name ) ) ) {
 
-                $response_code = wp_remote_retrieve_response_code( $response );
-                if ($response_code != 200) return;
+            $station_url = sprintf('http://www.radionomy.com/en/radio/%1$s',$station_slug);
+            $response = wp_remote_get( $station_url );
 
-                $content = wp_remote_retrieve_body( $response );
+            if ( is_wp_error($response) ) return;
 
-                libxml_use_internal_errors(true);
+            $response_code = wp_remote_retrieve_response_code( $response );
+            if ($response_code != 200) return;
 
-                //QueryPath
-                try{
-                    $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Datas::$querypath_options )->attr('content');
-                }catch(Exception $e){
-                    return false;
-                }
+            $content = wp_remote_retrieve_body( $response );
 
-                libxml_clear_errors();
+            libxml_use_internal_errors(true);
 
-                $image_file = basename($imagepath);
-
-                $pattern = '~^([^.]+)~';
-                preg_match($pattern, $image_file, $matches);
-
-                if ( !isset($matches[1]) ){
-                    return new WP_Error( 'wpsstm_radionomy_missing_station_id', __('Required station ID missing.','wpsstm') );
-                }
-
-                $station_id = $matches[1];
-                set_transient( $transient_name, $station_id, 1 * DAY_IN_SECONDS );
-
+            //QueryPath
+            try{
+                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Datas::$querypath_options )->attr('content');
+            }catch(Exception $e){
+                return false;
             }
-            $this->station_id = $station_id;
+
+            libxml_clear_errors();
+
+            $image_file = basename($imagepath);
+
+            $pattern = '~^([^.]+)~';
+            preg_match($pattern, $image_file, $matches);
+
+            if ( !isset($matches[1]) ){
+                return new WP_Error( 'wpsstm_radionomy_missing_station_id', __('Required station ID missing.','wpsstm') );
+            }
+
+            $station_id = $matches[1];
+            set_transient( $transient_name, $station_id, 1 * DAY_IN_SECONDS );
+
         }
 
-        return $this->station_id;
+        return $station_id;
 
     }
     
-    function get_remote_title($title){
-        if ( $this->can_handle_url() ){
-            $title = sprintf('Radionomy: %s', $this->station_slug);
+    function get_remote_title($title,$remote){
+        if ( $this->can_handle_url($remote->feed_url_no_filters) ){
+            $station_slug = $this->get_station_slug($remote->feed_url_no_filters);
+            $title = sprintf('Radionomy: %s', $station_slug);
         }
         return $title;
     }
