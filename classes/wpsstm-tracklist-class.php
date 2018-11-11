@@ -64,9 +64,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
         //time updated
-        $this->updated_time = get_post_modified_time( 'U', true, $this->post_id, true );
+        $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
         if ( $this->tracklist_type == 'live' ){//TOUFIX what if not the 'live' type ?
-            $this->updated_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+            $this->updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
         }
 
         //live
