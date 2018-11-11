@@ -425,36 +425,19 @@ class WPSSTM_Core_Tracks{
     */
     
     function the_track($post,$query){
-        global $wpsstm_tracklist;
-
-        if ( $query->get('post_type') == wpsstm()->post_type_track ){
-            //set global $wpsstm_track
-            $this->setup_global_track($post->ID);
-            $wpsstm_tracklist->index = $query->current_post;
-        }
-
-
+        global $wpsstm_track;
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return;
+        $wpsstm_track = new WPSSTM_Track( $post->ID );
     }
     
     function the_single_backend_track(){
         global $post;
+        global $wpsstm_track;
         $screen = get_current_screen();
         if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_track )  ){
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
-            $this->setup_global_track($post_id);
+            $wpsstm_track = new WPSSTM_Track( $post_id );
         }
-    }
-    
-    private function setup_global_track($track_id){
-        global $wpsstm_tracklist;
-        global $wpsstm_track;
-
-        //set global $wpsstm_tracklist (a tracklists with this single track)
-        //TOUFIX TOCHECK
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($track_id);
-        $track = new WPSSTM_Track( $track_id );
-        $wpsstm_tracklist->add_tracks($track);
-        $wpsstm_track = $wpsstm_tracklist->tracks[0];
     }
 
     function pre_get_posts_by_track_title( $query ) {
@@ -772,6 +755,7 @@ class WPSSTM_Core_Tracks{
         }
     }
     
+    //TOUFIX TOUCHECK
     function shortcode_track( $atts ) {
         global $post;
         global $wpsstm_tracklist;
@@ -786,8 +770,9 @@ class WPSSTM_Core_Tracks{
         $atts = shortcode_atts($default,$atts);
         
         if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
-            //set global $wpsstm_tracklist
-            $this->setup_global_track($atts['post_id']);
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
+            $track = new WPSSTM_Track( $atts['post_id'] );
+            $wpsstm_tracklist->add_tracks($track);
             $output = $wpsstm_tracklist->get_tracklist_html();
         }
 
