@@ -1,5 +1,14 @@
 @import "compass";
 
+.wpsstm-iframe{
+    width:100%;
+    border:1px solid grey;
+    
+    &.wpsstm-iframe-autoheight{
+        
+    }
+}
+
 /*
 MINIMAL STYLES
 */

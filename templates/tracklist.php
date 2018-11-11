@@ -1,5 +1,17 @@
+<?php 
+//
+add_filter( 'show_admin_bar','__return_false');
+do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
+//
+?>
+<!DOCTYPE html>
+<html class="no-js" <?php language_attributes(); ?>>
+<head>
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
+    <?php wp_head(); ?>
+</head>
 <?php
-
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 
@@ -127,3 +139,11 @@ if ( $wpsstm_tracklist->get_options('can_play') ){
 
     ?>
 </div>
+<?php
+//
+do_action( 'get_footer', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
+//
+?>
+<?php wp_footer(); ?>
+</body>
+</html>

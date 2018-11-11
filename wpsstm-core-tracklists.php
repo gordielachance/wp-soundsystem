@@ -21,7 +21,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
-        add_filter( 'template_include', array($this,'tracklist_xspf_template'));
+        add_filter( 'template_include', array($this,'tracklist_template'));
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         
@@ -322,12 +322,22 @@ class WPSSTM_Core_Tracklists{
     }
 
 
-    function tracklist_xspf_template($template){
+    function tracklist_template($template){
         if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
-        if ( $admin_action != 'export' ) return $template;
-        the_post();
-        return wpsstm_locate_template( 'tracklist-xspf.php' );
+        switch($admin_action){
+            case 'export':
+                the_post();
+                $template = wpsstm_locate_template( 'tracklist-xspf.php' );
+            break;
+            case 'render':
+                the_post();
+                $template = wpsstm_locate_template( 'tracklist.php' );
+            break;
+        }
+        return $template;
+        
     }
+
     
     function handle_tracklist_action(){
         global $post;

@@ -82,6 +82,14 @@
             minLength: 2,
         });
     });
+    
+    $('iframe.wpsstm-iframe-autoheight').load(function(e){
+        var iframe = $(this).get(0);
+        var content = $(iframe.contentWindow.document.body);
+        //var height = $(e.target).find('html').get(0).scrollHeight;
+        $(this).css('height',content.innerHeight());
+    });
+    
 
 })(jQuery);
 

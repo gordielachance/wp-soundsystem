@@ -30,6 +30,9 @@ class WPSSTM_Core_Tracks{
 
         add_action( 'template_redirect', array($this,'handle_track_action'));
         add_filter( 'template_include', array($this,'new_track_redirect'));
+        
+        //add_action( 'wp_print_styles', array($this,'track_template_no_css'), 99 );//TOUFIX
+        add_filter( 'template_include', array($this,'track_template'));
 
         //post content
         add_filter( 'the_content', array($this,'track_tracklist_table') );
@@ -228,6 +231,28 @@ class WPSSTM_Core_Tracks{
 
         wp_safe_redirect($track_url);
         exit;
+    }
+    
+    function track_template_no_css() {
+        global $wp_styles;
+        //if ( is_page_template( 'blankPage.php' ) ) {
+            $wp_styles->queue = array();
+        //}
+    }
+    
+    function track_template($template){
+        if ( !$track_admin = get_query_var( self::$qvar_track_admin ) ) return $template;
+        
+        global $post;
+        global $wpsstm_track;
+        
+        //TOUFIX TOUCHECK should we define it here ? Should it not be defined already ?
+        $wpsstm_track = new WPSSTM_Track($post->ID);
+
+        ob_start();
+        wpsstm_locate_template( 'track-admin.php', true, false );
+        $content = ob_get_clean();
+        echo $content;
     }
 
     function handle_track_action(){
@@ -615,14 +640,14 @@ class WPSSTM_Core_Tracks{
             'after_title', 
             'high' 
         );
-        
+
         add_meta_box( 
-            'wpsstm-track-options', 
-            __('Track Options','wpsstm'),
-            array($this,'metabox_track_options_content'),
+            'wpsstm-track-playlists', 
+            __('Playlists','wpsstm'),
+            array($this,'metabox_track_playlists_content'),
             wpsstm()->post_type_track, 
-            'side', 
-            'high' 
+            'side', //context
+            'default' //priority
         );
 
     }
@@ -667,8 +692,8 @@ class WPSSTM_Core_Tracks{
         return wpsstm_get_backend_form_input($input_attr);
     }
     
-    function metabox_track_options_content( $post ){
-        
+    function metabox_track_playlists_content( $post ){
+        wpsstm_locate_template( 'track-admin-playlists.php',true );
     }
 
     function mb_populate_trackid( $post_id ) {

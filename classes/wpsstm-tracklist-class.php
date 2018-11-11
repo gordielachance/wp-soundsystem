@@ -211,10 +211,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_html(){
         $this->register_tracklist_inline_js();
-        ob_start();
-        wpsstm_locate_template( 'content-tracklist.php', true, false );
-        $html = ob_get_clean();
-        return $html;
+        $link = $this->get_tracklist_action_url('render');
+        $el = printf('<iframe class="wpsstm-iframe wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
+        return $el;
         
     }
 
