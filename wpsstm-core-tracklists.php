@@ -323,6 +323,7 @@ class WPSSTM_Core_Tracklists{
 
 
     function tracklist_template($template){
+        global $wpsstm_tracklist;
         if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
         switch($admin_action){
             case 'export':

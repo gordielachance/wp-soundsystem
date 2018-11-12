@@ -12,37 +12,14 @@ class WPSSTM_Core_Player{
     }
 
     function player_html(){
-	   global $wp_query;
-        
-        if ( !did_action('init_playable_tracklist') ) return;
-        
-        ?>
-        <div id="wpsstm-player">
-            <div class="player-row">
-                <span id="wpsstm-player-track"></span>
-                <?php
-                //player actions
-                if ( $actions = $this->get_player_links() ){
-                    $list = get_actions_list($actions,'player');
-                    echo $list;
-                }                       
-                ?>
-            </div>
-            <div class="player-row">
-                    <span id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></span>
-                    <span id="wpsstm-audio-container">
-                        <audio></audio>
-                    </span>
-                    <span id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></span>
-                    <span id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></span>
-                    <span id="wpsstm-player-shuffle" class="wpsstm-player-extra"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-        <?php
+        global $wpsstm_player;
+        $wpsstm_player = $this;
+        if ( !did_action('wpsstm_load_player') ) return;
+        wpsstm_locate_template( 'player.php', true, false );
     }
     
     function enqueue_player_scripts_styles_shared(){
-        //TO FIX load only if player is loaded (see hook init_playable_tracklist ) ?
+        //TO FIX load only if player is loaded (see hook wpsstm_load_player ) ?
         
         //CSS
         wp_enqueue_style('wp-mediaelement');

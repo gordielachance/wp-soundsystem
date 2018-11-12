@@ -24,7 +24,6 @@ class WpsstmPagePlayer {
     init_player(){
         var self = this;
         var success = $.Deferred();
-        self.debug("init player");
         
         wpsstm.player_audio_el.mediaelementplayer({
             classPrefix: 'mejs-',
@@ -40,6 +39,8 @@ class WpsstmPagePlayer {
             loop: false,
             success: function(mediaElement, originalNode, player) {
                 wpsstm.current_media = mediaElement;
+                console.log("player has init");
+                console.log(this);
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
@@ -58,41 +59,6 @@ class WpsstmPagePlayer {
     init(){
         var self = this;
         self.init_player();
-        self.init_page_tracklists();
-    }
-
-    init_page_tracklists(){
-
-        var self = this;
-        var all_tracklists = $( ".wpsstm-tracklist" );
-
-        self.debug("init_page_tracklists()");
-
-        all_tracklists.each(function(index,tracklist_el) {
-            var tracklist = new WpsstmTracklist(tracklist_el);
-            self.tracklists.push(tracklist);
-        });
-
-        self.tracklists_shuffle_order = wpsstm_shuffle( Object.keys(self.tracklists).map(Number) );
-        
-        /*
-        autoplay
-        */
-        //which one could we autoplay?
-        var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
-            return tracklist_obj.options.autoplay;
-        });
-        
-        //autoplay the first one of those.
-        var play_tracklist = tracklists_autoplay[0];
-        
-        if ( play_tracklist ){
-            play_tracklist.debug("autoplay");
-            play_tracklist.start_tracklist();
-        }
-        
-        $(document).trigger("PageTracklistsInit"); //custom event
-
     }
     
     set_audio_sources(sources){
@@ -263,7 +229,9 @@ class WpsstmPagePlayer {
     /*
     initialize player when page has loaded
     */
-    $(document).on( "PageTracklistsInit", function( event ) {
+    $(document).on( "wpsstmStartTracklist", function( event ) {
+        //TOUFIX TOUCHECK was hooked on PageTracklistsInit before
+        
         /*
         Previous track bt
         */

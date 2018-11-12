@@ -236,7 +236,8 @@ class WpsstmLastFM {
 
 (function($){
     
-    $(document).on( "PageTracklistsInit", function( event ) {
+    $(document).on( "wpsstmStartTracklist", function( event ) {
+        //TOUFIX TOUCHECK was hooked on PageTracklistsInit before
         wpsstm_lastfm.init();
     });
     
