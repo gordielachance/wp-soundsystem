@@ -22,7 +22,7 @@ function wpsstm_get_html_attr($arr=null){
            if(is_bool($arr[$key])){
               return $arr[$key]?$key:'';
            }
-           return $key.'="'.$arr[$key].'"';
+           return $key.'="'.esc_attr($arr[$key]).'"';
         }, array_keys($arr)));
     }
 
