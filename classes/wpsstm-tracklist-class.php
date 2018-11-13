@@ -102,7 +102,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
             'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
-            'playable_opacity_class'    => ( wpsstm()->get_options('playable_opacity_class') == 'on' ),
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'ajax_autosource'           => true,
@@ -213,7 +212,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         $link = $this->get_tracklist_action_url('render');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
-        $iframe_el = sprintf('<iframe src="%s"></iframe>',$link);
+        $iframe_el = sprintf('<iframe width="100%%" scrolling="yes" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
         $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading wpsstm-iframe-autoheight">%s%s</div>',$notice_el,$iframe_el);
         
         return $el;
@@ -682,7 +681,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'wpsstm-tracklist',
             ( $this->get_options('ajax_tracklist') ) ? 'ajax-tracklist' : null,
             $this->get_options('can_play') ? 'tracklist-playable' : null,
-            ( $this->get_options('can_play') && $this->get_options('playable_opacity_class') ) ? 'playable-opacity' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
         );

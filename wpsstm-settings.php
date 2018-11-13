@@ -135,13 +135,7 @@ class WPSSTM_Settings {
             //soundcloud
             $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
             $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
-            
-            /*
-            Styling
-            */
-            $new_input['minimal_css'] = ( isset($input['minimal_css']) ) ? 'on' : 'off';
-            $new_input['playable_opacity_class'] = ( isset($input['playable_opacity_class']) ) ? 'on' : 'off';
-            
+
             /*
             System
             */
@@ -381,22 +375,6 @@ class WPSSTM_Settings {
             __('Styling','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'minimal_css', 
-            __('Minimal CSS','wpsstm'), 
-            array( $this, 'minimal_css_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_styling'//section
-        );
-        
-        add_settings_field(
-            'playable_opacity_class', 
-            __('.playable-opacity','wpsstm'), 
-            array( $this, 'playable_opacity_class_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_styling'
         );
 
         add_settings_field(
@@ -812,32 +790,7 @@ class WPSSTM_Settings {
         );
         
     }
-    
-    /*Styling*/
-    
-    function minimal_css_callback(){
-        $option = wpsstm()->get_options('minimal_css');
-        
-        printf(
-            '<input type="checkbox" name="%s[minimal_css]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Do not include default styling.","wpsstm")
-        );
-    }
 
-    function playable_opacity_class_callback(){
-        $option = wpsstm()->get_options('playable_opacity_class');
-        $help = sprintf(__('not playable:%s, playable:%s ,has played/hover:%s, active:%s','wpsstm'),'.25','.5','.75','1');
-        
-        printf(
-            '<input type="checkbox" name="%s[playable_opacity_class]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Toggle tracks opacity according to the playable state.","wpsstm") . sprintf(' <small>%s</small>',$help)
-        );
-    }
-    
     /*System*/
     
     function reset_options_callback(){

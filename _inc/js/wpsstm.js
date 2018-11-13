@@ -84,6 +84,7 @@
     });
     
     $('iframe.wpsstm-iframe-autoheight').load(function(e){
+        console.log("resize iframe");
         var iframe = $(this).get(0);
         var content = $(iframe.contentWindow.document.body);
         //var height = $(e.target).find('html').get(0).scrollHeight;

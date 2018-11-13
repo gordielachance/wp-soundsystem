@@ -9,7 +9,7 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
 //
 ?>
 <!DOCTYPE html>
-<html class="no-js" <?php language_attributes(); ?>>
+<html class="no-js wpsstm-iframe" <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >

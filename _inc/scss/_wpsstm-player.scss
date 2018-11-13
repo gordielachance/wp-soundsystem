@@ -3,113 +3,101 @@
 $player-bg-color:#222;
 $player-text-color:#FFF;
 
-/*
-MINIMAL STYLES
-*/
+#wpsstm-player{
 
-/*
-DEFAULT STYLES
-*/
+    position:fixed;
+    width:100%;
+    padding:0;
+    bottom: 0;
+    min-height:0em;
+    z-index: 50;
 
-body.wpsstm-default,body.wp-admin{
+    display:none;
+    background:$player-bg-color;
+    color:$player-text-color;
+    a{
+        color:$player-text-color;
+    }
 
-    #wpsstm-player{
-
-        position:fixed;
+    .player-row{
         width:100%;
         padding:0;
-        bottom: 0;
-        min-height:0em;
-        z-index: 50;
-
-        display:none;
-        background:$player-bg-color;
-        color:$player-text-color;
-        a{
-            color:$player-text-color;
-        }
-        
-        .player-row{
-            width:100%;
+        margin:0;
+        @include display-flex();
+        display: flex;
+        > * {
             padding:0;
             margin:0;
+            border:none;
             @include display-flex();
-            display: flex;
-            > * {
-                padding:0;
-                margin:0;
-                border:none;
-                @include display-flex();
-                @include flex-grow(1);
-                @include justify-content(center);
-                @include align-items(center);
-            }
-            .wpsstm-player-actions{
-                margin-right:.5em;
-                @include flex-shrink(0);
-                @include flex-grow(0);
-                .wpsstm-player-action{
+            @include flex-grow(1);
+            @include justify-content(center);
+            @include align-items(center);
+        }
+        .wpsstm-player-actions{
+            margin-right:.5em;
+            @include flex-shrink(0);
+            @include flex-grow(0);
+            .wpsstm-player-action{
 
-                    a{
-                        span{
-                            display:none;
-                        }
-                    }
-
-                    &.wpsstm-player-action-scrobbler{
-                        @include opacity(.25);
-                        a:before{
-                            content:"\f202"; //.fa-lastfm
-                        }
-                        &.lastfm-loading a{
-                            @extend .wpsstm-loading-icon;
-                        }
-                        &.scrobbler-error a:before{
-                            content:"\f071"; //.fa-exclamation-triangle;
-                        }
-                        &.scrobbler-enabled{
-                            @include opacity(1);
-                        }
+                a{
+                    span{
+                        display:none;
                     }
                 }
 
+                &.wpsstm-player-action-scrobbler{
+                    @include opacity(.25);
+                    a:before{
+                        content:"\f202"; //.fa-lastfm
+                    }
+                    &.lastfm-loading a{
+                        @extend .wpsstm-loading-icon;
+                    }
+                    &.scrobbler-error a:before{
+                        content:"\f071"; //.fa-exclamation-triangle;
+                    }
+                    &.scrobbler-enabled{
+                        @include opacity(1);
+                    }
+                }
             }
 
-            #wpsstm-audio-container{
-                @include display-flex();
-                @include flex-grow(1);
-            }
-            .wpsstm-player-extra{
-                @include flex-shrink(0);
-                @include flex-grow(0);
-                padding: 0 .5em;
-                &#wpsstm-player-shuffle:not(.active){
-                    @include opacity(.3);
-                }
-                &#wpsstm-player-loop:not(.active){
-                    @include opacity(.3);
-                }
-            }
+        }
 
-            .mejs-container{
-                width:100%!important;
+        #wpsstm-audio-container{
+            @include display-flex();
+            @include flex-grow(1);
+        }
+        .wpsstm-player-extra{
+            @include flex-shrink(0);
+            @include flex-grow(0);
+            padding: 0 .5em;
+            &#wpsstm-player-shuffle:not(.active){
+                @include opacity(.3);
+            }
+            &#wpsstm-player-loop:not(.active){
+                @include opacity(.3);
             }
         }
 
-    }
-    
-    //tracklists inside posts //TOFIXDDD
-    :not(#wpsstm-player-track-container) .wpsstm-tracklist.tracklist-template-table{
-
-        border:1px solid #F7F7F7;
-        padding:.5em 1em;
-
-        [itemprop="track"]{
-            .wpsstm-track-sources{
-                display:none;
-            }
+        .mejs-container{
+            width:100%!important;
         }
     }
-    
+
+}
+
+//tracklists inside posts //TOFIXDDD
+:not(#wpsstm-player-track-container) .wpsstm-tracklist.tracklist-template-table{
+
+    border:1px solid #F7F7F7;
+    padding:.5em 1em;
+
+    [itemprop="track"]{
+        .wpsstm-track-sources{
+            display:none;
+        }
+    }
 }
 

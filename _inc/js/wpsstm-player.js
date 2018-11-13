@@ -40,7 +40,6 @@ class WpsstmPagePlayer {
             success: function(mediaElement, originalNode, player) {
                 wpsstm.current_media = mediaElement;
                 console.log("player has init");
-                console.log(this);
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?

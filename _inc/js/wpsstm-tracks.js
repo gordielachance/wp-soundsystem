@@ -358,14 +358,19 @@ class WpsstmTrack {
         
     }
 
-    get_track_instances(ancestor){
-        //TOUFIX var selector = '[data-wpsstm-tracklist-idx="'+this.tracklist.index+'"] [itemprop="track"][data-wpsstm-track-idx="'+this.index+'"]';
-        var selector = '[itemprop="track"][data-wpsstm-track-idx="'+this.index+'"]';
-        if (ancestor !== undefined){
-            return $(ancestor).find(selector);
-        }else{
-            return $(selector);
-        }
+    get_track_instances(){
+        
+        var self = this;
+        
+        var tracks = [];
+
+        //TOUFIX TO IMPROVE
+        //should be rather this : var tracks_page = [self.track_el];
+        var tracks_page = self.tracklist.tracklist_el.find('[itemprop="track"][data-wpsstm-track-idx="'+this.index+'"]');
+        var track_player = wpsstm.bottom_trackinfo_el.find('[itemprop="track"]');
+        var tracks = $.merge(tracks_page,track_player);
+
+        return $(tracks);
     }
 
     load_player_track(){ //TO FIX SHOULD BE IN PLAYER ?
@@ -490,12 +495,11 @@ class WpsstmTrack {
         var deferredObject = $.Deferred();
         
         var track_el    = self.track_el;
-        var track_instances = self.get_track_instances();
 
         self.debug("track sources request");
 
         $(track_el).find('.wpsstm-track-sources').html('');
-        track_instances.addClass('track-loading');
+        self.track_el.addClass('track-loading');
 
         var ajax_data = {
             action:     'wpsstm_autosources_list',
@@ -513,7 +517,7 @@ class WpsstmTrack {
 
             //update autosource time
             //self.autosource_time = data.timestamp;
-            //track_instances.attr("data-wpsstm-autosource-time", self.autosource_time);
+            //self.track_el.attr("data-wpsstm-autosource-time", self.autosource_time);
             self.did_sources_request = true;
             
             if ( data.new_html ){
@@ -525,8 +529,8 @@ class WpsstmTrack {
 
                 //update HTML & repopulate track
                 self.debug("repopulate HTML");
-                track_instances.replaceWith( data.new_html );
-                self.init_html(data.new_html);
+                self.track_el.replaceWith( data.new_html );
+                self.init_html(self.track_el);
                 
             }
 
@@ -537,18 +541,18 @@ class WpsstmTrack {
             }else{
                 self.debug("track sources request failed: " + data.message);
                 self.can_play = false;
-                track_instances.addClass('track-error');
+                self.track_el.addClass('track-error');
                 deferredObject.reject(data.message);
             }
 
         });
 
         self.sources_request.fail(function() {
-            track_instances.addClass('track-error');
+            self.track_el.addClass('track-error');
         })
 
         self.sources_request.always(function() {
-            track_instances.removeClass('track-loading');
+            self.track_el.removeClass('track-loading');
         })
         
         return deferredObject.promise();

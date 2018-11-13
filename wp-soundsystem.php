@@ -104,8 +104,6 @@ class WP_SoundSystem {
             'autosource'                        => 'on',
             'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
-            'playable_opacity_class'            => 'on',
-            'minimal_css'                       => 'off',
         );
         
         $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
@@ -200,8 +198,6 @@ class WP_SoundSystem {
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
-        add_filter( 'body_class', array($this,'default_style_class'));
-        
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
         
         add_filter( 'template_include', array($this,'popup_template'));
@@ -212,13 +208,6 @@ class WP_SoundSystem {
         $vars[] = $this->qvar_popup;
         $vars[] = $this->qvar_wpsstm_statii;
         return $vars;
-    }
-    
-    function default_style_class($classes){
-        if ( wpsstm()->get_options('minimal_css') !== 'on'){
-            $classes[] = 'wpsstm-default';
-        }
-        return $classes;
     }
 
     // Move all "after_title" metaboxes above the default editor

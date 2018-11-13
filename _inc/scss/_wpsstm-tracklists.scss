@@ -1,57 +1,28 @@
 @import "compass";
 
-.wpsstm-iframe-container{
-    width:100%;
-    border:1px solid grey;
-    
-    .wpsstm-loading-notice{
-        display:none;
-        position:relative;
+ul.wpsstm-tracklist-actions{
+    margin: 1em 0;
+    .wpsstm-action{
+        font-size:.8em;
+        border: 1px solid #F7F7F7;
+        padding: .25em .5em;
         text-align:center;
-        span{
-            display:inline-block;
-            padding: .5em 0;
-            @include animation(opacityPulse 2s infinite ease-out);
-            @extend .wpsstm-loading-icon;
+        line-height: 1.8em;
+        &.wpsstm-tracklist-action-status-switch{
+            form{
+                display:none;
+            }
+            &.expanded{
+                em{
+                    display:none;
+                }
+                form{
+                   display:inline-block; 
+                }
+            }
         }
     }
     
-    &.wpsstm-iframe-loading{
-        .wpsstm-loading-notice{
-            display:inherit;
-        }
-        iframe{
-            display:none;
-        }
-    } 
-    
-    &.wpsstm-iframe-autoheight{
-        
-    }
-    
-   
-}
-
-/*
-MINIMAL STYLES
-*/
-
-.wpsstm-tracklist{
-    &:not(.wpsstm-loved-tracklist) .wpsstm-tracklist-action-unfavorite{
-        display:none!important;
-    }
-    
-    &.wpsstm-loved-tracklist{
-        .wpsstm-tracklist-action-favorite{
-            display:none!important;
-        }
-    }
-    &.tracklist-loading, &:not(.tracklist-expired){
-        .wpsstm-tracklist-action-refresh{
-            pointer-events:none;
-        }
-    }
-
 }
 
 .tracklist-list{ //output a simplier style
@@ -67,221 +38,207 @@ MINIMAL STYLES
 
 }
 
-ul.wpsstm-tracklist-actions{
-
-    li.wpsstm-tracklist-action{
-        &.wpsstm-tracklist-action-status-switch{
-            form{
-                display:none;
-            }
-            &.expanded{
-                em{
-                    display:none;
-                }
-                form{
-                   display:inline-block; 
-                }
-            }
+.wpsstm-tracklist{
+    
+    &:not(.wpsstm-loved-tracklist) .wpsstm-tracklist-action-unfavorite{
+        display:none!important;
+    }
+    
+    &.wpsstm-loved-tracklist{
+        .wpsstm-tracklist-action-favorite{
+            display:none!important;
         }
     }
-
-}
-
-/*
-DEFAULT STYLES
-*/
-
-body.wpsstm-default,body.wp-admin{
-
-    .wpsstm-tracklist{
-        position:relative;
-        
-        font-family: sans-serif;
-        font-size:0.8em;
-
-        .tracklist-header{
-            border-bottom:1px solid #F7F7F7;
-            padding:.25em;
-            
-            .wpsstm-tracklist-icon{
-                @include opacity (.15);
-            }
-            
-            .wpsstm-live-tracklist-link{
-                display:block;
-                margin: .5em 0;
-                @extend .wpsstm-no-underline;
-            }
-            
-            .wpsstm-tracklist-actions{
-                display:block;
-                text-align: center;
-                .wpsstm-action{
-                    margin:auto;
-                    @extend .wpsstm-action-bt;
-                    font-size:.8em;
-                }
-            }
-        }
-        
-        &.wpsstm-live-tracklist{
-            .wpsstm-tracklist-title{
-                @extend .wpsstm-icon;
-                &:before{
-                    content: "\f09e";
-                }
-            }
-        }
-
-        &.tracklist-loading{
-            .wpsstm-tracklist-icon{
-                @extend .wpsstm-loading-icon;
-            }
-        }
-
-        &:not(.tracklist-playing) .wpsstm-tracklist-icon:before,&.tracklist-pause .wpsstm-tracklist-icon:before{
-            content:"\f04b"; //.fa-play
-        }
-
-        &.tracklist-playing .wpsstm-tracklist-icon:before{
-            content:"\f04c"; //.fa-pause;
-        }
-
-        &.tracklist-error .wpsstm-tracklist-icon:before{
-            content:"\f071"; //.fa-exclamation-triangle;
-        }
-
-        &:not(.tracklist-expired){
-            .wpsstm-tracklist-action-refresh{
-                @include opacity(.5);
-            }
-        }
-        
-        &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
-            display:none;
-        }
-
-        &.ajax-tracklist{
-
-            &.tracklist-refresh{
-                > * {
-                    display:none;
-                    &.tracklist-header,&.wpsstm-tracklist-notices{
-                        display:inherit;
-                    }
-                    &.wpsstm-tracklist-notices > *{
-                        display:none;
-                        &#wpsstm-notice-ajax-refresh{
-                            display:inherit;
-                        }
-                    }
-                    .wpsstm-tracklist-time{
-                        display:none;
-                    }
-
-                }
-            }
+    &.tracklist-loading, &:not(.tracklist-expired){
+        .wpsstm-tracklist-action-refresh{
+            //TOUFIX TORESTORE pointer-events:none;
         }
     }
     
-    .wpsstm-tracklist.wpsstm-post-tracklist{
-        .wpsstm-track{
+    position:relative;
 
-            .wpsstm-track-sources{
-                display:none;
-                .wpsstm-expand-sources{
-                    margin-left: auto;
-                }
+    font-family: sans-serif;
+    font-size:0.8em;
+
+    .tracklist-header{
+        border-bottom:1px solid #F7F7F7;
+        padding:.25em;
+
+        .wpsstm-tracklist-icon{
+            @include opacity(.15);
+        }
+
+        .wpsstm-live-tracklist-link{
+            display:block;
+            margin: .5em 0;
+            @extend .wpsstm-no-underline;
+        }
+        
+        .wpsstm-tracklist-refresh-time{
+            @include opacity(.25);
+        }
+    }
+
+    &.wpsstm-live-tracklist{
+        .wpsstm-tracklist-title{
+            @extend .wpsstm-icon;
+            &:before{
+                content: "\f09e";
             }
+        }
+    }
 
-            .wpsstm-track-actions{
+    &.tracklist-loading{
+        .wpsstm-tracklist-icon{
+            @extend .wpsstm-loading-icon;
+        }
+    }
+
+    &:not(.tracklist-playing) .wpsstm-tracklist-icon:before,&.tracklist-pause .wpsstm-tracklist-icon:before{
+        content:"\f04b"; //.fa-play
+    }
+
+    &.tracklist-playing .wpsstm-tracklist-icon:before{
+        content:"\f04c"; //.fa-pause;
+    }
+
+    &.tracklist-error .wpsstm-tracklist-icon:before{
+        content:"\f071"; //.fa-exclamation-triangle;
+    }
+
+    &:not(.tracklist-expired){
+        .wpsstm-tracklist-action-refresh{
+            @include opacity(.5);
+        }
+    }
+
+    &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
+        display:none;
+    }
+
+    &.ajax-tracklist{
+
+        &.tracklist-refresh{
+            > * {
+                display:none;
+                &.tracklist-header,&.wpsstm-tracklist-notices{
+                    display:inherit;
+                }
+                &.wpsstm-tracklist-notices > *{
+                    display:none;
+                    &#wpsstm-notice-ajax-refresh{
+                        display:inherit;
+                    }
+                }
+                .wpsstm-tracklist-time{
+                    display:none;
+                }
+
+            }
+        }
+    }
+}
+
+.wpsstm-tracklist.wpsstm-post-tracklist{
+    .wpsstm-track{
+        
+        &.track-active{
+            background: rgba(252, 248, 227, .5);
+        }
+
+        .wpsstm-track-sources{
+            display:none;
+            .wpsstm-expand-sources{
                 margin-left: auto;
             }
         }
+
+        .wpsstm-track-actions{
+            margin-left: auto;
+        }
     }
-    
-    .wpsstm-tracklist.wpsstm-player-tracklist{
-        .wpsstm-track{
-            display:block!important;
-            .wpsstm-track-actions{
-                margin-left:inherit;
-            }
-            .wpsstm-track-sources{
+}
+
+.wpsstm-tracklist.wpsstm-player-tracklist{
+    .wpsstm-track{
+        display:block!important;
+        .wpsstm-track-actions{
+            margin-left:inherit;
+        }
+        .wpsstm-track-sources{
+            @include opacity(.6);
+            [data-wpsstm-source-idx]{
                 @include opacity(.6);
-                [data-wpsstm-source-idx]{
-                    @include opacity(.6);
-                    &.source-playing{
-                        @include opacity(.8);
-                    }
-                    &:hover{
-                        @include opacity(1);
-                    }
+                &.source-playing{
+                    @include opacity(.8);
+                }
+                &:hover{
+                    @include opacity(1);
                 }
             }
         }
     }
+}
 
-    .wpsstm-tracklist-actions{
-        display:block;
-        margin: 1em;
-        list-style: none;
-        line-height: 2.8em;
+.wpsstm-tracklist-actions{
+    display:block;
+    margin: 1em;
+    list-style: none;
+    line-height: 2.8em;
 
-        .wpsstm-tracklist-action{
-            &.wpsstm-tracklist-action-refresh a:before{
-                content:"\f021";//.fa-refresh;
-            }
-            &.wpsstm-tracklist-action-share a:before{
-                content:"\f1e0";//.fa-share-alt;
-            }
-            &.wpsstm-tracklist-action-export a:before{
-                content:"\f019";//.fa-download;
-            }
+    .wpsstm-tracklist-action{
+        &.wpsstm-tracklist-action-refresh a:before{
+            content:"\f021";//.fa-refresh;
+        }
+        &.wpsstm-tracklist-action-share a:before{
+            content:"\f1e0";//.fa-share-alt;
+        }
+        &.wpsstm-tracklist-action-export a:before{
+            content:"\f019";//.fa-download;
+        }
 
-            &.wpsstm-tracklist-action-favorite a:before{
-                content:"\f08a";//.fa-heart-o;
-            }
-            &.wpsstm-tracklist-action-unfavorite a:before{
-                content:"\f004";//.fa-heart;
-            }
+        &.wpsstm-tracklist-action-favorite a:before{
+            content:"\f08a";//.fa-heart-o;
+        }
+        &.wpsstm-tracklist-action-unfavorite a:before{
+            content:"\f004";//.fa-heart;
+        }
 
-            &.wpsstm-tracklist-action-new-subtrack{
-                 a:before{
-                     content:"\f055";//.fa-plus-circle;
-                }
-            }
-
-            &.wpsstm-tracklist-action-status-switch{
-                
-                a:before{
-                    content:"\f274";//.fa-calendar-check-o;
-                }
-                form{
-                    select{
-                        font-size:1em;
-                    }
-                    em{
-                        @include opacity(.5);
-                    }
-                }
-            }
-
-            &.wpsstm-tracklist-action-lock-tracklist a:before{
-                content:"\f023";//.fa-lock;
-            }
-            &.wpsstm-tracklist-action-unlock-tracklist a:before{
-                content:"\f023";//.fa-lock;
-            }
-            &.wpsstm-tracklist-action-edit-backend a:before{
-                content:"\f084";//.fa-key;
-            }
-            &.wpsstm-tracklist-action-trash a:before{
-                content: "\f1f8";//.fa-trash;
+        &.wpsstm-tracklist-action-new-subtrack{
+             a:before{
+                 content:"\f055";//.fa-plus-circle;
             }
         }
 
+        &.wpsstm-tracklist-action-status-switch{
+
+            a:before{
+                content:"\f274";//.fa-calendar-check-o;
+            }
+            form{
+                select{
+                    font-size:1em;
+                }
+                em{
+                    @include opacity(.5);
+                }
+            }
+        }
+
+        &.wpsstm-tracklist-action-lock-tracklist a:before{
+            content:"\f023";//.fa-lock;
+        }
+        &.wpsstm-tracklist-action-unlock-tracklist a:before{
+            content:"\f023";//.fa-lock;
+        }
+        &.wpsstm-tracklist-action-edit-backend a:before{
+            content:"\f084";//.fa-key;
+        }
+        &.wpsstm-tracklist-action-trash a:before{
+            content: "\f1f8";//.fa-trash;
+        }
     }
-    
+
 }
 
 #tracklists-manager{

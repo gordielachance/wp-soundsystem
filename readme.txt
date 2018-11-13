@@ -192,7 +192,6 @@ There is an option in the plugin settings to flush those community tracks : they
 * JS - improved toggleChildren.js
 * 'edit backend' action for tracklists/tracks/sources
 * new 'autoload' setting for tracklists
-* .playable-opacity setting / CSS
 * improved 'services' wizard widget
 * new plugin option 'Flush Community Tracks'
 * live playlists : get_the_title() now returns the remote tracklist title if WP post title is empty ('the_cached_remote_title' hooked on 'the_title')
