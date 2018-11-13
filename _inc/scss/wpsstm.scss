@@ -323,7 +323,6 @@ a.toggle-children-link, .toggle-children-link a{
 
 .wpsstm-iframe-container{
     width:100%;
-    border:1px solid #F7F7F7;
     
     .wpsstm-loading-notice{
         display:none;
@@ -352,12 +351,14 @@ a.toggle-children-link, .toggle-children-link a{
     
     iframe{
         width:100%;
-        padding:.5em;
+        box-sizing: content-box;
+        @include transition-property(height);
+        @include transition-duration(.4s);
     }
 }
 
 html.wpsstm-iframe{
-    margin:0!important;
+    margin:.5em!important;
 }
 
 @import "wpsstm-tracklists";

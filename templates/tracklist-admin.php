@@ -7,7 +7,7 @@ $tracklist_admin = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_admin 
 
 <div id="wpsstm-tracklist-admin" class="wpsstm-post-admin">
     <?php 
-    if ( $actions = $wpsstm_tracklist->get_tracklist_links('popup') ){
+    if ( $actions = $wpsstm_tracklist->get_tracklist_links() ){
         $list = get_actions_list($actions,'tracklist');
         echo $list;
     }

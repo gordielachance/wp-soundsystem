@@ -39,7 +39,7 @@ ul.wpsstm-tracklist-actions{
 }
 
 .wpsstm-tracklist{
-    
+
     &:not(.wpsstm-loved-tracklist) .wpsstm-tracklist-action-unfavorite{
         display:none!important;
     }
@@ -51,14 +51,9 @@ ul.wpsstm-tracklist-actions{
     }
     &.tracklist-loading, &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
-            //TOUFIX TORESTORE pointer-events:none;
+            pointer-events:none;
         }
     }
-    
-    position:relative;
-
-    font-family: sans-serif;
-    font-size:0.8em;
 
     .tracklist-header{
         border-bottom:1px solid #F7F7F7;

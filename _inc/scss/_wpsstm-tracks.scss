@@ -10,6 +10,7 @@ MINIMAL STYLES
     padding:0;
     margin:0;
     line-height: 3em;
+    font-size:.8em;
     @include transition-property(background);
     @include transition-duration(.4s);
     @extend .wpsstm-ellipsis;

@@ -1,13 +1,11 @@
 <?php
-add_filter( 'show_admin_bar','__return_false');
-
-
-
 global $wpsstm_tracklist;
-
+add_filter( 'show_admin_bar','__return_false');
+//
 do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
 //
 ?>
+
 <!DOCTYPE html>
 <html class="no-js wpsstm-iframe" <?php language_attributes(); ?>>
 <head>
@@ -19,12 +17,10 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
 
 $wpsstm_tracklist->populate_subtracks();
 
-
 //TOUFIX TOCHECK should be elsewhere ?
 if ( !$wpsstm_tracklist->get_options('ajax_autosource') ){
     $wpsstm_tracklist->tracklist_autosource();
 }
-
 
 //wizard notices
 if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
@@ -35,8 +31,8 @@ if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
 <?php
 //
 do_action( 'get_footer', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
+wp_footer();
 //
 ?>
-<?php wp_footer(); ?>
 </body>
 </html>

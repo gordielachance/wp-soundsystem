@@ -47,7 +47,7 @@ $tracklist = $wpsstm_tracklist;
         ?>
         <?php 
             //tracklist actions
-            if ( $actions = $tracklist->get_tracklist_links('page') ){
+            if ( $actions = $tracklist->get_tracklist_links() ){
                 echo get_actions_list($actions,'tracklist');
             }
         ?>

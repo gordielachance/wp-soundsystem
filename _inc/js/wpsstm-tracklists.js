@@ -191,15 +191,20 @@
         tracklist_obj.checkTracksIdenticalValues();
         
         //show more/less (tracks)
+        //TOUFIX
+        /*
         if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
             tracklist_obj.showMoreLessTracks({
                 childrenToShow:showSubtracksCount
             });
         }
         
+        
         //show more/less (tracklist/tracks/sources actions)
         var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
         wpsstm.showMoreLessActions(actions_lists);
+        
+        */
     });
 
 })(jQuery);
@@ -284,7 +289,7 @@ class WpsstmTracklist {
         if (meta_expiration.length){
             var value = meta_expiration.attr('content');
             expiration_time = Number(value);
-            
+
             is_expired = now > expiration_time;
             remaining_sec = expiration_time - now;
             

@@ -212,7 +212,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         $link = $this->get_tracklist_action_url('render');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
-        $iframe_el = sprintf('<iframe width="100%%" scrolling="yes" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
+        $iframe_el = sprintf('<iframe width="100%%" scrolling="no" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
         $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading wpsstm-iframe-autoheight">%s%s</div>',$notice_el,$iframe_el);
         
         return $el;
@@ -314,7 +314,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return in_array($user_id,(array)$loved_by);
     }
     
-    function get_tracklist_links($context = null){
+    function get_tracklist_links(){
         
         $tracklist_post_type = get_post_type($this->post_id);
         
@@ -363,6 +363,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'classes' =>    array('wpsstm-advanced-action'),
             'desc' =>       __('Export to XSPF', 'wpsstm'),
             'href' =>       $this->get_tracklist_action_url('export'),
+            'target' =>     '_blank',
         );
         
         //favorite / unfavorite
@@ -408,19 +409,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         //toggle type
-        if ( $this->user_can_toggle_playlist_type() ){
-            $actions['lock-tracklist'] = array(
-                'text' =>      __('Lock', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('lock-tracklist'),
-            );
-            $actions['unlock-tracklist'] = array(
-                'text' =>      __('Unlock', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
-            );
+        if ( $this->feed_url && $this->user_can_toggle_playlist_type() ){
+            
+            if($this->tracklist_type == 'live'){
+                $actions['lock-tracklist'] = array(
+                    'text' =>      __('Lock', 'wpsstm'),
+                    'classes' =>    array('wpsstm-advanced-action'),
+                    'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
+                    'href' =>       $this->get_tracklist_action_url('lock-tracklist'),
+                );
+            }else{
+                $actions['unlock-tracklist'] = array(
+                    'text' =>      __('Unlock', 'wpsstm'),
+                    'classes' =>    array('wpsstm-advanced-action'),
+                    'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
+                    'href' =>       $this->get_tracklist_action_url('unlock-tracklist'),
+                );
+            }
         }
 
         //edit backend
@@ -442,16 +447,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             );
         }
 
-        //context
-        switch($context){
-            case 'page':
-            break;
-            case 'popup':
-                unset($actions['refresh']);
-            break;
-        }
-        
-        return apply_filters('wpsstm_tracklist_actions',$actions,$context);
+        return apply_filters('wpsstm_tracklist_actions',$actions);
     }
 
     
