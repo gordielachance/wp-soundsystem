@@ -1,12 +1,35 @@
 @import "compass";
 
-.wpsstm-iframe{
+.wpsstm-iframe-container{
     width:100%;
     border:1px solid grey;
+    
+    .wpsstm-loading-notice{
+        display:none;
+        position:relative;
+        text-align:center;
+        span{
+            display:inline-block;
+            padding: .5em 0;
+            @include animation(opacityPulse 2s infinite ease-out);
+            @extend .wpsstm-loading-icon;
+        }
+    }
+    
+    &.wpsstm-iframe-loading{
+        .wpsstm-loading-notice{
+            display:inherit;
+        }
+        iframe{
+            display:none;
+        }
+    } 
     
     &.wpsstm-iframe-autoheight{
         
     }
+    
+   
 }
 
 /*

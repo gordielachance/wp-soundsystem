@@ -65,15 +65,7 @@ $tracklist = $wpsstm_tracklist;
         $tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
 
     }
-    
-    if ($tracklist->tracklist_type == 'live'){
-        /*
-        REFRESH notice
-        will be toggled using CSS
-        */
-        $tracklist->add_notice( 'tracklist-header', 'ajax-refresh', __('Refreshing...','wpsstm') );
-    }
-    
+
     /*
     empty tracklist
     */

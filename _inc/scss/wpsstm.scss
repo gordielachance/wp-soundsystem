@@ -158,15 +158,10 @@ body.wpsstm-default,body.wp-admin{
         margin:auto;
         padding: .5em 0;
 
-        #wpsstm-notice-ajax-refresh,#wpsstm-notice-empty-tracklist{
+        #wpsstm-notice-empty-tracklist{
             background:none;
             opacity: 1;
             font-size:1em;
-        }
-            
-        #wpsstm-notice-ajax-refresh{
-            @include animation(opacityPulse 2s infinite ease-out);
-            @extend .wpsstm-loading-icon;
         }
 
     }

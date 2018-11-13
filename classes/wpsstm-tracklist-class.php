@@ -212,7 +212,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             do_action('wpsstm_load_player'); //used to know if we must load the player stuff (scripts/styles/html...)
         }
         $link = $this->get_tracklist_action_url('render');
-        $el = printf('<iframe class="wpsstm-iframe wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
+        $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
+        $iframe_el = sprintf('<iframe src="%s"></iframe>',$link);
+        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading wpsstm-iframe-autoheight">%s%s</div>',$notice_el,$iframe_el);
+        
         return $el;
         
     }

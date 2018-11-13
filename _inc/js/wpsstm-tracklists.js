@@ -2,6 +2,9 @@
     
     $('iframe').load(function(e){
         var iframe = $(this).get(0);
+        
+        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
+        
         var content = $(iframe.contentWindow.document.body);
         var tracklist_el = $(content).find( ".wpsstm-tracklist" ).get(0);
         var tracklist = new WpsstmTracklist(tracklist_el);
