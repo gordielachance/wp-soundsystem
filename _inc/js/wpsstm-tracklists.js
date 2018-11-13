@@ -13,30 +13,21 @@
         wpsstm.tracklists_shuffle_order = wpsstm_shuffle( Object.keys(wpsstm.tracklists).map(Number) );
         
         /*
-        autoplay
+        autoplay ?
         */
-        
-        //TOUFIX
-        
-        /*
-        
-        //which one could we autoplay?
-        var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
-            return tracklist_obj.options.autoplay;
-        });
-        
-        //autoplay the first one of those.
-        var play_tracklist = tracklists_autoplay[0];
-        
-        */
-        
-        play_tracklist = tracklist_obj;
-        
-        if ( play_tracklist ){
-            play_tracklist.debug("autoplay");
-            play_tracklist.start_tracklist();
+        if ( !wpsstm.current_media.onplaying ){ //is not playing
+            //which one could we autoplay?
+            var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
+                //TOUFIX we should check the autoplay property of the HTML5 element instead of this one.
+                return tracklist_obj.options.autoplay;
+            });
+            var play_tracklist = tracklists_autoplay[0];
+            if ( play_tracklist ){
+                console.log("autoplay tracklist #" + tracklist_obj.index);
+                play_tracklist.start_tracklist();
+            }
         }
-        
+
     });
 
     $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
