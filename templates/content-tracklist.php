@@ -89,6 +89,21 @@ $tracklist = $wpsstm_tracklist;
                 global $wpsstm_track;
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
+            
+            //add subtrack form
+            if ( $tracklist->user_can_reorder_tracks() ){
+                ?>
+                <li class="wpsstm-new-subtrack">
+                <form action="<?php echo $tracklist->get_tracklist_action_url('new-subtrack');?>" method="GET">
+                    <input type="text" name="wpsstm-new-subtrack[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
+                    <input type="text" name="wpsstm-new-subtrack[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
+                    <input type="text" name="wpsstm-new-subtrack[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
+                    <input type="hidden" name="wpsstm-new-subtrack[tracklist_id]" value="<?php echo $tracklist->post_id;?>"/>
+                    <button type="submit" name="wpsstm-append-subtrack" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
+                </form>
+                </li>
+                <?php
+            }
             ?>
        </ul>
     <?php

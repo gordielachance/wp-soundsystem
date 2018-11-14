@@ -29,7 +29,6 @@ class WPSSTM_Core_Tracks{
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
 
         add_action( 'template_redirect', array($this,'handle_track_action'));
-        add_filter( 'template_include', array($this,'new_track_redirect'));
         
         //add_action( 'wp_print_styles', array($this,'track_template_no_css'), 99 );//TOUFIX
         add_filter( 'template_include', array($this,'track_template'));
@@ -186,51 +185,6 @@ class WPSSTM_Core_Tracks{
             $content = ob_get_clean();
         }
         return $content;
-    }
-
-    /*
-    when requesting wpsstm_track/?new-track=...&QUERYSTR=
-    create the track and redirect to wpsstm_track/XXX/?QUERYSTR=
-    */
-    
-    function new_track_redirect($template){
-        
-        $redirect_url = null;
-        
-        $track_action =  get_query_var( self::$qvar_track_action );
-        if ( $track_action != 'new-track' ) return $template;
-
-        //get current query
-        $query_str = $_SERVER['QUERY_STRING']; 
-        parse_str($query_str,$query); //make an array of it
-        $redirect_args = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
-
-        $track_args = isset($query['track']) ? $query['track'] : null;
-        $track_args = wp_unslash($track_args);
-        $track_args = json_decode($track_args);
-        
-        $track = new WPSSTM_Track();
-        $track->from_array($track_args);
-
-        if ( $track->post_id ){
-            $track_url = get_permalink($track->post_id);
-            $track_url = add_query_arg( array('wpsstm_success_code'=>'track-exists'),$track_url );
-        }else{
-            $success = $track->save_track_post();
-            if ( is_wp_error($success) ){
-                $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TO FIX TO CHECK or current URL ? more logical.
-                $track_url = add_query_arg(array('wpsstm_error_code'=>$success->get_error_code()),$track_url);
-            }else{
-                $track_url = get_permalink($track->post_id);
-                $track_url = add_query_arg( array('wpsstm_success_code'=>'new-track'),$track_url );
-            }
-        }
-
-        //pass the redirect args now
-        $track_url = add_query_arg($redirect_args,$track_url);
-
-        wp_safe_redirect($track_url);
-        exit;
     }
     
     function track_template_no_css() {

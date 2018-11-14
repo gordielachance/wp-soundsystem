@@ -344,13 +344,15 @@ class WPSSTM_Core_Tracklists{
         global $post;
         if (!$post) return;
         
+        //TOUFIX not working when posting the new-subtrack form,only working with URLS currently.
+
         if( !$action = get_query_var( self::$qvar_tracklist_action ) ) return;
-        
+
         $tracklist = new WPSSTM_Post_Tracklist($post->ID);
         $success = null;
-
+        
         switch($action){
-            case 'refresh':
+            case 'refresh': //TOUFIX CHECK if is used somewhere ? 
                 $wpsstm_tracklist->options['remote_delay_min'] = 0; //will force tracklist refresh
                 $success = $tracklist->populate_subtracks();
             break;
@@ -383,6 +385,15 @@ class WPSSTM_Core_Tracklists{
                 if ($track_id){
                     $track = new WPSSTM_Track($track_id);
                     $success = $tracklist->remove_subtrack_ids($track->post_id);
+                }
+            break;
+            case 'new-subtrack':
+                $track_arr = isset($_REQUEST['wpsstm-new-subtrack']) ? $_REQUEST['wpsstm-new-subtrack'] : null;
+
+                if ($track_arr){
+                    $track = new WPSSTM_Track(null,$tracklist);
+                    $track->from_array($track_arr);
+                    $success = $track->save_subtrack();
                 }
 
             break;

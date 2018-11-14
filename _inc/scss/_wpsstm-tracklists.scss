@@ -132,6 +132,18 @@ ul.wpsstm-tracklist-actions{
             }
         }
     }
+    
+    .wpsstm-new-subtrack{
+        form{
+            margin-top: 1em;
+            @include display-flex();
+            > * {
+                margin: 0 .5em;
+            }
+        }
+
+    }
+
 }
 
 .wpsstm-tracklist.wpsstm-post-tracklist{

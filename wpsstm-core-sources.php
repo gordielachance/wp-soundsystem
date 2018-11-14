@@ -347,7 +347,7 @@ class WPSSTM_Core_Sources{
         <div class="wpsstm-track-sources">
             <?php wpsstm_locate_template( 'content-source.php', true, false );?>
         </div>
-        <p class="wpsstm-new-track-sources-container">
+        <p class="wpsstm-new-sources-container">
             <?php
             $input_attr = array(
                 'id' => 'wpsstm-new_track-sources',
