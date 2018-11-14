@@ -5,8 +5,6 @@ ul.wpsstm-tracklist-actions{
     .wpsstm-action{
         font-size:.8em;
         border: 1px solid #F7F7F7;
-        padding: .25em .5em;
-        text-align:center;
         line-height: 1.8em;
         &.wpsstm-tracklist-action-status-switch{
             form{
@@ -52,6 +50,31 @@ ul.wpsstm-tracklist-actions{
     &.tracklist-loading, &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
             pointer-events:none;
+        }
+    }
+    
+    &.tracklist-playable [itemprop="track"]{
+
+        &[data-wpsstm-sources-count="0"]{
+            @include opacity(.25);
+        } 
+
+        &:not(.track-active){
+            @include opacity(.5);
+        }
+
+        &.track-has-played,&:hover{
+            @include opacity(.75);
+        }
+
+        &.track-active{
+            @include opacity(1);
+        }
+    }
+
+    &:not(.tracklist-playable) [itemprop="track"]{
+        .wpsstm-track-play-bt{
+            display:none;
         }
     }
 

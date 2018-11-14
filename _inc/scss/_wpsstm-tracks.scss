@@ -1,10 +1,6 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
 
-/*
-MINIMAL STYLES
-*/
-
 [itemprop="track"]{
     position:relative;
     padding:0;
@@ -44,6 +40,9 @@ MINIMAL STYLES
 
     &:hover{
         background: rgba(0,0,0,0.02);
+        .wpsstm-track-actions{
+            display:inherit;
+        }
     }
 
     &:not(:last-child){
@@ -52,40 +51,13 @@ MINIMAL STYLES
 
 }
 
-.wpsstm-tracklist{
-    &.tracklist-playable [itemprop="track"]{
-
-        &[data-wpsstm-sources-count="0"]{
-            @include opacity(.25);
-        } 
-
-        &:not(.track-active){
-            @include opacity(.5);
-        }
-
-        &.track-has-played,&:hover{
-            @include opacity(.75);
-        }
-
-        &.track-active{
-            @include opacity(1);
-        }
+[itemprop="track"]{
+    &:not(.wpsstm-loved-track) .wpsstm-track-action-unfavorite{
+        display:none!important;
     }
 
-    &:not(.tracklist-playable) [itemprop="track"]{
-        .wpsstm-track-play-bt{
-            display:none;
-        }
-    }
-
-    [itemprop="track"]{
-        &:not(.wpsstm-loved-track) .wpsstm-track-action-unfavorite{
-            display:none!important;
-        }
-
-        &.wpsstm-loved-track .wpsstm-track-action-favorite{
-            display:none!important;
-        }
+    &.wpsstm-loved-track .wpsstm-track-action-favorite{
+        display:none!important;
     }
 }
 
