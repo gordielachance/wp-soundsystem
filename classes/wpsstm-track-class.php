@@ -676,7 +676,7 @@ class WPSSTM_Track{
     }
     
     function get_track_admin_url($tab = null){
-        $args = array(WPSSTM_Core_Tracks::$qvar_track_admin=>$tab);
+        $args = array(WPSSTM_Core_Tracks::$qvar_track_action=>$tab);
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);
@@ -746,7 +746,7 @@ class WPSSTM_Track{
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_admin_url('about'),
-                'classes' =>    array('wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-track-popup'),
             );
         }
 
@@ -755,7 +755,7 @@ class WPSSTM_Track{
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_admin_url('playlists'),
-                'classes' =>    array('wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-track-popup'),
             );
         }
 
@@ -793,7 +793,7 @@ class WPSSTM_Track{
         if ($can_edit_track){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-track-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }

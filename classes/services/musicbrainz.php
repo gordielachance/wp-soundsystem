@@ -503,7 +503,7 @@ class WPSSTM_MusicBrainz {
 
     }
     
-    //TO FIX not used
+    //TOUFIX not used
     function fill_album_tracklist(WPSSTM_Post_Tracklist $tracklist){
         
         if ( get_post_type($tracklist->post_id) != wpsstm()->post_type_album ) return;

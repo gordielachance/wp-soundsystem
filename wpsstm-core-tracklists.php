@@ -4,8 +4,7 @@
 Handle posts that have a tracklist, like albums and playlists.
 **/
 class WPSSTM_Core_Tracklists{
-    
-    static $qvar_tracklist_admin = 'admin-tracklist';
+
     static $qvar_tracklist_action = 'tracklist-action';
     static $qvar_loved_tracklists = 'loved-tracklists';
     static $loved_tracklist_meta_key = '_wpsstm_user_favorite';
@@ -50,7 +49,6 @@ class WPSSTM_Core_Tracklists{
 
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
-        add_filter( 'the_content', array($this,'tracklist_admin') );
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
@@ -76,7 +74,6 @@ class WPSSTM_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = self::$qvar_tracklist_admin;
         $vars[] = self::$qvar_tracklist_action;
         $vars[] = self::$qvar_loved_tracklists;
         return $vars;
@@ -101,10 +98,6 @@ class WPSSTM_Core_Tracklists{
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post;
-        }else{
-            //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
-            //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     
@@ -132,16 +125,6 @@ class WPSSTM_Core_Tracklists{
         
         wp_enqueue_script( 'wpsstm-tracklists' );
 
-    }
-    
-    //load the admin template instead of regular content when 'admin-tracklist' is set
-    function tracklist_admin($content){
-        if ( $tracklist_admin = get_query_var( self::$qvar_tracklist_admin ) ){
-            ob_start();
-            wpsstm_locate_template( 'tracklist-admin.php', true, false );
-            $content = ob_get_clean();
-        }
-        return $content;
     }
 
     function ajax_toggle_favorite_tracklist(){
@@ -327,11 +310,11 @@ class WPSSTM_Core_Tracklists{
         if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
         switch($admin_action){
             case 'export':
-                the_post();
+                the_post();//TOUFIX TOUCHECK useful ?
                 $template = wpsstm_locate_template( 'tracklist-xspf.php' );
             break;
-            case 'render':
-                the_post();
+            default:
+                the_post();//TOUFIX TOUCHECK useful ?
                 $template = wpsstm_locate_template( 'tracklist.php' );
             break;
         }
@@ -371,10 +354,10 @@ class WPSSTM_Core_Tracklists{
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
             break;
-            case 'lock-tracklist':
+            case 'make-live':
                 $success = $tracklist->toggle_playlist_type();
             break;
-            case 'unlock-tracklist':
+            case 'make-static':
                 $success = $tracklist->toggle_playlist_type();
             break;
             case 'trash':
@@ -408,6 +391,7 @@ class WPSSTM_Core_Tracklists{
                 $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
             }
 
+            $redirect_url = add_query_arg( array(self::$qvar_tracklist_action=>$action),$redirect_url );
             wp_safe_redirect($redirect_url);
             exit();
         }

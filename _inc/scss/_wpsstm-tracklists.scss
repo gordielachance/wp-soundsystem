@@ -6,19 +6,6 @@ ul.wpsstm-tracklist-actions{
         font-size:.8em;
         border: 1px solid #F7F7F7;
         line-height: 1.8em;
-        &.wpsstm-tracklist-action-status-switch{
-            form{
-                display:none;
-            }
-            &.expanded{
-                em{
-                    display:none;
-                }
-                form{
-                   display:inline-block; 
-                }
-            }
-        }
     }
     
 }
@@ -37,16 +24,14 @@ ul.wpsstm-tracklist-actions{
 }
 
 .wpsstm-tracklist{
-
-    &:not(.wpsstm-loved-tracklist) .wpsstm-tracklist-action-unfavorite{
+    
+    &.wpsstm-loved-tracklist .wpsstm-tracklist-action-favorite{
         display:none!important;
     }
-    
-    &.wpsstm-loved-tracklist{
-        .wpsstm-tracklist-action-favorite{
-            display:none!important;
-        }
+    .wpsstm-tracklist-action-unfavorite{
+        display:none!important;
     }
+
     &.tracklist-loading, &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
             pointer-events:none;
@@ -239,27 +224,16 @@ ul.wpsstm-tracklist-actions{
                  content:"\f055";//.fa-plus-circle;
             }
         }
-
-        &.wpsstm-tracklist-action-status-switch{
-
+        &.wpsstm-tracklist-action-make-live,
+        &.wpsstm-tracklist-action-make-static{
             a:before{
-                content:"\f274";//.fa-calendar-check-o;
+                content:"\f09e";//.fa-rss;
             }
-            form{
-                select{
-                    font-size:1em;
-                }
-                em{
-                    @include opacity(.5);
+            &.wpsstm-tracklist-action-make-live{
+                a:before{
+                    @include opacity(.25);
                 }
             }
-        }
-
-        &.wpsstm-tracklist-action-lock-tracklist a:before{
-            content:"\f023";//.fa-lock;
-        }
-        &.wpsstm-tracklist-action-unlock-tracklist a:before{
-            content:"\f023";//.fa-lock;
         }
         &.wpsstm-tracklist-action-edit-backend a:before{
             content:"\f084";//.fa-key;

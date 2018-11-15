@@ -1,48 +1,5 @@
 (function($){
 
-    //modals
-    $(document).on('click', 'body:not(.wpsstm-popup) a.wpsstm-link-popup,body:not(.wpsstm-popup) li.wpsstm-link-popup>a', function(e) {
-        e.preventDefault();
-
-        var content_url = this.href;
-
-        //append popup arg
-        if( content_url.indexOf("?") >= 0 ) {
-            content_url = content_url+"&wpsstm-popup=true";
-        }else{
-            content_url = content_url+"?wpsstm-popup=true";
-        }
-
-        console.log(content_url);
-
-
-        var loader_el = $('<p id="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
-        var popup = $('<div></div>').append(loader_el);
-
-        popup.dialog({
-            width:800,
-            height:500,
-            modal: true,
-            dialogClass: 'wpsstm-dialog-iframe wpsstm-dialog dialog-loading',
-
-            open: function(ev, ui){
-                $('html').addClass('wpsstm-is-dialog');
-                var dialog = $(this).closest('.ui-dialog');
-                var dialog_content = dialog.find('.ui-dialog-content');
-                var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
-                dialog_content.append(iframe);
-                iframe.load(function(){
-                    dialog.removeClass('dialog-loading');
-                });
-            },
-            close: function(ev, ui){
-                $('html').removeClass('wpsstm-is-dialog');
-            }
-
-        });
-
-    });
-
     //artist autocomplete
     $('.wpsstm-artist-autocomplete').each(function() {
         var input = $(this);
@@ -135,7 +92,6 @@ function wpsstm_dialog_notice(notice){
         dialogClass: 'wpsstm-dialog',
         
         open: function(ev, ui){
-            $('html').addClass('wpsstm-is-dialog');
             var dialog = $(this).closest('.ui-dialog');
             var dialog_content = dialog.find('.ui-dialog-content');
             var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
@@ -145,7 +101,6 @@ function wpsstm_dialog_notice(notice){
             });
         },
         close: function(ev, ui){
-            $('html').removeClass('wpsstm-is-dialog');
         }
 
     });

@@ -40,7 +40,6 @@ class WP_SoundSystem {
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
-    public $qvar_popup = 'wpsstm-popup';
     
     public $subtracks_table_name = 'wpsstm_subtracks';
 
@@ -199,13 +198,9 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
-        add_filter( 'template_include', array($this,'popup_template'));
-
     }
     
     function add_wpsstm_query_vars($vars){
-        $vars[] = $this->qvar_popup;
         $vars[] = $this->qvar_wpsstm_statii;
         return $vars;
     }
@@ -561,28 +556,6 @@ class WP_SoundSystem {
         }
         
     }
-    
-    //loads the popup template if 'wpsstm-popup' is defined
-    function popup_template($template){
-        $is_popup = get_query_var( $this->qvar_popup );
-        if ( $is_popup ){
-            $template = wpsstm_locate_template( 'popup.php' );
-            add_filter('wpsstm_track_actions',array($this,'popup_template_action_links'));
-        }
-
-        return $template;
-    }
-    
-    //if the popup template is loaded, append 'wpsstm-popup=true' to the action URLs
-    function popup_template_action_links($actions){
-        foreach((array)$actions as $key=>$action){
-            if( isset($action['href']) ){
-                $actions[$key]['href'] = add_query_arg(array($this->qvar_popup=>true),$action['href']);
-            }
-        }
-        return $actions;
-    }
-
 }
 
 function wpsstm() {

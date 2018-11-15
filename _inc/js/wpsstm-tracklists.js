@@ -15,6 +15,44 @@
         
     });
     
+    //tracklist modals
+    $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
+        e.preventDefault();
+
+        var content_url = this.href;
+
+        console.log("tracklist popup");
+        console.log(content_url);
+
+
+        var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
+        var popup = $('<div></div>').append(loader_el);
+
+        popup_w = $(window).width();
+        popup_h = $(window).height();
+
+        popup.dialog({
+            width:popup_w,
+            height:popup_h,
+            modal: true,
+            dialogClass: 'wpsstm-tracklist-dialog wpsstm-dialog dialog-loading',
+
+            open: function(ev, ui){
+                var dialog = $(this).closest('.ui-dialog');
+                var dialog_content = dialog.find('.ui-dialog-content');
+                var iframe = $('<iframe src="'+content_url+'"></iframe>');
+                dialog_content.append(iframe);
+                iframe.load(function(){
+                    dialog.removeClass('dialog-loading');
+                });
+            },
+            close: function(ev, ui){
+            }
+
+        });
+
+    });
+    
     $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
 
         wpsstm.tracklists.push(tracklist_obj);
@@ -155,14 +193,6 @@
                 }
             })
         });
-        
-        //switch status
-        var switch_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-status-switch a");
-        switch_bt.click(function(e) {
-            e.preventDefault();
-            $(this).closest('li').toggleClass('expanded');
-            
-        });
 
         /*
         Tracks
@@ -206,6 +236,8 @@
         
         */
     });
+    
+    
 
 })(jQuery);
 

@@ -6,7 +6,6 @@ class WPSSTM_Core_Tracks{
     static $length_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
-    static $qvar_track_admin = 'admin-track';
     static $qvar_track_lookup = 'lookup_track';
     static $qvar_loved_tracks = 'loved-tracks';
     static $loved_track_meta_key = '_wpsstm_user_favorite';
@@ -32,12 +31,6 @@ class WPSSTM_Core_Tracks{
         
         //add_action( 'wp_print_styles', array($this,'track_template_no_css'), 99 );//TOUFIX
         add_filter( 'template_include', array($this,'track_template'));
-
-        //post content
-        add_filter( 'the_content', array($this,'track_tracklist_table') );
-        add_filter( 'the_content', array($this,'track_admin') );
-        add_filter( 'the_content', array($this,'track_lovedby') );
-        add_filter( 'the_content', array($this,'track_in_tracklists') );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -123,70 +116,6 @@ class WPSSTM_Core_Tracks{
         
     }
 
-    /*
-    Prepend the list of users that have favorited this track before the content
-    */
-    function track_lovedby($content){
-        global $wpsstm_track;
-        
-        $post_type = get_post_type();
-        if ( ( $post_type == wpsstm()->post_type_track ) && ( $playlists_list = $wpsstm_track->get_parents_list() ) ){
-            ob_start();
-            ?>
-            <div class="wpsstm-track-playlists">
-                <strong><?php _e('In playlists:','wpsstm');?></strong>
-                <?php echo $playlists_list; ?>
-            </div>
-            <?php
-            $extra = ob_get_clean();
-            $content = $extra . $content;
-        }
-        
-        return $content;
-    }
-    
-    /*
-    Prepend the list of tracklists this track belongs to before the content
-    */
-    function track_in_tracklists($content){
-        global $wpsstm_track;
-        
-        $post_type = get_post_type();
-        if ( ( $post_type == wpsstm()->post_type_track ) && ( $loved_list = $wpsstm_track->get_loved_by_list() ) ){
-            ob_start();
-            ?>
-            <div class="wpsstm-track-loved-by">
-                <strong><?php _e('Loved by:','wpsstm');?></strong>
-                <?php echo $loved_list; ?>
-            </div>
-            <?php
-            $extra = ob_get_clean();
-            $content = $extra . $content;
-        }
-        
-        return $content;
-    }
-    
-    function track_tracklist_table($content){
-        global $post;
-        global $wpsstm_tracklist;
-
-        if( !is_singular(wpsstm()->post_type_track) ) return $content;
-        if (!$wpsstm_tracklist) return $content;
-
-        return  $content . $wpsstm_tracklist->get_tracklist_html();
-    }
-    
-    //load the admin template instead of regular content when 'admin-track' is set
-    function track_admin($content){
-        if ( $track_admin = get_query_var( self::$qvar_track_admin ) ){
-            ob_start();
-            wpsstm_locate_template( 'track-admin.php', true, false );
-            $content = ob_get_clean();
-        }
-        return $content;
-    }
-    
     function track_template_no_css() {
         global $wp_styles;
         //if ( is_page_template( 'blankPage.php' ) ) {
@@ -195,18 +124,10 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_template($template){
-        if ( !$track_admin = get_query_var( self::$qvar_track_admin ) ) return $template;
-        
-        global $post;
-        global $wpsstm_track;
-        
-        //TOUFIX TOUCHECK should we define it here ? Should it not be defined already ?
-        $wpsstm_track = new WPSSTM_Track($post->ID);
-
-        ob_start();
-        wpsstm_locate_template( 'track-admin.php', true, false );
-        $content = ob_get_clean();
-        echo $content;
+        if ( !$track_action = get_query_var( self::$qvar_track_action ) ) return $template;
+        the_post();
+        $template = wpsstm_locate_template( 'track.php' );
+        return $template;
     }
 
     function handle_track_action(){
@@ -578,7 +499,6 @@ class WPSSTM_Core_Tracks{
     
     function add_query_vars_track( $qvars ) {
         $qvars[] = self::$qvar_track_lookup;
-        $qvars[] = self::$qvar_track_admin;
         $qvars[] = self::$qvar_track_action;
         $qvars[] = self::$qvar_loved_tracks;
         return $qvars;
@@ -749,6 +669,7 @@ class WPSSTM_Core_Tracks{
         $atts = shortcode_atts($default,$atts);
         
         if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
+            //single track tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
             $track = new WPSSTM_Track( $atts['post_id'] );
             $wpsstm_tracklist->add_tracks($track);

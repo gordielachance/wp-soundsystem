@@ -1,8 +1,16 @@
-<?php 
+<?php
+global $post;
+global $wpsstm_tracklist;
+global $wpsstm_track;
+$track_action = get_query_var( WPSSTM_Core_Tracks::$qvar_track_action );
 //
-do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
+add_filter( 'show_admin_bar','__return_false'); //hide admin bar
+do_action( 'wpsstm-iframe' );
+do_action( 'wpsstm-track-iframe' );
+do_action( 'get_header', 'wpsstm-track-iframe' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
 //
 ?>
+
 <!DOCTYPE html>
 <html class="no-js" <?php language_attributes(); ?>>
 <head>
@@ -10,12 +18,38 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
     <?php wp_head(); ?>
 </head>
-
-<body <?php body_class(); ?>>
+<body <?php body_class('wpsstm-iframe wpsstm-track-iframe'); ?>>
     <?php
-    global $wpsstm_tracklist;
-    global $wpsstm_track;
-    $track_admin = get_query_var( WPSSTM_Core_Tracks::$qvar_track_admin );
+    
+    //single track tracklist
+    $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
+    $track = new WPSSTM_Track( $post->ID );
+    $wpsstm_tracklist->add_tracks($track);
+    wpsstm_locate_template( 'content-tracklist.php', true, false );
+    
+    //track in playlists
+    if ( $playlists_list = $wpsstm_track->get_parents_list() ){
+
+        ?>
+        <div class="wpsstm-track-playlists">
+            <strong><?php _e('In playlists:','wpsstm');?></strong>
+            <?php echo $playlists_list; ?>
+        </div>
+        <?php
+    }
+    //track loved by
+    if ( $loved_list = $wpsstm_track->get_loved_by_list() ){
+        ?>
+        <div class="wpsstm-track-loved-by">
+            <strong><?php _e('Loved by:','wpsstm');?></strong>
+            <?php echo $loved_list; ?>
+        </div>
+        <?php
+    }
+    ?>
+    <?php
+    //tracklist
+    echo $wpsstm_tracklist->get_tracklist_html();
     ?>
     <div id="wpsstm-track-admin" class="wpsstm-post-admin">
         <?php
@@ -26,7 +60,7 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
 
         $tab_content = null;
 
-        switch ($track_admin){
+        switch ($track_action){
             case 'playlists':
                 ?>
                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
@@ -42,7 +76,7 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
                 </div>
                 <?php
             break;
-            default: //about
+            case 'about':
                 $text_el = null;
                 $bio = WPSSTM_LastFM::get_artist_bio($wpsstm_track->artist);
 
@@ -65,11 +99,11 @@ do_action( 'get_header', 'wpsstm' ); ////since we don't use get_header() here, f
         ?>
 
     </div><!-- .wpsstm-post-admin -->
-    <?php
-    //
-    do_action( 'get_footer', 'wpsstm' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
-    //
-    ?>
-    <?php wp_footer(); ?>
 </body>
+<?php
+//
+do_action( 'get_footer', 'wpsstm-track-iframe' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
+wp_footer();
+//
+?>
 </html>
