@@ -46,6 +46,12 @@ global $wpsstm_tracklist;
         ?>
     </div>
     <?php
+    
+    if ( $actions = $wpsstm_tracklist->get_tracklist_links() ){
+        $list = get_actions_list($actions,'tracklist');
+        echo $list;
+    }
+    
     //tracklist notices
 
     //wizard temporary tracklist notice
@@ -88,12 +94,13 @@ global $wpsstm_tracklist;
             if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
                 ?>
                 <li class="wpsstm-new-subtrack">
-                <form action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('new-subtrack');?>" method="GET">
+                <form action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('render');?>">
                     <input type="text" name="wpsstm-new-subtrack[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
                     <input type="text" name="wpsstm-new-subtrack[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
                     <input type="text" name="wpsstm-new-subtrack[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
                     <input type="hidden" name="wpsstm-new-subtrack[tracklist_id]" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
-                    <button type="submit" name="wpsstm-append-subtrack" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
+                    <input type="hidden" name="<?php echo WPSSTM_Core_Tracklists::$qvar_tracklist_action;?>" value="append-subtrack"/>
+                    <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
                 </form>
                 </li>
                 <?php

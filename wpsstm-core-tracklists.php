@@ -325,31 +325,22 @@ class WPSSTM_Core_Tracklists{
     
     function handle_tracklist_action(){
         global $post;
-        if (!$post) return;
         
         //TOUFIX not working when posting the new-subtrack form,only working with URLS currently.
-
-        if( !$action = get_query_var( self::$qvar_tracklist_action ) ) return;
-
+        
+        $action = isset($_REQUEST[self::$qvar_tracklist_action]) ? $_REQUEST[self::$qvar_tracklist_action] : null;
+        if (!$action) return;
+        if (!$post) return;
+        
         $tracklist = new WPSSTM_Post_Tracklist($post->ID);
         $success = null;
         
         switch($action){
-            case 'refresh': //TOUFIX CHECK if is used somewhere ? 
-                $wpsstm_tracklist->options['remote_delay_min'] = 0; //will force tracklist refresh
-                $success = $tracklist->populate_subtracks();
-            break;
             case 'favorite':
                 $success = $tracklist->love_tracklist(true);
             break;
             case 'unfavorite':
                 $success = $tracklist->love_tracklist(false);
-            break;
-            case 'export':
-                //see tracklist_xspf_template
-            break;
-            case 'switch-status':
-                $success = $tracklist->switch_status();
             break;
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
@@ -367,10 +358,10 @@ class WPSSTM_Core_Tracklists{
                 $track_id = isset($_GET['track_id']) ? $_GET['track_id'] : null;
                 if ($track_id){
                     $track = new WPSSTM_Track($track_id);
-                    $success = $tracklist->remove_subtrack_ids($track->post_id);
+                    $success = $tracklist->remove_subtrack_ids($track->post_id);//TOUFIX
                 }
             break;
-            case 'new-subtrack':
+            case 'append-subtrack':
                 $track_arr = isset($_REQUEST['wpsstm-new-subtrack']) ? $_REQUEST['wpsstm-new-subtrack'] : null;
 
                 if ($track_arr){
@@ -383,7 +374,8 @@ class WPSSTM_Core_Tracklists{
         }
         
         if ($success){ //redirect with a success / error code
-            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+            
+            $redirect_url = $tracklist->get_tracklist_action_url('render');
 
             if ( is_wp_error($success) ){
                 $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
@@ -391,7 +383,6 @@ class WPSSTM_Core_Tracklists{
                 $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
             }
 
-            $redirect_url = add_query_arg( array(self::$qvar_tracklist_action=>$action),$redirect_url );
             wp_safe_redirect($redirect_url);
             exit();
         }

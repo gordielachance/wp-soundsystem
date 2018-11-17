@@ -344,7 +344,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($can_refresh){
             $actions['refresh'] = array(
                 'text' =>      __('Refresh', 'wpsstm'),
-                'href' =>      $this->get_tracklist_action_url('refresh'),
+                'href' =>      $this->get_tracklist_action_url('render'),
             );
         }
         
