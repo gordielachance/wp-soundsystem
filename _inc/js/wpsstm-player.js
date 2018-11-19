@@ -252,8 +252,6 @@ class WpsstmPlayer {
 
         var self = this;
         var success = $.Deferred();
-        
-        self.track_to_player(track_obj);
 
         track_obj.maybe_load_sources().then(
             function(success_msg){
@@ -276,6 +274,7 @@ class WpsstmPlayer {
         return success.promise();
 
     }
+    
     play_first_available_source(track_obj,source_idx){
         
         var self = this;
@@ -333,18 +332,20 @@ class WpsstmPlayer {
 
         var self = this;
         var success = $.Deferred();
-        
+
+        //
+        var source_previous = self.current_source;
+        self.current_source = source_obj;
         //tracklists
         var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
         //tracks
+        var track_obj = source_obj.track;
         var tracks_instances = self.tracks_el;
+        self.tracks_el = track_obj.track_el; //push current track in collection
         //sources
-        self.tracks_el.find('[data-wpsstm-source-idx]').addClass('source-loading');
-        
-        var source_previous = self.current_source;
-        
+        var sources_instances = self.tracks_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
+        //
         var isDuplicatePlay = $(source_obj).is( $(source_previous) ); //if we're trying to play the same track again
-        var isTrackListSwitch = ( source_previous && (source_obj.track.tracklist.index === source_previous.track.tracklist.index) );
 
         //TOUFIX TOUMOUVE ?
         if (isDuplicatePlay){
@@ -354,22 +355,16 @@ class WpsstmPlayer {
         if (source_previous){
             self.end_media(); //stop current media
         }
-
-        //fire an event when a playlist starts to play
-        if ( isTrackListSwitch ){
-                source_previous.track.tracklist.debug("close tracklist");
-                $(document).trigger("wpsstmCloseTracklist",[source_previous.track.tracklist]); //custom event
-        }
-
-        self.debug("init_source: " + source_obj.src);
-        $(self.current_media).off(); //remove old events
-
-        ///
-        self.current_source = source_obj;
-
-        self.debug("play_source: ");
-        console.log(source_obj);
         
+        /*
+        fill player with track datas
+        */
+        
+        self.track_to_player(track_obj);
+
+        self.debug("play source: " + source_obj.src);
+        sources_instances.addClass('source-loading');
+
         //register new events
 
         $(self.current_media).on('loadeddata', function() {
@@ -386,8 +381,8 @@ class WpsstmPlayer {
             source_obj.debug('media - error');
 
             //sources
-            self.tracks_el.find('[data-wpsstm-source-idx]').addClass('source-error');
-            self.tracks_el.find('[data-wpsstm-source-idx]').removeClass('source-active source-loading');
+            sources_instances.addClass('source-error');
+            sources_instances.removeClass('source-active');
 
             success.reject(error);
 
@@ -404,7 +399,7 @@ class WpsstmPlayer {
             self.tracks_el.removeClass('track-error track-loading');
             self.tracks_el.addClass('track-playing track-has-played');
             //sources
-            self.tracks_el.find('[data-wpsstm-source-idx]').addClass('source-active source-playing source-has-played');
+            sources_instances.addClass('source-active source-playing source-has-played');
 
             source_obj.debug('media - play');
             success.resolve();
@@ -419,7 +414,7 @@ class WpsstmPlayer {
             //tracks
             self.tracks_el.removeClass('track-playing');
             //sources
-            self.tracks_el.find('[data-wpsstm-source-idx]').removeClass('source-playing');
+            sources_instances.removeClass('source-playing');
         });
 
         $(self.current_media).on('ended', function() {
@@ -429,20 +424,28 @@ class WpsstmPlayer {
             //tracklists
             self.tracks_el.parents('.wpsstm-tracklist').removeClass('tracklist-playing');
             //tracks
-            self.tracks_el.removeClass('track-playing track-active');
+            self.tracks_el.removeClass('track-active');
             //sources
-            self.tracks_el.find('[data-wpsstm-source-idx]').removeClass('source-playing source-active');
+            sources_instances.removeClass('source-playing source-active');
 
             //Play next song if any
             self.next_track_jump();
         });
         
         success.always(function(data, textStatus, jqXHR) {
-            self.tracks_el.find('[data-wpsstm-source-idx]').removeClass('source-loading');
+            sources_instances.removeClass('source-loading');
+            self.tracks_el.removeClass('track-loading');
         })
         success.fail(function() {
-            self.tracks_el.find('[data-wpsstm-source-idx]').addClass('source-error');
-            self.tracks_el.find('[data-wpsstm-source-idx]').removeClass('source-active');
+            //sources
+            sources_instances.addClass('source-error');
+            sources_instances.removeClass('source-active');
+            //tracks
+            self.tracks_el.addClass('track-error');
+            self.tracks_el.removeClass('track-active');
+            
+            //if is last source, go to next track.
+            
         })
 
         ////
@@ -450,6 +453,8 @@ class WpsstmPlayer {
         self.current_media.setSrc(source_obj.src);
         self.current_media.load();
         
+        ////
+
         return success.promise();
 
     }
@@ -515,9 +520,7 @@ class WpsstmPlayer {
         }
 
     }
-    
-    
-    
+
     /*
     Return the tracks; in the shuffled order if is_shuffle is true.
     */
@@ -551,49 +554,7 @@ class WpsstmPlayer {
         });
         
     }
-    
-    get_maybe_shuffle_tracklist_idx(idx){
-        var self = this;
-        if ( !self.is_shuffle ) return idx;
-        var new_idx = self.tracklists_shuffle_order[idx];
-        
-        self.debug("get_maybe_shuffle_tracklist_idx() : " + idx + "-->" + new_idx);
-        return new_idx;
-        
-    }
-    
-    get_maybe_unshuffle_tracklist_idx(idx){
-        var self = this;
-        if ( !self.is_shuffle ) return idx;
-        var shuffle_order = self.tracklists_shuffle_order;
-        var new_idx = shuffle_order.indexOf(idx);
-        self.debug("get_maybe_unshuffle_tracklist_idx() : " + idx + "-->" + new_idx);
-        return new_idx;
-    }
-    
-    /*
-    Return the tracklists; in the shuffled order if is_shuffle is true.
-    */
-    get_ordered_tracklists(){
-        
-        self = this;
 
-        if ( !self.is_shuffle ){
-            return self.tracklists;
-        }else{
-            
-            var shuffled_tracklists = [];
-
-            $(self.tracklists_shuffle_order).each(function() {
-                var idx = this;
-                shuffled_tracklists.push(self.tracklists[idx]);
-            });
-
-            return shuffled_tracklists;
-        }
-        
-    }
-    
     get_maybe_shuffle_track_idx(idx){
         var self = this;
         if ( !self.is_shuffle ) return idx;
@@ -647,9 +608,8 @@ class WpsstmPlayer {
         self.trackinfo_el.html(list);
         self.player_el.show();//show in not done yet
         
-        //shortcut for tracks instances
-        self.tracks_el = self.player_el.find('[itemprop="track"]').first();
-        self.tracks_el.push(track_obj.track_el.get(0));
+        //push current track in collection
+        self.tracks_el.push( self.player_el.find('[itemprop="track"]').first() );
         
     }
     
@@ -685,8 +645,10 @@ class WpsstmPlayer {
         var self = this;
         if (!self.current_source) return;
 
-        self.debug("end_source #" + self.current_source.index);
+        self.current_source.debug("end_source");
+        
         self.current_media.pause();
+        $(self.current_media).off(); //remove old events
 
         //TOUFIX should be hookend on events ?
         self.current_source.get_source_instances().removeClass('source-playing source-active source-loading');
