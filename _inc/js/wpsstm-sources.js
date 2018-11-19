@@ -10,7 +10,6 @@ class WpsstmTrackSource {
         this.type =             undefined;
         this.can_play =         undefined;
         this.duration =         undefined;
-        this.playPromise =      $.Deferred();
         
         //tracklist
         if ( track !== undefined ){
@@ -45,17 +44,6 @@ class WpsstmTrackSource {
         return self.track_el.closest('[data-wpsstm-track-idx="'+self.track.index+'"]');
     }
 
-    get_source_instances(ancestor){
-        var self = this;
-        var selector = '[data-wpsstm-tracklist-idx="'+self.track.tracklist.index+'"] [itemprop="track"][data-wpsstm-track-idx="'+self.track.index+'"] [data-wpsstm-source-idx="'+self.index+'"]';
-        
-        if (ancestor !== undefined){
-            return $(ancestor).find(selector);
-        }else{
-            return $(selector);
-        }
-    }
-
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
@@ -75,9 +63,7 @@ class WpsstmTrackSource {
     
     trash_source(){
         var self = this;
-
-        var source_instances = self.get_source_instances();
-        var source_action_links = source_instances.find('.wpsstm-source-action-trash a');
+        var source_action_links = self.source_el.find('.wpsstm-source-action-trash a');
 
         var ajax_data = {
             action:         'wpsstm_trash_source',
@@ -106,7 +92,7 @@ class WpsstmTrackSource {
                 }
 
                 ///
-                source_instances.remove();
+                self.source_el.remove();
 
             }else{
                 source_action_links.addClass('action-error');

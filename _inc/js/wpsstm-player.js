@@ -59,7 +59,6 @@ class WpsstmPlayer {
                 //TO FIX is this required ?
                 console.log("mediaElement error");
                 /*
-                var source_instances = self.get_source_instances();
                 source_instances.addClass('source-error');
                 source_instances.removeClass('source-active');
                 */
@@ -95,19 +94,8 @@ class WpsstmPlayer {
                     return;
                 }
 
-                track_obj.playPromise.done(function(v) { //fetch sources for next tracks
-                    self.maybe_load_queue_sources();
-                })
-                
-                track_obj.playPromise.fail(function() {
-                    track_obj.can_play = false;
-                    self.tracks_el.addClass('track-error');
-                })
-                
                 self.play_track(track_obj);
-                track_obj.track_el.addClass('track-active track-loading');
 
-                
                 $(document).trigger( "wpsstmRequestPlay",track_obj ); //custom event
 
 
@@ -253,12 +241,13 @@ class WpsstmPlayer {
         var self = this;
         var success = $.Deferred();
 
+        track_obj.track_el.addClass('track-active track-loading');
         track_obj.maybe_load_sources().then(
             function(success_msg){
 
                 var source_play = self.play_first_available_source(track_obj);
 
-                source_play.done(function(v) { //fetch sources for next tracks
+                source_play.done(function(v) {
                     success.resolve();
                 })
                 source_play.fail(function(reason) {
@@ -270,7 +259,16 @@ class WpsstmPlayer {
                 success.reject(error_msg);
             }
         );
-        
+
+        success.done(function(v) { //fetch sources for next tracks
+            self.maybe_load_queue_sources();
+        })
+
+        success.fail(function() {
+            track_obj.can_play = false;
+            self.tracks_el.addClass('track-error');
+        })
+
         return success.promise();
 
     }
@@ -278,15 +276,10 @@ class WpsstmPlayer {
     play_first_available_source(track_obj,source_idx){
         
         var self = this;
-        
-        //is a track init!
-        if ( source_idx === undefined ){
-            source_idx = 0;
-        }
-
         var success = $.Deferred();
-        
-        
+
+        source_idx = ( source_idx !== undefined )  ? source_idx : 0;
+
         /*
         This function will loop until a promise is resolved
         */
@@ -333,34 +326,42 @@ class WpsstmPlayer {
         var self = this;
         var success = $.Deferred();
 
-        //
+        /*
+        handle previous track playing
+        */
         var source_previous = self.current_source;
-        self.current_source = source_obj;
-        //tracklists
-        var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
-        //tracks
-        var track_obj = source_obj.track;
-        var tracks_instances = self.tracks_el;
-        self.tracks_el = track_obj.track_el; //push current track in collection
-        //sources
-        var sources_instances = self.tracks_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
-        //
         var isDuplicatePlay = $(source_obj).is( $(source_previous) ); //if we're trying to play the same track again
 
         //TOUFIX TOUMOUVE ?
         if (isDuplicatePlay){
-            success.reject("we've already queued this soure");
+            success.reject("we've already playing this soure");
         }
         
         if (source_previous){
             self.end_media(); //stop current media
         }
         
+
+        var track_obj = source_obj.track;
+        self.tracks_el = track_obj.track_el; //push current track in collection
+        
         /*
         fill player with track datas
         */
         
         self.track_to_player(track_obj);
+
+        self.current_source = source_obj;
+        //tracklists
+        var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
+        //tracks
+        var tracks_instances = self.tracks_el;
+        //sources
+        var sources_instances = self.tracks_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
+        
+        /*
+        new source
+        */
 
         self.debug("play source: " + source_obj.src);
         sources_instances.addClass('source-loading');
@@ -369,50 +370,48 @@ class WpsstmPlayer {
 
         $(self.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmSourceLoaded",[self,source_obj] ); //custom event
-            source_obj.can_play = true;
             source_obj.debug('source loaded: ' + source_obj.src);
             source_obj.duration = self.current_media.duration;
             self.current_media.play();
         });
 
         $(self.current_media).on('error', function(error) {
-
-            source_obj.can_play = false;
             source_obj.debug('media - error');
-
+            
             //sources
-            sources_instances.addClass('source-error');
             sources_instances.removeClass('source-active');
-
+            sources_instances.addClass('source-error');
+            //tracks
+            self.tracks_el.removeClass('track-active');
+            self.tracks_el.addClass('track-error');
+            ///
             success.reject(error);
 
         });
 
         $(self.current_media).on('play', function() {
-
-            var trackinfo_sources = self.tracks_el.find('[data-wpsstm-source-idx]');
-            $(trackinfo_sources).removeClass('source-playing');
-
+            source_obj.debug('media - play');
+            
             //tracklists
-            self.tracks_el.parents('.wpsstm-tracklist').addClass('tracklist-playing tracklist-has-played');
+            tracklist_instances.addClass('tracklist-playing tracklist-has-played');
             //tracks
-            self.tracks_el.removeClass('track-error track-loading');
-            self.tracks_el.addClass('track-playing track-has-played');
+            tracks_instances.removeClass('track-error track-loading');
+            tracks_instances.addClass('track-playing track-has-played');
             //sources
             sources_instances.addClass('source-active source-playing source-has-played');
-
-            source_obj.debug('media - play');
+            ///
             success.resolve();
+
         });
 
         $(self.current_media).on('pause', function() {
 
             source_obj.debug('player - pause');
-            
+
             //tracklists
-            self.tracks_el.parents('.wpsstm-tracklist').removeClass('tracklist-playing');
+            tracklist_instances.removeClass('tracklist-playing');
             //tracks
-            self.tracks_el.removeClass('track-playing');
+            tracks_instances.removeClass('track-playing');
             //sources
             sources_instances.removeClass('source-playing');
         });
@@ -422,9 +421,9 @@ class WpsstmPlayer {
             source_obj.debug('media - ended');
             
             //tracklists
-            self.tracks_el.parents('.wpsstm-tracklist').removeClass('tracklist-playing');
+            tracklist_instances.removeClass('tracklist-playing');
             //tracks
-            self.tracks_el.removeClass('track-active');
+            tracks_instances.removeClass('track-active');
             //sources
             sources_instances.removeClass('source-playing source-active');
 
@@ -436,20 +435,14 @@ class WpsstmPlayer {
             sources_instances.removeClass('source-loading');
             self.tracks_el.removeClass('track-loading');
         })
+        success.done(function(v) {
+            source_obj.can_play = true;
+        })
         success.fail(function() {
-            //sources
-            sources_instances.addClass('source-error');
-            sources_instances.removeClass('source-active');
-            //tracks
-            self.tracks_el.addClass('track-error');
-            self.tracks_el.removeClass('track-active');
-            
-            //if is last source, go to next track.
-            
+            source_obj.can_play = false;
         })
 
         ////
-
         self.current_media.setSrc(source_obj.src);
         self.current_media.load();
         
@@ -643,16 +636,24 @@ class WpsstmPlayer {
     end_media(){
 
         var self = this;
+
         if (!self.current_source) return;
 
         self.current_source.debug("end_source");
         
         self.current_media.pause();
-        $(self.current_media).off(); //remove old events
 
-        //TOUFIX should be hookend on events ?
-        self.current_source.get_source_instances().removeClass('source-playing source-active source-loading');
-        self.tracks_el.removeClass('track-loading track-active track-playing');
+        //TOUFIX TO CHECK should be hookend on events ?
+        //tracklists
+        var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
+        //tracks
+        var tracks_instances = self.tracks_el;
+        //sources
+        var sources_instances = self.tracks_el.find('[data-wpsstm-source-idx='+self.current_source.index+']');
+
+        sources_instances.removeClass('source-playing source-active source-loading');
+        tracks_instances.removeClass('track-loading track-active track-playing');
+        $(self.current_media).off(); //remove old events
 
     }
 

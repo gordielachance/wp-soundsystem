@@ -337,7 +337,6 @@ class WpsstmTrack {
         this.sources =              [];
         this.sources_request =      null;
         this.did_sources_request =  false;
-        this.playPromise =          $.Deferred();
         
         //tracklist
         if ( tracklist !== undefined ){

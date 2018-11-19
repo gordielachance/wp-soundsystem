@@ -106,8 +106,7 @@
                             wpsstm_dialog_notice(data.notice);
                         }
                     }else{
-                        var tracklist_instances = tracklist_obj.get_tracklist_instances();
-                        tracklist_instances.addClass('wpsstm-loved-tracklist');
+                        tracklist_obj.tracklist_el.addClass('wpsstm-loved-tracklist');
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
@@ -153,8 +152,7 @@
                         link.addClass('action-error');
                         console.log(data);
                     }else{
-                        var tracklist_instances = tracklist_obj.get_tracklist_instances()
-                        tracklist_instances.removeClass('wpsstm-loved-tracklist');
+                        tracklist_obj.tracklist_el.removeClass('wpsstm-loved-tracklist');
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
@@ -355,11 +353,6 @@ class WpsstmTracklist {
 
 
         return false;
-    }
-    
-    get_tracklist_instances(){
-        var tracklist_el = $('.wpsstm-tracklist[data-wpsstm-tracklist-idx="'+this.index+'"]');
-        return tracklist_el;
     }
 
     abord_tracks_sources_request() {
