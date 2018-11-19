@@ -99,7 +99,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'autoload'                  => ( !is_admin() ) ? true : false,
             'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
-            'can_play'                  => ( wpsstm()->get_options('player_enabled') == 'on' ),
+            'player_enabled'            => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
@@ -206,7 +206,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_html(){
         //TO FIX move at a smarter place ?        
-        if ( $this->get_options('can_play') ){
+        if ( $this->get_options('player_enabled') ){
             do_action('wpsstm_load_player'); //used to know if we must load the player stuff (scripts/styles/html...)
         }
         $link = $this->get_tracklist_action_url('render');
@@ -390,6 +390,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     'classes' =>    array('wpsstm-advanced-action'),
                     'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
                     'href' =>       $this->get_tracklist_action_url('make-live'),
+                    'target' =>     '_parent',
                 );
             }else{
                 $actions['make-static'] = array(
@@ -397,6 +398,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     'classes' =>    array('wpsstm-advanced-action'),
                     'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
                     'href' =>       $this->get_tracklist_action_url('make-static'),
+                    'target' =>     '_parent',
                 );
             }
         }
@@ -649,7 +651,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $classes = array(
             'wpsstm-tracklist',
             ( $this->get_options('ajax_tracklist') ) ? 'ajax-tracklist' : null,
-            $this->get_options('can_play') ? 'tracklist-playable' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
         );

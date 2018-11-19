@@ -11,7 +11,6 @@ if ( $query->have_posts() ) {
             $query->the_post();
             global $wpsstm_tracklist;
 
-            $wpsstm_tracklist->options['can_play'] = false;
             $wpsstm_tracklist->options['autoload'] = false;
             $wpsstm_tracklist->options['autoplay'] = false;
             

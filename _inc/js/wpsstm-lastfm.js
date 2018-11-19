@@ -241,16 +241,16 @@ class WpsstmLastFM {
         wpsstm_lastfm.init();
     });
     
-    $(document).on( "wpsstmMediaLoaded", function( event,source_obj ) {
+    $(document).on( "wpsstmSourceLoaded", function( event,player_obj,source_obj ) {
 
-        $(wpsstm.current_media).on('play', function() {
+        $(player_obj.current_media).on('play', function() {
             if (wpsstm_lastfm.scrobbler_enabled){
                 wpsstm_lastfm.updateNowPlaying(source_obj.track);
                 
             }
         });
         
-        $(wpsstm.current_media).on('ended', function() {
+        $(player_obj.current_media).on('ended', function() {
             if ( source_obj.duration > 30) { //scrobble
                 if (wpsstm_lastfm.scrobbler_enabled){
                     wpsstm_lastfm.user_scrobble(source_obj.track);

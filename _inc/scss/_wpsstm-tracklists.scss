@@ -14,16 +14,23 @@ ul.wpsstm-tracklist-actions{
     .tracklist-header{
         display:none!important;
     }
+}
+
+.wpsstm-tracklist{
+    
     .wpsstm-tracks-list{
         position:relative;
         padding:0;
         margin:0;
         list-style: none;
+        width:100%;
     }
-
-}
-
-.wpsstm-tracklist{
+    
+    &.wpsstm-post-tracklist{
+        [itemprop="track"].track-active{
+            background: rgba(252, 248, 227, .5);
+        }
+    }
     
     &.wpsstm-loved-tracklist .wpsstm-tracklist-action-favorite{
         display:none!important;
@@ -35,31 +42,6 @@ ul.wpsstm-tracklist-actions{
     &.tracklist-loading, &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
             pointer-events:none;
-        }
-    }
-    
-    &.tracklist-playable [itemprop="track"]{
-
-        &[data-wpsstm-sources-count="0"]{
-            @include opacity(.25);
-        } 
-
-        &:not(.track-active){
-            @include opacity(.5);
-        }
-
-        &.track-has-played,&:hover{
-            @include opacity(.75);
-        }
-
-        &.track-active{
-            @include opacity(1);
-        }
-    }
-
-    &:not(.tracklist-playable) [itemprop="track"]{
-        .wpsstm-track-play-bt{
-            display:none;
         }
     }
 
@@ -165,47 +147,6 @@ ul.wpsstm-tracklist-actions{
 
     }
 
-}
-
-.wpsstm-tracklist.wpsstm-post-tracklist{
-    .wpsstm-track{
-        
-        &.track-active{
-            background: rgba(252, 248, 227, .5);
-        }
-
-        .wpsstm-track-sources{
-            display:none;
-            .wpsstm-expand-sources{
-                margin-left: auto;
-            }
-        }
-
-        .wpsstm-track-actions{
-            margin-left: auto;
-        }
-    }
-}
-
-.wpsstm-tracklist.wpsstm-player-tracklist{
-    .wpsstm-track{
-        display:block!important;
-        .wpsstm-track-actions{
-            margin-left:inherit;
-        }
-        .wpsstm-track-sources{
-            @include opacity(.6);
-            [data-wpsstm-source-idx]{
-                @include opacity(.6);
-                &.source-playing{
-                    @include opacity(.8);
-                }
-                &:hover{
-                    @include opacity(1);
-                }
-            }
-        }
-    }
 }
 
 .wpsstm-tracklist-actions{

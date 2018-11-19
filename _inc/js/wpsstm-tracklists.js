@@ -1,24 +1,5 @@
 (function($){
-    
-    $( document ).ready(function() {
-      var playlists = $(".wpsstm-tracklist");
-        $.each(playlists, function( index, playlist_html ) {
-            var tracklist = new WpsstmTracklist(playlist_html);
-        });
-    });
-    
-    $('iframe').load(function(e){
-        
-        console.log("IFRAME LOADED");
-        
-        var iframe = $(this).get(0);
-        
-        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-        
-        //var content = $(iframe.contentWindow.document.body);
-        //var tracklist_el = $(content).find( ".wpsstm-tracklist" ).get(0);
-    });
-    
+
     //tracklist modals
     $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
         e.preventDefault();
@@ -58,10 +39,6 @@
     });
     
     $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
-
-        wpsstm.tracklists.push(tracklist_obj);
-        wpsstm.tracklists_shuffle_order = wpsstm_shuffle( Object.keys(wpsstm.tracklists).map(Number) );
-        
         //style new subtracks row
         var new_subtrack_row = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
         new_subtrack_row.addClass('wpsstm-new-subtrack-simple');
@@ -72,23 +49,6 @@
                 new_subtrack_row.removeClass('wpsstm-new-subtrack-simple');
             }
         });
-        
-        /*
-        autoplay ?
-        */
-
-        if ( (wpsstm.current_media !==undefined) && !wpsstm.current_media.onplaying ){ //is not playing //TOUFIX TOCHECK this statement is not working
-            //which one could we autoplay?
-            var tracklists_autoplay = wpsstm.get_ordered_tracklists().filter(function (tracklist_obj) {
-                //TOUFIX we should check the autoplay property of the HTML5 element instead of this one.
-                return tracklist_obj.options.autoplay;
-            });
-            var play_tracklist = tracklists_autoplay[0];
-            if ( play_tracklist ){
-                console.log("autoplay tracklist #" + tracklist_obj.index);
-                play_tracklist.start_tracklist();
-            }
-        }
 
     });
 
@@ -233,22 +193,28 @@
         
         //hide a tracklist columns if all datas are the same
         tracklist_obj.checkTracksIdenticalValues();
+
+    });
+    
+    $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
+
+        var tracklist_obj = track_obj.tracklist;
         
-        //show more/less (tracks)
-        //TOUFIX
-        /*
-        if ( showSubtracksCount = tracklist_obj.options.toggle_tracklist ){
+        //expand tracklist
+        var track_el = track_obj.track_el;
+        if ( track_el.is(":visible") ) return;
+
+        var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
+        var newTracksCount = track_obj.index + 1;
+        
+        if ( newTracksCount <= visibleTracksCount ) return;
+
+        if ( tracklist_obj.options.toggle_tracklist ){
             tracklist_obj.showMoreLessTracks({
-                childrenToShow:showSubtracksCount
+                childrenToShow:newTracksCount
             });
         }
         
-        
-        //show more/less (tracklist/tracks/sources actions)
-        var actions_lists = tracklist_obj.tracklist_el.find('.wpsstm-actions-list');
-        wpsstm.showMoreLessActions(actions_lists);
-        
-        */
     });
     
     
@@ -267,9 +233,9 @@ class WpsstmTracklist {
         this.expiration_time =          undefined;
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
-        this.tracks_shuffle_order =     undefined;
-        this.options =                  wpsstmPlayer.default_tracklist_options;
+        this.options =                  [];
         this.can_play =                 undefined;
+        this.targetPlayer =             undefined;
 
         this.populate_html(tracklist_html);
     }
@@ -305,7 +271,6 @@ class WpsstmTracklist {
         var tracks_html = self.tracklist_el.find('[itemprop="track"]');
 
         self.tracks = [];
-        self.tracks_shuffle_order = [];
 
         if ( !tracks_html.length) return;
 
@@ -314,7 +279,7 @@ class WpsstmTracklist {
             self.tracks.push(new_track);
         });
 
-        self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
+        
 
         /* tracks count */
         self.tracks_count = $(self.tracks).length;
@@ -379,8 +344,8 @@ class WpsstmTracklist {
         var self = this;
         
         if(typeof track_idx === undefined){
-            if (wpsstm.current_track){
-                return wpsstm.current_track;
+            if (this.targetPlayer.current_track){
+                return this.targetPlayer.current_track;
             }
         }else{
             track_idx = Number(track_idx);
@@ -397,25 +362,6 @@ class WpsstmTracklist {
         return tracklist_el;
     }
 
-    get_maybe_shuffle_track_idx(idx){
-        var self = this;
-        if ( !wpsstm.is_shuffle ) return idx;
-        var new_idx = self.tracks_shuffle_order[idx];
-        
-        self.debug("get_maybe_shuffle_track_idx() : " + idx + "-->" + new_idx);
-        return new_idx;
-    }
-    
-    get_maybe_unshuffle_track_idx(idx){
-        var self = this;
-        if ( !wpsstm.is_shuffle ) return idx;
-        var shuffle_order = self.tracks_shuffle_order;
-        var new_idx = shuffle_order.indexOf(idx);
-        
-        self.debug("get_maybe_unshuffle_track_idx : " + idx + "-->" + new_idx);
-        return new_idx;
-    }
-
     abord_tracks_sources_request() {
         
         var self = this;
@@ -427,142 +373,6 @@ class WpsstmTracklist {
         });
 
     };
-    
-    /*
-    Return the tracks; in the shuffled order if is_shuffle is true.
-    */
-    get_ordered_tracks(){
-        
-        self = this;
-
-        if ( !wpsstm.is_shuffle ){
-            return self.tracks;
-        }else{
-            
-            var shuffled_tracks = [];
-
-            $(self.tracks_shuffle_order).each(function() {
-                var idx = this;
-                shuffled_tracks.push(self.tracks[idx]);
-            });
-
-            return shuffled_tracks;
-        }
-        
-    }
-
-    previous_track_jump(){
-
-        var self = this;
-        
-        var current_track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
-        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); //shuffle ?
-
-        var tracks_before = self.get_ordered_tracks().slice(0,current_track_idx).reverse();
-
-        //which one should we play?
-        var tracks_playable = tracks_before.filter(function (track_obj) {
-            return (track_obj.can_play !== false);
-        });
-        var track_obj = tracks_playable[0];
-
-        if (track_obj){
-            track_obj.play_track();
-        }else{
-            
-            self.debug("previous_track_jump: can repeat ? " + wpsstm.can_repeat);
-            
-            if (wpsstm.can_repeat){
-                wpsstm.previous_tracklist_jump();
-            }
-        }
-    }
-    
-    next_track_jump(){
-
-        var self = this;
-        
-        var current_track_idx = ( wpsstm.current_track ) ? wpsstm.current_track.index : 0;
-        current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); // shuffle ?
-
-        var tracks_after = self.get_ordered_tracks().slice(current_track_idx+1);
-
-        //which one should we play?
-        var tracks_playable = tracks_after.filter(function (track_obj) {
-            return (track_obj.can_play !== false);
-        });
-        
-        var track_obj = tracks_playable[0];
-
-        if (track_obj){
-            track_obj.play_track();
-        }else{
-            
-            self.debug("next_track_jump: can repeat ? " + wpsstm.can_repeat);
-            
-            if (wpsstm.can_repeat){
-                
-                if (self.is_expired){
-                    self.debug("next_track_jump: tracklist is expired, unset 'can_play'");
-                    self.can_play = undefined; //will allow to refresh tracklist when calling maybe_refresh
-                }
-
-                $(document).trigger("wpsstmStopTracklist",[self]); //custom event
-                
-                wpsstm.next_tracklist_jump();
-            }
-        }
-
-
-    }
-
-    start_tracklist(){
-        var self = this;
-
-        var current_track = wpsstm.current_track;
-        if (current_track){
-            if ( self.index === current_track.tracklist.index ){
-                self.debug("loop tracklist");
-                $(document).trigger("wpsstmLoopTracklist",[self]); //custom event
-            }
-        }
-
-        var track_idx = 0;
-        track_idx = self.get_maybe_shuffle_track_idx(track_idx); //shuffle ?
-
-        var track_obj = self.tracks[track_idx];
-
-        if (track_obj){
-            track_obj.play_track();
-        }
-        
-        self.debug("start tracklist");
-        
-        $(document).trigger("wpsstmStartTracklist",[self]); //custom event
-
-        
-
-    }
-    
-    /*
-    Init a sources request for this track and the X following ones (if not populated yet)
-    */
-    
-    maybe_load_queue_sources() {
-
-        var self = this;
-
-        var max_items = 4; //number of following tracks to preload
-        var rtrack_in = wpsstm.current_track.index + 1;
-        var rtrack_out = wpsstm.current_track.index + max_items + 1;
-
-        var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
-
-        $(tracks_slice).each(function(index, track_to_preload) {
-            if ( track_to_preload.sources.length > 0 ) return true; //continue;
-            track_to_preload.maybe_load_sources();
-        });
-    }
 
     update_tracks_order(){
         var self = this;

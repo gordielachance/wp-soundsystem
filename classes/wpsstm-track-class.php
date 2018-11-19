@@ -1068,4 +1068,11 @@ class WPSSTM_Track{
 
     }
     
+    function can_play_track(){
+        if ( wpsstm()->get_options('player_enabled') != 'on' ){
+            return new WP_Error( 'wpsstm_player_disabled', __("Player is disabled.",'wpsstm') );
+        }
+        return true;
+    }
+    
 }

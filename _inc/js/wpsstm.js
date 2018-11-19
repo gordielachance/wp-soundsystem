@@ -1,3 +1,5 @@
+var bottomPlayer = undefined;
+
 (function($){
 
     //artist autocomplete
@@ -38,6 +40,33 @@
             delay: 500,
             minLength: 2,
         });
+    });
+    
+    $( document ).ready(function() {
+        wpsstm_debug("init","wpsstm");
+        var bottomPlayerEl = $('#wpsstm-player');
+        bottomPlayer = new WpsstmPlayer(bottomPlayerEl);
+        
+    });
+    
+    $('iframe').load(function(e){
+        
+        console.log("IFRAME LOADED");
+        
+        var iframe = $(this).get(0);
+        
+        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
+        
+        var content = $(iframe.contentWindow.document.body);
+        var tracklist_els = $(content).find( ".wpsstm-tracklist" );
+
+        $.each(tracklist_els, function( index, playlist_html ) {
+            var tracklist_obj = new WpsstmTracklist(playlist_html);
+            bottomPlayer.queue_tracklist(tracklist_obj);
+        });
+        
+        bottomPlayer.start_player();
+        
     });
     
     $('iframe.wpsstm-iframe-autoheight').load(function(e){

@@ -101,3 +101,23 @@ $player-text-color:#FFF;
     }
 }
 
+.wpsstm-player-tracklist{
+    .wpsstm-track{
+        display:block!important;
+        .wpsstm-track-actions{
+            margin-left:inherit;
+        }
+        .wpsstm-track-sources{
+            @include opacity(.6);
+            [data-wpsstm-source-idx]{
+                @include opacity(.6);
+                &.source-playing{
+                    @include opacity(.8);
+                }
+                &:hover{
+                    @include opacity(1);
+                }
+            }
+        }
+    }
+}
