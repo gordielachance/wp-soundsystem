@@ -268,6 +268,10 @@ class WpsstmPlayer {
             track_obj.can_play = false;
             self.tracks_el.addClass('track-error');
         })
+        
+        success.always(function() {
+            self.tracks_el.removeClass('track-loading');
+        })
 
         return success.promise();
 
@@ -473,10 +477,12 @@ class WpsstmPlayer {
     }
     
     previous_track_jump(){
+        
+        console.log("prev");
 
         var self = this;
         
-        var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
+        var current_track_idx = ( self.current_source ) ? self.current_source.track.index : 0;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); //shuffle ?
 
         var tracks_before = self.get_ordered_tracks().slice(0,current_track_idx).reverse();
@@ -488,7 +494,7 @@ class WpsstmPlayer {
         var track_obj = tracks_playable[0];
 
         if (track_obj){
-            track_obj.play_track();
+            self.play_track(track_obj);
         }
     }
     

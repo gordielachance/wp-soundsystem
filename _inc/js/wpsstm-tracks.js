@@ -333,6 +333,7 @@ class WpsstmTrack {
         this.album =                null;
         this.post_id =              null;
         //this.autosource_time =    null;
+        this.can_play =             null;
         
         this.sources =              [];
         this.sources_request =      null;
@@ -370,6 +371,9 @@ class WpsstmTrack {
 
         //populate existing sources
         self.populate_html_sources();
+        
+        console.log('track node has init');
+        console.log(self);
 
         $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
         
@@ -442,6 +446,7 @@ class WpsstmTrack {
                 //update HTML & repopulate track
                 self.debug("repopulate HTML");
                 var new_node = $(data.new_html);
+                new_node.append('TOUFIX');
                 self.track_el.replaceWith( new_node );
                 self.init_html(new_node);
             }
@@ -484,6 +489,8 @@ class WpsstmTrack {
             self.sources.push(source_obj);
             $(document).trigger("wpsstmTrackSingleSourceDomReady",[source_obj]); //custom event for single source
         });
+        
+        self.can_play = (self.sources.length > 0);
                 
         self.track_el.attr('data-wpsstm-sources-count',self.sources.length);        
         $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event for all sources

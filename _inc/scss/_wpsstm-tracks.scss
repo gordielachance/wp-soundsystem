@@ -12,13 +12,6 @@
     @extend .wpsstm-ellipsis;
     list-style: none;
 
-    .wpsstm-track-sources{
-        display:none;
-        .wpsstm-expand-sources{
-            margin-left: auto;
-        }
-    }
-
     .wpsstm-track-info{
     }
     .wpsstm-track-actions{
@@ -166,6 +159,9 @@
 
     &[data-wpsstm-sources-count="0"]{
         @include opacity(.25);
+        .wpsstm-track-sources{
+            display:none!important;
+        }
     } 
 
     &:not(.track-active){

@@ -1,20 +1,35 @@
 <?php
 
 class WPSSTM_Core_Player{
+    
+    var $options = array();
 
     function __construct() {
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
 
-        add_action( 'wp_footer', array($this,'player_html'));
+        add_action( 'wp_footer', array($this,'bottom_player'));
         add_action( 'admin_footer', array($this,'player_html'));
 
     }
+    
+    function bottom_player(){
+        if ( !did_action('wpsstm_load_player') ) return;
+        $options=array('id'=>'wpsstm-bottom-player');
+        $this->player_html($options);
+    }
 
-    function player_html(){
+    function player_html( $options = array() ){
         global $wpsstm_player;
         $wpsstm_player = $this;
-        if ( !did_action('wpsstm_load_player') ) return;
+        
+        $defaults = array(
+        'id' => null,
+        );
+        
+        $options = wp_parse_args($options,$defaults);
+        
+        $wpsstm_player->options = $options;
         wpsstm_locate_template( 'player.php', true, false );
     }
     

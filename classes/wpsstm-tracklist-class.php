@@ -205,15 +205,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_html(){
-        //TO FIX move at a smarter place ?        
-        if ( $this->get_options('player_enabled') ){
-            do_action('wpsstm_load_player'); //used to know if we must load the player stuff (scripts/styles/html...)
-        }
         $link = $this->get_tracklist_action_url('render');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
         $iframe_el = sprintf('<iframe width="100%%" scrolling="no" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
         $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading wpsstm-iframe-autoheight">%s%s</div>',$notice_el,$iframe_el);
-        
         return $el;
         
     }
