@@ -243,6 +243,7 @@ class WpsstmPlayer {
         
         self.current_track = track_obj;
         track_obj.track_el.addClass('track-active track-loading');
+
         track_obj.maybe_load_sources().then(
             function(success_msg){
 
@@ -260,6 +261,7 @@ class WpsstmPlayer {
                 success.reject(error_msg);
             }
         );
+
 
         success.done(function(v) { //fetch sources for next tracks
             self.maybe_load_queue_sources();
@@ -350,7 +352,6 @@ class WpsstmPlayer {
         
 
         var track_obj = source_obj.track;
-        
         self.tracks_el = track_obj.track_el; //push current track in collection
         
         /*
@@ -583,7 +584,7 @@ class WpsstmPlayer {
         var self = this;
 
         self.debug("source > player");
-        
+
         //audio sources
         self.set_player_sources(track_obj.sources);
         
@@ -612,9 +613,9 @@ class WpsstmPlayer {
         self.trackinfo_el.html(list);
         self.player_el.show();//show in not done yet
         
-        //push current track in collection
-        self.tracks_el.push( self.player_el.find('[itemprop="track"]').first() );
-        
+        //push player track html in tracks instances
+        self.tracks_el.push( row.get(0) );
+
     }
     
     set_player_sources(sources){
