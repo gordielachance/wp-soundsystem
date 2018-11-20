@@ -240,7 +240,8 @@ class WpsstmPlayer {
 
         var self = this;
         var success = $.Deferred();
-
+        
+        self.current_track = track_obj;
         track_obj.track_el.addClass('track-active track-loading');
         track_obj.maybe_load_sources().then(
             function(success_msg){
@@ -266,11 +267,13 @@ class WpsstmPlayer {
 
         success.fail(function() {
             track_obj.can_play = false;
-            self.tracks_el.addClass('track-error');
+            track_obj.track_el.addClass('track-error');
+            track_obj.track_el.removeClass('track-active');
+            self.next_track_jump();
         })
         
         success.always(function() {
-            self.tracks_el.removeClass('track-loading');
+            track_obj.track_el.removeClass('track-loading');
         })
 
         return success.promise();
@@ -299,27 +302,27 @@ class WpsstmPlayer {
 
         if (!sources_playable.length){
             success.reject("no playable sources to iterate");
+        }else{
+            (function iterateSources(index) {
+
+                if (index >= sources_playable.length) {
+                    success.reject();
+                    return;
+                }
+
+                var source_obj = sources_playable[index];
+                var sourceplay = self.play_source(source_obj);
+
+                sourceplay.done(function(v) {
+                    success.resolve();
+                })
+                sourceplay.fail(function() {
+                    iterateSources(index + 1);
+                })
+
+
+            })(0);
         }
-
-        (function iterateSources(index) {
-
-            if (index >= sources_playable.length) {
-                success.reject();
-                return;
-            }
-            
-            var source_obj = sources_playable[index];
-            var sourceplay = self.play_source(source_obj);
-
-            sourceplay.done(function(v) {
-                success.resolve();
-            })
-            sourceplay.fail(function() {
-                iterateSources(index + 1);
-            })
-
-
-        })(0);
         
         return success.promise();
         
@@ -347,15 +350,18 @@ class WpsstmPlayer {
         
 
         var track_obj = source_obj.track;
+        
         self.tracks_el = track_obj.track_el; //push current track in collection
         
         /*
         fill player with track datas
         */
-        
+
         self.track_to_player(track_obj);
 
         self.current_source = source_obj;
+        self.current_track = source_obj.track;
+        
         //tracklists
         var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
         //tracks
@@ -465,8 +471,8 @@ class WpsstmPlayer {
         var self = this;
 
         var max_items = 4; //number of following tracks to preload
-        var rtrack_in = self.current_source.track.index + 1;
-        var rtrack_out = self.current_source.track.index + max_items + 1;
+        var rtrack_in = self.current_track.index + 1;
+        var rtrack_out = self.current_track.index + max_items + 1;
 
         var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
 
@@ -482,7 +488,7 @@ class WpsstmPlayer {
 
         var self = this;
         
-        var current_track_idx = ( self.current_source ) ? self.current_source.track.index : 0;
+        var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); //shuffle ?
 
         var tracks_before = self.get_ordered_tracks().slice(0,current_track_idx).reverse();
@@ -502,7 +508,7 @@ class WpsstmPlayer {
 
         var self = this;
         
-        var current_track_idx = ( self.current_source ) ? self.current_source.track.index : 0;
+        var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); // shuffle ?
 
         var tracks_after = self.get_ordered_tracks().slice(current_track_idx+1);
@@ -546,7 +552,6 @@ class WpsstmPlayer {
     queue_tracklist(tracklist_obj){
         var self = this;
         
-        console.log("QUEUE TRACKLIST");
         $(tracklist_obj.tracks).each(function() {
             var track = this;
             self.tracks.push(track);

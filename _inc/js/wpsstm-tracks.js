@@ -288,7 +288,7 @@
         //remove
         track_obj.track_el.find('.wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
-            track_obj.tracklist.remove_tracklist_track(track_obj);
+            track_obj.tracklist.remove_subtrack(track_obj);
         });
         
         //delete
@@ -360,7 +360,7 @@ class WpsstmTrack {
         var self = this;
 
         if ( track_html === undefined ) return;
-        
+
         self.track_el =             $(track_html);
         self.index =                Number(self.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
@@ -371,9 +371,6 @@ class WpsstmTrack {
 
         //populate existing sources
         self.populate_html_sources();
-        
-        console.log('track node has init');
-        console.log(self);
 
         $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
         
@@ -448,7 +445,7 @@ class WpsstmTrack {
                 var new_node = $(data.new_html);
                 new_node.append('TOUFIX');
                 self.track_el.replaceWith( new_node );
-                self.init_html(new_node);
+                self.init_html( new_node.get(0) );
             }
 
             if (data.success === true){
