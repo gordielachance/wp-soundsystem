@@ -241,7 +241,6 @@ class WpsstmPlayer {
         var self = this;
         var success = $.Deferred();
         
-        self.current_track = track_obj;
         track_obj.track_el.addClass('track-active track-loading');
 
         track_obj.maybe_load_sources().then(
@@ -331,38 +330,38 @@ class WpsstmPlayer {
     }
     
     play_source(source_obj){
+        
+        console.log("PLAY SOURCE");
+        console.log(source_obj);
 
         var self = this;
         var success = $.Deferred();
-
-        /*
-        handle previous track playing
-        */
-        var source_previous = self.current_source;
-        var isDuplicatePlay = $(source_obj).is( $(source_previous) ); //if we're trying to play the same track again
-
-        //TOUFIX TOUMOUVE ?
-        if (isDuplicatePlay){
-            success.reject("we've already playing this soure");
-        }
-        
-        if (source_previous){
-            self.end_media(); //stop current media
-        }
-        
-
         var track_obj = source_obj.track;
-        self.tracks_el = track_obj.track_el; //push current track in collection
+
+        //we're trying to play the same source again
+        if ( $(source_obj).is( $(self.current_source) ) ){ 
+            success.reject("we've already playing this soure");
+            return success.promise();
+        }
         
-        /*
-        fill player with track datas
-        */
-
-        self.track_to_player(track_obj);
-
+        /* setup current source */
+        
+        if (self.current_source){ //a source is currently playing
+            self.end_media();
+        }
         self.current_source = source_obj;
-        self.current_track = source_obj.track;
         
+        console.log(track_obj);
+        console.log("VS");
+        console.log(self.current_track);
+
+        //update current track
+        if ( !$(track_obj).is( $(self.current_track) ) ){
+            self.current_track = track_obj;
+            self.tracks_el = track_obj.track_el;
+            self.track_to_player();
+        }
+
         //tracklists
         var tracklist_instances = self.tracks_el.parents('.wpsstm-tracklist');
         //tracks
@@ -579,19 +578,19 @@ class WpsstmPlayer {
         return new_idx;
     }
 
-    track_to_player(track_obj){
+    track_to_player(){
 
         var self = this;
 
         self.debug("source > player");
 
         //audio sources
-        self.set_player_sources(track_obj.sources);
+        self.set_player_sources(self.current_track.sources);
         
         /*
         track infos
         */
-        var tracklist_el = track_obj.tracklist.tracklist_el;
+        var tracklist_el = self.current_track.tracklist.tracklist_el;
 
         //copy attributes from the original playlist 
         var attributes = $(tracklist_el).prop("attributes");
@@ -605,16 +604,13 @@ class WpsstmPlayer {
 
         var list = $('<ul class="wpsstm-tracks-list" />'); 
 
-        var row = track_obj.track_el.clone(true,true);
+        var row = self.current_track.track_el.clone(true,true);
         row.find('.wpsstm-track-sources').removeClass('wpsstm-sources-expanded');
 
         $(list).append(row);
 
         self.trackinfo_el.html(list);
         self.player_el.show();//show in not done yet
-        
-        //push player track html in tracks instances
-        self.tracks_el.push( row.get(0) );
 
     }
     
