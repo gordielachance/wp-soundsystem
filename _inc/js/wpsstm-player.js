@@ -92,8 +92,17 @@ class WpsstmPlayer {
                     
                     return;
                 }
+                
+                //hide sources if it is expanded //TOUFIX not working
+                var toggleEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a.active');
+                console.log("tata");
+                console.log(toggleEl);
+                if (toggleEl.length){
+                    toggleEl.click();
+                }
 
                 self.play_track(track_obj);
+                
 
                 $(document).trigger( "wpsstmRequestPlay",track_obj ); //custom event
 
@@ -345,6 +354,15 @@ class WpsstmPlayer {
         
         var track_obj = source_obj.track;
         var track_el = $([]);
+        track_el.push(track_obj.track_el.get(0) );
+        track_el.push( self.trackinfo_el.find('.wpsstm-track').get(0) );
+        var tracklist_el = track_el.parents('.wpsstm-tracklist');
+        var source_el = track_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
+
+        self.debug("play source: " + source_obj.src);
+        source_el.addClass('source-active source-loading');
+        track_el.addClass('track-active track-loading');
+        tracklist_el.addClass('tracklist-active tracklist-loading');
         
         /*
         set current track
@@ -353,12 +371,6 @@ class WpsstmPlayer {
             self.current_track = track_obj;
             self.track_to_player();
         }
-        
-        track_el.push(track_obj.track_el.get(0) );
-        track_el.push( self.trackinfo_el.find('.wpsstm-track').get(0) );
-
-        var tracklist_el = track_el.parents('.wpsstm-tracklist');
-        var source_el = track_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
         
         /*
         set current source
@@ -374,15 +386,6 @@ class WpsstmPlayer {
             self.end_source();
         }
         self.current_source = source_obj;
-
-        /*
-        new source
-        */
-
-        self.debug("play source: " + source_obj.src);
-        source_el.addClass('source-active source-loading');
-        track_el.addClass('track-active track-loading');
-        tracklist_el.addClass('tracklist-active tracklist-loading');
 
         //register new events
 

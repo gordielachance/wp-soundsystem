@@ -3,6 +3,7 @@
 ul.wpsstm-tracklist-actions{
     margin: 1em 0;
     .wpsstm-action{
+        padding: .25em .5em;
         font-size:.8em;
         border: 1px solid #F7F7F7;
         line-height: 1.8em;
@@ -28,7 +29,7 @@ ul.wpsstm-tracklist-actions{
     
     &.wpsstm-post-tracklist{
         [itemprop="track"].track-active{
-            background: rgba(252, 248, 227, .5);
+            background: rgba(252, 248, 227, .25);
         }
     }
     

@@ -11,76 +11,41 @@
     }
 }
 
-.wpsstm-track-sources{
+.wpsstm-track-sources-list{
     font-size:.8em;
-    margin-left: auto;
-    @include display-flex();
+    position:relative;
     @include flex-grow(0);
-
-    .wpsstm-track-sources-list{
-        position:relative;
-        @include flex-grow(0);
-        @include transition-property(margin-bottom);
-        @include transition-duration(.2s);
-    }
-
-    .wpsstm-expand-sources{
-        margin-left: auto;
-        @include flex-grow(0);
-        @include flex-shrink(0);
-        a{
-            @extend .wpsstm-icon;
-            &:before{
-                content: "\f078";//.fa-chevron-down;
+    @include transition-property(margin-bottom);
+    @include transition-duration(.2s);
+    
+    [data-wpsstm-source-idx]{
+        display:none;
+        .wpsstm-source-actions{
+            > *{
+                &:not(.wpsstm-source-action-provider){
+                    display:none;
+                }
             }
-            span{
-                display:none;
+        }
+        &.source-active{
+            @include display-flex();
+        }
+    }
+    &:not(.active){
+        display:none;
+    }
+    &.active{
+        margin-bottom:.5em!important;
+        [data-wpsstm-source-idx]{
+            @include display-flex();
+            .wpsstm-source-actions{
+                .wpsstm-action{
+                    display:inline-block;
+                }
             }
         }
     }
     
-    &.wpsstm-sources-toggle{
-        [data-wpsstm-source-idx]{
-            display:none;
-            .wpsstm-source-actions{
-                > *{
-                    &:not(.wpsstm-source-action-provider){
-                        display:none;
-                    }
-                }
-            }
-            &.source-active{
-                @include display-flex();
-            }
-        }
-        &:not(.wpsstm-sources-expanded){
-            display:inline;
-            .wpsstm-track-sources-list{
-                display:none;
-            }
-        }
-        &.wpsstm-sources-expanded{
-            .wpsstm-track-sources-list{
-                margin-bottom:.5em!important;
-            }
-            [data-wpsstm-source-idx]{
-                @include display-flex();
-                .wpsstm-source-actions{
-                    .wpsstm-action{
-                        display:inline-block;
-                    }
-                }
-            }
-            .wpsstm-expand-sources{
-                a:before{
-                    content: "\f077";//.fa-chevron-up;
-                }
-            }
-        }
-    }
-
-
-
 }
 
 .wpsstm-track-sources-list{

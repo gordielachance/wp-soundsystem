@@ -797,6 +797,11 @@ class WPSSTM_Track{
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
+        
+        $actions['toggle-sources'] = array(
+            'text' =>      __('Sources'),
+            'href' =>       '#',
+        );
 
         return apply_filters('wpsstm_track_actions',$actions);
 

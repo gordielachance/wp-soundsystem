@@ -40,13 +40,8 @@ $can_play_track = $track->can_play_track();
         }
         ?>
     </div>
-    <div class="wpsstm-track-row wpsstm-track-sources wpsstm-sources-toggle">
-        <?php
-        //track sources
-        wpsstm_locate_template( 'content-source.php', true, false );
-        ?>
-        <span class="wpsstm-expand-sources">
-            <a href="#"><span><?php _e('Source Switch','wpsstm');?></span></a>
-        </span>
-    </div>
+    <?php
+    //track sources
+    wpsstm_locate_template( 'content-source.php', true, false );
+    ?>
 </li>

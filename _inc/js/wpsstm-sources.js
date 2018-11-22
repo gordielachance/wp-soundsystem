@@ -120,12 +120,6 @@ class WpsstmTrackSource {
             var sources_container = $(this);
             var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
 
-            //click expand sources
-            sources_container.find('.wpsstm-expand-sources a').click(function(e) {
-                e.preventDefault();
-                $(this).parents('.wpsstm-track-sources').toggleClass('wpsstm-sources-expanded');
-            });
-
             // sort track sources
             sources_list_el.sortable({
                 axis: "y",

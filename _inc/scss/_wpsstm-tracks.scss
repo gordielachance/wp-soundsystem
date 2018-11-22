@@ -12,13 +12,6 @@
     @extend .wpsstm-ellipsis;
     list-style: none;
 
-    .wpsstm-track-info{
-    }
-    .wpsstm-track-actions{
-        display:none;
-        margin-left: auto;
-    }
-
     .wpsstm-track-row {
         @include display-flex();
         @include flex-grow(1);
@@ -42,9 +35,11 @@
     }
     
     .wpsstm-track-actions{
-        @include opacity(0);
+        display:none;
+        margin-left: auto;
         li.wpsstm-action{
             display:inline;
+            padding:0 .1em;
             @extend .wpsstm-action-icon;
         }
     }
@@ -153,7 +148,7 @@
     
     &:hover,&.track-active{
         ul.wpsstm-track-actions{
-             @include opacity(1);
+             display:inherit;
         }
     }
 
@@ -187,6 +182,11 @@
     }
 }
 .wpsstm-track-action{
+    a{
+        span{
+            display:none;
+        }
+    }
     &.wpsstm-track-action-favorite a:before{
         content: "\f08a";//.fa-heart-o;
     }
@@ -223,6 +223,24 @@
     &.wpsstm-track-action-favorite a:before{
         content: "\f08a";//.fa-heart-o;
     }
+    &.wpsstm-track-action-toggle-sources{
+        a{
+            .wpsstm-sources-count{
+                display:inherit;
+            }
+            &:before{
+                content: "\f078";//.chevron-down;
+            }
+            &.active:before{
+                content: "\f077";//.fa-chevron-up;
+            }
+        }
+        .wpsstm-sources-count{
+            font-weight: bold;
+            font-size:.8em;
+        }
+    }
+
 }
 
 
