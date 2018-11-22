@@ -92,14 +92,6 @@ class WpsstmPlayer {
                     
                     return;
                 }
-                
-                //hide sources if it is expanded //TOUFIX not working
-                var toggleEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a.active');
-                console.log("tata");
-                console.log(toggleEl);
-                if (toggleEl.length){
-                    toggleEl.click();
-                }
 
                 self.play_track(track_obj);
                 
@@ -122,93 +114,6 @@ class WpsstmPlayer {
 
         });
 
-        /*
-        Previous track bt
-        */
-
-        self.player_el.find('#wpsstm-player-extra-previous-track').click(function(e) {
-            e.preventDefault();
-            self.previous_track_jump();
-        });
-
-        /*
-        Next track bt
-        */
-        self.player_el.find('#wpsstm-player-extra-next-track').click(function(e) {
-            e.preventDefault();
-            self.next_track_jump();
-        });
-
-        /*
-        Shuffle button
-        */
-        if ( self.is_shuffle ){
-            self.shuffle_el.addClass('active');
-        }
-
-        self.shuffle_el.find('a').click(function(e) {
-            e.preventDefault();
-
-            var is_active = !self.is_shuffle;
-            self.is_shuffle = is_active;
-
-            if (is_active){
-                localStorage.setItem("wpsstm-player-shuffle", true);
-                self.shuffle_el.addClass('active');
-            }else{
-                localStorage.removeItem("wpsstm-player-shuffle");
-                self.shuffle_el.removeClass('active');
-            }
-
-        });
-
-        /*
-        Loop button
-        */
-        if ( self.can_repeat ){
-            self.loop_el.addClass('active');
-        }
-
-        self.loop_el.find('a').click(function(e) {
-            e.preventDefault();
-
-            var is_active = !self.can_repeat;
-            self.can_repeat = is_active;
-
-            if (is_active){
-                localStorage.setItem("wpsstm-player-loop", true);
-                self.loop_el.addClass('active');
-            }else{
-                localStorage.setItem("wpsstm-player-loop", false);
-                self.loop_el.removeClass('active');
-            }
-
-        });
-        
-        /*
-        Scroll to playlist track when clicking the player's track number
-        */
-        self.player_el.on( "click",'[itemprop="track"] .wpsstm-track-position', function(e) {
-            e.preventDefault();
-            var player_track_el = $(this).parents('[itemprop="track"]');
-            var track_idx = Number(player_track_el.attr('data-wpsstm-track-idx'));
-
-            var tracklist_el = player_track_el.closest('[data-wpsstm-tracklist-idx]');
-            var tracklist_idx = Number(tracklist_el.attr('data-wpsstm-tracklist-idx'));
-            var visibleTracksCount = tracklist_el.find('[itemprop="track"]:visible').length;
-
-            var track_obj = self.current_track;
-
-            var track_el = track_obj.track_el;
-            var newTracksCount = track_obj.index + 1;
-
-            //https://stackoverflow.com/a/6677069/782013
-            $('html, body').animate({
-                scrollTop: track_el.offset().top - ( $(window).height() / 3) //not at the very top
-            }, 500);
-
-        });
-        
         /*
         Confirmation popup is a media is playing and that we leave the page
         //TO FIX TO improve ?
@@ -387,7 +292,15 @@ class WpsstmPlayer {
         }
         self.current_source = source_obj;
 
-        //register new events
+        //hide sources if it is expanded //TOUFIX not working
+        var toggleEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a');
+        if ( toggleEl.hasClass('.active') ){
+            toggleEl.click();
+        }
+
+        /*
+        register new events
+        */
 
         $(self.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmSourceLoaded",[self,source_obj] ); //custom event
@@ -490,10 +403,7 @@ class WpsstmPlayer {
         });
     }
     
-    previous_track_jump(){
-        
-        console.log("prev");
-
+    get_previous_track(){
         var self = this;
         
         var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
@@ -505,15 +415,21 @@ class WpsstmPlayer {
         var tracks_playable = tracks_before.filter(function (track_obj) {
             return (track_obj.can_play !== false);
         });
-        var track_obj = tracks_playable[0];
+        return tracks_playable[0];
+    }
+    
+    previous_track_jump(){
+        
+        var self = this;
+        
+        var track_obj = self.get_previous_track();
 
         if (track_obj){
             self.play_track(track_obj);
         }
     }
     
-    next_track_jump(){
-
+    get_next_track(){
         var self = this;
         
         var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
@@ -526,7 +442,13 @@ class WpsstmPlayer {
             return (track_obj.can_play !== false);
         });
         
-        var track_obj = tracks_playable[0];
+        return tracks_playable[0];
+    }
+    
+    next_track_jump(){
+        var self = this;
+        
+        var track_obj = self.get_next_track();
 
         if (track_obj){
             self.play_track(track_obj);
@@ -618,6 +540,108 @@ class WpsstmPlayer {
         $(list).append(row);
 
         self.trackinfo_el.html(list);
+        
+        ///
+        
+        /*
+        Previous track bt
+        */
+
+        var previous_track = self.get_previous_track();
+        var has_previous_track = (previous_track!==undefined);
+        var previousTrackEl = self.player_el.find('#wpsstm-player-extra-previous-track');
+
+        previousTrackEl.toggleClass('active',has_previous_track);
+        
+        previousTrackEl.click(function(e) {
+            e.preventDefault();
+            self.previous_track_jump();
+        });
+
+        /*
+        Next track bt
+        */
+        var next_track = self.get_next_track();
+        var has_next_track = (next_track!==undefined);
+        var nextTrackEl = self.player_el.find('#wpsstm-player-extra-next-track');
+
+        nextTrackEl.toggleClass('active',has_next_track);
+        
+        nextTrackEl.click(function(e) {
+            e.preventDefault();
+            self.next_track_jump();
+        });
+
+
+        /*
+        Shuffle button
+        */
+        if ( self.is_shuffle ){
+            self.shuffle_el.addClass('active');
+        }
+
+        self.shuffle_el.find('a').click(function(e) {
+            e.preventDefault();
+
+            var is_active = !self.is_shuffle;
+            self.is_shuffle = is_active;
+
+            if (is_active){
+                localStorage.setItem("wpsstm-player-shuffle", true);
+                self.shuffle_el.addClass('active');
+            }else{
+                localStorage.removeItem("wpsstm-player-shuffle");
+                self.shuffle_el.removeClass('active');
+            }
+            
+            //TOUFIX
+            
+
+        });
+
+        /*
+        Loop button
+        */
+        if ( self.can_repeat ){
+            self.loop_el.addClass('active');
+        }
+
+        self.loop_el.find('a').click(function(e) {
+            e.preventDefault();
+
+            var is_active = !self.can_repeat;
+            self.can_repeat = is_active;
+
+            if (is_active){
+                localStorage.setItem("wpsstm-player-loop", true);
+                self.loop_el.addClass('active');
+            }else{
+                localStorage.setItem("wpsstm-player-loop", false);
+                self.loop_el.removeClass('active');
+            }
+
+        });
+        
+        /*
+        Scroll to playlist track when clicking the player's track number
+        */
+        self.player_el.find('.wpsstm-track-position', function(e) {
+            e.preventDefault();
+            
+            var track_obj = self.current_track;
+
+            var track_el = track_obj.track_el;
+            var newTracksCount = track_obj.index + 1;
+
+            //https://stackoverflow.com/a/6677069/782013
+            $('html, body').animate({
+                scrollTop: track_el.offset().top - ( $(window).height() / 3) //not at the very top
+            }, 500);
+
+        });
+        
+        ///
+        
         self.player_el.show();//show in not done yet
 
     }

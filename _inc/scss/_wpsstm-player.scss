@@ -75,10 +75,7 @@ $player-text-color:#FFF;
             @include flex-shrink(0);
             @include flex-grow(0);
             padding: 0 .5em;
-            &#wpsstm-player-shuffle:not(.active){
-                @include opacity(.3);
-            }
-            &#wpsstm-player-loop:not(.active){
+            &:not(.active){
                 @include opacity(.3);
             }
         }
