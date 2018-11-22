@@ -67,7 +67,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-        $this->ajax_tracklist = $this->check_has_expired();
         
         //scraper
         $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
@@ -102,11 +101,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'player_enabled'            => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_tracklist'            => false,//should we load the subtracks through ajax ? (enabled by default for live playlists).
             'ajax_autosource'           => true,
             'remote_delay_min'          => 5,
             'is_expired'                => false,
-            'ajax_tracklist'            => false,
         );
 
         return $options;
@@ -205,6 +202,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_html(){
+        do_action('wpsstm_load_player');
         $link = $this->get_tracklist_action_url('render');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
         $iframe_el = sprintf('<iframe width="100%%" scrolling="no" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
@@ -645,7 +643,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
-            ( $this->get_options('ajax_tracklist') ) ? 'ajax-tracklist' : null,
             ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
             
         );
@@ -658,13 +655,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         return array_filter(array_unique($classes));
     }
-    
-    //if the tracklist is ajaxed and that this is not an ajax request, 
-    //pretend did_query_tracks is true so we don't try to populate them
-    //do not move under __construct since option 'ajax_tracklist' value might have changed when we call this.
-    function wait_for_ajax(){
-        return ($this->get_options('ajax_tracklist') && !wpsstm_is_ajax());
-    }
+
 
     function populate_subtracks(){
         global $wpdb;
@@ -672,7 +663,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $has_expired = $this->check_has_expired();
-        $live = ( ($this->tracklist_type == 'live') && $has_expired && !$this->wait_for_ajax() );
+        $live = ( ($this->tracklist_type == 'live') && $has_expired );
         $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
         $refresh_delay = $this->get_time_before_refresh();
         

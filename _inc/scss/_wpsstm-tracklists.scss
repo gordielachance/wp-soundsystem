@@ -96,32 +96,6 @@ ul.wpsstm-tracklist-actions{
             @include opacity(.5);
         }
     }
-
-    &:not(.tracklist-refresh) #wpsstm-notice-ajax-refresh{
-        display:none;
-    }
-
-    &.ajax-tracklist{
-
-        &.tracklist-refresh{
-            > * {
-                display:none;
-                &.tracklist-header,&.wpsstm-tracklist-notices{
-                    display:inherit;
-                }
-                &.wpsstm-tracklist-notices > *{
-                    display:none;
-                    &#wpsstm-notice-ajax-refresh{
-                        display:inherit;
-                    }
-                }
-                .wpsstm-tracklist-time{
-                    display:none;
-                }
-
-            }
-        }
-    }
     
     .wpsstm-new-subtrack{
         

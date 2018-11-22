@@ -44,14 +44,29 @@ var bottomPlayer = undefined;
     
     $( document ).ready(function() {
         wpsstm_debug("init","wpsstm");
-        var bottomPlayerEl = $('#wpsstm-player');
+        var bottomPlayerEl = $('#wpsstm-bottom-player');
         bottomPlayer = new WpsstmPlayer(bottomPlayerEl);
         
     });
     
+    //TOUFIX remove
+    /*
+    $( document ).ready(function() {
+        var tracklist_els = $( ".wpsstm-tracklist" );
+
+        $.each(tracklist_els, function( index, playlist_html ) {
+            var tracklist_obj = new WpsstmTracklist(playlist_html);
+            bottomPlayer.queue_tracklist(tracklist_obj);
+        });
+        
+        bottomPlayer.start_player();
+    });
+    */
+    
+    
     $('iframe').load(function(e){
         
-        console.log("IFRAME LOADED");
+        wpsstm_debug("iframe loaded");
         
         var iframe = $(this).get(0);
         

@@ -204,7 +204,7 @@ class WpsstmPlayer {
         */
         $(window).bind('beforeunload', function(){
 
-            if (tracklist_obj.targetPlayer.current_media && !tracklist_obj.targetPlayer.current_media.paused){
+            if (self.current_media && !self.current_media.paused){
                 return wpsstmPlayer.leave_page_text;
             }
 

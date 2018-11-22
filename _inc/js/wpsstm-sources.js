@@ -2,7 +2,7 @@ class WpsstmTrackSource {
     constructor(source_html,track) {
         
         this.source_el =        $([]);
-        this.track =            new WpsstmTrack();
+        this.track =            (track !== undefined) ? track : new WpsstmTrack();
         
         this.index =            undefined;
         this.post_id =          undefined;
