@@ -277,8 +277,6 @@ class WpsstmTracklist {
             self.tracks.push(new_track);
         });
 
-        
-
         /* tracks count */
         self.tracks_count = $(self.tracks).length;
         self.can_play =     (self.tracks_count < 0) ? undefined : true; //if -1:not yet populated
@@ -354,18 +352,6 @@ class WpsstmTracklist {
 
         return false;
     }
-
-    abord_tracks_sources_request() {
-        
-        var self = this;
-        
-        $.each(self.tracks, function( index, track ) {
-            if (track.sources_request){
-                track.sources_request.abort();
-            }
-        });
-
-    };
 
     update_tracks_order(){
         var self = this;

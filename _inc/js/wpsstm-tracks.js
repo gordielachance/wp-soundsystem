@@ -336,7 +336,6 @@ class WpsstmTrack {
         this.can_play =             null;
         
         this.sources =              [];
-        this.sources_request =      null;
         this.did_sources_request =  false;
         
         //tracklist
@@ -405,13 +404,9 @@ class WpsstmTrack {
     get_track_sources_request() {
 
         var self = this;
-        var deferredObject = $.Deferred();
-        
-        var track_el    = self.track_el;
+        var success = $.Deferred();
 
-        self.debug("track sources request");
-
-        $(track_el).find('.wpsstm-track-sources').html('');
+        self.track_el.find('.wpsstm-track-sources').html('');
         self.track_el.addClass('track-loading');
 
         var ajax_data = {
@@ -419,14 +414,14 @@ class WpsstmTrack {
             track:      self.to_ajax(),   
         };
 
-        self.sources_request = $.ajax({
+        var sources_request = $.ajax({
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
             dataType:   'json',
         });
 
-        self.sources_request.done(function(data) {
+        sources_request.done(function(data) {
 
             //update autosource time
             //self.autosource_time = data.timestamp;
@@ -434,42 +429,42 @@ class WpsstmTrack {
             self.did_sources_request = true;
             
             if ( data.new_html ){
-                
-                if(data.new_ids){
-                    //console.log("new source IDs:");
-                    //console.log(data.new_ids);
-                }
-
                 //update HTML & repopulate track
                 self.debug("repopulate HTML");
                 var new_node = $(data.new_html);
-                new_node.append('TOUFIX');
                 self.track_el.replaceWith( new_node );
                 self.init_html( new_node.get(0) );
-            }
-
-            if (data.success === true){
-
-                deferredObject.resolve();
-
+                
+                if (self.can_play){
+                    success.resolve();
+                }else{
+                    success.reject();
+                }
+                
+                
             }else{
                 self.debug("track sources request failed: " + data.message);
-                self.can_play = false;
-                self.track_el.addClass('track-error');
-                deferredObject.reject(data.message);
+                success.reject(data.message);
             }
 
         });
-
-        self.sources_request.fail(function() {
-            self.track_el.addClass('track-error');
-        })
-
-        self.sources_request.always(function() {
-            self.track_el.removeClass('track-loading');
-        })
         
-        return deferredObject.promise();
+        sources_request.fail(function() {
+            success.reject();
+        });
+        
+        ///
+
+        success.fail(function() {
+            self.can_play = false;
+            self.track_el.addClass('track-error');
+        });
+
+        success.always(function() {
+            self.track_el.removeClass('track-loading');
+        });
+        
+        return success.promise();
 
     }
     
@@ -477,9 +472,7 @@ class WpsstmTrack {
         var self =      this;
         
         self.sources =              [];//reset array
-        var track_el =  self.track_el; //page track
-
-        var source_els = $(track_el).find('[data-wpsstm-source-idx]');
+        var source_els = self.track_el.find('[data-wpsstm-source-idx]');
 
         $.each(source_els, function( index, source_el ) {
             var source_obj = new WpsstmTrackSource(source_el,self);
@@ -560,27 +553,6 @@ class WpsstmTrack {
 
     }
 
-    end_track(){
-        var self = this;
-
-        var source_obj = self.get_source_obj();
-        self.end_current_source();
-
-        self.track_el.removeClass('track-loading track-active track-playing');
-        
-
-    }
-    
-    end_current_source(){
-        var self = this;
-        
-        var source_obj = self.get_source_obj();
-        if (source_obj === undefined) return;
-        
-        source_obj.end_source();
-
-    }
-    
     static update_sources_order(track_id,source_ids){
         
         var success = $.Deferred();
