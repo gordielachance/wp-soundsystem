@@ -8,11 +8,8 @@ class WpsstmPlayer {
         this.loop_el =                  undefined;
         this.current_source =           undefined;
         this.current_track =            undefined;
-        this.requested_track =          undefined;
         this.tracks =                   [];
-        this.tracklists =               [];
         this.tracks_shuffle_order =     [];
-        this.tracklists_shuffle_order = [];
         this.is_shuffle =               ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         this.can_repeat =               ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
         
@@ -59,10 +56,6 @@ class WpsstmPlayer {
 
                 self.play_track(track_obj);
                 
-
-                $(document).trigger( "wpsstmRequestPlay",track_obj ); //custom event
-
-
             });
         });
         
@@ -177,8 +170,6 @@ class WpsstmPlayer {
 
         });
         
-        $(document).trigger( "wpsstmPlayerInit",[self] ); //custom event
-        
         self.audio_el.mediaelementplayer({
             classPrefix: 'mejs-',
             // All the config related to HLS
@@ -213,6 +204,9 @@ class WpsstmPlayer {
 
         //set the shuffle order
         self.shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
+        
+        self.debug("init_player");
+        $(document).trigger( "wpsstmPlayerInit",[self] ); //custom event
 
         /*
         autoplay
@@ -390,6 +384,7 @@ class WpsstmPlayer {
         */
         
         $(self.current_media).off(); //remove old events
+        $(document).trigger( "wpsstmSourceInit",[self,source_obj] );
 
         $(self.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmSourceLoaded",[self,source_obj] ); //custom event
@@ -401,7 +396,6 @@ class WpsstmPlayer {
         $(self.current_media).on('error', function(error) {
             self.debug('media - error');
             success.reject(error);
-
         });
 
         $(self.current_media).on('play', function() {

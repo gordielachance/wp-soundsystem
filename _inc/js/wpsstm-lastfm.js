@@ -143,7 +143,7 @@ class WpsstmLastFM {
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
 
-        self.debug(ajax_data);
+        //self.debug(ajax_data);
 
         return $.ajax({
 
@@ -214,8 +214,9 @@ class WpsstmLastFM {
 }
 
 (function($){
-    
+
     $(document).on( "wpsstmPlayerInit", function( event, player_obj ) {
+        
         wpsstm_lastfm.scrobble_icon =     player_obj.player_el.find('.wpsstm-player-action-scrobbler');
 
         //enable scrobbler at init
@@ -230,34 +231,40 @@ class WpsstmLastFM {
         });
     });
     
-    $(document).on( "wpsstmStartTracklist", function( event ) {
-        //TOUFIX TOUCHECK was hooked on PageTracklistsInit before
-        wpsstm_lastfm.init();
-    });
-    
-    $(document).on( "wpsstmSourceLoaded", function( event,player_obj,source_obj ) {
-
-        $(player_obj.current_media).on('play', function() {
+    $(document).on( "wpsstmSourceInit", function( event, player_obj ) {
+        
+        var nowPlayingTrack = function(){
+            var source_obj = player_obj.current_source;
+            var track_obj = source_obj.track;
+            if (!wpsstm_lastfm.scrobbler_enabled) return;
+            
+            wpsstm_lastfm.updateNowPlaying(track_obj);
+            $(player_obj.current_media).off('play', nowPlayingTrack); //run it only once
+        }
+        
+        var ScrobbleTrack = function() {
+            var source_obj = player_obj.current_source;
+            var track_obj = source_obj.track;
+            if ( source_obj.duration < 30) return;
+            
             if (wpsstm_lastfm.scrobbler_enabled){
-                wpsstm_lastfm.updateNowPlaying(source_obj.track);
-                
+                wpsstm_lastfm.user_scrobble(track_obj);
             }
-        });
+            //bot scrobble
+            if (wpsstm_lastfm.lastfm_scrobble_along){
+                wpsstm_lastfm.community_scrobble(track_obj);
+            }
+            
+            $(player_obj.current_media).off('ended', ScrobbleTrack); //run it only once
+        }
+
+        //now playing
+        $(player_obj.current_media).on('play', nowPlayingTrack);
         
-        $(player_obj.current_media).on('ended', function() {
-            if ( source_obj.duration > 30) { //scrobble
-                if (wpsstm_lastfm.scrobbler_enabled){
-                    wpsstm_lastfm.user_scrobble(source_obj.track);
-                }
-                //bot scrobble
-                if (wpsstm_lastfm.lastfm_scrobble_along){
-                    wpsstm_lastfm.community_scrobble(source_obj.track);
-                }
-            }
-        });
+        //track end
+        $(player_obj.current_media).on('ended', ScrobbleTrack);
         
     });
-
 
     $(document).on( "wpsstmTrackLove", function( event,track_obj,do_love ) {
         wpsstm_lastfm.love_unlove(track_obj,do_love);
