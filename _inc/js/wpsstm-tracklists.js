@@ -194,6 +194,9 @@
 
     });
     
+    
+    //TOUFIX expand tracklist to the current track / currently disabled
+    /*
     $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
 
         var tracklist_obj = track_obj.tracklist;
@@ -214,6 +217,7 @@
         }
         
     });
+    */
     
     
 

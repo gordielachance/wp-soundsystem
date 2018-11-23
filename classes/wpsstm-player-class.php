@@ -14,7 +14,7 @@ class WPSSTM_Player{
     }
     
     function bottom_player(){
-        //TOUFIXTORESTOREif ( !did_action('wpsstm_load_player') ) return;
+        if ( !did_action('wpsstm_load_player') ) return;
         $options=array('id'=>'wpsstm-bottom-player');
         $this->player_html($options);
     }
