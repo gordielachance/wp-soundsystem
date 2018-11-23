@@ -19,7 +19,6 @@
     @include transition-duration(.2s);
     
     [data-wpsstm-source-idx]{
-        display:none;
         .wpsstm-source-actions{
             > *{
                 &:not(.wpsstm-source-action-provider){
@@ -37,7 +36,6 @@
     &.active{
         margin-bottom:.5em!important;
         [data-wpsstm-source-idx]{
-            @include display-flex();
             .wpsstm-source-actions{
                 .wpsstm-action{
                     display:inline-block;

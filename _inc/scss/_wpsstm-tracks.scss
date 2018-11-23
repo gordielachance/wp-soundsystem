@@ -87,7 +87,7 @@
     }
 
    .wpsstm-track-position{
-
+        @extend .wpsstm-can-click;
         .wpsstm-player-icon-loading{
             display:none;
         }

@@ -59,11 +59,10 @@ var bottomPlayer = undefined;
             bottomPlayer.queue_tracklist(tracklist_obj);
         });
         
-        bottomPlayer.start_player();
+        bottomPlayer.init_player();
     });
     */
-    
-    
+
     $('iframe').load(function(e){
         
         wpsstm_debug("iframe loaded");
@@ -80,7 +79,7 @@ var bottomPlayer = undefined;
             bottomPlayer.queue_tracklist(tracklist_obj);
         });
         
-        bottomPlayer.start_player();
+        bottomPlayer.init_player();
         
     });
     

@@ -110,7 +110,6 @@ class WPSSTM_Core_Tracklists{
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
             //set global $wpsstm_source
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-            $wpsstm_tracklist->options['autoplay'] = false;
         }
     }
 

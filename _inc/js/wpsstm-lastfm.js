@@ -4,25 +4,6 @@ class WpsstmLastFM {
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
         this.scrobbler_enabled =        ( localStorage.getItem("wpsstm-scrobble") == 'true' ); //localStorage stores strings
     }
-    
-    init(){
-        
-        var self = this;
-        
-        self.scrobble_icon =     $('.wpsstm-player-action-scrobbler');
-
-        //enable scrobbler at init
-        if (self.scrobbler_enabled){
-            self.enable_scrobbler(true);
-        }
-
-        //click toggle scrobbling
-        $('.wpsstm-player-action-scrobbler').find('a').click(function(e) {
-            e.preventDefault();
-            self.enable_scrobbler(!self.scrobbler_enabled,true);
-        });
-
-    }
 
     enable_scrobbler(do_enable,show_notice){
         
@@ -45,31 +26,29 @@ class WpsstmLastFM {
                 },
                 success: function(data){
                     if (data.success === false) {
-                        console.log(data);
-                        self.scrobbler_enabled = false;
+                        do_enable = false;
                         $(self.scrobble_icon).addClass('scrobbler-error');
                         if (data.notice && show_notice){
                             wpsstm_dialog_notice(data.notice);
                         }
-                    }else{
-                        self.scrobbler_enabled = true;
-                        localStorage.setItem("wpsstm-scrobble", true);
-                        $(self.scrobble_icon).addClass('scrobbler-enabled');
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     console.log(xhr.status);
                     console.log(thrownError);
-                    self.scrobbler_enabled = false;
+                    do_enable = false;
                     $(self.scrobble_icon).addClass('scrobbler-error');
                 },
                 complete: function() {
                     $(self.scrobble_icon).removeClass('lastfm-loading');
+                    self.scrobbler_enabled = do_enable;
+                    localStorage.setItem("wpsstm-scrobble", do_enable);
+                    $(self.scrobble_icon).toggleClass('active',do_enable);
                 }
             })
         }else{
             self.scrobbler_enabled = false;
-            $(self.scrobble_icon).removeClass('scrobbler-enabled');
+            $(self.scrobble_icon).removeClass('active');
             localStorage.setItem("wpsstm-scrobble", false);
         }
     }
@@ -235,6 +214,21 @@ class WpsstmLastFM {
 }
 
 (function($){
+    
+    $(document).on( "wpsstmPlayerInit", function( event, player_obj ) {
+        wpsstm_lastfm.scrobble_icon =     player_obj.player_el.find('.wpsstm-player-action-scrobbler');
+
+        //enable scrobbler at init
+        if (wpsstm_lastfm.scrobbler_enabled){
+            wpsstm_lastfm.enable_scrobbler(true);
+        }
+
+        //click toggle scrobbling
+        wpsstm_lastfm.scrobble_icon.find('a').click(function(e) {
+            e.preventDefault();
+            wpsstm_lastfm.enable_scrobbler(!wpsstm_lastfm.scrobbler_enabled,true);
+        });
+    });
     
     $(document).on( "wpsstmStartTracklist", function( event ) {
         //TOUFIX TOUCHECK was hooked on PageTracklistsInit before

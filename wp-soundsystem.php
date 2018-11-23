@@ -122,10 +122,6 @@ class WP_SoundSystem {
         
         require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies (last.fm, scraper, etc.)
         
-        require $this->plugin_dir . 'classes/wpsstm-track-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
-        
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
         require $this->plugin_dir . 'wpsstm-settings.php';
@@ -138,9 +134,10 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
-        if ( wpsstm()->get_options('player_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-player.php';
-        }
+        require $this->plugin_dir . 'classes/wpsstm-track-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->include_apis();
@@ -170,13 +167,16 @@ class WP_SoundSystem {
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
         new WPSSTM_Core_BuddyPress();
-        new WPSSTM_Core_Player();
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
         new WPSSTM_Core_Sources();
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
+        
+        if ( wpsstm()->get_options('player_enabled') == 'on' ){
+            new WPSSTM_Player();
+        }
         
         
         do_action('wpsstm_init');

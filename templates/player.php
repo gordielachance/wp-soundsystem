@@ -15,7 +15,7 @@ global $wpsstm_player;
     <div class="player-row">
             <span id="wpsstm-player-extra-previous-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></span>
             <span id="wpsstm-audio-container">
-                <audio></audio>
+                <audio <?php echo $wpsstm_player->get_audio_attr();?>></audio>
             </span>
             <span id="wpsstm-player-extra-next-track" class="wpsstm-player-extra"><a href="#"><i class="fa fa-forward" aria-hidden="true"></i></a></span>
             <span id="wpsstm-player-loop" class="wpsstm-player-extra"><a title="<?php _e('Loop','wpsstm');?>" href="#"><i class="fa fa-refresh" aria-hidden="true"></i></a></span>

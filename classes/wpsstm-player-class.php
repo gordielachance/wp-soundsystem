@@ -1,6 +1,6 @@
 <?php
 
-class WPSSTM_Core_Player{
+class WPSSTM_Player{
     
     var $options = array();
 
@@ -14,7 +14,7 @@ class WPSSTM_Core_Player{
     }
     
     function bottom_player(){
-        if ( !did_action('wpsstm_load_player') ) return;
+        //TOUFIXTORESTOREif ( !did_action('wpsstm_load_player') ) return;
         $options=array('id'=>'wpsstm-bottom-player');
         $this->player_html($options);
     }
@@ -63,6 +63,17 @@ class WPSSTM_Core_Player{
     function get_player_links(){
         $actions = array();
         return apply_filters('wpsstm_get_player_actions',$actions);
+    }
+    
+    function get_audio_attr($values_attr=null){
+
+        $values_defaults = array(
+            'autoplay' =>                           ( wpsstm()->get_options('autoplay') == 'on' ),
+        );
+
+        $values_attr = array_merge($values_defaults,(array)$values_attr);
+        
+        return wpsstm_get_html_attr($values_attr);
     }
     
 }

@@ -39,42 +39,6 @@ class WpsstmPlayer {
             return;
         }
         
-        self.audio_el.mediaelementplayer({
-            classPrefix: 'mejs-',
-            // All the config related to HLS
-            hls: {
-                debug:          wpsstmL10n.debug,
-                autoStartLoad:  true
-            },
-            pluginPath: wpsstmPlayer.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
-            //audioWidth: '100%',
-            stretching: 'responsive',
-            features: ['playpause','loop','progress','current','duration','volume'],
-            loop: false,
-            success: function(mediaElement, originalNode, player) {
-                self.current_media = mediaElement;
-                self.debug("MediaElementJS ready");
-                self.init_player();
-            },error(mediaElement) {
-                // Your action when mediaElement had an error loading
-                //TO FIX is this required ?
-                console.log("mediaElement error");
-                /*
-                source_instances.addClass('source-error');
-                source_instances.removeClass('source-active');
-                */
-            }
-        });
-    }
-    
-    debug(msg){
-        var prefix = "WpsstmPlayer";
-        wpsstm_debug(msg,prefix);
-    }
-    
-    init_player(){
-
-        var self = this;
         $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
 
             //play button
@@ -127,7 +91,7 @@ class WpsstmPlayer {
         /*
         Scroll to playlist track when clicking the player's track number
         */
-        self.player_el.find('.wpsstm-track-position', function(e) {
+        self.player_el.find('.wpsstm-track-position').click(function(e) {
             e.preventDefault();
             
             var track_obj = self.current_track;
@@ -136,6 +100,7 @@ class WpsstmPlayer {
             var newTracksCount = track_obj.index + 1;
 
             //https://stackoverflow.com/a/6677069/782013
+            //TOUFIX BROKEN
             $('html, body').animate({
                 scrollTop: track_el.offset().top - ( $(window).height() / 3) //not at the very top
             }, 500);
@@ -211,20 +176,48 @@ class WpsstmPlayer {
             }
 
         });
-
+        
+        $(document).trigger( "wpsstmPlayerInit",[self] ); //custom event
+        
+        self.audio_el.mediaelementplayer({
+            classPrefix: 'mejs-',
+            // All the config related to HLS
+            hls: {
+                debug:          wpsstmL10n.debug,
+                autoStartLoad:  true
+            },
+            pluginPath: wpsstmPlayer.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
+            //audioWidth: '100%',
+            stretching: 'responsive',
+            features: ['playpause','loop','progress','current','duration','volume'],
+            loop: false,
+            success: function(mediaElement, originalNode, player) {
+                self.current_media = mediaElement;
+                self.debug("MediaElementJS ready");
+            },error(mediaElement) {
+                // Your action when mediaElement had an error loading
+                //TO FIX is this required ?
+                console.log("mediaElement error");
+                /*
+                source_instances.addClass('source-error');
+                source_instances.removeClass('source-active');
+                */
+            }
+        });
     }
     
-    start_player(){
+    init_player(){
         var self = this;
-        /*
-        autoplay ?
-        */
-        
-        console.log("start_player");
+        var has_autoplay = self.audio_el.get(0).autoplay;
+        var is_media_playing = ( (self.current_media !==undefined) && self.current_media.onplaying );
 
+        //set the shuffle order
         self.shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
 
-        if ( (self.current_media !==undefined) && !self.current_media.onplaying ){ //is not playing //TOUFIX TOCHECK this statement is not working
+        /*
+        autoplay
+        */
+        if ( has_autoplay && !is_media_playing ){
             var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
             var first_track = self.tracks[first_track_idx];
             
@@ -233,6 +226,11 @@ class WpsstmPlayer {
                 self.play_track(first_track);
             }
         }
+    }
+    
+    debug(msg){
+        var prefix = "WpsstmPlayer";
+        wpsstm_debug(msg,prefix);
     }
     
     play_track(track_obj){

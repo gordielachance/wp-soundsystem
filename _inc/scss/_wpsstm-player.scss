@@ -59,7 +59,7 @@ $player-text-color:#FFF;
                     &.scrobbler-error a:before{
                         content:"\f071"; //.fa-exclamation-triangle;
                     }
-                    &.scrobbler-enabled{
+                    &.active{
                         @include opacity(1);
                     }
                 }

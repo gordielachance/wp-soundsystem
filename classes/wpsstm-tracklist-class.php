@@ -95,10 +95,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     public static function get_default_options(){
         
         $options = array(
-            'autoload'                  => ( !is_admin() ) ? true : false,
-            'autoplay'                  => ( wpsstm()->get_options('autoplay') == 'on' ),
             'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
-            'player_enabled'            => ( wpsstm()->get_options('player_enabled') == 'on' ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
             'ajax_autosource'           => true,
@@ -620,9 +617,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //TO FIX weird code, not effiscient
         $extra_classes = ( isset($values_attr['extra_classes']) ) ? $values_attr['extra_classes'] : null;
         unset($values_attr['extra_classes']);
-        
-        //for data attribute
-        $options = $this->get_options();
 
         $values_defaults = array(
             'itemscope' =>                          true,

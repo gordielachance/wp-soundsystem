@@ -171,10 +171,6 @@ class WPSSTM_Core_Wizard{
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
 
-        if (wpsstm_is_backend() ){
-            $wpsstm_tracklist->options['autoplay'] = false;
-        }
-
         if ( !$post_id && $feed_url ){ //is wizard input
             $feed_url = trim($feed_url);
             $feed_url = apply_filters('wpsstm_wizard_input',$feed_url);
