@@ -57,9 +57,11 @@ class WPSSTM_LastFM{
         //JS
         wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
         
+        $can_scrobble_along = self::can_scrobble_along();
+        
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => ( self::can_community_scrobble() && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
+            'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' ) ),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -84,16 +86,13 @@ class WPSSTM_LastFM{
 
     public static function request_auth_token(){
         
-        $api_key = wpsstm()->get_options('lastfm_client_id');
-        $api_secret = wpsstm()->get_options('lastfm_client_secret');
-
-        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
-        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API secret missing", "wpsstm" ) );
+        $can_api = self::can_lastfm_api();
+        if ( is_wp_error($can_api) ) return $can_api;
 
         try {
             $authentication = new AuthApi('gettoken', array(
-                'apiKey' =>     $api_key,
-                'apiSecret' =>  $api_secret
+                'apiKey' =>     wpsstm()->get_options('lastfm_client_id'),
+                'apiSecret' =>  wpsstm()->get_options('lastfm_client_secret')
             ));
         }catch(Exception $e){
             return self::handle_api_exception($e);
@@ -137,14 +136,14 @@ class WPSSTM_LastFM{
     
     private static function get_basic_api_auth(){
         
+        $can_api = self::can_lastfm_api();
+        if ( is_wp_error($can_api) ) return $can_api;
+        
         //TO FIX store temporary ?
         $basic_auth = null;
-        
-        $api_key = wpsstm()->get_options('lastfm_client_id');
-        if ( !$api_key ) return new WP_Error( 'lastfm_missing_credentials', __( "Required Last.fm API key missing", "wpsstm" ) );
 
         $auth_args = array(
-            'apiKey' => $api_key
+            'apiKey' => wpsstm()->get_options('lastfm_client_id'),
         );
 
         try{
@@ -414,11 +413,34 @@ class WPSSTM_LastFM{
         return $actions;
     }
     
-    public static function can_community_scrobble(){
+    public static function can_lastfm_api(){
+        
+        $api_key = wpsstm()->get_options('lastfm_client_id');
+        $api_secret = wpsstm()->get_options('lastfm_client_secret');
+        
+        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
+        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.fm API secret missing", "wpsstm" ) );
+        
+        return true;
+        
+    }
+    
+    public static function can_scrobble_along(){
+        
+        $can_api = self::can_lastfm_api();
+        if ( is_wp_error($can_api) ) return $can_api;
+        
         $community_user_id = wpsstm()->get_options('community_user_id');
-        if (!$community_user_id) return;
+        if (!$community_user_id){
+            return new WP_Error( 'wpsstm_lastfm_community_scrobble',__('A community user is required.','wpsstm') );   
+        }
+        
         $community_user = new WPSSTM_LastFM_User($community_user_id);
-        return $community_user->is_user_api_logged();
+        $has_user_lastfm = $community_user->is_user_api_logged();
+        if ( !$has_user_lastfm ){
+            return new WP_Error( 'wpsstm_lastfm_community_scrobble', __("The community user must be authentificated to Last.fm. Please login with the community user, enable scrobbler and follow instructions.",'wpsstm'), 'inline' );
+        }
+        return true;
     }
 
     
@@ -750,12 +772,11 @@ class WPSSTM_LastFM_User{
     private function request_lastfm_user_api_metas(){
         if (!$this->user_id) return false;
         
+        $can_api = WPSSTM_LastFM::can_lastfm_api();
+        if ( is_wp_error($can_api) ) return $can_api;
+        
         $api_key = wpsstm()->get_options('lastfm_client_id');
         $api_secret = wpsstm()->get_options('lastfm_client_secret');
-        
-        if (!$api_key || !$api_secret){
-            return new WP_Error( 'lastfm_php_api', __('WPSSTM_LastFM_User: Missing Last.fm credentials','wpsstm') );
-        }
 
         $token = $this->get_user_token();
 
@@ -801,13 +822,12 @@ class WPSSTM_LastFM_User{
 
     private function get_user_api_auth(){
         
+        $can_api = WPSSTM_LastFM::can_lastfm_api();
+        if ( is_wp_error($can_api) ) return $can_api;
+        
         $api_key = wpsstm()->get_options('lastfm_client_id');
         $api_secret = wpsstm()->get_options('lastfm_client_secret');
-        
-        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
-        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.fm API secret missing", "wpsstm" ) );
 
-            
         $user_auth = null;
 
         $api_metas = $this->get_lastfm_user_api_metas();

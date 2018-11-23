@@ -140,13 +140,13 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
-        $this->include_apis();
+        $this->load_services();
     }
     
     /*
     Register scraper presets.
     */
-    private function include_apis(){
+    private function load_services(){
         
         $presets = array();
 

@@ -105,24 +105,19 @@ class WPSSTM_Settings {
                     $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
             }
 
-            /* 
-            MusicBrainz 
+            /*
+            Services
             */
             
+            //MusicBrainz
             $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
             $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
-            
-            /* 
-            Last.fm 
-            */
+
+            //Last.fm 
             $new_input['lastfm_client_id'] = ( isset($input['lastfm_client_id']) ) ? trim($input['lastfm_client_id']) : null;
             $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
             $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
             $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
-
-            /*
-            Other APIs
-            */
             
             //tuneefy
             $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
@@ -263,86 +258,33 @@ class WPSSTM_Settings {
         );
 
         /*
-        MusicBrainz
-        */
-
-        add_settings_section(
-            'settings-musicbrainz', // ID
-            __('MusicBrainz','wpsstm'), // Title
-            array( $this, 'section_musicbrainz_desc' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'musicbrainz_enabled', 
-            __('Enabled','wpsstm'), 
-            array( $this, 'musicbrainz_enabled_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-
-        add_settings_field(
-            'mb_auto_id', 
-            __('MusicBrainz auto ID','wpsstm'), 
-            array( $this, 'mb_auto_id_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings-musicbrainz'//section
-        );
-
-        /*
-        Last.fm
-        */
-        
-        add_settings_section(
-            'lastfm_settings', // ID
-            'Last.fm', // Title
-            array( $this, 'section_lastfm_desc' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'lastfm_client_id', 
-            __('API','wpsstm'), 
-            array( $this, 'lastfm_client_callback' ), 
-            'wpsstm-settings-page', 
-            'lastfm_settings'
-        );
-        
-        add_settings_field(
-            'lastfm_scrobbling', 
-            __('Scrobbling','wpsstm'), 
-            array( $this, 'lastfm_scrobbling_callback' ), 
-            'wpsstm-settings-page', 
-            'lastfm_settings'
-        );
-        
-        add_settings_field(
-            'lastfm_love', 
-            __('Mark tracks as favorites','wpsstm'), 
-            array( $this, 'lastfm_favorites_callback' ), 
-            'wpsstm-settings-page', 
-            'lastfm_settings'
-        );
-        
-        add_settings_field(
-            'lastfm_community_scrobble', 
-            __('Scrobble along','wpsstm'), 
-            array( $this, 'lastfm_community_scrobble_callback' ), 
-            'wpsstm-settings-page', 
-            'lastfm_settings'
-        );
-        
-        /*
-        APIs
+        Services
         */
         
         add_settings_section(
             'settings_apis', // ID
-            __('Other APIs','wpsstm'), // Title
+            __('Services','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
+        
+        add_settings_field(
+            'musicbrainz_client', 
+            __('Musicbrainz','wpsstm'), 
+            array( $this, 'musicbrainz_service_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_apis'//section
+        );
+        
+        add_settings_field(
+            'lastfm_client', 
+            __('Last.fm','wpsstm'), 
+            array( $this, 'lastfm_service_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_apis'//section
+        );
 
+        /*
         add_settings_field(
             'tuneefy_client', 
             __('Tuneefy'), 
@@ -350,6 +292,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'settings_apis'
         );
+        */
 
         add_settings_field(
             'spotify_client', 
@@ -418,31 +361,36 @@ class WPSSTM_Settings {
         
     }
     
-    function section_musicbrainz_desc(){
-        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">MusicBrainz</a>';
-        printf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post with this plugin, and will for example try to get the unique MusicBrainz ID of each item.','wpsstm'),$mb_link);
+    function musicbrainz_service_callback(){
+        $this->musicbrainz_enabled_callback();
+        $this->mb_auto_id_callback();
     }
-    
+
     function musicbrainz_enabled_callback(){
         $option = wpsstm()->get_options('musicbrainz_enabled');
+        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">MusicBrainz</a>';
+        $desc = sprintf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post.','wpsstm'),$mb_link);
+        printf('<p><small>%s</small></p>',$desc);
         
-        printf(
+        $el = sprintf(
             '<input type="checkbox" name="%s[musicbrainz_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Enable MusicBrainz","wpsstm")
+            __("Enable MusicBrainz.","wpsstm")
         );
+        printf('<p>%s</p>',$el);
     }
 
     function mb_auto_id_callback(){
         $option = wpsstm()->get_options('mb_auto_id');
         
-        printf(
+        $el = sprintf(
             '<input type="checkbox" name="%s[mb_auto_id]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option, 'on', false ),
-            __("Try to guess MusicBrainz ID when it is not defined.","wpsstm")
+            __("Auto-lookup MusicBrainz IDs.","wpsstm")
         );
+        printf('<p>%s</p>',$el);
     }
     
     function player_enabled_callback(){
@@ -517,79 +465,6 @@ class WPSSTM_Settings {
             $desc,
             $help
         );
-    }
-
-    function section_lastfm_desc(){
-        $api_link = sprintf('<a href="%s" target="_blank">%s</a>','https://www.last.fm/api/account/create',__('here','wpsstm') );
-        printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );            
-    }
-    
-    function lastfm_scrobbling_callback(){
-        $option = wpsstm()->get_options('lastfm_scrobbling');
-
-        printf(
-            '<input type="checkbox" name="%s[lastfm_scrobbling]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
-        );
-    }
-    
-    function lastfm_favorites_callback(){
-        $option = wpsstm()->get_options('lastfm_favorites');
-        
-        printf(
-            '<input type="checkbox" name="%s[lastfm_favorites]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Allow users to mark tracks as favorites and sync them with their Last.fm account.","wpsstm")
-        );
-    }
-    
-    function lastfm_community_scrobble_callback(){
-        
-        $enabled = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
-        
-        /*
-        form
-        */
-
-        $help = array();
-        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble along with the community user.","wpsstm");
-        $help[]= sprintf( "<small>%s</small>",__("0 = Disabled.","wpsstm") );
-        $help[]= sprintf( "<small>%s</small>",__("(You need to have authorized the community user to Last.fm)","wpsstm") );
-        
-        printf(
-            '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            implode('  ',$help)
-        );
-        
-        /*
-        errors
-        */
-
-        if ( $enabled ){
-
-            if ( !$community_user_id = wpsstm()->get_options('community_user_id') ){
-
-                add_settings_error( 'lastfm_community_scrobble', 'community-user-id-required', __("A Community user ID is required if you want to enable the scrobble along feature.",'wpsstm'), 'inline' );
-
-            }else{
-
-                //cap missing
-                if ( !$can_community_scrobble = WPSSTM_LastFM::can_community_scrobble() ){
-
-                    add_settings_error( 'lastfm_community_scrobble', 'community-user-cap-missing', __("Last.fm scrobble along requires the community user to be authentificated to Last.fm.",'wpsstm'), 'inline' );
-                }
-
-            }
-            
-        }
-        
-        //display settings errors
-        settings_errors('lastfm_community_scrobble');
     }
 
     function section_community_user_desc(){
@@ -691,13 +566,24 @@ class WPSSTM_Settings {
 
     //APIs
     
-    function lastfm_client_callback(){
+    function lastfm_service_callback(){
+        $this->lastfm_auth_callback();
+        $this->lastfm_scrobbling_callback();
+        $this->lastfm_favorites_callback();
+        $this->lastfm_community_scrobble_callback();
+    }
+    
+    function lastfm_auth_callback(){
         $client_id = wpsstm()->get_options('lastfm_client_id');
         $client_secret = wpsstm()->get_options('lastfm_client_secret');
-        $new_app_link = 'https://www.last.fm/api/account/create';
+        $new_app_url = 'https://www.last.fm/api/account/create';
+        
+        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',$new_app_url,__('here','wpsstm') );
+        $desc = sprintf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
+        printf('<p><small>%s</small></p>',$desc);
 
         //client ID
-        printf(
+        $client_el = sprintf(
             '<p><label>%s</label> <input type="text" name="%s[lastfm_client_id]" value="%s" /></p>',
             __('Api key:','wpsstm'),
             wpsstm()->meta_name_options,
@@ -705,13 +591,76 @@ class WPSSTM_Settings {
         );
         
         //client secret
-        printf(
+        $secret_el = sprintf(
             '<p><label>%s</label> <input type="text" name="%s[lastfm_client_secret]" value="%s" /></p>',
             __('Shared secret:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );
+        printf('<div>%s%s</div>',$client_el,$secret_el);
+    }
+    
+    function lastfm_scrobbling_callback(){
+        $option = wpsstm()->get_options('lastfm_scrobbling');
 
+        $el = sprintf(
+            '<input type="checkbox" name="%s[lastfm_scrobbling]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
+        );
+        printf('<p>%s</p>',$el);
+    }
+    
+    function lastfm_favorites_callback(){
+        $option = wpsstm()->get_options('lastfm_favorites');
+        
+        $el = sprintf(
+            '<input type="checkbox" name="%s[lastfm_favorites]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option, 'on', false ),
+            __("When a track is favorited/unfavorited, love/unlove it on Last.fm.","wpsstm")
+        );
+        
+        printf('<p>%s</p>',$el);
+    }
+    
+    function lastfm_community_scrobble_callback(){
+        
+        $enabled = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
+        
+        /*
+        form
+        */
+
+        $help = array();
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
+        
+        $el = sprintf(
+            '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $enabled,true, false ),
+            implode('  ',$help)
+        );
+        
+        /*
+        errors
+        */
+
+        if ( $enabled ){
+            
+            $can_scrobble_along = WPSSTM_LastFM::can_scrobble_along();
+            if ( is_wp_error($can_scrobble_along) ){
+                $error = sprintf( __( 'Cannot scrobble along: %s','wpsstm'),$can_scrobble_along->get_error_message() );
+                add_settings_error('lastfm_scrobble_along', 'cannot_scrobble_along',$error,'inline');
+            }
+            
+        }
+        
+        printf('<p>%s</p>',$el);
+        
+        //display settings errors
+        settings_errors('lastfm_scrobble_along');
     }
     
     function tuneefy_client_callback(){
