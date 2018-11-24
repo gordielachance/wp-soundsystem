@@ -101,8 +101,9 @@ $body_classes = array(
                 <?php
             break;
             case 'about':
+                global $wpsstm_lastfm;
                 $text_el = null;
-                $bio = WPSSTM_LastFM::get_artist_bio($wpsstm_track->artist);
+                $bio = $wpsstm_lastfm->get_artist_bio($wpsstm_track->artist);
 
                 //artist
                 if ( !is_wp_error($bio) && isset($bio['summary']) ){

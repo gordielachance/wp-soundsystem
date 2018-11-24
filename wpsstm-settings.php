@@ -8,7 +8,8 @@ class WPSSTM_Settings {
 
 	function __construct() {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
-        add_action( 'admin_init', array( $this, 'settings_init' ) );
+        add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
+        add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
 	}
 
     function create_admin_menu(){
@@ -42,105 +43,64 @@ class WPSSTM_Settings {
 
     }
     
+    static function is_settings_reset(){
+        return wpsstm_get_array_value(array('wpsstm_options','reset_options'),$_POST);
+    }
+    
     function settings_sanitize( $input ){
         $new_input = array();
 
-        if( isset( $input['reset_options'] ) ){
+        if ( self::is_settings_reset() ) return;
             
-            $new_input = wpsstm()->options_default;
-            
-        }else{ //sanitize values
-            
-            if( isset( $input['flush_community_tracks'] ) ){
-                WPSSTM_Core_Tracks::flush_community_tracks();
+        if( isset( $input['flush_community_tracks'] ) ){
+            WPSSTM_Core_Tracks::flush_community_tracks();
+        }
+
+        /*
+        Community user
+        */
+
+        //user id
+        if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
+            if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
+                $new_input['community_user_id'] = $input['community_user_id'];
             }
+        }
 
-            /*
-            Community user
-            */
-            
-            //user id
-            if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
-                if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
-                    $new_input['community_user_id'] = $input['community_user_id'];
-                }
+        /*
+        Tracklist
+        */
+
+        $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
+        $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
+        $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+
+        //shorten tracklist
+        if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
+            $new_input['toggle_tracklist'] = $input['toggle_tracklist'];
+        }
+
+        /*
+        Sources
+        */
+
+
+        /*
+        Live playlists
+        */
+
+        //scraper wizard page ID
+        if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
+            if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
+                $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
+                flush_rewrite_rules(); //because of function frontend_wizard_rewrite()
             }
-            
-            //scrobble along
-            $new_input['lastfm_community_scrobble'] = ( isset($input['lastfm_community_scrobble']) ) ? 'on' : 'off';
-            
-            /*
-            Tracklist
-            */
-            
-            $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
-            $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
-            $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
-            
-            //shorten tracklist
-            if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
-                $new_input['toggle_tracklist'] = $input['toggle_tracklist'];
-            }
-
-            /*
-            Sources
-            */
-
-
-            /*
-            Live playlists
-            */
-
-            //scraper wizard page ID
-            if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
-                if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
-                    $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
-                    flush_rewrite_rules(); //because of function frontend_wizard_rewrite()
-                }
-                
-            }
-            
-            //recent wizard entries
-            if ( isset ($input['recent_wizard_entries']) && ctype_digit($input['recent_wizard_entries']) ){
-                    $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
-            }
-
-            /*
-            Services
-            */
-            
-            //MusicBrainz
-            $new_input['musicbrainz_enabled'] = ( isset($input['musicbrainz_enabled']) ) ? 'on' : 'off';
-            $new_input['mb_auto_id'] = ( isset($input['mb_auto_id']) ) ? 'on' : 'off';
-
-            //Last.fm 
-            $new_input['lastfm_client_id'] = ( isset($input['lastfm_client_id']) ) ? trim($input['lastfm_client_id']) : null;
-            $new_input['lastfm_client_secret'] = ( isset($input['lastfm_client_secret']) ) ? trim($input['lastfm_client_secret']) : null;
-            $new_input['lastfm_scrobbling'] = ( isset($input['lastfm_scrobbling']) ) ? 'on' : 'off';
-            $new_input['lastfm_favorites'] = ( isset($input['lastfm_favorites']) ) ? 'on' : 'off';
-            
-            //tuneefy
-            $new_input['tuneefy_client_id'] = ( isset($input['tuneefy_client_id']) ) ? trim($input['tuneefy_client_id']) : null;
-            $new_input['tuneefy_client_secret'] = ( isset($input['tuneefy_client_secret']) ) ? trim($input['tuneefy_client_secret']) : null;
-
-            //spotify
-            $new_input['spotify_client_id'] = ( isset($input['spotify_client_id']) ) ? trim($input['spotify_client_id']) : null;
-            $new_input['spotify_client_secret'] = ( isset($input['spotify_client_secret']) ) ? trim($input['spotify_client_secret']) : null;
-            
-            //soundcloud
-            $new_input['soundcloud_client_id'] = ( isset($input['soundcloud_client_id']) ) ? trim($input['soundcloud_client_id']) : null;
-            $new_input['soundcloud_client_secret'] = ( isset($input['soundcloud_client_secret']) ) ? trim($input['soundcloud_client_secret']) : null;
-
-            /*
-            System
-            */
 
         }
-        
-        //remove default values
-        foreach((array)$input as $slug => $value){
-            $default = wpsstm()->get_default_option($slug);
-            if ($value == $default) unset ($input[$slug]);
+
+        //recent wizard entries
+        if ( isset ($input['recent_wizard_entries']) && ctype_digit($input['recent_wizard_entries']) ){
+                $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
         }
 
         //$new_input = array_filter($new_input); //disabled here because this will remove '0' values
@@ -258,59 +218,6 @@ class WPSSTM_Settings {
         );
 
         /*
-        Services
-        */
-        
-        add_settings_section(
-            'settings_apis', // ID
-            __('Services','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'musicbrainz_client', 
-            __('Musicbrainz','wpsstm'), 
-            array( $this, 'musicbrainz_service_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_apis'//section
-        );
-        
-        add_settings_field(
-            'lastfm_client', 
-            __('Last.fm','wpsstm'), 
-            array( $this, 'lastfm_service_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_apis'//section
-        );
-
-        /*
-        add_settings_field(
-            'tuneefy_client', 
-            __('Tuneefy'), 
-            array( $this, 'tuneefy_client_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_apis'
-        );
-        */
-
-        add_settings_field(
-            'spotify_client', 
-            __('Spotify'), 
-            array( $this, 'spotify_client_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_apis'
-        );
-        
-        add_settings_field(
-            'soundcloud_client', 
-            __('Soundcloud'), 
-            array( $this, 'soundcloud_client_id_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_apis'
-        );
-        
-        /*
         Styling
         */
         add_settings_section(
@@ -328,10 +235,9 @@ class WPSSTM_Settings {
             'settings_styling'
         );
 
-        /*
-        System
-        */
-
+    }
+    
+    function system_settings_init(){
         add_settings_section(
             'settings_system', // ID
             __('System','wpsstm'), // Title
@@ -354,43 +260,10 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
-
     }
     
-    function section_desc_empty(){
+    public static function section_desc_empty(){
         
-    }
-    
-    function musicbrainz_service_callback(){
-        $this->musicbrainz_enabled_callback();
-        $this->mb_auto_id_callback();
-    }
-
-    function musicbrainz_enabled_callback(){
-        $option = wpsstm()->get_options('musicbrainz_enabled');
-        $mb_link = '<a href="https://musicbrainz.org/" target="_blank">MusicBrainz</a>';
-        $desc = sprintf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post.','wpsstm'),$mb_link);
-        printf('<p><small>%s</small></p>',$desc);
-        
-        $el = sprintf(
-            '<input type="checkbox" name="%s[musicbrainz_enabled]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Enable MusicBrainz.","wpsstm")
-        );
-        printf('<p>%s</p>',$el);
-    }
-
-    function mb_auto_id_callback(){
-        $option = wpsstm()->get_options('mb_auto_id');
-        
-        $el = sprintf(
-            '<input type="checkbox" name="%s[mb_auto_id]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Auto-lookup MusicBrainz IDs.","wpsstm")
-        );
-        printf('<p>%s</p>',$el);
     }
     
     function player_enabled_callback(){
@@ -564,183 +437,9 @@ class WPSSTM_Settings {
         settings_errors('community_user_id');
     }
 
-    //APIs
-    
-    function lastfm_service_callback(){
-        $this->lastfm_auth_callback();
-        $this->lastfm_scrobbling_callback();
-        $this->lastfm_favorites_callback();
-        $this->lastfm_community_scrobble_callback();
-    }
-    
-    function lastfm_auth_callback(){
-        $client_id = wpsstm()->get_options('lastfm_client_id');
-        $client_secret = wpsstm()->get_options('lastfm_client_secret');
-        $new_app_url = 'https://www.last.fm/api/account/create';
-        
-        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',$new_app_url,__('here','wpsstm') );
-        $desc = sprintf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
-        printf('<p><small>%s</small></p>',$desc);
-
-        //client ID
-        $client_el = sprintf(
-            '<p><label>%s</label> <input type="text" name="%s[lastfm_client_id]" value="%s" /></p>',
-            __('Api key:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_id
-        );
-        
-        //client secret
-        $secret_el = sprintf(
-            '<p><label>%s</label> <input type="text" name="%s[lastfm_client_secret]" value="%s" /></p>',
-            __('Shared secret:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_secret
-        );
-        printf('<div>%s%s</div>',$client_el,$secret_el);
-    }
-    
-    function lastfm_scrobbling_callback(){
-        $option = wpsstm()->get_options('lastfm_scrobbling');
-
-        $el = sprintf(
-            '<input type="checkbox" name="%s[lastfm_scrobbling]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
-        );
-        printf('<p>%s</p>',$el);
-    }
-    
-    function lastfm_favorites_callback(){
-        $option = wpsstm()->get_options('lastfm_favorites');
-        
-        $el = sprintf(
-            '<input type="checkbox" name="%s[lastfm_favorites]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
-            __("When a track is favorited/unfavorited, love/unlove it on Last.fm.","wpsstm")
-        );
-        
-        printf('<p>%s</p>',$el);
-    }
-    
-    function lastfm_community_scrobble_callback(){
-        
-        $enabled = ( wpsstm()->get_options('lastfm_community_scrobble') == 'on' );
-        
-        /*
-        form
-        */
-
-        $help = array();
-        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
-        
-        $el = sprintf(
-            '<input type="checkbox" name="%s[lastfm_community_scrobble]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            implode('  ',$help)
-        );
-        
-        /*
-        errors
-        */
-
-        if ( $enabled ){
-            
-            $can_scrobble_along = WPSSTM_LastFM::can_scrobble_along();
-            if ( is_wp_error($can_scrobble_along) ){
-                $error = sprintf( __( 'Cannot scrobble along: %s','wpsstm'),$can_scrobble_along->get_error_message() );
-                add_settings_error('lastfm_scrobble_along', 'cannot_scrobble_along',$error,'inline');
-            }
-            
-        }
-        
-        printf('<p>%s</p>',$el);
-        
-        //display settings errors
-        settings_errors('lastfm_scrobble_along');
-    }
-    
-    function tuneefy_client_callback(){
-        $client_id = wpsstm()->get_options('tuneefy_client_id');
-        $client_secret = wpsstm()->get_options('tuneefy_client_secret');
-        $new_app_link = 'https://data.tuneefy.com/#header-oauth';
-        
-        $desc = sprintf(__('Required for autosourcing. Request your Tuneefy credentials %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
-        printf('<p><small>%s</small></p>',$desc);
-        
-        //client ID
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_id]" value="%s" /></p>',
-            __('Client ID:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_id
-        );
-        
-        //client secret
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[tuneefy_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_secret
-        );
-    }
-
-    function spotify_client_callback(){
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        $new_app_link = 'https://developer.spotify.com/my-applications/#!/applications/create';
-        
-        $desc = sprintf(__('Required for the Live Playlists Spotify preset.  Create a Spotify application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
-        printf('<p><small>%s</small></p>',$desc);
-        
-        //client ID
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[spotify_client_id]" value="%s" /></p>',
-            __('Client ID:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_id
-        );
-        
-        //client secret
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[spotify_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_secret
-        );
-    }
-    
-    function soundcloud_client_id_callback(){
-        $client_id = wpsstm()->get_options('soundcloud_client_id');
-        $client_secret = wpsstm()->get_options('soundcloud_client_secret');
-        
-        $new_app_link = 'http://soundcloud.com/you/apps/new';
-        
-        $desc = sprintf(__('Required for the Live Playlists Soundcloud preset.  Create a Soundcloud application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
-        printf('<p><small>%s</small></p>',$desc);
-
-        //client ID
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_id]" value="%s" /></p>',
-            __('Client ID:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_id
-        );
-        
-        //client secret
-        printf(
-            '<p><label>%s</label> <input type="text" name="%s[soundcloud_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
-            wpsstm()->meta_name_options,
-            $client_secret
-        );
-        
-    }
-
-    /*System*/
+    /*
+    System
+    */
     
     function reset_options_callback(){
         printf(
@@ -761,7 +460,7 @@ class WPSSTM_Settings {
     }
 
     
-	function  settings_page() {
+	function settings_page() {
         ?>
         <div class="wrap">
             <h2><?php _e('WP SoundSystem Settings','wpsstm');?></h2>  
@@ -785,6 +484,7 @@ class WPSSTM_Settings {
         </div>
         <?php
 	}
+
 }
 
 new WPSSTM_Settings;

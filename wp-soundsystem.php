@@ -79,25 +79,11 @@ class WP_SoundSystem {
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->options_default = array(
-            'musicbrainz_enabled'               => 'on',
-            'mb_auto_id'                        => 'on',
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'lastfm_client_id'                  => null,
-            'lastfm_client_secret'              => null,
-            'lastfm_scrobbling'                 => 'on',
-            'lastfm_favorites'                  => 'on',
-            'lastfm_community_scrobble'         => 'off',
-            'spotify_client_id'                 => null,
-            'spotify_client_secret'             => null,
-            'spotify_auto_id'                   => 'on',
-            'tuneefy_client_id'                 => null,
-            'tuneefy_client_secret'             => null,
-            'soundcloud_client_id'              => null,
-            'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
@@ -114,7 +100,7 @@ class WP_SoundSystem {
         
         if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
         if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
-        if ( ( $this->options['lastfm_community_scrobble'] == 'on' ) && !get_userdata( $this->options['lastfm_community_scrobble'] ) ) $this->options['lastfm_community_scrobble'] = 'off';
+        if ( ( $this->options['scrobble_along'] == 'on' ) && !get_userdata( $this->options['scrobble_along'] ) ) $this->options['scrobble_along'] = 'off';
         */
     }
     
@@ -162,6 +148,8 @@ class WP_SoundSystem {
     
     function setup_actions(){
         
+        do_action('wpsstm_init');
+        
         /* Now that files have been loaded, init all core classes */
         //TOUFIX should be better to hook this on a wpsstm_init action
         new WPSSTM_Core_Albums();
@@ -177,9 +165,7 @@ class WP_SoundSystem {
         if ( wpsstm()->get_options('player_enabled') == 'on' ){
             new WPSSTM_Player();
         }
-        
-        
-        do_action('wpsstm_init');
+
         ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));

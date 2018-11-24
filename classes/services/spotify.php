@@ -1,18 +1,32 @@
 <?php
 class WPSSTM_Spotify{
+    
+    static $spotify_options_meta_name = 'wpsstm_spotify_options';
     static $spotify_id_meta_key = '_wpsstm_spotify_id';
     static $spotify_data_meta_key = '_wpsstm_spotify_data';
     static $spotify_data_time_metakey = '_wpsstm_spotify_data_time';
     static $spotify_no_auto_id_metakey = '_wpsstm_spotify_no_auto_id';
     static $spotify_data_by_url_transient_prefix = 'wpsstm_spotify_by_url_'; //to cache the musicbrainz API results
+    
+    public $options_default = array();
+    public $options = array();
+    
     function __construct(){
-        if ( wpsstm()->get_options('spotify_client_id') && wpsstm()->get_options('spotify_client_secret') ){
-            add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
-            add_action('wpsstm_before_remote_response',array($this,'register_spotify_presets'));
+        
+        $this->options_default = array(
+            'client_id' =>          null,
+            'client_secret' =>      null,
+            'spotify_auto_id' =>    'on',
+        );
+        
+        $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name), $this->options_default);
+        
+        /*backend*/
+        add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );
+        
+        if ( $this->can_spotify_api() === true ){
+            
             add_action( 'add_meta_boxes', array($this, 'metabox_spotify_register'),55);
-            add_action( 'save_post', array(__class__,'metabox_spotify_id_save'), 7);
-            add_action( 'save_post', array(__class__,'auto_spotify_id_on_post_save'), 8);
-            add_action( 'save_post', array(__class__,'metabox_spotify_data_save'), 9);
             
             //backend columns
             add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_artist), array(__class__,'spotify_columns_register'), 10, 2 );
@@ -24,7 +38,96 @@ class WPSSTM_Spotify{
             add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'spotify_columns_content'), 10, 2 );
             
         }
+        
+        ///
+        
+        if ( $this->can_spotify_api() === true ){
+            add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
+            add_action('wpsstm_before_remote_response',array($this,'register_spotify_presets'));
+            
+            add_action( 'save_post', array($this,'metabox_spotify_id_save'), 7);
+            add_action( 'save_post', array($this,'auto_spotify_id_on_post_save'), 8);
+            add_action( 'save_post', array($this,'metabox_spotify_data_save'), 9);
+        }
     }
+    
+    function get_options($keys = null){
+        return wpsstm_get_array_value($keys,$this->options);
+    }
+        
+    public function can_spotify_api(){
+        
+        $client_id = $this->get_options('client_id');
+        $client_secret = $this->get_options('client_secret');
+        
+        if ( !$client_id ) return new WP_Error( 'spotify_no_client_id', __( "Required Spotify client ID missing", "wpsstm" ) );
+        if ( !$client_secret ) return new WP_Error( 'spotify_no_client_secret', __( "Required Spotify client secret missing", "wpsstm" ) );
+        
+        return true;
+        
+    }
+    
+    function spotify_settings_init(){
+        register_setting(
+            'wpsstm_option_group', // Option group
+            self::$spotify_options_meta_name, // Option name
+            array( $this, 'spotify_settings_sanitize' ) // Sanitize
+         );
+        
+        add_settings_section(
+            'spotify_service', // ID
+            'Spotify', // Title
+            array( $this, 'spotify_settings_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'spotify_client', 
+            __('API','wpsstm'), 
+            array( $this, 'spotify_api_settings' ), 
+            'wpsstm-settings-page', // Page
+            'spotify_service'//section
+        );
+        
+    }
+
+    function spotify_settings_sanitize($input){
+        if ( WPSSTM_Settings::is_settings_reset() ) return;
+
+        $new_input['client_id'] = ( isset($input['client_id']) ) ? trim($input['client_id']) : null;
+        $new_input['client_secret'] = ( isset($input['client_secret']) ) ? trim($input['client_secret']) : null;
+
+        return $new_input;
+    }
+    
+    function spotify_settings_desc(){
+        $new_app_link = 'https://developer.spotify.com/my-applications/#!/applications/create';
+        
+        printf(__('Required for the Live Playlists Spotify preset.  Create a Spotify application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+    }
+
+    function spotify_api_settings(){
+        
+        $client_id = $this->get_options('client_id');
+        $client_secret = $this->get_options('client_secret');
+        
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[client_id]" value="%s" /></p>',
+            __('Client ID:','wpsstm'),
+            self::$spotify_options_meta_name,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[client_secret]" value="%s" /></p>',
+            __('Client Secret:','wpsstm'),
+            self::$spotify_options_meta_name,
+            $client_secret
+        );
+    }
+    
     //register presets
     function register_spotify_presets($remote){
         new WPSSTM_Spotify_URL_Api_Preset($remote);
@@ -46,10 +149,13 @@ class WPSSTM_Spotify{
         return $links;
     }
     
-    static function get_access_token(){
+    function get_access_token(){
         
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
+        $can_api = $this->can_spotify_api();
+        if ( is_wp_error($can_api) ) return $can_api;
+        
+        $client_id = $this->get_options('client_id');
+        $client_secret = $this->get_options('client_secret');
 
 
         $token = false;
@@ -78,8 +184,8 @@ class WPSSTM_Spotify{
 
     }
     
-    static function get_spotify_request_args(){
-        $token = self::get_access_token();
+    function get_spotify_request_args(){
+        $token = $this->get_access_token();
         if ( is_wp_error( $token ) ) return $token;
         
         $request_args = array(
@@ -103,7 +209,7 @@ class WPSSTM_Spotify{
         );
 
         //MBID Metabox
-        $sid_callback = array(__class__,'metabox_spotify_id_content');
+        $sid_callback = array($this,'metabox_spotify_id_content');
         
         //TOUFIX
         /*
@@ -139,7 +245,7 @@ class WPSSTM_Spotify{
     Checks if the post contains enough information to do an API lookup
     */
 
-    static function can_spotify_search_entries($post_id){
+    function can_spotify_search_entries($post_id){
         $post_type = get_post_type($post_id);
         
         $spotify_id = wpsstm_get_post_spotify_id($post_id);
@@ -165,7 +271,7 @@ class WPSSTM_Spotify{
 
     }
     
-    static function get_edit_spotify_id_input($post_id = null){
+    private function get_edit_spotify_id_input($post_id = null){
         global $post;
         if (!$post) $post_id = $post->ID;
         
@@ -182,7 +288,7 @@ class WPSSTM_Spotify{
         
         $input_el = wpsstm_get_backend_form_input($input_attr);
         
-        if ( wpsstm()->get_options('spotify_auto_id') == "on" ){
+        if ( $this->get_options('spotify_auto_id') == "on" ){
             $is_ignore = ( get_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true ) );
             $input_auto_id_el = sprintf('<input type="checkbox" value="on" name="wpsstm-ignore-auto-spotify-id" %s/>',checked($is_ignore,true,false));
             $desc_el .= $input_auto_id_el . ' ' .__("Do not auto-identify",'wpsstm');
@@ -191,14 +297,14 @@ class WPSSTM_Spotify{
         return $input_el . $desc_el;
     }
 
-    public static function metabox_spotify_id_content($post){
+    public function metabox_spotify_id_content($post){
 
         $spotify_id = wpsstm_get_post_spotify_id($post->ID);
-        $can_search_entries = self::can_spotify_search_entries($post->ID);
+        $can_search_entries = $this->can_spotify_search_entries($post->ID);
 
         ?>
         <p>
-            <?php echo self::get_edit_spotify_id_input($post->ID);?>
+            <?php echo $this->get_edit_spotify_id_input($post->ID);?>
         </p>
         <table class="form-table">
             <tbody>
@@ -367,7 +473,7 @@ class WPSSTM_Spotify{
 
         $entries = null;
 
-        $entries = self::search_spotify_entries_for_post($post->ID);
+        $entries = $this->search_spotify_entries_for_post($post->ID);
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm-spotify-entries', 'api_error', $entries->get_error_message(),'inline');
@@ -409,7 +515,7 @@ class WPSSTM_Spotify{
     }
     
     //TOUFIX
-    private static function search_spotify_entries_for_post($post_id = null ){
+    private function search_spotify_entries_for_post($post_id = null ){
         
         global $post;
         if (!$post_id) $post_id = $post->ID;
@@ -457,7 +563,7 @@ class WPSSTM_Spotify{
 
         if (!$api_query) return;
         
-        $data = self::get_spotify_api_entry($api_type,null,$api_query);
+        $data = $this->get_spotify_api_entry($api_type,null,$api_query);
         if ( is_wp_error($data) ) return $data;
         
         $result_keys[] = 'items';
@@ -465,7 +571,7 @@ class WPSSTM_Spotify{
         
     }
     
-    static function get_spotify_api_entry($type,$spotify_id = null,$query = null,$offset = null){
+    function get_spotify_api_entry($type,$spotify_id = null,$query = null,$offset = null){
         global $post;
 
         $api_results = null;
@@ -508,7 +614,7 @@ class WPSSTM_Spotify{
         
         if ( !$api_results ){
             
-            $spotify_request_args = self::get_spotify_request_args();
+            $spotify_request_args = $this->get_spotify_request_args();
             $request = wp_remote_get($url,$spotify_request_args);
             if (is_wp_error($request)) return $request;
 
@@ -535,7 +641,7 @@ class WPSSTM_Spotify{
     Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
     **/
     
-    public static function auto_spotify_id( $post_id ){
+    public function auto_spotify_id( $post_id ){
 
         $sid = null;
         $entries = array();
@@ -545,7 +651,7 @@ class WPSSTM_Spotify{
         $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
         if ( !in_array($post_type,$allowed_post_types) ) return false;
 
-        $entries = self::search_spotify_entries_for_post($post_id);
+        $entries = $this->search_spotify_entries_for_post($post_id);
         if ( is_wp_error($entries) ) return $entries;
         if (!$entries) return;
         
@@ -558,7 +664,7 @@ class WPSSTM_Spotify{
         
         if ($sid){
             update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
-            self::reload_spotify_datas($post_id);
+            $this->reload_spotify_datas($post_id);
             return $sid;
         }
         
@@ -568,7 +674,7 @@ class WPSSTM_Spotify{
     Reload Spotify entry data for an MBID.
     */
     
-    private static function reload_spotify_datas($post_id){
+    private function reload_spotify_datas($post_id){
 
         //delete existing
         if ( delete_post_meta( $post_id, self::$spotify_data_meta_key ) ){
@@ -581,7 +687,7 @@ class WPSSTM_Spotify{
 
         //get API data
         $api_type = self::get_spotify_type_by_post_id($post_id,true);
-        $data = self::get_spotify_api_entry($api_type,$id);
+        $data = $this->get_spotify_api_entry($api_type,$id);
         if ( is_wp_error($data) ) return $data;
 
         if ( $success = update_post_meta( $post_id, self::$spotify_data_meta_key, $data ) ){
@@ -595,7 +701,7 @@ class WPSSTM_Spotify{
         
     }
     
-    public static function metabox_spotify_id_save( $post_id ) {
+    public function metabox_spotify_id_save( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -626,12 +732,12 @@ class WPSSTM_Spotify{
             update_post_meta( $post_id, self::$spotify_id_meta_key, $id );
             
             if ($is_id_update){
-                self::reload_spotify_datas($post_id);
+                $this->reload_spotify_datas($post_id);
             }
         }
         
         //ignore auto MBID
-        if ( wpsstm()->get_options('spotify_auto_id') == "on" ){
+        if ( $this->get_options('spotify_auto_id') == "on" ){
             $do_ignore = ( isset($_POST['wpsstm-ignore-auto-spotify-id']) ) ? true : false;
             if ($do_ignore){
                 update_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true );
@@ -642,14 +748,14 @@ class WPSSTM_Spotify{
 
         switch ($action){
             case 'autoguess-id':
-                $id = self::auto_spotify_id( $post_id );
+                $id = $this->auto_spotify_id( $post_id );
                 if ( is_wp_error($id) ) break;
             break;
         }
 
     }
     
-    public static function metabox_spotify_data_save( $post_id ){
+    public function metabox_spotify_data_save( $post_id ){
 
         $mbid = null;
         $mbdata = null;
@@ -685,7 +791,7 @@ class WPSSTM_Spotify{
         switch ($action){
 
             case 'reload':
-                self::reload_spotify_datas($post_id);
+                $this->reload_spotify_datas($post_id);
             break;
             /*
             TOUFIX    
@@ -693,7 +799,7 @@ class WPSSTM_Spotify{
                 $field_slugs = isset($_POST['wpsstm-spotify-data-fill-fields']) ? $_POST['wpsstm-spotify-data-fill-fields'] : array();
 
                 if ( !empty($field_slugs) ){
-                    self::fill_with_mbdatas($post_id,$field_slugs,true);
+                    $this->fill_with_mbdatas($post_id,$field_slugs,true);
                 }
 
             break;
@@ -706,7 +812,7 @@ class WPSSTM_Spotify{
     When saving an artist / track / album and that no Spotify ID exists, guess it - if option enabled
     */
     
-    public static function auto_spotify_id_on_post_save( $post_id ){
+    public function auto_spotify_id_on_post_save( $post_id ){
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
@@ -720,7 +826,7 @@ class WPSSTM_Spotify{
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
         //ignore if global option disabled
-        $auto_id = ( wpsstm()->get_options('spotify_auto_id') == "on" );
+        $auto_id = ( $this->get_options('spotify_auto_id') == "on" );
         if (!$auto_id) return false;
 
         //ignore if option disabled
@@ -733,7 +839,7 @@ class WPSSTM_Spotify{
         if ($track->spotify_id) return;
         
         //get auto mbid
-        $id = self::auto_spotify_id( $post_id );
+        $id = $this->auto_spotify_id( $post_id );
         if ( is_wp_error($id) ) return $id;
         
         if($id){
@@ -843,12 +949,13 @@ class WPSSTM_Spotify_URL_Api_Preset{
     }
 
     function get_remote_pagination($pagination,$remote){
+        global $wpsstm_spotify;
         
         if ( $this->can_handle_url($remote->url) ){
             
             $playlist_id = $this->get_playlist_id($remote->url);
             
-            $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
+            $data = $wpsstm_spotify->get_spotify_api_entry('playlists',$playlist_id);
 
             if ( is_wp_error($data) ){
                 return $data;
@@ -869,10 +976,11 @@ class WPSSTM_Spotify_URL_Api_Preset{
     }
     
     function get_remote_title($title,$remote){
+        global $wpsstm_spotify;
         
         if ( $this->can_handle_url($remote->url) ){
             $playlist_id = $this->get_playlist_id($remote->url);
-            $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
+            $data = $wpsstm_spotify->get_spotify_api_entry('playlists',$playlist_id);
             if ( !is_wp_error($data) ){
                  $title = wpsstm_get_array_value('name', $data);
             }
@@ -883,9 +991,11 @@ class WPSSTM_Spotify_URL_Api_Preset{
     }
     
     function get_remote_author($author,$remote){
+        global $wpsstm_spotify;
+        
         if ( $this->can_handle_url($remote->url) ){
             $playlist_id = $this->get_playlist_id($remote->url);
-            $data = WPSSTM_Spotify::get_spotify_api_entry('playlists',$playlist_id);
+            $data = $wpsstm_spotify->get_spotify_api_entry('playlists',$playlist_id);
             if ( !is_wp_error($data) ){
                  $author = wpsstm_get_array_value(array('owner','id'), $data);
             }
@@ -894,10 +1004,11 @@ class WPSSTM_Spotify_URL_Api_Preset{
     }
 
     function remote_request_args($args,$remote){
+        global $wpsstm_spotify;
         
         if ( $this->can_handle_url($remote->url) ){
             
-            $spotify_args = WPSSTM_Spotify::get_spotify_request_args();
+            $spotify_args = $wpsstm_spotify->get_spotify_request_args();
             if ( !is_wp_error($spotify_args) ){
                 $args = array_merge($args,$spotify_args);
             }
@@ -929,7 +1040,8 @@ class WPSSTM_Spotify_URI_Api_Preset extends WPSSTM_Spotify_URL_Api_Preset{
 }
 
 function wpsstm_spotify_init(){
-    new WPSSTM_Spotify();
+    global $wpsstm_spotify;
+    $wpsstm_spotify = new WPSSTM_Spotify();
 }
 
 add_action('wpsstm_init','wpsstm_spotify_init');

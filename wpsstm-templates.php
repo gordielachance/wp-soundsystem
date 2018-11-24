@@ -95,22 +95,6 @@ function wpsstm_get_post_length($post_id = null,$seconds = false){
     return ($seconds) ? $s : $ms;
 }
 
-function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
-    
-    if ( wpsstm()->get_options('musicbrainz_enabled') != 'on' ) return false;
-    
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbdata_metakey, true );
-    
-    if ($keys){
-        return wpsstm_get_array_value($keys, $data);
-    }else{
-        return $data;
-    }
-    
-}
-
 function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;

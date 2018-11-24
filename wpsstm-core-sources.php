@@ -581,6 +581,7 @@ class WPSSTM_Core_Sources{
     }
     
     static function can_autosource(){
+        global $wpsstm_spotify;
 
         //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
@@ -589,11 +590,8 @@ class WPSSTM_Core_Sources{
         }
         
         //spotify API
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        if (!$client_id || !$client_secret){
-            return new WP_Error( 'wpsstm_autosource',__('Autosource requires access to the Spotify API.','wpsstm') );   
-        }
+        $can_spotify_api = $wpsstm_spotify->can_spotify_api();
+        if ( is_wp_error($can_spotify_api) ) return $can_spotify_api;
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
