@@ -52,9 +52,10 @@
 
     });
 
+    //TOUFIX wpsstmStartTracklist is not triggered.
     $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
         
-        if ( tracklist_obj.is_expired ){
+        if ( tracklist_obj.isExpired ){
             tracklist_obj.debug("cache expired, refresh tracklist");
             tracklist_obj.reload_tracklist();
         }
@@ -231,13 +232,12 @@ class WpsstmTracklist {
         this.tracklist_el =             $([]);
         this.iframe_el =                $([]);
         this.tracklist_request =        undefined;
-        this.is_expired =               undefined;
-        this.expiration_time =          undefined;
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
         this.options =                  [];
         this.can_play =                 undefined;
         this.targetPlayer =             undefined;
+        this.isExpired =                undefined;
 
         this.populate_html(tracklist_html);
     }
@@ -296,38 +296,26 @@ class WpsstmTracklist {
         var is_expired = false;
         var remaining_sec = null;
         
-        var meta_expiration = self.tracklist_el.find('meta[itemprop="wpsstmExpiration"]');
-        
+        var meta_expiration = self.tracklist_el.find('meta[itemprop="wpsstmRefreshTimer"]');
         if (meta_expiration.length){
-            var value = meta_expiration.attr('content');
-            expiration_time = Number(value);
+            remaining_sec = meta_expiration.attr('content');
+        }
+        
+        if (remaining_sec > 0){
 
-            is_expired = now > expiration_time;
-            remaining_sec = expiration_time - now;
-            
-            var readable_date = new Date();
-            readable_date.setTime(expiration_time*1000);
-            var readable_date_str = readable_date.toUTCString();
-            
-            ///
-            self.expiration_time = expiration_time;
-            self.is_expired = is_expired;
-            ///
-            
-            if (is_expired){
-                console.log("this tracklist has expired on: " + readable_date_str);
-            }else{
-                if (remaining_sec > 0){
+            setTimeout(function(){
+                self.isExpired = true;
+                self.tracklist_el.addClass('tracklist-expired');
+                self.debug("tracklist has expired, stop expiration timer");
 
-                    setTimeout(function(){
-                        self.is_expired = true;
-                        self.tracklist_el.addClass('tracklist-expired');
-                        self.debug("tracklist has expired, stop expiration timer");
+            }, remaining_sec * 1000 );
 
-                    }, remaining_sec * 1000 );
-                }
-                console.log("tracklist will expire on: " + readable_date_str + " (in "+remaining_sec+" seconds)");
-            }
+        }
+        
+        if (remaining_sec < 0){
+            self.debug("tracklist has expired "+Math.abs(remaining_sec)+" seconds ago");
+        }else{
+            console.log("tracklist will expire in "+remaining_sec+" seconds");
         }
 
     }

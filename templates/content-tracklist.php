@@ -20,7 +20,7 @@ global $wpsstm_tracklist;
                 <?php 
             }
             //refreshed
-            if ( ($wpsstm_tracklist->tracklist_type == 'live') && ( $rate = $wpsstm_tracklist->get_time_before_refresh() ) ){
+            if ( ($wpsstm_tracklist->tracklist_type == 'live') && ( $rate = $wpsstm_tracklist->get_human_next_refresh_time() ) ){
                 ?>
                 <time class="wpsstm-tracklist-refresh-time">
                     <i class="fa fa-rss" aria-hidden="true"></i> 

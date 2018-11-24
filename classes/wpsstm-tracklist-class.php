@@ -91,6 +91,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type == 'live' ){//TOUFIX what if not the 'live' type ?
             $this->updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
         }
+        $seconds = $this->seconds_before_refresh();
+        $this->is_expired = ($seconds <= 0);
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
@@ -670,10 +672,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ( $this->did_query_tracks ) return true;
 
-        $has_expired = $this->check_has_expired();
-        $live = ( ($this->tracklist_type == 'live') && $has_expired );
+        $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
         $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
-        $refresh_delay = $this->get_time_before_refresh();
+        $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
             new WPSSTM_Live_Playlist_Stats($this); //remote request stats
@@ -740,46 +741,38 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    function get_time_before_refresh(){
+    //UTC
+
+    function seconds_before_refresh(){
+        
+        if ($this->tracklist_type != 'live') return false;
+        
+        $cache_min = $this->get_options('remote_delay_min');
+        if (!$cache_min) return false;
+        
+        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        if ( !$updated_time ) return false;
+        
+        $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
+        $now = current_time( 'timestamp', true );
+        
+        return $expiration_time - $now;
+    }
+
+    function get_human_next_refresh_time(){
 
         $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-        
+
         if ( !$cache_seconds ) return false;
         
         $time_refreshed = $this->updated_time;
-        $time_before = $time_refreshed + $cache_seconds;
+        $next_refresh = $time_refreshed + $cache_seconds;
         $now = current_time( 'timestamp', true );
-
-        return $refresh_time_human = human_time_diff( $now, $time_before );
-    }
-    
-    //UTC
-    function get_expiration_time(){
-        $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
-        return $this->updated_time + $cache_seconds;
-    }
-
-    // checks if the playlist has expired (and thus should be refreshed)
-    // set 'expiration_time'
-    private function check_has_expired(){
         
-        if ($this->is_expired !== null) return $this->is_expired;
+        $is_future = ( ($next_refresh - $now) > 0 );
+        if (!$is_future) return false;
         
-        $delay = $this->get_options('remote_delay_min');
-        $has_cache = (bool)$delay;
-
-        if (!$has_cache){
-            $is_expired = true;
-        }else{
-            $now = current_time( 'timestamp', true );
-            $expiration_time = $this->get_expiration_time(); //set expiration time
-            $is_expired = ( $now >= $expiration_time );
-            $time_before_refresh = $this->get_time_before_refresh();
-            //$this->tracklist_log(json_encode(array('expired'=>(bool)$is_expired,'delay'=>$time_before_refresh)),'check has expired');
-        }
-        
-        $this->is_expired = $is_expired;
-
+        return human_time_diff( $now, $next_refresh );
     }
     
     /*
@@ -880,8 +873,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             expiration time
             */
             //if no real cache is set; let's say tracklist is already expired at load!
-            $expiration_time = ($expiration = $this->get_expiration_time() ) ? $expiration : current_time( 'timestamp', true );
-            $metas['wpsstmExpiration'] = $expiration_time;
+            $metas['wpsstmRefreshTimer'] = $this->seconds_before_refresh();
         }
         
         return $metas;
