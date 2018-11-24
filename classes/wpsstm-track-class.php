@@ -1013,7 +1013,7 @@ class WPSSTM_Track{
         <span class="tracklist-row-action">
             <?php
             //checked
-            $checked = in_array($tracklist->post_id,$checked_playlist_ids);
+            $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
             $checked_str = checked($checked,true,false);
             printf('<input name="wpsstm_playlist_id" type="checkbox" value="%s" %s />',$tracklist->post_id,$checked_str);
             ?>
