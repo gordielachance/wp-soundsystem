@@ -716,7 +716,16 @@ class WpsstmPlayer {
 
 }
 
+var bottomPlayer = undefined;
+
 (function($){
+    
+    $( document ).ready(function() {
+        wpsstm_debug("init","wpsstm");
+        var bottomPlayerEl = $('#wpsstm-bottom-player');
+        bottomPlayer = new WpsstmPlayer(bottomPlayerEl);
+        
+    });
     
     $(document).on( "wpsstmStartTracklist", function( event, tracklist_obj ) {
     

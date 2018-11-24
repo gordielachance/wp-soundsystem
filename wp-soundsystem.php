@@ -163,10 +163,7 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
-        
-        if ( wpsstm()->get_options('player_enabled') == 'on' ){
-            new WPSSTM_Player();
-        }
+        new WPSSTM_Player();
 
         ////
 

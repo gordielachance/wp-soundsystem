@@ -1,5 +1,3 @@
-var bottomPlayer = undefined;
-
 (function($){
 
     //artist autocomplete
@@ -41,27 +39,6 @@ var bottomPlayer = undefined;
             minLength: 2,
         });
     });
-    
-    $( document ).ready(function() {
-        wpsstm_debug("init","wpsstm");
-        var bottomPlayerEl = $('#wpsstm-bottom-player');
-        bottomPlayer = new WpsstmPlayer(bottomPlayerEl);
-        
-    });
-    
-    //TOUFIX remove
-    /*
-    $( document ).ready(function() {
-        var tracklist_els = $( ".wpsstm-tracklist" );
-
-        $.each(tracklist_els, function( index, playlist_html ) {
-            var tracklist_obj = new WpsstmTracklist(playlist_html);
-            bottomPlayer.queue_tracklist(tracklist_obj);
-        });
-        
-        bottomPlayer.init_player();
-    });
-    */
 
     $('iframe').load(function(e){
         
@@ -74,6 +51,7 @@ var bottomPlayer = undefined;
         var content = $(iframe.contentWindow.document.body);
         var tracklist_els = $(content).find( ".wpsstm-tracklist" );
 
+        //TOUFIX this should be in player js
         $.each(tracklist_els, function( index, playlist_html ) {
             var tracklist_obj = new WpsstmTracklist(playlist_html);
             bottomPlayer.queue_tracklist(tracklist_obj);

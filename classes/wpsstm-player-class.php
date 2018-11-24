@@ -5,11 +5,13 @@ class WPSSTM_Player{
     var $options = array();
 
     function __construct() {
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
 
-        add_action( 'wp_footer', array($this,'bottom_player'));
-        add_action( 'admin_footer', array($this,'player_html'));
+        if ( wpsstm()->get_options('player_enabled') == 'on' ){
+            add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+            add_action( 'wp_footer', array($this,'bottom_player'));
+            add_action( 'admin_footer', array($this,'player_html'));
+        }
 
     }
     
