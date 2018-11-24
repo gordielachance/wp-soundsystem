@@ -15,17 +15,16 @@ class WPSSTM_MusicBrainz {
     static $mb_data_by_url_transient_prefix = 'wpsstm_mb_by_url_'; //to cache the musicbrainz API results
     static $qvar_mbid = 'mbid';
     
-    public $options_default = array();
     public $options = array();
 
     function __construct(){
         
-        $this->options_default = array(
+        $options_default = array(
             'enabled' =>    'on',
             'auto_mbid' =>  'on',
         );
         
-        $this->options = wp_parse_args(get_option( self::$mbz_options_meta_name), $this->options_default);
+        $this->options = wp_parse_args(get_option( self::$mbz_options_meta_name),$options_default);
         
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 7);

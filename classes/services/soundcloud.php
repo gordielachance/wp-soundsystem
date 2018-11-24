@@ -4,17 +4,16 @@ class WPSSTM_Souncloud{
     
     static $mimetype = 'video/soundcloud';
     static $soundcloud_options_meta_name = 'wpsstm_souncloud_options';
-    public $options_default = array();
     public $options = array();
     
     function __construct(){
         
-        $this->options_default = array(
+        $options_default = array(
             'client_id'              => null,
             'client_secret'          => null,
         );
         
-        $this->options = wp_parse_args(get_option( self::$soundcloud_options_meta_name), $this->options_default);
+        $this->options = wp_parse_args(get_option( self::$soundcloud_options_meta_name),$options_default);
         
         add_filter('wpsstm_get_source_mimetype',array($this,'get_soundcloud_source_type'),10,2);
         add_filter('wpsstm_get_source_stream_url',array($this,'get_soundcloud_stream_url'),10,2);

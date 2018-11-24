@@ -8,18 +8,17 @@ class WPSSTM_Spotify{
     static $spotify_no_auto_id_metakey = '_wpsstm_spotify_no_auto_id';
     static $spotify_data_by_url_transient_prefix = 'wpsstm_spotify_by_url_'; //to cache the musicbrainz API results
     
-    public $options_default = array();
     public $options = array();
     
     function __construct(){
         
-        $this->options_default = array(
+        $options_default = array(
             'client_id' =>          null,
             'client_secret' =>      null,
             'spotify_auto_id' =>    'on',
         );
         
-        $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name), $this->options_default);
+        $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name),$options_default);
         
         /*backend*/
         add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );

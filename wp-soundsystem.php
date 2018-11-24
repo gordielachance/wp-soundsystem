@@ -51,6 +51,7 @@ class WP_SoundSystem {
     public $meta_name_options = 'wpsstm_options';
     
     var $menu_page;
+    var $options = array();
 
     public static function instance() {
         
@@ -78,7 +79,8 @@ class WP_SoundSystem {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        $this->options_default = array(
+        
+        $options_default = array(
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
@@ -91,7 +93,7 @@ class WP_SoundSystem {
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
         );
         
-        $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
+        $this->options = wp_parse_args(get_option( $this->meta_name_options),$options_default);
         
         
         //validate options
@@ -331,10 +333,6 @@ class WP_SoundSystem {
     
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
-    }
-    
-    public function get_default_option($keys = null){
-        return wpsstm_get_array_value($keys,$this->options_default);
     }
 
     function register_scripts_styles_shared(){

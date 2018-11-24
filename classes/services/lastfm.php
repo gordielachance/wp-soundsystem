@@ -12,13 +12,12 @@ class WPSSTM_LastFM{
     
     public $lastfm_user = null;
     
-    public $options_default = array();
     public $options = array();
     
 
     function __construct(){
         
-        $this->options_default = array(
+        $options_default = array(
             'client_id' =>      null,
             'client_secret'=>   null,
             'scrobble'=>        'on',
@@ -26,7 +25,7 @@ class WPSSTM_LastFM{
             'scrobble_along'=>  'off',
         );
         
-        $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name), $this->options_default);
+        $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
         
         ///
 

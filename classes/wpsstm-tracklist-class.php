@@ -6,8 +6,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
-    var $options_default = array();
     var $options = array();
+    var $scraper_options = array();
     
     var $updated_time = null;
     private $is_expired = null;
@@ -26,7 +26,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $scraper_meta_name = '_wpsstm_scraper_options';
     public $feed_url = null;
-    var $scraper_options = array();
 
     function __construct($post_id = null ){
         
@@ -35,9 +34,37 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
         
-        $default_options = self::get_default_options();
-        $url_options = $this->get_url_options();
-        $this->options = wp_parse_args($url_options,$default_options);
+        /*
+        options
+        */
+
+        $this->options = array(
+            'autosource'                => 'on',
+            'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
+            'tracks_strict'             => true, //requires a title AND an artist
+            'ajax_autosource'           => true,
+            'remote_delay_min'          => 5,
+            'is_expired'                => false,
+        );
+        
+        /*
+        scraper options
+        */
+
+        $this->scraper_options = array(
+            'selectors' => array(
+                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="track"]'
+                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="byArtist"]'
+                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="name"]'
+                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="inAlbum"]'
+                'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
+            ),
+            'tracks_order'              => 'desc'
+        );
+        
+
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -68,10 +95,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
         
-        //scraper
+        //options
+        //$options_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        //$this->options = array_replace_recursive($this->options,(array)$options_db);
+        
+        //scraper options
         $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $scraper_default = WPSSTM_Remote_Datas::get_default_scraper_options();
-        $this->scraper_options = array_replace_recursive($scraper_default,(array)$scraper_db); //last one has priority
+        $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$scraper_db);
         
         //location
         $this->location = get_permalink($this->post_id);
@@ -82,34 +112,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function get_options($keys=null){
-        
-        $options = apply_filters('wpsstm_tracklist_options',$this->options,$this);
-
         if ($keys){
-            return wpsstm_get_array_value($keys, $options);
+            return wpsstm_get_array_value($keys, $this->options);
         }else{
-            return $options;
+            return $this->options;
         }
     }
-    
-    public static function get_default_options(){
-        
-        $options = array(
-            'autosource'                => ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ),
-            'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
-            'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_autosource'           => true,
-            'remote_delay_min'          => 5,
-            'is_expired'                => false,
-        );
-
-        return $options;
-
-    }
-
-    protected function get_url_options(){
-        $url_options = isset( $_REQUEST['tracklist_options'] ) ? (array)$_REQUEST['tracklist_options'] : array();
-        return $url_options;
+    function get_scraper_options($keys=null){
+        if ($keys){
+            return wpsstm_get_array_value($keys, $this->scraper_options);
+        }else{
+            return $this->scraper_options;
+        }
     }
 
     public function get_title(){
