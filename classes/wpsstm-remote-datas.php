@@ -78,7 +78,6 @@ class WPSSTM_Remote_Datas{
     
     function get_selectors($keys = null){
         $keys = array_merge(array('selectors'),$keys);
-        print_r($keys);die();
         return $this->get_options($keys);
     }
 
