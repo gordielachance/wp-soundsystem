@@ -47,6 +47,8 @@
         
         var allLoaded = $.Deferred();
         var countLoaded = 0;
+        
+        //TOUFIX remove event once done ?
 
         iframes.load(function(e){
             
@@ -92,10 +94,11 @@
             
             var allTracks = [];
             $(player_tracklists).each(function(index,tracklist) {
-                allTracks = allTracks.concat(tracklist.tracks); 
+                allTracks = allTracks.concat(tracklist.tracks);
             });
             
-            bottomPlayer.init_queue(allTracks);
+            bottomPlayer.append_tracks(allTracks);
+            bottomPlayer.autoplay();
             
         });
 
@@ -113,6 +116,29 @@ function wpsstm_debug(msg,prefix){
         if (!prefix) prefix = 'wpsstm';
         console.log(prefix + ': ' + msg);
     }
+}
+
+function wpsstm_arr_diff (a1, a2) {
+
+    var a = [], diff = [];
+
+    for (var i = 0; i < a1.length; i++) {
+        a[a1[i]] = true;
+    }
+
+    for (var i = 0; i < a2.length; i++) {
+        if (a[a2[i]]) {
+            delete a[a2[i]];
+        } else {
+            a[a2[i]] = true;
+        }
+    }
+
+    for (var k in a) {
+        diff.push(k);
+    }
+
+    return diff;
 }
 
 function wpsstm_shuffle(array) {

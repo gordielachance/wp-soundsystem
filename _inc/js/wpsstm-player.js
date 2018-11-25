@@ -111,9 +111,21 @@ class WpsstmPlayer {
             if ( tracklist_obj.isExpired ){
                 tracklist_obj.debug("cache expired, refresh tracklist");
                 var reloaded = self.reload_tracklist(tracklist_obj);
-                
+
                 reloaded.done(function(v) {
-                    self.debug("reload successful");
+                    self.debug("restart tracklist");
+
+                    
+                    var tracklist_tracks = self.tracks.filter(function (track_obj) {
+                        return (track_obj.tracklist.index === tracklist_obj.index);
+                    });
+                    
+                    //play first track of this tracklist
+                    var first_track = tracklist_tracks[0];
+                    if (first_track){
+                        self.play_track(first_track);
+                    }
+                    
                 })
                 
             }
@@ -251,46 +263,66 @@ class WpsstmPlayer {
     }
     
     reload_tracklist(tracklist_obj){
-        
+        var self = this;
         var success = $.Deferred();
         
-        tracklist_obj.debug("reload tracklist #" + tracklist_obj.index);
+        self.debug("reload tracklist #" + tracklist_obj.index);
         var iframe = tracklist_obj.iframe_el;
         var container = $(iframe).parents('.wpsstm-iframe-container');
         container.addClass('wpsstm-iframe-loading');
+        var old_tracks_count = self.tracks.length;
+        
+        //remove tracklist tracks from player
+        var remove_tracks = self.tracks.filter(function (track_obj) {
+            return (track_obj.tracklist.index === tracklist_obj.index);
+        });
+
+        //keep only the other ones
+        self.tracks = self.tracks.filter(function (track_obj) {
+            var index = $.inArray( track_obj, remove_tracks );
+            return (index == -1);
+        });
+
+        self.debug('was '+old_tracks_count+' tracks, removed tracks:' + remove_tracks.length +', new total:' + self.tracks.length);
+        
+        //$(iframe).off(); //remove current events //TOUFIX useful ? TO CHECK!!!
 
         iframe.contentWindow.location.reload(true);
 
-        //remove events
-        $(iframe).off();
-
         $(iframe).load(function(e){
-
-            tracklist_obj.debug("tracklist reloaded");
             success.resolve();
+        });
 
-            $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
+        success.done(function(v) {
+            self.debug("reload successful");
+            
+            $(iframe).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
             var content = $(iframe.contentWindow.document.body);
             var playlist_html = $(content).find( ".wpsstm-tracklist" );
             tracklist_obj = new WpsstmTracklist(playlist_html,tracklist_obj.index);
             
-            //TOUFIX remove old tracks
-            //add new tracks
-            
+            //append tracks to player
+            self.append_tracks(tracklist_obj.tracks);
 
-        });
+        })
         
         return success.promise();
         
     }
-    
+
     play_track(track_obj){
 
         var self = this;
         var success = $.Deferred();
         
-        //is tracklist first track
-        if (track_obj.index === 0){
+        //check if this is the first (playable) tracklist track in queue
+        var tracklist_tracks = self.tracks.filter(function (all_tracks_obj) {
+            return (all_tracks_obj.can_play !== false) && (all_tracks_obj.tracklist.index === track_obj.tracklist.index);
+        });
+        var first_tracklist_track = tracklist_tracks[0];
+
+        if ( $(track_obj).is( $(first_tracklist_track) ) ){
+            track_obj.tracklist.debug("wpsstmStartTracklist");
             $(document).trigger( "wpsstmStartTracklist",[track_obj.tracklist] );
         }
         
@@ -423,7 +455,7 @@ class WpsstmPlayer {
             self.end_source(previous_source);
         }
 
-        self.debug("play source: " + source_obj.src);
+        source_obj.debug("play source: " + source_obj.src);
         source_el.addClass('source-active source-loading');
         track_el.addClass('track-active track-loading');
         tracklist_el.addClass('tracklist-active tracklist-loading');
@@ -488,7 +520,7 @@ class WpsstmPlayer {
             //tracklists
             tracklist_el.removeClass('tracklist-playing');
             //tracks
-            track_el.removeClass('track-active');
+            track_el.removeClass('track-active track-playing');
             //sources
             source_el.removeClass('source-playing source-active');
 
@@ -605,7 +637,7 @@ class WpsstmPlayer {
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? $(self.tracks).index( next_track ) : undefined;
 
-        console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
+        //console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
         
         return next_track;
     }
@@ -644,31 +676,27 @@ class WpsstmPlayer {
         
     }
     
-    init_queue(tracks){
+    append_tracks(tracks){
         var self = this;
-        self.debug('queued tracks: ' + tracks.length);
         
-        //set tracks
-        self.tracks = tracks;
+        self.tracks = self.tracks.concat(tracks); 
+        self.debug('append tracks: ' + tracks.length +', total:' + self.tracks.length);
         
         //set the shuffle order
         self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
-        
-        //autoplay
-        
+ 
+    }
+    
+    autoplay(){
+        var self = this;
         var has_autoplay = self.audio_el.get(0).autoplay;
         var is_media_playing = ( (self.current_media !==undefined) && self.current_media.onplaying );
         
         if (has_autoplay && !is_media_playing){
             var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
             var first_track = self.tracks[first_track_idx];
-
-            console.log("autoplay");
-            console.log(first_track);
-
             self.play_track(first_track);            
         }
-        
     }
 
     get_maybe_shuffle_track_idx(idx){
