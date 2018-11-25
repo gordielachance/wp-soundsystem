@@ -39,7 +39,11 @@
     });
     
     $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
-        //style new subtracks row
+        
+        /*
+        New subtracks
+        */
+        
         var new_subtrack_row = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
         new_subtrack_row.addClass('wpsstm-new-subtrack-simple');
         var new_subtrack_bt = new_subtrack_row.find('button');
@@ -49,10 +53,6 @@
                 new_subtrack_row.removeClass('wpsstm-new-subtrack-simple');
             }
         });
-
-    });
-
-    $(document).on( "wpsstmTracklistLoaded", function( event, tracklist_obj ) {
         
         /*
         Tracklist actions
@@ -160,11 +160,11 @@
         });
 
         /*
-        Tracks
+        Subtracks
         */
 
 
-        // sort tracks
+        //sort subtracks
         tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
             axis: "y",
             handle: '.wpsstm-track-action-move',
@@ -270,8 +270,6 @@ class WpsstmTracklist {
         /* tracks count */
         self.tracks_count = $(self.tracks).length;
         self.can_play =     (self.tracks_count > 0);
-
-        $(document).trigger("wpsstmTracklistLoaded",[self]); //custom event
     }
     
     init_tracklist_expiration(){
