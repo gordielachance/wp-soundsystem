@@ -227,7 +227,6 @@ class WpsstmTracklist {
         this.tracks_count =             undefined;
         this.options =                  [];
         this.can_play =                 undefined;
-        this.targetPlayer =             undefined;
         this.isExpired =                undefined;
 
         this.populate_html(tracklist_html);
@@ -270,7 +269,7 @@ class WpsstmTracklist {
 
         /* tracks count */
         self.tracks_count = $(self.tracks).length;
-        self.can_play =     (self.tracks_count < 0) ? undefined : true; //if -1:not yet populated
+        self.can_play =     (self.tracks_count > 0);
 
         $(document).trigger("wpsstmTracklistLoaded",[self]); //custom event
     }
@@ -279,20 +278,19 @@ class WpsstmTracklist {
         var self = this;
         
         var now = Math.round( $.now() /1000);
-        var expiration_time = null;
-        var is_expired = false;
+        self.isExpired = false;
         var remaining_sec = null;
         
         var meta_expiration = self.tracklist_el.find('meta[itemprop="wpsstmRefreshTimer"]');
         if (meta_expiration.length){
             remaining_sec = meta_expiration.attr('content');
         }
-        
+
         if (!remaining_sec) return;
         
         if (remaining_sec > 0){
 
-            setTimeout(function(){
+            var expirationTimer = setTimeout(function(){
                 self.isExpired = true;
                 self.tracklist_el.addClass('tracklist-expired');
                 self.debug("tracklist has expired, stop expiration timer");
@@ -312,16 +310,9 @@ class WpsstmTracklist {
     get_track_obj(track_idx){
         var self = this;
         
-        if(typeof track_idx === undefined){
-            if (this.targetPlayer.current_track){
-                return this.targetPlayer.current_track;
-            }
-        }else{
-            track_idx = Number(track_idx);
-            var track_obj = self.tracks[track_idx];
-            if(typeof track_obj !== undefined) return track_obj;
-        }
-
+        track_idx = Number(track_idx);
+        var track_obj = self.tracks[track_idx];
+        if(typeof track_obj !== undefined) return track_obj;
 
         return false;
     }
