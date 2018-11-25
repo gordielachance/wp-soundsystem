@@ -61,8 +61,8 @@
         //refresh
         var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
         refresh_bts.click(function(e) {
-            tracklist_obj.tracklist_el.find('.wpsstm-iframe-container').addClass('wpsstm-iframe-loading');
-            tracklist_obj.debug("clicked 'refresh' link");
+            e.preventDefault();
+            var reloaded = self.reload_tracklist(tracklist_obj);
         });
 
         //favorite
