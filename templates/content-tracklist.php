@@ -6,7 +6,7 @@ global $wpsstm_tracklist;
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
         <strong class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->get_title();?>">
-            <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->get_title();?></a>
+            <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->get_title();?></a>
         </strong>
         <small class="wpsstm-tracklist-time">
             <?php
