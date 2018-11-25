@@ -52,15 +52,6 @@
 
     });
 
-    //TOUFIX wpsstmStartTracklist is not triggered.
-    $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
-        
-        if ( tracklist_obj.isExpired ){
-            tracklist_obj.debug("cache expired, refresh tracklist");
-            tracklist_obj.reload_tracklist();
-        }
-    });
-
     $(document).on( "wpsstmTracklistLoaded", function( event, tracklist_obj ) {
         
         /*
@@ -225,9 +216,9 @@
 })(jQuery);
 
 class WpsstmTracklist {
-    constructor(tracklist_html) {
+    constructor(tracklist_html,index) {
         
-        this.index =                    undefined;
+        this.index =                    ( index === undefined) ? 0 : index;
         this.post_id =                  undefined;
         this.tracklist_el =             $([]);
         this.iframe_el =                $([]);
@@ -255,7 +246,6 @@ class WpsstmTracklist {
         //TOUFIX TO IMPROVE we should locate the parent element from within the frame, what if we have several .wpsstm-iframe-container ?
         this.iframe_el =                $(parent.document).find('.wpsstm-iframe-container iframe');
 
-        this.index =                    Number( this.tracklist_el.data('wpsstm-tracklist-idx') );
         this.post_id =                  Number( this.tracklist_el.data('wpsstm-tracklist-id') );
         this.options =                  this.tracklist_el.data('wpsstm-tracklist-options');
 
@@ -318,14 +308,6 @@ class WpsstmTracklist {
             console.log("tracklist will expire in "+remaining_sec+" seconds");
         }
 
-    }
-
-    reload_tracklist(){
-        console.log("reload iframe");
-        var iframe = this.iframe_el;
-        var container = iframe.parents('.wpsstm-iframe-container');
-        container.addClass('wpsstm-iframe-loading');
-        iframe.get(0).contentWindow.location.reload(true);
     }
 
     get_track_obj(track_idx){

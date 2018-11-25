@@ -573,6 +573,7 @@ class WpsstmTrack {
 
     static update_sources_order(track_id,source_ids){
         
+        var self = this;
         var success = $.Deferred();
 
         //ajax update order
@@ -582,7 +583,7 @@ class WpsstmTrack {
             source_ids: source_ids
         };
         
-        //wpsstm_debug(ajax_data,"update_sources_order");
+        //self.debug(ajax_data,"update_sources_order");
 
         jQuery.ajax({
             type: "post",

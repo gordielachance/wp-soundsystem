@@ -215,11 +215,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_html(){
+
+        $attr = array(
+            'class' => "wpsstm-tracklist-iframe",
+            'width' =>  '100%',
+            'scrolling' => 'no',
+            'frameborder' => 0,
+            'src' => $this->get_tracklist_action_url('render'),
+        );
+        
+        $attr_str = wpsstm_get_html_attr($attr);
+        
         do_action('wpsstm_load_player');
-        $link = $this->get_tracklist_action_url('render');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
-        $iframe_el = sprintf('<iframe width="100%%" scrolling="no" frameborder="0" class="wpsstm-iframe-autoheight" src="%s"></iframe>',$link);
-        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading wpsstm-iframe-autoheight">%s%s</div>',$notice_el,$iframe_el);
+        $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
+        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s%s</div>',$notice_el,$iframe_el);
         return $el;
         
     }
@@ -638,7 +648,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemscope' =>                          true,
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
-            'data-wpsstm-tracklist-idx' =>          $this->index,
             'data-wpsstm-tracklist-options' =>      json_encode($this->get_options()),
             'data-wpsstm-toggle-tracklist' =>       $this->get_options('toggle_tracklist'),
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
@@ -744,7 +753,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     //UTC
 
     function seconds_before_refresh(){
-        
+
         if ($this->tracklist_type != 'live') return false;
         
         $cache_min = $this->get_options('remote_delay_min');

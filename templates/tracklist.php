@@ -2,9 +2,6 @@
 global $wpsstm_tracklist;
 $action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
-do_action('wpsstm_load_player');//TOUFIXTOREMOVE
-
-//
 add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );
 do_action( 'wpsstm-tracklist-iframe' );
