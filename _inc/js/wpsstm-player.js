@@ -111,13 +111,13 @@ class WpsstmPlayer {
             if ( tracklist_obj.isExpired ){
                 tracklist_obj.debug("cache expired, refresh tracklist");
 
+                self.end_source();
                 self.current_track = undefined; //unset current player track so the player won't try to go to the next track
                 var reloaded = self.reload_tracklist(tracklist_obj);
 
                 reloaded.done(function(v) {
                     self.debug("restart tracklist");
-                    self.end_source();
-                    
+
                     var tracklist_tracks = self.tracks.filter(function (track_obj) {
                         return (track_obj.tracklist.index === tracklist_obj.index);
                     });
@@ -286,26 +286,27 @@ class WpsstmPlayer {
         var tracks_before = self.tracks.slice(0,first_track_idx);
         var tracks_after = self.tracks.slice(first_track_idx + subtracks.length);
 
-        $(iframe).off(); //remove current events //TOUFIX useful ? TO CHECK!!!
-
         iframe.contentWindow.location.reload(true);
 
-        $(iframe).load(function(e){
+        /*
+        reload tracklist at refresh (fires only once)
+        */
+        $(iframe).one( "load", function() {
             
             $(iframe).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
             var content = $(iframe.contentWindow.document.body);
-            var playlist_html = $(content).find( ".wpsstm-tracklist" );
-            tracklist_obj = new WpsstmTracklist(playlist_html,tracklist_obj.index);
+            var playlist_html = $(content).find( ".wpsstm-tracklist" ).get(0);
+            tracklist_obj.populate_html(playlist_html);
             
             /*
             update player tracks
             */
 
-            self.tracks = tracks_before.concat(tracklist_obj.tracks,tracks_after);
+            var new_queue = tracks_before.concat(tracklist_obj.tracks,tracks_after);
 
-            self.debug('was '+old_tracks_count+' tracks, removed tracks:' + subtracks.length +', new tracks:'+tracklist_obj.tracks.length+', new total:' + self.tracks.length);
+            self.debug('was '+old_tracks_count+' tracks, removed tracks:' + subtracks.length +', new tracks:'+tracklist_obj.tracks.length+', new total:' + new_queue.length);
             
-            self.append_tracks(tracklist_obj.tracks);
+            self.append_tracks(new_queue,true);
             
             success.resolve();
             
@@ -690,11 +691,16 @@ class WpsstmPlayer {
         
     }
     
-    append_tracks(tracks){
+    append_tracks(new_tracks,reset){
         var self = this;
         
-        self.tracks = self.tracks.concat(tracks); 
-        self.debug('append tracks: ' + tracks.length +', total:' + self.tracks.length);
+        if (reset === undefined){
+            self.tracks = self.tracks.concat(new_tracks); 
+        }else{
+            self.tracks = new_tracks;
+        }
+
+        self.debug('added tracks: ' + new_tracks.length +', total:' + self.tracks.length);
         
         //set the shuffle order
         self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
@@ -844,10 +850,6 @@ class WpsstmPlayer {
 
 }
 
-
-
 (function($){
-    
-
 
 })(jQuery);

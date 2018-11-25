@@ -47,10 +47,11 @@
         
         var allLoaded = $.Deferred();
         var countLoaded = 0;
-        
-        //TOUFIX remove event once done ?
 
-        iframes.load(function(e){
+        /*
+        load iframes at init (fires only once)
+        */
+        iframes.one( "load", function() {
             
             ++countLoaded;//increment
             var iframe = $(this);
