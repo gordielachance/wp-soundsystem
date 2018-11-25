@@ -62,6 +62,7 @@
         var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
         refresh_bts.click(function(e) {
             e.preventDefault();
+            tracklist_obj.debug("clicked 'refresh' bt")
             var reloaded = self.reload_tracklist(tracklist_obj);
         });
 
