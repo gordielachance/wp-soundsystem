@@ -345,7 +345,7 @@ class WPSSTM_Core_Sources{
         $wpsstm_track->populate_sources();
         ?>
         <div class="wpsstm-track-sources">
-            <?php wpsstm_locate_template( 'content-source.php', true, false );?>
+            <?php wpsstm_locate_template( 'content-sources.php', true, false );?>
         </div>
         <p class="wpsstm-new-sources-container">
             <?php
@@ -428,14 +428,13 @@ class WPSSTM_Core_Sources{
         $new_sources = array();
 
         foreach((array)$source_urls as $url){
-            //TOFIXKKK where is track ?
             $source = new WPSSTM_Source(null);
             $source->permalink_url = $url;
             $new_sources[] = $source;
         }
-        
+
         $track->add_sources($new_sources);
-        $track->save_new_sources();//save only if it does not exists yet
+        $track->save_new_sources();
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){

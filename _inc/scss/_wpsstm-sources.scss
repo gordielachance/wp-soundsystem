@@ -17,22 +17,7 @@
     @include flex-grow(0);
     @include transition-property(margin-bottom);
     @include transition-duration(.2s);
-    
-    [data-wpsstm-source-idx]{
-        .wpsstm-source-actions{
-            > *{
-                &:not(.wpsstm-source-action-provider){
-                    display:none;
-                }
-            }
-        }
-        &.source-active{
-            @include display-flex();
-        }
-    }
-    &:not(.active){
-        display:none;
-    }
+
     &.active{
         margin-bottom:.5em!important;
         [data-wpsstm-source-idx]{
@@ -44,9 +29,6 @@
         }
     }
     
-}
-
-.wpsstm-track-sources-list{
     a{
         @extend .wpsstm-no-underline;
     }
@@ -100,6 +82,7 @@
             }
         }
         &.source-active{
+            @include display-flex();
             font-weight: bold;
         }
 
@@ -125,5 +108,18 @@
         }
 
 
+    }
+}
+
+[itemprop="track"]{
+    .wpsstm-track-sources-list:not(.active){
+        display:none;
+    }
+    .wpsstm-source-actions{
+        > *{
+            &:not(.wpsstm-source-action-provider){
+                display:none;
+            }
+        }
     }
 }

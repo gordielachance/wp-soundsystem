@@ -11,8 +11,6 @@ if ( $wpsstm_track->have_sources() ) { ?>
             
             $wpsstm_track->the_source();
             global $wpsstm_source;
-
-            if ( !$wpsstm_source->get_source_mimetype() ) continue;
             ?>
             <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
                 <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>

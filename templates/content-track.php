@@ -42,6 +42,6 @@ $can_play_track = $track->can_play_track();
     </div>
     <?php
     //track sources
-    wpsstm_locate_template( 'content-source.php', true, false );
+    wpsstm_locate_template( 'content-sources.php', true, false );
     ?>
 </li>

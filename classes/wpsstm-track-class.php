@@ -605,7 +605,6 @@ class WPSSTM_Track{
 
         //save new sources
         $this->add_sources($autosources);
-        
         $new_ids = $this->save_new_sources();
         
         $this->track_log(json_encode(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids))),'autosource results');
@@ -629,7 +628,6 @@ class WPSSTM_Track{
         foreach((array)$this->sources as $source){
 
             if ($source->post_id) continue;
-            $source->track = $this;
             $source_id = $source->save_source();
 
             if ( is_wp_error($source_id) ){
@@ -642,9 +640,7 @@ class WPSSTM_Track{
             }
 
         }
-
         return $inserted;
-        
     }
     
     private function get_new_track_url(){
