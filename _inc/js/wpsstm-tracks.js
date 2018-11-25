@@ -412,10 +412,14 @@ class WpsstmTrack {
             success.resolve("already did sources auto request for track #" + self.index);
             
         } else{
-            
             success = self.get_track_sources_request();
-            
         }
+        
+        //set .can_play property
+        success.always(function() {
+            self.can_play = (self.sources.length > 0);
+        });
+
         return success.promise();
     }
 
@@ -452,13 +456,7 @@ class WpsstmTrack {
                 var new_node = $(data.new_html);
                 self.track_el.replaceWith( new_node );
                 self.init_html( new_node.get(0) );
-                
-                if (self.can_play){
-                    success.resolve();
-                }else{
-                    success.reject();
-                }
-                
+                success.resolve();
                 
             }else{
                 self.debug("track sources request failed: " + data.message);
@@ -466,15 +464,8 @@ class WpsstmTrack {
             }
 
         });
-        
-        sources_request.fail(function() {
-            success.reject();
-        });
-        
-        ///
 
         success.fail(function() {
-            self.can_play = false;
             self.track_el.addClass('track-error');
         });
 
@@ -497,9 +488,7 @@ class WpsstmTrack {
             self.sources.push(source_obj);
             $(document).trigger("wpsstmTrackSingleSourceDomReady",[source_obj]); //custom event for single source
         });
-        
-        self.can_play = (self.sources.length > 0);
-                
+      
         self.track_el.attr('data-wpsstm-sources-count',self.sources.length);        
         $(document).trigger("wpsstmTrackSourcesDomReady",[self]); //custom event for all sources
 
