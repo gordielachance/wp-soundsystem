@@ -221,7 +221,6 @@ class WpsstmTracklist {
         this.index =                    ( index === undefined) ? 0 : index;
         this.post_id =                  undefined;
         this.tracklist_el =             $([]);
-        this.iframe_el =                $([]);
         this.tracklist_request =        undefined;
         this.tracks =                   undefined;
         this.tracks_count =             undefined;
@@ -242,8 +241,6 @@ class WpsstmTracklist {
 
         this.tracklist_el =             $(tracklist_html);
         if (this.tracklist_el.length == 0) return;
-        
-        this.iframe_el =                $(parent.document).find('iframe').get(this.index);
 
         this.post_id =                  Number( this.tracklist_el.data('wpsstm-tracklist-id') );
         this.options =                  this.tracklist_el.data('wpsstm-tracklist-options');
