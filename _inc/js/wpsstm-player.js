@@ -109,9 +109,13 @@ class WpsstmPlayer {
 
         $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
             if ( tracklist_obj.isExpired ){
-                self.current_media.pause();
                 tracklist_obj.debug("cache expired, refresh tracklist");
-                self.reload_tracklist(tracklist_obj);
+                var reloaded = self.reload_tracklist(tracklist_obj);
+                
+                reloaded.done(function(v) {
+                    self.debug("reload successful");
+                })
+                
             }
         });
         
@@ -247,28 +251,36 @@ class WpsstmPlayer {
     }
     
     reload_tracklist(tracklist_obj){
-        tracklist_obj.debug("reload tracklist");
+        
+        var success = $.Deferred();
+        
+        tracklist_obj.debug("reload tracklist #" + tracklist_obj.index);
         var iframe = tracklist_obj.iframe_el;
-        var container = iframe.parents('.wpsstm-iframe-container');
+        var container = $(iframe).parents('.wpsstm-iframe-container');
         container.addClass('wpsstm-iframe-loading');
-        
+
+        iframe.contentWindow.location.reload(true);
+
         //remove events
-        iframe.off();
-        
-        iframe.get(0).contentWindow.location.reload(true);
-        
-        iframe.load(function(e){
+        $(iframe).off();
+
+        $(iframe).load(function(e){
 
             tracklist_obj.debug("tracklist reloaded");
+            success.resolve();
+
             $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-            var iframe = $(this).get(0);
             var content = $(iframe.contentWindow.document.body);
             var playlist_html = $(content).find( ".wpsstm-tracklist" );
-            tracklist_obj = new WpsstmTracklist(playlist_html,index);
+            tracklist_obj = new WpsstmTracklist(playlist_html,tracklist_obj.index);
+            
+            //TOUFIX remove old tracks
+            //add new tracks
             
 
         });
         
+        return success.promise();
         
     }
     
@@ -537,7 +549,7 @@ class WpsstmPlayer {
     get_previous_track(){
         var self = this;
         
-        var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
+        var current_track_idx = ( self.current_track ) ? $(self.tracks).index( self.current_track ) : 0;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); //shuffle ?
 
         var tracks = self.get_ordered_tracks();
@@ -554,7 +566,10 @@ class WpsstmPlayer {
             return (track_obj.can_play !== false);
         });
         
-        return tracks_playable[0];
+        var previous_track = tracks_playable[0];
+        var previous_track_idx = ( previous_track ) ? $(self.tracks).index( previous_track ) : undefined;
+        
+        return previous_track;
     }
     
     previous_track_jump(){
@@ -570,8 +585,7 @@ class WpsstmPlayer {
     
     get_next_track(){
         var self = this;
-        
-        var current_track_idx = ( self.current_track ) ? self.current_track.index : 0;
+        var current_track_idx = ( self.current_track ) ? $(self.tracks).index( self.current_track ) : 0;
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); // shuffle ?
 
         var tracks = self.get_ordered_tracks();
@@ -589,6 +603,10 @@ class WpsstmPlayer {
         });
         
         var next_track = tracks_playable[0];
+        var next_track_idx = ( next_track ) ? $(self.tracks).index( next_track ) : undefined;
+
+        console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
+        
         return next_track;
     }
     

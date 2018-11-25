@@ -243,8 +243,7 @@ class WpsstmTracklist {
         this.tracklist_el =             $(tracklist_html);
         if (this.tracklist_el.length == 0) return;
         
-        //TOUFIX TO IMPROVE we should locate the parent element from within the frame, what if we have several .wpsstm-iframe-container ?
-        this.iframe_el =                $(parent.document).find('.wpsstm-iframe-container iframe');
+        this.iframe_el =                $(parent.document).find('iframe').get(this.index);
 
         this.post_id =                  Number( this.tracklist_el.data('wpsstm-tracklist-id') );
         this.options =                  this.tracklist_el.data('wpsstm-tracklist-options');
@@ -291,6 +290,8 @@ class WpsstmTracklist {
             remaining_sec = meta_expiration.attr('content');
         }
         
+        if (!remaining_sec) return;
+        
         if (remaining_sec > 0){
 
             setTimeout(function(){
@@ -305,7 +306,7 @@ class WpsstmTracklist {
         if (remaining_sec < 0){
             self.debug("tracklist has expired "+Math.abs(remaining_sec)+" seconds ago");
         }else{
-            console.log("tracklist will expire in "+remaining_sec+" seconds");
+            self.debug("tracklist will expire in "+remaining_sec+" seconds");
         }
 
     }
