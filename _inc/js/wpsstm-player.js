@@ -650,7 +650,7 @@ class WpsstmPlayer {
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? $(self.tracks).index( next_track ) : undefined;
 
-        console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
+        //console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
 
         return next_track;
     }
@@ -700,7 +700,7 @@ class WpsstmPlayer {
             self.tracks = new_tracks;
         }
 
-        self.debug('added tracks: ' + new_tracks.length +', total:' + self.tracks.length);
+        //self.debug('added tracks: ' + new_tracks.length +', total:' + self.tracks.length);
         
         //set the shuffle order
         self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );

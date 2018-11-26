@@ -263,7 +263,7 @@ class WP_SoundSystem {
             if ($current_version < 160){
                 $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
                 $wpdb->query("ALTER TABLE $subtracks_table ADD time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD pinned_from bigint(20) UNSIGNED NOT NULL DEFAULT '0'");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NOT NULL DEFAULT '0'");
             }
 
         }
@@ -282,7 +282,7 @@ class WP_SoundSystem {
             ID bigint(20) NOT NULL AUTO_INCREMENT,
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
-            pinned_from bigint(20) UNSIGNED NOT NULL DEFAULT '0',
+            from_tracklist bigint(20) UNSIGNED NULL,
             track_order int(11) NOT NULL DEFAULT '0',
             artist longtext NOT NULL,
             title longtext NOT NULL,

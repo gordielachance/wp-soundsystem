@@ -447,8 +447,8 @@ class WPSSTM_Core_Tracklists{
         //pinned from... ID
         $success = $wpdb->update( 
             $subtracks_table, //table
-            array('pinned_from'=>''), //data
-            array('pinned_from'=>$post_id) //where
+            array('from_tracklist'=>''), //data
+            array('from_tracklist'=>$post_id) //where
         );
         
     }

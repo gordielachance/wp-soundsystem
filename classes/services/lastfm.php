@@ -447,7 +447,7 @@ class WPSSTM_LastFM{
         
         $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
         $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
-        $result['track'] = $track;
+        $result['track'] = $track->to_array();
         
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -478,7 +478,7 @@ class WPSSTM_LastFM{
         
         $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         $success = $this->lastfm_user->now_playing_lastfm_track($track,$start_timestamp);
-        $result['track'] = $track;
+        $result['track'] = $track->to_array();
 
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -509,7 +509,7 @@ class WPSSTM_LastFM{
         $track->from_array($ajax_data['track']);
 
         $success = $this->lastfm_user->scrobble_lastfm_track($track,$start_timestamp);
-        $result['track'] = $track;
+        $result['track'] = $track->to_array();
 
         if ( $success ){
             if ( is_wp_error($success) ){
@@ -546,7 +546,7 @@ class WPSSTM_LastFM{
             
             $track = new WPSSTM_Track();
             $track->from_array($ajax_data['track']);
-            $result['track'] = $track;
+            $result['track'] = $track->to_array();
 
             //check that the new submission has not been sent just before
             $last_scrobble_meta_key = 'wpsstm_last_scrobble';

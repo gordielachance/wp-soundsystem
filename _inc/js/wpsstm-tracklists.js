@@ -172,12 +172,12 @@
                 console.log('update: '+ui.item.index())
                 //get track
                 var track_el = $(ui.item);
-                var track_idx = Number(track_el.attr('data-wpsstm-track-idx'));
+                var track_idx = Number(track_el.attr('data-wpsstm-subtrack-position'));
                 var track_obj = tracklist_obj.get_track_obj(track_idx);
 
                 //new position
                 track_obj.index = ui.item.index();
-                tracklist_obj.update_track_index(track_obj);
+                tracklist_obj.update_subtrack_position(track_obj);
                 
             }
         });
@@ -324,14 +324,13 @@ class WpsstmTracklist {
         });
     }
 
-    update_track_index(track_obj){
+    update_subtrack_position(track_obj){
         var self = this;
         var link = track_obj.track_el.find('.wpsstm-track-action-move a');
 
         //ajax update order
         var ajax_data = {
-            action            : 'wpsstm_set_track_position',
-            tracklist_id      : self.post_id,
+            action            : 'wpsstm_update_subtrack_position',
             track:              track_obj.to_ajax()
         };
 
@@ -344,6 +343,7 @@ class WpsstmTracklist {
                 link.addClass('action-loading');
             },
             success: function(data){
+                console.log(data);
                 if (data.success === false) {
                     link.addClass('action-error');
                     console.log(data);

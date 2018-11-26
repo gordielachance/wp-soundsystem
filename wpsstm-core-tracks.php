@@ -76,7 +76,7 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
         
-        add_action('wp_ajax_wpsstm_set_track_position', array($this,'ajax_set_track_position'));
+        add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
 
         //add/remove tracklist track
@@ -787,7 +787,7 @@ class WPSSTM_Core_Tracks{
             if ( ($do_love!==null) ){
 
                 $success = $track->love_track($do_love);
-                $result['track'] = $track;
+                $result['track'] = $track->to_array();
                 $this->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
 
                 if( is_wp_error($success) ){
@@ -804,25 +804,26 @@ class WPSSTM_Core_Tracks{
         wp_send_json( $result ); 
     }
     
-    function ajax_set_track_position(){
+    function ajax_update_subtrack_position(){
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
-            'message'   => null,
+            'message'   => "hello",
             'success'   => false,
             'input'     => $ajax_data
         );
         
-        $result['tracklist_id']  =  $tracklist_id =     ( isset($ajax_data['tracklist_id']) ) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        
-        $track = new WPSSTM_Track();
-        $track->tracklist = $tracklist;
-        $track->from_array($ajax_data['track']);
-        $result['track'] = $track;
+        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        $result['track_id'] = $track_id = wpsstm_get_array_value(array('track','post_id'),$ajax_data);
+        $result['tracklist_id'] = $tracklist_id = wpsstm_get_array_value(array('track','tracklist','post_id'),$ajax_data);
 
-        if ( $tracklist->post_id && $track->post_id && ($track->index != -1) ){
-            $success = $tracklist->save_track_position($track->post_id,$track->index);
+        $track = new WPSSTM_Track($track_id,$tracklist_id);
+        
+        $track->from_array($ajax_data['track']);
+        $result['track'] = $track->to_array();
+
+        if ( $track->post_id && $track->tracklist->post_id && ($track->position != -1) ){
+            $success = $tracklist->save_subtrack_position($track->subtrack_id,$track->position);
             
             if ( is_wp_error($success) ){
                 $result['message'] = $success->get_error_message();
@@ -848,7 +849,7 @@ class WPSSTM_Core_Tracks{
         $track->from_array($ajax_data['track']);
 
         $success = $track->trash_track();
-        $result['track'] = $track;
+        $result['track'] = $track->to_array();
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();

@@ -41,7 +41,7 @@ class WpsstmTrackSource {
 
     get_track_el(){
         var self = this;
-        return self.track_el.closest('[data-wpsstm-track-idx="'+self.track.index+'"]');
+        return self.track_el.closest('[data-wpsstm-subtrack-position="'+self.track.index+'"]');
     }
 
     //reduce object for communication between JS & PHP

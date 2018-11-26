@@ -580,11 +580,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    function save_track_position($track_id,$index){
-        return;//TOUFIX
+    function save_subtrack_position($subtrack_id,$position){
         if ( !$this->user_can_reorder_tracks() ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
+        
+        $this->tracklist_log(array('subtrack_id'=>$subtrack_id,'index'=>$position),"save_subtrack_position");
+        
+        //get subtracks
     }
     
     function can_get_tracklist_authorship(){
@@ -749,13 +752,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return true;
 
     }
-    
-    //UTC
 
     function seconds_before_refresh(){
 
         if ($this->tracklist_type != 'live') return false;
-        
+
         $cache_min = $this->get_options('remote_delay_min');
         if (!$cache_min) return false;
         
@@ -844,28 +845,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "SELECT * FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
-        $subtracks = $wpdb->get_results ( $querystr );
-        
+        $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
+        $subtrack_ids = $wpdb->get_col( $querystr);
+
         $tracks = array();
-        foreach((array)$subtracks as $subtrack){
+        foreach((array)$subtrack_ids as $subtrack_id){
 
             $track = new WPSSTM_Track(); //default
-            
-            if ($subtrack->track_id){
-                $track = new WPSSTM_Track($subtrack->track_id);
-            }else{
-                $track_arr = array(
-                    'artist' => $subtrack->artist,
-                    'title' =>  $subtrack->title,
-                    'album' =>  $subtrack->album,
-                    //TOUFIX playlist id ?
-                );
-                $track->from_array($track_arr);
-            }
-            
-            $track->subtrack_id = $subtrack->ID;
-            
+            $track->populate_subtrack($subtrack_id);            
             $tracks[] = $track;
         }
 
@@ -981,7 +968,7 @@ class WPSSTM_Tracklist{
             }
             
             $track->tracklist = $this;
-            $track->index = $current_index;
+            $track->position = $current_index;
             $add_tracks[] = $track;
             $current_index++;
         }

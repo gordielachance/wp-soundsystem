@@ -349,6 +349,7 @@ class WpsstmTrack {
         this.artist =               null;
         this.title =                null;
         this.album =                null;
+        this.subtrack_id =          null;
         this.post_id =              null;
         //this.autosource_time =    null;
         this.can_play =             null;
@@ -379,11 +380,12 @@ class WpsstmTrack {
         if ( track_html === undefined ) return;
 
         self.track_el =             $(track_html);
-        self.index =                Number(self.track_el.attr('data-wpsstm-track-idx')); //index in tracklist
+        self.index =                Number(self.track_el.attr('data-wpsstm-subtrack-position')); //index in tracklist
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
         self.title =                self.track_el.find('[itemprop="name"]').text();
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
         self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
+        self.subtrack_id =          Number(self.track_el.attr('data-wpsstm-subtrack-id'));
         //self.autosource_time =      Number(self.track_el.attr('data-wpsstm-autosource-time'));
 
         //populate existing sources
@@ -506,7 +508,7 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['index','post_id','artist', 'title','album','duration'];
+        var allowed = ['index','subtrack_id','post_id','artist', 'title','album','duration'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {

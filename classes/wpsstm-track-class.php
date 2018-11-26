@@ -1,9 +1,8 @@
 <?php
 
+
 class WPSSTM_Track{
     public $post_id = null;
-    public $subtrack_id = null;
-    public $index = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
     
     public $title;
     public $artist;
@@ -15,8 +14,6 @@ class WPSSTM_Track{
     public $image_url;
     public $location;
 
-    public $parent_ids = array();
-
     private $did_parents_query = false;
     
     var $source;
@@ -26,7 +23,14 @@ class WPSSTM_Track{
     var $in_source_loop = false;
     
     var $tracklist;
-
+    
+    ///
+    public $subtrack_id = null;
+    public $parent_ids = array();
+    public $position = -1;
+    public $subtrack_time = null;
+    public $subtrack_from = null;
+    
     function __construct( $post_id = null, $tracklist = null ){
 
         //has track ID
@@ -55,6 +59,32 @@ class WPSSTM_Track{
             $this->tracklist = new WPSSTM_Post_Tracklist(); //default
         }
 
+        
+    }
+    
+    function populate_subtrack($subtrack_id){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $subtrack = $wpdb->get_row("SELECT * FROM $subtracks_table WHERE ID = $subtrack_id");
+        
+        if (!$subtrack) return;
+        
+        $this->subtrack_id = $subtrack_id;
+        
+        //regular track stuff
+        if ($subtrack->track_id){
+            $this->__construct($subtrack->track_id,$subtrack->tracklist_id);
+        }else{
+            $this->title =  $subtrack->title;
+            $this->artist = $subtrack->artist;
+            $this->album =  $subtrack->album;
+        }
+        
+        //subtrack-specific stuff
+        $this->position =       $subtrack->track_order;
+        $this->subtrack_time =  $subtrack->time;
+        $this->subtrack_from =  $subtrack->from_tracklist;
         
     }
     
@@ -131,8 +161,8 @@ class WPSSTM_Track{
     function get_default(){
         return array(
             'post_id'       =>null,
-            'subtrack_id'   => null,
-            'index'         => -1,
+            'subtrack_id'   =>null,
+            'index'         =>-1,
             'title'         =>null,
             'artist'        =>null,
             'album'         =>null,
@@ -141,6 +171,7 @@ class WPSSTM_Track{
             'mbid'          =>null,
             'duration'      =>null,
             'sources'       =>null,
+            'tracklist'     => null,
         );
     }
     
@@ -209,7 +240,7 @@ class WPSSTM_Track{
     */
     function to_ajax(){
         
-        $allowed  = ['post_id','title','artist','album','mbid'];
+        $allowed  = ['post_id','title','artist','album','mbid','tracklist'];
         
         if ($this->post_id){
             $allowed  = ['post_id'];
@@ -286,29 +317,40 @@ class WPSSTM_Track{
         if (!$this->post_id){
             $this->local_track_lookup();
         }
-
-        $subtrack_data = array(
-            'tracklist_id' =>   $this->tracklist->post_id,
-            'track_order' =>    (int)$this->index
-        );
         
+        $track_data = array();
+
         //TOUFIX logic when switching track order ?
 
         //basic data
         if($this->post_id){
-            $subtrack_data['track_id'] = $this->post_id;
+            $track_data = array(
+                'track_id' =>   $this->post_id
+            );
         }else{
-            $subtrack_data['artist'] = $this->artist;
-            $subtrack_data['title'] = $this->title;
-            $subtrack_data['album'] = $this->album;
+            $track_data = array(
+                'artist' =>   $this->artist,
+                'title' =>   $this->title,
+                'album' =>   $this->album
+            );
         }
+        
+        //subtrack
+        $subtrack_data = array(
+            'tracklist_id' =>   $this->tracklist->post_id,
+            'track_order' =>    (int)$this->position,
+            'time' =>           current_time('timestamp'),
+            'from_tracklist' => $this->subtrack_from
+        );
+        
+        $track_data = array_merge($track_data,$subtrack_data);
         
         //update or insert ?
         if ($this->subtrack_id){
             
             $success = $wpdb->update( 
                 $subtracks_table, //table
-                $subtrack_data, //data
+                $track_data, //data
                 array(
                     'ID'=>$this->subtrack_id
                 )
@@ -319,7 +361,7 @@ class WPSSTM_Track{
             }
 
         }else{
-            $success = $wpdb->insert($subtracks_table,$subtrack_data);
+            $success = $wpdb->insert($subtracks_table,$track_data);
             
             if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
                 $this->subtrack_id = $wpdb->insert_id;
@@ -810,10 +852,11 @@ class WPSSTM_Track{
             'itemscope' =>                      true,
             'itemtype' =>                       "http://schema.org/MusicRecording",
             'itemprop' =>                       'track',
+            'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
+            'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
             'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true ),
-            'data-wpsstm-track-idx' =>          $this->index
         );
 
         return wpsstm_get_html_attr($attr);
