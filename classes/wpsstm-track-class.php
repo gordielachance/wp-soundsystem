@@ -227,42 +227,18 @@ class WPSSTM_Track{
     }
 
     function to_array(){
-        $defaults = $this->get_default();
-        $export = array();
-        foreach ((array)$defaults as $param=>$dummy){
-            $export[$param] = $this->$param;
-        }
-        return array_filter($export);
-    }
-    
-    /*
-    Reduce track to the minimum; used to send data through URLs or ajax.
-    */
-    function to_ajax(){
-        
-        $allowed  = ['post_id','title','artist','album','mbid','tracklist'];
-        
-        if ($this->post_id){
-            $allowed  = ['post_id'];
-        }
-        
-        $arr = $this->to_array();
 
-        /*
-        //requires PHP 5.6.0
-        
-        $filtered = array_filter(
-            $arr,
-            function ($key) use ($allowed) {
-                return in_array($key, $allowed);
-            },
-            ARRAY_FILTER_USE_KEY
+        return array(
+            'post_id' => $this->post_id,
+            'title' => $this->title,
+            'artist' => $this->artist,
+            'album' => $this->album,
+            'mbid' => $this->mbid,
+            'tracklist' => $this->tracklist->to_array(),
+            'subtrack_id' => $this->subtrack_id,
+            'position' => $this->position,
         );
-        */
-        
-        $filtered = array_intersect_key($arr, array_flip($allowed));
-        
-        return $filtered;
+        return array_filter($export);
     }
     
     /**
@@ -690,7 +666,7 @@ class WPSSTM_Track{
 
         $args = array(
             WPSSTM_Core_Tracks::$qvar_track_action =>   'new-track',
-            'track' =>                              urlencode( json_encode($this->to_ajax()) ),
+            'track' =>                              urlencode( json_encode($this->to_array()) ),
         );
         
         $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive

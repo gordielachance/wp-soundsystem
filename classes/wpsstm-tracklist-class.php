@@ -1012,14 +1012,9 @@ class WPSSTM_Tracklist{
 
     function to_array(){
         $export = array(
-            'tracks' => array(),
             'post_id' => $this->post_id,
             'index' => $this->index,
         );
-        foreach ($this->tracks as $track){
-            $export['tracks'][] = $track->to_array();
-        }
-
         return array_filter($export);
     }
 
