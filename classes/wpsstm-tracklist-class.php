@@ -580,16 +580,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    function move_subtrack($track,$b){
+    function move_subtrack($track,$new_pos){
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $a = $track->position;
+        $old_pos = $track->position;
         
         if ( !$track->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
         }
         
-        //if ($b > $tracks_count) $b = $tracks_count;//TOUFIX TO CHECK REQUIRED
-        if ( !is_int($b) || ($b < 1) ){
+        //if ($new_pos > $tracks_count) $new_pos = $tracks_count;//TOUFIX TO CHECK REQUIRED
+        if ( !is_int($new_pos) || ($new_pos < 1) ){
             return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
         }
         
@@ -597,23 +597,29 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_cannot_reorder', __("You don't have the capability required to reorder subtracks.",'wpsstm') );
         }
 
-        if ($a==b) return; //no update needed
+        if ($new_pos==$old_pos) return; //no update needed
 
-        $up = ($a > $b);
-
+        //update tracks range
+        $up = ($new_pos < $old_pos);
         if ($up){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE track_order < %d AND track_order >= %d",$a,$b);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE track_order < %d AND track_order >= %d",$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }else{
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE track_order > %d AND track_order <= %d",$a,$b);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE track_order > %d AND track_order <= %d",$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }
         
-            if ( is_wp_error($success) ){
-                $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$b),"error moving subtrack");
-            }else{
-                $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'new_position'=>$b),"moved subtrack");
-            }
+        //update this subtrack
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = %d WHERE ID = %d",$new_pos,$track->subtrack_id);
+            $result = $wpdb->get_results ( $querystr );
+        }
+
+        if ( is_wp_error($success) ){
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$new_pos),"error moving subtrack");
+        }else{
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'new_position'=>$new_pos),"moved subtrack");
+        }
 
         return $result;
 
