@@ -450,6 +450,7 @@ class WPSSTM_Core_Tracklists{
             array('from_tracklist'=>''), //data
             array('from_tracklist'=>$post_id) //where
         );
+    }
     
     /*
     Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
