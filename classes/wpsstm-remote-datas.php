@@ -35,13 +35,11 @@ class WPSSTM_Remote_Datas{
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
 
-    public function __construct($url = null,$args = null) {
+    public function __construct($url = null,$options = null) {
         
         $this->url = $url;
         do_action('wpsstm_before_remote_response',$this);
-        
-        $scraper_default = self::get_default_scraper_options();
-        $this->options = array_replace_recursive($scraper_default,(array)$args); //last one has priority
+        $this->options = (array)$options; //last one has priority
     }
     
     function get_remote_tracks(){
@@ -74,34 +72,13 @@ class WPSSTM_Remote_Datas{
         return $this->tracks;
     }
 
-    static function get_default_scraper_options(){
-        $live_options = array(
-            'selectors' => array(
-                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="track"]'
-                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="byArtist"]'
-                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="name"]'
-                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="inAlbum"]'
-                'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
-            ),
-            'tracks_order'              => 'desc'
-        );
-        
-        return $live_options;
-        
+    function get_options($keys = null){
+        return wpsstm_get_array_value($keys,$this->options);
     }
     
-    function get_scraper_options($keys=null){
-
-        $default_options = self::get_default_scraper_options();
-        $options = array_replace_recursive($default_options,(array)$this->options); //last one has priority
-
-        if ($keys){
-            return wpsstm_get_array_value($keys, $options);
-        }else{
-            return $options;
-        }
+    function get_selectors($keys = null){
+        $keys = array_merge(array('selectors'),$keys);
+        return $this->get_options($keys);
     }
 
     private function get_raw_tracks(){
@@ -125,7 +102,7 @@ class WPSSTM_Remote_Datas{
         }
         
         //sort
-        if ($this->get_scraper_options('tracks_order') == 'asc'){
+        if ($this->get_options('tracks_order') == 'asc'){
             $raw_tracks = array_reverse($raw_tracks);
         }
         
@@ -382,14 +359,7 @@ class WPSSTM_Remote_Datas{
         return $this->body_node = $result;
 
     }
-    
-    public function get_selectors($keys=null){
-        $keys = (array)$keys;
-        array_unshift($keys, 'selectors'); //add at beginning
-        $selectors = $this->get_scraper_options($keys);
-        return $selectors;
-    }
-    
+
     /*
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */

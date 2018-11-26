@@ -1,7 +1,6 @@
 <?php
 
 global $wpsstm_tracklist;
-$wpsstm_tracklist->options['ajax_tracklist'] = false;
 $wpsstm_tracklist->populate_subtracks();
 
 $tracklist = $wpsstm_tracklist;

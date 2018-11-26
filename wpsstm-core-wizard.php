@@ -171,10 +171,6 @@ class WPSSTM_Core_Wizard{
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
 
-        if (wpsstm_is_backend() ){
-            $wpsstm_tracklist->options['autoplay'] = false;
-        }
-
         if ( !$post_id && $feed_url ){ //is wizard input
             $feed_url = trim($feed_url);
             $feed_url = apply_filters('wpsstm_wizard_input',$feed_url);
@@ -540,16 +536,15 @@ class WPSSTM_Core_Wizard{
             <?php
 
             //path
-            $path = $wpsstm_tracklist->get_selectors( array($selector,'path') );
+            $path = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
 
             //regex
-            $regex = $wpsstm_tracklist->get_selectors( array($selector,'regex') );
+            $regex = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
-            $attr_disabled = ( $wpsstm_tracklist->response_type != 'text/html');
-            $attr = $wpsstm_tracklist->get_selectors( array($selector,'attr') );
+            $attr = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
 
@@ -619,11 +614,10 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s"/></span>',
                                         'wpsstm_wizard',
                                         $selector,
-                                        $attr,
-                                        disabled( $attr_disabled, true, false )
+                                        $attr
                                     );
                                     ?>
                                 </div>
@@ -758,12 +752,7 @@ class WPSSTM_Core_Wizard{
 
             }
             if ($tracks_output){
-                
-                //reverse
-                if ( $wpsstm_tracklist->get_scraper_options('tracks_order') == 'asc' ){
-                    $tracks_output = array_reverse($tracks_output);
-                }
-                
+
                 $output = sprintf('<div id="spiff-station-tracks-raw">%s</div>',implode(PHP_EOL,$tracks_output));
             }
 
@@ -790,7 +779,7 @@ class WPSSTM_Core_Wizard{
     function get_track_detail_selector_prefix(){
         global $wpsstm_tracklist;
         
-        $selector = $wpsstm_tracklist->get_selectors( array('tracks','path'));
+        $selector = $wpsstm_tracklist->get_scraper_options(array('selectors','tracks','path'));
 
         if (!$selector) return;
         return sprintf(
@@ -889,7 +878,6 @@ class WPSSTM_Core_Wizard{
         );
 
         $results_title = __('Results','spiff');
-
         $results_title .= ' '.$wpsstm_tracklist->track_count;
         //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $wpsstm_tracklist->track_count, 'wpsstm' ) );
         
@@ -995,24 +983,19 @@ class WPSSTM_Core_Wizard{
         if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
         if (!$wizard_data) return;
 
-        $default_settings = WPSSTM_Remote_Datas::get_default_scraper_options();
-        $old_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-        
+        $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
         $wizard_data = $this->sanitize_wizard_settings($wizard_data);
 
-        //remove all default values so we store only user-edited stuff
-        $wizard_data = wpsstm_array_recursive_diff($wizard_data,$default_settings);
-        
         //settings have been updated, clear tracklist cache
-        if ($old_settings != $wizard_data){
+        if ($db_settings != $wizard_data){
             wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
             delete_post_meta($post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         }
 
         if (!$wizard_data){
-            delete_post_meta($post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name);
+            delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
         }else{
-            update_post_meta($post_id, WPSSTM_Core_Live_Playlists::$scraper_meta_name, $wizard_data);
+            update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $wizard_data);
         }
 
     }
@@ -1062,9 +1045,6 @@ class WPSSTM_Core_Wizard{
         if ( isset($input['tracks_order']) ){
             $new_input['tracks_order'] = $input['tracks_order'];
         }
-
-        $default_args = $this->get_default_scraper_options();
-        $new_input = array_replace_recursive($default_args,$new_input); //last one has priority
 
         return $new_input;
     }

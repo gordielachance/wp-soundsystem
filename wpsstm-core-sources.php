@@ -345,9 +345,9 @@ class WPSSTM_Core_Sources{
         $wpsstm_track->populate_sources();
         ?>
         <div class="wpsstm-track-sources">
-            <?php wpsstm_locate_template( 'content-source.php', true, false );?>
+            <?php wpsstm_locate_template( 'content-sources.php', true, false );?>
         </div>
-        <p class="wpsstm-new-track-sources-container">
+        <p class="wpsstm-new-sources-container">
             <?php
             $input_attr = array(
                 'id' => 'wpsstm-new_track-sources',
@@ -428,14 +428,13 @@ class WPSSTM_Core_Sources{
         $new_sources = array();
 
         foreach((array)$source_urls as $url){
-            //TOFIXKKK where is track ?
             $source = new WPSSTM_Source(null);
             $source->permalink_url = $url;
             $new_sources[] = $source;
         }
-        
+
         $track->add_sources($new_sources);
-        $track->save_new_sources();//save only if it does not exists yet
+        $track->save_new_sources();
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
@@ -581,6 +580,7 @@ class WPSSTM_Core_Sources{
     }
     
     static function can_autosource(){
+        global $wpsstm_spotify;
 
         //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
@@ -589,11 +589,8 @@ class WPSSTM_Core_Sources{
         }
         
         //spotify API
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        if (!$client_id || !$client_secret){
-            return new WP_Error( 'wpsstm_autosource',__('Autosource requires access to the Spotify API.','wpsstm') );   
-        }
+        $can_spotify_api = $wpsstm_spotify->can_spotify_api();
+        if ( is_wp_error($can_spotify_api) ) return $can_spotify_api;
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);

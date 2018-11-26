@@ -4,8 +4,7 @@
 Handle posts that have a tracklist, like albums and playlists.
 **/
 class WPSSTM_Core_Tracklists{
-    
-    static $qvar_tracklist_admin = 'admin-tracklist';
+
     static $qvar_tracklist_action = 'tracklist-action';
     static $qvar_loved_tracklists = 'loved-tracklists';
     static $loved_tracklist_meta_key = '_wpsstm_user_favorite';
@@ -21,7 +20,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
         add_action( 'template_redirect', array($this,'handle_tracklist_action'));
-        add_filter( 'template_include', array($this,'tracklist_xspf_template'));
+        add_filter( 'template_include', array($this,'tracklist_template'));
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         
@@ -50,7 +49,6 @@ class WPSSTM_Core_Tracklists{
 
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
-        add_filter( 'the_content', array($this,'tracklist_admin') );
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
@@ -76,7 +74,6 @@ class WPSSTM_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = self::$qvar_tracklist_admin;
         $vars[] = self::$qvar_tracklist_action;
         $vars[] = self::$qvar_loved_tracklists;
         return $vars;
@@ -101,10 +98,6 @@ class WPSSTM_Core_Tracklists{
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
             $wpsstm_tracklist->index = $query->current_post;
-        }else{
-            //reset blank $wpsstm_tracklist (this might be called within wp_reset_postdata and thus we should reset it)
-            //TO FIX maybe that instead of this, we should have a fn wpsstm_reset_tracklistdata ?
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist(); //TOFIXTOCHECK should it not be a regular tracklist ?
         }
     }
     
@@ -117,7 +110,6 @@ class WPSSTM_Core_Tracklists{
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
             //set global $wpsstm_source
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-            $wpsstm_tracklist->options['autoplay'] = false;
         }
     }
 
@@ -132,16 +124,6 @@ class WPSSTM_Core_Tracklists{
         
         wp_enqueue_script( 'wpsstm-tracklists' );
 
-    }
-    
-    //load the admin template instead of regular content when 'admin-tracklist' is set
-    function tracklist_admin($content){
-        if ( $tracklist_admin = get_query_var( self::$qvar_tracklist_admin ) ){
-            ob_start();
-            wpsstm_locate_template( 'tracklist-admin.php', true, false );
-            $content = ob_get_clean();
-        }
-        return $content;
     }
 
     function ajax_toggle_favorite_tracklist(){
@@ -322,46 +304,50 @@ class WPSSTM_Core_Tracklists{
     }
 
 
-    function tracklist_xspf_template($template){
+    function tracklist_template($template){
+        global $wpsstm_tracklist;
         if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
-        if ( $admin_action != 'export' ) return $template;
-        the_post();
-        return wpsstm_locate_template( 'tracklist-xspf.php' );
+        switch($admin_action){
+            case 'export':
+                the_post();//TOUFIX TOUCHECK useful ?
+                $template = wpsstm_locate_template( 'tracklist-xspf.php' );
+            break;
+            default:
+                the_post();//TOUFIX TOUCHECK useful ?
+                $template = wpsstm_locate_template( 'tracklist.php' );
+            break;
+        }
+        return $template;
+        
     }
+
     
     function handle_tracklist_action(){
         global $post;
-        if (!$post) return;
         
-        if( !$action = get_query_var( self::$qvar_tracklist_action ) ) return;
+        //TOUFIX not working when posting the new-subtrack form,only working with URLS currently.
+        
+        $action = isset($_REQUEST[self::$qvar_tracklist_action]) ? $_REQUEST[self::$qvar_tracklist_action] : null;
+        if (!$action) return;
+        if (!$post) return;
         
         $tracklist = new WPSSTM_Post_Tracklist($post->ID);
         $success = null;
-
+        
         switch($action){
-            case 'refresh':
-                $wpsstm_tracklist->options['remote_delay_min'] = 0; //will force tracklist refresh
-                $success = $tracklist->populate_subtracks();
-            break;
             case 'favorite':
                 $success = $tracklist->love_tracklist(true);
             break;
             case 'unfavorite':
                 $success = $tracklist->love_tracklist(false);
             break;
-            case 'export':
-                //see tracklist_xspf_template
-            break;
-            case 'switch-status':
-                $success = $tracklist->switch_status();
-            break;
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
             break;
-            case 'lock-tracklist':
+            case 'make-live':
                 $success = $tracklist->toggle_playlist_type();
             break;
-            case 'unlock-tracklist':
+            case 'make-static':
                 $success = $tracklist->toggle_playlist_type();
             break;
             case 'trash':
@@ -371,14 +357,24 @@ class WPSSTM_Core_Tracklists{
                 $track_id = isset($_GET['track_id']) ? $_GET['track_id'] : null;
                 if ($track_id){
                     $track = new WPSSTM_Track($track_id);
-                    $success = $tracklist->remove_subtrack_ids($track->post_id);
+                    $success = $tracklist->remove_subtrack_ids($track->post_id);//TOUFIX
+                }
+            break;
+            case 'append-subtrack':
+                $track_arr = isset($_REQUEST['wpsstm-new-subtrack']) ? $_REQUEST['wpsstm-new-subtrack'] : null;
+
+                if ($track_arr){
+                    $track = new WPSSTM_Track(null,$tracklist);
+                    $track->from_array($track_arr);
+                    $success = $track->save_subtrack();
                 }
 
             break;
         }
         
         if ($success){ //redirect with a success / error code
-            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $tracklist->post_id ) : get_permalink($tracklist->post_id);
+            
+            $redirect_url = $tracklist->get_tracklist_action_url('render');
 
             if ( is_wp_error($success) ){
                 $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
@@ -451,8 +447,8 @@ class WPSSTM_Core_Tracklists{
         //pinned from... ID
         $success = $wpdb->update( 
             $subtracks_table, //table
-            array('pinned_from'=>''), //data
-            array('pinned_from'=>$post_id) //where
+            array('from_tracklist'=>''), //data
+            array('from_tracklist'=>$post_id) //where
         );
         
     }

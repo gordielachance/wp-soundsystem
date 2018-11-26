@@ -5,6 +5,7 @@ class WPSSTM_SongLink{
         
     }
     static function get_track_autosources($track){
+        global $wpsstm_spotify;
         
         $valid = $track->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
@@ -12,7 +13,7 @@ class WPSSTM_SongLink{
         $auto_sources = array();
         
         if (!$track->spotify_id){
-            $spotify_id = WPSSTM_Spotify::auto_spotify_id( $track->post_id );
+            $spotify_id = $wpsstm_spotify->auto_spotify_id( $track->post_id );
             if ( is_wp_error($spotify_id) ) return $spotify_id;
             $track->spotify_id = $spotify_id;
         }

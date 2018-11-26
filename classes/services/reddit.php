@@ -123,7 +123,7 @@ class WPSSTM_Reddit_Api_Preset{
     }
     
     /*
-    Keep only reddit posts that have a media
+    TOUFIX Keep only reddit posts that have a media
     */
     /*
     protected function get_track_nodes($body_node){
