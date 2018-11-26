@@ -68,6 +68,7 @@ class WPSSTM_Core_Tracklists{
         /*
         DB relationships
         */
+        add_action( 'before_delete_post', array($this,'remove_subtrack_tracklist_id') );
         add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
         
 
@@ -427,6 +428,28 @@ class WPSSTM_Core_Tracklists{
         }
         return $where;
     }
+    
+    /*
+    Unset tracklist occurences out of the subtracks table when it is deleted
+    */
+    
+    function remove_subtrack_tracklist_id($post_id){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        $tracklist_post_types = array(
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_playlist,
+            wpsstm()->post_type_live_playlist,
+        );
+
+        if ( !in_array(get_post_type($post_id),$tracklist_post_types) ) return;
+
+        return $wpdb->update( 
+            $subtracks_table, //table
+            array('from_tracklist'=>''), //data
+            array('from_tracklist'=>$post_id) //where
+        );
     
     /*
     Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
