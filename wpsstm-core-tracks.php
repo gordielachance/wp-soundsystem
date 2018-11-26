@@ -88,7 +88,7 @@ class WPSSTM_Core_Tracks{
         DB relationships
         */
         add_action( 'save_post', array($this,'set_subtrack_post_id'), 6);
-        add_action( 'before_delete_post', array($this,'remove_subtrack_post_id') );
+        add_action( 'before_delete_post', array($this,'delete_subtrack_track_id') );
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
     }
 
@@ -904,7 +904,7 @@ class WPSSTM_Core_Tracks{
     Just before a track post is removed, remove post its post ID from the subtracks table and replace it by the track artist / title / album
     */
 
-    function remove_subtrack_post_id($post_id){
+    function delete_subtrack_track_id($post_id){
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;

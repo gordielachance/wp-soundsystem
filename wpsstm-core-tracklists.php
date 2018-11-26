@@ -71,7 +71,7 @@ class WPSSTM_Core_Tracklists{
         /*
         DB relationships
         */
-        add_action( 'before_delete_post', array($this,'remove_subtrack_tracklist_id') );
+        add_action( 'before_delete_post', array($this,'delete_subtrack_tracklist_id') );
         add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
         
 
@@ -463,7 +463,7 @@ class WPSSTM_Core_Tracklists{
     Unset tracklist occurences out of the subtracks table when it is deleted
     */
     
-    function remove_subtrack_tracklist_id($post_id){
+    function delete_subtrack_tracklist_id($post_id){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         

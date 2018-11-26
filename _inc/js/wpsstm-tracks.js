@@ -288,7 +288,7 @@
         //remove
         track_obj.track_el.find('.wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
-            track_obj.tracklist.remove_subtrack(track_obj);
+            track_obj.tracklist.unlink_subtrack(track_obj);
         });
         
         //delete

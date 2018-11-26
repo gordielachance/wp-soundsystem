@@ -365,7 +365,7 @@ class WpsstmTracklist {
 
     }
     
-    remove_subtrack(track_obj){
+    unlink_subtrack(track_obj){
         
         var self = this;
         var track_el = track_obj.track_el;
