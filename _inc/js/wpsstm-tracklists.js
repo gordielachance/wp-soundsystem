@@ -169,16 +169,18 @@
             axis: "y",
             handle: '.wpsstm-track-action-move',
             update: function(event, ui) {
-                console.log('update: '+ui.item.index())
-                //get track
                 var track_el = $(ui.item);
-                var track_idx = Number(track_el.attr('data-wpsstm-subtrack-position'));
-                var track_obj = tracklist_obj.get_track_obj(track_idx);
+                var old_position = Number(track_el.attr('data-wpsstm-subtrack-position'));
+                var new_position = ui.item.index();
+                var track_obj = tracklist_obj.get_track_obj(old_position); //TOUFIX weird shit ?
 
-                //new position
-                track_obj.index = ui.item.index();
-                tracklist_obj.update_subtrack_position(track_obj);
-                
+                if (track_obj){
+                    console.log('update position: '+old_position+' > '+new_position);
+                    //new position
+                    track_obj.index = ui.item.index();
+                    tracklist_obj.update_subtrack_position(track_obj);
+                }
+
             }
         });
         
