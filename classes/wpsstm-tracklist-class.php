@@ -616,9 +616,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         if ( is_wp_error($success) ){
-            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$new_pos),"error moving subtrack");
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
         }else{
-            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'new_position'=>$new_pos),"moved subtrack");
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
         }
 
         return $result;
