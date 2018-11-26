@@ -580,14 +580,43 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    function save_subtrack_position($subtrack_id,$position){
-        if ( !$this->user_can_reorder_tracks() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+    function move_subtrack($track,$b){
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $a = $track->position;
+        
+        if ( !$track->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
         }
         
-        $this->tracklist_log(array('subtrack_id'=>$subtrack_id,'index'=>$position),"save_subtrack_position");
+        //if ($b > $tracks_count) $b = $tracks_count;//TOUFIX TO CHECK REQUIRED
+        if ( !is_int($b) || ($b < 1) ){
+            return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
+        }
         
-        //get subtracks
+        if ( !$this->user_can_reorder_tracks() ){
+            return new WP_Error( 'wpsstm_cannot_reorder', __("You don't have the capability required to reorder subtracks.",'wpsstm') );
+        }
+
+        if ($a==b) return; //no update needed
+
+        $up = ($a > $b);
+
+        if ($up){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE track_order < %d AND track_order >= %d",$a,$b);
+            $result = $wpdb->get_results ( $querystr );
+        }else{
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE track_order > %d AND track_order <= %d",$a,$b);
+            $result = $wpdb->get_results ( $querystr );
+        }
+        
+            if ( is_wp_error($success) ){
+                $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$b),"error moving subtrack");
+            }else{
+                $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'new_position'=>$b),"moved subtrack");
+            }
+
+        return $result;
+
     }
     
     function can_get_tracklist_authorship(){

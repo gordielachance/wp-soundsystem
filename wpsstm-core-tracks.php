@@ -76,11 +76,11 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
         
-        add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
 
         //add/remove tracklist track
         add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
+        
         
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
         
@@ -798,38 +798,6 @@ class WPSSTM_Core_Tracks{
                 }
             }
             
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
-    function ajax_update_subtrack_position(){
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'message'   => "hello",
-            'success'   => false,
-            'input'     => $ajax_data
-        );
-        
-        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
-        $result['track_id'] = $track_id = wpsstm_get_array_value(array('track','post_id'),$ajax_data);
-        $result['tracklist_id'] = $tracklist_id = wpsstm_get_array_value(array('track','tracklist','post_id'),$ajax_data);
-
-        $track = new WPSSTM_Track($track_id,$tracklist_id);
-        
-        $track->from_array($ajax_data['track']);
-        $result['track'] = $track->to_array();
-
-        if ( $track->post_id && $track->tracklist->post_id && ($track->position != -1) ){
-            $success = $tracklist->save_subtrack_position($track->subtrack_id,$track->position);
-            
-            if ( is_wp_error($success) ){
-                $result['message'] = $success->get_error_message();
-            }else{
-                $result['success'] = $success;
-            }
         }
 
         header('Content-type: application/json');

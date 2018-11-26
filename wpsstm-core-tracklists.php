@@ -65,6 +65,9 @@ class WPSSTM_Core_Tracklists{
         add_action('wp_ajax_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_tracklist', array($this,'ajax_toggle_favorite_tracklist')); //so we can output the non-logged user notice
         
+        //subtracks
+        add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
+        
         /*
         DB relationships
         */
@@ -170,6 +173,33 @@ class WPSSTM_Core_Tracklists{
             }
         }
 
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_update_subtrack_position(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'message'   => "hello",
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+        
+        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($subtrack_id);
+        $result['track'] = $track->to_array();
+
+        $success = $tracklist->move_subtrack($track->subtrack_id,$track->position);
+
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
+        }
+        
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
