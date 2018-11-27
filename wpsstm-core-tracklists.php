@@ -187,12 +187,14 @@ class WPSSTM_Core_Tracklists{
         );
         
         $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
-
+        $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
+        $result['new_pos'] = $new_pos = intval($new_pos);
+        
         $track = new WPSSTM_Track();
         $track->populate_subtrack($subtrack_id);
         $result['track'] = $track->to_array();
 
-        $success = $tracklist->move_subtrack($track->subtrack_id,$track->position);
+        $success = $track->move_subtrack($new_pos);
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();

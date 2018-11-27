@@ -49,14 +49,16 @@ class WPSSTM_Track{
             $this->duration     = wpsstm_get_post_length($post_id);
         }
         
+        /*
+        Tracklist
+        */
+        $this->tracklist = new WPSSTM_Post_Tracklist();
         if ($tracklist){
-            if ( is_object($tracklist) ){
+            if ( is_object($tracklist) ){ //object
                 $this->tracklist = $tracklist;
-            }elseif( is_int($tracklist) ){
+            }else{ //int
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
-        }else{
-            $this->tracklist = new WPSSTM_Post_Tracklist(); //default
         }
 
         
@@ -234,7 +236,7 @@ class WPSSTM_Track{
             'artist' => $this->artist,
             'album' => $this->album,
             'mbid' => $this->mbid,
-            'tracklist' => $this->tracklist->to_array(),
+            'tracklist' => (array)$this->tracklist,
             'subtrack_id' => $this->subtrack_id,
             'position' => $this->position,
         );
@@ -349,6 +351,59 @@ class WPSSTM_Track{
         }
 
         return $success;
+
+    }
+    
+    function move_subtrack($new_pos){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $old_pos = $this->position;
+        $tracklist_id = $this->tracklist->post_id;
+        
+        if ( !$this->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+        
+        if ( !$tracklist_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
+        }
+        
+        //if ($new_pos > $tracks_count) $new_pos = $tracks_count;//TOUFIX TO CHECK REQUIRED
+        if ( !is_int($new_pos) || ($new_pos < 1) ){
+            return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
+        }
+        
+        if ( !$this->tracklist->user_can_reorder_tracks() ){
+            return new WP_Error( 'wpsstm_cannot_reorder', __("You don't have the capability required to reorder subtracks.",'wpsstm') );
+        }
+
+        if ($new_pos==$old_pos){
+            return new WP_Error( 'wpsstm_not_needed', __("Same position: no update needed.",'wpsstm') );
+        }
+
+        //update tracks range
+        $up = ($new_pos < $old_pos);
+        if ($up){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE tracklist_id = %d AND track_order < %d AND track_order >= %d",$tracklist_id,$old_pos,$new_pos);
+            $result = $wpdb->get_results ( $querystr );
+        }else{
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d WHERE track_order > %d AND track_order <= %d",$tracklist_id,$old_pos,$new_pos);
+            $result = $wpdb->get_results ( $querystr );
+        }
+        
+        //update this subtrack
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = %d WHERE ID = %d",$new_pos,$this->subtrack_id);
+            $result = $wpdb->get_results ( $querystr );
+        }
+
+        if ( is_wp_error($result) ){
+            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
+        }else{
+            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
+        }
+
+        return $result;
 
     }
 
@@ -711,7 +766,7 @@ class WPSSTM_Track{
         Tracklist
         //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
         */
-        $tracklist_id = $this->tracklist->post_id;
+        $tracklist_id =             $this->tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );

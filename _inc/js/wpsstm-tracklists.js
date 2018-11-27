@@ -178,7 +178,7 @@
                     console.log('update position: '+old_position+' > '+new_position);
                     //new position
                     track_obj.index = ui.item.index();
-                    tracklist_obj.update_subtrack_position(track_obj);
+                    tracklist_obj.update_subtrack_position(track_obj,new_position);
                 }
 
             }
@@ -326,14 +326,15 @@ class WpsstmTracklist {
         });
     }
 
-    update_subtrack_position(track_obj){
+    update_subtrack_position(track_obj,new_pos){
         var self = this;
         var link = track_obj.track_el.find('.wpsstm-track-action-move a');
 
         //ajax update order
         var ajax_data = {
-            action            : 'wpsstm_update_subtrack_position',
-            track:              track_obj.to_ajax()
+            action:             'wpsstm_update_subtrack_position',
+            track:              track_obj.to_ajax(),
+            new_pos:            new_pos,
         };
 
         jQuery.ajax({
