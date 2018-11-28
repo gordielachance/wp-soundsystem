@@ -171,7 +171,7 @@
             update: function(event, ui) {
                 var track_el = $(ui.item);
                 var old_position = Number(track_el.attr('data-wpsstm-subtrack-position'));
-                var new_position = ui.item.index();
+                var new_position = ui.item.index() + 1;
                 var track_obj = tracklist_obj.get_track_obj(old_position); //TOUFIX weird shit ?
 
                 if (track_obj){

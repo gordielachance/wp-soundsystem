@@ -72,7 +72,7 @@ class WPSSTM_Track{
         
         if (!$subtrack) return;
         
-        $this->subtrack_id = $subtrack_id;
+        $this->subtrack_id = (int)$subtrack_id;
         
         //regular track stuff
         if ($subtrack->track_id){
@@ -84,7 +84,6 @@ class WPSSTM_Track{
         }
         
         //subtrack-specific stuff
-        $this->position =       $subtrack->track_order;
         $this->subtrack_time =  $subtrack->time;
         $this->subtrack_from =  $subtrack->from_tracklist;
         
@@ -359,6 +358,7 @@ class WPSSTM_Track{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $old_pos = $this->position;
         $tracklist_id = $this->tracklist->post_id;
+        $new_pos = intval($new_pos);
         
         if ( !$this->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
@@ -387,7 +387,7 @@ class WPSSTM_Track{
             $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE tracklist_id = %d AND track_order < %d AND track_order >= %d",$tracklist_id,$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }else{
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d WHERE track_order > %d AND track_order <= %d",$tracklist_id,$old_pos,$new_pos);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d AND track_order <= %d",$tracklist_id,$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }
         

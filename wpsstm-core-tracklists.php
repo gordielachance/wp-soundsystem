@@ -181,14 +181,14 @@ class WPSSTM_Core_Tracklists{
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
-            'message'   => "hello",
+            'message'   => null,
             'success'   => false,
             'input'     => $ajax_data
         );
         
         $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
         $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
-        $result['new_pos'] = $new_pos = intval($new_pos);
+        $result['new_pos'] = $new_pos;
         
         $track = new WPSSTM_Track();
         $track->populate_subtrack($subtrack_id);

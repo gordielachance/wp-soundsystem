@@ -835,7 +835,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
+        $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = '%s' ORDER BY track_order ASC", $this->post_id );
         $subtrack_ids = $wpdb->get_col( $querystr);
 
         $tracks = array();
@@ -958,7 +958,7 @@ class WPSSTM_Tracklist{
             }
             
             $track->tracklist = $this;
-            $track->position = $current_index;
+            $track->position = $current_index + 1;
             $add_tracks[] = $track;
             $current_index++;
         }

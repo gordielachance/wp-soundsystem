@@ -17,7 +17,7 @@ $can_play_track = $track->can_play_track();
                 </span>
             <?php } ?>
             <span class="wpsstm-track-position">
-                <span itemprop="position"><?php echo $track->position + 1;?></span>
+                <span itemprop="position"><?php echo $track->position;?></span>
             </span>
             <span class="wpsstm-track-image" itemprop="image">
                 <?php 
