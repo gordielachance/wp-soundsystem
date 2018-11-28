@@ -796,7 +796,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $saved = 0;
         foreach((array)$this->tracks as $index=>$track){
             $track->position = $index + 1;
-            $success = $track->save_subtrack();
+            $success = $this->save_subtrack($track);
             
             //populate subtrack ID
             if( is_wp_error($success) ){
@@ -851,16 +851,87 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $result;
     }
     
-    function append_subtrack($subtrack){
+    function validate_subtrack($track,$strict = true){
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
+        }
+        return $track->validate_track($strict);
+    }
+    
+    function save_subtrack($track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        if ( !$this->post_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
+        $valid = $this->validate_subtrack($track);
+        if ( is_wp_error( $valid ) ) return $valid;
+        
+        //check for a track ID
+        if (!$track->post_id){
+            $track->local_track_lookup();
         }
-        //TOUFIX
+        
+        $track_data = array();
+
+        //basic data
+        if($track->post_id){
+            $track_data = array(
+                'track_id' =>   $track->post_id
+            );
+        }else{
+            $track_data = array(
+                'artist' =>   $track->artist,
+                'title' =>   $track->title,
+                'album' =>   $track->album
+            );
+        }
+        
+        //append ?
+        if (!$track->position){
+            $track->position = $this->get_subtracks_count();
+        }
+        
+        //subtrack
+        $subtrack_data = array(
+            'tracklist_id' =>   $this->post_id,
+            'track_order' =>    (int)$track->position,
+            'time' =>           current_time('timestamp'),
+            'from_tracklist' => $track->subtrack_from, //TOUFIX
+        );
+        
+        $track_data = array_merge($track_data,$subtrack_data);
+        
+        //update or insert ?
+        if ($track->subtrack_id){
+            
+            $success = $wpdb->update( 
+                $subtracks_table, //table
+                $track_data, //data
+                array(
+                    'ID'=>$track->subtrack_id
+                )
+            );
+            
+            if ( is_wp_error($success) ){
+                $track->track_log(json_encode($track->to_array()),"Error while updating subtrack" ); 
+            }
+
+        }else{
+            $success = $wpdb->insert($subtracks_table,$track_data);
+            
+            if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
+                $track->subtrack_id = $wpdb->insert_id;
+                //$track->track_log(json_encode($track->to_array()),"Subtrack inserted" ); 
+            }else{
+                $error_msg = $success->get_error_message();
+                $track->track_log(array('track'=>json_encode($track->to_array()),'error'=>$error_msg), "Error while saving subtrack" ); 
+            }
+        }
+
+        $this->tracklist_log(json_encode($success),"SUCCESS");
+        return $success;
+
     }
-    
+
     private function tracklist_autosource(){
         $this->tracklist_log('tracklist autosource'); 
         foreach((array)$this->tracks as $track){
@@ -935,7 +1006,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function tracklist_log($message,$title = null){
 
         if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
+            $message = json_encode($message);
         }
 
         //global log

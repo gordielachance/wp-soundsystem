@@ -685,7 +685,8 @@ class WPSSTM_Core_Tracks{
         );
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = $result['track'] = new WPSSTM_Track($track_id);
+        $track = new WPSSTM_Track($track_id);
+        $result['track'] = $track->to_array();
         
         $source_ids = isset($ajax_data['source_ids']) ? $ajax_data['source_ids'] : null;
         $success = $track->update_sources_order($source_ids);
@@ -729,8 +730,6 @@ class WPSSTM_Core_Tracks{
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
             
         }else{
-
-
 
             if ( ($do_love!==null) ){
 

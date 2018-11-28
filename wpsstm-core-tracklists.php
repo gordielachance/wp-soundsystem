@@ -249,21 +249,24 @@ class WPSSTM_Core_Tracklists{
         );
         
         $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = new WPSSTM_Post_Tracklist($tracklist_id);
-        
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = $result['track'] = new WPSSTM_Track($track_id);
-        $track->tracklist = $tracklist;
-        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
-        
         $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
+        
+        $tracklist = $result['tracklist'] = new WPSSTM_Post_Tracklist($tracklist_id);
+        $result['tracklist'] = $tracklist->to_array();
+        
+        $track = new WPSSTM_Track($track_id);
+        $result['track'] = $track->to_array();
+        
+        $result['message'] = $track_action;
+        
         $success = false;
 
         if ($track_id && $tracklist->post_id && $track_action){
 
             switch($track_action){
                 case 'append':
-                    $success = $tracklist->append_subtrack($track);
+                    $success = $tracklist->save_subtrack($track);
                 break;
                 case 'unlink':
                     $success = $tracklist->unlink_subtrack($track);
@@ -271,7 +274,7 @@ class WPSSTM_Core_Tracklists{
             }
             
         }
-        
+
         if ( is_wp_error($success) ){
             $code = $success->get_error_code();
             $result['message'] = $success->get_error_message($code);
@@ -474,9 +477,9 @@ class WPSSTM_Core_Tracklists{
                 $track_arr = isset($_REQUEST['wpsstm-new-subtrack']) ? $_REQUEST['wpsstm-new-subtrack'] : null;
 
                 if ($track_arr){
-                    $track = new WPSSTM_Track(null,$tracklist);
+                    $track = new WPSSTM_Track();
                     $track->from_array($track_arr);
-                    $success = $track->save_subtrack();
+                    $success = $tracklist->save_subtrack($track);
                 }
 
             break;
