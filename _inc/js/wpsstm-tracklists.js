@@ -311,7 +311,7 @@ class WpsstmTracklist {
 
     }
 
-    update_tracks_order(){
+    refresh_tracks_positions(){
         var self = this;
         var all_rows = self.tracklist_el.find( '[itemprop="track"]' );
         jQuery.each( all_rows, function( key, value ) {
@@ -322,13 +322,14 @@ class WpsstmTracklist {
 
     update_subtrack_position(track_obj,new_pos){
         var self = this;
-        var link = track_obj.track_el.find('.wpsstm-track-action-move a');
+        var track_el = track_obj.track_el;
+        var link = track_el.find('.wpsstm-track-action-move a');
 
         //ajax update order
         var ajax_data = {
-            action:             'wpsstm_update_subtrack_position',
-            track:              track_obj.to_ajax(),
-            new_pos:            new_pos,
+            action:     'wpsstm_update_subtrack_position',
+            track:      track_obj.to_ajax(),
+            new_pos:    new_pos,
         };
 
         jQuery.ajax({
@@ -337,6 +338,7 @@ class WpsstmTracklist {
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
+                track_el.addClass('track-loading');
                 link.addClass('action-loading');
             },
             success: function(data){
@@ -344,7 +346,7 @@ class WpsstmTracklist {
                     link.addClass('action-error');
                     console.log(data);
                 }else{
-                    self.update_tracks_order();
+                    self.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -353,6 +355,7 @@ class WpsstmTracklist {
                 console.log(thrownError);
             },
             complete: function() {
+                track_el.removeClass('track-loading');
                 link.removeClass('action-loading');
             }
         })
@@ -363,12 +366,11 @@ class WpsstmTracklist {
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link = track_el.find('.wpsstm-track-action-remove a');
+        var link_el = track_el.find('.wpsstm-track-action-unlink a');
 
         var ajax_data = {
-            action            : 'wpsstm_remove_from_tracklist',
-            tracklist_id      : self.post_id,
-            track_id          : track_obj.post_id
+            action: 'wpsstm_unlink_subtrack',
+            track:  track_obj.to_ajax(),
         };
 
         jQuery.ajax({
@@ -378,23 +380,26 @@ class WpsstmTracklist {
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');
+                link_el.addClass('action-loading');
             },
             success: function(data){
+                
                 if (data.success === false) {
-                    link.addClass('action-error');
+                    link_el.addClass('action-error');
                     console.log(data);
                 }else{
                     $(track_el).remove();
-                    self.update_tracks_order();
+                    self.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                link.addClass('action-error');
+                link_el.addClass('action-error');
                 console.log(xhr.status);
                 console.log(thrownError);
             },
             complete: function() {
                 track_el.removeClass('track-loading');
+                link_el.removeClass('action-loading');
             }
         })
 

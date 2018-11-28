@@ -77,11 +77,6 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
         
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
-
-        //add/remove tracklist track
-        add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
-        
-        
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
         
         /*
@@ -678,53 +673,6 @@ class WPSSTM_Core_Tracks{
 
         return $output;
 
-    }
-
-    
-    function ajax_toggle_playlist_subtrack(){
-        
-        $ajax_data = wp_unslash($_POST);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false
-        );
-        
-        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
-        $tracklist = $result['tracklist'] = new WPSSTM_Post_Tracklist($tracklist_id);
-        
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = $result['track'] = new WPSSTM_Track($track_id);
-        $track->tracklist = $tracklist;
-        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
-        
-        $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
-        $success = false;
-
-        if ($track_id && $tracklist->post_id && $track_action){
-
-            switch($track_action){
-                case 'append':
-                    $success = $tracklist->append_subtrack_ids($track->post_id);
-                break;
-                case 'remove':
-                    $success = $tracklist->remove_subtrack_ids($track->post_id);
-                break;
-            }
-            
-        }
-        
-        if ( is_wp_error($success) ){
-            $code = $success->get_error_code();
-            $result['message'] = $success->get_error_message($code);
-        }else{
-            $result['success'] = $success;
-        }
-
-   
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
     }
     
     function ajax_update_sources_order(){

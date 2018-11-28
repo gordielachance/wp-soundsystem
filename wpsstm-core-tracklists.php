@@ -67,6 +67,9 @@ class WPSSTM_Core_Tracklists{
         
         //subtracks
         add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
+        add_action('wp_ajax_wpsstm_unlink_subtrack', array($this,'ajax_unlink_subtrack'));
+        //check/uncheck tracklist as parent
+        add_action('wp_ajax_wpsstm_toggle_playlist_subtrack', array($this,'ajax_toggle_playlist_subtrack'));
         
         /*
         DB relationships
@@ -202,6 +205,80 @@ class WPSSTM_Core_Tracklists{
             $result['success'] = $success;
         }
         
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+    }
+    
+    function ajax_unlink_subtrack(){
+        $ajax_data = wp_unslash($_POST);
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($subtrack_id);
+        $result['track'] = $track->to_array();
+        
+        $success = $track->tracklist->unlink_subtrack($track);
+        
+        if ( is_wp_error($success) ){
+            $code = $success->get_error_code();
+            $result['message'] = $success->get_error_message($code);
+        }else{
+            $result['success'] = $success;
+        }
+   
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
+        
+    }
+    
+    function ajax_toggle_playlist_subtrack(){
+        
+        $ajax_data = wp_unslash($_POST);
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'success'   => false
+        );
+        
+        $tracklist_id  = isset($ajax_data['tracklist_id']) ? $ajax_data['tracklist_id'] : null;
+        $tracklist = $result['tracklist'] = new WPSSTM_Post_Tracklist($tracklist_id);
+        
+        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
+        $track = $result['track'] = new WPSSTM_Track($track_id);
+        $track->tracklist = $tracklist;
+        $track->track_log($ajax_data,"ajax_toggle_playlist_subtrack"); 
+        
+        $track_action = isset($ajax_data['track_action']) ? $ajax_data['track_action'] : null;
+        $success = false;
+
+        if ($track_id && $tracklist->post_id && $track_action){
+
+            switch($track_action){
+                case 'append':
+                    $success = $tracklist->append_subtrack($track);
+                break;
+                case 'unlink':
+                    $success = $tracklist->unlink_subtrack($track);
+                break;
+            }
+            
+        }
+        
+        if ( is_wp_error($success) ){
+            $code = $success->get_error_code();
+            $result['message'] = $success->get_error_message($code);
+        }else{
+            $result['success'] = $success;
+        }
+   
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
@@ -386,11 +463,11 @@ class WPSSTM_Core_Tracklists{
             case 'trash':
                 $success = $tracklist->trash_tracklist();
             break;
-            case 'unlink':
+            case 'unlink': //TOUFIX useful here ? not only JS ?
                 $track_id = isset($_GET['track_id']) ? $_GET['track_id'] : null;
                 if ($track_id){
                     $track = new WPSSTM_Track($track_id);
-                    $success = $tracklist->remove_subtrack_ids($track->post_id);//TOUFIX
+                    $success = $tracklist->unlink_subtrack($track);
                 }
             break;
             case 'append-subtrack':

@@ -145,7 +145,7 @@
             action:         'wpsstm_toggle_playlist_subtrack',
             track_id:       track_id,
             tracklist_id:   tracklist_id,
-            track_action:   (is_checked ? 'append' : 'remove'),
+            track_action:   (is_checked ? 'append' : 'unlink'),
         };
 
         return $.ajax({
@@ -286,7 +286,7 @@
         });
         
         //unlink
-        track_obj.track_el.find('.wpsstm-track-action-remove a').click(function(e) {
+        track_obj.track_el.find('.wpsstm-track-action-unlink a').click(function(e) {
             e.preventDefault();
             track_obj.tracklist.unlink_subtrack(track_obj);
         });
@@ -546,7 +546,7 @@ class WpsstmTrack {
                     console.log(data);
                 }else{
                     $(track_el).remove();
-                    self.update_tracks_order();
+                    self.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

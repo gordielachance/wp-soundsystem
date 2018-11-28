@@ -822,6 +822,45 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
+    function unlink_subtrack($subtrack){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if ( !$this->post_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
+        }
+        
+        if ( !$subtrack->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+        
+        if ( !$subtrack->position ){
+            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
+        }
+
+        //update this subtrack
+        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE ID = '%s'", $subtrack->subtrack_id );
+        $result = $wpdb->get_results ( $querystr );
+
+        //update tracks range
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->post_id,$subtrack->position);
+            $result = $wpdb->get_results ( $querystr );
+        }
+        
+        return $result;
+    }
+    
+    function append_subtrack($subtrack){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if ( !$this->post_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
+        }
+        //TOUFIX
+    }
+    
     private function tracklist_autosource(){
         $this->tracklist_log('tracklist autosource'); 
         foreach((array)$this->tracks as $track){
