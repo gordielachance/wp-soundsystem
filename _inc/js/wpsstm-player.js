@@ -152,7 +152,7 @@ class WpsstmPlayer {
             var track_obj = self.current_track;
 
             var track_el = track_obj.track_el;
-            var newTracksCount = track_obj.index + 1;
+            var newTracksCount = track_obj.position + 1;
 
             //https://stackoverflow.com/a/6677069/782013
             //TOUFIX BROKEN

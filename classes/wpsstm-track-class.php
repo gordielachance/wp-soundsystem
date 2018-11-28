@@ -27,7 +27,7 @@ class WPSSTM_Track{
     ///
     public $subtrack_id = null;
     public $parent_ids = array();
-    public $position = -1;
+    public $position = 0;
     public $subtrack_time = null;
     public $subtrack_from = null;
     
@@ -86,7 +86,7 @@ class WPSSTM_Track{
         //subtrack-specific stuff
         $this->subtrack_time =  $subtrack->time;
         $this->subtrack_from =  $subtrack->from_tracklist;
-        
+        $this->position =       $subtrack->track_order;
     }
     
     function from_array( $args = null ){
@@ -297,8 +297,6 @@ class WPSSTM_Track{
         
         $track_data = array();
 
-        //TOUFIX logic when switching track order ?
-
         //basic data
         if($this->post_id){
             $track_data = array(
@@ -317,7 +315,8 @@ class WPSSTM_Track{
             'tracklist_id' =>   $this->tracklist->post_id,
             'track_order' =>    (int)$this->position,
             'time' =>           current_time('timestamp'),
-            'from_tracklist' => $this->subtrack_from
+            'from_tracklist' => $this->subtrack_from,
+            'track_order' =>    $this->position,
         );
         
         $track_data = array_merge($track_data,$subtrack_data);
@@ -358,6 +357,7 @@ class WPSSTM_Track{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $old_pos = $this->position;
         $tracklist_id = $this->tracklist->post_id;
+        $tracks_count = $this->tracklist->get_subtracks_count();
         $new_pos = intval($new_pos);
         
         if ( !$this->subtrack_id ){
@@ -368,8 +368,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
         }
         
-        //if ($new_pos > $tracks_count) $new_pos = $tracks_count;//TOUFIX TO CHECK REQUIRED
-        if ( !is_int($new_pos) || ($new_pos < 1) ){
+        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $tracks_count) ){
             return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
         }
         
@@ -378,7 +377,7 @@ class WPSSTM_Track{
         }
 
         if ($new_pos==$old_pos){
-            return new WP_Error( 'wpsstm_not_needed', __("Same position: no update needed.",'wpsstm') );
+            return new WP_Error( 'wpsstm_not_needed', __("Same position ".$old_pos." -> ".$new_pos.": no update needed.",'wpsstm') );
         }
 
         //update tracks range
@@ -398,8 +397,9 @@ class WPSSTM_Track{
         }
 
         if ( is_wp_error($result) ){
-            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$success->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
+            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$result->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
         }else{
+            $this->position = $new_pos;
             $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
         }
 

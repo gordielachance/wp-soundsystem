@@ -165,19 +165,23 @@
 
 
         //sort subtracks
+        var startSortIdx, endSortIdx;
         tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
             axis: "y",
             handle: '.wpsstm-track-action-move',
+            start: function(event, ui) { 
+                startSortIdx = ui.item.index();
+            },
             update: function(event, ui) {
-                var track_el = $(ui.item);
-                var old_position = Number(track_el.attr('data-wpsstm-subtrack-position'));
+                endSortIdx = ui.item.index();
+                var track_obj = tracklist_obj.tracks[startSortIdx];
+                var old_position = Number(track_obj.track_el.attr('data-wpsstm-subtrack-position'));
                 var new_position = ui.item.index() + 1;
-                var track_obj = tracklist_obj.get_track_obj(old_position); //TOUFIX weird shit ?
+                
 
                 if (track_obj){
-                    console.log('update position: '+old_position+' > '+new_position);
                     //new position
-                    track_obj.index = ui.item.index();
+                    track_obj.position = ui.item.index();
                     tracklist_obj.update_subtrack_position(track_obj,new_position);
                 }
 
@@ -201,7 +205,7 @@
         if ( track_el.is(":visible") ) return;
 
         var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
-        var newTracksCount = track_obj.index + 1;
+        var newTracksCount = track_obj.position + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
@@ -307,16 +311,6 @@ class WpsstmTracklist {
 
     }
 
-    get_track_obj(track_idx){
-        var self = this;
-        
-        track_idx = Number(track_idx);
-        var track_obj = self.tracks[track_idx];
-        if(typeof track_obj !== undefined) return track_obj;
-
-        return false;
-    }
-
     update_tracks_order(){
         var self = this;
         var all_rows = self.tracklist_el.find( '[itemprop="track"]' );
@@ -346,7 +340,6 @@ class WpsstmTracklist {
                 link.addClass('action-loading');
             },
             success: function(data){
-                console.log(data);
                 if (data.success === false) {
                     link.addClass('action-error');
                     console.log(data);

@@ -285,7 +285,7 @@
 
         });
         
-        //remove
+        //unlink
         track_obj.track_el.find('.wpsstm-track-action-remove a').click(function(e) {
             e.preventDefault();
             track_obj.tracklist.unlink_subtrack(track_obj);
@@ -296,7 +296,6 @@
             e.preventDefault();
             track_obj.delete_track();
         });
-        
         
         //sources
         var toggleSourcesEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a');
@@ -325,7 +324,7 @@
 
         var tracklist_obj = track_obj.tracklist;
         var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
-        var newTracksCount = track_obj.index + 1;
+        var newTracksCount = track_obj.position + 1;
         
         if ( newTracksCount <= visibleTracksCount ) return;
 
@@ -345,7 +344,7 @@ class WpsstmTrack {
         this.track_el =             $([]);
         this.tracklist =            new WpsstmTracklist();
         
-        this.index =                null;
+        this.position =             null;
         this.artist =               null;
         this.title =                null;
         this.album =                null;
@@ -369,7 +368,7 @@ class WpsstmTrack {
     }
 
     debug(msg){
-        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.index;
+        var prefix = " WpsstmTracklist #"+ this.tracklist.position +" - WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
     }
     
@@ -380,7 +379,7 @@ class WpsstmTrack {
         if ( track_html === undefined ) return;
 
         self.track_el =             $(track_html);
-        self.index =                Number(self.track_el.attr('data-wpsstm-subtrack-position')); //index in tracklist
+        self.position =             Number(self.track_el.attr('data-wpsstm-subtrack-position')); //index in tracklist
         self.artist =               self.track_el.find('[itemprop="byArtist"]').text();
         self.title =                self.track_el.find('[itemprop="name"]').text();
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
@@ -411,7 +410,7 @@ class WpsstmTrack {
             
         } else if ( self.did_sources_request ) {
             
-            success.resolve("already did sources auto request for track #" + self.index);
+            success.resolve("already did sources auto request for track #" + self.position);
             
         } else{
             success = self.get_track_sources_request();
@@ -508,7 +507,7 @@ class WpsstmTrack {
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['index','subtrack_id','post_id','artist', 'title','album','duration'];
+        var allowed = ['position','subtrack_id','post_id','artist', 'title','album','duration'];
         var filtered = Object.keys(self)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {

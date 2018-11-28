@@ -794,7 +794,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $errors = array();
         $no_updates = 0;
         $saved = 0;
-        foreach((array)$this->tracks as $track){
+        foreach((array)$this->tracks as $index=>$track){
+            $track->position = $index + 1;
             $success = $track->save_subtrack();
             
             //populate subtrack ID
@@ -937,7 +938,6 @@ class WPSSTM_Tracklist{
     function add_tracks($input_tracks){
         
         $add_tracks = array();
-        $current_index = count($this->tracks);
 
         //force array
         if ( !is_array($input_tracks) ) $input_tracks = array($input_tracks);
@@ -958,9 +958,7 @@ class WPSSTM_Tracklist{
             }
             
             $track->tracklist = $this;
-            $track->position = $current_index + 1;
             $add_tracks[] = $track;
-            $current_index++;
         }
 
         $new_tracks = $this->validate_tracks($add_tracks);
