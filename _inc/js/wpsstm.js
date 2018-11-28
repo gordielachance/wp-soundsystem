@@ -1,3 +1,7 @@
+var wpsstm = {};
+var isInIframe = (window.location != window.parent.location) ? true : false;
+wpsstm.tracklists = [];
+
 (function($){
 
     //artist autocomplete
@@ -42,93 +46,88 @@
     
     $( document ).ready(function() {
         
-        var tracklists = $('.wpsstm-tracklist');
         var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
         var iframes = $('iframe.wpsstm-tracklist-iframe');
-        var player_tracklists = [];
-        
-        var allLoaded = $.Deferred();
-        
+
         /*
         load tracklists
         */
-        tracklists.each(function(index,tracklist_html) {
+        
+        $('body.wpsstm-iframe .wpsstm-tracklist').each(function(index,tracklist_html) {
+            
+            if (isInIframe){
+                /*get tracklist index related to the parent document, so it matches the dom order */
+                index = wpsstm_get_iframe_index();
+            }
+            
             var tracklist_obj = new WpsstmTracklist(tracklist_html,index);
+            wpsstm.tracklists.push(tracklist_obj);
+            
+            if (isInIframe){
+                //send to parent
+                window.top.wpsstm.tracklists.push(tracklist_obj);
+            }
+            
         });
         
         /*
-        load iframe tracklists
+        wait for all iframes before initializing player
+        */
+  
+        var iframesLoaded = $.Deferred();
+        var loadedIFramesCount = 0;
+
+        iframes.one( "load", function() {
+
+            ++loadedIFramesCount;//increment
+            var iframe_el = $(this).get(0);
+
+            $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
+
+            var content = $(iframe_el.contentWindow.document.body);
+
+            //all frames is loaded
+            if ( loadedIFramesCount == iframes.length ){
+                iframesLoaded.resolve();
+            }
+
+        });
+        
+        /*
+        resize iframes
         */
         
-        if (!iframes.length){
-            allLoaded.resolve();
-        }else{
-            
-            var iframesLoaded = $.Deferred();
-            var loadedIFramesCount = 0;
-
-            iframes.one( "load", function() {
-
-                ++loadedIFramesCount;//increment
-                var iframe = $(this);
-                var iframe_el = $(this).get(0);
-                var iframe_index = iframes.index( iframe );
-
-                $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-
-                var content = $(iframe_el.contentWindow.document.body);
-                var tracklist_html = $(content).find( ".wpsstm-tracklist" ).get(0);
-
-                var tracklist_obj = new WpsstmTracklist(tracklist_html,iframe_index);
-                player_tracklists.push(tracklist_obj);
-
-                wpsstm_debug("iframe tracklist #"+iframe_index+" populated");
-
-                //all frames is loaded
-                if ( loadedIFramesCount == iframes.length ){
-                    iframesLoaded.resolve();
-                }
-
-                //resize iframe
-                var content = $(iframe_el.contentWindow.document);
-                //var height = $(e.target).find('html').get(0).scrollHeight;
-                iframe.css('height',content.outerHeight());
-                console.log("resized iframe");
-
-            });
-            
-            iframesLoaded.done(function(v) {
-                bottomPlayer.debug('all iframes have been loaded');
-
-                //sort tracklists by tracklist index
-                function compare_tracklist_idx(a,b) {
-                    if (a.index > b.index) return 1;
-                    if (b.index > a.index) return -1;
-                    return 0;
-                }
-
-                player_tracklists.sort(compare_tracklist_idx);
-
-                var allTracks = [];
-                $(player_tracklists).each(function(index,tracklist) {
-                    allTracks = allTracks.concat(tracklist.tracks);
-                });
-
-                bottomPlayer.append_tracks(allTracks);
-                bottomPlayer.autoplay();
-                
-                allLoaded.resolve();
-
-            });
-            
-        }
-        
-        allLoaded.done(function(v) {
-            bottomPlayer.debug('all tracklists have been loaded');
+        iframes.on( "load", function() {
+            var iframe = $(this);
+            var iframe_el = iframe.get(0);
+            var content = $(iframe_el.contentWindow.document);
+            //var height = $(e.target).find('html').get(0).scrollHeight;
+            iframe.css('height',content.outerHeight());
+            console.log("resized iframe");
         });
 
+        iframesLoaded.done(function(v) {
+            bottomPlayer.debug('all iframes have been loaded, init player');
 
-        
+            //sort tracklists by tracklist index
+            function compare_tracklist_idx(a,b) {
+                if (a.index > b.index) return 1;
+                if (b.index > a.index) return -1;
+                return 0;
+            }
+
+            wpsstm.tracklists.sort(compare_tracklist_idx);
+
+            var allTracks = [];
+            $(wpsstm.tracklists).each(function(index,tracklist) {
+                allTracks = allTracks.concat(tracklist.tracks);
+            });
+
+            bottomPlayer.append_tracks(allTracks);
+            bottomPlayer.autoplay();
+
+        });
+
     });
 
 
@@ -211,4 +210,17 @@ function wpsstm_dialog_notice(notice){
 
     });
  
+}
+
+//https://www.webdeveloper.com/forum/d/251166-resolved-how-to-get-the-iframe-index-using-javascript-from-inside-the-iframe-window/2
+function wpsstm_get_iframe_index(){
+    var iframe_index = -1;
+    var parent_iframes = $(parent.document).find('iframe.wpsstm-tracklist-iframe');
+    parent_iframes.each(function(index,iframe_el) {
+        if ( iframe_el.contentWindow === self ){
+            iframe_index = index;
+            return false;
+        }
+    });
+    return iframe_index;
 }
