@@ -1003,17 +1003,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $wpdb->get_var("SELECT COUNT(*) FROM $subtracks_table WHERE tracklist_id = $this->post_id");
     }
 
-    function tracklist_log($message,$title = null){
-
-        if (is_array($message) || is_object($message)) {
-            $message = json_encode($message);
-        }
+    function tracklist_log($data,$title = null){
 
         //global log
         if ($this->post_id){
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($message,$title,null);
+        wpsstm()->debug_log($data,$title,null);
         
 
     }

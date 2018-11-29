@@ -324,20 +324,16 @@ class WPSSTM_Source{
         return $this->icon;
     }
     
-    function source_log($message,$title = null){
-        
-        if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
-        }
-        
+    function source_log($data,$title = null){
+
         //track log
-        $this->track->track_log($message,$title);
+        $this->track->track_log($data,$title);
 
         //global log
         if ($this->post_id){
             $title = sprintf('[source:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($message,$title,null);
+        wpsstm()->debug_log($data,$title,null);
 
     }
 

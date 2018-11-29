@@ -1051,14 +1051,10 @@ class WPSSTM_Track{
         return true;
     }
     
-    function track_log($message,$title = null){
-        
-        if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
-        }
-        
+    function track_log($data,$title = null){
+
         //tracklist log
-        $this->tracklist->tracklist_log($message,$title);
+        $this->tracklist->tracklist_log($data,$title);
         
         //global log
         if ($this->post_id){

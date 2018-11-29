@@ -405,7 +405,7 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($message,$title = null, $file = null) {
+    public function debug_log($data,$title = null, $file = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 
@@ -414,10 +414,10 @@ class WP_SoundSystem {
         
         $output = null;
 
-        if (is_array($message) || is_object($message)) {
-            $output = $prefix . implode("\n", $message);
+        if (is_array($data) || is_object($data)) {
+            $data = "\n" . json_encode($data);
         } else {
-            $output = $prefix . $message;
+            $output = $prefix . $data;
         }
         
         if ($output){
