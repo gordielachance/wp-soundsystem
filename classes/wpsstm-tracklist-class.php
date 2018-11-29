@@ -886,15 +886,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //append ?
+        //TOUFIX TOUCHECK is it the right place for this ?
         if (!$track->position){
-            $track->position = $this->get_subtracks_count();
+            $track->position = $this->get_subtracks_count() + 1;
         }
         
         //subtrack
         $subtrack_data = array(
             'tracklist_id' =>   $this->post_id,
             'track_order' =>    (int)$track->position,
-            'time' =>           current_time('timestamp'),
+            'time' =>           current_time('mysql'),
             'from_tracklist' => $track->subtrack_from, //TOUFIX
         );
         
@@ -951,9 +952,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $tracks = array();
         foreach((array)$subtrack_ids as $subtrack_id){
-
+            
             $track = new WPSSTM_Track(); //default
-            $track->populate_subtrack($subtrack_id);            
+            $track->populate_subtrack($subtrack_id);
             $tracks[] = $track;
         }
 

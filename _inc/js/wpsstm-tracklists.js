@@ -432,7 +432,9 @@ class WpsstmTracklist {
         
         var self = this;
 
-        var all_tracks = $(self.tracklist_el).find('.wpsstm-tracks-list > *');
+        var all_tracks = $(self.tracklist_el).find('.wpsstm-tracks-list > .wpsstm-track:not(.wpsstm-new-subtrack)');
+        console.log("ALL");
+        console.log(all_tracks);
         if (all_tracks.length < 2) return;
         var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
         var values_by_selector = [];

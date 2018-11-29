@@ -13,8 +13,6 @@ class WPSSTM_Track{
     
     public $image_url;
     public $location;
-
-    private $did_parents_query = false;
     
     var $source;
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
@@ -181,9 +179,7 @@ class WPSSTM_Track{
     */
     function get_parent_ids($args = null){
         global $wpdb;
-        
-        if ($this->did_parents_query) return $this->parent_ids;
-        
+
         //track ID is required
         if ( !$this->post_id ) return;//track does not exists in DB
 
@@ -202,7 +198,6 @@ class WPSSTM_Track{
         $query = new WP_Query( $args );
 
         $this->parent_ids = $query->posts;
-        $this->did_parents_query = true;
 
         return $this->parent_ids;
     }
