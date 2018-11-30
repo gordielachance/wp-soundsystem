@@ -418,7 +418,7 @@ class WP_SoundSystem {
         $output = null;
 
         if (is_array($data) || is_object($data)) {
-            $data = "\n" . json_encode($data);
+            $data = "\n" . json_encode($data,JSON_UNESCAPED_UNICODE);
         } else {
             $output = $prefix . $data;
         }

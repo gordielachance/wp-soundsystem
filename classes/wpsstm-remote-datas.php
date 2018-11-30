@@ -112,7 +112,7 @@ class WPSSTM_Remote_Datas{
 
     private function get_remote_page_tracks(){
 
-        //$this->remote_log(json_encode($this->request_pagination),'get_remote_page_tracks request_pagination' );
+        //$this->remote_log($this->request_pagination,'get_remote_page_tracks request_pagination' );
 
         //tracks HTML
         $track_nodes = $this->get_track_nodes($this->body_node);

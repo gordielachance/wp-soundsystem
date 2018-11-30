@@ -251,7 +251,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function add_notice($slug,$code,$message,$error = false){
         
-        //$this->tracklist_log(json_encode(array('slug'=>$slug,'code'=>$code,'error'=>$error)),'[WPSSTM_Post_Tracklist notice]: ' . $message ); 
+        //$this->tracklist_log(array('slug'=>$slug,'code'=>$code,'error'=>$error),'[WPSSTM_Post_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
             'slug'      => $slug,
@@ -690,7 +690,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->did_query_tracks = true;
         $this->add_tracks($tracks);
         
-        $this->tracklist_log(json_encode(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay)),'Populated subtracks');
+        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
             
         //update live tracklist
         if ($live){
@@ -912,7 +912,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             );
             
             if ( is_wp_error($success) ){
-                $track->track_log(json_encode($track->to_array()),"Error while updating subtrack" ); 
+                $track->track_log($track->to_array(),"Error while updating subtrack" ); 
             }
 
         }else{
@@ -920,14 +920,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
                 $track->subtrack_id = $wpdb->insert_id;
-                //$track->track_log(json_encode($track->to_array()),"Subtrack inserted" ); 
+                //$track->track_log($track->to_array(),"Subtrack inserted" ); 
             }else{
                 $error_msg = $success->get_error_message();
                 $track->track_log(array('track'=>json_encode($track->to_array()),'error'=>$error_msg), "Error while saving subtrack" ); 
             }
         }
 
-        $this->tracklist_log(json_encode($success),"SUCCESS");
+        $this->tracklist_log($success,"SUCCESS");
         return $success;
 
     }

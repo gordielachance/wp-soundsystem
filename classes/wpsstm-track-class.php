@@ -599,7 +599,7 @@ class WPSSTM_Track{
         $this->add_sources($autosources);
         $new_ids = $this->save_new_sources();
         
-        $this->track_log(json_encode(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids))),'autosource results');
+        $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids)),'autosource results');
         
         return $new_ids;
 
@@ -856,7 +856,7 @@ class WPSSTM_Track{
             if ( is_wp_error($valid) ){
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
-                $source_obj->source_log(json_encode(array('error'=>$error_msg,'source'=>$source_obj)),"Unable to add source");
+                $source_obj->source_log(array('error'=>$error_msg,'source'=>$source_obj),"Unable to add source");
                 continue;
             }
 

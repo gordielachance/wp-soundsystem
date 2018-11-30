@@ -906,7 +906,7 @@ class WPSSTM_LastFM_User{
             }
         }
         
-        wpsstm()->debug_log(json_encode(array('token'=>$this->token,'transient'=>(bool)$token_transient,'request'=>(bool)$token_request)),"lastfm - get_user_token()");
+        wpsstm()->debug_log(array('token'=>$this->token,'transient'=>(bool)$token_transient,'request'=>(bool)$token_request),"lastfm - get_user_token()");
         return $this->token;
     }
     
@@ -985,7 +985,7 @@ class WPSSTM_LastFM_User{
 
             );
 
-            wpsstm()->debug_log(json_encode($user_api_metas),"WPSSTM_LastFM_User::request_lastfm_user_api_metas()");
+            wpsstm()->debug_log($user_api_metas,"WPSSTM_LastFM_User::request_lastfm_user_api_metas()");
 
             update_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name, $user_api_metas );
 
@@ -1023,7 +1023,6 @@ class WPSSTM_LastFM_User{
                 'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
             );
 
-            //wpsstm()->debug_log(json_encode($auth_args),"lastfm - get_user_api_auth()"); 
 
             try{
                 $user_auth = new AuthApi('setsession', $auth_args);
@@ -1078,7 +1077,7 @@ class WPSSTM_LastFM_User{
                 'lastfm_username' =>    $this->get_lastfm_user_api_metas('username')
             );
             
-            //wpsstm()->debug_log(json_encode($debug),"lastfm - is_user_api_logged()");
+            //wpsstm()->debug_log($debug,"lastfm - is_user_api_logged()");
             
         }
         
@@ -1121,7 +1120,7 @@ class WPSSTM_LastFM_User{
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
         $debug_args['success'] = $results;
         
-        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"WPSSTM_LastFM_User::lastfm_love_track()");
+        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::lastfm_love_track()");
         
         return $results;
     }
@@ -1140,7 +1139,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
         
-        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
+        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -1175,7 +1174,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
 
-        wpsstm()->debug_log(json_encode($debug_args,JSON_UNESCAPED_UNICODE),"WPSSTM_LastFM_User::scrobble_lastfm_track()");
+        wpsstm()->debug_log(debug_args,"WPSSTM_LastFM_User::scrobble_lastfm_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);

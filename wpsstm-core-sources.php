@@ -61,7 +61,7 @@ class WPSSTM_Core_Sources{
             'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
         );
         
-        wpsstm()->debug_log(json_encode($_POST),'testing autosource AJAX');
+        wpsstm()->debug_log($_POST,'testing autosource AJAX');
         
         $this->ajax_track_autosource();
     }
