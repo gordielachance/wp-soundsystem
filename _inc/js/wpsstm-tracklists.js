@@ -432,10 +432,10 @@ class WpsstmTracklist {
         
         var self = this;
 
-        var all_tracks = $(self.tracklist_el).find('.wpsstm-tracks-list > .wpsstm-track:not(.wpsstm-new-subtrack)');
-        console.log("ALL");
-        console.log(all_tracks);
-        if (all_tracks.length < 2) return;
+        if (self.tracks.length <= 1) return;
+        
+        var track_els = $(self.tracklist_el).find('[itemprop="track"]');
+        
         var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
         var values_by_selector = [];
         
@@ -445,7 +445,7 @@ class WpsstmTracklist {
 
         $.each( $(selectors), function() {
             var hide_column = undefined;
-            var cells = all_tracks.find(this); //get all track children by selector
+            var cells = track_els.find(this); //get all track children by selector
             
             var column_datas = cells.map(function() { //get all values for the matching items
                 return $(this).html();
