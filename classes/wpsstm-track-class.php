@@ -52,7 +52,7 @@ class WPSSTM_Track{
         */
         $this->tracklist = new WPSSTM_Post_Tracklist();
         if ($tracklist){
-            if ( is_object($tracklist) ){ //object
+            if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
             }else{ //int
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
