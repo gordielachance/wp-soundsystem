@@ -7,17 +7,13 @@ class WPSSTM_Core_Live_Playlists{
     public $presets;
 
     function __construct() {
-        
-        require_once(wpsstm()->plugin_dir . 'classes/wpsstm-scraper-stats.php');
 
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
         //listing
-        add_filter( 'pre_get_posts', array($this, 'sort_live_playlists'));
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 11 );
         add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 11 );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(&$this,'post_column_content'), 11 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
         
@@ -163,84 +159,6 @@ class WPSSTM_Core_Live_Playlists{
         $columns['requests-month'] = 'trending';
         $columns['requests-total'] = 'popular';
         return $columns;
-    }
-    
-    function post_column_content($column){
-        
-        global $wpsstm_tracklist;
-        $post_id = $wpsstm_tracklist->post_id;
-        
-        if ( !in_array($column,array('health','requests-month','requests-total')) ) return;
-        
-        $output = '—';
-        
-        switch($column){
-            //health
-            case 'health':
-
-                if ( get_post_status($post_id) != 'publish') break;
-
-                $percentage = WPSSTM_Live_Playlist_Stats::get_health($post_id);
-                $output = wpsstm_get_percent_bar($percentage);
-            break;
-            
-            //month requests
-            case 'requests-month':
-                
-                if ( get_post_status($post_id) != 'publish') break;
-                
-                $output = WPSSTM_Live_Playlist_Stats::get_monthly_request_count($post_id);
-            break;
-                
-            //total requests
-            case 'requests-total':
-                
-                if ( get_post_status($post_id) != 'publish') break;
-                
-                $output = WPSSTM_Live_Playlist_Stats::get_request_count($post_id);
-
-                
-            break;  
-        }
-
-        echo $output;
-    }
-
-    function sort_live_playlists( $query ) {
-
-        if ( ($query->get('post_type')==wpsstm()->post_type_live_playlist) && ( $orderby = $query->get( 'orderby' ) ) ){
-
-            $order = ( $query->get( 'order' ) ) ? $query->get( 'order' ) : 'DESC';
-
-            switch ($orderby){
-
-                case 'health':
-                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_health );
-                    $query->set('orderby','meta_value_num');
-                    $query->set('order', $order);
-                break;
-                    
-                case 'trending':
-                    //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_monthly_requests );
-                    $query->set('orderby','meta_value_num');
-                    $query->set('order', $order);
-                break;
-                    
-                case 'popular':
-                    //TO FIX check https://wordpress.stackexchange.com/questions/95847/popular-posts-by-view-with-jetpack
-                    $query->set('meta_key', WPSSTM_Live_Playlist_Stats::$meta_key_requests );
-                    $query->set('orderby','meta_value_num');
-                    $query->set('order', $order);
-                break;
-                break;
-                    
-            }
-
-        }
-
-        return $query;
-        
     }
 
     public static function is_community_user_ready(){

@@ -679,7 +679,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
-            new WPSSTM_Live_Playlist_Stats($this); //remote request stats
             $tracks = $remote->get_remote_tracks();
             if ( is_wp_error($tracks) ) return $tracks;
             
