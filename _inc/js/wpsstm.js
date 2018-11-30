@@ -94,17 +94,8 @@ wpsstm.tracklists = [];
         });
         
         /*
-        resize iframes
+        init player
         */
-        
-        iframes.on( "load", function() {
-            var iframe = $(this);
-            var iframe_el = iframe.get(0);
-            var content = $(iframe_el.contentWindow.document);
-            //var height = $(e.target).find('html').get(0).scrollHeight;
-            iframe.css('height',content.outerHeight());
-            console.log("resized iframe");
-        });
 
         iframesLoaded.done(function(v) {
             bottomPlayer.debug('all iframes have been loaded, init player');
@@ -126,6 +117,20 @@ wpsstm.tracklists = [];
             bottomPlayer.append_tracks(allTracks);
             bottomPlayer.autoplay();
 
+        });
+        
+        /*
+        resize iframes
+        */
+        //iframes.iFrameResize();
+
+        iframes.on( "load", function() {
+            var iframe = $(this);
+            var iframe_el = iframe.get(0);
+            var content = $(iframe_el.contentWindow.document);
+            //var height = $(e.target).find('html').get(0).scrollHeight;
+            iframe.css('height',content.outerHeight());
+            console.log("resized iframe");
         });
 
     });

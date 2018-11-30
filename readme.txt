@@ -93,6 +93,7 @@ This would be very appreciated — Thanks !
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
+* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer)
 
 = Contributors =
 
@@ -155,6 +156,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Spotify metabox
 * Static track unlink action
 * new filter 'wpsstm_pre_save_autosources'
+* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
 * TOFIX remote request pagination
 
 = 1.9.4 =
