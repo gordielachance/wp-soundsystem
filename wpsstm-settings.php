@@ -52,8 +52,8 @@ class WPSSTM_Settings {
 
         if ( self::is_settings_reset() ) return;
             
-        if( isset( $input['flush_community_tracks'] ) ){
-            WPSSTM_Core_Tracks::flush_community_tracks();
+        if( isset( $input['flush_orphan_tracks'] ) ){
+            WPSSTM_Core_Tracks::flush_orphan_tracks();
         }
 
         /*
@@ -255,8 +255,8 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'flush_tracks', 
-            __('Flush Community Tracks','wpsstm'), 
-            array( $this, 'flush_tracks_callback' ), 
+            __('Flush orphan tracks','wpsstm'), 
+            array( $this, 'flush_orphan_tracks_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
@@ -449,11 +449,10 @@ class WPSSTM_Settings {
         );
     }
     
-    function flush_tracks_callback(){
-        $desc = __("Delete community tracks.","wpsstm");
-        $desc.= sprintf( ' <small>%s</small>',__("(Only tracks that do not belong to any playlist or user likes)","wpsstm") );
+    function flush_orphan_tracks_callback(){
+        $desc = __("Delete tracks that do not belong to any playlists and have been created with the community user","wpsstm");
         printf(
-            '<input type="checkbox" name="%s[flush_community_tracks]" value="on"/> %s',
+            '<input type="checkbox" name="%s[flush_orphan_tracks]" value="on"/> %s',
             wpsstm()->meta_name_options,
             $desc
         );

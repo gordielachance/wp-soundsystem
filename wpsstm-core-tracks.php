@@ -8,6 +8,7 @@ class WPSSTM_Core_Tracks{
     static $qvar_track_action = 'track-action';
     static $qvar_track_lookup = 'lookup_track';
     static $qvar_favorite_tracks = 'loved-tracks';
+    static $qvar_subtracks = 'subtracks';
     
     var $subtracks_hide = null; //default hide subtracks in track listings
 
@@ -57,6 +58,7 @@ class WPSSTM_Core_Tracks{
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         
         add_filter( 'posts_join', array($this,'tracks_query_join_subtracks'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
@@ -342,11 +344,36 @@ class WPSSTM_Core_Tracks{
     function tracks_query_join_subtracks($join,$query){
         global $wpdb;
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
-
+        
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
+        
+        $subtracks_query =      $query->get(WPSSTM_Core_Tracks::$qvar_subtracks);
+        $subtrack_id_query =    $query->get('subtrack_id');
+        $subtrack_sort_query = ($query->get('orderby') == 'subtracks');
+
+        $join_subtracks = ( $subtracks_query || $subtrack_id_query || $subtrack_sort_query );
+        
+        if ($join_subtracks){
+            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table,$wpdb->posts);
+        }
+        
 
         return $join;
+    }
+    
+    function track_query_exclude_subtracks($where,$query){
+        global $wpdb;
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        $no_subtracks = ( $query->get(WPSSTM_Core_Tracks::$qvar_subtracks) === 0);
+        
+        if ($no_subtracks){
+            $where .= sprintf(" AND ID NOT IN (SELECT track_id FROM %s)",$subtracks_table);
+        }
+        
+        return $where;
     }
     
     function track_query_where_subtrack_id($where,$query){
@@ -384,8 +411,7 @@ class WPSSTM_Core_Tracks{
     function tracks_query_sort_by_subtrack_position($orderby_sql, $query){
 
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
-        
-        $query_orderby = $query->get('orderby') ? $query->get('orderby') : 'track_order';
+        if ( $query->get('orderby') != 'subtracks' ) return $orderby_sql;
 
         if ( $query_orderby == 'track_order'){
             $orderby_sql = 'subtracks.track_order ' . $query->get('order');
@@ -500,6 +526,8 @@ class WPSSTM_Core_Tracks{
         $qvars[] = self::$qvar_track_lookup;
         $qvars[] = self::$qvar_track_action;
         $qvars[] = self::$qvar_favorite_tracks;
+        $qvars[] = self::$qvar_subtracks;
+        
         return $qvars;
     }
     
@@ -943,56 +971,47 @@ class WPSSTM_Core_Tracks{
 
 
     }
-    
-    //TO FIX TO IMPROVE have a query that directly selects the flushable tracks without having to populate them all ?
-    //would be much faster.
-    static function get_flushable_track_ids(){
+
+    /*
+    Get tracks that have been created by the community user and that do not belong to any playlists
+    */
+    static function get_orphan_track_ids(){
         $community_user_id = wpsstm()->get_options('community_user_id');
         if ( !$community_user_id ) return;
         
         $flushable_ids = array();
         
         //get community tracks
-        $community_tracks_args = array(
-            'post_type' =>      wpsstm()->post_type_track,
-            'post_author' =>    $community_user_id,
-            'post_status' =>    'any',
-            'posts_per_page'=>  -1,
-            'fields' =>         'ids',
+        $orphan_tracks_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'author' =>                 $community_user_id,
+            'post_status' =>            'any',
+            'posts_per_page'=>          -1,
+            'fields' =>                 'ids',
+            self::$qvar_subtracks =>    0,
         );
         
-        $query = new WP_Query( $community_tracks_args );
-        $community_tracks_ids = $query->posts;
-        
-        foreach( (array)$community_tracks_ids as $track_id ){
-            $track = new WPSSTM_Track($track_id);
-            if ( $track->can_be_flushed() ){
-                $flushable_ids[] = $track->post_id;
-            }
-            
-        }
-        
-        return $flushable_ids;
+        $query = new WP_Query( $orphan_tracks_args );
+        return $query->posts;
         
     }
     
     /*
     Flush community tracks
     */
-    static function flush_community_tracks(){
+    static function flush_orphan_tracks(){
 
         $flushed_ids = array();
         
-        if ( $flushable_ids = self::get_flushable_track_ids() ){
+        if ( $flushable_ids = self::get_orphan_track_ids() ){
 
             foreach( (array)$flushable_ids as $track_id ){
-                $track = new WPSSTM_Track($track_id);
-                $success = $track->trash_track();
-                if ( !is_wp_error($success) ) $flushed_ids[] = $track->post_id;
+                $success = wp_trash_post($track_id);
+                if ( !is_wp_error($success) ) $flushed_ids[] = $track_id;
             }
         }
 
-        $this->track_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Post_Tracklist::flush_community_tracks()");
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Post_Tracklist::flush_orphan_tracks()");
 
         return $flushed_ids;
 

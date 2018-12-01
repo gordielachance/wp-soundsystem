@@ -951,8 +951,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
         $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
         $subtrack_ids = $wpdb->get_col( $querystr);
+        
+        //TOUFIX should we pass the subtrack IDS in a regular WP Query ?
 
         $tracks = array();
         foreach((array)$subtrack_ids as $subtrack_id){
