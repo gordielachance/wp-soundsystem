@@ -32,13 +32,6 @@ ul.wpsstm-tracklist-actions{
             background: rgba(252, 248, 227, .25);
         }
     }
-    
-    &.wpsstm-loved-tracklist .wpsstm-tracklist-action-favorite{
-        display:none!important;
-    }
-    .wpsstm-tracklist-action-unfavorite{
-        display:none!important;
-    }
 
     &.tracklist-loading, &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
@@ -137,13 +130,6 @@ ul.wpsstm-tracklist-actions{
         }
         &.wpsstm-tracklist-action-export a:before{
             content:"\f019";//.fa-download;
-        }
-
-        &.wpsstm-tracklist-action-favorite a:before{
-            content:"\f08a";//.fa-heart-o;
-        }
-        &.wpsstm-tracklist-action-unfavorite a:before{
-            content:"\f004";//.fa-heart;
         }
 
         &.wpsstm-tracklist-action-new-subtrack{

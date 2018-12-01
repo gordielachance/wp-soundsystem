@@ -136,42 +136,38 @@ class WPSSTM_Core_Tracklists{
     function ajax_toggle_favorite_tracklist(){
         
         $ajax_data = wp_unslash($_POST);
+
+        $tracklist_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         
         $result = array(
             'input'     => $ajax_data,
-            'success'   => false
+            'success'   => false,
+            'tracklist' => $tracklist->to_array(),
+            'do_love'   => null,
         );
-        
-        
-        $tracklist_id = $result['post_id'] = ( isset($ajax_data['post_id']) ) ?     $ajax_data['post_id'] : null;
-        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ?          filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null;
 
         if ( !get_current_user_id() ){
             
             $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            if ($do_love){
-                $action_link = $tracklist->get_tracklist_action_url('favorite');
-            }else{
-                $action_link = $tracklist->get_tracklist_action_url('unfavorite');
-            }
+            $action_link = $tracklist->get_tracklist_action_url('toggle-favorite');
             
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
 
-        }else{
-            //ajax do send strings
-
-            if ($tracklist->post_id && ($do_love!==null) ){
-                $success = $tracklist->love_tracklist($do_love);
-                if ( $success ){
-                    if( is_wp_error($success) ){
-                        $code = $success->get_error_code();
-                        $result['message'] = $success->get_error_message($code); 
-                    }else{
-                       $result['success'] = true; 
-                    }
+        }elseif ($tracklist->post_id ){
+            
+            $is_loved = $tracklist->is_tracklist_loved_by();
+            $result['do_love'] = $do_love = !$is_loved;
+            $success = $tracklist->love_tracklist($do_love);
+            
+            if ( $success ){
+                if( is_wp_error($success) ){
+                    $code = $success->get_error_code();
+                    $result['message'] = $success->get_error_message($code); 
+                }else{
+                   $result['success'] = true; 
                 }
             }
         }
@@ -448,12 +444,9 @@ class WPSSTM_Core_Tracklists{
         $success = null;
         
         switch($action){
-            case 'favorite':
-                $success = $tracklist->love_tracklist(true);
-            break;
-            case 'unfavorite':
-                $success = $tracklist->love_tracklist(false);
-            break;
+            case 'toggle-favorite':
+                $do_love = !$tracklist->is_tracklist_loved_by();
+                $success = $tracklist->love_tracklist($do_love);
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
             break;

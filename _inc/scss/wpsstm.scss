@@ -129,6 +129,13 @@ ul.wpsstm-actions-list{
                 }
             }
         }
+        
+        &.action-favorite a:before{
+            content: "\f08a";//.fa-heart-o;
+        }
+        &.action-unfavorite a:before{
+            content: "\f004";//.fa-heart;
+        }
     }
     
 }

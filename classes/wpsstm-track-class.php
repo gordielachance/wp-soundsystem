@@ -728,22 +728,22 @@ class WPSSTM_Track{
 
         //favorite
         if ($can_favorite_track){
-            $actions['favorite'] = array(
+            
+            $classes = array();
+            
+            if ($this->is_track_loved_by()){
+                $classes[] = 'action-unfavorite';
+            }else{
+                $classes[] = 'action-favorite';
+            }
+            
+            $actions['toggle-favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
-                'desc' =>       __('Add to favorites','wpsstm'),
+                'href' =>       $this->get_track_action_url('toggle-favorite'),
+                'desc' =>       __('Toggle favorite','wpsstm'),
+                'classes' =>    $classes,
             );
         }
-
-        //unfavorite
-        if ($can_favorite_track){
-            $actions['unfavorite'] = array(
-                'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite'),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
-            );
-        }
-        
         //track details
         if ($can_track_details){
             $actions['about'] = array(
@@ -834,7 +834,6 @@ class WPSSTM_Track{
         );
         
         $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
-        $classes[] = ( $this->is_track_loved_by() ) ? 'wpsstm-loved-track' : null;
 
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
         return array_filter(array_unique($classes));

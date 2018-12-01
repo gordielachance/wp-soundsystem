@@ -388,17 +388,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //favorite / unfavorite
         if ($can_favorite){
             
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('favorite'),
-                'desc' =>       __('Add to favorites','wpsstm'),
-            );
+            $classes = array();
             
-            $actions['unfavorite'] = array(
-                'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('unfavorite'),
-                'desc' =>       __('Remove from favorites','wpsstm'),
+            if ($this->is_tracklist_loved_by()){
+                $classes[] = 'action-unfavorite';
+            }else{
+                $classes[] = 'action-favorite';
+            }
+            
+            $actions['toggle-favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_tracklist_action_url('toggle-favorite'),
+                'desc' =>       __('Toggle favorites','wpsstm'),
+                'classes' =>    $classes
             );
+
         }
 
         //toggle type
@@ -659,8 +663,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
-            ( $this->is_tracklist_loved_by() ) ? 'wpsstm-loved-tracklist' : null
-            
         );
         
         if($extra_classes){

@@ -66,22 +66,23 @@
             var reloaded = self.reload_tracklist(tracklist_obj);
         });
 
-        //favorite
-        var favorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-favorite a');
+        //toggle favorite
+        var favorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-toggle-favorite a');
         favorite_bt.click(function(e) {
             e.preventDefault();
 
             var link = $(this);
+            var action_el = link.parents('.wpsstm-tracklist-action');
+            var do_love = action_el.hasClass('action-favorite');
             var tracklist_wrapper = link.closest('.wpsstm-tracklist');
             var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
 
             var ajax_data = {
                 action:         'wpsstm_toggle_favorite_tracklist',
-                post_id:        tracklist_id,
-                do_love:        true,
+                tracklist:      tracklist_obj.to_ajax(),
             };
 
-            tracklist_obj.debug("favorite tracklist:" + tracklist_id);
+            tracklist_obj.debug("toggle favorite tracklist:" + tracklist_id);
 
             return $.ajax({
                 type:       "post",
@@ -99,7 +100,11 @@
                             wpsstm_dialog_notice(data.notice);
                         }
                     }else{
-                        tracklist_obj.tracklist_el.addClass('wpsstm-loved-tracklist');
+                        if (do_love){
+                            action_el.removeClass('action-favorite').addClass('action-unfavorite');
+                        }else{
+                            action_el.removeClass('action-unfavorite').addClass('action-favorite');
+                        }
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
@@ -113,51 +118,6 @@
             })
         });
         
-        //unfavorite
-        var unfavorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-unfavorite a');
-        unfavorite_bt.click(function(e) {
-            e.preventDefault();
-
-            var link = $(this);
-            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
-            var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
-
-            if (!tracklist_id) return;
-
-            var ajax_data = {
-                action:         'wpsstm_toggle_favorite_tracklist',
-                post_id:        tracklist_id,
-                do_love:        false,
-            };
-
-            tracklist_obj.debug("unfavorite tracklist:" + tracklist_id);
-
-            return $.ajax({
-                type:       "post",
-                url:        wpsstmL10n.ajaxurl,
-                data:       ajax_data,
-                dataType:   'json',
-                beforeSend: function() {
-                    link.addClass('action-loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        link.addClass('action-error');
-                        console.log(data);
-                    }else{
-                        tracklist_obj.tracklist_el.removeClass('wpsstm-loved-tracklist');
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    link.addClass('action-error');
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    link.removeClass('action-loading');
-                }
-            })
-        });
 
         /*
         Subtracks

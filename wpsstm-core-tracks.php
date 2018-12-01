@@ -73,6 +73,9 @@ class WPSSTM_Core_Tracks{
         AJAX
         */
         
+        add_action('wp_ajax_wpsstm_track_html', array($this,'ajax_track_html'));
+        add_action('wp_ajax_nopriv_wpsstm_track_html', array($this,'ajax_track_html'));
+        
         add_action('wp_ajax_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
         add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
         //add_action('wp', array($this,'test_autosource_ajax') );
@@ -140,11 +143,9 @@ class WPSSTM_Core_Tracks{
         $success = null;
 
         switch($action){
-            case 'favorite':
-                $success = $track->love_track(true);
-            break;
-            case 'unfavorite':
-                $success = $track->love_track(false);
+            case 'toggle-favorite':
+                $do_love = !$track->is_track_loved_by();
+                $success = $track->love_track($do_love);
             break;
         }
         
@@ -683,15 +684,15 @@ class WPSSTM_Core_Tracks{
     function ajax_update_sources_order(){
         $ajax_data = wp_unslash($_POST);
         
+        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
+        $track = new WPSSTM_Track($track_id);
+        
         $result = array(
             'message'   => null,
             'success'   => false,
-            'input'     => $ajax_data
+            'input'     => $ajax_data,
+            'track'     => $track->to_array(),
         );
-        
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
-        $track = new WPSSTM_Track($track_id);
-        $result['track'] = $track->to_array();
         
         $source_ids = isset($ajax_data['source_ids']) ? $ajax_data['source_ids'] : null;
         $success = $track->update_sources_order($source_ids);
@@ -705,49 +706,61 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result ); 
     }
+    
+    function ajax_track_html(){
+        global $wpsstm_track;
+        
+        $ajax_data = wp_unslash($_POST);
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+
+        $result = array(
+            'input'     => $ajax_data,
+            'message'   => null,
+            'html'      => null,
+            'success'   => false,
+            'track'     => $track->to_array(),
+        );
+        
+        //define global
+        $wpsstm_track = $track;
+        
+        ob_start();
+        wpsstm_locate_template( 'content-track.php', true, false );
+        $updated_track = ob_get_clean();
+        $result['html'] = $updated_track;
+        $result['success'] = true;
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+
+    }
 
     function ajax_track_autosource(){
-        global $wpsstm_track;
+
         $ajax_data = wp_unslash($_POST);
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
         
-        $result = array(
-            'message'   => null,
-            'success'   => false,
-            'input'     => $ajax_data
-        );
-
-        $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
-
         $result = array(
             'input'     => $ajax_data,
             'timestamp' => current_time('timestamp'),
             'message'   => null,
-            'new_html'  => null,
             'success'   => false,
-            'track'     => $wpsstm_track->to_array(),
+            'track'     => $track->to_array(),
         );
-            
+   
         //autosource
         $new_ids = array();
         
-        $new_ids = $wpsstm_track->autosource();
-        $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
+        $new_ids = $track->autosource();
 
         if ( is_wp_error($new_ids) ){
             $result['message'] = $new_ids->get_error_message();
         }else{
-            $result['new_ids'] = $new_ids;
             $result['success'] = true;
         }
-        
-        //repopulate track (may have been created and thus have a post_id, etc.)
-        //TO FIX TO CHECK maybe it is not necessary to repopulate the track here?
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $updated_track = ob_get_clean();
-        $result['new_html'] = $updated_track;
-        $result['success'] = true;
 
         header('Content-type: application/json');
         wp_send_json( $result );
@@ -770,44 +783,41 @@ class WPSSTM_Core_Tracks{
     function ajax_toggle_favorite_track(){
 
         $ajax_data = wp_unslash($_POST);
+        
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
 
         $result = array(
             'input'     => $ajax_data,
+            'track'     => $track->to_array(),
             'message'   => null,
-            'success'   => false
+            'notice'    => null,
+            'do_love'   => null,
+            'success'   => false,
         );
-        
-        $do_love = $result['do_love'] = ( isset($ajax_data['do_love']) ) ? filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN) : null; //ajax do send strings
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
-        
+                
         if ( !get_current_user_id() ){
             
             $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            if ($do_love){
-                $action_link = $track->get_track_action_url('favorite');
-            }else{
-                $action_link = $track->get_track_action_url('unfavorite');
-            }
+            $action_link = $track->get_track_action_url('toggle-favorite');
             
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
             
         }else{
+            $is_loved = $track->is_track_loved_by();
+            $result['do_love'] = $do_love = !$is_loved;
 
-            if ( ($do_love!==null) ){
+            $success = $track->love_track($do_love);
+            $result['track'] = $track->to_array();
+            $track->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
 
-                $success = $track->love_track($do_love);
-                $result['track'] = $track->to_array();
-                $this->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
-
-                if( is_wp_error($success) ){
-                    $code = $success->get_error_code();
-                    $result['message'] = $success->get_error_message($code); 
-                }else{
-                    $result['success'] = $success; 
-                }
+            if( is_wp_error($success) ){
+                $code = $success->get_error_code();
+                $result['message'] = $success->get_error_message($code); 
+            }else{
+                $result['success'] = $success; 
             }
             
         }
@@ -819,17 +829,19 @@ class WPSSTM_Core_Tracks{
     function ajax_trash_track(){
         $ajax_data = wp_unslash($_POST);
         
-        $result = array(
-            'message'   => null,
-            'success'   => false,
-            'input'     => $ajax_data
-        );
 
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);
+        
+        $result = array(
+            'input' =>      $ajax_data,
+            'track'     =>  null,
+            'message' =>    null,
+            'success' =>    false,
+            'track' =>      $track->to_array(),
+        );
 
         $success = $track->trash_track();
-        $result['track'] = $track->to_array();
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();
