@@ -43,27 +43,8 @@ class WPSSTM_Core_Sources{
         AJAX
         */
         
-        //get track autosources
-        add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
-        add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
-        
         //delete source
         add_action('wp_ajax_wpsstm_trash_source', array($this,'ajax_trash_source'));
-
-        //add_action('wp', array($this,'test_autosource_ajax') );
-    }
-    
-    function test_autosource_ajax(){
-        
-        if ( is_admin() ) return;
-    
-        $_POST = array(
-            'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
-        );
-        
-        wpsstm()->debug_log($_POST,'testing autosource AJAX');
-        
-        $this->ajax_track_autosource();
     }
     
     function add_query_vars_source( $qvars ) {
@@ -172,8 +153,7 @@ class WPSSTM_Core_Sources{
     }
     
     /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action) for tracklists
-    For single tracks, check the_track function in -core-tracks.php
+    Register the global $wpsstm_source obj (hooked on 'the_post' action)
     */
     
     function the_source($post,$query){
@@ -508,49 +488,6 @@ class WPSSTM_Core_Sources{
                 }
             break;
         }
-    }
-
-    function ajax_track_autosource(){
-        global $wpsstm_track;
-        
-        //set global $wpsstm_track
-        $ajax_data = wp_unslash($_POST);
-        $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'timestamp' => current_time('timestamp'),
-            'message'   => null,
-            'new_html'  => null,
-            'success'   => false,
-            'track'     => $wpsstm_track->to_array(), //TO FIX TO CHECK - sending the whole PHP object makes the fn crash, so pass it as an array
-        );
-            
-        //autosource
-        $new_ids = array();
-        
-        $new_ids = $wpsstm_track->autosource();
-        $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
-
-        if ( is_wp_error($new_ids) ){
-            $result['message'] = $new_ids->get_error_message();
-        }else{
-            $result['new_ids'] = $new_ids;
-            $result['success'] = true;
-        }
-        
-        //repopulate track (may have been created and thus have a post_id, etc.)
-        //TO FIX TO CHECK maybe it is not necessary to repopulate the track here?
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $updated_track = ob_get_clean();
-        $result['new_html'] = $updated_track;
-        $result['success'] = true;
-
-        header('Content-type: application/json');
-        wp_send_json( $result );
-
     }
     
     function ajax_trash_source(){

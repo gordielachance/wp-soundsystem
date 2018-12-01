@@ -72,12 +72,17 @@ class WPSSTM_Core_Tracks{
         /*
         AJAX
         */
+        
+        add_action('wp_ajax_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
+        add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
+        //add_action('wp', array($this,'test_autosource_ajax') );
 
         add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
         add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
         
         add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
+
         
         /*
         DB relationships
@@ -701,6 +706,65 @@ class WPSSTM_Core_Tracks{
         wp_send_json( $result ); 
     }
 
+    function ajax_track_autosource(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+
+        $result = array(
+            'input'     => $ajax_data,
+            'timestamp' => current_time('timestamp'),
+            'message'   => null,
+            'new_html'  => null,
+            'success'   => false,
+            'track'     => $track->to_array(),
+        );
+            
+        //autosource
+        $new_ids = array();
+        
+        $new_ids = $track->autosource();
+        $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
+
+        if ( is_wp_error($new_ids) ){
+            $result['message'] = $new_ids->get_error_message();
+        }else{
+            $result['new_ids'] = $new_ids;
+            $result['success'] = true;
+        }
+        
+        //repopulate track (may have been created and thus have a post_id, etc.)
+        //TO FIX TO CHECK maybe it is not necessary to repopulate the track here?
+        ob_start();
+        wpsstm_locate_template( 'content-track.php', true, false );
+        $updated_track = ob_get_clean();
+        $result['new_html'] = $updated_track;
+        $result['success'] = true;
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+
+    }
+    
+    function test_autosource_ajax(){
+        
+        if ( is_admin() ) return;
+    
+        $_POST = array(
+            'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
+        );
+        
+        wpsstm()->debug_log($_POST,'testing autosource AJAX');
+        
+        $this->ajax_track_autosource();
+    }
     
     function ajax_toggle_favorite_track(){
 

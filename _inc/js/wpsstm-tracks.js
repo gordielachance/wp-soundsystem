@@ -433,7 +433,7 @@ class WpsstmTrack {
         self.track_el.addClass('track-loading');
 
         var ajax_data = {
-            action:     'wpsstm_autosources_list',
+            action:     'wpsstm_track_autosource',
             track:      self.to_ajax(),   
         };
 
