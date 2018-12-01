@@ -72,10 +72,10 @@ class WpsstmPlayer {
             });
         });
         
-        $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
+        $(document).on( "wpsstmPlayerTrackReady", function( event, track_obj ) {
 
             //play button
-            track_obj.track_el.find('.wpsstm-track-icon').click(function(e) {
+            track_obj.track_el.find('.wpsstm-track-play-bt').click(function(e) {
                 e.preventDefault();
                 
                 //re-click
@@ -347,6 +347,7 @@ class WpsstmPlayer {
         set current track
         */
         if ( !$(track_obj).is( $(self.current_track) ) ){
+            self.end_source();
             self.current_track = track_obj;
             self.track_to_player();
         }

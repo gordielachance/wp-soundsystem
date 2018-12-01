@@ -175,7 +175,7 @@
     });
 
     $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
-        
+
         //toggle favorite
         track_obj.track_el.find('.wpsstm-track-action-toggle-favorite a').click(function(e) {
 
@@ -336,6 +336,7 @@ class WpsstmTrack {
         self.populate_html_sources();
 
         $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
+        parent.$('body').trigger("wpsstmPlayerTrackReady",[self]); //fire custom event in iframe parent
         
     }
     
