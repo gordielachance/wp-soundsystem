@@ -466,7 +466,10 @@ class WPSSTM_Track{
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($do_love){
-            $success = $tracklist->save_subtrack($this);
+            $new_subtrack = clone $this;
+            $new_subtrack->subtrack_id = null;
+            $new_subtrack->position = null;
+            $success = $tracklist->save_subtrack($new_subtrack);
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
             
