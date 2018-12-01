@@ -899,10 +899,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //subtrack
         $subtrack_data = array(
             'tracklist_id' =>   $this->post_id,
-            'track_order' =>    (int)$track->position,
-            'time' =>           current_time('mysql'),
-            'from_tracklist' => $track->subtrack_from, //TOUFIX
+            'track_order' =>    (int)$track->position
         );
+        
+        //new subtrack
+        if (!$track->subtrack_id){
+            $subtrack_data['time'] = current_time('mysql');
+            $subtrack_data['from_tracklist'] = $track->subtrack_from;
+        }
         
         $track_data = array_merge($track_data,$subtrack_data);
         
