@@ -87,8 +87,11 @@ global $wpsstm_tracklist;
     <?php
         wp_reset_postdata(); //TOFIXTOCHECK useful ? Since we don't use the_post here...
     }else{ //no tracks
-        $msg = sprintf( '<strong>%s</strong><br/><small>%s</small>',__('No tracks found.','wpsstm'),$error->get_error_message() );
-        $wpsstm_tracklist->add_notice( 'tracklist-header', 'empty-tracklist', $msg );
+        ?>
+        <p id="wpsstm-no-tracks">
+            <?php _e('No tracks found.','wpsstm'); ?>  <a href="#"><?php _e('Add tracks','wpsstm'); ?> ?</a>
+        </p>
+        <?php
     }
     
     /*

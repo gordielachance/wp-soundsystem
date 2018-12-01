@@ -792,7 +792,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log('delete current tracklist subtracks'); 
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = '%s'", $this->post_id );
+        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE tracklist_id = %d", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
         
 
@@ -875,6 +875,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $track->local_track_lookup();
         }
         
+        //TOUFIX should we check for a capabiliy here ?
+        
         $track_data = array();
 
         //basic data
@@ -889,9 +891,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'album' =>   $track->album
             );
         }
-        
-        //append ?
-        //TOUFIX TOUCHECK is it the right place for this ?
+
         if (!$track->position){
             $track->position = $this->get_subtracks_count() + 1;
         }
@@ -951,15 +951,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = '%s' ORDER BY track_order ASC", $this->post_id );
+        $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
         $subtrack_ids = $wpdb->get_col( $querystr);
 
         $tracks = array();
         foreach((array)$subtrack_ids as $subtrack_id){
             
-            $track = new WPSSTM_Track(); //default
-            $track->populate_subtrack($subtrack_id);
-            $tracks[] = $track;
+            $subtrack = new WPSSTM_Track(); //default
+            $subtrack->populate_subtrack($subtrack_id);
+            $tracks[] = $subtrack;
         }
 
         return $tracks;
@@ -1005,7 +1005,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         if (!$this->post_id) return false;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        return $wpdb->get_var("SELECT COUNT(*) FROM $subtracks_table WHERE tracklist_id = $this->post_id");
+        $querystr = $wpdb->prepare( "SELECT COUNT(*) FROM $subtracks_table WHERE tracklist_id = %d", $this->post_id );
+        return $wpdb->get_var($querystr);
     }
 
     function tracklist_log($data,$title = null){

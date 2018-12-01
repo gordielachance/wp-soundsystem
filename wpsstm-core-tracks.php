@@ -7,8 +7,7 @@ class WPSSTM_Core_Tracks{
     static $image_url_metakey = '_wpsstm_track_image_url';
     static $qvar_track_action = 'track-action';
     static $qvar_track_lookup = 'lookup_track';
-    static $qvar_loved_tracks = 'loved-tracks';
-    static $loved_track_meta_key = '_wpsstm_user_favorite';
+    static $qvar_favorite_tracks = 'loved-tracks';
     
     var $subtracks_hide = null; //default hide subtracks in track listings
 
@@ -55,12 +54,13 @@ class WPSSTM_Core_Tracks{
         add_action( 'current_screen',  array($this, 'the_single_backend_track'));
         
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracks') );
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
-        add_filter( 'posts_join', array($this,'subtracks_join_query'), 10, 2 );
-        add_filter( 'posts_where', array($this,'subtracks_where_query'), 10, 2 );
-        add_filter( 'posts_orderby', array($this,'sort_subtracks_by_position'), 10, 2 );
         
+        add_filter( 'posts_join', array($this,'tracks_query_join_subtracks'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
+        add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
+
         /*
         add_action( 'admin_notices',  array($this, 'toggle_subtracks_notice') );
         add_action( 'current_screen',  array($this, 'toggle_subtracks_store_option') );
@@ -301,26 +301,6 @@ class WPSSTM_Core_Tracks{
         }
     }
     
-    function pre_get_posts_loved_tracks( $query ) {
-        
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-
-        if ( $user_id = $query->get( self::$qvar_loved_tracks ) ){
-
-            $meta_query = (array)$query->get('meta_query');
-
-            $meta_query[] = array(
-                'key'     => self::$loved_track_meta_key,
-                'value'   => $user_id,
-            );
-
-            $query->set( 'meta_query', $meta_query);
-            
-        }
-
-        return $query;
-    }
-    
     /*
     Register the global $wpsstm_tracklist and  $wpsstm_track global objects (hooked on 'the_post' action)
     */
@@ -359,43 +339,61 @@ class WPSSTM_Core_Tracks{
         return $query;
     }
 
-    function subtracks_join_query($join,$query){
+    function tracks_query_join_subtracks($join,$query){
         global $wpdb;
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
-        if ( $query->get('tracklist_id') ){
-            $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table,$wpdb->posts);
-        }
+
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
+
         return $join;
     }
     
-    function subtracks_where_query($where,$query){
+    function track_query_where_subtrack_id($where,$query){
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
-        if ( $tracklist_id = $query->get('tracklist_id') ){
-            $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
+        if ( $subtrack_id = $query->get('subtrack_id') ){
+            $where .= sprintf(" AND subtracks.ID = %s",$subtrack_id);
         }
         return $where;
     }
     
-    /*
-    By default, Wordpress will sort the subtracks by date.
-    If we have a subtracks query with a tracklist ID set; and that no orderby is defined, rather sort by tracklist position.
-    */
-    
-    function sort_subtracks_by_position($orderby_sql, $query){
+    function track_query_where_favorited($where,$query){
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+
+        if ( !$query->get( self::$qvar_favorite_tracks ) ) return $where;
+        
+        
+        //get all favorites tracklists
+        $query_args = array(
+            'post_type' =>      wpsstm()->post_type_playlist,
+            'posts_per_page' => -1,
+            'post_status' =>    array('publish','private','future','pending','draft'),
+            'fields' =>         'ids',
+            WPSSTM_Core_Tracklists::$qvar_loved_tracklists => true,
+        );
+        $query = new WP_Query( $query_args );
+        $ids = $query->posts;
+        
+        $ids_str = implode(',',$ids);
+        $where .= sprintf(" AND subtracks.tracklist_id IN (%s)",$ids_str);
+
+        return $where;
+    }
+
+    function tracks_query_sort_by_subtrack_position($orderby_sql, $query){
 
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
         
         $query_orderby = $query->get('orderby') ? $query->get('orderby') : 'track_order';
 
-        if ( $query->get('tracklist_id') && ( $query_orderby == 'track_order') ){
+        if ( $query_orderby == 'track_order'){
             $orderby_sql = 'subtracks.track_order ' . $query->get('order');
         }
         
         return $orderby_sql;
 
-    }
-    
+    }    
 
     function register_post_type_track() {
 
@@ -501,7 +499,7 @@ class WPSSTM_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = self::$qvar_track_lookup;
         $qvars[] = self::$qvar_track_action;
-        $qvars[] = self::$qvar_loved_tracks;
+        $qvars[] = self::$qvar_favorite_tracks;
         return $qvars;
     }
     

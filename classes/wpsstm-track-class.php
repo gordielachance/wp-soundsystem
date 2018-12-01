@@ -359,7 +359,7 @@ class WPSSTM_Track{
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = $post_type_obj->cap->edit_posts;
+        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($user_id,$required_cap) ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new track.",'wpsstm') );
@@ -439,6 +439,7 @@ class WPSSTM_Track{
         }
 
         //set post status to 'publish' if it is not done yet (it could be a temporary post)
+        //TOUFIX useful ?
         $track_post_type = get_post_status($this->post_id);
         if ($track_post_type != 'publish'){
             $success = wp_update_post(array(
@@ -449,20 +450,35 @@ class WPSSTM_Track{
         }
         
         //capability check
-        //TO FIX we should add a meta to the user rather than to the track, and check for another capability here ?
-        /*
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit this track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit tracklists.",'wpsstm') );
         }
-        */
+        
+        //get tracklist
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        
+        if ( !$tracklist_id || is_wp_error($tracklist_id) ){
+            return $tracklist_id;
+        }
+        
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($do_love){
-            $success = update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key, $user_id );
+            $success = $tracklist->save_subtrack($this);
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key, $user_id );
+            
+            //find matche(s) from user's favorites
+            $ids = $this->get_user_favorites_subtrack_matches();
+            
+            foreach($ids as $subtrack_id){
+                $subtrack = new WPSSTM_Track(); //default
+                $subtrack->populate_subtrack($subtrack_id);
+                $success = $tracklist->unlink_subtrack($subtrack);
+            }
+
             do_action('wpsstm_unlove_track',$this->post_id,$this);
         }
 
@@ -470,11 +486,53 @@ class WPSSTM_Track{
         
     }
     
-    function get_track_loved_by(){
-        //track ID is required
-        if ( !$this->post_id  ) return;//track does not exists in DB
+    /*
+    retrieve the subtracks IDs that matches a track in the user's favorite playlist
+    */
+    function get_user_favorites_subtrack_matches($user_id = null){
+        global $wpdb;
+        //get subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        //get tracklist
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id($user_id);
         
-        return get_post_meta($this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key);
+        if ( !$tracklist_id || is_wp_error($tracklist_id)  ){
+            return $tracklist_id;
+        }
+        
+        if ($this->post_id){
+            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND track_id = %d", $tracklist_id, $this->post_id );
+        }else{
+            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND artist = '%s' AND title = '%s' AND album = '%s'", $tracklist_id, $this->artist,$this->title,$this->album );
+        }
+        
+        return $wpdb->get_col( $querystr);
+
+    }
+    
+    function get_track_loved_by(){
+        global $wpdb;
+
+        //get subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $ids = WPSSTM_Core_Tracklists::get_all_favorite_tracklist_ids();
+
+        if ( !$ids || is_wp_error($ids)  ){
+            return $ids;
+        }
+        $ids_str = implode(',',$ids);
+        
+        $querystr = sprintf( "SELECT posts.post_author FROM $wpdb->posts posts INNER JOIN %s AS subtracks ON (subtracks.tracklist_id = posts.ID)  WHERE subtracks.tracklist_id IN(%s)", $subtracks_table, $ids_str);
+
+        if ($this->post_id){
+            $querystr = $wpdb->prepare( $querystr ." AND subtracks.track_id = %d",$this->post_id );
+        }else{
+            $querystr = $wpdb->prepare( $querystr ." AND artist = '%s' AND title = '%s' AND album = '%s'",$this->artist,$this->title,$this->album );
+        }
+
+        return $wpdb->get_col( $querystr);
     }
     
     function is_track_loved_by($user_id = null){

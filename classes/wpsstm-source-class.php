@@ -334,12 +334,7 @@ class WPSSTM_Source{
             $title = sprintf('[source:%s] ',$this->post_id) . $title;
         }
 
-        if ( $this->track->post_id ){
-            $this->tracklist->tracklist_log($data,$title);
-        }else{
-            wpsstm()->debug_log($data,$title);
-        }
-
+        $this->track->track_log($data,$title);
 
     }
 

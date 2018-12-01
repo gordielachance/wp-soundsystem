@@ -3,11 +3,13 @@
 /**
 Handle posts that have a tracklist, like albums and playlists.
 **/
+
 class WPSSTM_Core_Tracklists{
 
     static $qvar_tracklist_action = 'tracklist-action';
     static $qvar_loved_tracklists = 'loved-tracklists';
-    static $loved_tracklist_meta_key = '_wpsstm_user_favorite';
+    static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
+    static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
 
     function __construct() {
         global $wpsstm_tracklist;
@@ -44,8 +46,8 @@ class WPSSTM_Core_Tracklists{
         add_action( 'the_post', array($this,'the_tracklist'),10,2);
         add_action( 'current_screen',  array($this, 'the_single_backend_tracklist'));
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
-        add_filter( 'posts_join', array($this,'subtrack_tracklists_join_query'), 10, 2 );
-        add_filter( 'posts_where', array($this,'subtrack_tracklists_where_query'), 10, 2 );
+        add_filter( 'posts_join', array($this,'tracklist_query_join_subtracks_table'), 10, 2 );
+        add_filter( 'posts_where', array($this,'tracklist_query_where_tracklist_id'), 10, 2 );
 
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
@@ -494,42 +496,48 @@ class WPSSTM_Core_Tracklists{
 
     }
     
+    static function get_all_favorite_tracklist_ids(){
+        global $wpdb;
+        //get all subtracks metas
+        $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
+        $ids = $wpdb->get_col( $querystr);
+        return $ids;
+    }
+
     function pre_get_posts_loved_tracklists( $query ) {
 
-        if ( $user_id = $query->get( self::$qvar_loved_tracklists ) ){
-
-            $meta_query = (array)$query->get('meta_query');
-
-            $meta_query[] = array(
-                'key'     => self::$loved_tracklist_meta_key,
-                'value'   => $user_id,
-            );
-
-            $query->set( 'meta_query', $meta_query);
+        if ( $query->get( self::$qvar_loved_tracklists ) ){
+            
+            $ids = get_all_favorite_tracklist_ids();
+            
+            $query->set ( 'post__in', $ids ); 
             
         }
 
         return $query;
     }
 
-    function subtrack_tracklists_join_query($join,$query){
+    function tracklist_query_join_subtracks_table($join,$query){
         global $wpdb;
         
-        //TO FIX add post type check ?
+        if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return $join;
 
-        if ( $query->get('subtrack_id') ) {
-            $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-            $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if ( $tracklist_id = $query->get('tracklist_id') ) {
+            $join .= sprintf(" INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
         }
+
         return $join;
     }
     
-    function subtrack_tracklists_where_query($where,$query){
+    function tracklist_query_where_tracklist_id($where,$query){
+        global $wpdb;
         
-        //TO FIX add post type check ?
+        if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return $where;
 
-        if ( $subtrack_id = $query->get('subtrack_id') ) {
-            $where .= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
+        if ( $tracklist_id = $query->get('tracklist_id') ) {
+            $where .= sprintf(" AND subtracks.tracklist_id = %s",$subtrack_id);
         }
         return $where;
     }
@@ -579,6 +587,58 @@ class WPSSTM_Core_Tracklists{
             array('from_tracklist'=>''), //data
             array('from_tracklist'=>$post_id) //where
         );
+        
+    }
+    
+    /*
+    Get the ID of the favorites tracklist for a user, or create it
+    */
+    
+    static function get_user_favorites_id($user_id = null){
+        if (!$user_id) $user_id = get_current_user_id();
+        if (!$user_id) return;
+
+        $love_id = get_user_option( WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $user_id );
+        
+        //tracklist doesn't exists
+        if ( $love_id && !get_post_type($love_id) ){
+            delete_user_option( $user_id, WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key );
+            $love_id = null;
+        }
+        
+        if (!$love_id){
+            
+            /*
+            create new tracklist
+            */
+            
+            //capability check
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+            $required_cap = $post_type_obj->cap->create_posts;
+            if ( !current_user_can($required_cap) ){
+                return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to create tracklists.",'wpsstm') );
+            }
+            
+            //user
+            $user_info = get_userdata($user_id);
+            
+            $playlist_new_args = array(
+                'post_type'     => wpsstm()->post_type_playlist,
+                'post_status'   => 'publish',
+                'post_author'   => $user_id,
+                'post_title'    => sprintf(__("%s's favorites tracks",'wpsstm'),$user_info->user_login)
+            );
+
+            $success = wp_insert_post( $playlist_new_args, true );
+            if ( is_wp_error($success) ) return $success;
+            $love_id = $success;
+            $meta = update_user_option( $user_id, WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $love_id);
+            
+            wpsstm()->debug_log(array('user_id'=>$user_id,'post_id'=>$love_id,'meta'=>$meta),'created favorites tracklist');
+            
+        }
+        
+        return $love_id;
         
     }
 
