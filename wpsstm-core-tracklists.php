@@ -10,6 +10,7 @@ class WPSSTM_Core_Tracklists{
     static $qvar_loved_tracklists = 'loved-tracklists';
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
+    static $qvar_tracklist_id = 'tracklist-id';
 
     function __construct() {
         global $wpsstm_tracklist;
@@ -48,6 +49,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
         add_filter( 'posts_join', array($this,'tracklist_query_join_subtracks_table'), 10, 2 );
         add_filter( 'posts_where', array($this,'tracklist_query_where_tracklist_id'), 10, 2 );
+        add_filter( 'posts_where', array($this,'tracklist_query_where_track_id'), 10, 2 );
 
         //post content
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
@@ -85,6 +87,7 @@ class WPSSTM_Core_Tracklists{
     function add_tracklist_query_vars($vars){
         $vars[] = self::$qvar_tracklist_action;
         $vars[] = self::$qvar_loved_tracklists;
+        $vars[] = self::$qvar_tracklist_id;
         return $vars;
     }
 
@@ -520,11 +523,18 @@ class WPSSTM_Core_Tracklists{
     function tracklist_query_join_subtracks_table($join,$query){
         global $wpdb;
         
-        if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return $join;
+        //check this is a tracklist query
+        //https://stackoverflow.com/a/7542708/782013
+        $post_types = $query->get('post_type');
+        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
+        if ( !$has_tracklist_type ) return $join;
 
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        if ( $tracklist_id = $query->get('tracklist_id') ) {
+        $tracklist_id = $query->get(self::$qvar_tracklist_id);
+        $subtrack_id = $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id);
+        
+        if ( $tracklist_id || $subtrack_id ) {
             $join .= sprintf(" INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
         }
 
@@ -534,11 +544,29 @@ class WPSSTM_Core_Tracklists{
     function tracklist_query_where_tracklist_id($where,$query){
         global $wpdb;
         
-        if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return $where;
+        //check this is a tracklist query
+        //https://stackoverflow.com/a/7542708/782013
+        $post_types = $query->get('post_type');
+        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
+        if ( !$has_tracklist_type ) return $where;
 
-        if ( $tracklist_id = $query->get('tracklist_id') ) {
-            $where .= sprintf(" AND subtracks.tracklist_id = %s",$subtrack_id);
+        if ( $tracklist_id = $query->get(self::$qvar_tracklist_id) ) {
+            $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
         }
+        return $where;
+    }
+    
+    function tracklist_query_where_track_id($where,$query){
+        
+        //check this is a tracklist query
+        //https://stackoverflow.com/a/7542708/782013
+        $post_types = $query->get('post_type');
+        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
+        if ( !$has_tracklist_type ) return $where;
+
+        if ( !$subtrack_id = $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id) ) return $where;
+        
+        $where.= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
         return $where;
     }
     

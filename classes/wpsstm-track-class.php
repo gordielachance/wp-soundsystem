@@ -192,34 +192,34 @@ class WPSSTM_Track{
     /*
     Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
     */
-    function get_parent_ids($args = null){
+    function get_subtrack_tracklist_ids($args = null){
         global $wpdb;
 
         //track ID is required
         if ( !$this->post_id ) return;//track does not exists in DB
 
         $default_args = array(
-            'post_type'         => wpsstm()->tracklist_post_types,
-            'post_status'       => 'any',
-            'posts_per_page'    => -1,
-            'fields'            => 'ids',
-            'subtrack_id'       => $this->post_id,
+            'post_type' =>                              wpsstm()->tracklist_post_types,
+            'post_status'  =>                           'any',
+            'posts_per_page' =>                         -1,
+            'fields'=>                                  'ids',
+            WPSSTM_Core_Tracks::$qvar_subtrack_id =>    $this->post_id,
         );
 
         $args = wp_parse_args((array)$args,$default_args);
 
-        //$this->track_log($args,'WPSSTM_Track::get_parent_ids()');
+        //$this->track_log($args,'WPSSTM_Track::get_subtrack_tracklist_ids()');
 
         $query = new WP_Query( $args );
 
-        $this->parent_ids = $query->posts;
+        $this->parent_ids = array_unique($query->posts);
 
         return $this->parent_ids;
     }
 
     function get_parents_list(){
 
-        $tracklist_ids = $this->get_parent_ids();
+        $tracklist_ids = $this->get_subtrack_tracklist_ids();
         $links = array();
 
         foreach((array)$tracklist_ids as $tracklist_id){
@@ -1068,7 +1068,7 @@ class WPSSTM_Track{
     Add a checkbox in front of every tracklist row to append/remove track
     */
     function playlists_manager_append_track_checkbox($tracklist){
-        $checked_playlist_ids = $this->get_parent_ids();
+        $checked_playlist_ids = $this->get_subtrack_tracklist_ids();
 
         ?>
         <span class="tracklist-row-action">
@@ -1087,7 +1087,7 @@ class WPSSTM_Track{
     */
     
     function can_be_flushed(){
-        $parent_ids = (array)$this->get_parent_ids();
+        $parent_ids = (array)$this->get_subtrack_tracklist_ids();
         $loved_by = $this->get_track_loved_by();
         $can_be_flushed = ( wpsstm_is_community_post($this->post_id) && empty($parent_ids) && empty($loved_by) );
         
