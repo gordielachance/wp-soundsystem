@@ -313,7 +313,7 @@ class WpsstmTrack {
     }
 
     debug(msg){
-        var prefix = " WpsstmTracklist #"+ this.tracklist.position +" - WpsstmTrack #" + this.position;
+        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
     }
     
