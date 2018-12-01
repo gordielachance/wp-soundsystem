@@ -89,7 +89,14 @@ global $wpsstm_tracklist;
     }else{ //no tracks
         ?>
         <p id="wpsstm-no-tracks">
-            <?php _e('No tracks found.','wpsstm'); ?>  <a href="#"><?php _e('Add tracks','wpsstm'); ?> ?</a>
+            <?php _e('No tracks found.','wpsstm'); ?>
+            <?php
+            if ($wpsstm_tracklist->tracklist_type=='static'){
+                ?>
+                <a href="#"><?php _e('Add tracks','wpsstm'); ?> ?</a>
+                <?php
+            }
+            ?>
         </p>
         <?php
     }
