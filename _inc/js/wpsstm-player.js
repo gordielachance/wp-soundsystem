@@ -325,6 +325,11 @@ class WpsstmPlayer {
         var self = this;
         var success = $.Deferred();
         
+        if (track_obj === undefined){
+            success.reject('track is undefined');
+            return success.promise();
+        }
+        
         //check if this is the first (playable) tracklist track in queue
         var tracklist_tracks = self.tracks.filter(function (all_tracks_obj) {
             return (all_tracks_obj.can_play !== false) && (all_tracks_obj.tracklist.index === track_obj.tracklist.index);
@@ -715,7 +720,7 @@ class WpsstmPlayer {
         if (has_autoplay && !is_media_playing){
             var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
             var first_track = self.tracks[first_track_idx];
-            self.play_track(first_track);            
+            self.play_track(first_track);
         }
     }
 
