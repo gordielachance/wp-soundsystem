@@ -696,10 +696,16 @@ class WPSSTM_Track{
     
     private function get_new_track_url(){
         global $wp;
+        
+        $track = array(
+            'artist' => $this->artist,
+            'title' =>  $this->title,
+            'album' =>  $this->album
+        );
 
         $args = array(
             WPSSTM_Core_Tracks::$qvar_track_action =>   'new-track',
-            'track' =>                                  urlencode( json_encode($this->to_array()) ),
+            'track' =>                                  urlencode( json_encode($track) ),
         );
         
         $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive

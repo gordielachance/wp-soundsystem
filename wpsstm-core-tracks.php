@@ -150,6 +150,39 @@ class WPSSTM_Core_Tracks{
                 $do_love = !$track->is_track_loved_by();
                 $success = $track->love_track($do_love);
             break;
+            case 'new-track':
+                //get current query
+                $query_str = $_SERVER['QUERY_STRING']; 
+                parse_str($query_str,$query); //make an array of it
+                $redirect_args = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
+
+                $track_args = wpsstm_get_array_value('track',$query);
+                $track_args = wp_unslash($track_args);
+                $track_args = json_decode($track_args,true);
+
+                $track = new WPSSTM_Track();
+                $track->from_array($track_args);
+
+                if ( $track->post_id ){
+                    $track_url = get_permalink($track->post_id);
+                    $track_url = add_query_arg( array('wpsstm_success_code'=>'track-exists'),$track_url );
+                }else{
+                    $success = $track->save_track_post();
+                    if ( is_wp_error($success) ){
+                        $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TO FIX TO CHECK or current URL ? more logical.
+                        $track_url = add_query_arg(array('wpsstm_error_code'=>$success->get_error_code()),$track_url);
+                    }else{
+                        $track_url = get_permalink($track->post_id);
+                        $track_url = add_query_arg( array('wpsstm_success_code'=>'new-track'),$track_url );
+                    }
+                }
+
+                //pass the redirect args now
+                $track_url = add_query_arg($redirect_args,$track_url);
+
+                wp_redirect($track_url);
+                exit;
+                break;
         }
         
         if ($success){ //redirect with a success / error code
