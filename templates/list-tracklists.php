@@ -10,10 +10,6 @@ if ( $query->have_posts() ) {
 
             $query->the_post();
             global $wpsstm_tracklist;
-
-            $wpsstm_tracklist->options['can_play'] = false;
-            $wpsstm_tracklist->options['autoload'] = false;
-            $wpsstm_tracklist->options['autoplay'] = false;
             
             //TO FIX TO CHECK or use get_tracklist_class() here ?
             $row_classes = array('tracklist-row','wpsstm-tracklist');
@@ -38,7 +34,7 @@ if ( $query->have_posts() ) {
                 </span>
                 <span class="wpsstm-tracklist-actions">
                     <?php
-                    if ( $actions = $wpsstm_tracklist->get_tracklist_links('page') ){
+                    if ( $actions = $wpsstm_tracklist->get_tracklist_links() ){
                         echo get_actions_list($actions,'tracklist');
                     }
                     ?>

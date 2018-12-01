@@ -2,7 +2,7 @@
 class WPSSTM_Slacker{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_slacker_service_links'));
-        add_action('wpsstm_live_tracklist_init',array($this,'register_slacker_preset'));
+        add_action('wpsstm_before_remote_response',array($this,'register_slacker_preset'));
     }
     //register preset
     function register_slacker_preset($tracklist){
@@ -26,35 +26,29 @@ class WPSSTM_Slacker{
 }
 class WPSSTM_Slacker_Preset{
 
-    private $station_slug;
-
-    function __construct($tracklist){
-        $this->tracklist = $tracklist;
-        $this->station_slug = $this->get_station_slug();
-        
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+    function __construct($remote){
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
-    function can_handle_url(){
-        if (!$this->station_slug ) return;
+    function can_handle_url($url){
+        $station_slug = $this->get_station_slug($url);
+        if (!$station_slug ) return;
         return true;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
+    function set_selectors($remote){
         
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
-                'track_artist'      => array('path'=>'span.artist'),
-                'track_title'       => array('path'=>'span.title')
-            );
-        }
-        return $options;
+        if ( !$this->can_handle_url($remote->url) ) return;
+        $remote->options['selectors'] = array(
+            'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
+            'track_artist'      => array('path'=>'span.artist'),
+            'track_title'       => array('path'=>'span.title')
+        );
     }
 
-    function get_station_slug(){
+    function get_station_slug($url){
         $pattern = '~^https?://(?:www.)?slacker.com/station/([^/]+)/?~i';
-        preg_match($pattern, $this->tracklist->feed_url, $matches);
+        preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 

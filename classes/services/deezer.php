@@ -2,12 +2,12 @@
 
 class WPSSTM_Deezer{
     function __construct(){
-        add_action('wpsstm_live_tracklist_init',array(__class__,'register_deezer_preset'));
+        add_action('wpsstm_before_remote_response',array(__class__,'register_deezer_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_deezer_service_links'));
     }
     //register preset
-    static function register_deezer_preset($tracklist){
-        new WPSSTM_Deezer_Preset($tracklist);
+    static function register_deezer_preset($remote){
+        new WPSSTM_Deezer_Preset($remote);
     }
 
     static function register_deezer_service_links($links){
@@ -29,36 +29,30 @@ class WPSSTM_Deezer{
 }
 
 class WPSSTM_Deezer_Preset{
-    var $tracklist;
-    private $playlist_id;
-
-    function __construct($tracklist){
-        $this->tracklist = $tracklist;
-        $this->playlist_id = $this->get_playlist_id();
-        
-        add_filter( 'wpsstm_live_tracklist_scraper_options',array($this,'get_live_tracklist_options'), 10, 2 );
+    function __construct($remote){
+        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
     }
     
-    function can_handle_url(){
-        if ( !$this->playlist_id ) return;
+    function can_handle_url($url){
+        $playlist_id = $this->get_playlist_id($url);
+        if ( !$playlist_id ) return;
         return true;
     }
     
-    function get_live_tracklist_options($options,$tracklist){
-        if ( $this->can_handle_url() ){
-            $options['selectors'] = array(
-                'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
-                'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
-                'track_title'       => array('path'=>'span[itemprop="name"]'),
-                'track_album'       => array('path'=>'[itemprop="inAlbum"]')
-            );
-        }
-        return $options;
+    function set_selectors($remote){
+        
+        if ( !$this->can_handle_url($remote->url) ) return;
+        $remote->options['selectors'] = array(
+            'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
+            'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
+            'track_title'       => array('path'=>'span[itemprop="name"]'),
+            'track_album'       => array('path'=>'[itemprop="inAlbum"]')
+        );
     }
 
-    function get_playlist_id(){
+    function get_playlist_id($url){
         $pattern = '~^https?://(?:www.)?deezer.com/(?:.*/)?playlist/([^/]+)~i';
-        preg_match($pattern, $this->tracklist->feed_url, $matches);
+        preg_match($pattern,$url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 

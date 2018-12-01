@@ -43,27 +43,8 @@ class WPSSTM_Core_Sources{
         AJAX
         */
         
-        //get track autosources
-        add_action('wp_ajax_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
-        add_action('wp_ajax_nopriv_wpsstm_autosources_list', array($this,'ajax_track_autosource'));
-        
         //delete source
         add_action('wp_ajax_wpsstm_trash_source', array($this,'ajax_trash_source'));
-
-        //add_action('wp', array($this,'test_autosource_ajax') );
-    }
-    
-    function test_autosource_ajax(){
-        
-        if ( is_admin() ) return;
-    
-        $_POST = array(
-            'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
-        );
-        
-        wpsstm()->debug_log(json_encode($_POST),'testing autosource AJAX');
-        
-        $this->ajax_track_autosource();
     }
     
     function add_query_vars_source( $qvars ) {
@@ -172,8 +153,7 @@ class WPSSTM_Core_Sources{
     }
     
     /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action) for tracklists
-    For single tracks, check the_track function in -core-tracks.php
+    Register the global $wpsstm_source obj (hooked on 'the_post' action)
     */
     
     function the_source($post,$query){
@@ -333,8 +313,8 @@ class WPSSTM_Core_Sources{
         </p>
 
         <?php
-        
-        if ( $then = get_post_meta( $post->ID, self::$autosource_time_metakey, true ) ){
+
+        if ( $then = get_post_meta( $wpsstm_track->post_id, self::$autosource_time_metakey, true ) ){
             $now = current_time( 'timestamp' );
             $refreshed = human_time_diff( $now, $then );
             $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);
@@ -345,9 +325,9 @@ class WPSSTM_Core_Sources{
         $wpsstm_track->populate_sources();
         ?>
         <div class="wpsstm-track-sources">
-            <?php wpsstm_locate_template( 'content-source.php', true, false );?>
+            <?php wpsstm_locate_template( 'content-sources.php', true, false );?>
         </div>
-        <p class="wpsstm-new-track-sources-container">
+        <p class="wpsstm-new-sources-container">
             <?php
             $input_attr = array(
                 'id' => 'wpsstm-new_track-sources',
@@ -428,14 +408,13 @@ class WPSSTM_Core_Sources{
         $new_sources = array();
 
         foreach((array)$source_urls as $url){
-            //TOFIXKKK where is track ?
             $source = new WPSSTM_Source(null);
             $source->permalink_url = $url;
             $new_sources[] = $source;
         }
-        
+
         $track->add_sources($new_sources);
-        $track->save_new_sources();//save only if it does not exists yet
+        $track->save_new_sources();
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
@@ -510,49 +489,6 @@ class WPSSTM_Core_Sources{
             break;
         }
     }
-
-    function ajax_track_autosource(){
-        global $wpsstm_track;
-        
-        //set global $wpsstm_track
-        $ajax_data = wp_unslash($_POST);
-        $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'timestamp' => current_time('timestamp'),
-            'message'   => null,
-            'new_html'  => null,
-            'success'   => false,
-            'track'     => $wpsstm_track->to_array(), //TO FIX TO CHECK - sending the whole PHP object makes the fn crash, so pass it as an array
-        );
-            
-        //autosource
-        $new_ids = array();
-        
-        $new_ids = $wpsstm_track->autosource();
-        $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
-
-        if ( is_wp_error($new_ids) ){
-            $result['message'] = $new_ids->get_error_message();
-        }else{
-            $result['new_ids'] = $new_ids;
-            $result['success'] = true;
-        }
-        
-        //repopulate track (may have been created and thus have a post_id, etc.)
-        //TO FIX TO CHECK maybe it is not necessary to repopulate the track here?
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $updated_track = ob_get_clean();
-        $result['new_html'] = $updated_track;
-        $result['success'] = true;
-
-        header('Content-type: application/json');
-        wp_send_json( $result );
-
-    }
     
     function ajax_trash_source(){
         $ajax_data = wp_unslash($_POST);
@@ -581,6 +517,7 @@ class WPSSTM_Core_Sources{
     }
     
     static function can_autosource(){
+        global $wpsstm_spotify;
 
         //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
@@ -589,16 +526,13 @@ class WPSSTM_Core_Sources{
         }
         
         //spotify API
-        $client_id = wpsstm()->get_options('spotify_client_id');
-        $client_secret = wpsstm()->get_options('spotify_client_secret');
-        if (!$client_id || !$client_secret){
-            return new WP_Error( 'wpsstm_autosource',__('Autosource requires access to the Spotify API.','wpsstm') );   
-        }
+        $can_spotify_api = $wpsstm_spotify->can_spotify_api();
+        if ( is_wp_error($can_spotify_api) ) return $can_spotify_api;
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
         if ($sources_post_type_obj){ //be sure post type is registered before doing that check - eg. it isn't when saving settings.
-            $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+            $autosource_cap = $sources_post_type_obj->cap->create_posts;
             if ( !$has_cap = user_can($community_user_id,$autosource_cap) ){
                 $error = sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>');
                 return new WP_Error( 'wpsstm_autosource',$error );

@@ -1,8 +1,8 @@
 <?php
 
+
 class WPSSTM_Track{
     public $post_id = null;
-    public $index = -1; //order in the playlist, if any //TO FIX this property should not exist. Order is related to the tracklist, not to the track ?
     
     public $title;
     public $artist;
@@ -13,11 +13,6 @@ class WPSSTM_Track{
     
     public $image_url;
     public $location;
-
-    public $parent_ids = array();
-
-    private $did_post_id_lookup = false;
-    private $did_parents_query = false;
     
     var $source;
     public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
@@ -26,62 +21,125 @@ class WPSSTM_Track{
     var $in_source_loop = false;
     
     var $tracklist;
-
+    
+    ///
+    public $subtrack_id = null;
+    public $parent_ids = array();
+    public $position = 0;
+    public $subtrack_time = null;
+    public $subtrack_from = null;
+    
     function __construct( $post_id = null, $tracklist = null ){
 
         //has track ID
-        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_track ) ){
-
-            $this->post_id = (int)$post_id;
-
-            //populate datas if they are not set yet (eg. if we save a track, we could have set the values for track update)
-
-            $this->title        = wpsstm_get_post_track($post_id);
-            $this->artist       = wpsstm_get_post_artist($post_id);
-            $this->album        = wpsstm_get_post_album($post_id);
-            $this->mbid         = wpsstm_get_post_mbid($post_id);
-            $this->spotify_id   = wpsstm_get_post_spotify_id($post_id);
-            $this->image_url    = wpsstm_get_post_image_url($post_id);
-            $this->duration     = wpsstm_get_post_length($post_id);
+        if ( $track_id = intval($post_id) ) {
+            $this->post_id = $track_id;
+            $this->populate_track_post();
         }
         
+        /*
+        Tracklist
+        */
+        $this->tracklist = new WPSSTM_Post_Tracklist();
+        
         if ($tracklist){
-            if ( is_object($tracklist) ){
+            if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
-            }elseif( is_int($tracklist) ){
-                $this->tracklist = wpsstm_get_tracklist($track);
+            }elseif( $tracklist_id = intval($tracklist) ){
+                $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
             }
-        }else{
-            $this->tracklist = wpsstm_get_tracklist(); //default
         }
 
         
     }
     
+    function populate_track_post(){
+        
+        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track ) ){
+            $this->tracklist_log('Invalid track post');
+            return;
+        }
+        
+        $this->title        = wpsstm_get_post_track($this->post_id);
+        $this->artist       = wpsstm_get_post_artist($this->post_id);
+        $this->album        = wpsstm_get_post_album($this->post_id);
+        $this->mbid         = wpsstm_get_post_mbid($this->post_id);
+        $this->spotify_id   = wpsstm_get_post_spotify_id($this->post_id);
+        $this->image_url    = wpsstm_get_post_image_url($this->post_id);
+        $this->duration     = wpsstm_get_post_length($this->post_id);
+    }
+    
+    function populate_subtrack($subtrack_id){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $subtrack = $wpdb->get_row("SELECT * FROM $subtracks_table WHERE ID = $subtrack_id");
+        
+        if (!$subtrack) return;
+
+        //track
+        if ($track_id = $subtrack->track_id){
+            $this->post_id = $track_id;
+            $this->populate_track_post();
+        }else{
+            $this->title =  $subtrack->title;
+            $this->artist = $subtrack->artist;
+            $this->album =  $subtrack->album;
+        }
+        
+        //tracklist
+        if ($tracklist_id = $subtrack->tracklist_id){
+            $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+        }
+        
+        //subtrack-specific
+        $this->subtrack_id =    $subtrack->ID;
+        $this->subtrack_time =  $subtrack->time;
+        $this->subtrack_from =  $subtrack->from_tracklist;
+        $this->position =       $subtrack->track_order;
+    }
+    
     function from_array( $args = null ){
 
-        $args_default = $this->get_default();
-        $args = wp_parse_args((array)$args,$args_default);
+        $allowed = array(
+            'post_id',
+            'subtrack_id',
+            'index',
+            'title',
+            'artist',
+            'album',
+            'image_url',
+            'location',
+            'mbid',
+            'duration',
+            'source_urls',
+            'tracklist_id',
+        );
 
         //set properties from args input
         foreach ($args as $key=>$value){
             
+            if ( !in_array($key,$allowed) ) continue;
+            
             switch($key){
-                case 'sources':
+                case 'tracklist_id':
+                    $this->tracklist = new WPSSTM_Post_Tracklist($value);
+                break;
+                case 'source_urls':
                     $this->add_sources($value);
                 break;
                 default:
-                    if ( !array_key_exists($key,$args_default) ) continue;
                     if ( !isset($args[$key]) ) continue; //value has not been set
                     $this->$key = $args[$key];
                 break;
             }
 
         }
-
-        //populate post ID if track already exists in the DB
-        //TO FIX check if this doesn't slow the page rendering
-        $this->populate_local_track();
+        
+        //track
+        if ( $this->post_id ){
+            $this->populate_track_post();
+        }
     }
     
     /*
@@ -118,43 +176,25 @@ class WPSSTM_Track{
     Get the post ID for this track if it already exists in the database; and populate its data
     */
     
-    function populate_local_track(){
-        if ( $this->post_id || $this->did_post_id_lookup ) return;
-        if (!$this->artist || !$this->title) return;
+    function local_track_lookup(){
+        if ( $this->post_id ) return;
+        if ( !$this->validate_track() ) return;
 
         if ( $duplicates = $this->get_track_duplicates() ){
-            $this->__construct( $duplicates[0] );
-            $this->track_log( json_encode(array('track'=>sprintf('%s - %s - %s',$this->artist,$this->title,$this->album)),JSON_UNESCAPED_UNICODE),'WPSSTM_Track::populate_local_track()');
+            $this->post_id = $duplicates[0];
+            //$this->track_log( json_encode($this->to_array(),JSON_UNESCAPED_UNICODE),'Track found in the local database');
         }
-
-        $this->did_post_id_lookup = true;
+        
         return $this->post_id;
 
     }
 
-    function get_default(){
-        return array(
-            'post_id'       =>null,
-            'index'         => -1,
-            'title'         =>null,
-            'artist'        =>null,
-            'album'         =>null,
-            'image_url'     =>null,
-            'location'      =>null,
-            'mbid'          =>null,
-            'duration'      =>null,
-            'sources'       =>null,
-        );
-    }
-    
     /*
     Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
     */
     function get_parent_ids($args = null){
         global $wpdb;
-        
-        if ($this->did_parents_query) return $this->parent_ids;
-        
+
         //track ID is required
         if ( !$this->post_id ) return;//track does not exists in DB
 
@@ -173,7 +213,6 @@ class WPSSTM_Track{
         $query = new WP_Query( $args );
 
         $this->parent_ids = $query->posts;
-        $this->did_parents_query = true;
 
         return $this->parent_ids;
     }
@@ -199,42 +238,18 @@ class WPSSTM_Track{
     }
 
     function to_array(){
-        $defaults = $this->get_default();
-        $export = array();
-        foreach ((array)$defaults as $param=>$dummy){
-            $export[$param] = $this->$param;
-        }
-        return array_filter($export);
-    }
-    
-    /*
-    Reduce track to the minimum; used to send data through URLs or ajax.
-    */
-    function to_ajax(){
-        
-        $allowed  = ['post_id','title','artist','album','mbid'];
-        
-        if ($this->post_id){
-            $allowed  = ['post_id'];
-        }
-        
-        $arr = $this->to_array();
 
-        /*
-        //requires PHP 5.6.0
-        
-        $filtered = array_filter(
-            $arr,
-            function ($key) use ($allowed) {
-                return in_array($key, $allowed);
-            },
-            ARRAY_FILTER_USE_KEY
+        return array(
+            'post_id' => $this->post_id,
+            'title' => $this->title,
+            'artist' => $this->artist,
+            'album' => $this->album,
+            'mbid' => $this->mbid,
+            'tracklist' => (array)$this->tracklist,
+            'subtrack_id' => $this->subtrack_id,
+            'position' => $this->position,
         );
-        */
-        
-        $filtered = array_intersect_key($arr, array_flip($allowed));
-        
-        return $filtered;
+        return array_filter($export);
     }
     
     /**
@@ -270,8 +285,63 @@ class WPSSTM_Track{
         }
         return true;
     }
+    
+    function move_subtrack($new_pos){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $old_pos = $this->position;
+        $tracklist_id = $this->tracklist->post_id;
+        $tracks_count = $this->tracklist->get_subtracks_count();
+        $new_pos = intval($new_pos);
+        
+        if ( !$this->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+        
+        if ( !$tracklist_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
+        }
+        
+        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $tracks_count) ){
+            return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
+        }
+        
+        if ( !$this->tracklist->user_can_reorder_tracks() ){
+            return new WP_Error( 'wpsstm_cannot_reorder', __("You don't have the capability required to reorder subtracks.",'wpsstm') );
+        }
 
-    function save_track($args = null){
+        if ($new_pos==$old_pos){
+            return new WP_Error( 'wpsstm_not_needed', __("Same position ".$old_pos." -> ".$new_pos.": no update needed.",'wpsstm') );
+        }
+
+        //update tracks range
+        $up = ($new_pos < $old_pos);
+        if ($up){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE tracklist_id = %d AND track_order < %d AND track_order >= %d",$tracklist_id,$old_pos,$new_pos);
+            $result = $wpdb->get_results ( $querystr );
+        }else{
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d AND track_order <= %d",$tracklist_id,$old_pos,$new_pos);
+            $result = $wpdb->get_results ( $querystr );
+        }
+        
+        //update this subtrack
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = %d WHERE ID = %d",$new_pos,$this->subtrack_id);
+            $result = $wpdb->get_results ( $querystr );
+        }
+
+        if ( is_wp_error($result) ){
+            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$result->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
+        }else{
+            $this->position = $new_pos;
+            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
+        }
+
+        return $result;
+
+    }
+
+    function save_track_post($args = null){
         
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
@@ -289,7 +359,7 @@ class WPSSTM_Track{
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = $post_type_obj->cap->edit_posts;
+        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($user_id,$required_cap) ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new track.",'wpsstm') );
@@ -314,7 +384,7 @@ class WPSSTM_Track{
 
         //check if this track already exists
         if (!$this->post_id){
-            $this->populate_local_track();
+            $this->local_track_lookup();
         }
         
         if (!$this->post_id){
@@ -327,10 +397,13 @@ class WPSSTM_Track{
             $success = wp_update_post( $args, true );
         }
         
-        if ( is_wp_error($success) ) return $success;
+        if ( is_wp_error($success) ){
+            $error_msg = $success->get_error_message();
+            $this->track_log($error_msg, "Error while saving track details" ); 
+            return $success;
+        } 
         $this->post_id = $success;
-        
-        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "WPSSTM_Track::save_track()" ); 
+        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "Saved track details" ); 
 
         return $this->post_id;
         
@@ -361,11 +434,12 @@ class WPSSTM_Track{
 
         //track does not exists yet, create it
         if ( !$this->post_id ){
-            $success = $this->save_track();
+            $success = $this->save_track_post();
             if ( is_wp_error($success) ) return $success;
         }
 
         //set post status to 'publish' if it is not done yet (it could be a temporary post)
+        //TOUFIX useful ?
         $track_post_type = get_post_status($this->post_id);
         if ($track_post_type != 'publish'){
             $success = wp_update_post(array(
@@ -376,20 +450,35 @@ class WPSSTM_Track{
         }
         
         //capability check
-        //TO FIX we should add a meta to the user rather than to the track, and check for another capability here ?
-        /*
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit this track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit tracklists.",'wpsstm') );
         }
-        */
+        
+        //get tracklist
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        
+        if ( !$tracklist_id || is_wp_error($tracklist_id) ){
+            return $tracklist_id;
+        }
+        
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($do_love){
-            $success = update_post_meta( $this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key, $user_id );
+            $success = $tracklist->save_subtrack($this);
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key, $user_id );
+            
+            //find matche(s) from user's favorites
+            $ids = $this->get_user_favorites_subtrack_matches();
+            
+            foreach($ids as $subtrack_id){
+                $subtrack = new WPSSTM_Track(); //default
+                $subtrack->populate_subtrack($subtrack_id);
+                $success = $tracklist->unlink_subtrack($subtrack);
+            }
+
             do_action('wpsstm_unlove_track',$this->post_id,$this);
         }
 
@@ -397,11 +486,53 @@ class WPSSTM_Track{
         
     }
     
-    function get_track_loved_by(){
-        //track ID is required
-        if ( !$this->post_id  ) return;//track does not exists in DB
+    /*
+    retrieve the subtracks IDs that matches a track in the user's favorite playlist
+    */
+    function get_user_favorites_subtrack_matches($user_id = null){
+        global $wpdb;
+        //get subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        //get tracklist
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id($user_id);
         
-        return get_post_meta($this->post_id, WPSSTM_Core_Tracks::$loved_track_meta_key);
+        if ( !$tracklist_id || is_wp_error($tracklist_id)  ){
+            return $tracklist_id;
+        }
+        
+        if ($this->post_id){
+            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND track_id = %d", $tracklist_id, $this->post_id );
+        }else{
+            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND artist = '%s' AND title = '%s' AND album = '%s'", $tracklist_id, $this->artist,$this->title,$this->album );
+        }
+        
+        return $wpdb->get_col( $querystr);
+
+    }
+    
+    function get_track_loved_by(){
+        global $wpdb;
+
+        //get subtracks
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $ids = WPSSTM_Core_Tracklists::get_all_favorite_tracklist_ids();
+
+        if ( !$ids || is_wp_error($ids)  ){
+            return $ids;
+        }
+        $ids_str = implode(',',$ids);
+        
+        $querystr = sprintf( "SELECT posts.post_author FROM $wpdb->posts posts INNER JOIN %s AS subtracks ON (subtracks.tracklist_id = posts.ID)  WHERE subtracks.tracklist_id IN(%s)", $subtracks_table, $ids_str);
+
+        if ($this->post_id){
+            $querystr = $wpdb->prepare( $querystr ." AND subtracks.track_id = %d",$this->post_id );
+        }else{
+            $querystr = $wpdb->prepare( $querystr ." AND artist = '%s' AND title = '%s' AND album = '%s'",$this->artist,$this->title,$this->album );
+        }
+
+        return $wpdb->get_col( $querystr);
     }
     
     function is_track_loved_by($user_id = null){
@@ -496,7 +627,7 @@ class WPSSTM_Track{
                 'post_author'   => wpsstm()->get_options('community_user_id'),	
             );	
             	
-            $success = $this->save_track($tracks_args);	
+            $success = $this->save_track_post($tracks_args);	
             if ( is_wp_error($success) ){
                 $error_msg = $success->get_error_message();
                 $this->track_log($error_msg,'Error while creating community track');
@@ -504,8 +635,6 @@ class WPSSTM_Track{
             }else{
                 $this->track_log($success,'Community track created');
             }
-        }else{
-            $this->track_log($this->post_id,'TOUFIX track has ID');
         }
 
         //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);
@@ -538,13 +667,16 @@ class WPSSTM_Track{
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
         $autosources = array_slice($autosources, 0, $limit_autosources);
         $autosources = apply_filters('wpsstm_track_autosources',$autosources);
+        
+        //save autosourced time
+        $now = current_time('timestamp');
+        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
 
         //save new sources
         $this->add_sources($autosources);
-        
         $new_ids = $this->save_new_sources();
         
-        $this->track_log(json_encode(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids))),'autosource results');
+        $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>count($autosources),'sources_saved'=>count($new_ids)),'autosource results');
         
         return $new_ids;
 
@@ -555,17 +687,12 @@ class WPSSTM_Track{
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );
         }
-        
-        //save time autosourced
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
 
         //insert sources
         $inserted = array();
         foreach((array)$this->sources as $source){
 
             if ($source->post_id) continue;
-            $source->track = $this;
             $source_id = $source->save_source();
 
             if ( is_wp_error($source_id) ){
@@ -578,9 +705,7 @@ class WPSSTM_Track{
             }
 
         }
-
         return $inserted;
-        
     }
     
     private function get_new_track_url(){
@@ -588,7 +713,7 @@ class WPSSTM_Track{
 
         $args = array(
             WPSSTM_Core_Tracks::$qvar_track_action =>   'new-track',
-            'track' =>                              urlencode( json_encode($this->to_ajax()) ),
+            'track' =>                              urlencode( json_encode($this->to_array()) ),
         );
         
         $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
@@ -612,7 +737,7 @@ class WPSSTM_Track{
     }
     
     function get_track_admin_url($tab = null){
-        $args = array(WPSSTM_Core_Tracks::$qvar_track_admin=>$tab);
+        $args = array(WPSSTM_Core_Tracks::$qvar_track_action=>$tab);
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);
@@ -633,7 +758,7 @@ class WPSSTM_Track{
         Tracklist
         //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
         */
-        $tracklist_id = $this->tracklist->post_id;
+        $tracklist_id =             $this->tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
@@ -661,28 +786,28 @@ class WPSSTM_Track{
 
         //favorite
         if ($can_favorite_track){
-            $actions['favorite'] = array(
+            
+            $classes = array();
+            
+            if ($this->is_track_loved_by()){
+                $classes[] = 'action-unfavorite';
+            }else{
+                $classes[] = 'action-favorite';
+            }
+            
+            $actions['toggle-favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
-                'desc' =>       __('Add to favorites','wpsstm'),
+                'href' =>       $this->get_track_action_url('toggle-favorite'),
+                'desc' =>       __('Toggle favorite','wpsstm'),
+                'classes' =>    $classes,
             );
         }
-
-        //unfavorite
-        if ($can_favorite_track){
-            $actions['unfavorite'] = array(
-                'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite'),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
-            );
-        }
-        
         //track details
         if ($can_track_details){
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_admin_url('about'),
-                'classes' =>    array('wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-track-popup'),
             );
         }
 
@@ -691,7 +816,7 @@ class WPSSTM_Track{
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
                 'href' =>       $this->get_track_admin_url('playlists'),
-                'classes' =>    array('wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-track-popup'),
             );
         }
 
@@ -729,10 +854,15 @@ class WPSSTM_Track{
         if ($can_edit_track){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-link-popup'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-track-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }
+        
+        $actions['toggle-sources'] = array(
+            'text' =>      __('Sources'),
+            'href' =>       '#',
+        );
 
         return apply_filters('wpsstm_track_actions',$actions);
 
@@ -745,10 +875,11 @@ class WPSSTM_Track{
             'itemscope' =>                      true,
             'itemtype' =>                       "http://schema.org/MusicRecording",
             'itemprop' =>                       'track',
+            'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
+            'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
             'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true ),
-            'data-wpsstm-track-idx' =>          $this->index
         );
 
         return wpsstm_get_html_attr($attr);
@@ -761,7 +892,6 @@ class WPSSTM_Track{
         );
         
         $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
-        $classes[] = ( $this->is_track_loved_by() ) ? 'wpsstm-loved-track' : null;
 
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
         return array_filter(array_unique($classes));
@@ -798,7 +928,7 @@ class WPSSTM_Track{
             if ( is_wp_error($valid) ){
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
-                $source_obj->source_log(json_encode(array('error'=>$error_msg,'source'=>$source_obj)),"Unable to add source");
+                $source_obj->source_log(array('error'=>$error_msg,'source'=>$source_obj),"Unable to add source");
                 continue;
             }
 
@@ -944,7 +1074,7 @@ class WPSSTM_Track{
         <span class="tracklist-row-action">
             <?php
             //checked
-            $checked = in_array($tracklist->post_id,$checked_playlist_ids);
+            $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
             $checked_str = checked($checked,true,false);
             printf('<input name="wpsstm_playlist_id" type="checkbox" value="%s" %s />',$tracklist->post_id,$checked_str);
             ?>
@@ -988,20 +1118,25 @@ class WPSSTM_Track{
         return true;
     }
     
-    function track_log($message,$title = null){
-        
-        if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
-        }
-        
-        //tracklist log
-        $this->tracklist->tracklist_log($message,$title);
-        
-        //global log
+    function track_log($data,$title = null){
+
         if ($this->post_id){
             $title = sprintf('[track:%s] ',$this->post_id) . $title;
         }
 
+        if ( $this->tracklist->post_id ){
+            $this->tracklist->tracklist_log($data,$title);
+        }else{
+            wpsstm()->debug_log($data,$title);
+        }
+
+    }
+    
+    function can_play_track(){
+        if ( wpsstm()->get_options('player_enabled') != 'on' ){
+            return new WP_Error( 'wpsstm_player_disabled', __("Player is disabled.",'wpsstm') );
+        }
+        return true;
     }
     
 }

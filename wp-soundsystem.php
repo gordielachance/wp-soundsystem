@@ -18,7 +18,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '157';
+    public $db_version = '160';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -40,7 +40,6 @@ class WP_SoundSystem {
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
     public $qvar_wpsstm_statii = 'wpsstm_statii';
-    public $qvar_popup = 'wpsstm-popup';
     
     public $subtracks_table_name = 'wpsstm_subtracks';
 
@@ -52,6 +51,7 @@ class WP_SoundSystem {
     public $meta_name_options = 'wpsstm_options';
     
     var $menu_page;
+    var $options = array();
 
     public static function instance() {
         
@@ -79,36 +79,21 @@ class WP_SoundSystem {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        $this->options_default = array(
-            'musicbrainz_enabled'               => 'on',
-            'mb_auto_id'                        => 'on',
+        
+        $options_default = array(
             'frontend_scraper_page_id'          => null,
             'visitors_wizard'                   => 'on',
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'lastfm_client_id'                  => null,
-            'lastfm_client_secret'              => null,
-            'lastfm_scrobbling'                 => 'on',
-            'lastfm_favorites'                  => 'on',
-            'lastfm_community_scrobble'         => 'off',
-            'spotify_client_id'                 => null,
-            'spotify_client_secret'             => null,
-            'spotify_auto_id'                   => 'on',
-            'tuneefy_client_id'                 => null,
-            'tuneefy_client_secret'             => null,
-            'soundcloud_client_id'              => null,
-            'soundcloud_client_secret'          => null,
             'player_enabled'                    => 'on',
             'autoplay'                          => 'on',
             'autosource'                        => 'on',
             'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
-            'playable_opacity_class'            => 'on',
-            'minimal_css'                       => 'off',
         );
         
-        $this->options = wp_parse_args(get_option( $this->meta_name_options), $this->options_default);
+        $this->options = wp_parse_args(get_option( $this->meta_name_options),$options_default);
         
         
         //validate options
@@ -117,17 +102,13 @@ class WP_SoundSystem {
         
         if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
         if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
-        if ( ( $this->options['lastfm_community_scrobble'] == 'on' ) && !get_userdata( $this->options['lastfm_community_scrobble'] ) ) $this->options['lastfm_community_scrobble'] = 'off';
+        if ( ( $this->options['scrobble_along'] == 'on' ) && !get_userdata( $this->options['scrobble_along'] ) ) $this->options['scrobble_along'] = 'off';
         */
     }
     
     function includes(){
         
         require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies (last.fm, scraper, etc.)
-        
-        require $this->plugin_dir . 'classes/wpsstm-track-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
@@ -141,18 +122,19 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
-        if ( wpsstm()->get_options('player_enabled') == 'on' ){
-            require $this->plugin_dir . 'wpsstm-core-player.php';
-        }
+        require $this->plugin_dir . 'classes/wpsstm-track-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
-        $this->include_apis();
+        $this->load_services();
     }
     
     /*
     Register scraper presets.
     */
-    private function include_apis(){
+    private function load_services(){
         
         $presets = array();
 
@@ -168,21 +150,21 @@ class WP_SoundSystem {
     
     function setup_actions(){
         
+        do_action('wpsstm_init');
+        
         /* Now that files have been loaded, init all core classes */
         //TOUFIX should be better to hook this on a wpsstm_init action
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
         new WPSSTM_Core_BuddyPress();
-        new WPSSTM_Core_Player();
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
         new WPSSTM_Core_Sources();
         new WPSSTM_Core_Tracklists();
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
-        
-        
-        do_action('wpsstm_init');
+        new WPSSTM_Player();
+
         ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
@@ -200,25 +182,12 @@ class WP_SoundSystem {
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
-        add_filter( 'body_class', array($this,'default_style_class'));
-        
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
-        add_filter( 'template_include', array($this,'popup_template'));
-
     }
     
     function add_wpsstm_query_vars($vars){
-        $vars[] = $this->qvar_popup;
         $vars[] = $this->qvar_wpsstm_statii;
         return $vars;
-    }
-    
-    function default_style_class($classes){
-        if ( wpsstm()->get_options('minimal_css') !== 'on'){
-            $classes[] = 'wpsstm-default';
-        }
-        return $classes;
     }
 
     // Move all "after_title" metaboxes above the default editor
@@ -283,6 +252,19 @@ class WP_SoundSystem {
 
                 $result = $wpdb->get_results ( $querystr );
             }
+            
+            if ($current_version < 158){
+                //update subtracks table
+                $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+                $wpdb->query("ALTER TABLE $subtracks_table ADD artist longtext NOT NULL");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD title longtext NOT NULL");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext");
+            }
+            if ($current_version < 160){
+                $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+                $wpdb->query("ALTER TABLE $subtracks_table ADD time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NOT NULL DEFAULT '0'");
+            }
 
         }
         
@@ -300,7 +282,12 @@ class WP_SoundSystem {
             ID bigint(20) NOT NULL AUTO_INCREMENT,
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
+            from_tracklist bigint(20) UNSIGNED NULL,
             track_order int(11) NOT NULL DEFAULT '0',
+            artist longtext NOT NULL,
+            title longtext NOT NULL,
+            album longtext,
+            time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)
         ) $charset_collate;";
 
@@ -344,10 +331,6 @@ class WP_SoundSystem {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
-    public function get_default_option($keys = null){
-        return wpsstm_get_array_value($keys,$this->options_default);
-    }
 
     function register_scripts_styles_shared(){
 
@@ -359,6 +342,9 @@ class WP_SoundSystem {
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
+        
+        //wp_register_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'13.5.15');//TOUFIX load in iframes only
+        //wp_register_script( 'iframeResizer', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.min.js', array('iframeResizerContentWindow'),'13.5.15');
         
         //js
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
@@ -422,24 +408,18 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($message,$title = null, $file = null) {
+    public function debug_log($data,$title = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 
         $prefix = '[wpsstm] ';
         if($title) $prefix.=$title.': ';
-        
-        $output = null;
 
-        if (is_array($message) || is_object($message)) {
-            $output = $prefix . implode("\n", $message);
-        } else {
-            $output = $prefix . $message;
+        if (is_array($data) || is_object($data)) {
+            $data = "\n" . json_encode($data,JSON_UNESCAPED_UNICODE);
         }
-        
-        if ($output){
-            error_log($output);
-        }
+
+        error_log($prefix . $data);
     }
     
     function register_community_view($views){
@@ -554,28 +534,6 @@ class WP_SoundSystem {
         }
         
     }
-    
-    //loads the popup template if 'wpsstm-popup' is defined
-    function popup_template($template){
-        $is_popup = get_query_var( $this->qvar_popup );
-        if ( $is_popup ){
-            $template = wpsstm_locate_template( 'popup.php' );
-            add_filter('wpsstm_track_actions',array($this,'popup_template_action_links'));
-        }
-
-        return $template;
-    }
-    
-    //if the popup template is loaded, append 'wpsstm-popup=true' to the action URLs
-    function popup_template_action_links($actions){
-        foreach((array)$actions as $key=>$action){
-            if( isset($action['href']) ){
-                $actions[$key]['href'] = add_query_arg(array($this->qvar_popup=>true),$action['href']);
-            }
-        }
-        return $actions;
-    }
-
 }
 
 function wpsstm() {

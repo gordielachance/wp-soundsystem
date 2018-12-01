@@ -8,20 +8,15 @@ class WPSSTM_Core_Wizard{
     static $qvar_tracklist_wizard = 'wztr';
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
 
-    
     function __construct(){
         
         add_filter( 'query_vars', array($this,'add_wizard_query_vars'));
+        
+        //shared
+        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
 
         //frontend
-        add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
-        add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
-        add_action( 'the_post', array($this,'populate_wizard_tracklist_input'), 11, 2); //after 'the_tracklist' priority
-        add_action( 'the_post', array($this,'populate_wizard_tracklist_id'), 12, 2); //after 'the_tracklist' priority
-        add_filter( 'the_content', array($this,'frontend_wizard_content'));
-
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
+        add_action('init', array( $this, 'frontend_wizard_init' ) );
 
         //backend
         add_action( 'admin_head', array($this, 'init_backend_wizard') );
@@ -29,9 +24,21 @@ class WPSSTM_Core_Wizard{
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register'), 11 );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_register_scripts_style_shared' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'wizard_scripts_styles_backend' ) );
-        
+
     }
     
+    function frontend_wizard_init(){
+        $can_frontend_wizard = WPSSTM_Core_Wizard::can_frontend_wizard();
+        if( !is_wp_error($can_frontend_wizard) ){
+            add_action( 'wp', array($this,'frontend_wizard_create_from_search' ) );
+            add_action( 'template_redirect', array($this,'community_tracklist_redirect'));
+            add_action( 'the_post', array($this,'populate_wizard_tracklist_input'), 11, 2); //after 'the_tracklist' priority
+            add_action( 'the_post', array($this,'populate_wizard_tracklist_id'), 12, 2); //after 'the_tracklist' priority
+            add_filter( 'the_content', array($this,'frontend_wizard_content'));
+            add_action( 'wp_enqueue_scripts', array( $this, 'wizard_scripts_styles_frontend' ) );
+        }
+    }
+
     /**
     *   Add the query variables for the Wizard
     */
@@ -103,7 +110,7 @@ class WPSSTM_Core_Wizard{
 
         //live playlist page but this is a community tracklist ! Redirect to wizard.
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
-            $wpsstm_tracklist = wpsstm_get_tracklist($post->ID);
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
                 $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
@@ -147,7 +154,6 @@ class WPSSTM_Core_Wizard{
     */
     
     function frontend_wizard_content($content){
-
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
         
         ob_start();
@@ -160,14 +166,10 @@ class WPSSTM_Core_Wizard{
         global $wpsstm_tracklist;
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         
         //wizard specific options
         $wpsstm_tracklist->options['tracks_strict'] = false;
-
-        if (wpsstm_is_backend() ){
-            $wpsstm_tracklist->options['autoplay'] = false;
-        }
 
         if ( !$post_id && $feed_url ){ //is wizard input
             $feed_url = trim($feed_url);
@@ -232,7 +234,7 @@ class WPSSTM_Core_Wizard{
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
         
         //set global $wpsstm_tracklist
-        $wpsstm_tracklist = wpsstm_get_tracklist($post_id);
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         
         $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
@@ -244,7 +246,7 @@ class WPSSTM_Core_Wizard{
             $wpsstm_tracklist->feed_url = trim($input);
             $success = $wpsstm_tracklist->save_feed_url(); //TO FIX input not filtered. Should we rather use populate_wizard_tracklist(null,$input) here ?
             //save wizard settings
-            $success = $wpsstm_tracklist->save_wizard($wizard_data);
+            $success = $this->save_wizard($post_id,$wizard_data);
         }elseif ( isset($wizard_data['import-tracks']) ){
             $wpsstm_tracklist->append_wizard_tracks();
         }elseif( isset($wizard_data['restore-scraper']) ){
@@ -256,7 +258,7 @@ class WPSSTM_Core_Wizard{
                 }
             }
 
-            $success = $wpsstm_tracklist->save_wizard($wizard_data);
+            $success = $this->save_wizard($post_id,$wizard_data);
         }
 
     }
@@ -272,7 +274,7 @@ class WPSSTM_Core_Wizard{
 
         if ( is_admin() ) return;
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return;
-        if ( !self::can_frontend_wizard() ) return;
+        if ( is_wp_error(self::can_frontend_wizard()) ) return;
 
         //wizard action
         $is_load_url = isset($_REQUEST[ 'wpsstm_wizard' ]['action']['load-url']);
@@ -291,7 +293,7 @@ class WPSSTM_Core_Wizard{
             'fields'            => 'ids',
             'meta_query' => array(
                 array(
-                    'key' => WPSSTM_Core_Live_Playlists::$feed_url_meta_name,
+                    'key' => WPSSTM_Post_Tracklist::$feed_url_meta_name,
                     'value' => $wpsstm_tracklist->feed_url
                 )
             )
@@ -342,7 +344,7 @@ class WPSSTM_Core_Wizard{
             'post_status'   => 'publish',
             'post_author'   => wpsstm()->get_options('community_user_id'),
             'meta_input'   => array(
-                WPSSTM_Core_Live_Playlists::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
+                WPSSTM_Post_Tracklist::$feed_url_meta_name => $wpsstm_tracklist->feed_url,
                 self::$is_wizard_tracklist_metakey  => true,
             )
         );
@@ -369,16 +371,6 @@ class WPSSTM_Core_Wizard{
         //populate backend tracklist
         $this->populate_wizard_tracklist($post->ID);
 
-        /*
-        TOFIXGGG TO CHECK is this useful ? should we re-enable it ?
-        if ( ( $wpsstm_tracklist->preset_slug != 'default') && ( $edited = $wpsstm_tracklist->get_user_edited_scraper_options() ) ){
-            $restore_link = sprintf('<a href="%s">%s</a>','#',__('here','wpsstm'));
-            $restore_link = get_submit_button(__('Restore','wpsstm'),'primary','wpsstm_wizard[restore-scraper]',false);
-            $notice = sprintf(__("The Tracks / Track Details settings do not match the %s preset.",'wpsstm'),'<em>' . $wpsstm_tracklist->preset_name . '</em>' ) . '  ' . $restore_link;
-            $wpsstm_tracklist->add_notice( 'wizard-header', 'not_preset_defaults', $notice );
-        }
-        */
-        
         /*
         Input
         */
@@ -495,7 +487,7 @@ class WPSSTM_Core_Wizard{
         );
 
         add_settings_field(
-            'datas_cache_min', 
+            'remote_delay_min', 
             __('Cache duration','wpsstm'), 
             array( $this, 'cache_callback' ), 
             'wpsstm-wizard-step-options',
@@ -544,16 +536,15 @@ class WPSSTM_Core_Wizard{
             <?php
 
             //path
-            $path = $wpsstm_tracklist->get_selectors( array($selector,'path') );
+            $path = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
 
             //regex
-            $regex = $wpsstm_tracklist->get_selectors( array($selector,'regex') );
+            $regex = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
-            $attr_disabled = ( $wpsstm_tracklist->response_type != 'text/html');
-            $attr = $wpsstm_tracklist->get_selectors( array($selector,'attr') );
+            $attr = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
 
@@ -623,11 +614,10 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s"/></span>',
                                         'wpsstm_wizard',
                                         $selector,
-                                        $attr,
-                                        disabled( $attr_disabled, true, false )
+                                        $attr
                                     );
                                     ?>
                                 </div>
@@ -664,7 +654,7 @@ class WPSSTM_Core_Wizard{
     public static function feed_url_callback(){
         global $wpsstm_tracklist;
         
-        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url_no_filters : null;
+        $option = ($wpsstm_tracklist->tracklist_type == 'live') ? $wpsstm_tracklist->feed_url : null;
 
         $text_input = sprintf(
             '<input type="text" name="%s[search]" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
@@ -762,12 +752,7 @@ class WPSSTM_Core_Wizard{
 
             }
             if ($tracks_output){
-                
-                //reverse
-                if ( $wpsstm_tracklist->get_scraper_options('tracks_order') == 'asc' ){
-                    $tracks_output = array_reverse($tracks_output);
-                }
-                
+
                 $output = sprintf('<div id="spiff-station-tracks-raw">%s</div>',implode(PHP_EOL,$tracks_output));
             }
 
@@ -794,7 +779,7 @@ class WPSSTM_Core_Wizard{
     function get_track_detail_selector_prefix(){
         global $wpsstm_tracklist;
         
-        $selector = $wpsstm_tracklist->get_selectors( array('tracks','path'));
+        $selector = $wpsstm_tracklist->get_scraper_options(array('selectors','tracks','path'));
 
         if (!$selector) return;
         return sprintf(
@@ -826,7 +811,7 @@ class WPSSTM_Core_Wizard{
     function cache_callback(){
         global $wpsstm_tracklist;
         
-        $option = $wpsstm_tracklist->get_scraper_options('datas_cache_min');
+        $option = $wpsstm_tracklist->get_options('remote_delay_min');
 
         $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
         $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
@@ -834,7 +819,7 @@ class WPSSTM_Core_Wizard{
         $desc = implode("<br/>",$desc);
 
         printf(
-            '<input type="number" name="%s[datas_cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
+            '<input type="number" name="%s[remote_delay_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
             'wpsstm_wizard',
             $option,
             __('minutes','spiff'),
@@ -893,12 +878,8 @@ class WPSSTM_Core_Wizard{
         );
 
         $results_title = __('Results','spiff');
-          
-        if ( $wpsstm_tracklist->did_query_tracks ){
-            $tracks_count = count($wpsstm_tracklist->tracks);
-            $results_title .= ' '.$tracks_count;
-            //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $tracks_count, 'wpsstm' ) );
-        }
+        $results_title .= ' '.$wpsstm_tracklist->track_count;
+        //TOFIFIX $results_title .= sprintf(' <small>%s</small>',_n( '%s track', '%s tracks', $wpsstm_tracklist->track_count, 'wpsstm' ) );
         
         $results_tab = array(
             'title'  => $results_title,
@@ -933,17 +914,22 @@ class WPSSTM_Core_Wizard{
     }
 
     public static function can_frontend_wizard(){
-
-        if ( !$user_id = get_current_user_id() ){
-            $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') == 'on' );
-            if (!$can_wizard_unlogged) return false;
-        }
-
-        $community_user_id = wpsstm()->get_options('community_user_id');
         
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_live_playlist);
-        $required_cap = $post_type_obj->cap->edit_posts;
-        return user_can($community_user_id,$required_cap);
+        $page_id = wpsstm()->get_options('frontend_scraper_page_id');
+        
+        if (!$page_id){
+            return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
+        }
+        
+        $user_id = get_current_user_id(); 
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        $can_wizard_unlogged = ( ( wpsstm()->get_options('visitors_wizard') == 'on' ) && $community_user_id );
+        
+        if ( !$user_id && !$can_wizard_unlogged ){
+            return new WP_Error( 'wpsstm_wizard_not_logged', __('You need to be logged to use the wizard.','wpsstm'));
+        }
+        
+        return WPSSTM_Core_Live_Playlists::is_community_user_ready();
     }
     
     private static function get_available_widgets(){
@@ -988,6 +974,79 @@ class WPSSTM_Core_Wizard{
     public static function is_advanced_wizard(){
         global $wpsstm_tracklist;
         return ( wpsstm_is_backend() && ($wpsstm_tracklist->tracklist_type == 'live') );
+    }
+    
+    function save_wizard($post_id,$wizard_data = null){
+        
+        $post_type = get_post_type($post_id);
+
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ) return;
+        if (!$wizard_data) return;
+
+        $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+        $wizard_data = $this->sanitize_wizard_settings($wizard_data);
+
+        //settings have been updated, clear tracklist cache
+        if ($db_settings != $wizard_data){
+            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
+            delete_post_meta($post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+        }
+
+        if (!$wizard_data){
+            delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
+        }else{
+            update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $wizard_data);
+        }
+
+    }
+
+    
+    /*
+     * Sanitize wizard data
+     */
+    
+    function sanitize_wizard_settings($input){
+
+        $new_input = array();
+
+        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
+
+        //cache
+        if ( isset($input['remote_delay_min']) && ctype_digit($input['remote_delay_min']) ){
+            $new_input['remote_delay_min'] = $input['remote_delay_min'];
+        }
+
+        //selectors 
+        if ( isset($input['selectors']) && !empty($input['selectors']) ){
+            
+            foreach ($input['selectors'] as $selector_slug=>$value){
+
+                //path
+                if ( isset($value['path']) ) {
+                    $value['path'] = trim($value['path']);
+                }
+
+                //attr
+                if ( isset($value['attr']) ) {
+                    $value['attr'] = trim($value['attr']);
+                }
+
+                //regex
+                if ( isset($value['regex']) ) {
+                    $value['regex'] = trim($value['regex']);
+                }
+
+                $new_input['selectors'][$selector_slug] = array_filter($value);
+
+            }
+        }
+
+        //order
+        if ( isset($input['tracks_order']) ){
+            $new_input['tracks_order'] = $input['tracks_order'];
+        }
+
+        return $new_input;
     }
 
 }

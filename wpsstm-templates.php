@@ -22,13 +22,12 @@ function wpsstm_get_html_attr($arr=null){
            if(is_bool($arr[$key])){
               return $arr[$key]?$key:'';
            }
-           return $key.'="'.$arr[$key].'"';
+           return $key.'="'.esc_attr($arr[$key]).'"';
         }, array_keys($arr)));
     }
 
     return $str;
 }
-
 
 function wpsstm_get_percent_bar($percent){
         $pc_status_classes = array('wpsstm-pc-bar');
@@ -94,22 +93,6 @@ function wpsstm_get_post_length($post_id = null,$seconds = false){
     }
     
     return ($seconds) ? $s : $ms;
-}
-
-function wpsstm_get_post_mbdatas($post_id = null, $keys=null){
-    
-    if ( wpsstm()->get_options('musicbrainz_enabled') != 'on' ) return false;
-    
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    $data = get_post_meta( $post_id, WPSSTM_MusicBrainz::$mbdata_metakey, true );
-    
-    if ($keys){
-        return wpsstm_get_array_value($keys, $data);
-    }else{
-        return $data;
-    }
-    
 }
 
 function wpsstm_get_post_artist($post_id = null){
@@ -227,12 +210,6 @@ function get_actions_list($actions,$prefix){
     if ( !empty($track_actions_list) ){
         return sprintf('<ul class="wpsstm-%s-actions wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_list));
     }
-}
-
-function wpsstm_get_live_tracklist_url($post_id = null){
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    return get_post_meta($post_id, WPSSTM_Core_Live_Playlists::$feed_url_meta_name, true );
 }
 
 function wpsstm_get_datetime($timestamp){

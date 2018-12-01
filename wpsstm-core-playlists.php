@@ -3,7 +3,7 @@
 class WPSSTM_Core_Playlists{
 
     function __construct() {
-        require wpsstm()->plugin_dir . 'classes/wpsstm-live-tracklist-class.php';
+        require wpsstm()->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
         add_action( 'init', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
@@ -151,7 +151,7 @@ class WPSSTM_Core_Playlists{
             'new_html'  => null
         );
 
-        $playlist = wpsstm_get_tracklist();
+        $playlist = new WPSSTM_Post_Tracklist();
         $playlist->title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
         $playlist_id = $playlist->save_playlist();
 

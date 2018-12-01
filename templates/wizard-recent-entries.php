@@ -13,7 +13,9 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
     <section id="wpsstm-frontend-wizard-recent">
         <h2><?php _e('Recently');?></h2>
         <ul>
-            <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post(); ?>
+            <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post();
+                $tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
+                ?>
                 <li>
                     <a href="<?php echo get_permalink();?>">
                     <?php 
@@ -23,7 +25,7 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
                         <?php
                     }
                     ?>
-                    <span><?php echo wpsstm_get_live_tracklist_url();?></span>
+                    <span><?php echo wpsstm_get_short_url($tracklist->feed_url);?></span>
                     </a>
                 </li>
             <?php endwhile; ?><!-- end of the loop -->

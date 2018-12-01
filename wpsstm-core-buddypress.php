@@ -120,7 +120,7 @@ class WPSSTM_Core_BuddyPress{
         //favorite query
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WPSSTM_Core_Tracklists::$qvar_tracklist_admin//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WPSSTM_Core_Tracklists::$qvar_tracklist_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
             'fields' =>         'ids',
@@ -154,10 +154,10 @@ class WPSSTM_Core_BuddyPress{
         global $bp;
         
         //favorite tracks query
+        //TOUFIX broken
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'posts_per_page' => -1,
-            WPSSTM_Core_Tracks::$qvar_loved_tracks => bp_displayed_user_id(),
             'fields' =>         'ids',
         );
         $query = new WP_Query( $query_args );
@@ -263,7 +263,7 @@ class WPSSTM_Core_BuddyPress{
         //member favorite playlists
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WPSSTM_Core_Tracklists::$qvar_tracklist_admin//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WPSSTM_Core_Tracklists::$qvar_tracklist_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
         );
@@ -298,26 +298,19 @@ class WPSSTM_Core_BuddyPress{
     TO FIX in the end, this should be part of core-playlists.php
     */
 
+    //TOUFIX broken
+    //instead of this, we should have a true tracklist post to store the user favorite tracks, would be easier to handle.
     public function member_get_favorite_tracks_playlist(){
         
-        $tracklist = wpsstm_get_tracklist();
+        //get tracklist
         $user_id = bp_displayed_user_id();
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id($user_id);
         
-        if ( $user_datas = get_userdata( $user_id ) ) {
-
-            $display_name = $user_datas->display_name;
-            $tracklist->title = sprintf(__("%s's favorite tracks",'wpsstm'),$display_name);
-            $tracklist->author = $display_name;
-
-            $subtracks_qargs = array(
-                WPSSTM_Core_Tracks::$qvar_loved_tracks =>   $user_id,
-            );
-            $tracklist->populate_subtracks($subtracks_qargs);
-        }else{
-            $tracklist->did_query_tracks = true; //so it's not requested later
+        if ( !$tracklist_id || is_wp_error($tracklist_id) ){
+            return $tracklist_id;
         }
-
-        return $tracklist;
+        
+        return new WPSSTM_Post_Tracklist($tracklist_id);
     }
     
     function love_track_activity($track_id){

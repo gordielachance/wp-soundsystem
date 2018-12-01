@@ -18,48 +18,49 @@ class WPSSTM_Source{
 
     function __construct($post_id = null){
 
-        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
-            $this->post_id = (int)$post_id;
-            $this->title = get_the_title($post_id);
-
-            $this->permalink_url = get_post_meta($post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
-
-            if ($this->index == -1){ //if not set yet
-                $this->index = get_post_field('menu_order', $this->post_id);
-            }
-            
-            $track = wp_get_post_parent_id( $this->post_id );
+        //has track ID
+        if ( $source_id = intval($post_id) ) {
+            $this->post_id = $source_id;
+            $this->populate_source_post();
         }
 
         $this->track = new WPSSTM_Track(); //default
 
     }
-
-    //TOFIXKKK
-    function get_default(){
-        return array(
-            'post_id'       => null,
-            'index'         => -1,
-            'track_id'      => null,
-            'permalink_url' => null,
-            'title'         => null,
-            'is_community'  => null,
-            'match'         => null,
-        );
-    }
     
+    function populate_source_post(){
+
+        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_source ) ){
+            $this->source_log('Invalid source post');
+            return;
+        }
+        
+        $this->title = get_the_title($this->post_id);
+        $this->permalink_url = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
+        $this->index = get_post_field('menu_order', $this->post_id);
+        if ( $track_id = wp_get_post_parent_id( $this->post_id ) ){
+            $this->track = new WPSSTM_Track($track_id);
+        }
+
+    }
+
     function from_array( $args = null ){
 
-        $args_default = $this->get_default();
-        $args = wp_parse_args((array)$args,$args_default);
-        $post_id = null;
-
+        $allowed = array(
+            'post_id',
+            'index',
+            'permalink_url',
+            'title',
+            'is_community',
+        );
+        
         //set properties from args input
         foreach ($args as $key=>$value){
             
+            if ( !in_array($key,$allowed) ) continue;
+            
             switch($key){
                 default:
-                    if ( !array_key_exists($key,$args_default) ) continue;
                     if ( !isset($args[$key]) ) continue; //value has not been set
                     $this->$key = $args[$key];
                 break;
@@ -67,7 +68,10 @@ class WPSSTM_Source{
   
         }
 
-        $this->__construct( $this->post_id );
+        //source
+        if ( $this->post_id ){
+            $this->populate_source_post();
+        }
         
     }
 
@@ -152,10 +156,10 @@ class WPSSTM_Source{
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $required_cap = $post_type_obj->cap->edit_posts;
+        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($post_author,$required_cap) ){
-            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit sources.",'wpsstm') );
+            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit this souce.",'wpsstm') );
         }
 
         $args = array(
@@ -324,20 +328,13 @@ class WPSSTM_Source{
         return $this->icon;
     }
     
-    function source_log($message,$title = null){
+    function source_log($data,$title = null){
         
-        if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
-        }
-        
-        //track log
-        $this->track->track_log($message,$title);
-
-        //global log
         if ($this->post_id){
             $title = sprintf('[source:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($message,$title,null);
+
+        $this->track->track_log($data,$title);
 
     }
 
