@@ -432,23 +432,6 @@ class WPSSTM_Track{
         if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
 
-        //track does not exists yet, create it
-        if ( !$this->post_id ){
-            $success = $this->save_track_post();
-            if ( is_wp_error($success) ) return $success;
-        }
-
-        //set post status to 'publish' if it is not done yet (it could be a temporary post)
-        //TOUFIX useful ?
-        $track_post_type = get_post_status($this->post_id);
-        if ($track_post_type != 'publish'){
-            $success = wp_update_post(array(
-                'ID' =>             $this->post_id,
-                'post_status' =>    'publish'
-            ), true);
-            if( is_wp_error($success) ) return $success;
-        }
-        
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
         $required_cap = $post_type_obj->cap->edit_posts;
