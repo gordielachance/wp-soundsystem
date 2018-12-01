@@ -89,7 +89,7 @@ class WPSSTM_Remote_Datas{
         $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination, $this);
 
         if ( $this->request_pagination['page_items_limit'] > 0 ){
-            $this->request_pagination['total_pages'] = ceil( $this->track_count / $this->request_pagination['page_items_limit'] );
+            $this->request_pagination['total_pages'] = ceil( count($this->tracks) / $this->request_pagination['page_items_limit'] );
         }
 
         while ( $this->request_pagination['current_page'] <= $this->request_pagination['total_pages'] ) {
