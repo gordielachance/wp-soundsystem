@@ -167,7 +167,7 @@ class WpsstmLastFM {
     last.fm API - track.love
     */
 
-    love_unlove(track_obj,do_love){
+    toggle_lastfm_love(track_obj,do_love){
         
         var self = this;
 
@@ -267,7 +267,7 @@ class WpsstmLastFM {
     });
 
     $(document).on( "wpsstmTrackLove", function( event,track_obj,do_love ) {
-        wpsstm_lastfm.love_unlove(track_obj,do_love);
+        wpsstm_lastfm.toggle_lastfm_love(track_obj,do_love);
     });
     
 })(jQuery);
