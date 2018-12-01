@@ -44,13 +44,13 @@
         New subtracks
         */
         
-        var new_subtrack_row = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
-        new_subtrack_row.addClass('wpsstm-new-subtrack-simple');
-        var new_subtrack_bt = new_subtrack_row.find('button');
+        var new_subtrack_el = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
+        new_subtrack_el.addClass('wpsstm-new-subtrack-simple');
+        var new_subtrack_bt = new_subtrack_el.find('button');
         new_subtrack_bt.click(function(e) {
             if ( new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple') ){
                 e.preventDefault();
-                new_subtrack_row.removeClass('wpsstm-new-subtrack-simple');
+                new_subtrack_el.removeClass('wpsstm-new-subtrack-simple');
             }
         });
         

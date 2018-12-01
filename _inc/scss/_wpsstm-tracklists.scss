@@ -98,19 +98,17 @@ ul.wpsstm-tracklist-actions{
         }
     }
     
-    .wpsstm-new-subtrack{
+    form.wpsstm-new-subtrack{
         
-        form{
-            margin-top: 1em;
-            @include display-flex();
-            @include justify-content(center);
-            align-items: center;
-            > * {
-                margin: 0 .5em;
-            }
+        margin-top: 1em;
+        @include display-flex();
+        @include justify-content(center);
+        align-items: center;
+        > * {
+            margin: 0 .5em;
         }
         &.wpsstm-new-subtrack-simple{
-            form > *:not(button){
+            > *:not(button){
                 display:none;
             }
         }

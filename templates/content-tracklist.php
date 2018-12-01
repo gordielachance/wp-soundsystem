@@ -65,20 +65,13 @@ global $wpsstm_tracklist;
 
     }
 
-    /*
-    empty tracklist
-    */
-    if( $error = $wpsstm_tracklist->tracks_error ){
-        $msg = sprintf( '<strong>%s</strong><br/><small>%s</small>',__('No tracks found.','wpsstm'),$error->get_error_message() );
-        $wpsstm_tracklist->add_notice( 'tracklist-header', 'empty-tracklist', $msg );
-    }
-
     if ( $notices_el = $wpsstm_tracklist->get_notices_output('tracklist-header') ){
         echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
     }
-    ?>
-
-    <?php
+    
+    /*
+    tracks list
+    */
 
     if ( $wpsstm_tracklist->have_tracks() ) {
     ?>
@@ -89,26 +82,30 @@ global $wpsstm_tracklist;
                 global $wpsstm_track;
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
-            
-            //add subtrack form
-            if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
-                ?>
-                <li class="wpsstm-new-subtrack">
-                <form action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('render');?>">
-                    <input type="text" name="wpsstm-new-subtrack[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
-                    <input type="text" name="wpsstm-new-subtrack[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
-                    <input type="text" name="wpsstm-new-subtrack[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
-                    <input type="hidden" name="wpsstm-new-subtrack[tracklist_id]" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
-                    <input type="hidden" name="<?php echo WPSSTM_Core_Tracklists::$qvar_tracklist_action;?>" value="append-subtrack"/>
-                    <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
-                </form>
-                </li>
-                <?php
-            }
             ?>
        </ul>
     <?php
         wp_reset_postdata(); //TOFIXTOCHECK useful ? Since we don't use the_post here...
+    }else{ //no tracks
+        $msg = sprintf( '<strong>%s</strong><br/><small>%s</small>',__('No tracks found.','wpsstm'),$error->get_error_message() );
+        $wpsstm_tracklist->add_notice( 'tracklist-header', 'empty-tracklist', $msg );
+    }
+    
+    /*
+    new subtrack
+    */
+    
+    if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
+        ?>
+        <form class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('render');?>">
+            <input type="text" name="wpsstm-new-subtrack[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
+            <input type="text" name="wpsstm-new-subtrack[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
+            <input type="text" name="wpsstm-new-subtrack[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
+            <input type="hidden" name="wpsstm-new-subtrack[tracklist_id]" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
+            <input type="hidden" name="<?php echo WPSSTM_Core_Tracklists::$qvar_tracklist_action;?>" value="append-subtrack"/>
+            <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
+        </form>
+        <?php
     }
 
     ?>
