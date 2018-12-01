@@ -239,7 +239,7 @@ class WPSSTM_Track{
 
     function to_array(){
 
-        return array(
+        $export = array(
             'post_id' => $this->post_id,
             'title' => $this->title,
             'artist' => $this->artist,
@@ -699,7 +699,7 @@ class WPSSTM_Track{
 
         $args = array(
             WPSSTM_Core_Tracks::$qvar_track_action =>   'new-track',
-            'track' =>                              urlencode( json_encode($this->to_array()) ),
+            'track' =>                                  urlencode( json_encode($this->to_array()) ),
         );
         
         $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
@@ -721,21 +721,7 @@ class WPSSTM_Track{
 
         return $url;
     }
-    
-    function get_track_admin_url($tab = null){
-        $args = array(WPSSTM_Core_Tracks::$qvar_track_action=>$tab);
 
-        if ($this->post_id){
-            $url = get_permalink($this->post_id);
-            $url = add_query_arg($args,$url);
-        }else{
-            $url = $this->get_new_track_url();
-            $url = add_query_arg(array('wpsstm-redirect'=>$args),$url);
-        }
-
-        return $url;
-    }
-    
     function get_track_links(){
         
         $actions = array();
@@ -792,7 +778,7 @@ class WPSSTM_Track{
         if ($can_track_details){
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
-                'href' =>       $this->get_track_admin_url('about'),
+                'href' =>       $this->get_track_action_url('about'),
                 'classes' =>    array('wpsstm-track-popup'),
             );
         }
@@ -801,7 +787,7 @@ class WPSSTM_Track{
         if ($can_playlists_manager){
             $actions['playlists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_admin_url('playlists'),
+                'href' =>       $this->get_track_action_url('playlists'),
                 'classes' =>    array('wpsstm-track-popup'),
             );
         }
