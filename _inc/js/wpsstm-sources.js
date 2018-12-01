@@ -131,13 +131,7 @@ class WpsstmTrackSource {
                         attribute: 'data-wpsstm-source-id'
                     });
 
-                    sources_list_el.addClass('wpsstm-freeze');
-
                     var reordered = WpsstmTrack.update_sources_order(track_obj.post_id,sourceOrder); //TOUFIX bad logic
-
-                    reordered.always(function() {
-                        sources_list_el.removeClass('wpsstm-freeze');
-                    })
 
                 }
             });

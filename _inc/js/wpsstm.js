@@ -6,8 +6,8 @@ wpsstm.tracklists = [];
 
     //artist autocomplete
     $('.wpsstm-artist-autocomplete').each(function() {
-        var input = $(this);
-        input.autocomplete({
+        var input_el = $(this);
+        input_el.autocomplete({
             source: function( request, response ) {
                 $.ajax({
                     type: "post",
@@ -18,7 +18,7 @@ wpsstm.tracklists = [];
                         search:              request.term + '*', //wildcard!
                     },
                     beforeSend: function() {
-                        input.addClass('input-loading');
+                        input_el.addClass('input-loading');
                     },
                     success: function( ajax ) {
                         if(ajax.success){
@@ -35,7 +35,7 @@ wpsstm.tracklists = [];
                         console.log("status: " + textStatus + ", error: " + errorThrown); 
                     },
                     complete: function() {
-                        input.removeClass('input-loading');
+                        input_el.removeClass('input-loading');
                     }
                 });
             },

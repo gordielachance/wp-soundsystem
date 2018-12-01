@@ -67,6 +67,7 @@
 
 .wpsstm-freeze{
     pointer-events: none;
+    @include opacity(.5);
 }
 
 .wpsstm-icon{
@@ -103,6 +104,7 @@ ul.wpsstm-actions-list{
             @extend .wpsstm-icon;
             &.action-loading{
                 @extend .wpsstm-loading-icon;
+                @extend .wpsstm-freeze;
             }
             &.action-error:before{
                 content:"\f071"; //.fa-exclamation-triangle;
@@ -134,16 +136,15 @@ ul.wpsstm-actions-list{
 .wpsstm-ellipsis{
     @include ellipsis($no-wrap: true);
 }
-.wpsstm-freeze{
-    @include opacity(.5);
-}
 
 input{
+    &.input-loading{
+        @extend .wpsstm-freeze;
+        @include striped-bg();
+    }
+
     &.wpsstm-fullwidth{
         width:100%;
-    }
-    &[type="text"].input-loading{
-        @include striped-bg();
     }
 }
 
@@ -168,11 +169,6 @@ input{
             height: 100%;
             box-sizing: border-box;
             padding: 0 2em;
-        }
-    }
-    &.input-loading{
-        input[type="text"]{
-            @include striped-bg();
         }
     }
 }
