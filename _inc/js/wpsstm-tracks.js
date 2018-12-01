@@ -516,7 +516,7 @@ class WpsstmTrack {
         }, {});
         
         //tracklist
-        filtered.tracklist = self.tracklist.to_ajax();
+        filtered.tracklist_id = self.tracklist.post_id;
         
         return filtered;
     }

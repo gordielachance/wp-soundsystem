@@ -435,7 +435,7 @@ class WPSSTM_Remote_Datas{
                 'title'         => $title,
                 'album'         => $album,
                 'image_url'     => $this->get_track_image($single_track_node),
-                'sources'       => $sources,
+                'source_urls'   => $sources,
             );
 
             $tracks_arr[] = array_filter($args);
@@ -599,7 +599,7 @@ class WPSSTM_Remote_Datas{
 
         $title = '[remote] ' . $title;
         
-        wpsstm()->debug_log($message,$title,null);
+        wpsstm()->debug_log($message,$title);
         
 
     }

@@ -313,8 +313,8 @@ class WPSSTM_Core_Sources{
         </p>
 
         <?php
-        
-        if ( $then = get_post_meta( $post->ID, self::$autosource_time_metakey, true ) ){
+
+        if ( $then = get_post_meta( $wpsstm_track->post_id, self::$autosource_time_metakey, true ) ){
             $now = current_time( 'timestamp' );
             $refreshed = human_time_diff( $now, $then );
             $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);

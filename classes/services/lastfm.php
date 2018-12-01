@@ -1174,7 +1174,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
 
-        wpsstm()->debug_log(debug_args,"WPSSTM_LastFM_User::scrobble_lastfm_track()");
+        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::scrobble_lastfm_track()");
         
         try {
             $track_api = new TrackApi($this->user_auth);

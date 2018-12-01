@@ -18,48 +18,49 @@ class WPSSTM_Source{
 
     function __construct($post_id = null){
 
-        if ( $post_id && ( get_post_type($post_id) == wpsstm()->post_type_source ) ){
-            $this->post_id = (int)$post_id;
-            $this->title = get_the_title($post_id);
-
-            $this->permalink_url = get_post_meta($post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
-
-            if ($this->index == -1){ //if not set yet
-                $this->index = get_post_field('menu_order', $this->post_id);
-            }
-            
-            $track = wp_get_post_parent_id( $this->post_id );
+        //has track ID
+        if ( $source_id = intval($post_id) ) {
+            $this->post_id = $source_id;
+            $this->populate_source_post();
         }
 
         $this->track = new WPSSTM_Track(); //default
 
     }
-
-    //TOFIXKKK
-    function get_default(){
-        return array(
-            'post_id'       => null,
-            'index'         => -1,
-            'track_id'      => null,
-            'permalink_url' => null,
-            'title'         => null,
-            'is_community'  => null,
-            'match'         => null,
-        );
-    }
     
+    function populate_source_post(){
+
+        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_source ) ){
+            $this->source_log('Invalid source post');
+            return;
+        }
+        
+        $this->title = get_the_title($this->post_id);
+        $this->permalink_url = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
+        $this->index = get_post_field('menu_order', $this->post_id);
+        if ( $track_id = wp_get_post_parent_id( $this->post_id ) ){
+            $this->track = new WPSSTM_Track($track_id);
+        }
+
+    }
+
     function from_array( $args = null ){
 
-        $args_default = $this->get_default();
-        $args = wp_parse_args((array)$args,$args_default);
-        $post_id = null;
-
+        $allowed = array(
+            'post_id',
+            'index',
+            'permalink_url',
+            'title',
+            'is_community',
+        );
+        
         //set properties from args input
         foreach ($args as $key=>$value){
             
+            if ( !in_array($key,$allowed) ) continue;
+            
             switch($key){
                 default:
-                    if ( !array_key_exists($key,$args_default) ) continue;
                     if ( !isset($args[$key]) ) continue; //value has not been set
                     $this->$key = $args[$key];
                 break;
@@ -67,7 +68,10 @@ class WPSSTM_Source{
   
         }
 
-        $this->__construct( $this->post_id );
+        //source
+        if ( $this->post_id ){
+            $this->populate_source_post();
+        }
         
     }
 
@@ -325,15 +329,17 @@ class WPSSTM_Source{
     }
     
     function source_log($data,$title = null){
-
-        //track log
-        $this->track->track_log($data,$title);
-
-        //global log
+        
         if ($this->post_id){
             $title = sprintf('[source:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($data,$title,null);
+
+        if ( $this->track->post_id ){
+            $this->track->track_log($data,$title);
+        }else{
+            wpsstm()->debug_log($data,$title);
+        }
+
 
     }
 

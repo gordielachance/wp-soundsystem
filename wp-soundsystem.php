@@ -408,7 +408,7 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($data,$title = null, $file = null) {
+    public function debug_log($data,$title = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 

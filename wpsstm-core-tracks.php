@@ -707,6 +707,7 @@ class WPSSTM_Core_Tracks{
     }
 
     function ajax_track_autosource(){
+        global $wpsstm_track;
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
@@ -715,8 +716,8 @@ class WPSSTM_Core_Tracks{
             'input'     => $ajax_data
         );
 
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
+        $wpsstm_track = new WPSSTM_Track();
+        $wpsstm_track->from_array($ajax_data['track']);
 
         $result = array(
             'input'     => $ajax_data,
@@ -724,13 +725,13 @@ class WPSSTM_Core_Tracks{
             'message'   => null,
             'new_html'  => null,
             'success'   => false,
-            'track'     => $track->to_array(),
+            'track'     => $wpsstm_track->to_array(),
         );
             
         //autosource
         $new_ids = array();
         
-        $new_ids = $track->autosource();
+        $new_ids = $wpsstm_track->autosource();
         $result['success'] = ( !is_wp_error($new_ids) ) ? true : false;
 
         if ( is_wp_error($new_ids) ){

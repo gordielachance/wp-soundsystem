@@ -68,15 +68,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $this->set_tracklist_pagination($pagination_args);
 
-        if ($post_id){
-            $this->post_id = (int)$post_id;
+        //has tracklist ID
+        if ( $tracklist_id = intval($post_id) ) {
+            $this->post_id = $tracklist_id;
             $this->populate_tracklist_post();
         }
     }
     
     function populate_tracklist_post(){
 
-        if (!$this->post_id) return;
+        if ( !$this->post_id || ( !in_array(get_post_type($this->post_id),wpsstm()->tracklist_post_types) ) ){
+            $this->tracklist_log('Invalid tracklist post');
+            return;
+        }
 
         $this->title = get_the_title($this->post_id);
         $post_author_id = get_post_field( 'post_author', $this->post_id );
@@ -926,8 +930,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $track->track_log(array('track'=>json_encode($track->to_array()),'error'=>$error_msg), "Error while saving subtrack" ); 
             }
         }
-
-        $this->tracklist_log($success,"SUCCESS");
+        
         return $success;
 
     }
@@ -1009,7 +1012,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($this->post_id){
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($data,$title,null);
+        wpsstm()->debug_log($data,$title);
         
 
     }
@@ -1051,7 +1054,6 @@ class WPSSTM_Tracklist{
         foreach ($input_tracks as $track){
 
             if ( !is_a($track, 'WPSSTM_Track') ){
-                
                 if ( is_array($track) ){
                     $track_args = $track;
                     $track = new WPSSTM_Track(null);
@@ -1063,7 +1065,6 @@ class WPSSTM_Tracklist{
                 }
             }
             
-            $track->tracklist = $this;
             $add_tracks[] = $track;
         }
 
