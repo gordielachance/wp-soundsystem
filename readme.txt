@@ -147,14 +147,15 @@ There is an option in the plugin settings to flush those community tracks : they
 = 1.9.9 =
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
 * tracklists are now inserted as iframes (faster and better for styling)
-* PHP : pass tracklist object  to the track object / pass track object to the source object
-* merged all playlists classes; and new class WPSSTM_Remote_Datas
+* loved tracks are now regular subtracks, part of a regular tracklist that is created for each user
 * Improved autosource
 * Improved wizard
 * Improved templates
 * Better tracks source GUI
 * Spotify metabox
 * Static track unlink action
+* PHP : pass tracklist object  to the track object / pass track object to the source object
+* merged all playlists classes; and new class WPSSTM_Remote_Datas
 * new filter 'wpsstm_pre_save_autosources'
 * [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
 * TOFIX remote request pagination
