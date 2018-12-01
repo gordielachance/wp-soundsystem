@@ -8,7 +8,7 @@ $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
 $labels = get_post_type_labels($playlist_type_obj);
 
 //capability check
-$create_playlist_cap = $playlist_type_obj->cap->edit_posts;
+$create_playlist_cap = $playlist_type_obj->cap->create_posts;
 
 if ( !current_user_can($create_playlist_cap) ){
     

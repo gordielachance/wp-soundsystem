@@ -156,10 +156,10 @@ class WPSSTM_Source{
         
         //capability check
         $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $required_cap = $post_type_obj->cap->edit_posts;
+        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($post_author,$required_cap) ){
-            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit sources.",'wpsstm') );
+            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit this souce.",'wpsstm') );
         }
 
         $args = array(
@@ -335,7 +335,7 @@ class WPSSTM_Source{
         }
 
         if ( $this->track->post_id ){
-            $this->track->track_log($data,$title);
+            $this->tracklist->tracklist_log($data,$title);
         }else{
             wpsstm()->debug_log($data,$title);
         }

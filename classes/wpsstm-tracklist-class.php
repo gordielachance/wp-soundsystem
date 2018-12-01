@@ -151,9 +151,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //capability check
         $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $create_playlist_cap = $playlist_type_obj->cap->edit_posts;
+        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
-        if ( !current_user_can($create_playlist_cap) ){
+        if ( !current_user_can($required_cap) ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new playlist.",'wpsstm') );
         }
         

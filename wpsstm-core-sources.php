@@ -532,7 +532,7 @@ class WPSSTM_Core_Sources{
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
         if ($sources_post_type_obj){ //be sure post type is registered before doing that check - eg. it isn't when saving settings.
-            $autosource_cap = $sources_post_type_obj->cap->edit_posts;
+            $autosource_cap = $sources_post_type_obj->cap->create_posts;
             if ( !$has_cap = user_can($community_user_id,$autosource_cap) ){
                 $error = sprintf(__("Autosource requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autosource_cap.'</em>');
                 return new WP_Error( 'wpsstm_autosource',$error );
