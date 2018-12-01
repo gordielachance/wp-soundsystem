@@ -772,8 +772,9 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         
         $ajax_data = wp_unslash($_POST);
+        $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
         $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
+        $track->populate_subtrack($subtrack_id);
 
         $result = array(
             'input'     => $ajax_data,
