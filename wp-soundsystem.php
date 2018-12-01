@@ -414,18 +414,12 @@ class WP_SoundSystem {
 
         $prefix = '[wpsstm] ';
         if($title) $prefix.=$title.': ';
-        
-        $output = null;
 
         if (is_array($data) || is_object($data)) {
             $data = "\n" . json_encode($data,JSON_UNESCAPED_UNICODE);
-        } else {
-            $output = $prefix . $data;
         }
-        
-        if ($output){
-            error_log($output);
-        }
+
+        error_log($prefix . $data);
     }
     
     function register_community_view($views){

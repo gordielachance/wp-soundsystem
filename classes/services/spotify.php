@@ -659,10 +659,10 @@ class WPSSTM_Spotify{
         //get ID of first entry
         $sid = $first_entry['id'];
 
-        wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'spotify_'=>$sid)),"Auto Spotify ID" ); 
+        wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'spotify'=>$sid)),"Auto Spotify ID" ); 
         
         if ($sid){
-            update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
+            $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
             $this->reload_spotify_datas($post_id);
             return $sid;
         }
@@ -678,7 +678,6 @@ class WPSSTM_Spotify{
         //delete existing
         if ( delete_post_meta( $post_id, self::$spotify_data_meta_key ) ){
             delete_post_meta( $post_id, self::$spotify_data_time_metakey ); //delete timestamp
-            wpsstm()->debug_log('WPSSTM_MusicBrainz::reload_spotify_datas() : deleted Spotify datas');
         }
 
 
@@ -719,7 +718,7 @@ class WPSSTM_Spotify{
         
         
         //update ID
-        $old_id = wpsstm_get_post_mbid($post_id);
+        $old_id = wpsstm_get_post_spotify_id($post_id);
         $id = ( isset($_POST[ 'wpsstm_spotify_id' ]) ) ? $_POST[ 'wpsstm_spotify_id' ] : null;
         $is_id_update = ($old_id != $id);
 
