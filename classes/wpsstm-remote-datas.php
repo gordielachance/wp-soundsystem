@@ -144,6 +144,8 @@ class WPSSTM_Remote_Datas{
         if ( $this->redirect_url != $url){
             $this->remote_log($url,'original URL' );
         }
+        
+        if ( is_wp_error($this->redirect_url) ) return $this->redirect_url;
         $this->remote_log($this->redirect_url,'*** REDIRECT URL ***' );
         
         /*

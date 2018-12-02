@@ -33,7 +33,7 @@ class WPSSTM_Radionomy_API_Preset{
     function __construct($remote){
         
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'web_to_api_url') );
         add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
 
     }
@@ -43,20 +43,23 @@ class WPSSTM_Radionomy_API_Preset{
         if ( !$station_slug ) return;
         return true;
     }
+    
+    function is_api_url($url){
+        $pattern = '~^http(?:s)?://api.radionomy.com/(.*)~i';
+        preg_match($pattern,$url, $matches);
+        return ( !empty($matches) );
+    }
 
-    function get_remote_url($url){
-        if ( $this->can_handle_url($url) ){
-            
-            $station_id = $this->get_station_id($url);
+    function web_to_api_url($url){
+        if ( $station_id = $this->get_url_station_id($url) ){
             if ( is_wp_error($station_id) ) return $station_id;
-
             $url = sprintf('http://api.radionomy.com/tracklist.cfm?radiouid=%s&apikey=XXX&amount=20&type=xml&cover=true',$station_id);
         }
         return $url;
     }
     
     function set_selectors($remote){
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        if ( !$this->is_api_url($remote->redirect_url) ) return;
         
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'tracks track'),
@@ -74,7 +77,7 @@ class WPSSTM_Radionomy_API_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_station_id($url){
+    function get_url_station_id($url){
 
         $station_slug = $this->get_station_slug($url);
         if (!$station_slug) return;

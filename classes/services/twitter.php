@@ -15,7 +15,7 @@ class WPSSTM_Twitter_Timeline_Preset{
 
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_mobile_url') );
         add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,3 );
         
     }
@@ -26,7 +26,7 @@ class WPSSTM_Twitter_Timeline_Preset{
         return true;
     }
 
-    function get_remote_url($url){
+    function get_mobile_url($url){
         if ( $this->can_handle_url($url) ){
             $user_slug = $this->get_user_slug($url);
             $url = sprintf('https://mobile.twitter.com/%s',$user_slug);
@@ -47,7 +47,7 @@ class WPSSTM_Twitter_Timeline_Preset{
     }
     
     function remote_request_args($args,$url,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->can_handle_url($url) ){
             //it seems that the request fails with our default user agent, remove it.
             $args['headers']['User-Agent'] = '';
         }

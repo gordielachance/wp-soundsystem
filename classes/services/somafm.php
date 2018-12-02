@@ -54,7 +54,7 @@ class WPSSTM_SomaFM_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'song'),
             'track_artist'      => array('path'=>'artist'),
@@ -71,7 +71,7 @@ class WPSSTM_SomaFM_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->can_handle_url($remote->url) ){
             $station_slug = $this->get_station_slug($remote->url);
             $title = sprintf( __('%s on SomaFM','wpsstm'),$station_slug );
         }

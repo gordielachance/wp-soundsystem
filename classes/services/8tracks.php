@@ -31,7 +31,7 @@ class WPSSTM_8tracks{
 class WPSSTM_8Tracks_Preset{
     
     function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_mix_url') );
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
     }
@@ -56,7 +56,7 @@ class WPSSTM_8Tracks_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_remote_url($url){
+    function get_mix_url($url){
         
         if ( $this->can_handle_url($url) ){
             $mix_data = $this->get_mix_data($url);
@@ -76,7 +76,7 @@ class WPSSTM_8Tracks_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        if ( !$this->can_handle_url($remote->url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'>tracks'),
             'track_artist'      => array('path'=>'performer'),
@@ -118,7 +118,7 @@ class WPSSTM_8Tracks_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->can_handle_url($remote->url) ){
             $mix_data = $this->get_mix_data($remote->url);
             if ( !is_wp_error( $mix_data ) ){
                 $title = wpsstm_get_array_value('name', $mix_data);

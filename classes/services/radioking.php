@@ -29,7 +29,7 @@ class WPSSTM_RadioKing{
 class WPSSTM_RadioKing_Api_Preset{
 
     function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'web_to_api_url') );
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
         add_filter( 'wpsstm_live_tracklist_track_image',array($this,'get_remote_track_image'),10,3 );
@@ -39,8 +39,14 @@ class WPSSTM_RadioKing_Api_Preset{
         if ( !$this->get_station_slug($url) ) return;
         return true;
     }
+    
+    function is_api_url($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?radioking.com/api/(.*)~i';
+        preg_match($pattern,$url, $matches);
+        return ( !empty($matches) );
+    }
 
-    function get_remote_url($url){
+    function web_to_api_url($url){
         
         if ( $this->can_handle_url($url) ){
             $station_id = $this->get_station_id($url);
@@ -54,7 +60,7 @@ class WPSSTM_RadioKing_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        if ( !$this->is_api_url($remote->redirect_url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
@@ -63,7 +69,6 @@ class WPSSTM_RadioKing_Api_Preset{
             'track_image'       => array('path'=>'cover'),
         );
     }
-
 
     function get_station_slug($url){
         $pattern = '~^https?://(?:.*\.)?radioking.com/radio/([^/]+)~i';
@@ -97,7 +102,7 @@ class WPSSTM_RadioKing_Api_Preset{
     }
 
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->is_api_url($remote->redirect_url) ){
             $station_data = $this->get_station_data($remote->url);
             if ( !is_wp_error($station_data) ){
                 $title = wpsstm_get_array_value(array('name'), $station_data);

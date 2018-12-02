@@ -35,7 +35,7 @@ class WPSSTM_Soundsgood_Api_Preset{
 
     function __construct($remote){
         
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        add_filter( 'wpsstm_live_tracklist_url',array($this,'web_url_to_api_url') );
         add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,3 );
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
         add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
@@ -47,8 +47,14 @@ class WPSSTM_Soundsgood_Api_Preset{
         if ( !$station_slug ) return;
         return true;
     }
+    
+    function is_api_url($url){
+        $pattern = '~^http(?:s)?://api.soundsgood.co/(.*)~i';
+        preg_match($pattern,$url, $matches);
+        return ( !empty($matches) );
+    }
 
-    function get_remote_url($url){
+    function web_url_to_api_url($url){
         if ( $this->can_handle_url($url) ){
             $station_slug = $this->get_station_slug($url);
             $url = sprintf('https://api.soundsgood.co/playlists/%s/tracks',$station_slug);
@@ -58,7 +64,7 @@ class WPSSTM_Soundsgood_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        if ( !$this->is_api_url($remote->redirect_url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
@@ -74,7 +80,7 @@ class WPSSTM_Soundsgood_Api_Preset{
     }
     
     function remote_request_args($args,$url,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->is_api_url($url) ){
             $client_id = WPSSTM_SoundsGood::get_client_id();
             $args['headers']['client'] = $client_id;
         }
@@ -82,7 +88,7 @@ class WPSSTM_Soundsgood_Api_Preset{
     }
     
     function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->is_api_url($remote->redirect_url) ){
             $station_slug = $this->get_station_slug($remote->url);
             $url = sprintf(__('%s on Soundsgood','wpsstm'),$station_slug);
         }
