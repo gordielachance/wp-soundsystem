@@ -61,7 +61,7 @@ class WPSSTM_Reddit_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         
         $remote->options['selectors'] = array(
             //in HTML
@@ -82,7 +82,7 @@ class WPSSTM_Reddit_Api_Preset{
     }
     
     function get_remote_title($title,$remote){ //because we've got no title in the JSON
-        if ( $this->can_handle_url($remote->url) ){
+        if ( $this->can_handle_url($remote->redirect_url) ){
             
             $subreddit_slug = $this->get_subreddit_slug($remote->url);
 
@@ -186,7 +186,7 @@ class WPSSTM_Reddit_Api_Preset{
 
     function filter_remote_tracks($tracks,$remote){
         
-        if ( $this->can_handle_url($remote->url) ){
+        if ( $this->can_handle_url($remote->redirect_url) ){
             foreach((array)$tracks as $key=>$track){
                 $track->artist = $this->filter_string($track->artist);
                 $track->title = $this->filter_string($track->title);

@@ -33,7 +33,7 @@ class WPSSTM_Hypem_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'.section-track'),

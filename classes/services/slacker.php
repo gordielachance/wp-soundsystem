@@ -38,7 +38,7 @@ class WPSSTM_Slacker_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
             'track_artist'      => array('path'=>'span.artist'),

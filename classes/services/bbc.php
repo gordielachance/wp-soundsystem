@@ -63,7 +63,7 @@ class WPSSTM_BBC_Station_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'.music-track'),
             'track_artist'      => array('path'=>'.music-track__artist'),
@@ -88,7 +88,7 @@ class WPSSTM_BBC_Playlist_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),

@@ -283,7 +283,7 @@ class WPSSTM_Soundcloud_User_Api_Preset{
     
     function set_selectors($remote){
         
-        if ( !$this->can_handle_url($remote->url) ) return;
+        if ( !$this->can_handle_url($remote->redirect_url) ) return;
         
         $remote->options['selectors'] = array(
             'tracks'            => array('path'=>'element'),
@@ -340,7 +340,7 @@ class WPSSTM_Soundcloud_User_Api_Preset{
     
     function get_remote_title($title,$remote){
         
-        if ( $this->can_handle_url($remote->url) ){
+        if ( $this->can_handle_url($remote->redirect_url) ){
             
             $user_slug = $this->get_user_slug($remote->url);
             $page_slug = $this->get_user_page($remote->url);
