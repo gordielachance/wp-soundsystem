@@ -38,7 +38,7 @@ class WPSSTM_Remote_Datas{
 
     public function __construct($url = null,$options = null) {
         
-        $this->url = $url;
+        $this->url = trim($url);
         do_action('wpsstm_before_remote_response',$this);
         $this->options = (array)$options; //last one has priority
     }
@@ -130,36 +130,36 @@ class WPSSTM_Remote_Datas{
         return $tracks;
     }
 
-    /*
-    Arguments for the remote request.  (Could be overriden for presets).
-    https://codex.wordpress.org/Function_Reference/wp_remote_get
-    */
-    
-    public function get_request_args($url){
-        $args = array(
-            'headers'   => array(
-                'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
-            )
-        );
-        return apply_filters('wpsstm_live_tracklist_request_args',$args,$url,$this);
-    }
-
     private function populate_remote_response($url){
 
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
         
-        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->url);
-        $url_args = $this->get_request_args($this->redirect_url);
-        
-        $this->remote_log($this->redirect_url,'*** REDIRECT URL ***' );
-        //$this->remote_log( json_encode($url_args),'URL args' );
-        
+        /*
+        redirect URL
+        */
+        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$url,$this);
+
         if ( $this->redirect_url != $url){
             $this->remote_log($url,'original URL' );
-        }       
+        }
+        $this->remote_log($this->redirect_url,'*** REDIRECT URL ***' );
         
+        /*
+        URL args
+        */
+        $url_args = $defaut_url_args = array(
+            'headers'   => array(
+                'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+            )
+        );
+        $url_args = apply_filters('wpsstm_live_tracklist_request_args',$url_args,$this->redirect_url,$this);
+
+        if ($url_args != $defaut_url_args){
+            $this->remote_log($url_args,'***  URL ARGS***' );
+        }
+
         //
         $response = wp_remote_get( $this->redirect_url, $url_args );
 
@@ -181,8 +181,10 @@ class WPSSTM_Remote_Datas{
 
         $this->response = $response;
         
-        $this->remote_log('*** SUCCESS ***' );
-        
+        if ( !is_wp_error($response) ){
+            $this->remote_log('*** SUCCESS ***' );
+        }
+
         return $this->response;
 
     }
@@ -585,10 +587,6 @@ class WPSSTM_Remote_Datas{
     }
     
     function remote_log($message,$title = null){
-
-        if (is_array($message) || is_object($message)) {
-            $message = implode("\n", $message);
-        }
 
         $title = '[remote] ' . $title;
         
