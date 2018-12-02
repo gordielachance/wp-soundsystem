@@ -14,11 +14,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '1.9.9';
+    public $version = '2.0.0';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '160';
+    public $db_version = '200';
     /** Paths *****************************************************************/
     public $file = '';
     /**

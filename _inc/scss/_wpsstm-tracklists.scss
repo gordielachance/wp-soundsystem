@@ -26,6 +26,11 @@ ul.wpsstm-tracklist-actions{
         list-style: none;
         width:100%;
     }
+    .wpsstm-empty-tracks-list{
+        padding: .5em;
+        text-align: center;
+        margin: .5em 0;
+    }
     
     &.wpsstm-post-tracklist{
         [itemprop="track"].track-active{

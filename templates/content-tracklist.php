@@ -88,7 +88,7 @@ global $wpsstm_tracklist;
         wp_reset_postdata(); //TOFIXTOCHECK useful ? Since we don't use the_post here...
     }else{ //no tracks
         ?>
-        <p id="wpsstm-no-tracks">
+        <p class="wpsstm-empty-tracks-list">
             <?php _e('No tracks found.','wpsstm'); ?>
             <?php
             if ($wpsstm_tracklist->tracklist_type=='static'){
