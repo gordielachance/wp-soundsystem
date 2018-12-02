@@ -126,7 +126,16 @@ class WPSSTM_Track{
                     $this->tracklist = new WPSSTM_Post_Tracklist($value);
                 break;
                 case 'source_urls':
-                    $this->add_sources($value);
+                    
+                    $sources = array();
+                    foreach((array)$value as $source_url){
+                        $source = array(
+                            'permalink_url' => $source_url,
+                        );
+                        $sources[] = $source;
+                    }
+                    
+                    $this->add_sources($sources);
                 break;
                 default:
                     if ( !isset($args[$key]) ) continue; //value has not been set

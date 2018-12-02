@@ -8,6 +8,7 @@ class WPSSTM_Remote_Datas{
 
     //url stuff
     var $url = null;
+    var $redirect_url = null; //url in the end, after filters have been applied
     var $scraper_options = array();
 
     //response
@@ -61,7 +62,6 @@ class WPSSTM_Remote_Datas{
         
         $response_body = $this->populate_response_body();
         if ( is_wp_error($response_body) ) return $response_body;
-        
         do_action('wpsstm_did_remote_response',$this);
         
         $body_node = $this->populate_body_node();
@@ -86,7 +86,8 @@ class WPSSTM_Remote_Datas{
         $raw_tracks = array();
 
         //count total pages
-        $this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination, $this);
+        //TOUFIX paginated requests do not work actually.
+        //$this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination, $this);
 
         if ( $this->request_pagination['page_items_limit'] > 0 ){
             $this->request_pagination['total_pages'] = ceil( count($this->tracks) / $this->request_pagination['page_items_limit'] );
@@ -105,7 +106,7 @@ class WPSSTM_Remote_Datas{
         if ($this->get_options('tracks_order') == 'asc'){
             $raw_tracks = array_reverse($raw_tracks);
         }
-        
+
         return apply_filters('wpsstm_remote_tracks',$raw_tracks,$this);
         
     }
@@ -134,13 +135,13 @@ class WPSSTM_Remote_Datas{
     https://codex.wordpress.org/Function_Reference/wp_remote_get
     */
     
-    public function get_request_args(){
-        $defaults = array(
+    public function get_request_args($url){
+        $args = array(
             'headers'   => array(
                 'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
             )
         );
-        return apply_filters('wpsstm_live_tracklist_request_args',$defaults,$this);
+        return apply_filters('wpsstm_live_tracklist_request_args',$args,$url,$this);
     }
 
     private function populate_remote_response($url){
@@ -148,18 +149,19 @@ class WPSSTM_Remote_Datas{
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
-        $url_args = $this->get_request_args();
-        $remote_url = apply_filters('wpsstm_live_tracklist_url',$this->url);
         
-        $this->remote_log($remote_url,'*** GET REMOTE URL ***' );
+        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$this->url);
+        $url_args = $this->get_request_args($this->redirect_url);
+        
+        $this->remote_log($this->redirect_url,'*** REDIRECT URL ***' );
         //$this->remote_log( json_encode($url_args),'URL args' );
         
-        if ( $remote_url != $url){
+        if ( $this->redirect_url != $url){
             $this->remote_log($url,'original URL' );
         }       
         
         //
-        $response = wp_remote_get( $remote_url, $url_args );
+        $response = wp_remote_get( $this->redirect_url, $url_args );
 
         //errors
         if ( !is_wp_error($response) ){
@@ -419,24 +421,15 @@ class WPSSTM_Remote_Datas{
             $artist =   $this->get_track_artist($single_track_node);
             $title =    $this->get_track_title($single_track_node);
             $album =    $this->get_track_album($single_track_node);
-            
-            $sources = array();
-            if ( $sources_urls = $this->get_track_source_urls($single_track_node) ){
-                foreach((array)$sources_urls as $source_url){
-                    $source = array(
-                        'permalink_url' => $source_url,
-                    );
-                    $sources[] = $source;
-                }
-            }
 
             $args = array(
                 'artist'        => $artist,
                 'title'         => $title,
                 'album'         => $album,
                 'image_url'     => $this->get_track_image($single_track_node),
-                'source_urls'   => $sources,
+                'source_urls'   => $this->get_track_source_urls($single_track_node),
             );
+
 
             $tracks_arr[] = array_filter($args);
 

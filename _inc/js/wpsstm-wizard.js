@@ -19,9 +19,8 @@ artist_helper_input.change(function() {
     var similar_el = $('#wpsstm-wizard-widget-artist-similar a');
 
     if (artist){
-        var artist_url = 'https://www.last.fm/music/'+lastfm_artist;
-        top_tracks_el.attr('data-wpsstm-wizard-click',artist_url+'/+tracks');
-        similar_el.attr('data-wpsstm-wizard-click',artist_url + '/+similar');
+        top_tracks_el.attr('data-wpsstm-wizard-click','https://www.last.fm/music/'+encodeURI(lastfm_artist));
+        similar_el.attr('data-wpsstm-wizard-click','lastfm:station:music:'+encodeURI(lastfm_artist)+':similar');
     }else{
         top_tracks_el.removeAttr( "data-wpsstm-wizard-click" );
         similar_el.removeAttr( "data-wpsstm-wizard-click" );
@@ -55,9 +54,9 @@ user_helper_input.change(function() {
     var library_el = $('#wpsstm-wizard-widget-lastfm-user-stations-library a');
     var mix_el = $('#wpsstm-wizard-widget-lastfm-user-stations-mix a');
 
-    recommandations_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:recommended');
-    library_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:library');
-    mix_el.attr('data-wpsstm-wizard-click','lastfm:user:'+username+':station:mix');
+    recommandations_el.attr('data-wpsstm-wizard-click','lastfm:station:user:'+username+':recommended');
+    library_el.attr('data-wpsstm-wizard-click','lastfm:station:user:'+username+':library');
+    mix_el.attr('data-wpsstm-wizard-click','lastfm:station:user:'+username+':mix');
 
     wrapper.toggleClass('wpsstm-wizard-widget-success',(username.length !== 0));
 
