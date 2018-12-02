@@ -428,7 +428,7 @@ class WPSSTM_Core_Tracklists{
             break;
             default:
                 the_post();//TOUFIX TOUCHECK useful ?
-                $template = wpsstm_locate_template( 'tracklist.php' );
+                $template = wpsstm_locate_template( 'iframe-tracklist.php' );
             break;
         }
         return $template;

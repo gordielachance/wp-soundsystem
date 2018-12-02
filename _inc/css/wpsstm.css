@@ -411,6 +411,10 @@ ul.wpsstm-tracklist-actions .wpsstm-action {
   display: none !important;
 }
 
+/* line 20, ../scss/_wpsstm-tracklists.scss */
+.wpsstm-tracklist {
+  font-family: sans-serif;
+}
 /* line 22, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist .wpsstm-tracks-list {
   position: relative;

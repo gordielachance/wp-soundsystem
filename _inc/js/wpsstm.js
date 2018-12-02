@@ -127,9 +127,8 @@ wpsstm.tracklists = [];
         iframes.on( "load", function() {
             var iframe = $(this);
             var iframe_el = iframe.get(0);
-            var content = $(iframe_el.contentWindow.document);
-            //var height = $(e.target).find('html').get(0).scrollHeight;
-            iframe.css('height',content.outerHeight());
+            var child_doc = $(iframe_el.contentWindow.document);
+            iframe.css('height',child_doc.outerHeight());
             console.log("resized iframe");
         });
 

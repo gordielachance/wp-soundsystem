@@ -2,9 +2,10 @@
 global $wpsstm_tracklist;
 $action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
 
-add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );
 do_action( 'wpsstm-tracklist-iframe' );
+
+add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'get_header', 'wpsstm-tracklist-iframe' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.
 //
 

@@ -30,7 +30,6 @@ class WPSSTM_Core_Tracks{
 
         add_action( 'template_redirect', array($this,'handle_track_action'));
         
-        //add_action( 'wp_print_styles', array($this,'track_template_no_css'), 99 );//TOUFIX
         add_filter( 'template_include', array($this,'track_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -122,17 +121,10 @@ class WPSSTM_Core_Tracks{
         
     }
 
-    function track_template_no_css() {
-        global $wp_styles;
-        //if ( is_page_template( 'blankPage.php' ) ) {
-            $wp_styles->queue = array();
-        //}
-    }
-    
     function track_template($template){
         if ( !$track_action = get_query_var( self::$qvar_track_action ) ) return $template;
-        the_post();
-        $template = wpsstm_locate_template( 'track.php' );
+        the_post();//TOUFIX TOUCHECK USEFUL ?
+        $template = wpsstm_locate_template( 'iframe-track.php' );
         return $template;
     }
 
