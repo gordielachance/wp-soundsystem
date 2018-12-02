@@ -336,7 +336,7 @@ class WpsstmTrack {
         self.populate_html_sources();
 
         $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
-        parent.$('body').trigger("wpsstmPlayerTrackReady",[self]); //fire custom event in iframe parent
+        window.parent.$(window.parent.document).trigger("wpsstmPlayerTrackReady",[self]); //fire custom event in iframe parent
         
     }
     
