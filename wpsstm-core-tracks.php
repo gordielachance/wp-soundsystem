@@ -8,6 +8,7 @@ class WPSSTM_Core_Tracks{
     static $qvar_track_action = 'track-action';
     static $qvar_track_lookup = 'lookup_track';
     static $qvar_favorite_tracks = 'loved-tracks';
+    static $qvar_track = 'track';
     static $qvar_subtracks = 'subtracks';
     static $qvar_subtrack_id = 'subtrack-id';
     
@@ -27,10 +28,12 @@ class WPSSTM_Core_Tracks{
 
         add_action( 'init', array($this,'register_post_type_track' ));
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
+        
+        //rewrite rules
+        add_action('init', array($this, 'tracks_rewrite_rules') );
+        add_action( 'template_redirect', array($this,'handle_wpsstm_action'));
 
         add_action( 'template_redirect', array($this,'handle_track_action'));
-        
-        //add_action( 'wp_print_styles', array($this,'track_template_no_css'), 99 );//TOUFIX
         add_filter( 'template_include', array($this,'track_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -47,7 +50,7 @@ class WPSSTM_Core_Tracks{
 
         //tracklist shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
-        
+
         /*
         QUERIES
         */
@@ -71,7 +74,7 @@ class WPSSTM_Core_Tracks{
         */
 
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
-        
+
         /*
         AJAX
         */
@@ -97,6 +100,60 @@ class WPSSTM_Core_Tracks{
         add_action( 'before_delete_post', array($this,'delete_subtrack_track_id') );
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
     }
+    
+    function handle_wpsstm_action(){
+        $post_type = get_post_type();
+        if($post_type != wpsstm()->post_type_track) return;
+        
+        $action = get_query_var( WP_SoundSystem::$qvar_action );        
+        $redirect = get_query_var( WP_SoundSystem::$qvar_redirect );
+        $track = get_query_var( self::$qvar_track );
+        
+        $new_track = array(
+            'artist'    => wpsstm_get_array_value('artist',$track),
+            'album'     => wpsstm_get_array_value('album',$track),
+            'title'     => wpsstm_get_array_value('title',$track),
+        );
+        $new_track = array_filter($new_track);
+        
+        if (!$new_track) return;
+        print_r($new_track);
+        
+        print_r(get_post_type());
+        
+        if($redirect){
+            echo"<br/>";
+            print_r($redirect);
+        }
+        die();
+        
+        
+    }
+    
+    function tracks_rewrite_rules(){
+        
+        flush_rewrite_rules();
+        
+        //add_rewrite_tag('%action%','([^&]+)'); //establish the 'action' query var
+        
+        add_rewrite_rule(
+            sprintf('^%s/%s/%s/([^/]*)/([^/]*)/([^/]*)?',WPSSTM_BASE_SLUG,WPSSTM_TRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // /music/track/new/ARTIST/ALBUM/TITLE
+            sprintf("index.php?post_type=%s&%s=%s&%s[artist]=%s&%s[album]=%s&%s[title]=%s",
+                    wpsstm()->post_type_track,
+                    WP_SoundSystem::$qvar_action,
+                    WPSSTM_NEW_ITEM_SLUG,
+                    self::$qvar_track,
+                     '$matches[1]',
+                    self::$qvar_track,
+                    '$matches[2]',
+                    self::$qvar_track,
+                    '$matches[3]'
+           ),
+            'top'
+        );
+        
+        
+    }
 
     //add custom admin submenu under WPSSTM
     function backend_tracks_submenu($parent_slug){
@@ -115,20 +172,12 @@ class WPSSTM_Core_Tracks{
         
     }
 
-    
     function register_tracks_scripts_styles_shared(){
         //JS
         wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-sources'),wpsstm()->version, true );
         
     }
 
-    function track_template_no_css() {
-        global $wp_styles;
-        //if ( is_page_template( 'blankPage.php' ) ) {
-            $wp_styles->queue = array();
-        //}
-    }
-    
     function track_template($template){
         if ( !$track_action = get_query_var( self::$qvar_track_action ) ) return $template;
         the_post();
@@ -502,7 +551,10 @@ class WPSSTM_Core_Tracks{
             'has_archive' => true,
             'query_var' => true,
             'can_export' => true,
-            'rewrite' => true,
+            'rewrite' => array(
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_TRACKS_SLUG),
+                'with_front' => FALSE
+            ),
             /**
              * A string used to build the edit, delete, and read capabilities for posts of this type. You 
              * can use a string or an array (for singular and plural forms).  The array is useful if the 
@@ -562,6 +614,7 @@ class WPSSTM_Core_Tracks{
         $qvars[] = self::$qvar_favorite_tracks;
         $qvars[] = self::$qvar_subtracks;
         $qvars[] = self::$qvar_subtrack_id;
+        $qvars[] = self::$qvar_track;
         
         return $qvars;
     }

@@ -39,7 +39,9 @@ class WP_SoundSystem {
     public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
-    public $qvar_wpsstm_statii = 'wpsstm_statii';
+    public static $qvar_redirect = 'wpsstm_redirect';
+    public static $qvar_action = 'wpsstm_action';
+    
     
     public $subtracks_table_name = 'wpsstm_subtracks';
 
@@ -79,6 +81,11 @@ class WP_SoundSystem {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
+        
+        define("WPSSTM_BASE_SLUG", "music");
+        define("WPSSTM_TRACKS_SLUG", "tracks");
+        define("WPSSTM_TRACK_SLUG", "track");
+        define("WPSSTM_NEW_ITEM_SLUG", "new");
         
         $options_default = array(
             'frontend_scraper_page_id'          => null,
@@ -185,9 +192,10 @@ class WP_SoundSystem {
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
     }
     
-    function add_wpsstm_query_vars($vars){
-        $vars[] = $this->qvar_wpsstm_statii;
-        return $vars;
+    function add_wpsstm_query_vars($qvars){
+        $qvars[] = self::$qvar_redirect;
+        $qvars[] = self::$qvar_action;
+        return $qvars;
     }
 
     // Move all "after_title" metaboxes above the default editor
