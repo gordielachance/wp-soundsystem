@@ -89,16 +89,19 @@ class WPSSTM_Core_Sources{
             'hierarchical' => true,
             'supports' => array( 'author','title'),
             'taxonomies' => array(),
-            'public' => true,
             'show_ui' => true,
             'show_in_menu' => false,
             'show_in_nav_menus' => true,
-            'publicly_queryable' => true,
-            'exclude_from_search' => false,
+            'public' => true,
+            'publicly_queryable' => false,
+            'exclude_from_search' => true,
             'has_archive' => true,
             'query_var' => true,
             'can_export' => true,
-            'rewrite' => true,
+            'rewrite' => array(
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_SOURCES_SLUG),
+                'with_front' => FALSE
+            ),
             /**
              * A string used to build the edit, delete, and read capabilities for posts of this type. You 
              * can use a string or an array (for singular and plural forms).  The array is useful if the 

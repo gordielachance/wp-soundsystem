@@ -70,7 +70,10 @@ class WPSSTM_Core_Live_Playlists{
             'has_archive' => true,
             'query_var' => true,
             'can_export' => true,
-            'rewrite' => true,
+            'rewrite' => array(
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_LIVE_PLAYLISTS_SLUG),
+                'with_front' => FALSE
+            ),
             
             //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
             

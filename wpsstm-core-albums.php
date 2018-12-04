@@ -144,7 +144,10 @@ class WPSSTM_Core_Albums{
             'has_archive' => true,
             'query_var' => true,
             'can_export' => true,
-            'rewrite' => true,
+            'rewrite' => array(
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_ALBUMS_SLUG),
+                'with_front' => FALSE
+            ),
             /**
              * A string used to build the edit, delete, and read capabilities for posts of this type. You 
              * can use a string or an array (for singular and plural forms).  The array is useful if the 

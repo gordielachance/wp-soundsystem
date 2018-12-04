@@ -83,8 +83,20 @@ class WP_SoundSystem {
         $this->plugin_url = plugin_dir_url ( $this->file );
         
         define("WPSSTM_BASE_SLUG", "music");
+        
+        define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
+        define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
+        define("WPSSTM_PLAYLISTS_SLUG", "playlists");
+        define("WPSSTM_PLAYLIST_SLUG", "playlist");
+        define("WPSSTM_ARTISTS_SLUG", "artists");
+        define("WPSSTM_ARTIST_SLUG", "artist");
+        define("WPSSTM_ALBUMS_SLUG", "albums");
+        define("WPSSTM_ALBUM_SLUG", "album");
         define("WPSSTM_TRACKS_SLUG", "tracks");
         define("WPSSTM_TRACK_SLUG", "track");
+        define("WPSSTM_SOURCES_SLUG", "sources");
+        define("WPSSTM_SOURCE_SLUG", "source");
+        
         define("WPSSTM_NEW_ITEM_SLUG", "new");
         
         $options_default = array(
