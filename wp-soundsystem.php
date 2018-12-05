@@ -94,6 +94,8 @@ class WP_SoundSystem {
         define("WPSSTM_ALBUM_SLUG", "album");
         define("WPSSTM_TRACKS_SLUG", "tracks");
         define("WPSSTM_TRACK_SLUG", "track");
+        define("WPSSTM_SUBTRACKS_SLUG", "subtracks");
+        define("WPSSTM_SUBTRACK_SLUG", "subtrack");
         define("WPSSTM_SOURCES_SLUG", "sources");
         define("WPSSTM_SOURCE_SLUG", "source");
         

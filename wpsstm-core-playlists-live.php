@@ -71,7 +71,7 @@ class WPSSTM_Core_Live_Playlists{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => array(
-                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_LIVE_PLAYLISTS_SLUG),
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_LIVE_PLAYLISTS_SLUG), // = /music/radios
                 'with_front' => FALSE
             ),
             

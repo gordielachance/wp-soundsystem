@@ -99,7 +99,9 @@ class WPSSTM_Track{
         $this->position =       $subtrack->track_order;
     }
     
-    function from_array( $args = null ){
+    function from_array( $args ){
+        
+        if ( !is_array($args) ) return;
 
         $allowed = array(
             'post_id',

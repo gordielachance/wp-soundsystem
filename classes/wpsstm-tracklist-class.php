@@ -530,7 +530,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
     }
 
-    function toggle_playlist_type(){
+    function toggle_live($live = true){
 
         //capability check
         if ( !$this->user_can_toggle_playlist_type() ){
@@ -544,7 +544,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //toggle
-        $new_type = ($this->tracklist_type == 'static') ? wpsstm()->post_type_live_playlist : wpsstm()->post_type_playlist;
+        $new_type = ($live) ? wpsstm()->post_type_live_playlist : wpsstm()->post_type_playlist;
 
         $success = set_post_type( $this->post_id, $new_type );
 
@@ -892,6 +892,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             );
         }
 
+        //append track
         if (!$track->position){
             $track->position = $this->get_subtracks_count() + 1;
         }

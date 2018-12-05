@@ -65,7 +65,7 @@ class WPSSTM_Core_Playlists{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => array(
-                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_PLAYLISTS_SLUG),
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_PLAYLISTS_SLUG), // = /music/playlists
                 'with_front' => FALSE
             ),
             /**
