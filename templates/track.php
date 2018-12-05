@@ -85,10 +85,10 @@ $body_classes = array(
         */
 
         switch ($action){
-            case 'playlists':
+            case 'append':
                 ?>
                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                    <?php wpsstm_locate_template( 'track-admin-playlists.php',true );?>
+                    <?php wpsstm_locate_template( 'append-track.php',true );?>
                 </div>
                 <?php
 

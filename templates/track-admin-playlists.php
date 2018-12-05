@@ -12,7 +12,7 @@ $create_playlist_cap = $playlist_type_obj->cap->create_posts;
 
 if ( !current_user_can($create_playlist_cap) ){
     
-    $action_link = $wpsstm_track->$this->get_track_action_url('playlists');
+    $action_link = $wpsstm_track->$this->get_track_action_url('append');
     $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
     $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
     printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
