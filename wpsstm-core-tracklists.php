@@ -22,11 +22,9 @@ class WPSSTM_Core_Tracklists{
         
         //rewrite rules
         add_action('init', array($this, 'tracklists_rewrite_rules'), 100 );
-
-        add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
-
-        add_action( 'wp', array($this,'handle_tracklist_action'), 8);
-        add_filter( 'template_include', array($this,'tracklist_template'));
+        add_filter('query_vars', array($this,'add_tracklist_query_vars'));
+        add_action('wp', array($this,'handle_tracklist_action'), 8);
+        add_filter('template_include', array($this,'tracklist_template'));
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
         

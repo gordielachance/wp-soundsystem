@@ -704,39 +704,28 @@ class WPSSTM_Track{
         }
         return $inserted;
     }
-    
-    private function get_new_track_url(){
-        global $wp;
-        
-        $track = array(
-            'artist' => $this->artist,
-            'title' =>  $this->title,
-            'album' =>  $this->album
-        );
 
-        $args = array(
-            WPSSTM_Core_Tracks::$qvar_track_action =>   'new-track',
-            'track' =>                                  urlencode( json_encode($track) ),
-        );
+    function get_track_action_url($action = null){
         
-        $url = get_post_type_archive_link( wpsstm()->post_type_track ); //'tracks' archive
-        $url = add_query_arg($args,$url);
-        return $url;
-    }
-
-    function get_track_action_url($track_action = null){
-        
-        $args = array(WPSSTM_Core_Tracks::$qvar_track_action=>$track_action);
+        $url = get_permalink($this->post_id);
+        $track = array();
 
         if ($this->post_id){
-            $url = get_permalink($this->post_id);
-            $url = add_query_arg($args,$url);
+            $track = array('post_id'=>$this->post_id);
         }else{
-            $url = $this->get_new_track_url();
-            $url = add_query_arg(array('wpsstm-redirect'=>$args),$url);
+        $track = array(
+                'artist' => $this->artist,
+                'title' =>  $this->title,
+                'album' =>  $this->album
+            );
         }
+        
+        $args = array(
+            WP_SoundSystem::$qvar_action =>     $action,
+            WPSSTM_Core_Tracks::$qvar_track =>  $track
+        );
 
-        return $url;
+        return add_query_arg($args,$url);
     }
 
     function get_track_links(){
@@ -751,8 +740,6 @@ class WPSSTM_Track{
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
-        $can_move_track =           ( $can_edit_tracklist && $tracklist_id && ($this->tracklist->tracklist_type == 'static') && ($this->tracklist->track_count > 1) );
-        $can_remove_track =         ( $can_edit_tracklist && $tracklist_id && ($this->tracklist->tracklist_type == 'static') );
         
         /*
         Track
@@ -760,9 +747,15 @@ class WPSSTM_Track{
         $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
         $can_track_details =        ($this->title && $this->artist);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
-        $can_delete_tracks =        current_user_can($track_type_obj->cap->delete_posts);
+        $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
         $can_favorite_track =       true;//call to action
         $can_playlists_manager =    true;//call to action
+        
+        /*
+        Subtrack
+        */
+        $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
+        $can_unlink_subtrack =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
         //share
         /*
@@ -775,21 +768,24 @@ class WPSSTM_Track{
 
         //favorite
         if ($can_favorite_track){
-            
-            $classes = array();
-            
+
             if ($this->is_track_loved_by()){
-                $classes[] = 'action-unfavorite';
+                $actions['toggle-favorite'] = array(
+                    'text' =>      __('Favorite','wpsstm'),
+                    'href' =>       $this->get_track_action_url('favorite'),
+                    'desc' =>       __('Toggle favorite','wpsstm'),
+                    'classes' =>    array('action-unfavorite'),
+                );
+                
             }else{
-                $classes[] = 'action-favorite';
+                $actions['toggle-favorite'] = array(
+                    'text' =>      __('Favorite','wpsstm'),
+                    'href' =>       $this->get_track_action_url('unfavorite'),
+                    'desc' =>       __('Toggle favorite','wpsstm'),
+                    'classes' =>    array('action-favorite'),
+                );
             }
-            
-            $actions['toggle-favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('toggle-favorite'),
-                'desc' =>       __('Toggle favorite','wpsstm'),
-                'classes' =>    $classes,
-            );
+
         }
         //track details
         if ($can_track_details){
@@ -802,14 +798,14 @@ class WPSSTM_Track{
 
         //playlists manager
         if ($can_playlists_manager){
-            $actions['playlists'] = array(
+            $actions['append'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_action_url('playlists'),
+                'href' =>       $this->get_track_action_url('append'),
                 'classes' =>    array('wpsstm-track-popup'),
             );
         }
 
-        if ($can_move_track){
+        if ($can_move_subtrack){
             $actions['move'] = array(
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
@@ -818,7 +814,7 @@ class WPSSTM_Track{
         }
 
         //unlink track
-        if ($can_remove_track){
+        if ($can_unlink_subtrack){
             $tracklist_action_url = $this->tracklist->get_tracklist_action_url('unlink');
             $unlink_action_url = add_query_arg(array('track_id'=>$this->post_id),$tracklist_action_url);
             $actions['unlink'] = array(
@@ -830,7 +826,7 @@ class WPSSTM_Track{
         }
 
         //delete track
-        if ($can_delete_tracks){
+        if ($can_delete_track){
             $actions['trash'] = array(
                 'text' =>      __('Trash'),
                 'classes' =>    array('wpsstm-advanced-action'),

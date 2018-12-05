@@ -32,6 +32,7 @@ class WPSSTM_Core_Tracks{
         
         //rewrite rules
         add_action('init', array($this, 'tracks_rewrite_rules'), 100 );
+        add_filter( 'post_link', array($this, 'filter_track_link'), 10, 2 );
         add_action( 'wp', array($this,'handle_wpsstm_track_action'), 8);
         add_filter( 'template_include', array($this,'track_template'));
 
@@ -146,15 +147,15 @@ class WPSSTM_Core_Tracks{
 
         wp_safe_redirect($redirect_url);
         exit();
- 
-       }
+
+    }
+
+    function tracks_rewrite_rules(){
 
     }
     
-    
-    
-    function tracks_rewrite_rules(){
-
+    function filter_track_link($link, $post){
+        die("toto");
     }
 
     //add custom admin submenu under WPSSTM
@@ -621,7 +622,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function metabox_track_playlists_content( $post ){
-        wpsstm_locate_template( 'track-admin-playlists.php',true );
+        wpsstm_locate_template( 'append-track.php',true );
     }
 
     function mb_populate_trackid( $post_id ) {
