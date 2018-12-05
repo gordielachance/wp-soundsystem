@@ -19,10 +19,13 @@ class WPSSTM_Core_Tracklists{
 
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
+        
+        //rewrite rules
+        add_action('init', array($this, 'tracklists_rewrite_rules'), 100 );
 
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars'));
 
-        add_action( 'template_redirect', array($this,'handle_tracklist_action'));
+        add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         add_filter( 'template_include', array($this,'tracklist_template'));
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
@@ -105,7 +108,6 @@ class WPSSTM_Core_Tracklists{
     
     function the_tracklist($post,$query){
         global $wpsstm_tracklist;
-
         if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
@@ -434,55 +436,103 @@ class WPSSTM_Core_Tracklists{
         return $template;
         
     }
+    
+    function tracklists_rewrite_rules(){
+        
+        flush_rewrite_rules();
+        
+        //all tracklists (static,live,album)
+        foreach((array)wpsstm()->tracklist_post_types as $post_type){
+            /* 
+            < /music/TYPE/ID/ACTION - music/playlist/59086/?wpsstm_action=delete
+            > /index.php?post_type=TYPE&p=ID&wpsstm_action=ACTION
+            */
+            
+            $obj = get_post_type_object( $post_type );
 
+            add_rewrite_rule( 
+                sprintf('%s/([0-9^/]+)/([^/]+)/?',$obj->rewrite['slug']),
+                'index.php?post_type=wpsstm_playlist&p=$matches[1]&wpsstm_action=$matches[2]',
+                'top'
+            );
+        }
+    }
     
     function handle_tracklist_action(){
-        global $post;
+        global $wpsstm_tracklist;
         
-        //TOUFIX not working when posting the new-subtrack form,only working with URLS currently.
+        //check post
+        $id = get_query_var( 'p' );
+        $post_type = get_post_type($id);
+        if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return; //post does not exists
         
-        $action = isset($_REQUEST[self::$qvar_tracklist_action]) ? $_REQUEST[self::$qvar_tracklist_action] : null;
-        if (!$action) return;
-        if (!$post) return;
+        //check action
+        $action = get_query_var( wpsstm()::$qvar_action ); //WP_SoundSystem::$qvar_action
+        if(!$action) return;
         
-        $tracklist = new WPSSTM_Post_Tracklist($post->ID);
-        $success = null;
-        
+        //populate stuff
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($id);
+        $redirect_url = get_permalink($id);
+        $subtrack_arr = get_query_var( WPSSTM_Core_Tracks::$qvar_subtrack );
+
+        //action
         switch($action){
-            case 'toggle-favorite':
-                $do_love = !$tracklist->is_tracklist_loved_by();
-                $success = $tracklist->love_tracklist($do_love);
-            case 'get-autorship':
-                $success = $tracklist->get_autorship();
+
+            case 'queue': //add subtrack
+                $track = new WPSSTM_Track();
+                $track->from_array($subtrack_arr);
+                $success = $wpsstm_tracklist->save_subtrack($track);
             break;
-            case 'make-live':
-                $success = $tracklist->toggle_playlist_type();
+
+            case 'favorite':
+            case 'unfavorite':
+                $do_love = ( $action == 'favorite');
+                $success = $wpsstm_tracklist->love_tracklist($do_love);
             break;
-            case 'make-static':
-                $success = $tracklist->toggle_playlist_type();
-            break;
+
             case 'trash':
                 $success = $tracklist->trash_tracklist();
             break;
-            case 'unlink': //TOUFIX useful here ? not only JS ?
-                $track_id = isset($_GET['track_id']) ? $_GET['track_id'] : null;
-                if ($track_id){
-                    $track = new WPSSTM_Track($track_id);
-                    $success = $tracklist->unlink_subtrack($track);
-                }
+
+            case 'lock':
+            case 'unlock':
+                $live = ( $action == 'unlock');
+                $success = $wpsstm_tracklist->toggle_live($live);
             break;
-            case 'append-subtrack':
-                $track_arr = isset($_REQUEST['wpsstm-new-subtrack']) ? $_REQUEST['wpsstm-new-subtrack'] : null;
-
-                if ($track_arr){
-                    $track = new WPSSTM_Track();
-                    $track->from_array($track_arr);
-                    $success = $tracklist->save_subtrack($track);
-                }
-
+            case 'refresh':
+                //remove updated time
+                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+            break;
+            case 'get-autorship':
+                $success = $tracklist->get_autorship();
+            break;
+            default:
+                print_r($action);
+                die();
             break;
         }
         
+        /*
+        Redirection
+        */
+
+        if (!$success){
+            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$action),$redirect_url );
+        }
+        if ( is_wp_error($success) ){
+            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
+        }else{
+            $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
+        }
+
+        wp_safe_redirect($redirect_url);
+        exit();
+
+        if($redirect){
+            print_r($redirect);
+            die();
+        }
+
         if ($success){ //redirect with a success / error code
             
             $redirect_url = $tracklist->get_tracklist_action_url('render');

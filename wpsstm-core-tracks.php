@@ -9,6 +9,7 @@ class WPSSTM_Core_Tracks{
     static $qvar_track_lookup = 'lookup_track';
     static $qvar_favorite_tracks = 'loved-tracks';
     static $qvar_track = 'track';
+    static $qvar_subtrack = 'subtrack';
     static $qvar_subtracks = 'subtracks';
     static $qvar_subtrack_id = 'subtrack-id';
     
@@ -30,10 +31,8 @@ class WPSSTM_Core_Tracks{
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         
         //rewrite rules
-        add_action('init', array($this, 'tracks_rewrite_rules') );
-        add_action( 'template_redirect', array($this,'handle_wpsstm_action'));
-
-        add_action( 'template_redirect', array($this,'handle_track_action'));
+        add_action('init', array($this, 'tracks_rewrite_rules'), 100 );
+        add_action( 'wp', array($this,'handle_wpsstm_track_action'), 8);
         add_filter( 'template_include', array($this,'track_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
@@ -101,58 +100,61 @@ class WPSSTM_Core_Tracks{
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
     }
     
-    function handle_wpsstm_action(){
-        $post_type = get_post_type();
-        if($post_type != wpsstm()->post_type_track) return;
+    function handle_wpsstm_track_action(){
+        global $wpsstm_track;
         
-        $action = get_query_var( WP_SoundSystem::$qvar_action );        
-        $redirect = get_query_var( WP_SoundSystem::$qvar_redirect );
-        $track = get_query_var( self::$qvar_track );
+        //check post
+        $id = get_query_var( 'p' );
+        $post_type = get_post_type($id);
+        if( $post_type != wpsstm()->post_type_track ) return; //post does not exists
+
+        //check action
+        $action = get_query_var( wpsstm()::$qvar_action ); //WP_SoundSystem::$qvar_action
+        if(!$action) return;
         
-        $new_track = array(
-            'artist'    => wpsstm_get_array_value('artist',$track),
-            'album'     => wpsstm_get_array_value('album',$track),
-            'title'     => wpsstm_get_array_value('title',$track),
-        );
-        $new_track = array_filter($new_track);
-        
-        if (!$new_track) return;
-        print_r($new_track);
-        
-        print_r(get_post_type());
-        
-        if($redirect){
-            echo"<br/>";
-            print_r($redirect);
+        //populate stuff
+        $wpsstm_track = new WPSSTM_Track($id);
+        $redirect_url = get_permalink($id);
+
+        //action
+        switch($action){
+            case 'favorite':
+            case 'unfavorite':
+                $do_love = ( $action == 'favorite');
+                $success = $wpsstm_track->love_track($do_love);
+            break;
+
+            case 'trash':
+                $success = $track->trash_track();
+            break;
+                
+            default:
+                print_r($action);
+                die();
+            break;
         }
-        die();
-        
-        
+
+        /*
+        Redirection
+        */
+
+        if ( is_wp_error($success) ){
+            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
+        }else{
+            $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
+        }
+
+        wp_safe_redirect($redirect_url);
+        exit();
+ 
+       }
+
     }
     
+    
+    
     function tracks_rewrite_rules(){
-        
-        flush_rewrite_rules();
-        
-        //add_rewrite_tag('%action%','([^&]+)'); //establish the 'action' query var
-        
-        add_rewrite_rule(
-            sprintf('^%s/%s/%s/([^/]*)/([^/]*)/([^/]*)?',WPSSTM_BASE_SLUG,WPSSTM_TRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // /music/track/new/ARTIST/ALBUM/TITLE
-            sprintf("index.php?post_type=%s&%s=%s&%s[artist]=%s&%s[album]=%s&%s[title]=%s",
-                    wpsstm()->post_type_track,
-                    WP_SoundSystem::$qvar_action,
-                    WPSSTM_NEW_ITEM_SLUG,
-                    self::$qvar_track,
-                     '$matches[1]',
-                    self::$qvar_track,
-                    '$matches[2]',
-                    self::$qvar_track,
-                    '$matches[3]'
-           ),
-            'top'
-        );
-        
-        
+
     }
 
     //add custom admin submenu under WPSSTM
@@ -185,70 +187,6 @@ class WPSSTM_Core_Tracks{
         return $template;
     }
 
-    function handle_track_action(){
-        global $post;
-        if (!$post) return;
-        
-        if( !$action = get_query_var( self::$qvar_track_action ) ) return;
-        
-        $track = new WPSSTM_Track($post->ID);
-        $success = null;
-
-        switch($action){
-            case 'toggle-favorite':
-                $do_love = !$track->is_track_loved_by();
-                $success = $track->love_track($do_love);
-            break;
-            case 'new-track':
-                //get current query
-                $query_str = $_SERVER['QUERY_STRING']; 
-                parse_str($query_str,$query); //make an array of it
-                $redirect_args = isset($query['wpsstm-redirect']) ? $query['wpsstm-redirect'] : null;
-
-                $track_args = wpsstm_get_array_value('track',$query);
-                $track_args = wp_unslash($track_args);
-                $track_args = json_decode($track_args,true);
-
-                $track = new WPSSTM_Track();
-                $track->from_array($track_args);
-
-                if ( $track->post_id ){
-                    $track_url = get_permalink($track->post_id);
-                    $track_url = add_query_arg( array('wpsstm_success_code'=>'track-exists'),$track_url );
-                }else{
-                    $success = $track->save_track_post();
-                    if ( is_wp_error($success) ){
-                        $track_url = get_post_type_archive_link( wpsstm()->post_type_track ); //TO FIX TO CHECK or current URL ? more logical.
-                        $track_url = add_query_arg(array('wpsstm_error_code'=>$success->get_error_code()),$track_url);
-                    }else{
-                        $track_url = get_permalink($track->post_id);
-                        $track_url = add_query_arg( array('wpsstm_success_code'=>'new-track'),$track_url );
-                    }
-                }
-
-                //pass the redirect args now
-                $track_url = add_query_arg($redirect_args,$track_url);
-
-                wp_redirect($track_url);
-                exit;
-                break;
-        }
-        
-        if ($success){ //redirect with a success / error code
-            $redirect_url = ( wpsstm_is_backend() ) ? get_edit_post_link( $track->post_id ) : get_permalink($track->post_id);
-
-            if ( is_wp_error($success) ){
-                $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
-            }else{
-                $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
-            }
-
-            wp_safe_redirect($redirect_url);
-            exit();
-        }
-
-    }
-    
     /*
     Display a notice (and link) to toggle view subtracks
     */
@@ -552,7 +490,7 @@ class WPSSTM_Core_Tracks{
             'query_var' => true,
             'can_export' => true,
             'rewrite' => array(
-                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_TRACKS_SLUG),
+                'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_TRACKS_SLUG), // = /music/tracks
                 'with_front' => FALSE
             ),
             /**
@@ -615,6 +553,7 @@ class WPSSTM_Core_Tracks{
         $qvars[] = self::$qvar_subtracks;
         $qvars[] = self::$qvar_subtrack_id;
         $qvars[] = self::$qvar_track;
+        $qvars[] = self::$qvar_subtrack;
         
         return $qvars;
     }
