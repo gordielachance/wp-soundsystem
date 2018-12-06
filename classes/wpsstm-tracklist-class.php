@@ -1030,7 +1030,6 @@ class WPSSTM_Tracklist{
     
     //datas
     var $tracks = array();
-    var $tracks_error = null; //TOUFIX TOCHECK
     var $notices = array();
     
     var $track;
