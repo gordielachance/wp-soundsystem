@@ -1,6 +1,6 @@
 <?php
 global $wpsstm_tracklist;
-$action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
+$action = get_query_var( WP_SoundSystem::$qvar_action );
 
 add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );

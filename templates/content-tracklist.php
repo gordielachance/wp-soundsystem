@@ -112,7 +112,7 @@ global $wpsstm_tracklist;
             <input type="text" name="wpsstm-new-subtrack[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
             <input type="text" name="wpsstm-new-subtrack[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
             <input type="hidden" name="wpsstm-new-subtrack[tracklist_id]" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
-            <input type="hidden" name="<?php echo WPSSTM_Core_Tracklists::$qvar_tracklist_action;?>" value="append-subtrack"/>
+            <input type="hidden" name="<?php echo WP_SoundSystem::$qvar_action;?>" value="append-subtrack"/>
             <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
         </form>
         <?php

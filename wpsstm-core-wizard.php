@@ -112,7 +112,7 @@ class WPSSTM_Core_Wizard{
         if( is_singular( wpsstm()->post_type_live_playlist ) ){
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
             if ($wpsstm_tracklist->post_id){
-                $tracklist_action = get_query_var( WPSSTM_Core_Tracklists::$qvar_tracklist_action );
+                $tracklist_action = get_query_var( WP_SoundSystem::$qvar_action );
 
                 if ( !$tracklist_action && $wpsstm_tracklist && wpsstm_is_community_post($wpsstm_tracklist->post_id) ){
                     $link = get_permalink(wpsstm()->get_options('frontend_scraper_page_id'));

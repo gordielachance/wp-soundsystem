@@ -153,10 +153,6 @@ class WPSSTM_Core_Tracks{
     function tracks_rewrite_rules(){
 
     }
-    
-    function filter_track_link($link, $post){
-        die("toto");
-    }
 
     //add custom admin submenu under WPSSTM
     function backend_tracks_submenu($parent_slug){

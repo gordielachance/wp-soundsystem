@@ -372,7 +372,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $actions['share'] = array(
             'text' =>       __('Share', 'wpsstm'),
             'classes' =>    array('wpsstm-advanced-action'),
-            'href' =>       $this->get_tracklist_admin_url('share'),
+            'href' =>       $this->get_tracklist_action_url('share'),
             'classes' =>    array('wpsstm-tracklist-popup'),
         );
         
@@ -449,21 +449,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return apply_filters('wpsstm_tracklist_actions',$actions);
     }
 
-    
-    function get_tracklist_admin_url($tab =  null){
-        if ( !$this->post_id ) return;
-        $args = array(WPSSTM_Core_Tracklists::$qvar_tracklist_action=>$tab);
-        $url = get_permalink($this->post_id);
-        $url = add_query_arg($args,$url);
-        return $url;
-    }
-
     function get_tracklist_action_url($action = null){
         if ( !$this->post_id ) return;
 
         $url = add_query_arg(
             array(
-                WPSSTM_Core_Tracklists::$qvar_tracklist_action=>$action
+                WP_SoundSystem::$qvar_action => $action
             ),
             get_permalink($this->post_id)
         );

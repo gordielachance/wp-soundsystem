@@ -120,7 +120,7 @@ class WPSSTM_Core_BuddyPress{
         //favorite query
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WPSSTM_Core_Tracklists::$qvar_tracklist_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WP_SoundSystem::$qvar_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
             'fields' =>         'ids',
@@ -263,7 +263,7 @@ class WPSSTM_Core_BuddyPress{
         //member favorite playlists
         $query_args = array(
             'post_type' =>      wpsstm()->tracklist_post_types,
-            //WPSSTM_Core_Tracklists::$qvar_tracklist_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
+            //WP_SoundSystem::$qvar_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
             'posts_per_page' => -1,
             'orderby' =>        'title',
         );

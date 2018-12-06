@@ -6,7 +6,6 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WPSSTM_Core_Tracklists{
 
-    static $qvar_tracklist_action = 'tracklist-action';
     static $qvar_loved_tracklists = 'loved-tracklists';
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
@@ -21,12 +20,14 @@ class WPSSTM_Core_Tracklists{
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
         
         //rewrite rules
-        add_action('init', array($this, 'tracklists_rewrite_rules'), 100 );
-        add_filter('query_vars', array($this,'add_tracklist_query_vars'));
-        add_action('wp', array($this,'handle_tracklist_action'), 8);
-        add_filter('template_include', array($this,'tracklist_template'));
+        add_action( 'init', array($this, 'tracklists_rewrite_rules'), 100 );
+        add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
+        add_action( 'wp', array($this,'handle_tracklist_action'), 8);
+        add_filter( 'post_link', array($this, 'filter_tracklist_link'), 10, 3 );
+        add_filter('template_include', array($this,'tracklist_export_template') );
 
-        add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register'));
+        
+        add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
@@ -86,7 +87,6 @@ class WPSSTM_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = self::$qvar_tracklist_action;
         $vars[] = self::$qvar_loved_tracklists;
         $vars[] = self::$qvar_tracklist_id;
         return $vars;
@@ -416,28 +416,16 @@ class WPSSTM_Core_Tracklists{
         return $output;
 
     }
-
-
-    function tracklist_template($template){
-        global $wpsstm_tracklist;
-        if( !$admin_action = get_query_var( self::$qvar_tracklist_action ) ) return $template;
-        switch($admin_action){
-            case 'export':
-                the_post();//TOUFIX TOUCHECK useful ?
-                $template = wpsstm_locate_template( 'tracklist-xspf.php' );
-            break;
-            default:
-                the_post();//TOUFIX TOUCHECK useful ?
-                $template = wpsstm_locate_template( 'tracklist.php' );
-            break;
-        }
-        return $template;
-        
-    }
     
     function tracklists_rewrite_rules(){
         
-        flush_rewrite_rules();
+        flush_rewrite_rules(); //TOUFIX elsewhere
+        
+        add_rewrite_tag(
+            '%wpsstm_action%',
+            '([^&]+)',
+            sprintf('%s=','wpsstm_action')
+        );
         
         //all tracklists (static,live,album)
         foreach((array)wpsstm()->tracklist_post_types as $post_type){
@@ -449,7 +437,7 @@ class WPSSTM_Core_Tracklists{
             $obj = get_post_type_object( $post_type );
 
             add_rewrite_rule( 
-                sprintf('%s/([0-9^/]+)/([^/]+)/?',$obj->rewrite['slug']),
+                sprintf('%s/([0-9^/]+)/([^/]+)/?',$obj->rewrite['slug']), // /music/playlists/ID/ACTION
                 'index.php?post_type=wpsstm_playlist&p=$matches[1]&wpsstm_action=$matches[2]',
                 'top'
             );
@@ -499,7 +487,7 @@ class WPSSTM_Core_Tracklists{
             break;
             case 'refresh':
                 //remove updated time
-                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+                $success = delete_post_meta($wpsstm_tracklist->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
             break;
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
@@ -513,7 +501,7 @@ class WPSSTM_Core_Tracklists{
         /*
         Redirection
         */
-
+        /*
         if (!$success){
             $redirect_url = add_query_arg( array('wpsstm_error_code'=>$action),$redirect_url );
         }
@@ -530,21 +518,39 @@ class WPSSTM_Core_Tracklists{
             print_r($redirect);
             die();
         }
+        */
 
-        if ($success){ //redirect with a success / error code
-            
-            $redirect_url = $tracklist->get_tracklist_action_url('render');
+    }
 
-            if ( is_wp_error($success) ){
-                $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
-            }else{
-                $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
-            }
+    function tracklist_export_template($template){
+        global $wpsstm_tracklist;
 
-            wp_safe_redirect($redirect_url);
-            exit();
+        //check query
+        $post_type = get_query_var( 'post_type' );
+        if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $template; //post does not exists
+        
+        //check action
+        $action = get_query_var( wpsstm()::$qvar_action ); //WP_SoundSystem::$qvar_action
+        if(!$action) return $template;
+        
+        switch($action){
+            case 'export':
+                the_post();//TOUFIX TOUCHECK useful ?
+                $template = wpsstm_locate_template( 'tracklist-xspf.php' );
+            break;
+            default:
+                the_post();//TOUFIX TOUCHECK useful ?
+                $template = wpsstm_locate_template( 'tracklist.php' );
+            break;
         }
-
+        return $template;
+        
+    }
+    
+    function filter_tracklist_link($url, $post, $leavename=false){
+          //if ( false === strpos( $link, '%wpsstm_action%') ) return $link;
+        
+        print_r($link);die();
     }
     
     static function get_all_favorite_tracklist_ids(){
