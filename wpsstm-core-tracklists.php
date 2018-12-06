@@ -20,13 +20,12 @@ class WPSSTM_Core_Tracklists{
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
         
         //rewrite rules
-        add_action( 'init', array($this, 'tracklists_rewrite_rules'), 100 );
+        add_action( 'init', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
+        add_filter('template_include', array($this,'tracklist_template') );
         add_filter( 'post_link', array($this, 'filter_tracklist_link'), 10, 3 );
-        add_filter('template_include', array($this,'tracklist_export_template') );
 
-        
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
@@ -492,10 +491,6 @@ class WPSSTM_Core_Tracklists{
             case 'get-autorship':
                 $success = $tracklist->get_autorship();
             break;
-            default:
-                print_r($action);
-                die();
-            break;
         }
         
         /*
@@ -522,7 +517,7 @@ class WPSSTM_Core_Tracklists{
 
     }
 
-    function tracklist_export_template($template){
+    function tracklist_template($template){
         global $wpsstm_tracklist;
 
         //check query
@@ -535,11 +530,9 @@ class WPSSTM_Core_Tracklists{
         
         switch($action){
             case 'export':
-                the_post();//TOUFIX TOUCHECK useful ?
                 $template = wpsstm_locate_template( 'tracklist-xspf.php' );
             break;
             default:
-                the_post();//TOUFIX TOUCHECK useful ?
                 $template = wpsstm_locate_template( 'tracklist.php' );
             break;
         }
@@ -550,7 +543,7 @@ class WPSSTM_Core_Tracklists{
     function filter_tracklist_link($url, $post, $leavename=false){
           //if ( false === strpos( $link, '%wpsstm_action%') ) return $link;
         
-        print_r($link);die();
+        return $url;
     }
     
     static function get_all_favorite_tracklist_ids(){

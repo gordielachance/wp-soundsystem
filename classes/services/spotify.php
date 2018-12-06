@@ -905,7 +905,7 @@ class WPSSTM_Spotify_Api_Preset{
     function is_api_url($url){
         
         $pattern = '~^http(?:s)?://api.spotify.com/(.*)~i';
-        preg_match($pattern,'https://api.spotify.com/v1/playlists/3GkQFw34JM9eAgXV0zLeF9/tracks', $matches);
+        preg_match($pattern,$url, $matches);
         return ( !empty($matches) );
     }
     
