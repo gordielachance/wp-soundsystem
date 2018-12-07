@@ -27,6 +27,25 @@ $body_classes = array(
     <?php 
 
     $tab_content = null;
+    
+    /*
+    Notices
+    */
+
+    //wizard temporary tracklist notice
+    //TO FIX should be in populate_wizard_tracklist() ?
+    if ( !wpsstm_is_backend() && $wpsstm_tracklist->can_get_tracklist_authorship() ){
+        $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
+        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+        $message = __("This is a temporary playlist.","wpsstm");
+        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+        $wpsstm_tracklist->add_notice('get-autorship', $message );
+
+    }
+
+    if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
+        echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
+    }
 
     switch($action){
         case 'share':
@@ -42,11 +61,6 @@ $body_classes = array(
                 $wpsstm_tracklist->tracklist_autosource();
             }
 
-            //wizard notices
-            //TOUFIX TOCHECK good place for this ?
-            if ( $notices_el = $wpsstm_tracklist->get_notices_output('wizard-header') ){
-                echo $notices_el;
-            }
             wpsstm_locate_template( 'content-tracklist.php', true, false );
         break;
     }

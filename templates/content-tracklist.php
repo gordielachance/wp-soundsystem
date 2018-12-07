@@ -52,23 +52,6 @@ global $wpsstm_tracklist;
         echo $list;
     }
     
-    //tracklist notices
-
-    //wizard temporary tracklist notice
-    //TO FIX should be in populate_wizard_tracklist() ?
-    if ( !wpsstm_is_backend() && $wpsstm_tracklist->can_get_tracklist_authorship() ){
-        $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
-        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
-        $message = __("This is a temporary playlist.","wpsstm");
-        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
-        $wpsstm_tracklist->add_notice( 'tracklist-header', 'get-autorship', $message );
-
-    }
-
-    if ( $notices_el = $wpsstm_tracklist->get_notices_output('tracklist-header') ){
-        echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
-    }
-    
     /*
     tracks list
     */

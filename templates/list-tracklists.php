@@ -48,7 +48,7 @@ if ( $query->have_posts() ) {
     wp_reset_postdata();
 }else{
     ?>
-    <p><?php _e( 'Sorry, no tracklists matching those criteria.','wpsstm' ); ?></p>
+    <p class="wpsstm-notice"><?php _e( 'Sorry, no tracklists matching those criteria.','wpsstm' ); ?></p>
     <?php
 }
 ?>

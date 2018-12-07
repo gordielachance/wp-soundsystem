@@ -147,10 +147,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return true;
     }
 
-    function save_playlist(){
+    function save_tracklist(){
 
         //capability check
-        $playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $post_type = ($this->tracklist_type == 'static') ? wpsstm()->post_type_playlist : wpsstm()->post_type_live_playlist;
+        $post_type_obj = get_post_type_object($post_type);
         $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !current_user_can($required_cap) ){
@@ -195,7 +196,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-            $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Post_Tracklist::save_playlist() - post playlist inserted"); 
+            $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Post_Tracklist::save_tracklist() - post playlist inserted"); 
 
         }else{ //is a playlist update
             
@@ -209,7 +210,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
             
-           $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Post_Tracklist::save_playlist() - post track updated"); 
+           $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_update_args)), "WPSSTM_Post_Tracklist::save_tracklist() - post track updated"); 
         }
 
         $this->post_id = $post_playlist_id;
@@ -253,7 +254,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Use a custom function to display our notices since natice WP function add_settings_error() works only backend.
     */
     
-    function add_notice($slug,$code,$message,$error = false){
+    function add_notice($code,$message,$error = false){
         
         //$this->tracklist_log(array('slug'=>$slug,'code'=>$code,'error'=>$error),'[WPSSTM_Post_Tracklist notice]: ' . $message ); 
         
@@ -264,33 +265,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'error'     => $error
         );
 
-    }
-
-    function get_notices_output($context){
-        
-        $notices = array();
-
-        foreach ($this->notices as $notice){
-            if ( $notice['slug'] != $context ) continue;
-            
-            $notice_classes = array(
-                'inline',
-                'settings-error',
-                'wpsstm-notice',
-                'is-dismissible'
-            );
-            
-            //$notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
-            
-            $notice_attr_arr = array(
-                'id'    => sprintf('wpsstm-notice-%s',$notice['code']),
-                'class' => implode(' ',$notice_classes),
-            );
-
-            $notices[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
-        }
-        
-        return implode("\n",$notices);
     }
     
     function love_tracklist($do_love){
@@ -390,17 +364,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             $classes = array();
             
-            if ($this->is_tracklist_loved_by()){
-                $classes[] = 'action-unfavorite';
-            }else{
-                $classes[] = 'action-favorite';
-            }
-            
-            $actions['toggle-favorite'] = array(
+            $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('toggle-favorite'),
-                'desc' =>       __('Toggle favorites','wpsstm'),
-                'classes' =>    $classes
+                'href' =>       $this->get_tracklist_action_url('favorite'),
+                'desc' =>       __('Toggle favorite','wpsstm'),
+                'classes' =>    array('action-unfavorite'),
+            );
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_tracklist_action_url('unfavorite'),
+                'desc' =>       __('Toggle favorite','wpsstm'),
+                'classes' =>    array('action-favorite'),
             );
 
         }
@@ -818,35 +792,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function unlink_subtrack($subtrack){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( !$this->post_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
-        }
-        
-        if ( !$subtrack->subtrack_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
-        
-        if ( !$subtrack->position ){
-            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
-        }
-
-        //update this subtrack
-        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE ID = '%s'", $subtrack->subtrack_id );
-        $result = $wpdb->get_results ( $querystr );
-
-        //update tracks range
-        if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->post_id,$subtrack->position);
-            $result = $wpdb->get_results ( $querystr );
-        }
-        
-        return $result;
-    }
-    
     function validate_subtrack($track,$strict = true){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
@@ -897,7 +842,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //new subtrack
         if (!$track->subtrack_id){
             $subtrack_data['time'] = current_time('mysql');
-            $subtrack_data['from_tracklist'] = $track->subtrack_from;
+            $subtrack_data['from_tracklist'] = $track->from_tracklist;
         }
         
         $track_data = array_merge($track_data,$subtrack_data);

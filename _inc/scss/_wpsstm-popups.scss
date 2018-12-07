@@ -12,6 +12,21 @@ body.wpsstm-iframe{
     &.wpsstm-track-iframe{
         margin:.5em!important;
     }
+    &.wpsstm-track-action-tracklists-selector{
+        form{
+            &#wpsstm-new-tracklist{
+                 margin:2em;
+            }
+            &#wpsstm-toggle-tracklists{
+                margin:1em;
+            }
+            button[type="submit"]{
+                margin: 1em auto;
+                display: block;
+            }
+        }
+    }
+    
 }
 
 .wpsstm-dialog{

@@ -176,13 +176,13 @@ class WPSSTM_Core_Wizard{
             $feed_url = apply_filters('wpsstm_wizard_input',$feed_url);
 
             if( !$feed_url ){
-                $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_input', __('Missing wizard input.','wpsstm') );
+                $wpsstm_tracklist->add_notice('wpsstm_wizard_missing_input', __('Missing wizard input.','wpsstm') );
                 return false;
             }
 
             $url_parsed = parse_url($feed_url); //check this is an URL
             if( empty($url_parsed['scheme']) ){
-                $wpsstm_tracklist->add_notice( 'wizard-header','wpsstm_wizard_missing_url_input', __('Missing wizard URL input.','wpsstm') );
+                $wpsstm_tracklist->add_notice('wpsstm_wizard_missing_url_input', __('Missing wizard URL input.','wpsstm') );
                 return false;
             }
             

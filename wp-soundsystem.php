@@ -556,6 +556,33 @@ class WP_SoundSystem {
         }
         
     }
+    
+    static function get_notices_output($notices){
+        
+        $output = array();
+
+        foreach ((array)$notices as $notice){
+
+            $notice_classes = array(
+                'inline',
+                'settings-error',
+                'wpsstm-notice',
+                'is-dismissible'
+            );
+            
+            //$notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
+            
+            $notice_attr_arr = array(
+                'id'    => sprintf('wpsstm-notice-%s',$notice['code']),
+                'class' => implode(' ',$notice_classes),
+            );
+
+            $output[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
+        }
+        
+        return implode("\n",$output);
+    }
+    
 }
 
 function wpsstm() {

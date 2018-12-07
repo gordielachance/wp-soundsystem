@@ -33,6 +33,16 @@ $can_play_track = $track->can_play_track();
             <span class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $track->artist;?>"><?php echo $track->artist;?></span>
             <span class="wpsstm-track-title" itemprop="name" title="<?php echo $track->title;?>"><?php echo $track->title;?></span>
             <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $track->album;?>"><?php echo $track->album;?></span>
+            <?php 
+            if ($track->from_tracklist){
+                ?>
+                <span class="wpsstm-from-tracklist">
+                    <?php _e('Spotted in:','wpsstm');?>
+                    <a target="_parent" href="<?php echo get_permalink($track->from_tracklist);?>"><?php echo get_the_title($track->from_tracklist);?></a>
+                </span>
+                <?php
+            }
+            ?>
         </div>
         <?php
         if ( $actions = $track->get_track_links() ){

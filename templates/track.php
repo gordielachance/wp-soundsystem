@@ -2,7 +2,7 @@
 global $post;
 global $wpsstm_tracklist;
 global $wpsstm_track;
-$action = get_query_var( WPSSTM_Core_Tracks::$qvar_track_action );
+$action = get_query_var( WP_SoundSystem::$qvar_action );
 //
 add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );
@@ -27,6 +27,16 @@ $body_classes = array(
 </head>
 <body <?php body_class($body_classes); ?>>
     <header>
+        <div class="wpsstm-track-notices">
+            <?php
+            /*
+            Notices
+            */
+            if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
+                echo $notices_el;
+            }
+            ?>
+        </div>
         <p>
             <h2 class="wpsstm-track-title"><?php echo $wpsstm_track->title;?></h2>
             <h3 class="wpsstm-track-artist"><?php echo $wpsstm_track->artist;?></h3>
@@ -34,7 +44,6 @@ $body_classes = array(
         </p>
         <p>
             <?php
-
             /*
             Track actions
             */
@@ -85,10 +94,11 @@ $body_classes = array(
         */
 
         switch ($action){
-            case 'append':
+            case 'tracklists-selector':
+            case 'toggle-tracklists':
                 ?>
                 <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                    <?php wpsstm_locate_template( 'append-track.php',true );?>
+                    <?php wpsstm_locate_template( 'track-append.php',true );?>
                 </div>
                 <?php
 
