@@ -146,8 +146,8 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         $success = null;
 
-        if ( !$action = get_query_var( WP_SoundSystem::$qvar_action ) ) return; //action does not exists
-        if ( get_post_type() != wpsstm()->post_type_track ) return;
+        if ( !$action = get_query_var( WP_SoundSystem::$qvar_action ) ) return; //action does not exist
+        if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
 
         $success = $wpsstm_track->do_track_action($action);
 
@@ -169,41 +169,23 @@ class WPSSTM_Core_Tracks{
     function handle_ajax_track_action($template){
         global $wp_query;
         global $wpsstm_track;
+        
+        $success = null;
 
         // since the "ajax" query variable does not require a value, we need to check for its existence
         if ( !$action = get_query_var( WP_SoundSystem::$qvar_ajax ) ) return $template; //ajax action does not exists
-        if ( get_post_type() != wpsstm()->post_type_track ) return;
+        if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
         
         wpsstm()->debug_log("handle_ajax_track_action");
-        
+
         $result = array(
             'input' =>  $_REQUEST,
             'message'=> null,
             'success'=> null,
-            'item' =>   null,
+            'item' =>   $wpsstm_track->to_array(),
         );
         
-        /*
-        item
-        */
-        
-        $post_type = get_post_type();
-        
-        switch( $post_type ){
-            case wpsstm()->post_type_track:
-                $result['item'] = $wpsstm_track->to_array();
-            break;
-        }
-        
-        /*
-        do action 
-        */
-        
-        switch( $post_type ){
-            case wpsstm()->post_type_track:
-                $success = $wpsstm_track->do_track_action($action);
-            break;
-        }
+        $success = $wpsstm_track->do_track_action($action);
 
         if ( is_wp_error($success) ){
             $result['success'] = false;

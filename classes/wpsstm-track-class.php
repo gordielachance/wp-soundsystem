@@ -410,6 +410,10 @@ class WPSSTM_Track{
     
     function unlink_subtrack(){
         
+        if ( !$this->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+        
         //capability check
         if ( !$this->tracklist->user_can_edit_tracklist() ){
             return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
@@ -417,10 +421,6 @@ class WPSSTM_Track{
         
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        if ( !$this->subtrack_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
         
         if ( !$this->position ){
             return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
