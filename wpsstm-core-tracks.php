@@ -195,7 +195,7 @@ class WPSSTM_Core_Tracks{
         if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //ajax action does not exists
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
         
-        wpsstm()->debug_log("handle_ajax_track_action");
+        wpsstm()->debug_log($action,"handle_ajax_track_action");
 
         $result = array(
             'input' =>  $_REQUEST,

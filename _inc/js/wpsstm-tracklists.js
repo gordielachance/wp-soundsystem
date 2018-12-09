@@ -327,14 +327,11 @@ class WpsstmTracklist {
         var self = this;
         var track_el = track_obj.track_el;
         var link_el = track_el.find('.wpsstm-track-action-unlink a');
-        
-		var data : {
-			action : 'wpsstm_track_action'
-		}
+        var action_url = link_el.data('wpsstm-ajax-url');
 
         jQuery.ajax({
             type: "post",
-            url: link_el.attr('href'),
+            url: action_url,
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');

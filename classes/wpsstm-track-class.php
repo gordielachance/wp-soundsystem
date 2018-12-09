@@ -718,14 +718,17 @@ class WPSSTM_Track{
         return $inserted;
     }
 
-    function get_track_action_url($action){
+    function get_track_action_url($action,$ajax=false){
         
         if (!$this->post_id) return;
         $url = get_permalink($this->post_id);
-
-        $args = array(
-            'wpsstm_action' =>     $action,
-        );
+        $args = array();
+        
+        if (!$ajax){
+            $args['wpsstm_action'] = $action;
+        }else{
+            $args['wpsstm_ajax_action'] = $action;
+        }
         
         switch ($action){
             case 'tracklists-selector':
@@ -741,14 +744,20 @@ class WPSSTM_Track{
         return $url;
     }
 
-    function get_subtrack_action_url($action){
+    function get_subtrack_action_url($action,$ajax = false){
         
         if ( !$this->subtrack_id ) return;
         $url = get_post_type_archive_link( wpsstm()->post_type_track );
+        
         $args = array(
             'subtrack_id' =>                $this->subtrack_id,
-            'wpsstm_action' =>             $action,
         );
+        
+        if (!$ajax){
+            $args['wpsstm_action'] = $action;
+        }else{
+            $args['wpsstm_ajax_action'] = $action;
+        }
         
         return add_query_arg($args,$url);
     }
@@ -796,13 +805,15 @@ class WPSSTM_Track{
 
             $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
+                'href' =>       $this->get_track_action_url('unfavorite'),
+                'ajax' =>       $this->get_track_action_url('unfavorite',true),
                 'desc' =>       __('Toggle favorite','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite'),
+                'href' =>       $this->get_track_action_url('favorite'),
+                'ajax' =>       $this->get_track_action_url('favorite',true),
                 'desc' =>       __('Toggle favorite','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
@@ -820,24 +831,23 @@ class WPSSTM_Track{
         /*
         Subtracks
         */
-        //TOUFIX urgent
-        //if ($can_unlink_subtrack){
-            $unlink_action_url = $this->get_subtrack_action_url('unlink');
+        if ($can_unlink_subtrack){
             $actions['unlink'] = array(
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $unlink_action_url,
+                'href' =>       $this->get_subtrack_action_url('unlink'),
+                'ajax' =>       $this->get_subtrack_action_url('unlink',true),
             );
-        //}
+        }
         
         if ($can_move_subtrack){
-            $unlink_move_url = $this->get_subtrack_action_url('move');
             $actions['move'] = array(
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action'),
-                'href' =>       $unlink_move_url,
+                'href' =>       $this->get_subtrack_action_url('move'),
+                'ajax' =>       $this->get_subtrack_action_url('move',true),
             );
         }
         
@@ -852,11 +862,13 @@ class WPSSTM_Track{
 
         //delete track
         if ($can_delete_track){
+            $trash_action_url = $this->get_track_action_url('trash');
             $actions['trash'] = array(
                 'text' =>      __('Trash'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Trash this track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
+                'ajax' =>       $this->get_track_action_url('trash',true),
             );
         }
         
