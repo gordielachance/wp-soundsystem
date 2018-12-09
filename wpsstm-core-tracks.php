@@ -97,7 +97,6 @@ class WPSSTM_Core_Tracks{
     function populate_global_track($query){
 
         global $wpsstm_track;
-        global $wpsstm_tracklist;
         
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
@@ -127,14 +126,7 @@ class WPSSTM_Core_Tracks{
         if( ( $post_type == wpsstm()->post_type_track ) && $track_args ){
             $wpsstm_track->from_array($track_args);
         }
-        
-        /*
-        Tracklist
-        */
-        if ( $wpsstm_track->tracklist->post_id ){
-            $wpsstm_tracklist = $wpsstm_track->tracklist;
-        }
-        
+
         if ( $wpsstm_track->post_id ){
             wpsstm()->debug_log($wpsstm_track->to_array(),"defined global track");
         }
