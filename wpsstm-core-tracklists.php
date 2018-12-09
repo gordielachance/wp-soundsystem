@@ -9,8 +9,6 @@ class WPSSTM_Core_Tracklists{
     static $qvar_loved_tracklists = 'loved-tracklists';
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
-    static $qvar_tracklist_id = 'tracklist-id';
-    static $qvar_subtrack_position = 'subtrack-position';
 
     function __construct() {
         global $wpsstm_tracklist;
@@ -78,8 +76,8 @@ class WPSSTM_Core_Tracklists{
 
     function add_tracklist_query_vars($vars){
         $vars[] = self::$qvar_loved_tracklists;
-        $vars[] = self::$qvar_tracklist_id;
-        $vars[] = self::$qvar_subtrack_position;
+        $vars[] = 'tracklist_id';
+        $vars[] = 'subtrack_position';
         return $vars;
     }
 
@@ -248,8 +246,6 @@ class WPSSTM_Core_Tracklists{
     
     function tracklists_rewrite_rules(){
         
-        flush_rewrite_rules(); //TOUFIX elsewhere
-        
         add_rewrite_tag(
             '%wpsstm_action%',
             '([^&]+)',
@@ -264,7 +260,7 @@ class WPSSTM_Core_Tracklists{
             //subtrack by tracklist position
             add_rewrite_rule( 
                 sprintf('^%s/(\d+)/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS/ACTION
-                sprintf('index.php?post_type=%s&%s=$matches[1]&%s=$matches[2]',wpsstm()->post_type_track,self::$qvar_tracklist_id,self::$qvar_subtrack_position),
+                sprintf('index.php?post_type=%s&tracklist_id=$matches[1]&subtrack_position=$matches[2]',wpsstm()->post_type_track),
                 'top'
             );
             
@@ -272,7 +268,7 @@ class WPSSTM_Core_Tracklists{
 
             add_rewrite_rule( 
                 sprintf('^%s/(\d+)/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ACTION
-                sprintf('index.php?post_type=%s&p=$matches[1]&%s=$matches[2]',$post_type,WP_SoundSystem::$qvar_action),
+                sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',$post_type),
                 'top'
             );
             
@@ -322,12 +318,12 @@ class WPSSTM_Core_Tracklists{
         if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return; //post does not exists
         
         //check action
-        $action = get_query_var( WP_SoundSystem::$qvar_action ); //WP_SoundSystem::$qvar_action
+        $action = get_query_var( 'wpsstm_action' );
         if(!$action) return;
         
         //populate stuff
         $redirect_url = get_permalink($id);
-        $subtrack_arr = get_query_var( WPSSTM_Core_Tracks::$qvar_subtrack );
+        $subtrack_arr = get_query_var( 'wpsstm_item' );
 
         //action
         switch($action){
@@ -414,7 +410,7 @@ class WPSSTM_Core_Tracklists{
         if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $template; //post does not exists
         
         //check action
-        $action = get_query_var( WP_SoundSystem::$qvar_action ); //WP_SoundSystem::$qvar_action
+        $action = get_query_var( 'wpsstm_action' );
         if(!$action) return $template;
         
         switch($action){
@@ -467,8 +463,8 @@ class WPSSTM_Core_Tracklists{
 
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $tracklist_id = $query->get(self::$qvar_tracklist_id);
-        $subtrack_id = $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id);
+        $tracklist_id = $query->get('tracklist_id');
+        $subtrack_id = $query->get('subtrack_id');
         
         if ( $tracklist_id || $subtrack_id ) {
             $join .= sprintf(" INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
@@ -486,7 +482,7 @@ class WPSSTM_Core_Tracklists{
         $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
         if ( !$has_tracklist_type ) return $where;
 
-        if ( $tracklist_id = $query->get(self::$qvar_tracklist_id) ) {
+        if ( $tracklist_id = $query->get('tracklist_id') ) {
             $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
         }
         return $where;
@@ -500,7 +496,7 @@ class WPSSTM_Core_Tracklists{
         $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
         if ( !$has_tracklist_type ) return $where;
 
-        if ( !$subtrack_id = $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id) ) return $where;
+        if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
         
         $where.= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
         return $where;

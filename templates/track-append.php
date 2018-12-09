@@ -20,8 +20,8 @@ if ( !get_current_user_id() ){
     <form action="<?php echo get_permalink($wpsstm_track->post_id);?>" id="wpsstm-new-tracklist">
         <input name="wpstm-new-tracklist-title" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
 
-        <input name="<?php echo WP_SoundSystem::$qvar_action;?>" type="hidden" value='new-tracklist' />
-        <input type="hidden" name="<?php echo WPSSTM_Core_Tracks::$qvar_track;?>[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+        <input name="wpsstm_action" type="hidden" value='new-tracklist' />
+        <input type="hidden" name="wpsstm_item[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
         <button type="submit" class="button button-primary wpsstm-icon-button">
             <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
         </button>
@@ -29,8 +29,8 @@ if ( !get_current_user_id() ){
     <form action="<?php echo get_permalink($wpsstm_track->post_id);?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>">
         <?php echo $wpsstm_track->get_subtrack_playlist_manager_list(); ?>
 
-        <input name="<?php echo WP_SoundSystem::$qvar_action;?>" type="hidden" value='toggle-tracklists' />
-        <input type="hidden" name="<?php echo WPSSTM_Core_Tracks::$qvar_track;?>[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+        <input name="wpsstm_action" type="hidden" value='toggle-tracklists' />
+        <input type="hidden" name="wpsstm_item[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
         <button type="submit" class="button button-primary wpsstm-icon-button">
             <?php _e('Save');?>
         </button>

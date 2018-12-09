@@ -246,7 +246,9 @@ class WPSSTM_Source{
         
         $url = null;
         
-        $args = array(WPSSTM_Core_Sources::$qvar_source_action=>$action);
+        $args = array(
+            'wpsstm_action'=>$action
+        );
 
         if ($this->post_id){
             $url = get_permalink($this->post_id);

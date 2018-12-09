@@ -428,7 +428,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $url = add_query_arg(
             array(
-                WP_SoundSystem::$qvar_action => $action
+                'wpsstm_action' => $action
             ),
             get_permalink($this->post_id)
         );

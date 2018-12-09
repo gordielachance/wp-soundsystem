@@ -2,7 +2,7 @@
 global $post;
 global $wpsstm_tracklist;
 global $wpsstm_track;
-$action = get_query_var( WP_SoundSystem::$qvar_action );
+$action = get_query_var( 'wpsstm_action' );
 //
 add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );

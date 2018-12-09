@@ -202,7 +202,7 @@ class WPSSTM_Track{
             'post_status'  =>                           'any',
             'posts_per_page' =>                         -1,
             'fields'=>                                  'ids',
-            WPSSTM_Core_Tracks::$qvar_subtrack_id =>    $this->post_id,
+            'subtrack_id' =>                            $this->post_id,
         );
 
         $args = wp_parse_args((array)$args,$default_args);
@@ -724,13 +724,13 @@ class WPSSTM_Track{
         $url = get_permalink($this->post_id);
 
         $args = array(
-            WP_SoundSystem::$qvar_action =>     $action,
+            'wpsstm_action' =>     $action,
         );
         
         switch ($action){
             case 'tracklists-selector':
                 if ($tracklist_id = $this->tracklist->post_id){
-                    $args[WPSSTM_Core_Tracks::$qvar_track]['from_tracklist'] = $tracklist_id;
+                    $args['wpsstm_item']['from_tracklist'] = $tracklist_id;
                 }
                 
             break;
@@ -746,8 +746,8 @@ class WPSSTM_Track{
         if ( !$this->subtrack_id ) return;
         $url = get_post_type_archive_link( wpsstm()->post_type_track );
         $args = array(
-            WPSSTM_Core_Tracks::$qvar_subtrack_id =>     $this->subtrack_id,
-            WP_SoundSystem::$qvar_action =>             $action,
+            'subtrack_id' =>                $this->subtrack_id,
+            'wpsstm_action' =>             $action,
         );
         
         return add_query_arg($args,$url);
@@ -1236,7 +1236,7 @@ class WPSSTM_Track{
                     }
                     
                     //update track action //TOUFIX elsewhere ?
-                    $wp_query->set(WP_SoundSystem::$qvar_action,'tracklists-selector');
+                    $wp_query->set('wpsstm_action','tracklists-selector');
                     
                 }
             break;

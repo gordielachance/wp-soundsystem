@@ -2,7 +2,6 @@
 
 class WPSSTM_Core_Sources{
     static $source_url_metakey = '_wpsstm_source_url';
-    static $qvar_source_action = 'source-action';
     static $autosource_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
 
     function __construct() {
@@ -12,8 +11,6 @@ class WPSSTM_Core_Sources{
         $wpsstm_source = new WPSSTM_Source();
         
         add_action( 'init', array($this,'register_post_type_sources' ));
-
-        add_filter( 'query_vars', array($this,'add_query_vars_source') );
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_sources_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));
@@ -45,11 +42,6 @@ class WPSSTM_Core_Sources{
         
         //delete source
         add_action('wp_ajax_wpsstm_trash_source', array($this,'ajax_trash_source'));
-    }
-    
-    function add_query_vars_source( $qvars ) {
-        $qvars[] = self::$qvar_source_action;
-        return $qvars;
     }
 
     function register_post_type_sources() {

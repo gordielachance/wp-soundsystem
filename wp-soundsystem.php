@@ -38,11 +38,7 @@ class WP_SoundSystem {
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
-    
-    public static $qvar_action = 'wpsstm_action';
-    public static $qvar_ajax = 'wpsstm_ajax_action';
-    
-    
+
     public $subtracks_table_name = 'wpsstm_subtracks';
 
     /**
@@ -203,12 +199,33 @@ class WP_SoundSystem {
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
+        add_action( 'init', array($this, 'wpsstm_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
     }
     
+    function wpsstm_rewrite_rules(){
+        flush_rewrite_rules(); //TOUFIX elsewhere
+        
+        //wpsstm_action
+        add_rewrite_tag(
+            '%wpsstm_action%',
+            '([^&]+)'
+        );
+        
+        //wpsstm_ajax_action
+        add_rewrite_tag(
+            '%wpsstm_ajax_action%',
+            '([^&]+)'
+        );
+        
+        //wpsstm_ajax_action
+        add_rewrite_tag(
+            '%wpsstm_item%',
+            '([^&]+)'
+        );
+    }
+    
     function add_wpsstm_query_vars($qvars){
-        $qvars[] = self::$qvar_ajax;
-        $qvars[] = self::$qvar_action;
         return $qvars;
     }
 
