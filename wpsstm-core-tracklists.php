@@ -10,6 +10,7 @@ class WPSSTM_Core_Tracklists{
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
     static $qvar_tracklist_id = 'tracklist-id';
+    static $qvar_subtrack_position = 'subtrack-position';
 
     function __construct() {
         global $wpsstm_tracklist;
@@ -78,6 +79,7 @@ class WPSSTM_Core_Tracklists{
     function add_tracklist_query_vars($vars){
         $vars[] = self::$qvar_loved_tracklists;
         $vars[] = self::$qvar_tracklist_id;
+        $vars[] = self::$qvar_subtrack_position;
         return $vars;
     }
 
@@ -256,17 +258,20 @@ class WPSSTM_Core_Tracklists{
         
         //all tracklists (static,live,album)
         foreach((array)wpsstm()->tracklist_post_types as $post_type){
-            /* 
-            < /music/TYPE/ID/ACTION - music/playlist/59086/?wpsstm_action=delete
-            > /index.php?post_type=TYPE&p=ID&wpsstm_action=ACTION
-            */
-            
+
             $obj = get_post_type_object( $post_type );
+
+            //subtrack by tracklist position
+            add_rewrite_rule( 
+                sprintf('^%s/(\d+)/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS/ACTION
+                sprintf('index.php?post_type=%s&%s=$matches[1]&%s=$matches[2]',wpsstm()->post_type_track,self::$qvar_tracklist_id,self::$qvar_subtrack_position),
+                'top'
+            );
             
             //tracklist ID action
 
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/([^/]+)/?',$obj->rewrite['slug']), // /music/playlists/ID/ACTION
+                sprintf('^%s/(\d+)/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ACTION
                 sprintf('index.php?post_type=%s&p=$matches[1]&%s=$matches[2]',$post_type,WP_SoundSystem::$qvar_action),
                 'top'
             );
@@ -274,7 +279,7 @@ class WPSSTM_Core_Tracklists{
              //tracklist ID
             
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/?',$obj->rewrite['slug']), // /music/playlists/ID/ACTION
+                sprintf('^%s/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ACTION
                 sprintf('index.php?post_type=%s&p=$matches[1]',$post_type),
                 'top'
             );

@@ -60,6 +60,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'posts_join', array($this,'tracks_query_join_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
 
@@ -145,20 +146,43 @@ class WPSSTM_Core_Tracks{
         global $wp_query;
         global $wpsstm_track;
         $success = null;
+        $redirect_url = null;
+        $action_feedback = null;
 
         if ( !$action = get_query_var( WP_SoundSystem::$qvar_action ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
 
         $success = $wpsstm_track->do_track_action($action);
 
+        switch($action){
+            case 'unlink':
+                $redirect_url = get_permalink($wpsstm_track->tracklist->post_id);
+            break;
+        }
+
         /*
-        Notices
+        Redirect or notice
         */
-        
-        if ( is_wp_error($success) ){
-            $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
+        if ($redirect_url){
+            
+            $redirect_args = array(
+                'wpsstm_did_action' =>  $action,
+                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
+            );
+            
+            $redirect_url = add_query_arg($redirect_args, $redirect_url);
+            
+            wp_safe_redirect($redirect_url);
+            die($redirect_url);
+            
         }else{
-            $wpsstm_track->add_notice('success',__('Success!','wpsstm'));
+            
+            if ( is_wp_error($success) ){
+                $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
+            }else{
+                $wpsstm_track->add_notice('success',__('Success!','wpsstm'));
+            }
+            
         }
 
     }
@@ -210,6 +234,10 @@ class WPSSTM_Core_Tracks{
         //check action
         $action = get_query_var( WP_SoundSystem::$qvar_action );
         if(!$action) return $template;
+        
+        //check track exists
+        //TOUFIX what if track do not have a track ID (new track) ?
+        if(!$wpsstm_track->post_id) return $template;
         
         switch($action){
             default:
@@ -387,11 +415,12 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $subtracks_query =      $query->get(WPSSTM_Core_Tracks::$qvar_subtracks);
-        $subtrack_id_query =    $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id);
-        $subtrack_sort_query = ($query->get('orderby') == 'subtracks');
+        $subtracks_query =          $query->get(WPSSTM_Core_Tracks::$qvar_subtracks);
+        $subtrack_id_query =            $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id);
+        $subtrack_position_query =      $query->get(WPSSTM_Core_Tracklists::$qvar_subtrack_position);
+        $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
 
-        $join_subtracks = ( $subtracks_query || $subtrack_id_query || $subtrack_sort_query );
+        $join_subtracks = ( $subtracks_query || $subtrack_id_query || $subtrack_sort_query || $subtrack_position_query  );
         
         if ($join_subtracks){
             $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table,$wpdb->posts);
@@ -415,6 +444,19 @@ class WPSSTM_Core_Tracks{
         return $where;
     }
 
+    function track_query_where_subtrack_position($where,$query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$subtrack_position = $query->get(WPSSTM_Core_Tracklists::$qvar_subtrack_position) ) return $where;
+        if ( !$tracklist_id = $query->get(WPSSTM_Core_Tracklists::$qvar_tracklist_id) ) return $where;
+
+        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtracks.track_order = %s",$tracklist_id,$subtrack_position);
+
+        //so single template is shown, instead of search results
+        //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
+        $query->is_single = true; 
+
+        return $where;
+    }
     function track_query_where_subtrack_id($where,$query){
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
         if ( !$subtrack_id = $query->get(WPSSTM_Core_Tracks::$qvar_subtrack_id) ) return $where;
@@ -427,6 +469,7 @@ class WPSSTM_Core_Tracks{
 
         return $where;
     }
+    
     /*
     function pre_get_posts_by_subtrack_id( $query ){
         global $wpdb;
