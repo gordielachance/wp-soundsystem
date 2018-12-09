@@ -22,7 +22,7 @@ class WPSSTM_Core_Tracklists{
         //rewrite rules
         add_action( 'init', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
-        //add_action( 'parse_query', array($this,'populate_global_tracklist'));
+        add_action( 'parse_query', array($this,'populate_global_tracklist'));
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         add_filter('template_include', array($this,'tracklist_template') );
@@ -284,8 +284,6 @@ class WPSSTM_Core_Tracklists{
     
     function populate_global_tracklist($query){
         global $wpsstm_tracklist;
-        
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
 
         if( !$post_id = $query->get( 'p' ) ) return;
         $post_type = get_post_type($post_id);
