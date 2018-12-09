@@ -167,8 +167,8 @@ class WPSSTM_Track{
         }
 
         $query = new WP_Query( $query_args );
-
         return $query->posts;
+
     }
     
     /*
@@ -244,7 +244,7 @@ class WPSSTM_Track{
             'artist' => $this->artist,
             'album' => $this->album,
             'mbid' => $this->mbid,
-            'tracklist' => (array)$this->tracklist,
+            'tracklist' => $this->tracklist->to_array(),
             'subtrack_id' => $this->subtrack_id,
             'position' => $this->position,
         );
@@ -409,6 +409,12 @@ class WPSSTM_Track{
     }
     
     function unlink_subtrack(){
+        
+        //capability check
+        if ( !$this->tracklist->user_can_edit_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
+        }
+        
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
@@ -814,7 +820,8 @@ class WPSSTM_Track{
         /*
         Subtracks
         */
-        if ($can_unlink_subtrack){
+        //TOUFIX urgent
+        //if ($can_unlink_subtrack){
             $unlink_action_url = $this->get_subtrack_action_url('unlink');
             $actions['unlink'] = array(
                 'text' =>      __('Remove'),
@@ -822,7 +829,7 @@ class WPSSTM_Track{
                 'desc' =>       __('Remove from playlist','wpsstm'),
                 'href' =>       $unlink_action_url,
             );
-        }
+        //}
         
         if ($can_move_subtrack){
             $unlink_move_url = $this->get_subtrack_action_url('move');
@@ -1159,6 +1166,86 @@ class WPSSTM_Track{
             'error'     => $error
         );
 
+    }
+    
+    function do_track_action($action){
+        global $wp_query;
+        
+        $success = null;
+        
+        //action
+        switch($action){
+            case 'favorite':
+            case 'unfavorite':
+                $do_love = ( $action == 'favorite');
+                $success = $this->love_track($do_love);
+            break;
+
+            case 'trash':
+                $success = $this->trash_track();
+            break;
+            case 'toggle-tracklists':
+                $to_tracklists = wpsstm_get_array_value('target-tracklists',$_REQUEST);
+                if (!$to_tracklists){
+                    $success = new WP_Error('wpsstm_missing_target_tracklist',__('Missing target tracklist','wpsstm'));
+                }else{
+ 
+                    foreach ((array)$to_tracklists as $id=>$str_value){
+                        $append = ($str_value == 'on');
+                        $tracklist = new WPSSTM_Post_Tracklist($id);
+                        
+                        if ($append){
+                            $success = $tracklist->save_subtrack($this);
+
+                        }else{
+                            $matches = $this->get_subtrack_matches($tracklist->post_id);
+
+                            foreach ((array)$matches as $subtrack_id){
+                                $this->populate_subtrack($subtrack_id);
+                                $success = $this->unlink_subtrack();
+                               if ( is_wp_error($success) ){
+                                    break; //break at first error
+                                }
+                                
+                            }
+                            
+                        }
+
+                        if ( is_wp_error($success) ){
+                            break; //break at first error
+                        }
+                    }
+                }
+            break;
+            case 'append':
+                $success = $this->tracklist->save_subtrack($this);
+            break;
+            case 'new-tracklist':
+                $tracklist_title = wpsstm_get_array_value('wpstm-new-tracklist-title',$_REQUEST);
+                if (!$tracklist_title){
+                    $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
+                }else{
+                    //create new tracklist
+                    $tracklist = new WPSSTM_Post_Tracklist();
+                    $tracklist->title = $tracklist_title;
+                    $success = $tracklist->save_tracklist();
+                    
+                    //append subtrack
+                    if ( !is_wp_error($success) ){
+                        $success = $tracklist->save_subtrack($this);
+                    }
+                    
+                    //update track action //TOUFIX elsewhere ?
+                    $wp_query->set(WP_SoundSystem::$qvar_action,'tracklists-selector');
+                    
+                }
+            break;
+            case 'unlink':
+                $success = $this->unlink_subtrack();
+            break;
+        }
+        
+        return $success;
     }
     
 }

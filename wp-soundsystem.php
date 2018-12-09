@@ -39,8 +39,8 @@ class WP_SoundSystem {
     public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
     
-    public static $qvar_redirect = 'wpsstm_redirect';
     public static $qvar_action = 'wpsstm_action';
+    public static $qvar_ajax = 'wpsstm_ajax_action';
     
     
     public $subtracks_table_name = 'wpsstm_subtracks';
@@ -207,7 +207,7 @@ class WP_SoundSystem {
     }
     
     function add_wpsstm_query_vars($qvars){
-        $qvars[] = self::$qvar_redirect;
+        $qvars[] = self::$qvar_ajax;
         $qvars[] = self::$qvar_action;
         return $qvars;
     }

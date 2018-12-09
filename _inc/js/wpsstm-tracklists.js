@@ -327,6 +327,10 @@ class WpsstmTracklist {
         var self = this;
         var track_el = track_obj.track_el;
         var link_el = track_el.find('.wpsstm-track-action-unlink a');
+        
+		var data : {
+			action : 'wpsstm_track_action'
+		}
 
         jQuery.ajax({
             type: "post",

@@ -26,112 +26,126 @@ $body_classes = array(
     <?php wp_head(); ?>
 </head>
 <body <?php body_class($body_classes); ?>>
-    <header>
-        <div class="wpsstm-track-notices">
-            <?php
-            /*
-            Notices
-            */
-            if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
-                echo $notices_el;
-            }
+    <?php 
+    if (have_posts()){
+        while (have_posts()) {
+            
+            the_post();
+            
+            ///
+            
             ?>
-        </div>
-        <p>
-            <h2 class="wpsstm-track-title"><?php echo $wpsstm_track->title;?></h2>
-            <h3 class="wpsstm-track-artist"><?php echo $wpsstm_track->artist;?></h3>
-            <h3 class="wpsstm-track-album"><?php echo $wpsstm_track->album;?></h3>
-        </p>
-        <p>
-            <?php
-            /*
-            Track actions
-            */
-            if ( $actions = $wpsstm_track->get_track_links($wpsstm_tracklist) ){
-                $list = get_actions_list($actions,'track');
-                echo $list;
-            }
-            ?>
-        </p>
-        <p>
-        <?php
+            <header>
+                    <div class="wpsstm-track-notices">
+                        <?php
+                        /*
+                        Notices
+                        */
+                        if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
+                            echo $notices_el;
+                        }
+                        ?>
+                    </div>
+                    <p>
+                        <h2 class="wpsstm-track-title"><?php echo $wpsstm_track->title;?></h2>
+                        <h3 class="wpsstm-track-artist"><?php echo $wpsstm_track->artist;?></h3>
+                        <h3 class="wpsstm-track-album"><?php echo $wpsstm_track->album;?></h3>
+                    </p>
+                    <p>
+                        <?php
+                        /*
+                        Track actions
+                        */
+                        if ( $actions = $wpsstm_track->get_track_links($wpsstm_tracklist) ){
+                            $list = get_actions_list($actions,'track');
+                            echo $list;
+                        }
+                        ?>
+                    </p>
+                    <p>
+                    <?php
 
-        /*
-        Parent playlists
-        */
-        if ( $playlists_list = $wpsstm_track->get_parents_list() ){
+                    /*
+                    Parent playlists
+                    */
+                    if ( $playlists_list = $wpsstm_track->get_parents_list() ){
 
-            ?>
-            <div class="wpsstm-track-playlists">
-                <strong><?php _e('In playlists:','wpsstm');?></strong>
-                <?php echo $playlists_list; ?>
-            </div>
-            <?php
-        }
-        ?>
-        </p>
-        <p>
-        <?php
-        /*
-        Favorited by
-        */
-        if ( $loved_list = $wpsstm_track->get_loved_by_list() ){
-            ?>
-            <div class="wpsstm-track-loved-by">
-                <strong><?php _e('Loved by:','wpsstm');?></strong>
-                <?php echo $loved_list; ?>
-            </div>
-            <?php
-        }
-        ?>
-        </p>
-    </header>
-    <div>
-        <?php
+                        ?>
+                        <div class="wpsstm-track-playlists">
+                            <strong><?php _e('In playlists:','wpsstm');?></strong>
+                            <?php echo $playlists_list; ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    </p>
+                    <p>
+                    <?php
+                    /*
+                    Favorited by
+                    */
+                    if ( $loved_list = $wpsstm_track->get_loved_by_list() ){
+                        ?>
+                        <div class="wpsstm-track-loved-by">
+                            <strong><?php _e('Loved by:','wpsstm');?></strong>
+                            <?php echo $loved_list; ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    </p>
+                </header>
+                <div>
+                    <?php
 
-        /*
-        Content
-        */
+                    /*
+                    Content
+                    */
 
-        switch ($action){
-            case 'tracklists-selector':
-            case 'toggle-tracklists':
+                    switch ($action){
+                        case 'tracklists-selector':
+                        case 'toggle-tracklists':
+                            ?>
+                            <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
+                                <?php wpsstm_locate_template( 'track-append.php',true );?>
+                            </div>
+                            <?php
+
+                        break;
+                        case 'trash':
+                            ?>
+                            <div id="wpsstm-track-admin-trash" class="wpsstm-track-admin">
+                                trash
+                            </div>
+                            <?php
+                        break;
+                        case 'about':
+                            global $wpsstm_lastfm;
+                            $text_el = null;
+                            $bio = $wpsstm_lastfm->get_artist_bio($wpsstm_track->artist);
+
+                            //artist
+                            if ( !is_wp_error($bio) && isset($bio['summary']) ){
+                                $artist_text = $bio['summary'];
+                            }else{
+                                $artist_text = __('No data found for this artist','wpsstm');
+                            }
+
+                            ?>
+                            <div id="wpsstm-track-admin-about" class="wpsstm-track-admin">
+                                <h2><?php echo $wpsstm_track->artist;?></h2>
+                                <div><?php echo $artist_text;?></div>
+                            </div>
+                            <?php
+                        break;
+                    }
                 ?>
-                <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                    <?php wpsstm_locate_template( 'track-append.php',true );?>
                 </div>
-                <?php
-
-            break;
-            case 'trash':
-                ?>
-                <div id="wpsstm-track-admin-trash" class="wpsstm-track-admin">
-                    trash
-                </div>
-                <?php
-            break;
-            case 'about':
-                global $wpsstm_lastfm;
-                $text_el = null;
-                $bio = $wpsstm_lastfm->get_artist_bio($wpsstm_track->artist);
-
-                //artist
-                if ( !is_wp_error($bio) && isset($bio['summary']) ){
-                    $artist_text = $bio['summary'];
-                }else{
-                    $artist_text = __('No data found for this artist','wpsstm');
-                }
-
-                ?>
-                <div id="wpsstm-track-admin-about" class="wpsstm-track-admin">
-                    <h2><?php echo $wpsstm_track->artist;?></h2>
-                    <div><?php echo $artist_text;?></div>
-                </div>
-                <?php
-            break;
+            <?php
+            
         }
+    }
     ?>
-    </div>
 </body>
 <?php
 //

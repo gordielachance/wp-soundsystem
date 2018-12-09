@@ -259,7 +259,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //$this->tracklist_log(array('slug'=>$slug,'code'=>$code,'error'=>$error),'[WPSSTM_Post_Tracklist notice]: ' . $message ); 
         
         $this->notices[] = array(
-            'slug'      => $slug,
             'code'      => $code,
             'message'   => $message,
             'error'     => $error
@@ -424,6 +423,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_action_url($action = null){
+
         if ( !$this->post_id ) return;
 
         $url = add_query_arg(
@@ -480,7 +480,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
             
         //capability check
-        $can_get_authorship = $this->can_get_tracklist_authorship();
+        $can_get_authorship = $this->user_can_get_tracklist_autorship();
         
         if ( !$can_get_authorship ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
@@ -552,8 +552,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return update_post_meta( $this->post_id, self::$feed_url_meta_name, $this->feed_url );
         }
     }
+    
+    function user_can_edit_tracklist(){
+        $post_type = get_post_type($this->post_id);
+        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return false;
         
-    function can_get_tracklist_authorship(){
+        $tracklist_obj = get_post_type_object($post_type);
+        $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
+        
+        return $can_edit_tracklist;
+    }
+        
+    function user_can_get_tracklist_autorship(){
         
         if ( !$post_type = get_post_type($this->post_id) ) return false;
         if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return false; //is not a tracklist (maybe we are checking a single track here)
@@ -581,27 +591,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return ( $can_edit_tracklist && $can_edit_type );
         
     }
-    
-    function user_can_store_tracklist(){
 
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $post_author = get_post_field( 'post_author', $this->post_id );
-        if( $post_author != $community_user_id ) return false;
-
-        $post_type = get_post_type($this->post_id);
-        $tracklist_obj = get_post_type_object($post_type);
-        return current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        
-    }
-    
     function user_can_reorder_tracks(){
-        $post_type = get_post_type($this->post_id);
-        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return false;
-        
-        $tracklist_obj = get_post_type_object($post_type);
-        $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        
-        return ( ($this->tracklist_type == 'static') && $can_edit_tracklist );
+        return ( $this->user_can_edit_tracklist() && ($this->tracklist_type == 'static') );
     }
 
     function get_tracklist_attr($values_attr=null){
@@ -752,6 +744,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     protected function update_subtracks(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        //TOUFIX TOUCHECK capability check
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks'); 
@@ -980,7 +974,7 @@ class WPSSTM_Tracklist{
     var $track;
     var $current_track = -1;
     var $track_count = -1; //-1 when not yet populated
-    var $in_track_loop = false;
+    var $in_subtracks_loop = false;
 
     function __construct($post_id = null){
  
@@ -1063,7 +1057,7 @@ class WPSSTM_Tracklist{
 	 * Set up the next track and iterate current track index.
 	 * @return WP_Post Next track.
 	 */
-	public function next_track() {
+	public function next_subtrack() {
 
 		$this->current_track++;
 
@@ -1077,22 +1071,15 @@ class WPSSTM_Tracklist{
 	 * property to true.
 	 * @global WP_Post $wpsstm_track
 	 */
-	public function the_track() {
+	public function the_subtrack() {
 		global $wpsstm_track;
-		$this->in_track_loop = true;
+		$this->in_subtracks_loop = true;
 
 		if ( $this->current_track == -1 ) // loop has just started
-			/**
-			 * Fires once the loop is started.
-			 *
-			 * @since 2.0.0
-			 *
-			 * @param WP_Query &$this The WP_Query instance (passed by reference).
-			 */
 			do_action_ref_array( 'wpsstm_tracks_loop_start', array( &$this ) );
 
-		$wpsstm_track = $this->next_track();
-		//$this->setup_trackdata( $wpsstm_track );
+        $wpsstm_track = $this->next_subtrack();
+        //$this->setup_subtrack_data( $wpsstm_track );
 	}
 
 	/**
@@ -1100,7 +1087,8 @@ class WPSSTM_Tracklist{
 	 * Calls the {@see 'wpsstm_tracks_loop_end'} action when the loop is complete.
 	 * @return bool True if tracks are available, false if end of loop.
 	 */
-	public function have_tracks() {
+	public function have_subtracks() {
+
 		if ( $this->current_track + 1 < $this->track_count ) {
 			return true;
 		} elseif ( $this->current_track + 1 == $this->track_count && $this->track_count > 0 ) {
@@ -1116,7 +1104,7 @@ class WPSSTM_Tracklist{
 			$this->rewind_tracks();
 		}
 
-		$this->in_track_loop = false;
+		$this->in_subtracks_loop = false;
 		return false;
 	}
 

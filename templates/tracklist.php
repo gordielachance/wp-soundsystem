@@ -25,48 +25,54 @@ $body_classes = array(
 </head>
 <body <?php body_class($body_classes); ?>>  
     <?php 
+    if (have_posts()){
+        while (have_posts()) {
+            
+            the_post();
+            
+            ///
+            
+            $tab_content = null;
 
-    $tab_content = null;
-    
-    /*
-    Notices
-    */
+            /*
+            Notices
+            */
 
-    //wizard temporary tracklist notice
-    //TO FIX should be in populate_wizard_tracklist() ?
-    if ( !wpsstm_is_backend() && $wpsstm_tracklist->can_get_tracklist_authorship() ){
-        $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
-        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
-        $message = __("This is a temporary playlist.","wpsstm");
-        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
-        $wpsstm_tracklist->add_notice('get-autorship', $message );
+            //wizard temporary tracklist notice
+            //TO FIX should be in populate_wizard_tracklist() ?
+            if ( !wpsstm_is_backend() && $wpsstm_tracklist->user_can_get_tracklist_autorship() ){
+                $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
+                $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+                $message = __("This is a temporary playlist.","wpsstm");
+                $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+                $wpsstm_tracklist->add_notice('get-autorship', $message );
 
-    }
-
-    if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
-        echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
-    }
-
-    switch($action){
-        case 'share':
-            $text = __("Use this link to share this playlist:","wpsstm");
-            $link = get_permalink($wpsstm_tracklist->post_id);
-            printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
-        break;
-        default: //'render'
-            $wpsstm_tracklist->populate_subtracks();
-
-            //TOUFIX TOCHECK should be elsewhere ?
-            if ( !$wpsstm_tracklist->get_options('ajax_autosource') ){
-                $wpsstm_tracklist->tracklist_autosource();
             }
 
-            wpsstm_locate_template( 'content-tracklist.php', true, false );
-        break;
+            if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
+                echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
+            }
+
+            switch($action){
+                case 'share':
+                    $text = __("Use this link to share this playlist:","wpsstm");
+                    $link = get_permalink($wpsstm_tracklist->post_id);
+                    printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
+                break;
+                default: //'render'
+                    $wpsstm_tracklist->populate_subtracks();
+
+                    //TOUFIX TOCHECK should be elsewhere ?
+                    if ( !$wpsstm_tracklist->get_options('ajax_autosource') ){
+                        $wpsstm_tracklist->tracklist_autosource();
+                    }
+
+                    wpsstm_locate_template( 'content-tracklist.php', true, false );
+                break;
+            }
+        } 
     }
-
     ?>
-
     <?php
     //
     do_action( 'get_footer', 'wpsstm-tracklist-iframe' ); ////since we don't use get_header() here, fire the action so hooks still are loaded.

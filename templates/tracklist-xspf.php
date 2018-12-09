@@ -41,10 +41,10 @@ $xspf->addPlaylistInfo('annotation', $annotation);
 
 
 //subtracks
-if ( $tracklist->have_tracks() ) {
+if ( $tracklist->have_subtracks() ) {
     $track_position = 0;
-    while ( $tracklist->have_tracks() ) {
-        $tracklist->the_track();
+    while ( $tracklist->have_subtracks() ) {
+        $tracklist->the_subtrack();
         global $wpsstm_track;
         $arr = $wpsstm_track->to_xspf_array();
         $xspf->addTrack($arr);

@@ -232,10 +232,7 @@ class WPSSTM_Core_Wizard{
         if ($is_autosave || $is_autodraft || $is_revision || !$is_valid_nonce) return;
         
         $_POST[ 'wpsstm_scraper_wizard_nonce' ] = null; //so it breaks infinite loop
-        
-        //set global $wpsstm_tracklist
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        
+
         $wpsstm_tracklist->tracklist_log($wpsstm_tracklist->post_id, "WPSSTM_Core_Wizard::backend_wizard_save()");
 
         $wizard_data = ( isset($_POST['wpsstm_wizard']) ) ? $_POST['wpsstm_wizard'] : null;

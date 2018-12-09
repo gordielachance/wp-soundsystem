@@ -56,25 +56,24 @@ global $wpsstm_tracklist;
     tracks list
     */
 
-    if ( $wpsstm_tracklist->have_tracks() ) {
+    if ( $wpsstm_tracklist->have_subtracks() ) {
     ?>
         <ul class="wpsstm-tracks-list">
             <?php
-            while ( $wpsstm_tracklist->have_tracks() ) {
-                $wpsstm_tracklist->the_track();
-                global $wpsstm_track;
+
+            while ( $wpsstm_tracklist->have_subtracks() ) {
+                $wpsstm_tracklist->the_subtrack();
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
             ?>
        </ul>
     <?php
-        wp_reset_postdata(); //TOFIXTOCHECK useful ? Since we don't use the_post here...
     }else{ //no tracks
         ?>
         <p id="wpsstm-no-tracks">
             <?php _e('No tracks found.','wpsstm'); ?>
             <?php
-            if ($wpsstm_tracklist->tracklist_type=='static'){
+            if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
                 ?>
                 <a href="#"><?php _e('Add tracks','wpsstm'); ?> ?</a>
                 <?php
