@@ -32,17 +32,17 @@ class WPSSTM_Track{
     public $notices = array();
     
     function __construct( $post_id = null, $tracklist = null ){
+        
+        /*
+        Tracklist
+        */
+        $this->tracklist = new WPSSTM_Post_Tracklist();
 
         //has track ID
         if ( $track_id = intval($post_id) ) {
             $this->post_id = $track_id;
             $this->populate_track_post();
         }
-        
-        /*
-        Tracklist
-        */
-        $this->tracklist = new WPSSTM_Post_Tracklist();
         
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
@@ -58,7 +58,7 @@ class WPSSTM_Track{
     function populate_track_post(){
         
         if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track ) ){
-            $this->tracklist_log('Invalid track post');
+            $this->track_log('Invalid track post');
             return;
         }
         
