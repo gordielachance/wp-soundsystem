@@ -110,6 +110,8 @@ class WPSSTM_Track{
         foreach ($args as $key=>$value){
 
             switch($key){
+                case 'album';
+                   if ($value == '_') continue;
                 case 'source_urls':
                     
                     $sources = array();
@@ -358,6 +360,11 @@ class WPSSTM_Track{
 
         if ( !user_can($user_id,$required_cap) ){
             return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new track.",'wpsstm') );
+        }
+        
+        //album
+        if ($this->album != '_'){
+            $this->album = null;
         }
         
         $meta_input = array(
