@@ -122,7 +122,7 @@ class WPSSTM_Core_Tracks{
             $wpsstm_track->from_array($track_args);
         }
 
-        if ( $wpsstm_track->post_id ){
+        if ( $wpsstm_track->post_id ){ //TOUFIX what if empty ?
             wpsstm()->debug_log($wpsstm_track->to_array(),"defined global track");
         }
 
@@ -249,20 +249,28 @@ class WPSSTM_Core_Tracks{
             '%subtrack_id%',
             '(\d+)'
         );
+        
+        //single NEW subtrack action
+        add_rewrite_rule(
+            sprintf('^%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
+            sprintf('index.php?post_type=%s&wpsstm_action_data[artist]=$matches[1]&wpsstm_action_data[album]=$matches[2]&wpsstm_action_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_action_data[artist]=ARTIST&wpsstm_action_data[album]=ALBUM&wpsstm_action_data[title]=TITLE&wpsstm_action=unlink
+            'top'
+        );
 
-        //single subtrack action
+        //single ID subtrack action
         add_rewrite_rule(
             sprintf('^%s/%s/(\d+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/action/ACTION
             sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
             'top'
         );
+        
         add_rewrite_rule(
             sprintf('^%s/%s/(\d+)/ajax/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/ajax/ACTION
             sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
             'top'
         );
         
-        //single subtrack
+        //single ID subtrack
         add_rewrite_rule(
             sprintf('^%s/%s/(\d+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID
             sprintf('index.php?post_type=%s&subtrack_id=$matches[1]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251
