@@ -108,13 +108,8 @@ class WPSSTM_Track{
 
         //set properties from args input
         foreach ($args as $key=>$value){
-            
-            if ( !property_exists($this,$key) )  continue;
-            
+
             switch($key){
-                case 'tracklist_id':
-                    $this->tracklist = new WPSSTM_Post_Tracklist($value);
-                break;
                 case 'source_urls':
                     
                     $sources = array();
@@ -128,6 +123,7 @@ class WPSSTM_Track{
                     $this->add_sources($sources);
                 break;
                 default:
+                    if ( !property_exists($this,$key) )  continue;
                     if ( !isset($args[$key]) ) continue; //value has not been set
                     $this->$key = $args[$key];
                 break;
@@ -718,29 +714,37 @@ class WPSSTM_Track{
         return $inserted;
     }
 
-    function get_subtrack_url(){
-        if ( !$this->subtrack_id ) return;
-        $url = home_url();
-        if ( !get_option('permalink_structure') ){
-            $args = array(
-                'post_type' =>      wpsstm()->$post_type_track,
-                'subtrack_id' =>    $this->subtrack_id
-            );
-            $url = add_query_arg($args,$url);
-        }else{
-            $url .= sprintf('/%s/%s/%d/',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,$this->subtrack_id);
-        }
-
-        return $url;
-    }
-    
     function get_track_url(){
-        $url = null;
+        $url = home_url();
         
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
+        
+        /*
+        Subtrack
+        */
         if ( $this->subtrack_id ){
-            $url = $this->get_subtrack_url();
+            if ( !get_option('permalink_structure') ){
+                $args = array(
+                    'post_type' =>      wpsstm()->$post_type_track,
+                    'subtrack_id' =>    $this->subtrack_id
+                );
+                $url = add_query_arg($args,$url);
+            }else{
+                $url .= sprintf('/%s/%s/%d/',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,$this->subtrack_id);
+            }
+        /*
+        Track
+        */
         }elseif ( $this->post_id ){
-            $url = get_permalink($this->post_id);
+            if ( !get_option('permalink_structure') ){
+                $args = array(
+                    'post_type' =>      wpsstm()->$post_type_track,
+                    'p' =>              $this->post_id
+                );
+                $url = add_query_arg($args,$url);
+            }else{
+                $url .= sprintf('/%s/%d/',$post_type_obj->rewrite['slug'],$this->post_id);
+            }
         }else{
             return false;
         }
@@ -751,7 +755,7 @@ class WPSSTM_Track{
     function get_track_action_url($action,$ajax = false){
 
         $url = $this->get_track_url();
-        if (!$url) return;
+        if (!$url) return false;
         
         $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
         $action_permavar = ($ajax) ? 'ajax' : 'action';
@@ -771,10 +775,11 @@ class WPSSTM_Track{
             //TOUFIXTOUCHECK maybe should be elsewhere
             case 'tracklists-selector':
                 if ($tracklist_id = $this->tracklist->post_id){
+                    $track_arr = array(
+                        'from_tracklist' => $tracklist_id
+                    );
                     $args = array(
-                        'wpsstm_item' => array(
-                            'from_tracklist' => $tracklist_id
-                        )
+                        'wpsstm_action_data' => $track_arr
                     );
                     $url = add_query_arg($args,$url);
                 }
@@ -1193,7 +1198,7 @@ class WPSSTM_Track{
 
     }
     
-    function do_track_action($action){
+    function do_track_action($action,$action_data = null){
         global $wp_query;
         
         $success = null;

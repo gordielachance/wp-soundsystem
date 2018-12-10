@@ -283,40 +283,39 @@ class WpsstmTracklist {
     update_subtrack_position(track_obj,new_pos){
         var self = this;
         var track_el = track_obj.track_el;
-        var link = track_el.find('.wpsstm-track-action-move a');
+        var link_el = track_el.find('.wpsstm-track-action-move a');
+        var action_url = link_el.data('wpsstm-ajax-url');
 
         //ajax update order
         var ajax_data = {
-            action:     'wpsstm_update_subtrack_position',
-            track:      track_obj.to_ajax(),
             new_pos:    new_pos,
         };
 
         jQuery.ajax({
             type: "post",
-            url: wpsstmL10n.ajaxurl,
+            url: action_url,
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');
-                link.addClass('action-loading');
+                link_el.addClass('action-loading');
             },
             success: function(data){
                 if (data.success === false) {
-                    link.addClass('action-error');
+                    link_el.addClass('action-error');
                     console.log(data);
                 }else{
                     self.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                link.addClass('action-error');
+                link_el.addClass('action-error');
                 console.log(xhr.status);
                 console.log(thrownError);
             },
             complete: function() {
                 track_el.removeClass('track-loading');
-                link.removeClass('action-loading');
+                link_el.removeClass('action-loading');
             }
         })
 
@@ -328,10 +327,12 @@ class WpsstmTracklist {
         var track_el = track_obj.track_el;
         var link_el = track_el.find('.wpsstm-track-action-unlink a');
         var action_url = link_el.data('wpsstm-ajax-url');
+        var ajax_data = {};
 
         jQuery.ajax({
             type: "post",
             url: action_url,
+            data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');

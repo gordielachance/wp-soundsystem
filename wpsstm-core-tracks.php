@@ -17,7 +17,7 @@ class WPSSTM_Core_Tracks{
         add_action( 'init', array($this,'register_post_type_track' ));
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'parse_query', array($this,'populate_global_track'));
-        add_action( 'the_post', array($this,'populate_loop_track'),10,2);
+        //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
 
         //rewrite rules
         add_action('init', array($this, 'tracks_rewrite_rules'), 100 );
@@ -95,7 +95,7 @@ class WPSSTM_Core_Tracks{
         
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
-        $track_args = $query->get( 'wpsstm_item' );
+        $track_args = $query->get( 'wpsstm_action_data' );
         
         
         /*
@@ -137,7 +137,6 @@ class WPSSTM_Core_Tracks{
     }
 
     function handle_track_action(){
-        global $wp_query;
         global $wpsstm_track;
         $success = null;
         $redirect_url = null;
@@ -146,7 +145,9 @@ class WPSSTM_Core_Tracks{
         if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
 
-        $success = $wpsstm_track->do_track_action($action);
+        $action_data = get_query_var( 'wpsstm_action_data' );
+        
+        $success = $wpsstm_track->do_track_action($action,$action_data);
 
         switch($action){
             case 'unlink':
@@ -180,10 +181,7 @@ class WPSSTM_Core_Tracks{
         }
 
     }
-    
-    /*
-    Maybe see also https://www.coderrr.com/create-your-own-admin-ajax-php-type-handler/
-    */
+
     function handle_ajax_track_action($template){
         global $wp_query;
         global $wpsstm_track;
@@ -194,6 +192,8 @@ class WPSSTM_Core_Tracks{
         if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //ajax action does not exists
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
         
+        $action_data = get_query_var( 'wpsstm_action_data' );
+        
         wpsstm()->debug_log($action,"handle_ajax_track_action");
 
         $result = array(
@@ -203,7 +203,7 @@ class WPSSTM_Core_Tracks{
             'item' =>   $wpsstm_track->to_array(),
         );
         
-        $success = $wpsstm_track->do_track_action($action);
+        $success = $wpsstm_track->do_track_action($action,$action_data);
 
         if ( is_wp_error($success) ){
             $result['success'] = false;
@@ -232,11 +232,7 @@ class WPSSTM_Core_Tracks{
         //check action
         $action = get_query_var( 'wpsstm_action' );
         if(!$action) return $template;
-        
-        //check track exists
-        //TOUFIX what if track do not have a track ID (new track) ?
-        if(!$wpsstm_track->post_id) return $template;
-        
+
         switch($action){
             default:
                 $template = wpsstm_locate_template( 'track.php' );
@@ -249,7 +245,6 @@ class WPSSTM_Core_Tracks{
 
         $track_post_type_obj = get_post_type_object( wpsstm()->post_type_track );
 
-        //TOUFIX TOUCHECK useful ?
         add_rewrite_tag(
             '%subtrack_id%',
             '(\d+)'
@@ -267,6 +262,13 @@ class WPSSTM_Core_Tracks{
             'top'
         );
         
+        //single subtrack
+        add_rewrite_rule(
+            sprintf('^%s/%s/(\d+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID
+            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251
+            'top'
+        );
+        
         
         //single track action
         add_rewrite_rule(
@@ -277,13 +279,6 @@ class WPSSTM_Core_Tracks{
         add_rewrite_rule(
             sprintf('^%s/(\d+)/ajax/([^/]+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID/ajax/ACTION
             sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
-            'top'
-        );
-
-        //single subtrack
-        add_rewrite_rule(
-            sprintf('^%s/%s/(\d+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID
-            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251
             'top'
         );
 

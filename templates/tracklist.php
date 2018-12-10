@@ -48,11 +48,20 @@ $body_classes = array(
                 $wpsstm_tracklist->add_notice('get-autorship', $message );
 
             }
-
-            if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
-                echo sprintf('<div class="wpsstm-tracklist-notices">%s</div>',$notices_el);
-            }
-
+            ?>
+    
+            <div class="wpsstm-tracklist-notices">
+                <?php
+                /*
+                Notices
+                */
+                if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
+                    echo $notices_el;
+                }
+                ?>
+                
+            </div>
+            <?php
             switch($action){
                 case 'share':
                     $text = __("Use this link to share this playlist:","wpsstm");

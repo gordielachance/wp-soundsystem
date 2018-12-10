@@ -421,18 +421,47 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         return apply_filters('wpsstm_tracklist_actions',$actions);
     }
+    
+    function get_tracklist_url(){
+        
+        $url = home_url();
+        
+        if ( !$this->post_id ) return false;
+        $post_type = get_post_type($this->post_id);
+        $post_type_obj = get_post_type_object($post_type);
+        
+        if ( !get_option('permalink_structure') ){
+            $args = array(
+                'post_type' =>      $post_type,
+                'p' =>              $this->post_id
+            );
+            $url = add_query_arg($args,$url);
+        }else{
+            $url .= sprintf('/%s/%d/',$post_type_obj->rewrite['slug'],$this->post_id);
+        }
+        
+        return $url;
+    }
 
-    function get_tracklist_action_url($action = null){
+    function get_tracklist_action_url($action = null,$ajax=false){
 
-        if ( !$this->post_id ) return;
+        $url = $this->get_tracklist_url();
+        if ( !$url ) return false;
 
-        $url = add_query_arg(
-            array(
-                'wpsstm_action' => $action
-            ),
-            get_permalink($this->post_id)
-        );
+        $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
+        $action_permavar = ($ajax) ? 'ajax' : 'action';
+        
 
+        if ( !get_option('permalink_structure') ){
+            $args = array(
+                $action_var =>     $action,
+            );
+
+            $url = add_query_arg($args,$url);
+        }else{
+            $url .= sprintf('%s/%s/',$action_permavar,$action);
+        }
+        
         return $url;
     }
 
@@ -955,8 +984,47 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
         }
         wpsstm()->debug_log($data,$title);
+    }
+    
+    function do_tracklist_action($action,$action_data = null){
+        global $wp_query;
         
+        $success = null;
+        
+        //action
+        //action
+        switch($action){
 
+            case 'queue': //add subtrack
+                $track = new WPSSTM_Track();
+                $track->from_array($action_data);
+                $success = $this->save_subtrack($track);
+            break;
+
+            case 'favorite':
+            case 'unfavorite':
+                $do_love = ( $action == 'favorite');
+                $success = $this->love_tracklist($do_love);
+            break;
+
+            case 'trash':
+                $success = $this->trash_tracklist();
+            break;
+
+            case 'lock':
+            case 'unlock':
+                $live = ( $action == 'unlock');
+                $success = $this->toggle_live($live);
+            break;
+            case 'refresh':
+                //remove updated time
+                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+            break;
+            case 'get-autorship':
+                $success = $this->get_autorship();
+            break;
+        }
+        return $success;
     }
 
 }

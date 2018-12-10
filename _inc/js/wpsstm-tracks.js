@@ -377,16 +377,14 @@ class WpsstmTrack {
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link = $(track_el).find('.wpsstm-track-action-trash a');
+        var link_el = $(track_el).find('.wpsstm-track-action-trash a');
+        var action_url = link_el.data('wpsstm-ajax-url');
 
-        var ajax_data = {
-            action:     'wpsstm_trash_track',
-            track:      track_obj.to_ajax(),
-        };
+        var ajax_data = {};
 
         jQuery.ajax({
             type: "post",
-            url: wpsstmL10n.ajaxurl,
+            url: action_url,
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
@@ -394,7 +392,7 @@ class WpsstmTrack {
             },
             success: function(data){
                 if (data.success === false) {
-                    link.addClass('action-error');
+                    link_el.addClass('action-error');
                     console.log(data);
                 }else{
                     $(track_el).remove();
@@ -402,7 +400,7 @@ class WpsstmTrack {
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                link.addClass('action-error');
+                link_el.addClass('action-error');
                 console.log(xhr.status);
                 console.log(thrownError);
             },

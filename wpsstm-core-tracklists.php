@@ -22,8 +22,9 @@ class WPSSTM_Core_Tracklists{
         add_action( 'init', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         add_action( 'parse_query', array($this,'populate_global_tracklist'));
-        add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
+        //add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2); //TOUFIX if enabled, notices do not work anymore
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
+        add_filter( 'template_include', array($this,'handle_ajax_tracklist_action'), 5);
         add_filter('template_include', array($this,'tracklist_template') );
         add_filter( 'post_link', array($this, 'filter_tracklist_link'), 10, 3 );
 
@@ -245,13 +246,7 @@ class WPSSTM_Core_Tracklists{
     }
     
     function tracklists_rewrite_rules(){
-        
-        add_rewrite_tag(
-            '%wpsstm_action%',
-            '([^&]+)',
-            sprintf('%s=','wpsstm_action')
-        );
-        
+
         //all tracklists (static,live,album)
         foreach((array)wpsstm()->tracklist_post_types as $post_type){
 
@@ -259,7 +254,7 @@ class WPSSTM_Core_Tracklists{
 
             //subtrack by tracklist position
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS/ACTION
+                sprintf('^%s/(\d+)/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS
                 sprintf('index.php?post_type=%s&tracklist_id=$matches[1]&subtrack_position=$matches[2]',wpsstm()->post_type_track),
                 'top'
             );
@@ -267,30 +262,44 @@ class WPSSTM_Core_Tracklists{
             //tracklist ID action
 
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ACTION
+                sprintf('^%s/(\d+)/action/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/action/ACTION
                 sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',$post_type),
+                'top'
+            );
+            
+            add_rewrite_rule( 
+                sprintf('^%s/(\d+)/ajax/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ajax/ACTION
+                sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_ajax_action=$matches[2]',$post_type),
                 'top'
             );
             
              //tracklist ID
             
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ACTION
+                sprintf('^%s/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID
                 sprintf('index.php?post_type=%s&p=$matches[1]',$post_type),
                 'top'
             );
+            
             
         }
     }
     
     function populate_global_tracklist($query){
         global $wpsstm_tracklist;
+        global $post;
 
-        if( !$post_id = $query->get( 'p' ) ) return;
-        $post_type = get_post_type($post_id);
-        if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return;
+        if( $post_id = $query->get( 'p' ) ){
+            $post_type = get_post_type($post_id);
+            if( in_array($post_type,wpsstm()->tracklist_post_types) ){
+                $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
+            }
+        }
+
+        if ( $tracklist_id = get_query_var( 'tracklist_id' ) ){
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+        }
         
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
     }
     
@@ -310,96 +319,82 @@ class WPSSTM_Core_Tracklists{
 
     function handle_tracklist_action(){
         global $wpsstm_tracklist;
-        global $wpsstm_track;
+        $success = null;
+        $redirect_url = null;
+        $action_feedback = null;
         
-        //check post
-        $id = get_query_var( 'p' );
-        $post_type = get_post_type($id);
-        if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return; //post does not exists
+        if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
+        if ( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
         
-        //check action
-        $action = get_query_var( 'wpsstm_action' );
-        if(!$action) return;
-        
-        //populate stuff
-        $redirect_url = get_permalink($id);
-        $subtrack_arr = get_query_var( 'wpsstm_item' );
+        $action_data = get_query_var( 'wpsstm_action_data' );
 
-        //action
-        switch($action){
-
-            case 'queue': //add subtrack
-                $track = new WPSSTM_Track();
-                $track->from_array($subtrack_arr);
-                $success = $wpsstm_tracklist->save_subtrack($track);
-            break;
-
-            case 'favorite':
-            case 'unfavorite':
-                $do_love = ( $action == 'favorite');
-                $success = $wpsstm_tracklist->love_tracklist($do_love);
-            break;
-
-            case 'trash':
-                $success = $tracklist->trash_tracklist();
-            break;
-
-            case 'lock':
-            case 'unlock':
-                $live = ( $action == 'unlock');
-                $success = $wpsstm_tracklist->toggle_live($live);
-            break;
-            case 'refresh':
-                //remove updated time
-                $success = delete_post_meta($wpsstm_tracklist->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
-            break;
-            case 'get-autorship':
-                $success = $tracklist->get_autorship();
-            break;
-        }
-        
-        /*
-        Redirection
-        */
-        /*
-        if (!$success){
-            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$action),$redirect_url );
-        }
-        if ( is_wp_error($success) ){
-            $redirect_url = add_query_arg( array('wpsstm_error_code'=>$success->get_error_code()),$redirect_url );
-        }else{
-            $redirect_url = add_query_arg( array('wpsstm_success_code'=>$action),$redirect_url );
-        }
-
-        wp_safe_redirect($redirect_url);
-        exit();
-
-        if($redirect){
-            print_r($redirect);
-            die();
-        }
-        */
+        $success = $wpsstm_tracklist->do_tracklist_action($action,$action_data);
 
         /*
-        Ajax
+        Redirect or notice
         */
-        $is_ajax = wpsstm_is_ajax();
-        if ( $is_ajax ){
-            $result = array(
-                'input'     => $_REQUEST,
-                //'track'     => $wpsstm_track->to_array(),
-                'message'   => "couki",
-                'notice'    => null,
-                'success'   => false,
+        if ($redirect_url){
+            
+            $redirect_args = array(
+                'wpsstm_did_action' =>  $action,
+                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
             );
             
-            wpsstm()->debug_log("HANDLE TRACKLIST ACTION: " . $action);
-            wpsstm()->debug_log($result);
+            $redirect_url = add_query_arg($redirect_args, $redirect_url);
             
-            header('Content-type: application/json');
-            wp_send_json( $result );   
+            wp_safe_redirect($redirect_url);
+            die($redirect_url);
+            
+        }else{
+            
+            if ( is_wp_error($success) ){
+                $wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
+            }else{
+                $wpsstm_tracklist->add_notice('success',__('Success!','wpsstm'));
+            }
+            
         }
 
+    }
+    
+    function handle_ajax_tracklist_action($template){
+        global $wp_query;
+        global $wpsstm_track;
+        
+        $success = null;
+
+        // since the "ajax" query variable does not require a value, we need to check for its existence
+        if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //ajax action does not exists
+        if ( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
+        
+        $action_data = get_query_var( 'wpsstm_action_data' );
+        
+        wpsstm()->debug_log($action,"handle_ajax_tracklist_action");
+
+        $result = array(
+            'input' =>  $_REQUEST,
+            'message'=> null,
+            'success'=> null,
+            'item' =>   $wpsstm_track->to_array(),
+        );
+        
+        $success = $wpsstm_tracklist->do_tracklist_action($action,$action_data);
+
+        if ( is_wp_error($success) ){
+            $result['success'] = false;
+            $result['message'] = $success->get_error_message();
+            
+        }else{
+            $result['success'] = $success;
+        }
+
+        header('Content-type: application/json');
+        send_nosniff_header();
+        header('Cache-Control: no-cache');
+        header('Pragma: no-cache');
+        
+        wp_send_json( $result );  
+        
     }
 
     function tracklist_template($template){

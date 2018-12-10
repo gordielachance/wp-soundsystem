@@ -21,7 +21,7 @@ if ( !get_current_user_id() ){
         <input name="wpstm-new-tracklist-title" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
 
         <input name="wpsstm_action" type="hidden" value='new-tracklist' />
-        <input type="hidden" name="wpsstm_item[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+        <input type="hidden" name="wpsstm_action_data[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
         <button type="submit" class="button button-primary wpsstm-icon-button">
             <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
         </button>
@@ -30,7 +30,7 @@ if ( !get_current_user_id() ){
         <?php echo $wpsstm_track->get_subtrack_playlist_manager_list(); ?>
 
         <input name="wpsstm_action" type="hidden" value='toggle-tracklists' />
-        <input type="hidden" name="wpsstm_item[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+        <input type="hidden" name="wpsstm_action_data[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
         <button type="submit" class="button button-primary wpsstm-icon-button">
             <?php _e('Save');?>
         </button>
