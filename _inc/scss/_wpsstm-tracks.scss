@@ -95,7 +95,7 @@
 
     }
 
-   .wpsstm-track-position{
+    .wpsstm-track-position{
         @extend .wpsstm-can-click;
         .wpsstm-player-icon-loading{
             display:none;
@@ -170,6 +170,17 @@
 
     &.track-active{
         @include opacity(1);
+    }
+    
+    &.favorited-track{
+        .wpsstm-track-actions .action-favorite{
+            display:none;
+        }
+    }
+    &:not(.favorited-track){
+        .wpsstm-track-actions .action-unfavorite{
+            display:none;
+        }
     }
 
 }

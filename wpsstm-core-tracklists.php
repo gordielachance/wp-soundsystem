@@ -585,8 +585,13 @@ class WPSSTM_Core_Tracklists{
 
             $success = wp_insert_post( $playlist_new_args, true );
             if ( is_wp_error($success) ) return $success;
+            
             $love_id = $success;
             $meta = update_user_option( $user_id, WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $love_id);
+            
+            //add to favorites
+            $tracklist = new WPSSTM_Post_Tracklist($love_id);
+            $tracklist->love_tracklist(true);
             
             wpsstm()->debug_log(array('user_id'=>$user_id,'post_id'=>$love_id,'meta'=>$meta),'created favorites tracklist');
             

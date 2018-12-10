@@ -101,9 +101,9 @@
                         }
                     }else{
                         if (do_love){
-                            action_el.removeClass('action-favorite').addClass('action-unfavorite');
+                            tracklist_obj.tracklist_el.addClass('favorited-tracklist');
                         }else{
-                            action_el.removeClass('action-unfavorite').addClass('action-favorite');
+                            tracklist_obj.tracklist_el.removeClass('favorited-tracklist');
                         }
                     }
                 },

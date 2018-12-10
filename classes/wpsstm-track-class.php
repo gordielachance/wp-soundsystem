@@ -779,7 +779,7 @@ class WPSSTM_Track{
         Track
         */
         $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
-        $can_track_details =        ($this->title && $this->artist);
+        $can_open_track =           ($this->post_id);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
         $can_favorite_track =       true;//call to action
@@ -802,25 +802,26 @@ class WPSSTM_Track{
 
         //favorite
         if ($can_favorite_track){
+            
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       $this->get_track_action_url('favorite'),
+                'ajax' =>       $this->get_track_action_url('favorite',true),
+                'desc' =>       __('Add track to favorites','wpsstm'),
+                'classes' =>    array('action-favorite'),
+            );
 
             $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite'),
                 'ajax' =>       $this->get_track_action_url('unfavorite',true),
-                'desc' =>       __('Toggle favorite','wpsstm'),
+                'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
-            );
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
-                'ajax' =>       $this->get_track_action_url('favorite',true),
-                'desc' =>       __('Toggle favorite','wpsstm'),
-                'classes' =>    array('action-favorite'),
             );
 
         }
         //track details
-        if ($can_track_details){
+        if ($can_open_track){
             $actions['about'] = array(
                 'text' =>      __('About', 'wpsstm'),
                 'href' =>       $this->get_track_action_url('about'),
@@ -911,6 +912,7 @@ class WPSSTM_Track{
 
         $classes = array(
             'wpsstm-track',
+            ( $this->is_track_loved_by() ) ? 'favorited-track' : null,
         );
         
         $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;

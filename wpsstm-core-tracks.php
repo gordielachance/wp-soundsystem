@@ -215,6 +215,10 @@ class WPSSTM_Core_Tracks{
         }
 
         header('Content-type: application/json');
+        send_nosniff_header();
+        header('Cache-Control: no-cache');
+        header('Pragma: no-cache');
+        
         wp_send_json( $result );  
         
     }

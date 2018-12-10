@@ -75,9 +75,9 @@
                         }
                     }else{
                         if (do_love){
-                            action_el.removeClass('action-favorite').addClass('action-unfavorite');
+                            track_obj.track_el.addClass('favorited-track');
                         }else{
-                            action_el.removeClass('action-unfavorite').addClass('action-favorite');
+                            track_obj.track_el.removeClass('favorited-track');
                         }
                     }
                 },

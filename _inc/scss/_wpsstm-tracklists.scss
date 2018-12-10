@@ -91,6 +91,17 @@ ul.wpsstm-tracklist-actions{
         }
     }
     
+    &.favorited-tracklist{
+        .wpsstm-tracklist-actions .action-favorite{
+            display:none;
+        }
+    }
+    &:not(.favorited-tracklist){
+        .wpsstm-tracklist-actions .action-unfavorite{
+            display:none;
+        }
+    }
+    
     form.wpsstm-new-subtrack{
         
         margin-top: 1em;

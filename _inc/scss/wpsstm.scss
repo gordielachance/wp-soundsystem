@@ -130,10 +130,14 @@ ul.wpsstm-actions-list{
             }
         }
         
-        &.action-favorite a:before{
+        &.action-favorite a:before,
+        &.action-unfavorite:hover a:before
+        {
             content: "\f08a";//.fa-heart-o;
         }
-        &.action-unfavorite a:before{
+        &.action-unfavorite a:before,
+        &.action-favorite:hover a:before
+        {
             content: "\f004";//.fa-heart;
         }
     }
