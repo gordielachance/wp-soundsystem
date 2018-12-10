@@ -206,19 +206,19 @@ class WP_SoundSystem {
     function wpsstm_rewrite_rules(){
         flush_rewrite_rules(); //TOUFIX elsewhere
         
-        //wpsstm_action
+        //TOUFIX TOUCHECK useful ?
         add_rewrite_tag(
             '%wpsstm_action%',
             '([^&]+)'
         );
         
-        //wpsstm_ajax_action
+        //TOUFIX TOUCHECK useful ?
         add_rewrite_tag(
             '%wpsstm_ajax_action%',
             '([^&]+)'
         );
         
-        //wpsstm_ajax_action
+        //TOUFIX TOUCHECK useful ?
         add_rewrite_tag(
             '%wpsstm_item%',
             '([^&]+)'

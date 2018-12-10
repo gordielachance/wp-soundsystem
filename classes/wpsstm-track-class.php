@@ -718,48 +718,71 @@ class WPSSTM_Track{
         return $inserted;
     }
 
-    function get_track_action_url($action,$ajax=false){
-        
-        if (!$this->post_id) return;
-        $url = get_permalink($this->post_id);
-        $args = array();
-        
-        if (!$ajax){
-            $args['wpsstm_action'] = $action;
+    function get_subtrack_url(){
+        if ( !$this->subtrack_id ) return;
+        $url = home_url();
+        if ( !get_option('permalink_structure') ){
+            $args = array(
+                'post_type' =>      wpsstm()->$post_type_track,
+                'subtrack_id' =>    $this->subtrack_id
+            );
+            $url = add_query_arg($args,$url);
         }else{
-            $args['wpsstm_ajax_action'] = $action;
+            $url .= sprintf('/%s/%s/%d/',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,$this->subtrack_id);
+        }
+
+        return $url;
+    }
+    
+    function get_track_url(){
+        $url = null;
+        
+        if ( $this->subtrack_id ){
+            $url = $this->get_subtrack_url();
+        }elseif ( $this->post_id ){
+            $url = get_permalink($this->post_id);
+        }else{
+            return false;
+        }
+        
+        return $url;
+    }
+
+    function get_track_action_url($action,$ajax = false){
+
+        $url = $this->get_track_url();
+        if (!$url) return;
+        
+        $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
+        $action_permavar = ($ajax) ? 'ajax' : 'action';
+        
+
+        if ( !get_option('permalink_structure') ){
+            $args = array(
+                $action_var =>     $action,
+            );
+
+            $url = add_query_arg($args,$url);
+        }else{
+            $url .= sprintf('%s/%s/',$action_permavar,$action);
         }
         
         switch ($action){
+            //TOUFIXTOUCHECK maybe should be elsewhere
             case 'tracklists-selector':
                 if ($tracklist_id = $this->tracklist->post_id){
-                    $args['wpsstm_item']['from_tracklist'] = $tracklist_id;
+                    $args = array(
+                        'wpsstm_item' => array(
+                            'from_tracklist' => $tracklist_id
+                        )
+                    );
+                    $url = add_query_arg($args,$url);
                 }
                 
             break;
         }
-        
-        $url = add_query_arg($args,$url);
 
         return $url;
-    }
-
-    function get_subtrack_action_url($action,$ajax = false){
-        
-        if ( !$this->subtrack_id ) return;
-        $url = get_post_type_archive_link( wpsstm()->post_type_track );
-        
-        $args = array(
-            'subtrack_id' =>                $this->subtrack_id,
-        );
-        
-        if (!$ajax){
-            $args['wpsstm_action'] = $action;
-        }else{
-            $args['wpsstm_ajax_action'] = $action;
-        }
-        
-        return add_query_arg($args,$url);
     }
 
     function get_track_links(){
@@ -837,8 +860,8 @@ class WPSSTM_Track{
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $this->get_subtrack_action_url('unlink'),
-                'ajax' =>       $this->get_subtrack_action_url('unlink',true),
+                'href' =>       $this->get_track_action_url('unlink'),
+                'ajax' =>       $this->get_track_action_url('unlink',true),
             );
         }
         
@@ -847,8 +870,8 @@ class WPSSTM_Track{
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action'),
-                'href' =>       $this->get_subtrack_action_url('move'),
-                'ajax' =>       $this->get_subtrack_action_url('move',true),
+                'href' =>       $this->get_track_action_url('move'),
+                'ajax' =>       $this->get_track_action_url('move',true),
             );
         }
         
@@ -1109,18 +1132,6 @@ class WPSSTM_Track{
         <?php
     }
 
-    /*
-    Check that a track can be flushed; which means it is a community post that does not belong to any playlist or user's likes
-    */
-    
-    function can_be_flushed(){
-        $parent_ids = (array)$this->get_subtrack_tracklist_ids();
-        $loved_by = $this->get_track_loved_by();
-        $can_be_flushed = ( wpsstm_is_community_post($this->post_id) && empty($parent_ids) && empty($loved_by) );
-        
-        return apply_filters('wpsstm_track_can_be_flushed',$can_be_flushed,$this);
-    }
-    
     function update_sources_order($source_ids){
         global $wpdb;
         
