@@ -607,7 +607,7 @@ class WPSSTM_Track{
         
         $autosources = array();
 
-        if ( wpsstm()->get_options('autosource') != 'on' ){
+        if ( !wpsstm()->get_options('autosource') ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
         }
         
@@ -1176,7 +1176,7 @@ class WPSSTM_Track{
     }
     
     function can_play_track(){
-        if ( wpsstm()->get_options('player_enabled') != 'on' ){
+        if ( !wpsstm()->get_options('player_enabled') ){
             return new WP_Error( 'wpsstm_player_disabled', __("Player is disabled.",'wpsstm') );
         }
         return true;

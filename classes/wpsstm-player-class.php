@@ -6,7 +6,7 @@ class WPSSTM_Player{
 
     function __construct() {
 
-        if ( wpsstm()->get_options('player_enabled') == 'on' ){
+        if ( wpsstm()->get_options('player_enabled') ){
             add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
             add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
             add_action( 'wp_footer', array($this,'bottom_player'));
@@ -70,7 +70,7 @@ class WPSSTM_Player{
     function get_audio_attr($values_attr=null){
 
         $values_defaults = array(
-            'autoplay' =>                           ( wpsstm()->get_options('autoplay') == 'on' ),
+            'autoplay' =>   wpsstm()->get_options('autoplay'),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);

@@ -71,9 +71,9 @@ class WPSSTM_Settings {
         Tracklist
         */
 
-        $new_input['player_enabled'] = ( isset($input['player_enabled']) ) ? 'on' : 'off';
-        $new_input['autoplay'] = ( isset($input['autoplay']) ) ? 'on' : 'off';
-        $new_input['autosource'] = ( isset($input['autosource']) ) ? 'on' : 'off';
+        $new_input['player_enabled'] = isset($input['player_enabled']);
+        $new_input['autoplay'] = isset($input['autoplay']);
+        $new_input['autosource'] = isset($input['autosource']);
 
         //shorten tracklist
         if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
@@ -273,7 +273,7 @@ class WPSSTM_Settings {
         printf(
             '<input type="checkbox" name="%s[player_enabled]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             $desc
         );
     }
@@ -284,14 +284,14 @@ class WPSSTM_Settings {
         printf(
             '<input type="checkbox" name="%s[autoplay]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $option, true, false ),
             __("Autoplay the first track displayed.","wpsstm")
         );
     }
 
     function autosource_callback(){
         
-        $enabled = ( wpsstm()->get_options('autosource') == 'on' );
+        $enabled = wpsstm()->get_options('autosource');
 
         /*
         form
@@ -398,7 +398,7 @@ class WPSSTM_Settings {
         printf(
             '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             __("Enable frontend wizard for non-logged users.","wpsstm")
         );
     }

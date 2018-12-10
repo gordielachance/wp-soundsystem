@@ -20,8 +20,8 @@ class WPSSTM_MusicBrainz {
     function __construct(){
         
         $options_default = array(
-            'enabled' =>    'on',
-            'auto_mbid' =>  'on',
+            'enabled' =>    true,
+            'auto_mbid' =>  true,
         );
         
         $this->options = wp_parse_args(get_option( self::$mbz_options_meta_name),$options_default);
@@ -90,8 +90,8 @@ class WPSSTM_MusicBrainz {
         if ( WPSSTM_Settings::is_settings_reset() ) return;
         
         //MusicBrainz
-        $new_input['enabled'] = ( isset($input['enabled']) ) ? 'on' : 'off';
-        $new_input['auto_mbid'] = ( isset($input['auto_mbid']) ) ? 'on' : 'off';
+        $new_input['enabled'] = isset($input['enabled']);
+        $new_input['auto_mbid'] = isset($input['auto_mbid']);
         
         return $new_input;
     }
@@ -108,7 +108,7 @@ class WPSSTM_MusicBrainz {
         $el = sprintf(
             '<input type="checkbox" name="%s[enabled]" value="on" %s /> %s',
             self::$mbz_options_meta_name,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             __("Enable MusicBrainz.","wpsstm")
         );
         printf('<p>%s</p>',$el);
@@ -120,7 +120,7 @@ class WPSSTM_MusicBrainz {
         $el = sprintf(
             '<input type="checkbox" name="%s[auto_mbid]" value="on" %s /> %s',
             self::$mbz_options_meta_name,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             __("Auto-lookup MusicBrainz IDs.","wpsstm")
         );
         printf('<p>%s</p>',$el);
@@ -221,7 +221,7 @@ class WPSSTM_MusicBrainz {
         
         $input_el = wpsstm_get_backend_form_input($input_attr);
         
-        if ( $this->get_options('auto_mbid') == "on" ){
+        if ( $this->get_options('auto_mbid') ){
             $is_ignore = ( get_post_meta( $post_id, self::$no_auto_mbid_metakey, true ) );
             $input_auto_id_el = sprintf('<input type="checkbox" value="on" name="wpsstm-ignore-auto-mbid" %s/>',checked($is_ignore,true,false));
             $desc_el .= $input_auto_id_el . ' ' .__("Do not auto-identify",'wpsstm');
@@ -482,7 +482,7 @@ class WPSSTM_MusicBrainz {
         }
         
         //ignore auto MBID
-        if ( $this->get_options('auto_mbid') == "on" ){
+        if ( $this->get_options('auto_mbid') ){
             $do_ignore = ( isset($_POST['wpsstm-ignore-auto-mbid']) ) ? true : false;
             if ($do_ignore){
                 update_post_meta( $post_id, self::$no_auto_mbid_metakey, true );
@@ -689,7 +689,7 @@ class WPSSTM_MusicBrainz {
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
         //ignore if global option disabled
-        $auto_id = ( $this->get_options('auto_mbid') == "on" );
+        $auto_id = ( $this->get_options('auto_mbid') );
         if (!$auto_id) return false;
 
         //ignore if option disabled
@@ -987,7 +987,7 @@ class WPSSTM_MusicBrainz {
     
     function get_post_mbdatas($post_id = null, $keys=null){
 
-        if ( $this->get_options('enabled') != 'on' ) return false;
+        if ( !$this->get_options('enabled') ) return false;
 
         global $post;
         if (!$post_id) $post_id = $post->ID;

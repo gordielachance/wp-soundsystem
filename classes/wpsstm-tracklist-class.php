@@ -37,12 +37,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         /*
         options
         */
-
+        
+        $can_autosource = ( WPSSTM_Core_Sources::can_autosource() === true);
+        
         $this->options = array(
-            'autosource'                => 'on',
+            'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_autosource'           => true,
+            'ajax_autosource'           => true, //whether or not autosource is fired through ajax or through PHP
             'remote_delay_min'          => 5,
             'is_expired'                => false,
         );
@@ -676,7 +678,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($live){
             $tracks = $remote->get_remote_tracks();
             if ( is_wp_error($tracks) ) return $tracks;
-            
         }else{
             $tracks = $this->get_static_subtracks();
         }

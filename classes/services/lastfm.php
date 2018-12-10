@@ -20,9 +20,9 @@ class WPSSTM_LastFM{
         $options_default = array(
             'client_id' =>      null,
             'client_secret'=>   null,
-            'scrobble'=>        'on',
-            'favorites'=>       'on',
-            'scrobble_along'=>  'off',
+            'scrobble'=>        true,
+            'favorites'=>       true,
+            'scrobble_along'=>  false,
         );
         
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
@@ -129,9 +129,9 @@ class WPSSTM_LastFM{
         //Last.fm 
         $new_input['client_id'] = ( isset($input['client_id']) ) ? trim($input['client_id']) : null;
         $new_input['client_secret'] = ( isset($input['client_secret']) ) ? trim($input['client_secret']) : null;
-        $new_input['scrobble'] = ( isset($input['scrobble']) ) ? 'on' : 'off';
-        $new_input['scrobble_along'] = ( isset($input['scrobble_along']) ) ? 'on' : 'off';
-        $new_input['favorites'] = ( isset($input['favorites']) ) ? 'on' : 'off';
+        $new_input['scrobble'] = isset($input['scrobble']);
+        $new_input['scrobble_along'] = isset($input['scrobble_along']);
+        $new_input['favorites'] = isset($input['favorites']);
 
         return $new_input;
     }
@@ -171,7 +171,7 @@ class WPSSTM_LastFM{
         $el = sprintf(
             '<input type="checkbox" name="%s[scrobble]" value="on" %s /> %s',
             self::$lastfm_options_meta_name,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
         );
         printf('<p>%s</p>',$el);
@@ -183,7 +183,7 @@ class WPSSTM_LastFM{
         $el = sprintf(
             '<input type="checkbox" name="%s[favorites]" value="on" %s /> %s',
             self::$lastfm_options_meta_name,
-            checked( $option, 'on', false ),
+            checked( $option,true, false ),
             __("When a track is favorited/unfavorited, love/unlove it on Last.fm.","wpsstm")
         );
         
@@ -192,7 +192,7 @@ class WPSSTM_LastFM{
     
     function scrobble_along_callback(){
         
-        $enabled = ( $this->get_options('scrobble_along') == 'on' );
+        $enabled = $this->get_options('scrobble_along');
         
         /*
         form
@@ -244,7 +244,7 @@ class WPSSTM_LastFM{
         
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && ( $this->get_options('scrobble_along') == 'on' ) ),
+            'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && $this->get_options('scrobble_along') ),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -527,7 +527,7 @@ class WPSSTM_LastFM{
 
     function ajax_lastfm_scrobble_community_track(){
         
-        $enabled = ( $this->get_options('scrobble_along') == 'on' );
+        $enabled = $this->get_options('scrobble_along');
         $ajax_data = wp_unslash($_POST);
         $community_user_id = wpsstm()->get_options('community_user_id');
 

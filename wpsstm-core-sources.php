@@ -336,7 +336,7 @@ class WPSSTM_Core_Sources{
         <p class="wpsstm-submit-wrapper">
             <?php
             //autosource
-            if ( ( wpsstm()->get_options('autosource') == 'on' ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
+            if ( ( !wpsstm()->get_options('autosource') ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
                 ?>
                 <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_track_autosource" class="button" value="<?php _e('Autosource','wpsstm');?>">
                 <?php

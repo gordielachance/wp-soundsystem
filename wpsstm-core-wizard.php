@@ -920,7 +920,7 @@ class WPSSTM_Core_Wizard{
         
         $user_id = get_current_user_id(); 
         $community_user_id = wpsstm()->get_options('community_user_id');
-        $can_wizard_unlogged = ( ( wpsstm()->get_options('visitors_wizard') == 'on' ) && $community_user_id );
+        $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') && $community_user_id );
         
         if ( !$user_id && !$can_wizard_unlogged ){
             return new WP_Error( 'wpsstm_wizard_not_logged', __('You need to be logged to use the wizard.','wpsstm'));

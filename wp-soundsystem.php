@@ -99,27 +99,26 @@ class WP_SoundSystem {
         
         $options_default = array(
             'frontend_scraper_page_id'          => null,
-            'visitors_wizard'                   => 'on',
+            'visitors_wizard'                   => true,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'player_enabled'                    => 'on',
-            'autoplay'                          => 'on',
-            'autosource'                        => 'on',
+            'player_enabled'                    => true,
+            'autoplay'                          => true,
+            'autosource'                        => true,
             'limit_autosources'                 => 5,
             'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
         );
         
-        $this->options = wp_parse_args(get_option( $this->meta_name_options),$options_default);
-        
-        
-        //validate options
+        $db_option = get_option( $this->meta_name_options);
+        $this->options = wp_parse_args($db_option,$options_default);
+
         /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
         https://wordpress.stackexchange.com/a/126206/70449
         
         if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
         if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
-        if ( ( $this->options['scrobble_along'] == 'on' ) && !get_userdata( $this->options['scrobble_along'] ) ) $this->options['scrobble_along'] = 'off';
+        if ( $this->options['scrobble_along'] && !get_userdata( $this->options['scrobble_along'] ) ) $this->options['scrobble_along'] = false;
         */
     }
     
@@ -166,7 +165,7 @@ class WP_SoundSystem {
     }
     
     function setup_actions(){
-        
+
         do_action('wpsstm_init');
         
         /* Now that files have been loaded, init all core classes */

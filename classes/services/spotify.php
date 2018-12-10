@@ -15,7 +15,7 @@ class WPSSTM_Spotify{
         $options_default = array(
             'client_id' =>          null,
             'client_secret' =>      null,
-            'spotify_auto_id' =>    'on',
+            'spotify_auto_id' =>    true,
         );
         
         $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name),$options_default);
@@ -286,7 +286,7 @@ class WPSSTM_Spotify{
         
         $input_el = wpsstm_get_backend_form_input($input_attr);
         
-        if ( $this->get_options('spotify_auto_id') == "on" ){
+        if ( $this->get_options('spotify_auto_id') ){
             $is_ignore = ( get_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true ) );
             $input_auto_id_el = sprintf('<input type="checkbox" value="on" name="wpsstm-ignore-auto-spotify-id" %s/>',checked($is_ignore,true,false));
             $desc_el .= $input_auto_id_el . ' ' .__("Do not auto-identify",'wpsstm');
@@ -734,7 +734,7 @@ class WPSSTM_Spotify{
         }
         
         //ignore auto MBID
-        if ( $this->get_options('spotify_auto_id') == "on" ){
+        if ( $this->get_options('spotify_auto_id') ){
             $do_ignore = ( isset($_POST['wpsstm-ignore-auto-spotify-id']) ) ? true : false;
             if ($do_ignore){
                 update_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true );
@@ -823,8 +823,7 @@ class WPSSTM_Spotify{
         if ( !in_array($post_type,$allowed_post_types) ) return;
         
         //ignore if global option disabled
-        $auto_id = ( $this->get_options('spotify_auto_id') == "on" );
-        if (!$auto_id) return false;
+        if ( !$this->get_options('spotify_auto_id') ) return false;
 
         //ignore if option disabled
         $is_ignore = ( get_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true ) );
