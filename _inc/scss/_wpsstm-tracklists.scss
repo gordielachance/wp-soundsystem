@@ -92,12 +92,12 @@ ul.wpsstm-tracklist-actions{
     }
     
     &.favorited-tracklist{
-        .wpsstm-tracklist-actions .action-favorite{
+        .wpsstm-tracklist-action.action-favorite{
             display:none;
         }
     }
     &:not(.favorited-tracklist){
-        .wpsstm-tracklist-actions .action-unfavorite{
+        .wpsstm-tracklist-action.action-unfavorite{
             display:none;
         }
     }

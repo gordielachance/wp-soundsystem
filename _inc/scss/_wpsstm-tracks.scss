@@ -173,12 +173,12 @@
     }
     
     &.favorited-track{
-        .wpsstm-track-actions .action-favorite{
+        .wpsstm-track-action.action-favorite{
             display:none;
         }
     }
     &:not(.favorited-track){
-        .wpsstm-track-actions .action-unfavorite{
+        .wpsstm-track-action.action-unfavorite{
             display:none;
         }
     }
