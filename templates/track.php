@@ -103,18 +103,9 @@ $body_classes = array(
                     */
 
                     switch ($action){
-                        case 'tracklists-selector':
-                        case 'toggle-tracklists':
-                            ?>
-                            <div id="wpsstm-track-admin-playlists" class="wpsstm-track-admin">
-                                <?php wpsstm_locate_template( 'track-append.php',true );?>
-                            </div>
-                            <?php
-
-                        break;
                         case 'trash':
                             ?>
-                            <div id="wpsstm-track-admin-trash" class="wpsstm-track-admin">
+                            <div id="wpsstm-track-admin-trash">
                                 trash
                             </div>
                             <?php
@@ -132,7 +123,7 @@ $body_classes = array(
                             }
 
                             ?>
-                            <div id="wpsstm-track-admin-about" class="wpsstm-track-admin">
+                            <div id="wpsstm-track-admin-about">
                                 <h2><?php echo $wpsstm_track->artist;?></h2>
                                 <div><?php echo $artist_text;?></div>
                             </div>

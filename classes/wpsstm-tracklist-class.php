@@ -136,6 +136,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     public function get_title(){
         $title = $this->title;
+        print_r($this->post_id);
         if (!$title && $this->post_id){
             $title = sprintf(__('(playlist #%d)','wpsstm'),$this->post_id);
         }

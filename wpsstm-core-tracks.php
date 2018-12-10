@@ -317,9 +317,7 @@ class WPSSTM_Core_Tracks{
     }
 
     function register_tracks_scripts_styles_shared(){
-        //JS
-        wp_register_script( 'wpsstm-track-append', wpsstm()->plugin_url . '_inc/js/wpsstm-track-append.js', array('jquery'),wpsstm()->version, true ); //TOUFIX should be elsewhere like in iframe scripts
-        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-sources','wpsstm-track-append'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-sources'),wpsstm()->version, true );
         
     }
 

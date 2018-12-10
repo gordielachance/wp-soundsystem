@@ -1099,45 +1099,25 @@ class WPSSTM_Track{
         );
         return $sources_url;
     }
-
-    function get_subtrack_playlist_manager_list(){
-        global $tracklist_manager_query;
-        
-        //handle checkbox
-        add_filter('wpsstm_before_tracklist_row',array($this,'playlists_manager_append_track_checkbox'));
-        
-        ob_start();
-        //get logged user static playlists
-        $args = array(
-            'post_type' =>      wpsstm()->post_type_playlist,
-            'author' =>         get_current_user_id(), //TOFIX TO CHECK WHAT IF NOT LOGGED ?
-            'post_status' =>    array('publish','private','future','pending','draft'),
-            'posts_per_page' => -1,
-            'orderby' =>        'title',
-            'order'=>           'ASC'
-        );
-
-        $tracklist_manager_query = new WP_Query( $args );
-        wpsstm_locate_template( 'list-tracklists.php', true, false );
-        $output = ob_get_clean();
-        return $output;
-    }
     
     /*
     Add a checkbox in front of every tracklist row to append/remove track
     */
-    function playlists_manager_append_track_checkbox($tracklist){
-        $checked_playlist_ids = $this->get_subtrack_tracklist_ids();
+    public static function tracklists_manager_track_checkbox(){
+         global $wpsstm_track;
+        global $wpsstm_tracklist;
+        
+        $checked_playlist_ids = $wpsstm_track->get_subtrack_tracklist_ids();
 
         ?>
         <span class="tracklist-row-action">
             <?php
             //checked
-            $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
+            $checked = in_array($wpsstm_tracklist->post_id,(array)$checked_playlist_ids);
             $checked_str = checked($checked,true,false);
 
-            printf('<input name="target-tracklists[%s]" type="radio" value="on" %s /><label>Add</label>',$tracklist->post_id,$checked_str);
-            printf('<input name="target-tracklists[%s]" type="radio" value="off" %s /><label>Remove</label>',$tracklist->post_id,!$checked_str);
+            printf('<input name="target-tracklists[%s]" type="radio" value="on" %s /><label>Add</label>',$wpsstm_tracklist->post_id,$checked_str);
+            printf('<input name="target-tracklists[%s]" type="radio" value="off" %s /><label>Remove</label>',$wpsstm_tracklist->post_id,!$checked_str);
     
             ?>
         </span>

@@ -11,9 +11,6 @@ class WPSSTM_Core_Playlists{
         /*
         AJAX
         */
-        
-        //new playlist (from tracklist manager)
-        add_action('wp_ajax_wpsstm_subtrack_tracklist_manager_new_playlist', array($this,'ajax_subtrack_tracklist_manager_new_playlist'));
 
     }
 
@@ -135,50 +132,6 @@ class WPSSTM_Core_Playlists{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
-    }
-    
-    /*
-    Create new playlist from within the tracklist manager
-    */
-    
-    function ajax_subtrack_tracklist_manager_new_playlist(){
-        $ajax_data = wp_unslash($_POST);
-
-        wpsstm()->debug_log($ajax_data,"ajax_subtrack_tracklist_manager_new_playlist");
-
-        $result = array(
-            'input'     => $ajax_data,
-            'message'   => null,
-            'success'   => false,
-            'new_html'  => null
-        );
-
-        $playlist = new WPSSTM_Post_Tracklist();
-        $playlist->title = $result['tracklist_title'] = ( isset($ajax_data['playlist_title']) ) ? trim($ajax_data['playlist_title']) : null;
-        $playlist_id = $playlist->save_tracklist();
-
-        if ( is_wp_error($playlist_id) ){
-            
-            $code = $playlist_id->get_error_code();
-            $result['message'] = $playlist_id->get_error_message($code);
-            
-        }else{
-
-            $result['playlist_id'] = $playlist_id;
-            $result['success'] = true;
-            
-            $track_id = $result['track_id'] = ( isset($ajax_data['track_id']) ) ? $ajax_data['track_id'] : null;
-            $track = new WPSSTM_Track($track_id);
-
-            $list_all = $track->get_subtrack_playlist_manager_list();
-            
-            $result['new_html'] = $list_all;
-
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
         
     }
     
