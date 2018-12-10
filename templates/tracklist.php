@@ -14,6 +14,12 @@ $body_classes = array(
     ($action) ? sprintf('wpsstm-tracklist-action-%s',$action) : null,
 );
 
+//populate subtracks ?
+//we do this here since we want to be able to catch the notices if tracks don't populate.
+if ($action=='render'){
+    $wpsstm_tracklist->populate_subtracks();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -69,13 +75,6 @@ $body_classes = array(
                     printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                 break;
                 default: //'render'
-                    $wpsstm_tracklist->populate_subtracks();
-
-                    //TOUFIX TOCHECK should be elsewhere ?
-                    if ( !$wpsstm_tracklist->get_options('ajax_autosource') ){
-                        $wpsstm_tracklist->tracklist_autosource();
-                    }
-
                     wpsstm_locate_template( 'content-tracklist.php', true, false );
                 break;
             }

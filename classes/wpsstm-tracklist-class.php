@@ -677,9 +677,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if ($live){
             $tracks = $remote->get_remote_tracks();
-            if ( is_wp_error($tracks) ) return $tracks;
         }else{
             $tracks = $this->get_static_subtracks();
+        }
+
+        if ( is_wp_error($tracks) ){
+            $this->add_notice('populate_subtracks', $tracks->get_error_message() );
+            return $tracks;
         }
 
         //populate tracks
