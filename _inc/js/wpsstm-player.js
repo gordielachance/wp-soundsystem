@@ -111,7 +111,7 @@ class WpsstmPlayer {
             if ( tracklist_obj.isExpired ){
                 tracklist_obj.debug("cache expired, refresh tracklist");
 
-                self.end_source();
+                self.end_track();
                 self.current_track = undefined; //unset current player track so the player won't try to go to the next track
                 var reloaded = self.reload_tracklist(tracklist_obj);
 
@@ -347,7 +347,7 @@ class WpsstmPlayer {
         set current track
         */
         if ( !$(track_obj).is( $(self.current_track) ) ){
-            self.end_source();
+            self.end_track();
             self.current_track = track_obj;
             self.track_to_player();
         }
@@ -670,6 +670,7 @@ class WpsstmPlayer {
             self.play_track(track_obj);
         }else{
             console.log("no next track");
+            self.end_track();
         }
 
     }
@@ -830,6 +831,25 @@ class WpsstmPlayer {
         self.audio_el.append(new_sources);
     }
     
+    end_track(track_obj){
+        var self = this;
+
+        if (!track_obj) track_obj = self.current_track;
+        if (!track_obj) return;
+        track_obj.debug("end_track");
+        
+
+        var track_instances = track_obj.track_el;
+        
+        track_instances.removeClass('track-loading track-active track-playing');
+        self.player_el.find('[itemprop="track"]').removeClass('track-loading track-active track-playing');
+
+        self.end_source();
+        
+        self.current_track = undefined;
+
+    }
+    
     end_source(source_obj){
 
         var self = this;
@@ -844,13 +864,14 @@ class WpsstmPlayer {
         //TOUFIX TO CHECK should be hookend on events ?
         //tracklists
         var tracklist_instances = source_obj.track.track_el.parents('.wpsstm-tracklist');
-        //tracks
-        var track_instances = source_obj.track.track_el;
+
         //sources
         var sources_instances = source_obj.track.track_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
 
         sources_instances.removeClass('source-playing source-active source-loading');
-        track_instances.removeClass('track-loading track-active track-playing');
+        
+        
+        self.current_source = undefined;
         
     }
 
