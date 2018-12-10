@@ -329,6 +329,13 @@ class WPSSTM_Core_Tracklists{
         $action_data = get_query_var( 'wpsstm_action_data' );
 
         $success = $wpsstm_tracklist->do_tracklist_action($action,$action_data);
+        
+        switch($action){
+            case 'live':
+            case 'static':
+                $redirect_url = get_permalink($wpsstm_tracklist->post_id);
+            break;
+        }
 
         /*
         Redirect or notice

@@ -386,19 +386,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->feed_url && $this->user_can_toggle_playlist_type() ){
             
             if($this->tracklist_type == 'live'){
-                $actions['make-live'] = array(
-                    'text' =>      __('Sync', 'wpsstm'),
+                $actions['live'] = array(
+                    'text' =>      __('Stop sync', 'wpsstm'),
                     'classes' =>    array('wpsstm-advanced-action'),
                     'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
-                    'href' =>       $this->get_tracklist_action_url('make-live'),
+                    'href' =>       $this->get_tracklist_action_url('static'),
                     'target' =>     '_parent',
                 );
             }else{
-                $actions['make-static'] = array(
-                    'text' =>      __('Stop sync', 'wpsstm'),
+                $actions['static'] = array(
+                    'text' =>      __('Sync', 'wpsstm'),
                     'classes' =>    array('wpsstm-advanced-action'),
                     'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
-                    'href' =>       $this->get_tracklist_action_url('make-static'),
+                    'href' =>       $this->get_tracklist_action_url('live'),
                     'target' =>     '_parent',
                 );
             }
@@ -1018,9 +1018,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $success = $this->trash_tracklist();
             break;
 
-            case 'lock':
-            case 'unlock':
-                $live = ( $action == 'unlock');
+            case 'live':
+            case 'static':
+                $live = ( $action == 'live');
                 $success = $this->toggle_live($live);
             break;
             case 'refresh':

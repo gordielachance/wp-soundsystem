@@ -148,12 +148,12 @@ ul.wpsstm-tracklist-actions{
                  content:"\f055";//.fa-plus-circle;
             }
         }
-        &.wpsstm-tracklist-action-make-live,
-        &.wpsstm-tracklist-action-make-static{
+        &.wpsstm-tracklist-action-live,
+        &.wpsstm-tracklist-action-static{
             a:before{
                 content:"\f09e";//.fa-rss;
             }
-            &.wpsstm-tracklist-action-make-live{
+            &.wpsstm-tracklist-action-live{
                 a:before{
                     @include opacity(.25);
                 }
