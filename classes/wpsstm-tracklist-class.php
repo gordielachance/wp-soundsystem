@@ -366,12 +366,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('favorite'),
+                'ajax' =>       $this->get_tracklist_action_url('favorite',true),
                 'desc' =>       __('Add tracklist to favorites','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unfavorite'),
+                'ajax' =>       $this->get_tracklist_action_url('unfavorite',true),
                 'desc' =>       __('Remove tracklist from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );

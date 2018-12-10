@@ -359,7 +359,7 @@ class WPSSTM_Core_Tracklists{
     
     function handle_ajax_tracklist_action($template){
         global $wp_query;
-        global $wpsstm_track;
+        global $wpsstm_tracklist;
         
         $success = null;
 
@@ -375,7 +375,7 @@ class WPSSTM_Core_Tracklists{
             'input' =>  $_REQUEST,
             'message'=> null,
             'success'=> null,
-            'item' =>   $wpsstm_track->to_array(),
+            'item' =>   $wpsstm_tracklist->to_array(),
         );
         
         $success = $wpsstm_tracklist->do_tracklist_action($action,$action_data);

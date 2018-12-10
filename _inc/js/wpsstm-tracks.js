@@ -41,20 +41,14 @@
     $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
 
         //toggle favorite
-        track_obj.track_el.find('.wpsstm-track-action-toggle-favorite a').click(function(e) {
+        track_obj.track_el.find('.wpsstm-track-action.action-favorite a,.wpsstm-track-action.action-unfavorite a').click(function(e) {
 
             e.preventDefault();
 
             var link = $(this);
             var action_el = link.parents('.wpsstm-track-action');
             var do_love = action_el.hasClass('action-favorite');
-
-            var track_ajax = track_obj.to_ajax();
-
-            var ajax_data = {
-                action:     'wpsstm_toggle_favorite_track',
-                track:      track_ajax
-            };
+            var ajax_data = {};
 
             return $.ajax({
 
@@ -382,7 +376,7 @@ class WpsstmTrack {
 
         var ajax_data = {};
 
-        jQuery.ajax({
+        $.ajax({
             type: "post",
             url: action_url,
             data:ajax_data,

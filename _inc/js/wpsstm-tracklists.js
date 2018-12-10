@@ -67,35 +67,30 @@
         });
 
         //toggle favorite
-        var favorite_bt = tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action-toggle-favorite a');
-        favorite_bt.click(function(e) {
+        tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action.action-favorite a,.wpsstm-tracklist-action.action-unfavorite a').click(function(e) {
             e.preventDefault();
 
-            var link = $(this);
-            var action_el = link.parents('.wpsstm-tracklist-action');
+            var link_el = $(this);
+            var action_el = link_el.parents('.wpsstm-tracklist-action');
             var do_love = action_el.hasClass('action-favorite');
-            var tracklist_wrapper = link.closest('.wpsstm-tracklist');
-            var tracklist_id = Number(tracklist_wrapper.attr('data-wpsstm-tracklist-id'));
+            var action_url = link_el.data('wpsstm-ajax-url');
 
-            var ajax_data = {
-                action:         'wpsstm_toggle_favorite_tracklist',
-                tracklist:      tracklist_obj.to_ajax(),
-            };
+            var ajax_data = {};
 
-            tracklist_obj.debug("toggle favorite tracklist:" + tracklist_id);
+            tracklist_obj.debug("toggle favorite tracklist:");
 
             return $.ajax({
                 type:       "post",
-                url:        wpsstmL10n.ajaxurl,
-                data:       ajax_data,
+                url: action_url,
+                data:ajax_data,
                 dataType:   'json',
                 beforeSend: function() {
-                    link.addClass('action-loading');
+                    link_el.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
-                        link.addClass('action-error');
+                        link_el.addClass('action-error');
                         if (data.notice){
                             wpsstm_dialog_notice(data.notice);
                         }
@@ -108,12 +103,12 @@
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
-                    link.addClass('action-error');
+                    link_el.addClass('action-error');
                     console.log(xhr.status);
                     console.log(thrownError);
                 },
                 complete: function() {
-                    link.removeClass('action-loading');
+                    link_el.removeClass('action-loading');
                 }
             })
         });
@@ -291,7 +286,7 @@ class WpsstmTracklist {
             new_pos:    new_pos,
         };
 
-        jQuery.ajax({
+        $.ajax({
             type: "post",
             url: action_url,
             data:ajax_data,
@@ -329,7 +324,7 @@ class WpsstmTracklist {
         var action_url = link_el.data('wpsstm-ajax-url');
         var ajax_data = {};
 
-        jQuery.ajax({
+        $.ajax({
             type: "post",
             url: action_url,
             data:ajax_data,
