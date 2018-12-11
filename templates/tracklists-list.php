@@ -1,10 +1,10 @@
 <?php
+global $wpdb;
 global $wpsstm_tracklist;
 
 //handle checkbox
 add_filter('wpsstm_tracklists_manager_row_checked',array('WPSSTM_Track','tracklists_manager_track_checkbox'),10,2);
 
-/*
 //get logged user static playlists
 $args = array(
     'post_type' =>      wpsstm()->post_type_playlist,
@@ -20,19 +20,15 @@ if ( isset($args['author']) && ( $args['author'] == get_current_user_id() ) ){
 }
 
 $args = apply_filters('wpsstm_tracklists_manager_query',$args);
-$query = new WP_Query( $args );
+$manager_query = new WP_Query( $args );
 
-print_r($args);
-*/
-
-if ( have_posts() ) {
+if ( $manager_query->have_posts() ) {
     ?>
     <ul id="tracklists-manager">
         <?php
-        while ( have_posts() ) {
+        while ( $manager_query->have_posts() ) {
 
-            the_post();
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
+            $manager_query->the_post();
             
             //TO FIX TO CHECK or use get_tracklist_class() here ?
             $row_classes = array('tracklist-row','wpsstm-tracklist');
@@ -46,7 +42,7 @@ if ( have_posts() ) {
                     $checked = apply_filters('wpsstm_tracklists_manager_row_checked',false,$wpsstm_tracklist);
                     $checked_str = checked($checked,true,false);
 
-                    printf('<input name="tracklists[%s]" type="checkbox" value="on" %s />',$wpsstm_tracklist->post_id,$checked_str);
+                    printf('<input name="wpsstm_tracklists_manager[tracklists][]" type="checkbox" value="%s" %s />',$wpsstm_tracklist->post_id,$checked_str);
 
                     ?>
                 </span>
@@ -82,4 +78,5 @@ if ( have_posts() ) {
     <p class="wpsstm-notice"><?php _e( 'Sorry, no tracklists matching those criteria.','wpsstm' ); ?></p>
     <?php
 }
+wp_reset_postdata();
 ?>

@@ -21,9 +21,7 @@
 
         
     }
-    
-    //at init
-    formToggleTracklist.find('button[type="submit"]').hide(); //hide since form is sent through JS
+
     toggleTracklistResults();
  
     //filter playlists
@@ -32,7 +30,7 @@
         e.preventDefault();
         var value = $(this).val().toLowerCase();
         var form = $(this).parents('form');
-        var toggleForm = $('#wpsstm-toggle-tracklists');
+        var toggleForm = $('form#wpsstm-toggle-tracklists');
 
         
         var tracklist_items = toggleForm.find('#tracklists-manager .tracklist-row');
@@ -57,9 +55,12 @@
     });
 
     //toggle track in playlist
+    /*
+    formToggleTracklist.find('button[type="submit"]').hide(); //hide since form is sent through JS
     formToggleTracklist.on( "click",'input[type="radio"]', function(e){
         var form = $(this).closest('form#wpsstm-toggle-tracklists');
         form.submit();
     });
+    */
 
 })(jQuery);

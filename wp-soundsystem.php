@@ -215,11 +215,6 @@ class WP_SoundSystem {
             '%wpsstm_ajax_action%',
             '([^&]+)'
         );
-        
-        add_rewrite_tag(
-            '%wpsstm_action_data%',
-            '([^&]+)'
-        );
     }
     
     function add_wpsstm_query_vars($qvars){

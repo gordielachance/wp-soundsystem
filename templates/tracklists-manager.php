@@ -11,29 +11,39 @@ $body_classes = array(
     'wpsstm-tracklist-manager-iframe'
 );
 
+$manager_redirect_url = WPSSTM_Core_Tracklists::get_tracklists_manager_url();
+
+/*
+post type check
+*/
+$post_type = get_post_type();
+if ( !in_array($post_type,wpsstm()->tracklist_post_types) ){
+    die("invalid tracklist post type");
+}
+
+$post_type_obj = get_post_type_object( get_post_type() );
+$create_cap = $post_type_obj->cap->create_posts;
+$edit_cap = $post_type_obj->cap->edit_posts;
+
 /*
 populate track
 */
-if ( $url_track =  get_query_var( 'wpsstm_action_data' ) ){
+$has_valid_track = false;
+if ( $url_track =  get_query_var( 'wpsstm_track_data' ) ){
+    
     $track = new WPSSTM_Track();
-
     $track->from_array($url_track);
     $valid = $track->validate_track();
+
     if ( is_wp_error($valid) ){
         printf('<p class="wpsstm-notice">%s</p>',$valid->get_error_message());
     }else{
         global $wpsstm_track;
+        $has_valid_track = true;
         $wpsstm_track = $track;
+        $manager_redirect_url = $wpsstm_track->get_tracklists_manager_url();
     }
 }
-
-//TOUFIX
-$wpsstm_track = new WPSSTM_Track();
-$wpsstm_track->artist = 'Thibault Cauvin';
-$wpsstm_track->title = 'Danza Española No. 1: La Vida Breve';
-$track_arr = $wpsstm_track->to_array();
-$track_json = wp_json_encode($track_arr);
-$track_attr = esc_attr($track_json);
 
 ?>
 
@@ -48,34 +58,47 @@ $track_attr = esc_attr($track_json);
     <?php
 
     if ( !get_current_user_id() ){ //not logge
-
-        $action_link = $wpsstm_track->get_track_action_url('tracklists-selector');
-        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
+        
+        $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($manager_redirect_url),__('here','wpsstm'));
         $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
         printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
 
     }else{
+        
+        /*
+        Track header if any
+        */
+        if ($has_valid_track){
+            wpsstm_locate_template( 'track-header.php', true, false );
+        }
 
-        ?>
-        <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-new-tracklist">
-            <input name="wpsstm_action_data[tracklist_title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
+        
+        if ( current_user_can($create_cap) ){
 
-            <input name="wpsstm_action" type="hidden" value='new' />
-            <input type="hidden" name="wpsstm_action_data[json_track]" value="<?php echo $track_attr;?>" />
-            <button type="submit" class="button button-primary wpsstm-icon-button">
-                <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
-            </button>
-        </form>
-        <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>">
-            <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
-
-            <input name="wpsstm_action" type="hidden" value='toggle-tracklists' />
-            <input type="hidden" name="wpsstm_action_data[json_track]" value="<?php echo $track_attr;?>" />
-            <button type="submit" class="button button-primary wpsstm-icon-button">
-                <?php _e('Save');?>
-            </button>
-        </form>
+            ?>
+            <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-new-tracklist" method="post">
+                <input name="wpsstm_tracklist_data[title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
+                <?php echo $wpsstm_track->get_track_hidden_form_fields();?>
+                <input name="wpsstm_action" type="hidden" value='new' />
+                <button type="submit" class="button button-primary wpsstm-icon-button">
+                    <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
+                </button>
+            </form>
         <?php
+        }
+        
+        if ( current_user_can($edit_cap) ){
+            ?>
+            <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
+                <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
+                <?php echo $wpsstm_track->get_track_hidden_form_fields();?>
+                <input name="wpsstm_action" type="hidden" value='toggle' />
+                <button type="submit" class="button button-primary wpsstm-icon-button">
+                    <?php _e('Save');?>
+                </button>
+            </form>
+            <?php
+        }
     }
     ?>
     <?php

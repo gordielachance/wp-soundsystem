@@ -117,7 +117,7 @@ class WPSSTM_Core_Tracks{
         Swap with track args if any
         */
             
-        if( ( $post_type == wpsstm()->post_type_track ) && ( $track_args = $query->get( 'wpsstm_action_data' ) ) ){
+        if( ( $post_type == wpsstm()->post_type_track ) && ( $track_args = $query->get( 'wpsstm_track_data' ) ) ){
             $wpsstm_track->from_array($track_args);
         }
 
@@ -144,9 +144,9 @@ class WPSSTM_Core_Tracks{
         if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
 
-        $action_data = get_query_var( 'wpsstm_action_data' );
+        $track_data = get_query_var( 'wpsstm_track_data' );
         
-        $success = $wpsstm_track->do_track_action($action,$action_data);
+        $success = $wpsstm_track->do_track_action($action,$track_data);
 
         switch($action){
             case 'unlink':
@@ -191,7 +191,7 @@ class WPSSTM_Core_Tracks{
         if( !array_key_exists( 'wpsstm_ajax_action', $wp_query->query_vars ) ) return $template;
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
         
-        $action_data = get_query_var( 'wpsstm_action_data' );
+        $track_data = get_query_var( 'wpsstm_track_data' );
         
         wpsstm()->debug_log($action,"handle_ajax_track_action");
 
@@ -202,7 +202,7 @@ class WPSSTM_Core_Tracks{
             'item' =>   $wpsstm_track->to_array(),
         );
         
-        $success = $wpsstm_track->do_track_action($action,$action_data);
+        $success = $wpsstm_track->do_track_action($action,$track_data);
 
         if ( is_wp_error($success) ){
             $result['success'] = false;
@@ -225,6 +225,7 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
 
         //check query
+        if ( !is_single() ) return $template;
         $post_type = get_query_var( 'post_type' );
         if( $post_type != wpsstm()->post_type_track ) return $template; //post does not exists
         
@@ -245,14 +246,19 @@ class WPSSTM_Core_Tracks{
         $track_post_type_obj = get_post_type_object( wpsstm()->post_type_track );
 
         add_rewrite_tag(
-            '%subtrack_id%',
+            '%wpsstm_track_data%',
+            '([^&]+)'
+        );
+        
+        add_rewrite_tag(
+            '%subtrack_id%', //TOUFIX TOUCHECK
             '(\d+)'
         );
         
         //single NEW subtrack action
         add_rewrite_rule(
             sprintf('^%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
-            sprintf('index.php?post_type=%s&wpsstm_action_data[artist]=$matches[1]&wpsstm_action_data[album]=$matches[2]&wpsstm_action_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_action_data[artist]=ARTIST&wpsstm_action_data[album]=ALBUM&wpsstm_action_data[title]=TITLE&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&wpsstm_track_data[artist]=$matches[1]&wpsstm_track_data[album]=$matches[2]&wpsstm_track_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_track_data[artist]=ARTIST&wpsstm_track_data[album]=ALBUM&wpsstm_track_data[title]=TITLE&wpsstm_action=unlink
             'top'
         );
 
@@ -328,7 +334,7 @@ class WPSSTM_Core_Tracks{
         
         $after['sources'] = __('Sources','wpsstm');
         $after['track-playlists'] = __('Playlists','wpsstm');
-        $after['track-lovedby'] = __('Favorited','wpsstm');
+        $after['track-favoritedby'] = __('Favorited','wpsstm');
         
         return array_merge($before,$defaults,$after);
     }
@@ -350,10 +356,10 @@ class WPSSTM_Core_Tracks{
 
                 
             break;
-            case 'track-lovedby':
+            case 'track-favoritedby':
                 $output = '—';
                 
-                if ( $list = $wpsstm_track->get_loved_by_list() ){
+                if ( $list = $wpsstm_track->get_favorited_by_list() ){
                     $output = $list;
                 }
                 echo $output;
@@ -947,7 +953,7 @@ class WPSSTM_Core_Tracks{
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
             
         }else{
-            $is_loved = $track->is_track_loved_by();
+            $is_loved = $track->is_track_favorited_by();
             $result['do_love'] = $do_love = !$is_loved;
 
             $success = $track->love_track($do_love);

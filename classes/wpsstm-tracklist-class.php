@@ -136,7 +136,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     public function get_title(){
         $title = $this->title;
-        print_r($this->post_id);
         if (!$title && $this->post_id){
             $title = sprintf(__('(playlist #%d)','wpsstm'),$this->post_id);
         }
@@ -295,18 +294,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $success;
     }
     
-    function get_tracklist_loved_by(){
+    function get_tracklist_favorited_by(){
         if ( !$this->post_id ) return false;
         return get_post_meta($this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key);
     }
     
-    function is_tracklist_loved_by($user_id = null){
+    function is_tracklist_favorited_by($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
         if ( !$this->post_id ) return false;
         
-        $loved_by = $this->get_tracklist_loved_by();
-        return in_array($user_id,(array)$loved_by);
+        $favorited_by = $this->get_tracklist_favorited_by();
+        return in_array($user_id,(array)$favorited_by);
     }
     
     function get_tracklist_links(){
@@ -654,7 +653,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $classes = array(
             'wpsstm-tracklist',
-            ( $this->is_tracklist_loved_by() ) ? 'favorited-tracklist' : null,
+            ( $this->is_tracklist_favorited_by() ) ? 'favorited-tracklist' : null,
         );
         
         if($extra_classes){
@@ -964,10 +963,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    function get_loved_by_list(){
+    function get_favorited_by_list(){
         $links = array();
         $output = null;
-        if ( $user_ids = $this->get_tracklist_loved_by() ){
+        if ( $user_ids = $this->get_tracklist_favorited_by() ){
+
             foreach($user_ids as $user_id){
                 $user_info = get_userdata($user_id);
                 $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
@@ -1033,6 +1033,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             break;
         }
         return $success;
+    }
+    
+    function get_tracklist_hidden_form_fields(){
+        if ($this->post_id){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[post_id]" value="%s" />',esc_attr($this->post_id));
+        }
+        if ($this->title){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[title]" value="%s" />',esc_attr($this->title));
+        }
+        return implode("\n",$fields);
     }
 
 }

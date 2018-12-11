@@ -46,7 +46,7 @@ $body_classes = array(
                         }
                         ?>
                     </div>
-                    <p>
+                    <p id="single-track-header">
                         <h2 class="wpsstm-track-title"><?php echo $wpsstm_track->title;?></h2>
                         <h3 class="wpsstm-track-artist"><?php echo $wpsstm_track->artist;?></h3>
                         <h3 class="wpsstm-track-album"><?php echo $wpsstm_track->album;?></h3>
@@ -84,7 +84,7 @@ $body_classes = array(
                     /*
                     Favorited by
                     */
-                    if ( $loved_list = $wpsstm_track->get_loved_by_list() ){
+                    if ( $loved_list = $wpsstm_track->get_favorited_by_list() ){
                         ?>
                         <div class="wpsstm-track-loved-by">
                             <strong><?php _e('Loved by:','wpsstm');?></strong>

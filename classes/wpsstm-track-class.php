@@ -110,6 +110,9 @@ class WPSSTM_Track{
         foreach ($args as $key=>$value){
 
             switch($key){
+                case 'tracklist_id';
+                    $this->tracklist = new WPSSTM_Post_Tracklist($value);
+                break;
                 case 'album';
                    if ($value == '_') continue;
                 case 'source_urls':
@@ -132,11 +135,15 @@ class WPSSTM_Track{
             }
 
         }
-        
-        //track
-        if ( $this->post_id ){
+
+        //subtrack or track id ?
+        if ($this->subtrack_id){
+            $this->populate_subtrack($this->subtrack_id);
+        }elseif ( $this->post_id ){
             $this->populate_track_post();
         }
+        
+        
     }
     
     /*
@@ -189,7 +196,7 @@ class WPSSTM_Track{
     /*
     Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
     */
-    function get_subtrack_tracklist_ids($args = null){
+    function get_in_tracklists_ids($args = null){
         global $wpdb;
 
         //track ID is required
@@ -205,7 +212,7 @@ class WPSSTM_Track{
 
         $args = wp_parse_args((array)$args,$default_args);
 
-        //$this->track_log($args,'WPSSTM_Track::get_subtrack_tracklist_ids()');
+        //$this->track_log($args,'WPSSTM_Track::get_in_tracklists_ids()');
 
         $query = new WP_Query( $args );
 
@@ -216,7 +223,7 @@ class WPSSTM_Track{
 
     function get_parents_list(){
 
-        $tracklist_ids = $this->get_subtrack_tracklist_ids();
+        $tracklist_ids = $this->get_in_tracklists_ids();
         $links = array();
 
         foreach((array)$tracklist_ids as $tracklist_id){
@@ -236,17 +243,33 @@ class WPSSTM_Track{
 
     function to_array(){
 
-        $export = array(
+        $arr = array(
             'post_id' => $this->post_id,
             'title' => $this->title,
             'artist' => $this->artist,
             'album' => $this->album,
-            'mbid' => $this->mbid,
-            'tracklist' => $this->tracklist->to_array(),
+            'tracklist_id' => $this->tracklist->post_id,
+            'from_tracklist' => $this->from_tracklist,
             'subtrack_id' => $this->subtrack_id,
             'position' => $this->position,
         );
-        return array_filter($export);
+        return array_filter($arr);
+    }
+    
+    function to_url(){
+        $arr = $this->to_array();
+        
+        if ($this->post_id || $this->subtrack_id){
+            $removekeys = array('title','artist','album');
+            $arr = array_diff_key($arr, array_flip($removekeys));
+        }
+        
+        if ($this->subtrack_id){
+            $removekeys = array('post_id','tracklist_id','position','from_tracklist');
+            $arr = array_diff_key($arr, array_flip($removekeys));
+        }
+        
+        return array_filter($arr);
     }
     
     /**
@@ -436,7 +459,7 @@ class WPSSTM_Track{
         //update tracks range
         if ( !is_wp_error($result) ){
             $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->tracklist->post_id,$this->position);
-            $result = $wpdb->get_results ( $querystr );
+            $range_success = $wpdb->get_results ( $querystr );
         }
         
         return $result;
@@ -524,7 +547,7 @@ class WPSSTM_Track{
 
     }
     
-    function get_track_loved_by(){
+    function get_track_favorited_by(){
         global $wpdb;
 
         //get subtracks
@@ -548,17 +571,17 @@ class WPSSTM_Track{
         return $wpdb->get_col( $querystr);
     }
     
-    function is_track_loved_by($user_id = null){
+    function is_track_favorited_by($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
         
-        $loved_by = $this->get_track_loved_by();
-        return in_array($user_id,(array)$loved_by);
+        $favorited_by = $this->get_track_favorited_by();
+        return in_array($user_id,(array)$favorited_by);
     }
     
-    function get_loved_by_list(){
+    function get_favorited_by_list(){
         $list = null;
-        if ( !$user_ids = $this->get_track_loved_by() ) return;
+        if ( !$user_ids = $this->get_track_favorited_by() ) return;
         
         foreach($user_ids as $user_id){
             $user_info = get_userdata($user_id);
@@ -777,24 +800,19 @@ class WPSSTM_Track{
         }else{
             $url .= sprintf('%s/%s/',$action_permavar,$action);
         }
-        
-        switch ($action){
-            //TOUFIXTOUCHECK maybe should be elsewhere
-            case 'tracklists-selector':
-                if ($tracklist_id = $this->tracklist->post_id){
-                    $track_arr = array(
-                        'from_tracklist' => $tracklist_id
-                    );
-                    $args = array(
-                        'wpsstm_action_data' => $track_arr
-                    );
-                    $url = add_query_arg($args,$url);
-                }
-                
-            break;
-        }
 
         return $url;
+    }
+    
+    function get_tracklists_manager_url(){
+        $manager_url = WPSSTM_Core_Tracklists::get_tracklists_manager_url();
+        
+        $track_args = $this->to_url();
+        $manager_url = add_query_arg(
+            array('wpsstm_track_data'=>$track_args),
+            $manager_url
+        );
+        return $manager_url;
     }
 
     function get_track_links(){
@@ -891,7 +909,7 @@ class WPSSTM_Track{
         if ($can_playlists_manager){
             $actions['toggle-tracklists'] = array(
                 'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_action_url('tracklists-selector'),
+                'href' =>       $this->get_tracklists_manager_url(),
                 'classes' =>    array('wpsstm-track-popup'),
             );
         }
@@ -947,7 +965,7 @@ class WPSSTM_Track{
 
         $classes = array(
             'wpsstm-track',
-            ( $this->is_track_loved_by() ) ? 'favorited-track' : null,
+            ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
         );
         
         $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
@@ -1108,7 +1126,7 @@ class WPSSTM_Track{
         
         if ( !$wpsstm_track->subtrack_id ) return $checked;
         
-        $checked_playlist_ids = $wpsstm_track->get_subtrack_tracklist_ids();
+        $checked_playlist_ids = $wpsstm_track->get_in_tracklists_ids();
         $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
         return $checked;
     }
@@ -1190,39 +1208,6 @@ class WPSSTM_Track{
             case 'trash':
                 $success = $this->trash_track();
             break;
-            case 'toggle-tracklists':
-                $to_tracklists = wpsstm_get_array_value('target-tracklists',$_REQUEST);
-                if (!$to_tracklists){
-                    $success = new WP_Error('wpsstm_missing_target_tracklist',__('Missing target tracklist','wpsstm'));
-                }else{
- 
-                    foreach ((array)$to_tracklists as $id=>$str_value){
-                        $append = ($str_value == 'on');
-                        $tracklist = new WPSSTM_Post_Tracklist($id);
-                        
-                        if ($append){
-                            $success = $tracklist->save_subtrack($this);
-
-                        }else{
-                            $matches = $this->get_subtrack_matches($tracklist->post_id);
-
-                            foreach ((array)$matches as $subtrack_id){
-                                $this->populate_subtrack($subtrack_id);
-                                $success = $this->unlink_subtrack();
-                               if ( is_wp_error($success) ){
-                                    break; //break at first error
-                                }
-                                
-                            }
-                            
-                        }
-
-                        if ( is_wp_error($success) ){
-                            break; //break at first error
-                        }
-                    }
-                }
-            break;
             case 'append':
                 $success = $this->tracklist->save_subtrack($this);
             break;
@@ -1232,6 +1217,32 @@ class WPSSTM_Track{
         }
         
         return $success;
+    }
+    
+    function get_track_hidden_form_fields(){
+        $fields = array();
+        if ($this->post_id){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[post_id]" value="%s" />',esc_attr($this->post_id));
+        }
+        if ($this->subtrack_id){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[subtrack_id]" value="%s" />',esc_attr($this->subtrack_id));
+        }
+        if ($this->from_tracklist){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[from_tracklist]" value="%s" />',esc_attr($this->from_tracklist));
+        }
+        if ($this->tracklist->post_id){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[tracklist_id]" value="%s" />',esc_attr($this->tracklist->post_id));
+        }
+        if ($this->artist){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[artist]" value="%s" />',esc_attr($this->artist));
+        }
+        if ($this->album){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[album]" value="%s" />',esc_attr($this->album));
+        }
+        if ($this->title){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[title]" value="%s" />',esc_attr($this->title));
+        }
+        return implode("\n",$fields);
     }
     
 }

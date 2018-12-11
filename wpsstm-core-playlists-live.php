@@ -11,13 +11,9 @@ class WPSSTM_Core_Live_Playlists{
         add_action( 'init', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
-        //listing
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_register'), 11 );
-        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_live_playlist), array(&$this,'post_column_sortable_register'), 11 );
-
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
         
-        add_filter( 'the_title', array($this, 'the_cached_remote_title'), 10, 2 );
+        add_filter( 'the_title', array($this, 'the_cached_remote_title'), 9, 2 );
         
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
 
@@ -146,22 +142,6 @@ class WPSSTM_Core_Live_Playlists{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
-    }
-
-    function post_column_register($columns){
-        
-        $columns['health'] = __('Live','spiff');
-        $columns['requests-month'] = __('Requests (month)','spiff');
-        $columns['requests-total'] = __('Requests (total)','spiff');
-        
-        return $columns;
-    }
-    
-    function post_column_sortable_register($columns){
-        $columns['health'] = 'health';
-        $columns['requests-month'] = 'trending';
-        $columns['requests-total'] = 'popular';
-        return $columns;
     }
 
     public static function is_community_user_ready(){
