@@ -95,7 +95,6 @@ class WPSSTM_Core_Tracks{
         
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
-        $track_args = $query->get( 'wpsstm_action_data' );
         
         
         /*
@@ -118,7 +117,7 @@ class WPSSTM_Core_Tracks{
         Swap with track args if any
         */
             
-        if( ( $post_type == wpsstm()->post_type_track ) && $track_args ){
+        if( ( $post_type == wpsstm()->post_type_track ) && ( $track_args = $query->get( 'wpsstm_action_data' ) ) ){
             $wpsstm_track->from_array($track_args);
         }
 
@@ -189,8 +188,8 @@ class WPSSTM_Core_Tracks{
         $success = null;
 
         // since the "ajax" query variable does not require a value, we need to check for its existence
-        if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //ajax action does not exists
-        if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
+        if( !array_key_exists( 'wpsstm_ajax_action', $wp_query->query_vars ) ) return $template;
+        if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
         
         $action_data = get_query_var( 'wpsstm_action_data' );
         

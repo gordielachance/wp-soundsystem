@@ -175,7 +175,7 @@ class WPSSTM_Track{
     
     function local_track_lookup(){
         if ( $this->post_id ) return;
-        if ( !$this->validate_track() ) return;
+        if ( $this->validate_track() !== true ) return;
 
         if ( $duplicates = $this->get_track_duplicates() ){
             $this->post_id = $duplicates[0];
@@ -270,14 +270,14 @@ class WPSSTM_Track{
 
         if ($strict){
             if (!$this->artist){
-                return new WP_Error( 'wpsstm_missing_track_artist', __("No artist found for this track.",'wpsstm') );
+                return new WP_Error( 'wpsstm_missing_track_artist', __("Missing track artist.",'wpsstm') );
             }
             if (!$this->title){
-                return new WP_Error( 'wpsstm_missing_track_title', __("No title found for this track.",'wpsstm') );
+                return new WP_Error( 'wpsstm_missing_track_title', __("Missing track title.",'wpsstm') );
             }
         }else{ //wizard mode
             if ( !$this->artist || !$this->title ){
-                return new WP_Error( 'wpsstm_missing_track_details', __("No artist or title found for this track.",'wpsstm') );
+                return new WP_Error( 'wpsstm_missing_track_details', __("Missing track artist or title.",'wpsstm') );
             }
         }
         return true;
@@ -1101,27 +1101,16 @@ class WPSSTM_Track{
     }
     
     /*
-    Add a checkbox in front of every tracklist row to append/remove track
+    Checks the tracklists manager checkbox if the global track is part of the playlist displayed in the row
     */
-    public static function tracklists_manager_track_checkbox(){
-         global $wpsstm_track;
-        global $wpsstm_tracklist;
+    public static function tracklists_manager_track_checkbox($checked,$tracklist){
+        global $wpsstm_track;
+        
+        if ( !$wpsstm_track->subtrack_id ) return $checked;
         
         $checked_playlist_ids = $wpsstm_track->get_subtrack_tracklist_ids();
-
-        ?>
-        <span class="tracklist-row-action">
-            <?php
-            //checked
-            $checked = in_array($wpsstm_tracklist->post_id,(array)$checked_playlist_ids);
-            $checked_str = checked($checked,true,false);
-
-            printf('<input name="target-tracklists[%s]" type="radio" value="on" %s /><label>Add</label>',$wpsstm_tracklist->post_id,$checked_str);
-            printf('<input name="target-tracklists[%s]" type="radio" value="off" %s /><label>Remove</label>',$wpsstm_tracklist->post_id,!$checked_str);
-    
-            ?>
-        </span>
-        <?php
+        $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
+        return $checked;
     }
 
     function update_sources_order($source_ids){
@@ -1236,26 +1225,6 @@ class WPSSTM_Track{
             break;
             case 'append':
                 $success = $this->tracklist->save_subtrack($this);
-            break;
-            case 'new-tracklist':
-                $tracklist_title = wpsstm_get_array_value('wpstm-new-tracklist-title',$_REQUEST);
-                if (!$tracklist_title){
-                    $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
-                }else{
-                    //create new tracklist
-                    $tracklist = new WPSSTM_Post_Tracklist();
-                    $tracklist->title = $tracklist_title;
-                    $success = $tracklist->save_tracklist();
-                    
-                    //append subtrack
-                    if ( !is_wp_error($success) ){
-                        $success = $tracklist->save_subtrack($this);
-                    }
-                    
-                    //update track action //TOUFIX elsewhere ?
-                    $wp_query->set('wpsstm_action','tracklists-selector');
-                    
-                }
             break;
             case 'unlink':
                 $success = $this->unlink_subtrack();

@@ -1,8 +1,4 @@
 <?php
-global $wpsstm_track;
-global $tracklist_manager_query;
-
-$action = get_query_var( 'wpsstm_action' );
 
 add_filter( 'show_admin_bar','__return_false'); //hide admin bar
 do_action( 'wpsstm-iframe' );
@@ -15,11 +11,29 @@ $body_classes = array(
     'wpsstm-tracklist-manager-iframe'
 );
 
-$track_type_obj = get_post_type_object(wpsstm()->post_type_track);
-$can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
+/*
+populate track
+*/
+if ( $url_track =  get_query_var( 'wpsstm_action_data' ) ){
+    $track = new WPSSTM_Track();
 
-$playlist_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-$labels = get_post_type_labels($playlist_type_obj);
+    $track->from_array($url_track);
+    $valid = $track->validate_track();
+    if ( is_wp_error($valid) ){
+        printf('<p class="wpsstm-notice">%s</p>',$valid->get_error_message());
+    }else{
+        global $wpsstm_track;
+        $wpsstm_track = $track;
+    }
+}
+
+//TOUFIX
+$wpsstm_track = new WPSSTM_Track();
+$wpsstm_track->artist = 'Thibault Cauvin';
+$wpsstm_track->title = 'Danza Española No. 1: La Vida Breve';
+$track_arr = $wpsstm_track->to_array();
+$track_json = wp_json_encode($track_arr);
+$track_attr = esc_attr($track_json);
 
 ?>
 
@@ -32,7 +46,8 @@ $labels = get_post_type_labels($playlist_type_obj);
 </head>
 <body <?php body_class($body_classes); ?>>  
     <?php
-    if ( !get_current_user_id() ){
+
+    if ( !get_current_user_id() ){ //not logge
 
         $action_link = $wpsstm_track->get_track_action_url('tracklists-selector');
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
@@ -42,38 +57,20 @@ $labels = get_post_type_labels($playlist_type_obj);
     }else{
 
         ?>
-        <form action="<?php echo get_permalink($wpsstm_track->post_id);?>" id="wpsstm-new-tracklist">
-            <input name="wpstm-new-tracklist-title" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
+        <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-new-tracklist">
+            <input name="wpsstm_action_data[tracklist_title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
 
-            <input name="wpsstm_action" type="hidden" value='new-tracklist' />
-            <input type="hidden" name="wpsstm_action_data[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+            <input name="wpsstm_action" type="hidden" value='new' />
+            <input type="hidden" name="wpsstm_action_data[json_track]" value="<?php echo $track_attr;?>" />
             <button type="submit" class="button button-primary wpsstm-icon-button">
                 <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
             </button>
         </form>
-        <form action="<?php echo get_permalink($wpsstm_track->post_id);?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>">
-            <?php
-
-            //handle checkbox
-            add_filter('wpsstm_before_tracklist_row',array('WPSSTM_Track','tracklists_manager_track_checkbox'));
-
-            //get logged user static playlists
-            $args = array(
-                'post_type' =>      wpsstm()->post_type_playlist,
-                'author' =>         get_current_user_id(), //TOFIX TO CHECK WHAT IF NOT LOGGED ?
-                'post_status' =>    array('publish','private','future','pending','draft'),
-                'posts_per_page' => -1,
-                'orderby' =>        'title',
-                'order'=>           'ASC'
-            );
-
-            $tracklist_manager_query = new WP_Query( $args );
-            wpsstm_locate_template( 'tracklists-list.php', true, false );
-            
-            ?>
+        <form action="<?php echo WPSSTM_Core_Tracklists::get_tracklists_manager_url();?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>">
+            <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
 
             <input name="wpsstm_action" type="hidden" value='toggle-tracklists' />
-            <input type="hidden" name="wpsstm_action_data[from_tracklist]" value="<?php echo $wpsstm_track->from_tracklist;?>" />
+            <input type="hidden" name="wpsstm_action_data[json_track]" value="<?php echo $track_attr;?>" />
             <button type="submit" class="button button-primary wpsstm-icon-button">
                 <?php _e('Save');?>
             </button>

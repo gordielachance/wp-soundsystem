@@ -119,11 +119,12 @@ class WPSSTM_Core_BuddyPress{
         
         //favorite query
         $query_args = array(
-            'post_type' =>      wpsstm()->tracklist_post_types,
-            //wpsstm_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
-            'posts_per_page' => -1,
-            'orderby' =>        'title',
-            'fields' =>         'ids',
+            'post_type' =>                                      wpsstm()->tracklist_post_types,
+            WPSSTM_Core_Tracklists::$qvar_loved_tracklists =>   true,
+            'author' =>                                         bp_displayed_user_id(),
+            'posts_per_page' =>                                 -1,
+            'orderby' =>                                        'title',
+            'fields' =>                                         'ids',
         );
 
         $query = new WP_Query( $query_args );
@@ -225,50 +226,48 @@ class WPSSTM_Core_BuddyPress{
         echo $title;
     }
     
-    function user_static_playlists_subnav_content(){
-        global $tracklist_manager_query;
-
+    function displayed_user_playlists_manager_args($args){
         //member static playlists
-        $query_args = array(
+        $new = array(
             'post_type' =>      wpsstm()->post_type_playlist,
-            'author' =>         bp_displayed_user_id(),
-            'posts_per_page' => -1,
-            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
-            'orderby' =>        'title',
+            'author' =>         bp_displayed_user_id()
         );
         
-        $tracklist_manager_query = new WP_Query( $query_args );
+        return wp_parse_args($new,$args);
+    }
+    
+    function displayed_user_live_playlists_manager_args($args){
+        //member static playlists
+        $new = array(
+            'post_type' =>      wpsstm()->post_type_live_playlist,
+            'author' =>         bp_displayed_user_id()
+        );
+        
+        return wp_parse_args($new,$args);
+    }
+    
+    function displayed_user_loved_tracklists_manager_args($args){
+        //member static playlists
+        $new = array(
+            WPSSTM_Core_Tracklists::$qvar_loved_tracklists =>       true,
+            'author' =>                                             bp_displayed_user_id()
+        );
+        
+        return wp_parse_args($new,$args);
+    }
+
+    function user_static_playlists_subnav_content(){
+        add_filter( 'wpsstm_tracklists_manager_query',array($this->displayed_user_playlists_manager_args) );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
     function user_live_playlists_subnav_content(){
-        global $tracklist_manager_query;
-        
-        //member live playlists
-        $query_args = array(
-            'post_type' =>      wpsstm()->post_type_live_playlist,
-            'author' =>         bp_displayed_user_id(),
-            'posts_per_page' => -1,
-            'post_status' =>    ( bp_displayed_user_id() == bp_loggedin_user_id() ) ? 'publish' : array('publish','private','future','pending','draft'),
-            'orderby' =>        'title',
-        );
-        
-        $tracklist_manager_query = new WP_Query( $query_args );
+        add_filter( 'wpsstm_tracklists_manager_query',array($this->displayed_user_live_playlists_manager_args) );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
     function user_loved_tracklists_subnav_content(){
-        global $tracklist_manager_query;
-
-        //member favorite playlists
-        $query_args = array(
-            'post_type' =>      wpsstm()->tracklist_post_types,
-            //wpsstm_action//WPSSTM_Core_Tracklists::$qvar_loved_tracklists => bp_displayed_user_id(),
-            'posts_per_page' => -1,
-            'orderby' =>        'title',
-        );
-        
-        $tracklist_manager_query = new WP_Query( $query_args );
+        add_filter( 'wpsstm_tracklists_manager_query',array($this->displayed_user_loved_tracklists_manager_args) );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     

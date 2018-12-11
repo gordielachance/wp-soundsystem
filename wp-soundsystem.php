@@ -96,6 +96,7 @@ class WP_SoundSystem {
         define("WPSSTM_SOURCE_SLUG", "source");
         
         define("WPSSTM_NEW_ITEM_SLUG", "new");
+        define("WPSSTM_MANAGER_SLUG", "manager");
         
         $options_default = array(
             'frontend_scraper_page_id'          => null,
