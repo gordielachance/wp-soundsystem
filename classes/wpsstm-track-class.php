@@ -24,7 +24,6 @@ class WPSSTM_Track{
     
     ///
     public $subtrack_id = null;
-    public $parent_ids = array();
     public $position = 0;
     public $subtrack_time = null;
     public $from_tracklist = null;
@@ -75,9 +74,8 @@ class WPSSTM_Track{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $query = "SELECT * FROM $subtracks_table WHERE ID = $subtrack_id";
+        $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE ID = %s",$subtrack_id);
         $subtrack = $wpdb->get_row($query);
-
         if (!$subtrack) return;
 
         //track
@@ -194,36 +192,32 @@ class WPSSTM_Track{
     }
 
     /*
-    Get IDs of the parent tracklists (albums / playlists / live playlists) for a subtrack.
+    Get IDs of the parent tracklists (albums / playlists / live playlists) for a track.
     */
-    function get_in_tracklists_ids($args = null){
+    function get_in_tracklists_ids(){
         global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        $subtracks_ids = $this->get_subtrack_matches();
+        
+        if ( is_wp_error($subtracks_ids) ) return $subtracks_ids;
+        if ( !$subtracks_ids ) return;
 
-        //track ID is required
-        if ( !$this->post_id ) return;//track does not exists in DB
+        $subtracks_ids_str = implode(',',$subtracks_ids);
+        
+        // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
+        //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
+        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
+        
+        $tracklist_ids = $wpdb->get_col($querystr);
+        return array_unique($tracklist_ids);
 
-        $default_args = array(
-            'post_type' =>                              wpsstm()->tracklist_post_types,
-            'post_status'  =>                           'any',
-            'posts_per_page' =>                         -1,
-            'fields'=>                                  'ids',
-            'subtrack_id' =>                            $this->post_id,
-        );
-
-        $args = wp_parse_args((array)$args,$default_args);
-
-        //$this->track_log($args,'WPSSTM_Track::get_in_tracklists_ids()');
-
-        $query = new WP_Query( $args );
-
-        $this->parent_ids = array_unique($query->posts);
-
-        return $this->parent_ids;
     }
 
     function get_parents_list(){
 
         $tracklist_ids = $this->get_in_tracklists_ids();
+        //TOUFIX filter with viewable tracklists (regular WP_Query);
         $links = array();
 
         foreach((array)$tracklist_ids as $tracklist_id){
@@ -452,8 +446,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
         }
 
-        //update this subtrack
-        $querystr = $wpdb->prepare( "DELETE FROM $subtracks_table WHERE ID = '%s'", $this->subtrack_id );
+        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $this->subtrack_id );
         $result = $wpdb->get_results ( $querystr );
 
         //update tracks range
@@ -530,19 +523,31 @@ class WPSSTM_Track{
     }
 
     /*
-    retrieve the subtracks IDs that matches a track in a playlist
+    retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
     */
-    function get_subtrack_matches($tracklist_id){
+    function get_subtrack_matches($tracklist_id = null){
         global $wpdb;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         if ($this->post_id){
-            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND track_id = %d", $tracklist_id, $this->post_id );
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
+            
         }else{
-            $querystr = $wpdb->prepare( "SELECT ID FROM $subtracks_table WHERE tracklist_id = %d AND artist = '%s' AND title = '%s' AND album = '%s'", $tracklist_id, $this->artist,$this->title,$this->album );
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s'", $this->artist,$this->title);
+            
+            //TO FIX - this specific thing is needed because of the SQL structure ? Is there a way to avoid this ?
+            if ($this->album){
+                $querystr.=  $wpdb->prepare( " AND album = '%s'",$this->album );
+            }else{
+                $querystr.=  " AND album IS NULL";
+            }
         }
         
+        if($tracklist_id){
+            $querystr.= $wpdb->prepare( " AND tracklist_id = %d",$tracklist_id);
+        }
+
         return $wpdb->get_col( $querystr);
 
     }
@@ -805,9 +810,10 @@ class WPSSTM_Track{
     }
     
     function get_tracklists_manager_url(){
-        $manager_url = WPSSTM_Core_Tracklists::get_tracklists_manager_url();
+        $manager_url = WPSSTM_Core_Tracklists::get_manager_url(wpsstm()->post_type_playlist);
         
         $track_args = $this->to_url();
+        $track_args['from_tracklist'] = $this->tracklist->post_id;
         $manager_url = add_query_arg(
             array('wpsstm_track_data'=>$track_args),
             $manager_url
@@ -1117,19 +1123,6 @@ class WPSSTM_Track{
         );
         return $sources_url;
     }
-    
-    /*
-    Checks the tracklists manager checkbox if the global track is part of the playlist displayed in the row
-    */
-    public static function tracklists_manager_track_checkbox($checked,$tracklist){
-        global $wpsstm_track;
-        
-        if ( !$wpsstm_track->subtrack_id ) return $checked;
-        
-        $checked_playlist_ids = $wpsstm_track->get_in_tracklists_ids();
-        $checked = in_array($tracklist->post_id,(array)$checked_playlist_ids);
-        return $checked;
-    }
 
     function update_sources_order($source_ids){
         global $wpdb;
@@ -1223,6 +1216,16 @@ class WPSSTM_Track{
         $fields = array();
         if ($this->post_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[post_id]" value="%s" />',esc_attr($this->post_id));
+        }else{
+            if ($this->artist){
+                $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[artist]" value="%s" />',esc_attr($this->artist));
+            }
+            if ($this->album){
+                $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[album]" value="%s" />',esc_attr($this->album));
+            }
+            if ($this->title){
+                $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[title]" value="%s" />',esc_attr($this->title));
+            }
         }
         if ($this->subtrack_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[subtrack_id]" value="%s" />',esc_attr($this->subtrack_id));
@@ -1232,15 +1235,6 @@ class WPSSTM_Track{
         }
         if ($this->tracklist->post_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[tracklist_id]" value="%s" />',esc_attr($this->tracklist->post_id));
-        }
-        if ($this->artist){
-            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[artist]" value="%s" />',esc_attr($this->artist));
-        }
-        if ($this->album){
-            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[album]" value="%s" />',esc_attr($this->album));
-        }
-        if ($this->title){
-            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[title]" value="%s" />',esc_attr($this->title));
         }
         return implode("\n",$fields);
     }

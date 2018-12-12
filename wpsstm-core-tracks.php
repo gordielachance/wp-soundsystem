@@ -491,7 +491,7 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $subtrack_query = "SELECT * FROM $subtracks_table WHERE ID = $subtrack_id";
+        $subtrack_query = "SELECT * FROM `$subtracks_table` WHERE ID = $subtrack_id";
         $subtrack = $wpdb->get_row($subtrack_query);
         $track_id = $subtrack->track_id;
         

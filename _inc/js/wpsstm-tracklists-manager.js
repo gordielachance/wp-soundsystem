@@ -55,12 +55,13 @@
     });
 
     //toggle track in playlist
-    /*
+
     formToggleTracklist.find('button[type="submit"]').hide(); //hide since form is sent through JS
     formToggleTracklist.on( "click",'input[type="radio"]', function(e){
         var form = $(this).closest('form#wpsstm-toggle-tracklists');
+        form.addClass('wpsstm-freeze');
         form.submit();
     });
-    */
+
 
 })(jQuery);

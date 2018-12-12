@@ -289,7 +289,7 @@ class WP_SoundSystem {
                 $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
                 $wpdb->query("ALTER TABLE $subtracks_table ADD artist longtext NOT NULL");
                 $wpdb->query("ALTER TABLE $subtracks_table ADD title longtext NOT NULL");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext NULL");
             }
             if ($current_version < 160){
                 $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
@@ -317,7 +317,7 @@ class WP_SoundSystem {
             track_order int(11) NOT NULL DEFAULT '0',
             artist longtext NOT NULL,
             title longtext NOT NULL,
-            album longtext,
+            album longtext NULL,
             time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)
         ) $charset_collate;";

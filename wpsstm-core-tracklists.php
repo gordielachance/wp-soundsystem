@@ -404,8 +404,12 @@ class WPSSTM_Core_Tracklists{
         $track_data = get_query_var( 'wpsstm_track_data' );
         $subtrack = new WPSSTM_Track();
         $subtrack->from_array($track_data);
-        
-        
+
+        //unset some vars or it will update (move) the previous subtrack instead of creating a new one
+        $new_subtrack = clone $subtrack;
+        $new_subtrack->position = null;
+        $new_subtrack->subtrack_id = null;
+
         $tracklist_data = get_query_var( 'wpsstm_tracklist_data' );
         $redirect_url = null;
         $success = null;
@@ -426,14 +430,6 @@ class WPSSTM_Core_Tracklists{
                     if ( !is_wp_error($success) ){
                         $tracklist_id = $success;
                         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-
-                        //new subtrack
-                        $new_subtrack = new WPSSTM_Track();
-                        $new_subtrack->artist = $subtrack->artist;
-                        $new_subtrack->album = $subtrack->album;
-                        $new_subtrack->title = $subtrack->title;
-                        $new_subtrack->from_tracklist = $subtrack->tracklist->post_id;
-
                         $success = $tracklist->save_subtrack($new_subtrack);
                     }
                     $redirect_url = $new_subtrack->get_tracklists_manager_url();
@@ -445,55 +441,72 @@ class WPSSTM_Core_Tracklists{
                 /*
                 Get playlists IDs this track is queued in
                 */
-                $parent_args = array(
-                    'post_type' => wpsstm()->static_tracklist_post_types
-                );
 
-                $current_parent_ids = (array)$subtrack->get_in_tracklists_ids($parent_args);
-                $new_parent_ids = wpsstm_get_array_value(array('wpsstm_tracklists_manager','tracklists'),$_REQUEST);
-                $add_to_ids = array_diff($new_parent_ids,$current_parent_ids);
-                $remove_from_ids = array_diff($current_parent_ids,$new_parent_ids);
-
-                /*append*/
-                foreach ($add_to_ids as $id){
-                    $tracklist = new WPSSTM_Post_Tracklist($id);
-                    
-                    //new subtrack
-                    $new_subtrack = new WPSSTM_Track();
-                    $new_subtrack->artist = $subtrack->artist;
-                    $new_subtrack->album = $subtrack->album;
-                    $new_subtrack->title = $subtrack->title;
-                    $new_subtrack->from_tracklist = $subtrack->tracklist->post_id;
-                    
-                    $success = $tracklist->save_subtrack($new_subtrack);
-
-                    if ( is_wp_error($success) ){
-                        break; //break at first error
+                $current_parent_ids = (array)$subtrack->get_in_tracklists_ids();
+                
+                $batch = wpsstm_get_array_value(array('wpsstm_tracklists_manager_batch'),$_REQUEST);
+                $add_to_ids = array();
+                $remove_from_ids = array();
+                
+                foreach((array)$batch as $id=>$value){
+                    switch($value){
+                        case '1':
+                            $add_to_ids[] = $id;
+                        break;
+                        case '-1':
+                            $remove_from_ids[] = $id;
+                        break;
                     }
                 }
                 
-                /*remove*/
-                foreach ($remove_from_ids as $id){
-                    $matches = $subtrack->get_subtrack_matches($id);
+                //extra check
+                $remove_from_ids = array_intersect($remove_from_ids,$current_parent_ids);
+                $add_to_ids = array_diff($add_to_ids,$current_parent_ids);
+                
+                
 
-                    foreach ((array)$matches as $subtrack_id){
-                        $subtrack->populate_subtrack($subtrack_id);
-                        $success = $subtrack->unlink_subtrack();
+                /*remove*/
+                foreach ($remove_from_ids as $tracklist_id){
+
+                    $subtrack_ids = $subtrack->get_subtrack_matches($tracklist_id);
+
+                    if ( is_wp_error($subtrack_ids) ){
+                        $success = $subtrack_ids;
+                        break;
+                    } 
+
+                    foreach ($subtrack_ids as $subtrack_id){
+                        $remove_subtrack = new WPSSTM_Track();
+                        $remove_subtrack->populate_subtrack($subtrack_id);
+                        if (!$remove_subtrack->subtrack_id) continue; //this subtrack does not exists in the requested playlist
                         
-                        print_r("remove from " . $id . ": ");
-                        print_r($success);
-                        echo"<br/>";
-                        
+                        $success = $remove_subtrack->unlink_subtrack();
+
                         if ( is_wp_error($success) ){
                             break; //break at first error
                         }
 
                     }
 
+                }
+
+                /*append*/
+                
+                
+                
+                foreach ($add_to_ids as $id){
+                    $tracklist = new WPSSTM_Post_Tracklist($id);
+
+                    //or it will update (move) the previous subtrack instead of creating a new one
+                    $tracklist_subtrack = clone $new_subtrack;
+                    $success = $tracklist->save_subtrack($tracklist_subtrack);
+
                     if ( is_wp_error($success) ){
                         break; //break at first error
                     }
                 }
+                
+
 
                 $redirect_url = $subtrack->get_tracklists_manager_url();
                 
@@ -768,7 +781,7 @@ class WPSSTM_Core_Tracklists{
         
     }
     
-    public static function get_tracklists_manager_url($post_type = null){
+    public static function get_manager_url($post_type = null){
         
         if (!$post_type) $post_type = get_post_type();
         
