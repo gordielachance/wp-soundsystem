@@ -830,6 +830,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $track->validate_track($strict);
     }
     
+    function add_subtrack($track){
+        $new_track = clone $track;
+        //unset some subtracks vars or subtrack will be moved instead of added
+        $new_track->subtrack_id = null;
+        return $this->save_subtrack($new_track);
+    }
+    
     function save_subtrack($track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
@@ -859,25 +866,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             );
         }
 
-        //append track
-        if (!$track->position){
-            $track->position = $this->get_subtracks_count() + 1;
-        }
-        
-        //subtrack
-        $subtrack_data = array(
-            'tracklist_id' =>   $this->post_id,
-            'track_order' =>    (int)$track->position
-        );
-        
         //new subtrack
         if (!$track->subtrack_id){
-            $subtrack_data['time'] = current_time('mysql');
-            $subtrack_data['from_tracklist'] = $track->from_tracklist;
+            $subtrack_data['time'] =            current_time('mysql');
+            $subtrack_data['tracklist_id'] =    $this->post_id;
+            $subtrack_data['from_tracklist'] =  $track->from_tracklist;
+            $subtrack_data['track_order'] =     $this->get_subtracks_count() + 1;
+            
+            $track_data = array_merge($track_data,$subtrack_data);
         }
-        
-        $track_data = array_merge($track_data,$subtrack_data);
-        
+
         //update or insert ?
         if ($track->subtrack_id){
             
@@ -908,6 +906,38 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         return $success;
 
+    }
+    
+    function unlink_subtrack($track){
+        
+        if ( !$track->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+        
+        //capability check
+        if ( !$this->user_can_edit_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
+        }
+        
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if ( !$track->position ){
+            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
+        }
+
+        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $track->subtrack_id );
+        $result = $wpdb->get_results ( $querystr );
+
+        //update tracks range
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->post_id,$track->position);
+            $range_success = $wpdb->get_results ( $querystr );
+            $track->subtrack_id = null;
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"unlinked subtrack");
+        }
+        
+        return $result;
     }
 
     private function tracklist_autosource(){
@@ -1005,15 +1035,27 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             case 'queue': //add subtrack
                 
-                $new_track = new WPSSTM_Track();
+                $track = new WPSSTM_Track();
                 
                 //build track from request
                 if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $new_track->from_array($url_track);
+                    $track->from_array($url_track);
                 }
 
-                $success = $this->save_subtrack($new_track);
+                $success = $this->add_subtrack($track);
                 
+            break;
+                
+            case 'unlink':
+                
+                $track = new WPSSTM_Track();
+                
+                //build track from request
+                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
+                    $track->from_array($url_track);
+                }
+
+                $success = $this->unlink_subtrack($track);
             break;
 
             case 'favorite':

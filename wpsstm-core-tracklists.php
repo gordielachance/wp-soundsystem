@@ -360,7 +360,6 @@ class WPSSTM_Core_Tracklists{
         $success = $wpsstm_tracklist->do_tracklist_action($action,$tracklist_data);
         
         switch($action){
-            case 'queue':
             case 'live':
             case 'static':
                 $redirect_url = get_permalink($wpsstm_tracklist->post_id);
@@ -405,11 +404,6 @@ class WPSSTM_Core_Tracklists{
         $subtrack = new WPSSTM_Track();
         $subtrack->from_array($url_track);
 
-        //unset some vars or it will update (move) the previous subtrack instead of creating a new one
-        $new_subtrack = clone $subtrack;
-        $new_subtrack->position = null;
-        $new_subtrack->subtrack_id = null;
-
         $tracklist_data = get_query_var( 'wpsstm_tracklist_data' );
         $redirect_url = null;
         $success = null;
@@ -430,9 +424,9 @@ class WPSSTM_Core_Tracklists{
                     if ( !is_wp_error($success) ){
                         $tracklist_id = $success;
                         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                        $success = $tracklist->save_subtrack($new_subtrack);
+                        $success = $tracklist->add_subtrack($subtrack);
                     }
-                    $redirect_url = $new_subtrack->get_tracklists_manager_url();
+                    $redirect_url = $subtrack->get_tracklists_manager_url();
                 }
             break;
                 
@@ -474,13 +468,13 @@ class WPSSTM_Core_Tracklists{
                         $success = $subtrack_ids;
                         break;
                     } 
+                    
+                    $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
                     foreach ($subtrack_ids as $subtrack_id){
-                        $remove_subtrack = new WPSSTM_Track();
-                        $remove_subtrack->populate_subtrack($subtrack_id);
-                        if (!$remove_subtrack->subtrack_id) continue; //this subtrack does not exists in the requested playlist
-                        
-                        $success = $remove_subtrack->unlink_subtrack();
+                        $track = new WPSSTM_Track();
+                        $track->populate_subtrack($subtrack_id);
+                        $success = $tracklist->unlink_subtrack($track);
 
                         if ( is_wp_error($success) ){
                             break; //break at first error
@@ -496,10 +490,7 @@ class WPSSTM_Core_Tracklists{
                 
                 foreach ($add_to_ids as $id){
                     $tracklist = new WPSSTM_Post_Tracklist($id);
-
-                    //or it will update (move) the previous subtrack instead of creating a new one
-                    $tracklist_subtrack = clone $new_subtrack;
-                    $success = $tracklist->save_subtrack($tracklist_subtrack);
+                    $success = $tracklist->add_subtrack($subtrack);
 
                     if ( is_wp_error($success) ){
                         break; //break at first error

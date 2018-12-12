@@ -428,38 +428,6 @@ class WPSSTM_Track{
         
     }
     
-    function unlink_subtrack(){
-        
-        if ( !$this->subtrack_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
-        
-        //capability check
-        if ( !$this->tracklist->user_can_edit_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
-        }
-        
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( !$this->position ){
-            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
-        }
-
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $this->subtrack_id );
-        $result = $wpdb->get_results ( $querystr );
-
-        //update tracks range
-        if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->tracklist->post_id,$this->position);
-            $range_success = $wpdb->get_results ( $querystr );
-            $this->subtrack_id = null;
-            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'tracklist'=>$this->tracklist->post_id),"unlinked subtrack");
-        }
-        
-        return $result;
-    }
-    
     function trash_track(){
 
         //capability check
@@ -503,11 +471,7 @@ class WPSSTM_Track{
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($do_love){
-            //clone it or it will only be moved
-            $new_subtrack = clone $this;
-            $new_subtrack->subtrack_id = null;
-            $new_subtrack->position = null;
-            $success = $tracklist->save_subtrack($new_subtrack);
+            $success = $tracklist->add_subtrack($this);
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
             
@@ -516,9 +480,9 @@ class WPSSTM_Track{
             $ids = $this->get_subtrack_matches($tracklist_id);
 
             foreach($ids as $subtrack_id){
-                $subtrack = new WPSSTM_Track(); //default
-                $subtrack->populate_subtrack($subtrack_id);
-                $success = $subtrack->unlink_subtrack();
+                $track = new WPSSTM_Track(); //default
+                $track->populate_subtrack($subtrack_id);
+                $success = $tracklist->unlink_subtrack($track);
             }
 
             do_action('wpsstm_unlove_track',$this->post_id,$this);
@@ -794,6 +758,32 @@ class WPSSTM_Track{
     }
 
     function get_track_action_url($action,$ajax = false){
+        
+        /*exceptions*/
+        
+        switch($action){
+            case 'favorite':
+            case 'unfavorite':
+                
+                $tracklist_action = ($action=='favorite') ? 'queue' : 'unlink';
+                
+                //TOUFIX this should be put elsewhere so it isn't populated for each track ?
+                $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+                $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+                $url = $tracklist->get_tracklist_action_url($tracklist_action);
+
+                $track_args = $this->to_url();
+                $url = add_query_arg(
+                    array('wpsstm_track_data'=>$track_args),
+                    $url
+                );
+
+                return $url;
+                
+            break;
+        }
+        
+        //
 
         $url = $this->get_track_url();
         if (!$url) return false;
@@ -801,7 +791,6 @@ class WPSSTM_Track{
         $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
         $action_permavar = ($ajax) ? 'ajax' : 'action';
         
-
         if ( !get_option('permalink_structure') ){
             $args = array(
                 $action_var =>     $action,
@@ -1206,12 +1195,6 @@ class WPSSTM_Track{
 
             case 'trash':
                 $success = $this->trash_track();
-            break;
-            case 'append':
-                $success = $this->tracklist->save_subtrack($this);
-            break;
-            case 'unlink':
-                $success = $this->unlink_subtrack();
             break;
         }
         

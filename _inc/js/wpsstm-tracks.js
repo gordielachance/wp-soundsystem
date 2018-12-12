@@ -50,9 +50,6 @@
             var do_love = action_el.hasClass('action-favorite');
             var action_url = link_el.data('wpsstm-ajax-url');
             var ajax_data = {};
-            
-            console.log("COUCOU");
-            console.log(action_url);
 
             return $.ajax({
 
