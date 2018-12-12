@@ -111,8 +111,6 @@ class WPSSTM_Track{
                 case 'tracklist_id';
                     $this->tracklist = new WPSSTM_Post_Tracklist($value);
                 break;
-                case 'album';
-                   if ($value == '_') continue;
                 case 'source_urls':
                     
                     $sources = array();
@@ -125,10 +123,12 @@ class WPSSTM_Track{
                     
                     $this->add_sources($sources);
                 break;
+                case 'album';
+                   if ($value == '_') continue;
                 default:
                     if ( !property_exists($this,$key) )  continue;
                     if ( !isset($args[$key]) ) continue; //value has not been set
-                    $this->$key = $args[$key];
+                    $this->$key = $value;
                 break;
             }
 
@@ -477,8 +477,10 @@ class WPSSTM_Track{
     }
 
     function love_track($do_love){
+
+        $valid = $this->validate_track();
         
-        if ( !$this->artist || !$this->title ) return new WP_Error('missing_love_track_data',__("Required track information missing",'wpsstm'));
+        if ( is_wp_error($valid) ) return $valid;
         if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
 
         //capability check
@@ -1185,7 +1187,7 @@ class WPSSTM_Track{
 
     }
     
-    function do_track_action($action,$action_data = null){
+    function do_track_action($action){
         global $wp_query;
         
         $success = null;

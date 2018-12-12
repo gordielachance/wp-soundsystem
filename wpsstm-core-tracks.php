@@ -113,16 +113,14 @@ class WPSSTM_Core_Tracks{
             $wpsstm_track->populate_subtrack($subtrack_id);
         }
         
+        
+        
         /*
-        Swap with track args if any
+        From URL args if any
         */
             
-        if( ( $post_type == wpsstm()->post_type_track ) && ( $track_args = $query->get( 'wpsstm_track_data' ) ) ){
+        if( ( $track_args = $query->get( 'wpsstm_track_data' ) ) ){
             $wpsstm_track->from_array($track_args);
-        }
-
-        if ( $wpsstm_track->post_id ){ //TOUFIX what if empty ?
-            wpsstm()->debug_log($wpsstm_track->to_array(),"defined global track");
         }
 
     }
@@ -144,9 +142,7 @@ class WPSSTM_Core_Tracks{
         if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
 
-        $track_data = get_query_var( 'wpsstm_track_data' );
-        
-        $success = $wpsstm_track->do_track_action($action,$track_data);
+        $success = $wpsstm_track->do_track_action($action);
 
         switch($action){
             case 'unlink':
@@ -187,12 +183,9 @@ class WPSSTM_Core_Tracks{
         
         $success = null;
 
-        // since the "ajax" query variable does not require a value, we need to check for its existence
-        if( !array_key_exists( 'wpsstm_ajax_action', $wp_query->query_vars ) ) return $template;
+        if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
-        
-        $track_data = get_query_var( 'wpsstm_track_data' );
-        
+
         wpsstm()->debug_log($action,"handle_ajax_track_action");
 
         $result = array(
@@ -202,7 +195,7 @@ class WPSSTM_Core_Tracks{
             'item' =>   $wpsstm_track->to_array(),
         );
         
-        $success = $wpsstm_track->do_track_action($action,$track_data);
+        $success = $wpsstm_track->do_track_action($action);
 
         if ( is_wp_error($success) ){
             $result['success'] = false;

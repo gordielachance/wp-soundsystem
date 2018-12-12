@@ -326,7 +326,6 @@ class WPSSTM_Core_Tracklists{
         if ( $tracklist_id = get_query_var( 'tracklist_id' ) ){
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         }
-        
 
     }
     
@@ -380,7 +379,7 @@ class WPSSTM_Core_Tracklists{
             $redirect_url = add_query_arg($redirect_args, $redirect_url);
             
             wp_safe_redirect($redirect_url);
-            die($redirect_url);
+            die();
             
         }else{
             
@@ -526,7 +525,7 @@ class WPSSTM_Core_Tracklists{
             $redirect_url = add_query_arg($redirect_args, $redirect_url);
             
             wp_safe_redirect($redirect_url);
-            die($redirect_url);
+            die();
             
         }else{
             

@@ -995,19 +995,25 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         wpsstm()->debug_log($data,$title);
     }
     
-    function do_tracklist_action($action,$action_data = null){
+    function do_tracklist_action($action,$tracklist_data = null){
         global $wp_query;
         
         $success = null;
         
         //action
-        //action
         switch($action){
 
             case 'queue': //add subtrack
-                $track = new WPSSTM_Track();
-                $track->from_array($action_data);
-                $success = $this->save_subtrack($track);
+                
+                $new_track = new WPSSTM_Track();
+                
+                //build track from request
+                if( $track_args = $wp_query->get( 'wpsstm_track_data' ) ){
+                    $new_track->from_array($track_args);
+                }
+
+                $success = $this->save_subtrack($new_track);
+                
             break;
 
             case 'favorite':
