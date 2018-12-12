@@ -445,51 +445,36 @@ class WPSSTM_Track{
         return $success;
         
     }
-
-    function love_track($do_love){
-
-        $success = null;
-        $valid = $this->validate_track();
+    
+    function remove_subtrack(){
+        if ( !$this->subtrack_id ){
+            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
         
-        if ( is_wp_error($valid) ) return $valid;
-        if ( !$user_id = get_current_user_id() ) return new WP_Error('no_user_id',__("User is not logged",'wpsstm'));
-
         //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
-        $required_cap = $post_type_obj->cap->edit_posts;
-        if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_track_no_edit_cap', __("You don't have the capability required to edit tracklists.",'wpsstm') );
+        if ( !$this->tracklist->user_can_edit_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
         }
         
-        //get tracklist
-        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        if ( !$tracklist_id || is_wp_error($tracklist_id) ){
-            return $tracklist_id;
-        }
-        
-        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-
-        if ($do_love){
-            $success = $tracklist->add_subtrack($this);
-            do_action('wpsstm_love_track',$this->post_id,$this);
-        }else{
-            
-            //find matche(s) in user's favorites
-
-            $ids = $this->get_subtrack_matches($tracklist_id);
-
-            foreach($ids as $subtrack_id){
-                $track = new WPSSTM_Track(); //default
-                $track->populate_subtrack($subtrack_id);
-                $success = $tracklist->dequeue_subtrack($track);
-            }
-
-            do_action('wpsstm_unlove_track',$this->post_id,$this);
+        if ( !$this->position ){
+            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
         }
 
-        return $success;
+        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $this->subtrack_id );
+        $result = $wpdb->get_results ( $querystr );
+
+        //update tracks range
+        if ( !is_wp_error($result) ){
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->tracklist->post_id,$this->position);
+            $range_success = $wpdb->get_results ( $querystr );
+             $this->track_log(array('subtrack_id'=>$this->subtrack_id,'tracklist'=>$this->tracklist->post_id),"dequeued subtrack");
+            $this->subtrack_id = null;
+        }
         
+        return $result;
     }
 
     /*
@@ -843,7 +828,7 @@ class WPSSTM_Track{
         Subtrack
         */
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
-        $can_dequeue_subtrack =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
+        $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
         //share
         /*
@@ -886,7 +871,7 @@ class WPSSTM_Track{
         /*
         Subtracks
         */
-        if ($can_dequeue_subtrack){
+        if ($can_dequeue_track){
             $actions['dequeue'] = array(
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
@@ -1187,12 +1172,6 @@ class WPSSTM_Track{
         
         //action
         switch($action){
-            case 'favorite':
-            case 'unfavorite':
-                $do_love = ( $action == 'favorite');
-                $success = $this->love_track($do_love);
-            break;
-
             case 'trash':
                 $success = $this->trash_track();
             break;

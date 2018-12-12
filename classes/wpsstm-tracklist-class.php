@@ -831,10 +831,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function add_subtrack($track){
-        $new_track = clone $track;
         //unset some subtracks vars or subtrack will be moved instead of added
+        $new_track = clone $track;
         $new_track->subtrack_id = null;
-        return $this->save_subtrack($new_track);
+        
+        $success = $this->save_subtrack($new_track);
+        
+        //favorites ?
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        if ( $success && ($this->post_id == $tracklist_id) ){
+            do_action('wpsstm_love_track',$track->post_id);
+        }
+        
+        return $success;
+
     }
     
     function save_subtrack($track){
@@ -908,36 +918,28 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    function dequeue_subtrack($track){
+    function dequeue_track($track){
         
-        if ( !$track->subtrack_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
+        $subtrack_ids = $track->get_subtrack_matches($this->post_id);
+        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
         
-        //capability check
-        if ( !$this->user_can_edit_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
-        }
-        
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( !$track->position ){
-            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
-        }
+        foreach ($subtrack_ids as $subtrack_id){
+            $subtrack = new WPSSTM_Track();
+            $subtrack->populate_subtrack($subtrack_id);
+            $success = $subtrack->remove_subtrack();
 
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $track->subtrack_id );
-        $result = $wpdb->get_results ( $querystr );
+            if ( is_wp_error($success) ) return $success;
 
-        //update tracks range
-        if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->post_id,$track->position);
-            $range_success = $wpdb->get_results ( $querystr );
-            $track->subtrack_id = null;
-            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"dequeueed subtrack");
         }
         
-        return $result;
+        //favorites ?
+        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        if ($this->post_id == $tracklist_id){
+            do_action('wpsstm_unlove_track',$track->post_id);
+        }
+        
+        return true;
+        
     }
 
     private function tracklist_autosource(){
@@ -1054,8 +1056,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
                     $track->from_array($url_track);
                 }
-
-                $success = $this->dequeue_subtrack($track);
+                
+                $success = $this->dequeue_track($track);
+                
+                
             break;
 
             case 'favorite':

@@ -461,33 +461,11 @@ class WPSSTM_Core_Tracklists{
 
                 /*remove*/
                 foreach ($remove_from_ids as $tracklist_id){
-
-                    $subtrack_ids = $subtrack->get_subtrack_matches($tracklist_id);
-
-                    if ( is_wp_error($subtrack_ids) ){
-                        $success = $subtrack_ids;
-                        break;
-                    } 
-                    
                     $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-
-                    foreach ($subtrack_ids as $subtrack_id){
-                        $track = new WPSSTM_Track();
-                        $track->populate_subtrack($subtrack_id);
-                        $success = $tracklist->dequeue_subtrack($track);
-
-                        if ( is_wp_error($success) ){
-                            break; //break at first error
-                        }
-
-                    }
-
+                    $success = $tracklist->dequeue_track($subtrack);
                 }
 
                 /*append*/
-                
-                
-                
                 foreach ($add_to_ids as $id){
                     $tracklist = new WPSSTM_Post_Tracklist($id);
                     $success = $tracklist->add_subtrack($subtrack);

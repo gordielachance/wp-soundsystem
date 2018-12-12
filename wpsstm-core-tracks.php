@@ -130,17 +130,6 @@ class WPSSTM_Core_Tracks{
 
         $success = $wpsstm_track->do_track_action($action);
 
-        switch($action){
-            case 'favorite':
-            case 'unfavorite':
-                $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-                $redirect_url = get_permalink($tracklist_id);
-            break;
-            case 'dequeue':
-                $redirect_url = get_permalink($wpsstm_track->tracklist->post_id);
-            break;
-        }
-
         /*
         Redirect or notice
         */
