@@ -45,25 +45,29 @@
 
             e.preventDefault();
 
-            var link = $(this);
-            var action_el = link.parents('.wpsstm-track-action');
+            var link_el = $(this);
+            var action_el = link_el.parents('.wpsstm-track-action');
             var do_love = action_el.hasClass('action-favorite');
+            var action_url = link_el.data('wpsstm-ajax-url');
             var ajax_data = {};
+            
+            console.log("COUCOU");
+            console.log(action_url);
 
             return $.ajax({
 
                 type:       "post",
-                url:        wpsstmL10n.ajaxurl,
+                url:        action_url,
                 data:       ajax_data,
                 dataType:   'json',
 
                 beforeSend: function() {
-                    link.addClass('action-loading');
+                    link_el.addClass('action-loading');
                 },
                 success: function(data){
                     if (data.success === false) {
                         console.log(data);
-                        link.addClass('action-error');
+                        link_el.addClass('action-error');
                         if (data.notice){
                             wpsstm_dialog_notice(data.notice);
                         }
@@ -73,16 +77,16 @@
                         }else{
                             track_obj.track_el.removeClass('favorited-track');
                         }
+                        $(document).trigger("wpsstmTrackLove", [track_obj,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     console.log(xhr.status);
                     console.log(thrownError);
-                    link.addClass('action-error');
+                    link_el.addClass('action-error');
                 },
                 complete: function() {
-                    link.removeClass('action-loading');
-                    $(document).trigger("wpsstmTrackLove", [track_obj,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                    link_el.removeClass('action-loading');
                 }
             })
 

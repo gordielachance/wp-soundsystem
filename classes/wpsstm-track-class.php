@@ -453,6 +453,8 @@ class WPSSTM_Track{
         if ( !is_wp_error($result) ){
             $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->tracklist->post_id,$this->position);
             $range_success = $wpdb->get_results ( $querystr );
+            $this->subtrack_id = null;
+            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'tracklist'=>$this->tracklist->post_id),"unlinked subtrack");
         }
         
         return $result;
@@ -478,6 +480,7 @@ class WPSSTM_Track{
 
     function love_track($do_love){
 
+        $success = null;
         $valid = $this->validate_track();
         
         if ( is_wp_error($valid) ) return $valid;
@@ -500,6 +503,7 @@ class WPSSTM_Track{
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($do_love){
+            //clone it or it will only be moved
             $new_subtrack = clone $this;
             $new_subtrack->subtrack_id = null;
             $new_subtrack->position = null;
@@ -507,10 +511,10 @@ class WPSSTM_Track{
             do_action('wpsstm_love_track',$this->post_id,$this);
         }else{
             
-            //find matche(s) from user's favorites
+            //find matche(s) in user's favorites
 
             $ids = $this->get_subtrack_matches($tracklist_id);
-            
+
             foreach($ids as $subtrack_id){
                 $subtrack = new WPSSTM_Track(); //default
                 $subtrack->populate_subtrack($subtrack_id);

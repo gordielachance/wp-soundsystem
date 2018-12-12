@@ -71,10 +71,6 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
         //add_action('wp', array($this,'test_autosource_ajax') );
 
-        add_action('wp_ajax_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track'));
-        add_action('wp_ajax_nopriv_wpsstm_toggle_favorite_track', array($this,'ajax_toggle_favorite_track')); //so we can output the non-logged user notice
-        
-        add_action('wp_ajax_wpsstm_trash_track', array($this,'ajax_trash_track'));
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
 
         
@@ -112,16 +108,7 @@ class WPSSTM_Core_Tracks{
         if ( $subtrack_id = get_query_var( 'subtrack_id' ) ){
             $wpsstm_track->populate_subtrack($subtrack_id);
         }
-        
-        
-        
-        /*
-        From URL args if any
-        */
-            
-        if( ( $track_args = $query->get( 'wpsstm_track_data' ) ) ){
-            $wpsstm_track->from_array($track_args);
-        }
+
 
     }
     
@@ -136,7 +123,6 @@ class WPSSTM_Core_Tracks{
     function handle_track_action(){
         global $wpsstm_track;
         $success = null;
-        $redirect_url = null;
         $action_feedback = null;
 
         if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
@@ -145,6 +131,11 @@ class WPSSTM_Core_Tracks{
         $success = $wpsstm_track->do_track_action($action);
 
         switch($action){
+            case 'favorite':
+            case 'unfavorite':
+                $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+                $redirect_url = get_permalink($tracklist_id);
+            break;
             case 'unlink':
                 $redirect_url = get_permalink($wpsstm_track->tracklist->post_id);
             break;
@@ -194,7 +185,7 @@ class WPSSTM_Core_Tracks{
             'success'=> null,
             'item' =>   $wpsstm_track->to_array(),
         );
-        
+
         $success = $wpsstm_track->do_track_action($action);
 
         if ( is_wp_error($success) ){
@@ -204,6 +195,8 @@ class WPSSTM_Core_Tracks{
         }else{
             $result['success'] = $success;
         }
+        
+        $wpsstm_track->track_log($result);
 
         header('Content-type: application/json');
         send_nosniff_header();
@@ -920,78 +913,6 @@ class WPSSTM_Core_Tracks{
         $this->ajax_track_autosource();
     }
     
-    function ajax_toggle_favorite_track(){
-
-        $ajax_data = wp_unslash($_POST);
-        
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
-
-        $result = array(
-            'input'     => $ajax_data,
-            'track'     => $track->to_array(),
-            'message'   => null,
-            'notice'    => null,
-            'do_love'   => null,
-            'success'   => false,
-        );
-                
-        if ( !get_current_user_id() ){
-            
-            $wp_auth_icon = '<i class="fa fa-wordpress" aria-hidden="true"></i>';
-            $action_link = $track->get_track_action_url('toggle-favorite');
-            
-            $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($action_link),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
-            
-        }else{
-            $is_loved = $track->is_track_favorited_by();
-            $result['do_love'] = $do_love = !$is_loved;
-
-            $success = $track->love_track($do_love);
-            $result['track'] = $track->to_array();
-            $track->track_log( json_encode($track,JSON_UNESCAPED_UNICODE), "ajax_toggle_favorite_track()"); 
-
-            if( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code); 
-            }else{
-                $result['success'] = $success; 
-            }
-            
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
-    function ajax_trash_track(){
-        $ajax_data = wp_unslash($_POST);
-        
-
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
-        
-        $result = array(
-            'input' =>      $ajax_data,
-            'track'     =>  null,
-            'message' =>    null,
-            'success' =>    false,
-            'track' =>      $track->to_array(),
-        );
-
-        $success = $track->trash_track();
-
-        if ( is_wp_error($success) ){
-            $result['message'] = $success->get_error_message();
-        }else{
-            $result['success'] = $success;
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
         
     function trash_track_sources($post_id){
         

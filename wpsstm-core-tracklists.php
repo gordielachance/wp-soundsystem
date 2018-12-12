@@ -360,6 +360,7 @@ class WPSSTM_Core_Tracklists{
         $success = $wpsstm_tracklist->do_tracklist_action($action,$tracklist_data);
         
         switch($action){
+            case 'queue':
             case 'live':
             case 'static':
                 $redirect_url = get_permalink($wpsstm_tracklist->post_id);
@@ -400,9 +401,9 @@ class WPSSTM_Core_Tracklists{
         if( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
         if( !$action = get_query_var( 'wpsstm_action' ) ) return;
 
-        $track_data = get_query_var( 'wpsstm_track_data' );
+        $url_track = get_query_var( 'wpsstm_track_data' );
         $subtrack = new WPSSTM_Track();
-        $subtrack->from_array($track_data);
+        $subtrack->from_array($url_track);
 
         //unset some vars or it will update (move) the previous subtrack instead of creating a new one
         $new_subtrack = clone $subtrack;

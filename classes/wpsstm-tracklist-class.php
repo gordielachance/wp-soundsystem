@@ -1008,8 +1008,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $new_track = new WPSSTM_Track();
                 
                 //build track from request
-                if( $track_args = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $new_track->from_array($track_args);
+                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
+                    $new_track->from_array($url_track);
                 }
 
                 $success = $this->save_subtrack($new_track);
