@@ -3,8 +3,6 @@ global $wpdb;
 global $wpsstm_tracklist;
 global $wpsstm_track;
 
-$checked_playlist_ids = $wpsstm_track->get_in_tracklists_ids();
-
 //get logged user static playlists
 $args = array(
     'post_type' =>      wpsstm()->post_type_playlist,
@@ -38,12 +36,18 @@ if ( $manager_query->have_posts() ) {
             <li class="<?php echo implode(' ',$row_classes);?>">
                 <span class="tracklist-row-action">
                     <?php
-                    //checked
-                    $checked = in_array($wpsstm_tracklist->post_id,(array)$checked_playlist_ids);
-                    $checked_str = checked($checked,true,false);
+
+                    if ( $wpsstm_track->validate_track() ){ //track toggle action
+                        $checked_playlist_ids = $wpsstm_track->get_in_tracklists_ids();
+                        $checked = in_array($wpsstm_tracklist->post_id,(array)$checked_playlist_ids);
+                        $checked_str = checked($checked,true,false);
+                        ?>
+                        <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="1" <?php checked($checked,true);?> /><label>+</label>
+                        <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="-1" /><label>-</label>
+                        <?php
+                    }
+            
                     ?>
-                    <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="1" <?php checked($checked,true);?> /><label>+</label>
-                    <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="-1" /><label>-</label>
                 </span>
                 <span class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->get_title();?>">
                     <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->get_title();?></a>
