@@ -153,7 +153,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Improved templates
 * Better tracks source GUI
 * Spotify metabox
-* Static track unlink action
+* Static track dequeue action
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Datas
 * new filter 'wpsstm_pre_save_autosources'

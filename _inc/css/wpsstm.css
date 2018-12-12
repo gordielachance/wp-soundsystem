@@ -794,7 +794,7 @@ ul.wpsstm-tracklist-actions .wpsstm-action {
   content: "\f1f8";
 }
 /* line 209, ../scss/_wpsstm-tracks.scss */
-.wpsstm-track-action.wpsstm-track-action-unlink a:before {
+.wpsstm-track-action.wpsstm-track-action-dequeue a:before {
   content: "\f127";
 }
 /* line 212, ../scss/_wpsstm-tracks.scss */

@@ -316,7 +316,7 @@ class WpsstmTracklist {
 
     }
     
-    dequeue_subtrack(track_obj){
+    dequeue_track(track_obj){
         
         var self = this;
         var track_el = track_obj.track_el;

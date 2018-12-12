@@ -92,7 +92,7 @@
         //dequeue
         track_obj.track_el.find('.wpsstm-track-action-dequeue a').click(function(e) {
             e.preventDefault();
-            track_obj.tracklist.dequeue_subtrack(track_obj);
+            track_obj.tracklist.dequeue_track(track_obj);
         });
         
         //delete
