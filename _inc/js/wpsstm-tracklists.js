@@ -316,11 +316,11 @@ class WpsstmTracklist {
 
     }
     
-    unlink_subtrack(track_obj){
+    dequeue_subtrack(track_obj){
         
         var self = this;
         var track_el = track_obj.track_el;
-        var link_el = track_el.find('.wpsstm-track-action-unlink a');
+        var link_el = track_el.find('.wpsstm-track-action-dequeue a');
         var action_url = link_el.data('wpsstm-ajax-url');
         var ajax_data = {};
 

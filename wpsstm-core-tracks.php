@@ -136,7 +136,7 @@ class WPSSTM_Core_Tracks{
                 $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
                 $redirect_url = get_permalink($tracklist_id);
             break;
-            case 'unlink':
+            case 'dequeue':
                 $redirect_url = get_permalink($wpsstm_track->tracklist->post_id);
             break;
         }
@@ -244,20 +244,20 @@ class WPSSTM_Core_Tracks{
         //single NEW subtrack action
         add_rewrite_rule(
             sprintf('^%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
-            sprintf('index.php?post_type=%s&wpsstm_track_data[artist]=$matches[1]&wpsstm_track_data[album]=$matches[2]&wpsstm_track_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_track_data[artist]=ARTIST&wpsstm_track_data[album]=ALBUM&wpsstm_track_data[title]=TITLE&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&wpsstm_track_data[artist]=$matches[1]&wpsstm_track_data[album]=$matches[2]&wpsstm_track_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_track_data[artist]=ARTIST&wpsstm_track_data[album]=ALBUM&wpsstm_track_data[title]=TITLE&wpsstm_action=dequeue
             'top'
         );
 
         //single ID subtrack action
         add_rewrite_rule(
             sprintf('^%s/%s/(\d+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/action/ACTION
-            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
         
         add_rewrite_rule(
             sprintf('^%s/%s/(\d+)/ajax/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/ajax/ACTION
-            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
         
@@ -272,12 +272,12 @@ class WPSSTM_Core_Tracks{
         //single track action
         add_rewrite_rule(
             sprintf('^%s/(\d+)/action/([^/]+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID/action/ACTION
-            sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
         add_rewrite_rule(
             sprintf('^%s/(\d+)/ajax/([^/]+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID/ajax/ACTION
-            sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=unlink
+            sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_ajax_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
 

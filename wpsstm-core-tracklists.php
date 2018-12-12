@@ -474,7 +474,7 @@ class WPSSTM_Core_Tracklists{
                     foreach ($subtrack_ids as $subtrack_id){
                         $track = new WPSSTM_Track();
                         $track->populate_subtrack($subtrack_id);
-                        $success = $tracklist->unlink_subtrack($track);
+                        $success = $tracklist->dequeue_subtrack($track);
 
                         if ( is_wp_error($success) ){
                             break; //break at first error

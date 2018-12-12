@@ -908,7 +908,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    function unlink_subtrack($track){
+    function dequeue_subtrack($track){
         
         if ( !$track->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
@@ -934,7 +934,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->post_id,$track->position);
             $range_success = $wpdb->get_results ( $querystr );
             $track->subtrack_id = null;
-            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"unlinked subtrack");
+            $this->tracklist_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"dequeueed subtrack");
         }
         
         return $result;
@@ -1046,7 +1046,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 
             break;
                 
-            case 'unlink':
+            case 'dequeue':
                 
                 $track = new WPSSTM_Track();
                 
@@ -1055,7 +1055,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     $track->from_array($url_track);
                 }
 
-                $success = $this->unlink_subtrack($track);
+                $success = $this->dequeue_subtrack($track);
             break;
 
             case 'favorite':

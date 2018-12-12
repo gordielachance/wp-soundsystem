@@ -482,7 +482,7 @@ class WPSSTM_Track{
             foreach($ids as $subtrack_id){
                 $track = new WPSSTM_Track(); //default
                 $track->populate_subtrack($subtrack_id);
-                $success = $tracklist->unlink_subtrack($track);
+                $success = $tracklist->dequeue_subtrack($track);
             }
 
             do_action('wpsstm_unlove_track',$this->post_id,$this);
@@ -765,7 +765,7 @@ class WPSSTM_Track{
             case 'favorite':
             case 'unfavorite':
                 
-                $tracklist_action = ($action=='favorite') ? 'queue' : 'unlink';
+                $tracklist_action = ($action=='favorite') ? 'queue' : 'dequeue';
                 
                 //TOUFIX this should be put elsewhere so it isn't populated for each track ?
                 $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
@@ -843,7 +843,7 @@ class WPSSTM_Track{
         Subtrack
         */
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
-        $can_unlink_subtrack =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
+        $can_dequeue_subtrack =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
         //share
         /*
@@ -886,13 +886,13 @@ class WPSSTM_Track{
         /*
         Subtracks
         */
-        if ($can_unlink_subtrack){
-            $actions['unlink'] = array(
+        if ($can_dequeue_subtrack){
+            $actions['dequeue'] = array(
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $this->get_track_action_url('unlink'),
-                'ajax' =>       $this->get_track_action_url('unlink',true),
+                'href' =>       $this->get_track_action_url('dequeue'),
+                'ajax' =>       $this->get_track_action_url('dequeue',true),
             );
         }
         

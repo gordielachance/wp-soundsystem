@@ -89,10 +89,10 @@
 
         });
 
-        //unlink
-        track_obj.track_el.find('.wpsstm-track-action-unlink a').click(function(e) {
+        //dequeue
+        track_obj.track_el.find('.wpsstm-track-action-dequeue a').click(function(e) {
             e.preventDefault();
-            track_obj.tracklist.unlink_subtrack(track_obj);
+            track_obj.tracklist.dequeue_subtrack(track_obj);
         });
         
         //delete
