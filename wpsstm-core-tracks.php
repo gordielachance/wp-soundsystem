@@ -124,6 +124,7 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         $success = null;
         $action_feedback = null;
+        $redirect_url = null;
 
         if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;

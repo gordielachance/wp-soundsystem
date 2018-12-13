@@ -458,10 +458,6 @@ class WPSSTM_Track{
         
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( !$this->position ){
-            return new WP_Error( 'wpsstm_missing_subtrack_position', __("Required subtrack position missing.",'wpsstm') );
-        }
 
         $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $this->subtrack_id );
         $result = $wpdb->get_results ( $querystr );
@@ -743,32 +739,6 @@ class WPSSTM_Track{
     }
 
     function get_track_action_url($action,$ajax = false){
-        
-        /*exceptions*/
-        
-        switch($action){
-            case 'favorite':
-            case 'unfavorite':
-                
-                $tracklist_action = ($action=='favorite') ? 'queue' : 'dequeue';
-                
-                //TOUFIX this should be put elsewhere so it isn't populated for each track ?
-                $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-                $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                $url = $tracklist->get_tracklist_action_url($tracklist_action);
-
-                $track_args = $this->to_url();
-                $url = add_query_arg(
-                    array('wpsstm_track_data'=>$track_args),
-                    $url
-                );
-
-                return $url;
-                
-            break;
-        }
-        
-        //
 
         $url = $this->get_track_url();
         if (!$url) return false;
@@ -785,6 +755,32 @@ class WPSSTM_Track{
         }else{
             $url .= sprintf('%s/%s/',$action_permavar,$action);
         }
+
+        return $url;
+    }
+    
+    function get_subtrack_action_url($action,$ajax = false){
+        
+        if ( in_array($action,array('favorite','unfavorite')) ){
+            
+            $action = ($action=='favorite') ? 'queue' : 'dequeue';
+            
+            //TOUFIX this should be put elsewhere so it isn't populated for each track ?
+            $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+        }else{
+            $tracklist_id = $this->tracklist->post_id;
+        }
+
+        if (!$tracklist_id) return;
+        
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+        $url = $tracklist->get_tracklist_action_url($action);
+
+        $track_args = $this->to_url();
+        $url = add_query_arg(
+            array('wpsstm_track_data'=>$track_args),
+            $url
+        );
 
         return $url;
     }
@@ -844,16 +840,16 @@ class WPSSTM_Track{
             
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
-                'ajax' =>       $this->get_track_action_url('favorite',true),
+                'href' =>       $this->get_subtrack_action_url('favorite'),
+                'ajax' =>       $this->get_subtrack_action_url('favorite',true),
                 'desc' =>       __('Add track to favorites','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
 
             $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite'),
-                'ajax' =>       $this->get_track_action_url('unfavorite',true),
+                'href' =>       $this->get_subtrack_action_url('unfavorite'),
+                'ajax' =>       $this->get_subtrack_action_url('unfavorite',true),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
@@ -876,8 +872,8 @@ class WPSSTM_Track{
                 'text' =>      __('Remove'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $this->get_track_action_url('dequeue'),
-                'ajax' =>       $this->get_track_action_url('dequeue',true),
+                'href' =>       $this->get_subtrack_action_url('dequeue'),
+                'ajax' =>       $this->get_subtrack_action_url('dequeue',true),
             );
         }
         
@@ -886,8 +882,8 @@ class WPSSTM_Track{
                 'text' =>      __('Move', 'wpsstm'),
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action'),
-                'href' =>       $this->get_track_action_url('move'),
-                'ajax' =>       $this->get_track_action_url('move',true),
+                'href' =>       $this->get_subtrack_action_url('move'),
+                'ajax' =>       $this->get_subtrack_action_url('move',true),
             );
         }
         

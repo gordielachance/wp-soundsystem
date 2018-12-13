@@ -1,16 +1,5 @@
 @import "compass";
 
-ul.wpsstm-tracklist-actions{
-    margin: 1em 0;
-    .wpsstm-action{
-        padding: .25em .5em;
-        font-size:.8em;
-        border: 1px solid #F7F7F7;
-        line-height: 1.8em;
-    }
-    
-}
-
 .tracklist-list{ //output a simplier style
     .tracklist-header{
         display:none!important;
@@ -28,6 +17,28 @@ ul.wpsstm-tracklist-actions{
     }
     
     &.wpsstm-post-tracklist{
+        
+        .wpsstm-tracklist-actions{
+            display:block;
+            margin: 1em 0;
+            list-style: none;
+            line-height: 2.8em;
+
+            .wpsstm-tracklist-action{
+
+                padding: .25em .5em;
+                font-size:.8em;
+                border: 1px solid #F7F7F7;
+                line-height: 1.8em;
+                
+                &:hover{
+                    border-color:#F7F7F7;
+                    background:rgba(0, 0, 0, .025);
+                }
+                
+            }
+        }
+        
         [itemprop="track"].track-active{
             background: rgba(252, 248, 227, .25);
         }
@@ -127,10 +138,6 @@ ul.wpsstm-tracklist-actions{
 }
 
 .wpsstm-tracklist-actions{
-    display:block;
-    margin: 1em;
-    list-style: none;
-    line-height: 2.8em;
 
     .wpsstm-tracklist-action{
         &.wpsstm-tracklist-action-refresh a:before{
@@ -199,9 +206,7 @@ ul.wpsstm-tracklist-actions{
                 text-align:right;
                 visibility:hidden;
                 ul{
-                    display:inline;
                     li{
-                        display:inline;
                         @extend .wpsstm-action-icon;
                     }
                 }

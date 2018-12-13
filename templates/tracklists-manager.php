@@ -14,13 +14,8 @@ $body_classes = array(
 $manager_redirect_url = WPSSTM_Core_Tracklists::get_manager_url();
 
 /*
-post type check
+capabilities
 */
-$post_type = get_post_type();
-if ( !in_array($post_type,wpsstm()->tracklist_post_types) ){
-    die("invalid tracklist post type");
-}
-
 $post_type_obj = get_post_type_object( get_post_type() );
 $create_cap = $post_type_obj->cap->create_posts;
 $edit_cap = $post_type_obj->cap->edit_posts;
@@ -28,31 +23,28 @@ $edit_cap = $post_type_obj->cap->edit_posts;
 /*
 populate track
 */
-$has_valid_track = false;
+$track = new WPSSTM_Track();
+
 if ( $url_track =  get_query_var( 'wpsstm_track_data' ) ){
-    
-    $track = new WPSSTM_Track();
     $track->from_array($url_track);
-    
-    //build new subtrack
-    $subtrack = new WPSSTM_Track();
-    $subtrack->from_tracklist = $track->tracklist->post_id;
-    $subtrack->post_id = $track->post_id;
-    $subtrack->artist = $track->artist;
-    $subtrack->album = $track->album;
-    $subtrack->title = $track->title;
-
-    $valid = $subtrack->validate_track();
-
-    if ( is_wp_error($valid) ){
-        printf('<p class="wpsstm-notice">%s</p>',$valid->get_error_message());
-    }else{
-        global $wpsstm_track;
-        $has_valid_track = true;
-        $wpsstm_track = $subtrack;
-        $manager_redirect_url = $wpsstm_track->get_tracklists_manager_url();
-    }
 }
+    
+//init new subtrack
+$subtrack = new WPSSTM_Track();
+$subtrack->from_tracklist = $track->tracklist->post_id;
+$subtrack->post_id = $track->post_id;
+$subtrack->artist = $track->artist;
+$subtrack->album = $track->album;
+$subtrack->title = $track->title;
+
+$valid = $subtrack->validate_track();
+
+if ( !is_wp_error($valid) ){
+    global $wpsstm_track;
+    $wpsstm_track = $subtrack;
+    $manager_redirect_url = $wpsstm_track->get_tracklists_manager_url();
+}
+
 
 ?>
 
@@ -77,7 +69,7 @@ if ( $url_track =  get_query_var( 'wpsstm_track_data' ) ){
         /*
         Track header if any
         */
-        if ($has_valid_track){
+        if ( $subtrack->validate_track() === true ){
             wpsstm_locate_template( 'track-header.php', true, false );
         }
 

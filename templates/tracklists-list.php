@@ -5,7 +5,7 @@ global $wpsstm_track;
 
 //get logged user static playlists
 $args = array(
-    'post_type' =>      wpsstm()->post_type_playlist,
+    'post_type' =>      get_post_type(),
     'author' =>         get_current_user_id(),
     'posts_per_page' => -1,
     'orderby' =>        'title',
@@ -37,13 +37,14 @@ if ( $manager_query->have_posts() ) {
                 <span class="tracklist-row-action">
                     <?php
 
-                    if ( $wpsstm_track->validate_track() ){ //track toggle action
+                    if ( $wpsstm_track->validate_track() === true ){ //track toggle action
                         $checked_playlist_ids = $wpsstm_track->get_in_tracklists_ids();
                         $checked = in_array($wpsstm_tracklist->post_id,(array)$checked_playlist_ids);
+                        $old_value = ($checked) ? 1 : -1;
                         $checked_str = checked($checked,true,false);
                         ?>
-                        <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="1" <?php checked($checked,true);?> /><label>+</label>
-                        <input name="wpsstm_tracklists_manager_batch[<?php echo $wpsstm_tracklist->post_id;?>]" type="radio" value="-1" /><label>-</label>
+                        <input name="wpsstm_tracklists_manager_new[<?php echo $wpsstm_tracklist->post_id;?>]" type="checkbox" value="1" <?php checked($checked,true);?> />
+                        <input name="wpsstm_tracklists_manager_old[<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
                         <?php
                     }
             
