@@ -114,20 +114,33 @@
     }
     
     form.wpsstm-new-subtrack{
+        margin: 1em 0;
+        padding: 1em;
         
-        margin-top: 1em;
-        @include display-flex();
-        @include justify-content(center);
-        align-items: center;
-        > * {
-            margin: 0 .5em;
+        label{
+            margin-bottom:1em;
+            display:block;
         }
+        
+        .wpsstm-new-subtrack-fields{
+            @include display-flex();
+            @include justify-content(center);
+            align-items: center;
+            > * {
+                margin: 0 .5em;
+            }
+        }
+
         &.wpsstm-new-subtrack-simple{
-            > *:not(button){
+            label{
+                display:none;
+            }
+            .wpsstm-new-subtrack-fields > *:not(button){
                 display:none;
             }
         }
         &:not(.wpsstm-new-subtrack-simple){
+            background: #fcf8e3;
             button span{
                 display:none;
             }
