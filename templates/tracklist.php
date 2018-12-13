@@ -45,7 +45,7 @@ if ($action=='render'){
             */
 
             //wizard temporary tracklist notice
-            //TO FIX should be in populate_wizard_tracklist() ?
+            //TOUFIX is this the right place ?
             if ( !wpsstm_is_backend() && $wpsstm_tracklist->user_can_get_tracklist_autorship() ){
                 $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
                 $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));

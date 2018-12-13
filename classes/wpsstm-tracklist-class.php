@@ -403,6 +403,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 );
             }
         }
+        
+        //wizard
+        if ( $can_edit_tracklist ){
+            $actions['wizard'] = array(
+                'text' =>       __('Wizard'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-tracklist-popup'),
+                'href' =>      $this->get_tracklist_action_url('wizard'),
+            );
+        }
 
         //edit backend
         if ( $can_edit_tracklist ){
@@ -575,15 +584,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         return $success;
         
-    }
-    
-    function save_feed_url(){
-
-        if (!$this->feed_url){
-            return delete_post_meta( $this->post_id, self::$feed_url_meta_name );
-        }else{
-            return update_post_meta( $this->post_id, self::$feed_url_meta_name, $this->feed_url );
-        }
     }
     
     function user_can_edit_tracklist(){

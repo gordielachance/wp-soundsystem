@@ -82,7 +82,7 @@ global $wpsstm_tracklist;
     
     if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
         ?>
-        <form class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>">
+        <form class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
             <label><?php _e('New track','wpsstm');?></label>
             <p class="wpsstm-new-subtrack-fields">
             <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
