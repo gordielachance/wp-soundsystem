@@ -37,12 +37,12 @@ class WPSSTM_Player{
     
     function enqueue_player_scripts_styles_shared(){
         //TO FIX load only if player is loaded (see hook wpsstm_load_player ) ?
-        
+
         //CSS
         wp_enqueue_style('wp-mediaelement');
 
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wpsstm','wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
