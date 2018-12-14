@@ -119,21 +119,29 @@ wpsstm.tracklists = [];
 
         });
         
-        /*
-        resize iframes
-        */
-        //iframes.iFrameResize();
-
-        iframes.on( "load", function() {
+        $('iframe.wpsstm-iframe-autoheight').on( "load", function() {
             var iframe = $(this);
             var iframe_el = iframe.get(0);
             var content = $(iframe_el.contentWindow.document);
             //var height = $(e.target).find('html').get(0).scrollHeight;
+            var height = content.outerHeight();
             iframe.css('height',content.outerHeight());
-            console.log("resized iframe");
+            console.log("resized iframe to: " + height);
         });
-
+        
     });
+    
+        /*
+        resize iframes
+        */
+        /*
+        if (typeof iFrameResize === "function") { //check that fn is available
+            $('.wpsstm-iframe-autoheight').iFrameResize({
+                //log:true,
+            });
+        }
+        */
+        
 
 
 })(jQuery);

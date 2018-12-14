@@ -348,10 +348,13 @@ a.toggle-children-link, .toggle-children-link a{
             display:none;
         }
     } 
+}
 
-    iframe{
-        width:100%;
-        box-sizing: content-box;
+iframe{
+    margin: 0px;
+    padding: 0px;
+    width:100%;
+    &.wpsstm-iframe-autoheight{
         @include transition-property(height);
         @include transition-duration(.4s);
     }

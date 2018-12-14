@@ -375,10 +375,15 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
 .wpsstm-iframe-container.wpsstm-iframe-loading iframe {
   display: none;
 }
-/* line 352, ../scss/wpsstm.scss */
-.wpsstm-iframe-container iframe {
+
+/* line 353, ../scss/wpsstm.scss */
+iframe {
+  margin: 0px;
+  padding: 0px;
   width: 100%;
-  box-sizing: content-box;
+}
+/* line 357, ../scss/wpsstm.scss */
+iframe.wpsstm-iframe-autoheight {
   -moz-transition-property: height;
   -o-transition-property: height;
   -webkit-transition-property: height;
@@ -1190,12 +1195,6 @@ body.wpsstm-iframe.wpsstm-tracklist-manager-iframe form button[type="submit"] {
 .wpsstm-dialog iframe {
   width: 100%;
   height: 100%;
-}
-
-/* line 123, ../scss/_wpsstm-popups.scss */
-iframe.wpsstm-iframe-autofit {
-  width: 100%;
-  min-height: 400px;
 }
 
 /* line 4, ../scss/_pure-tree.scss */

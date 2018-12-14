@@ -69,10 +69,19 @@ class WPSSTM_Core_Wizard{
 
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
-        $iframe_url = $wpsstm_tracklist->get_tracklist_action_url('wizard');
-        ?>
-        <iframe id="wpsstm-backend-wizard" class="wpsstm-iframe-autofit" src="<?php echo $iframe_url;?>"></iframe>
-        <?php
+
+        $attr = array(
+            'id' =>     'wpsstm-backend-wizard',
+            'class' => "wpsstm-iframe-autoheight",
+            'width' =>  '100%',
+            'scrolling' => 'no',
+            'frameborder' => 0,
+            'src' => $wpsstm_tracklist->get_tracklist_action_url('wizard'),
+        );
+        
+        $attr_str = wpsstm_get_html_attr($attr);
+        
+        printf('<iframe %s></iframe>',$attr_str);
     }
 
     /*
