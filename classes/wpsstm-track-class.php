@@ -480,6 +480,10 @@ class WPSSTM_Track{
         global $wpdb;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        //check we have enough informations on this track
+        if ( !$this->post_id && ( $this->validate_track() !== true) ) return false;
+        
 
         if ($this->post_id){
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
