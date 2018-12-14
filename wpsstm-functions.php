@@ -23,34 +23,6 @@ function wpsstm_get_array_value($keys = null, $array){
     return false;
 }
 
-/*
-Filter an array/object on one of its key/property value
-Eg. filter sources array by url : if several values have the same url, keep only the first value met.
-https://stackoverflow.com/a/6057401/782013
-*/
-
-function wpsstm_array_unique_by_subkey($array,$subkey){
-    
-    $temp = array();
-    
-    $unique = array_filter($array, function ($v) use (&$temp,$subkey) {
-        
-        if ( is_object($v) ) $v = (array)$v;
-        
-        if ( !array_key_exists($subkey,$v) ) return false;
-
-        if ( in_array($v[$subkey], $temp) ) {
-            return false;
-        } else {
-            array_push($temp, $v[$subkey]);
-            return true;
-        }
-    });
-    
-    return $unique;
-}
-
-
 /**
 * Make a nested HTML list from a multi-dimensionnal array.
 */
@@ -102,31 +74,6 @@ function wpsstm_get_list_from_array($input,$parent_slugs=array() ){
     }
     
 
-}
-
-function wpsstm_get_transients_by_prefix( $prefix ) {
-	global $wpdb;
-    
-    $names = array();
-    
-	// Add our prefix after concating our prefix with the _transient prefix
-	$name = sprintf('_transient_%s_',$prefix);
-	// Build up our SQL query
-	$sql = "SELECT `option_name` FROM $wpdb->options WHERE `option_name` LIKE '%s'";
-	// Execute our query
-	$transients = $wpdb->get_col( $wpdb->prepare( $sql, $name . '%' ) );
-
-	// If if looks good, pass it back
-	if ( $transients && ! is_wp_error( $transients ) ) {
-        
-        foreach((array)$transients as $real_key){
-            $names[] = str_replace( '_transient_', '', $real_key );
-        }
-        
-		return $names;
-	}
-	// Otherise return false
-	return false;
 }
 
 /**

@@ -161,7 +161,7 @@ class WPSSTM_Source{
         $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($post_author,$required_cap) ){
-            return new WP_Error( 'wpsstm_save_source_cap_missing', __("You don't have the capability required to edit this souce.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this souce.",'wpsstm') );
         }
 
         $args = array(
