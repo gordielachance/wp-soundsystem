@@ -789,4 +789,43 @@ class WPSSTM_Core_Tracklists{
         }
         return $url;
     }
+    
+    static function get_temporary_tracklists_ids(){
+        $community_user_id = wpsstm()->get_options('community_user_id');
+        if ( !$community_user_id ) return;
+
+        //get community tracks
+        $args = array(
+            'post_type' =>              wpsstm()->tracklist_post_types,
+            'author' =>                 $community_user_id,
+            'post_status' =>            'any',
+            'posts_per_page'=>          -1,
+            'fields' =>                 'ids',
+        );
+        
+        $query = new WP_Query( $args );
+        return $query->posts;
+    }
+    
+    /*
+    Trash temporary tracklists
+    */
+    static function trash_temporary_tracklists(){
+
+        $flushed_ids = array();
+        
+        if ( $flushable_ids = self::get_temporary_tracklists_ids() ){
+
+            foreach( (array)$flushable_ids as $id ){
+                $success = wp_trash_post($id);
+                if ( !is_wp_error($success) ) $flushed_ids[] = $id;
+            }
+        }
+
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted temporary tracklists");
+
+        return $flushed_ids;
+
+    }
+    
 }

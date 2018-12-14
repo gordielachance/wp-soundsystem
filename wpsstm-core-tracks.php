@@ -1003,9 +1003,7 @@ class WPSSTM_Core_Tracks{
     static function get_orphan_track_ids(){
         $community_user_id = wpsstm()->get_options('community_user_id');
         if ( !$community_user_id ) return;
-        
-        $flushable_ids = array();
-        
+
         //get community tracks
         $orphan_tracks_args = array(
             'post_type' =>              wpsstm()->post_type_track,
@@ -1024,7 +1022,7 @@ class WPSSTM_Core_Tracks{
     /*
     Flush community tracks
     */
-    static function flush_orphan_tracks(){
+    static function trash_orphan_tracks(){
 
         $flushed_ids = array();
         
@@ -1036,7 +1034,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"WPSSTM_Post_Tracklist::flush_orphan_tracks()");
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted orphan tracks");
 
         return $flushed_ids;
 

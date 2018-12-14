@@ -52,8 +52,12 @@ class WPSSTM_Settings {
 
         if ( self::is_settings_reset() ) return;
             
-        if( isset( $input['flush_orphan_tracks'] ) ){
-            WPSSTM_Core_Tracks::flush_orphan_tracks();
+        if( isset( $input['trash-orphan-tracks'] ) ){
+            WPSSTM_Core_Tracks::trash_orphan_tracks();
+        }
+        
+        if( isset( $input['trash-temporary-tracklists'] ) ){
+            WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
 
         /*
@@ -254,9 +258,17 @@ class WPSSTM_Settings {
         );
         
         add_settings_field(
-            'flush_tracks', 
-            __('Flush orphan tracks','wpsstm'), 
-            array( $this, 'flush_orphan_tracks_callback' ), 
+            'trash_temporary_tracklists', 
+            __('Trash temporary tracklists','wpsstm'), 
+            array( $this, 'trash_temporary_tracklists_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_system'//section
+        );
+        
+        add_settings_field(
+            'trash_orphan_tracks', 
+            __('Trash orphan tracks','wpsstm'), 
+            array( $this, 'trash_orphan_tracks_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
@@ -449,10 +461,21 @@ class WPSSTM_Settings {
         );
     }
     
-    function flush_orphan_tracks_callback(){
-        $desc = __("Delete tracks that do not belong to any playlists and have been created with the community user","wpsstm");
+    function trash_temporary_tracklists_callback(){
+        $count = count(WPSSTM_Core_Tracklists::get_temporary_tracklists_ids());
+        $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[flush_orphan_tracks]" value="on"/> %s',
+            '<input type="checkbox" name="%s[trash-temporary-tracklists]" value="on"/> %s',
+            wpsstm()->meta_name_options,
+            $desc
+        );
+    }
+    
+    function trash_orphan_tracks_callback(){
+        $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
+        $desc = sprintf(__("Delete %d tracks that do not belong to any playlists and have been created with the community user.","wpsstm"),$count);
+        printf(
+            '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on"/> %s',
             wpsstm()->meta_name_options,
             $desc
         );
