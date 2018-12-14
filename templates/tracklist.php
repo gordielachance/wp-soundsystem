@@ -46,7 +46,7 @@ if ($action=='render'){
 
             //wizard temporary tracklist notice
             //TOUFIX is this the right place ?
-            if ( !wpsstm_is_backend() && $wpsstm_tracklist->user_can_get_tracklist_autorship() ){
+            if ( $wpsstm_tracklist->user_can_get_tracklist_autorship() === true ){
                 $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
                 $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
                 $message = __("This is a temporary playlist.","wpsstm");

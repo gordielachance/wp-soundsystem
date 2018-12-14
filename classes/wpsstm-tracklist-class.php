@@ -512,21 +512,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     */
     
     function get_autorship(){
-        
-        if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
-        }
-        
-        if ( !wpsstm_is_community_post($this->post_id) ){
-            return new WP_Error( 'wpsstm_not_community_post', __('This is not a community post.','wpsstm') );
-        }
-            
+  
         //capability check
         $can_get_authorship = $this->user_can_get_tracklist_autorship();
-        
-        if ( !$can_get_authorship ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
-        }
+        if ( is_wp_error($can_get_authorship) ) return $can_get_authorship;
         
         $args = array(
             'ID'            => $this->post_id,
@@ -598,13 +587,27 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     function user_can_get_tracklist_autorship(){
         
-        if ( !$post_type = get_post_type($this->post_id) ) return false;
-        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return false; //is not a tracklist (maybe we are checking a single track here)
-        if ( !wpsstm_is_community_post($this->post_id) ) return false;
+        if (!$this->post_id){
+            return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
+        }
+        
+        $post_type = get_post_type($this->post_id);
+        
+        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ){
+            return new WP_Error( 'wpsstm_invalid_post_type', __('Invalid tracklist post type.','wpsstm') );
+        }
+        
+        if ( !wpsstm_is_community_post($this->post_id) ){
+            return new WP_Error( 'wpsstm_not_community_post', __('This is not a community post.','wpsstm') );
+        }
             
         //capability check
         $post_type_obj = get_post_type_object($post_type);
-        return current_user_can($post_type_obj->cap->edit_posts);
+        if ( !current_user_can($post_type_obj->cap->edit_posts) ){ //TOUFIX TOUCHECK should be create_posts ?
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+        }
+        
+        return true;
     }
     
     function user_can_toggle_playlist_type(){
