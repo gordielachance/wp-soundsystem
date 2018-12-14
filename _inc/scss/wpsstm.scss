@@ -345,7 +345,7 @@ a.toggle-children-link, .toggle-children-link a{
             display:inherit;
         }
         iframe{
-            display:none;
+            //TOUFIX breaks JS resizing of iframes display:none;
         }
     } 
 }
@@ -355,7 +355,6 @@ iframe{
     padding: 0px;
     width:100%;
     &.wpsstm-iframe-autoheight{
-        min-height:500px;
         @include transition-property(height);
         @include transition-duration(.4s);
     }
