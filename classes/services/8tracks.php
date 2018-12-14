@@ -40,7 +40,7 @@ class WPSSTM_8Tracks_Preset{
         $user_slug = $this->get_user_slug($url);
         $playlist_slug = $this->get_tracklist_slug($url);
         if ( !$user_slug ) return;
-        if ( !$playlist_slugg ) return;
+        if ( !$playlist_slug ) return;
         return true;
     }
 
