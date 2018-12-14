@@ -403,7 +403,7 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $subtracks_query =              $query->get('subtracks');
+        $subtracks_query =              $query->get('in_subtracks');
         $subtrack_id_query =            $query->get('subtrack_id');
         $subtrack_position_query =      $query->get('subtrack_position');
         $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
@@ -423,7 +423,7 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $no_subtracks = ( $query->get('subtracks') === 0);
+        $no_subtracks = ( $query->get('in_subtracks') === 0);
         
         if ($no_subtracks){
             $where .= sprintf(" AND ID NOT IN (SELECT track_id FROM %s)",$subtracks_table);
@@ -621,7 +621,7 @@ class WPSSTM_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = self::$qvar_track_lookup;
         $qvars[] = self::$qvar_favorite_tracks;
-        $qvars[] = 'subtracks';
+        $qvars[] = 'in_subtracks';
         $qvars[] = 'subtrack_id';
         
         return $qvars;
@@ -1011,7 +1011,7 @@ class WPSSTM_Core_Tracks{
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
-            'subtracks' =>              0,
+            'in_subtracks' =>           0,
         );
         
         $query = new WP_Query( $orphan_tracks_args );

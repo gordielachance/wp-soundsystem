@@ -384,6 +384,7 @@ iframe {
 }
 /* line 357, ../scss/wpsstm.scss */
 iframe.wpsstm-iframe-autoheight {
+  min-height: 500px;
   -moz-transition-property: height;
   -o-transition-property: height;
   -webkit-transition-property: height;

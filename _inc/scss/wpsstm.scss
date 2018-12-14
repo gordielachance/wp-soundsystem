@@ -355,6 +355,7 @@ iframe{
     padding: 0px;
     width:100%;
     &.wpsstm-iframe-autoheight{
+        min-height:500px;
         @include transition-property(height);
         @include transition-duration(.4s);
     }
