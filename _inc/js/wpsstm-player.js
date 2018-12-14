@@ -1,3 +1,5 @@
+var $ = jQuery.noConflict();
+
 class WpsstmPlayer {
     constructor(id){
         
@@ -877,6 +879,55 @@ class WpsstmPlayer {
 
 }
 
-(function($){
+$( document ).ready(function() {
 
-})(jQuery);
+    var iframes = $('iframe.wpsstm-tracklist-iframe');
+
+    /*
+    wait for all iframes before initializing player
+    */
+
+    var iframesLoaded = $.Deferred();
+    var loadedIFramesCount = 0;
+
+    iframes.one( "load", function() {
+
+        ++loadedIFramesCount;//increment
+        var iframe_el = $(this).get(0);
+
+        var content = $(iframe_el.contentWindow.document.body);
+
+        //all frames are loaded
+        if ( loadedIFramesCount == iframes.length ){
+            iframesLoaded.resolve();
+        }
+
+    });
+
+    /*
+    init player
+    */
+    var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
+    iframesLoaded.done(function(v) {
+        bottomPlayer.debug('all iframes have been loaded, init player');
+
+        //sort tracklists by tracklist index
+        function compare_tracklist_idx(a,b) {
+            if (a.index > b.index) return 1;
+            if (b.index > a.index) return -1;
+            return 0;
+        }
+
+        wpsstm.tracklists.sort(compare_tracklist_idx);
+
+        var allTracks = [];
+        $(wpsstm.tracklists).each(function(index,tracklist) {
+            allTracks = allTracks.concat(tracklist.tracks);
+        });
+
+        bottomPlayer.append_tracks(allTracks);
+        bottomPlayer.autoplay();
+
+    });
+
+});
