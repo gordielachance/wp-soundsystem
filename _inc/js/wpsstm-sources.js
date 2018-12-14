@@ -1,3 +1,5 @@
+var $ = jQuery.noConflict();
+
 class WpsstmTrackSource {
     constructor(source_html,track) {
         
@@ -111,58 +113,52 @@ class WpsstmTrackSource {
 
 }
 
-(function($){
+$(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
 
-    $(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
+    //sources manager
+    track_obj.track_el.find('.wpsstm-track-sources').each(function() {
+        var sources_container = $(this);
+        var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
 
-        //sources manager
-        track_obj.track_el.find('.wpsstm-track-sources').each(function() {
-            var sources_container = $(this);
-            var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
+        // sort track sources
+        sources_list_el.sortable({
+            axis: "y",
+            items : "[data-wpsstm-source-id]",
+            handle: '.wpsstm-source-action-move a',
+            update: function(event, ui) {
 
-            // sort track sources
-            sources_list_el.sortable({
-                axis: "y",
-                items : "[data-wpsstm-source-id]",
-                handle: '.wpsstm-source-action-move a',
-                update: function(event, ui) {
+                var sourceOrder = sources_list_el.sortable('toArray', {
+                    attribute: 'data-wpsstm-source-id'
+                });
 
-                    var sourceOrder = sources_list_el.sortable('toArray', {
-                        attribute: 'data-wpsstm-source-id'
-                    });
+                var reordered = WpsstmTrack.update_sources_order(track_obj.post_id,sourceOrder); //TOUFIX bad logic
 
-                    var reordered = WpsstmTrack.update_sources_order(track_obj.post_id,sourceOrder); //TOUFIX bad logic
-
-                }
-            });
-
+            }
         });
 
     });
 
-    $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
+});
 
-        //delete source
-        source_obj.source_el.find('.wpsstm-source-action-trash a').click(function(e) {
-            e.preventDefault();
-            source_obj.trash_source();
-        });
+$(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
-    });
-    
-    /*
-    metabox
-    */
-    //new source container
-    $( ".postbox#wpsstm-metabox-sources #wpsstm-add-source-url" ).click(function(e) {
+    //delete source
+    source_obj.source_el.find('.wpsstm-source-action-trash a').click(function(e) {
         e.preventDefault();
-        var container = $(this).parents('.postbox');
-        var first_input_block = container.find('#wpsstm-new_track-sources').parent().first();
-        var cloned = first_input_block.clone().insertBefore(container);
-        cloned.find('input[type="text"]').val("");
-        cloned.insertBefore(first_input_block);
+        source_obj.trash_source();
     });
-    
-})(jQuery);
 
+});
 
+/*
+metabox
+*/
+//new source container
+$( ".postbox#wpsstm-metabox-sources #wpsstm-add-source-url" ).click(function(e) {
+    e.preventDefault();
+    var container = $(this).parents('.postbox');
+    var first_input_block = container.find('#wpsstm-new_track-sources').parent().first();
+    var cloned = first_input_block.clone().insertBefore(container);
+    cloned.find('input[type="text"]').val("");
+    cloned.insertBefore(first_input_block);
+});

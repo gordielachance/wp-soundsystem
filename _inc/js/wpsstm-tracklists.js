@@ -1,181 +1,178 @@
-(function($){
+var $ = jQuery.noConflict();
 
-    //tracklist modals
-    $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
+//tracklist modals
+$('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
+    e.preventDefault();
+
+    var content_url = this.href;
+
+    console.log("tracklist popup");
+    console.log(content_url);
+
+
+    var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
+    var popup = $('<div></div>').append(loader_el);
+
+    popup_w = $(window).width();
+    popup_h = $(window).height();
+
+    popup.dialog({
+        width:popup_w,
+        height:popup_h,
+        modal: true,
+        dialogClass: 'wpsstm-tracklist-dialog wpsstm-dialog dialog-loading',
+
+        open: function(ev, ui){
+            var dialog = $(this).closest('.ui-dialog');
+            var dialog_content = dialog.find('.ui-dialog-content');
+            var iframe = $('<iframe src="'+content_url+'"></iframe>');
+            dialog_content.append(iframe);
+            iframe.load(function(){
+                dialog.removeClass('dialog-loading');
+            });
+        },
+        close: function(ev, ui){
+        }
+
+    });
+
+});
+
+$(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
+
+    /*
+    New subtracks
+    */
+
+    var new_subtrack_el = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
+    new_subtrack_el.addClass('wpsstm-new-subtrack-simple');
+    var new_subtrack_bt = new_subtrack_el.find('button');
+    new_subtrack_bt.click(function(e) {
+        if ( new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple') ){
+            e.preventDefault();
+            new_subtrack_el.removeClass('wpsstm-new-subtrack-simple');
+        }
+    });
+
+    /*
+    Tracklist actions
+    */
+
+    //refresh
+    var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
+    refresh_bts.click(function(e) {
+        e.preventDefault();
+        tracklist_obj.debug("clicked 'refresh' bt")
+        var reloaded = self.reload_tracklist(tracklist_obj);
+    });
+
+    //toggle favorite
+    tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action.action-favorite a,.wpsstm-tracklist-action.action-unfavorite a').click(function(e) {
         e.preventDefault();
 
-        var content_url = this.href;
+        var link_el = $(this);
+        var action_el = link_el.parents('.wpsstm-tracklist-action');
+        var do_love = action_el.hasClass('action-favorite');
+        var action_url = link_el.data('wpsstm-ajax-url');
 
-        console.log("tracklist popup");
-        console.log(content_url);
+        var ajax_data = {};
 
+        tracklist_obj.debug("toggle favorite tracklist:");
 
-        var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
-        var popup = $('<div></div>').append(loader_el);
-
-        popup_w = $(window).width();
-        popup_h = $(window).height();
-
-        popup.dialog({
-            width:popup_w,
-            height:popup_h,
-            modal: true,
-            dialogClass: 'wpsstm-tracklist-dialog wpsstm-dialog dialog-loading',
-
-            open: function(ev, ui){
-                var dialog = $(this).closest('.ui-dialog');
-                var dialog_content = dialog.find('.ui-dialog-content');
-                var iframe = $('<iframe src="'+content_url+'"></iframe>');
-                dialog_content.append(iframe);
-                iframe.load(function(){
-                    dialog.removeClass('dialog-loading');
-                });
+        return $.ajax({
+            type:       "post",
+            url: action_url,
+            data:ajax_data,
+            dataType:   'json',
+            beforeSend: function() {
+                link_el.addClass('action-loading');
             },
-            close: function(ev, ui){
-            }
-
-        });
-
-    });
-    
-    $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
-        
-        /*
-        New subtracks
-        */
-        
-        var new_subtrack_el = tracklist_obj.tracklist_el.find('.wpsstm-new-subtrack');
-        new_subtrack_el.addClass('wpsstm-new-subtrack-simple');
-        var new_subtrack_bt = new_subtrack_el.find('button');
-        new_subtrack_bt.click(function(e) {
-            if ( new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple') ){
-                e.preventDefault();
-                new_subtrack_el.removeClass('wpsstm-new-subtrack-simple');
-            }
-        });
-        
-        /*
-        Tracklist actions
-        */
-
-        //refresh
-        var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
-        refresh_bts.click(function(e) {
-            e.preventDefault();
-            tracklist_obj.debug("clicked 'refresh' bt")
-            var reloaded = self.reload_tracklist(tracklist_obj);
-        });
-
-        //toggle favorite
-        tracklist_obj.tracklist_el.find('.wpsstm-tracklist-action.action-favorite a,.wpsstm-tracklist-action.action-unfavorite a').click(function(e) {
-            e.preventDefault();
-
-            var link_el = $(this);
-            var action_el = link_el.parents('.wpsstm-tracklist-action');
-            var do_love = action_el.hasClass('action-favorite');
-            var action_url = link_el.data('wpsstm-ajax-url');
-
-            var ajax_data = {};
-
-            tracklist_obj.debug("toggle favorite tracklist:");
-
-            return $.ajax({
-                type:       "post",
-                url: action_url,
-                data:ajax_data,
-                dataType:   'json',
-                beforeSend: function() {
-                    link_el.addClass('action-loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                        link_el.addClass('action-error');
-                        if (data.notice){
-                            wpsstm_dialog_notice(data.notice);
-                        }
-                    }else{
-                        if (do_love){
-                            tracklist_obj.tracklist_el.addClass('favorited-tracklist');
-                        }else{
-                            tracklist_obj.tracklist_el.removeClass('favorited-tracklist');
-                        }
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
+            success: function(data){
+                if (data.success === false) {
+                    console.log(data);
                     link_el.addClass('action-error');
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    link_el.removeClass('action-loading');
+                    if (data.notice){
+                        wpsstm_dialog_notice(data.notice);
+                    }
+                }else{
+                    if (do_love){
+                        tracklist_obj.tracklist_el.addClass('favorited-tracklist');
+                    }else{
+                        tracklist_obj.tracklist_el.removeClass('favorited-tracklist');
+                    }
                 }
-            })
-        });
-        
-
-        /*
-        Subtracks
-        */
-
-
-        //sort subtracks
-        var startSortIdx, endSortIdx;
-        tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
-            axis: "y",
-            handle: '.wpsstm-track-action-move',
-            start: function(event, ui) { 
-                startSortIdx = ui.item.index();
             },
-            update: function(event, ui) {
-                endSortIdx = ui.item.index();
-                var track_obj = tracklist_obj.tracks[startSortIdx];
-                var old_position = Number(track_obj.track_el.attr('data-wpsstm-subtrack-position'));
-                var new_position = ui.item.index() + 1;
-                
-
-                if (track_obj){
-                    //new position
-                    track_obj.position = ui.item.index();
-                    tracklist_obj.update_subtrack_position(track_obj,new_position);
-                }
-
+            error: function (xhr, ajaxOptions, thrownError) {
+                link_el.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                link_el.removeClass('action-loading');
             }
-        });
-        
-        //hide a tracklist columns if all datas are the same
-        tracklist_obj.checkTracksIdenticalValues();
-
+        })
     });
-    
-    
-    //TOUFIX expand tracklist to the current track / currently disabled
+
+
     /*
-    $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
-
-        var tracklist_obj = track_obj.tracklist;
-        
-        //expand tracklist
-        var track_el = track_obj.track_el;
-        if ( track_el.is(":visible") ) return;
-
-        var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
-        var newTracksCount = track_obj.position + 1;
-        
-        if ( newTracksCount <= visibleTracksCount ) return;
-
-        if ( tracklist_obj.options.toggle_tracklist ){
-            tracklist_obj.showMoreLessTracks({
-                childrenToShow:newTracksCount
-            });
-        }
-        
-    });
+    Subtracks
     */
-    
-    
 
-})(jQuery);
+
+    //sort subtracks
+    var startSortIdx, endSortIdx;
+    tracklist_obj.tracklist_el.find( '.wpsstm-tracks-list' ).sortable({
+        axis: "y",
+        handle: '.wpsstm-track-action-move',
+        start: function(event, ui) { 
+            startSortIdx = ui.item.index();
+        },
+        update: function(event, ui) {
+            endSortIdx = ui.item.index();
+            var track_obj = tracklist_obj.tracks[startSortIdx];
+            var old_position = Number(track_obj.track_el.attr('data-wpsstm-subtrack-position'));
+            var new_position = ui.item.index() + 1;
+
+
+            if (track_obj){
+                //new position
+                track_obj.position = ui.item.index();
+                tracklist_obj.update_subtrack_position(track_obj,new_position);
+            }
+
+        }
+    });
+
+    //hide a tracklist columns if all datas are the same
+    tracklist_obj.checkTracksIdenticalValues();
+
+});
+
+
+//TOUFIX expand tracklist to the current track / currently disabled
+/*
+$(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
+
+    var tracklist_obj = track_obj.tracklist;
+
+    //expand tracklist
+    var track_el = track_obj.track_el;
+    if ( track_el.is(":visible") ) return;
+
+    var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
+    var newTracksCount = track_obj.position + 1;
+
+    if ( newTracksCount <= visibleTracksCount ) return;
+
+    if ( tracklist_obj.options.toggle_tracklist ){
+        tracklist_obj.showMoreLessTracks({
+            childrenToShow:newTracksCount
+        });
+    }
+
+});
+*/
+
 
 class WpsstmTracklist {
     constructor(tracklist_html,index) {
