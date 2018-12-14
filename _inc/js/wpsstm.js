@@ -48,38 +48,42 @@ $( document ).ready(function() {
     var iframes = $('iframe.wpsstm-tracklist-iframe');
 
     /*
-    load tracklists
+    Fire an event from within the iframe to its parent.
     */
 
     $('body.wpsstm-iframe .wpsstm-tracklist').each(function(index,tracklist_html) {
+        if (!isInIframe) return false;//break
+        //send to parent
+        var iframe = wpsstm_get_tracklist_iframe();
+        parent.$( iframe ).trigger('wpsstmIframeTracklistReady',[tracklist_html]);
+        
 
-        if (isInIframe){
-            /*get tracklist index related to the parent document, so it matches the dom order */
-            index = wpsstm_get_iframe_index();
-        }
-
-        var tracklist_obj = new WpsstmTracklist(tracklist_html,index);
+    });
+    
+    /*
+    Catch the event fired from within the iframe, and init its tracklist.
+    */
+    
+    $('iframe.wpsstm-tracklist-iframe').on("wpsstmIframeTracklistReady", function( event, tracklist_html ) {
+        var tracklistIndex = $('iframe.wpsstm-tracklist-iframe').index( $(this) );
+        wpsstm_debug("wpsstmIframeTracklistReady: #" + tracklistIndex);
+        var tracklist_obj = new WpsstmTracklist(tracklist_html,tracklistIndex);
         wpsstm.tracklists.push(tracklist_obj);
-
-        if (isInIframe){
-            //send to parent
-            window.top.wpsstm.tracklists.push(tracklist_obj);
-        }
-
     });
 
     iframes.one( "load", function() {
         $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
     });
-
-    $('iframe.wpsstm-iframe-autoheight').on( "load", function() {
-        var iframe = $(this);
-        var iframe_el = iframe.get(0);
-        var content = $(iframe_el.contentWindow.document);
-        //var height = $(e.target).find('html').get(0).scrollHeight;
-        var height = content.outerHeight();
-        iframe.css('height',content.outerHeight());
-        console.log("resized iframe to: " + height);
+    
+    /*
+    Set height of tracklist Iframe once it has init.
+    */
+    $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
+        var document = tracklist_obj.tracklist_el.context.ownerDocument;
+        var newHeight = $(document).outerHeight();
+        tracklist_obj.debug("resizing  iframe #" + tracklist_obj.index + "to pixels: " + newHeight);
+        var iframe = $('iframe.wpsstm-tracklist-iframe').get(tracklist_obj.index);
+        $(iframe).css('height',newHeight);
     });
 
 });
@@ -123,16 +127,23 @@ function wpsstm_dialog_notice(notice){
 }
 
 //https://www.webdeveloper.com/forum/d/251166-resolved-how-to-get-the-iframe-index-using-javascript-from-inside-the-iframe-window/2
-function wpsstm_get_iframe_index(){
-    var iframe_index = -1;
+function wpsstm_get_tracklist_iframe(){
+    var return_el = undefined;
     var parent_iframes = $(parent.document).find('iframe.wpsstm-tracklist-iframe');
     parent_iframes.each(function(index,iframe_el) {
         if ( iframe_el.contentWindow === self ){
-            iframe_index = index;
+            return_el = iframe_el;
             return false;
         }
     });
-    return iframe_index;
+    return return_el;
+}
+
+function wpsstm_get_index_tracklist_iframe(){
+    var iframe_index = -1;
+    var iframe_el = wpsstm_get_tracklist_iframe();
+    var parent_iframes = $(parent.document).find('iframe.wpsstm-tracklist-iframe');
+    return $(parent_iframes).index( $(iframe_el) );
 }
 
 function wpsstm_debug(msg,prefix){
