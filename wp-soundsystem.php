@@ -263,7 +263,7 @@ class WP_SoundSystem {
             if ($current_version < 160){
                 $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
                 $wpdb->query("ALTER TABLE $subtracks_table ADD time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NOT NULL DEFAULT '0'");
+                $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NULL");
             }
 
         }
