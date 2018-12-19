@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 1.9.9
+Version: 2.0.0
 License: GPL2
 */
 
@@ -331,6 +331,13 @@ class WP_SoundSystem {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
+    
+    function register_script_styles_iframes( $template ){
+        if( did_action( 'wpsstm-tracklist-iframe') ){
+            wp_enqueue_script('iframeResizerContentWindow');
+        }
+        return $template;
+    }
 
     function register_scripts_styles_shared(){
 
@@ -342,11 +349,6 @@ class WP_SoundSystem {
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
-        
-        //wp_register_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'13.5.15');//TOUFIX load in iframes only
-        //wp_register_script( 'iframeResizer', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.min.js', array('iframeResizerContentWindow'),'13.5.15');
-        
-        //js
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
 
         $datas = array(
@@ -355,13 +357,20 @@ class WP_SoundSystem {
         );
 
         wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
-        
-        //JS
+
         wp_enqueue_script( 'wpsstm' );
-        
-        //CSS
         wp_enqueue_style( 'wpsstm' );
         
+        /*
+        Iframe
+        */
+        if( did_action( 'wpsstm-tracklist-iframe') ){
+            //wp_enqueue_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'13.5.15',true);
+        }else{
+            //TOUFIX only if page contains tracklists
+            //wp_enqueue_script( 'iframeResizer', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.min.js', array('jquery'),'13.5.15');
+        }
+
     }
 
     /*
