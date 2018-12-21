@@ -26,6 +26,8 @@ class WPSSTM_MusicBrainz {
         
         $this->options = wp_parse_args(get_option( self::$mbz_options_meta_name),$options_default);
         
+        add_filter('wpsstm_remote_presets',array($this,'register_musicbrainz_preset'));
+        
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 7);
         add_action( 'save_post', array($this,'auto_mbid_on_post_save'), 8);
@@ -48,6 +50,11 @@ class WPSSTM_MusicBrainz {
     
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
+    }
+    
+    function register_musicbrainz_preset($presets){
+        $presets[] = new WPSSTM_Musicbrainz_Release_ID_Preset();
+        return $presets;
     }
     
     static function is_entries_switch(){
@@ -101,7 +108,6 @@ class WPSSTM_MusicBrainz {
         printf(__('%s is an open data music database.  By enabling it, the plugin will fetch various informations about the tracks, artists and albums you post.','wpsstm'),$mb_link);
     }
 
-
     function mbz_enabled_callback(){
         $option = $this->get_options('enabled');
         
@@ -126,7 +132,6 @@ class WPSSTM_MusicBrainz {
         printf('<p>%s</p>',$el);
     }
 
-    
     public static function pre_get_posts_mbid( $query ) {
 
         if ( $search = $query->get( self::$qvar_mbid ) ){
@@ -588,52 +593,6 @@ class WPSSTM_MusicBrainz {
         $fields_success['post_id'] = $post_id;
         wpsstm()->debug_log( json_encode($fields_success),"metabox_mbid_save() - filled post with MB datas" ); 
 
-    }
-    
-    //TOUFIX not used
-    function fill_album_tracklist(WPSSTM_Post_Tracklist $tracklist){
-        
-        if ( get_post_type($tracklist->post_id) != wpsstm()->post_type_album ) return;
-        
-        $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $mbdatas = $this->get_post_mbdatas($post_id);
-
-        //check MusicBrainz datas has media(s)
-        if ( !isset($mbdatas['media']) ) return;
-        $medias = (array)$mbdatas['media'];
-
-        // Get array keys
-        $media_keys = array_keys($medias);
-        // Fetch last array key
-        $media_last_key = array_pop($media_keys);
-
-        
-        $tracks_arr = array();
-        foreach ((array)$medias as $media_key => $media){
-            
-            if ( !isset($media['tracks']) ) continue;
-            $media_tracks = $media['tracks'];
-            
-            // Get array keys
-            $media_tracks_keys = array_keys($media_tracks);
-            // Fetch last array key
-            $media_tracks_last_key = array_pop($media_tracks_keys);
-
-            foreach((array)$media_tracks as $track_key=>$raw_track){
-                
-                $track = new WPSSTM_Track();
-                $track->artist = $raw_track['artist-credit'][0]['name']; //TO FIX what if multiple artists ?
-                $track->title = $raw_track['title'];
-                $track->mbid = $raw_track['id'];
-                //TOUFIX album ?
-                
-                $tracks_arr[] = $track;
-
-            }
-        }
-
-        $tracklist->add_tracks($tracks_arr);
-        return $tracklist->update_subtracks();
     }
     
     /*
@@ -1180,6 +1139,51 @@ class WPSSTM_MB_Entries extends WP_List_Table {
 	public function column_mbitem_score( $item ) {
         echo wpsstm_get_percent_bar($item['score']);
 	}
+    
+}
+
+class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
+    
+    var $mbid;
+    var $mbdatas;
+    
+    function __construct(){
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
+            'tracks'           => array('path'=>'track'),
+            'track_artist'     => array('path'=>'artist > name'),
+            'track_title'      => array('path'=>'recording > title'),
+            'track_album'      => array('path'=>'/ release > title'),
+        );
+    }
+
+    function init_url($url){
+        global $wpsstm_musicbrainz;
+        
+        if ( $this->mbid = self::get_release_mbid($url) ){
+            $this->mbdatas = $wpsstm_musicbrainz->get_musicbrainz_api_entry('release',$this->mbid);
+        }
+        
+        return $this->mbdatas;
+    }
+    
+    function get_remote_request_url(){
+        $url = sprintf('http://musicbrainz.org/ws/2/release/%s',$this->mbid);
+        $inc = array('artist-credits','recordings');
+        $url = add_query_arg(array('inc'=>implode('+',$inc)),$url);
+        return $url;
+    }
+
+    static function get_release_mbid($url){
+        $pattern = '~^https?://(?:www\.)?musicbrainz.org/release/([\w\d-]+)~i';
+        preg_match($pattern,$url, $matches);
+
+        $mbid =  isset($matches[1]) ? $matches[1] : null;
+        
+        return $mbid;
+        
+    }
     
 }
 
