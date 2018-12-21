@@ -155,7 +155,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Spotify metabox
 * Static track dequeue action
 * PHP : pass tracklist object  to the track object / pass track object to the source object
-* merged all playlists classes; and new class WPSSTM_Remote_Datas
+* merged all playlists classes; and new class WPSSTM_Remote_Tracklist
 * new filter 'wpsstm_pre_save_autosources'
 * [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
 * TOFIX remote request pagination

@@ -3,11 +3,12 @@
 class WPSSTM_RadioKing{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_radioking_service_link'));
-        add_action('wpsstm_before_remote_response',array($this,'register_radioking_preset'));
+        add_filter('wpsstm_remote_presets',array($this,'register_radioking_preset'));
     }
     //register preset
-    function register_radioking_preset($remote){
-        new WPSSTM_RadioKing_Api_Preset($remote);
+    function register_hypem_preset($presets){
+        $presets[] = new WPSSTM_RadioKing_Api_Preset();
+        return $presets;
     }
     function register_radioking_service_link($links){
         $links[] = array(
@@ -26,44 +27,38 @@ class WPSSTM_RadioKing{
     }
 }
 
-class WPSSTM_RadioKing_Api_Preset{
-
-    function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
-        add_filter( 'wpsstm_live_tracklist_track_image',array($this,'get_remote_track_image'),10,3 );
-    }
+class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     
-    function can_handle_url($url){
-        if ( !$this->get_station_slug($url) ) return;
-        return true;
-    }
+    var $station_slug;
+    var $station_id;
+    var $station_data;
 
-    function get_remote_url($url){
+    function __construct(){
         
-        if ( $this->can_handle_url($url) ){
-            $station_id = $this->get_station_id($url);
-            if ( is_wp_error($station_id) ) return $station_id;
-
-            $url = sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
-        }
-        return $url;
-
-    }
-    
-    function set_selectors($remote){
+        parent::__construct();
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),
             'track_artist'      => array('path'=>'artist'),
             'track_album'       => array('path'=>'album'),
             'track_title'       => array('path'=>'title'),
             'track_image'       => array('path'=>'cover'),
         );
+            
+        add_filter( 'wpsstm_live_tracklist_track_image',array($this,'get_remote_track_image'),10,3 );
+    }
+    
+    function init_url($url){
+        if ( ( $this->station_slug = $this->get_station_slug($url) ) && ( $this->station_data = $this->get_station_data($this->station_id) ) ){
+            $this->station_id = wpsstm_get_array_value(array('idradio'),$this->station_data);
+        }
+        
+        return $this->station_id;
     }
 
+    function get_remote_request_url(){
+        return sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
+    }
 
     function get_station_slug($url){
         $pattern = '~^https?://(?:.*\.)?radioking.com/radio/([^/]+)~i';
@@ -71,9 +66,10 @@ class WPSSTM_RadioKing_Api_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_station_data($url){
+    function get_station_data($station_slug){
 
-        $station_slug = $this->get_station_slug($url);
+        if (!$station_slug) return;
+        
         $transient_name = 'wpsstm-radioking-' . $station_slug . '-data';
 
         if ( false === ( $station_data = get_transient($transient_name ) ) ) {
@@ -88,22 +84,9 @@ class WPSSTM_RadioKing_Api_Preset{
         return $station_data;
 
     }
-    
-    function get_station_id($url){
-        $station_data = $this->get_station_data($url);
-        if ( is_wp_error($station_data) ) return $station_data;
-        
-        return wpsstm_get_array_value(array('idradio'),$station_data);
-    }
 
-    function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
-            $station_data = $this->get_station_data($remote->url);
-            if ( !is_wp_error($station_data) ){
-                $title = wpsstm_get_array_value(array('name'), $station_data);
-            }
-        }
-        return $title;
+    function get_remote_title(){
+        return wpsstm_get_array_value(array('name'), $this->station_data);
     }
     
     //TOUFIX TOUCHECK

@@ -675,11 +675,42 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
-        $remote = new WPSSTM_Remote_Datas($this->feed_url,$this->scraper_options);
+        $live = true;//TOUFIXTOUREMOVE
+        
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
-            $tracks = $remote->get_remote_tracks();
+            
+            /*
+            redirect URL
+            */
+            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url); //filter for bangs, etc.
+            
+            //build presets
+            $preset = null;
+            $presets = array();
+            $presets = apply_filters('wpsstm_remote_presets',$presets);
+
+            //select pre-request preset
+            foreach((array)$presets as $test_preset){
+                if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
+                    $preset = $test_preset;
+                    $this->tracklist_log($preset->get_preset_name(),'preset found');
+                    break;
+                }
+            }
+
+            do_action('wpsstm_before_remote_response',$this);
+
+            $remote_request_url = $preset->get_remote_request_url();
+            if ( $this->feed_url != $remote_request_url){
+                $preset->remote_log($this->feed_url,'original URL' );
+            }
+            $preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
+            
+            
+            $tracks = $preset->get_all_remote_tracks();
+            
         }else{
             $tracks = $this->get_static_subtracks();
         }
@@ -697,7 +728,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
         //update live tracklist
         if ($live){
-            $updated = $this->set_live_datas($remote);
+            $updated = $this->set_live_datas($preset);
             if ( is_wp_error($updated) ) return $updated;
         }
  
@@ -712,12 +743,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Update WP post and eventually update subtracks.
     */
     
-    function set_live_datas(WPSSTM_Remote_Datas $datas){
+    function set_live_datas(WPSSTM_Remote_Tracklist $datas){
 
         if (!$this->post_id){
             $this->tracklist_log('wpsstm_missing_post_id','Set live datas error' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
+        
+        //capability check
+        $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+        if ( is_wp_error($can) ) return $can;
 
         //save subtracks
         if ($this->tracks){

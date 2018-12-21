@@ -2,20 +2,29 @@
 
 use \ForceUTF8\Encoding;
 
-class WPSSTM_Remote_Datas{
+class WPSSTM_Remote_Tracklist{
     
     var $options;
 
-    //url stuff
+    //url request
     var $url = null;
-    var $redirect_url = null; //url in the end, after filters have been applied
+    var $remote_request_url = null; //url in the end, after filters have been applied
+    
+    var $default_request_args = array(
+        'headers'   => array(
+            'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+        )
+    );
+    
+    var $remote_request_args;
+    
     var $scraper_options = array();
 
     //response
     var $request_pagination = array(
         'total_pages'       => 1,
-        'page_items_limit'  => -1, //When possible (eg. APIs), set the limit of tracks each request can get
-        'current_page'      => 1
+        'page_items_limit'  => null, //When possible (eg. APIs), set the limit of tracks each request can get
+        'current_page'      => 0
     );
     public $response = null;
     public $response_type = null;
@@ -39,20 +48,51 @@ class WPSSTM_Remote_Datas{
     public function __construct($url = null,$options = null) {
         
         $this->url = trim($url);
-        do_action('wpsstm_before_remote_response',$this);
+        
         $this->options = (array)$options; //last one has priority
     }
     
-    function get_remote_tracks(){
+    function init_url($url){
+        return (filter_var($url, FILTER_VALIDATE_URL) !== FALSE);
+    }
+    
+    function get_all_remote_tracks(){
+        
+        $page_tracks = $this->get_remote_page_tracks();
+        if ( is_wp_error($page_tracks) ) return $page_tracks;
+        
+        $this->tracks = array_merge($this->tracks,(array)$page_tracks);
+
+        //sort
+        if ($this->get_options('tracks_order') == 'asc'){
+            $this->tracks = array_reverse($this->tracks);
+        }
+        
+        return $this->tracks;
+    
+    }
+    
+    private function get_remote_page_tracks(){
         
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
         
-        //capability check
-        $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
-        if ( is_wp_error($can) ) return $can;
+        /*
+        redirect URL
+        */
+        $this->remote_request_url = $this->get_remote_request_url();
+
+        /*
+        URL args
+        */
+
+        $this->remote_request_args = $this->get_remote_request_args();
+
+        if ($this->remote_request_args != $this->default_request_args){
+            $this->remote_log($this->remote_request_args,'***  URL ARGS***' );
+        }
 
         /* POPULATE PAGE */
-        $response = $this->populate_remote_response($this->url);
+        $response = $this->populate_remote_response();
         $response_code = wp_remote_retrieve_response_code( $response );
 
         if ( is_wp_error($response) ) return $response;
@@ -66,10 +106,12 @@ class WPSSTM_Remote_Datas{
         
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
-
-        $this->tracks = $this->get_raw_tracks();
         
-        return $this->tracks;
+        //update pagination
+        $this->request_pagination['current_page']++;
+
+        return $this->get_parsed_page_tracks();
+
     }
 
     function get_options($keys = null){
@@ -81,40 +123,7 @@ class WPSSTM_Remote_Datas{
         return $this->get_options($keys);
     }
 
-    private function get_raw_tracks(){
-
-        $raw_tracks = array();
-
-        //count total pages
-        //TOUFIX paginated requests do not work actually.
-        //$this->request_pagination = apply_filters('wppstm_live_tracklist_pagination',$this->request_pagination, $this);
-
-        if ( $this->request_pagination['page_items_limit'] > 0 ){
-            $this->request_pagination['total_pages'] = ceil( count($this->tracks) / $this->request_pagination['page_items_limit'] );
-        }
-
-        while ( $this->request_pagination['current_page'] <= $this->request_pagination['total_pages'] ) {
-            if ( $page_raw_tracks = $this->get_remote_page_tracks() ) {
-                if ( is_wp_error($page_raw_tracks) ) return $page_raw_tracks;
-                $raw_tracks = array_merge($raw_tracks,(array)$page_raw_tracks);
-                
-            }
-            $this->request_pagination['current_page']++;
-        }
-        
-        //sort
-        if ($this->get_options('tracks_order') == 'asc'){
-            $raw_tracks = array_reverse($raw_tracks);
-        }
-
-        return apply_filters('wpsstm_remote_tracks',$raw_tracks,$this);
-        
-    }
-
-    private function get_remote_page_tracks(){
-
-        //$this->remote_log($this->request_pagination,'get_remote_page_tracks request_pagination' );
-
+    private function get_parsed_page_tracks(){
         //tracks HTML
         $track_nodes = $this->get_track_nodes($this->body_node);
         if ( is_wp_error($track_nodes) ){
@@ -126,42 +135,25 @@ class WPSSTM_Remote_Datas{
 
         //tracks
         $tracks = $this->parse_track_nodes($track_nodes);
-        $this->remote_log(count($tracks),'get_remote_page_tracks request_url - found track nodes' );
+        $this->remote_log(count($tracks),'found tracks' );
         return $tracks;
     }
+    
+    function get_remote_request_url(){
+        return $this->url;
+    }
 
-    private function populate_remote_response($url){
+    function get_remote_request_args(){
+        return $this->default_request_args;
+    }
+
+    private function populate_remote_response(){
 
         if( $this->response !== null ) return $this->response; //already populated
 
         $response = null;
-        
-        /*
-        redirect URL
-        */
-        $this->redirect_url = apply_filters('wpsstm_live_tracklist_url',$url,$this);
 
-        if ( $this->redirect_url != $url){
-            $this->remote_log($url,'original URL' );
-        }
-        $this->remote_log($this->redirect_url,'*** REDIRECT URL ***' );
-        
-        /*
-        URL args
-        */
-        $url_args = $defaut_url_args = array(
-            'headers'   => array(
-                'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
-            )
-        );
-        $url_args = apply_filters('wpsstm_live_tracklist_request_args',$url_args,$this->redirect_url,$this);
-
-        if ($url_args != $defaut_url_args){
-            $this->remote_log($url_args,'***  URL ARGS***' );
-        }
-
-        //
-        $response = wp_remote_get( $this->redirect_url, $url_args );
+        $response = wp_remote_get( $this->remote_request_url, $this->remote_request_args );
 
         //errors
         if ( !is_wp_error($response) ){
@@ -594,5 +586,10 @@ class WPSSTM_Remote_Datas{
         
 
     }
+    
+   public function get_preset_name()
+   {
+      return static::class;
+   }
     
 }

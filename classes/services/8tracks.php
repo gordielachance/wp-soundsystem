@@ -2,13 +2,14 @@
 
 class WPSSTM_8tracks{
     function __construct(){
-        add_action('wpsstm_before_remote_response',array(__class__,'register_8tracks_playlists_preset'));
+        add_filter('wpsstm_remote_presets',array($this,'register_8tracks_presets'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_8tracks_service_link'));
     }
     
     //register preset
-    static function register_8tracks_playlists_preset($remote){
-        new WPSSTM_8Tracks_Preset($remote);
+    function register_8tracks_presets($presets){
+        $presets[] = new WPSSTM_8Tracks_Preset();
+        return $presets;
     }
 
     static function register_8tracks_service_link($links){
@@ -28,75 +29,58 @@ class WPSSTM_8tracks{
     }
 }
 
-class WPSSTM_8Tracks_Preset{
+class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
     
-    function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
+    var $user_slug;
+    var $playlist_slug;
+    var $mix_data;
+    var $mix_id;
+    
+    function __construct() {
+        
+        parent::__construct();
+
+        $this->options['selectors'] = array(
+            'tracks'            => array('path'=>'>tracks'),
+            'track_artist'      => array('path'=>'performer'),
+            'track_title'       => array('path'=>'name')
+        );
+
+        //add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        //add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
     }
     
-    function can_handle_url($url){
-        $user_slug = $this->get_user_slug($url);
-        $playlist_slug = $this->get_tracklist_slug($url);
-        if ( !$user_slug ) return;
-        if ( !$playlist_slug ) return;
-        return true;
+    function init_url($url){
+        $this->user_slug = self::get_user_slug($url);
+        $this->playlist_slug = self::get_tracklist_slug($url);
+        
+        if ($this->user_slug && $this->playlist_slug){
+            $this->mix_data = $this->get_mix_data($this->user_slug,$this->playlist_slug);
+        }
+
+        return $this->mix_data;
     }
 
-    function get_user_slug($url){
+
+    static function get_user_slug($url){
         $pattern = '~^https?://(?:www.)?8tracks.com/([^/]+)~i';
         preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_tracklist_slug($url){
+    static function get_tracklist_slug($url){
         $pattern = '~^https?://(?:www.)?8tracks.com/[^/]+/([[\w\d-]+)~i';
         preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
     function get_remote_url($url){
-        
-        if ( $this->can_handle_url($url) ){
-            $mix_data = $this->get_mix_data($url);
-            if ( is_wp_error($mix_data) ) return $mix_data;
-
-            //populate mix ID
-            if ( !$mix_id = wpsstm_get_array_value(array('id'),  $mix_data) ) {
-                return new WP_Error( 'wpsstm_8tracks_missing_mix_id', __('Required mix ID missing.','wpsstm') );
-            }
-
-            $url = sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
-        }
-
-        return $url;
-
+        $mix_id = wpsstm_get_array_value(array('id'), $this->mix_data);
+        return sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
     }
-    
-    function set_selectors($remote){
-        
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
-            'tracks'            => array('path'=>'>tracks'),
-            'track_artist'      => array('path'=>'performer'),
-            'track_title'       => array('path'=>'name')
-        );
-    }
-    
-    function get_mix_data($url){
-        
-        $user_slug = $this->get_user_slug($url);
-        $playlist_slug = $this->get_tracklist_slug($url);
 
-        //can request ?
-        if ( !$user_slug ){
-            return new WP_Error( 'wpsstm_8tracks_missing_user_slug', __('Required user slug missing.','wpsstm') );
-        }
-        if ( !$playlist_slug ){
-            return new WP_Error( 'wpsstm_8tracks_missing_tracklist_slug', __('Required tracklist slug missing.','wpsstm') );
-        }
-        
+    function get_mix_data($user_slug,$playlist_slug){
+
         //TO FIX TO CHECK might be too long for a transient key ?
         $transient_name = sprintf('wpsstm-8tracks-%s-%s-data',sanitize_title($user_slug),sanitize_title($playlist_slug));
 
@@ -117,13 +101,8 @@ class WPSSTM_8Tracks_Preset{
         
     }
     
-    function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
-            $mix_data = $this->get_mix_data($remote->url);
-            if ( !is_wp_error( $mix_data ) ){
-                $title = wpsstm_get_array_value('name', $mix_data);
-            }
-        }
+    function get_remote_title(){
+        $title = wpsstm_get_array_value('name', $this->mix_data);
         return $title;
     }
 }

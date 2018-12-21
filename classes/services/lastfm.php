@@ -1,5 +1,7 @@
 <?php
 
+///TO FIX use last.fm API instead of scraping ? Only downside is that we don't get the youbube sources with that.
+
 use LastFmApi\Api\AuthApi;
 use LastFmApi\Api\ArtistApi;
 use LastFmApi\Api\TrackApi;
@@ -28,9 +30,13 @@ class WPSSTM_LastFM{
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
         
         ///
+        add_filter('wpsstm_feed_url', array($this, 'lastfm_artist_bang_to_url'));
+        add_filter('wpsstm_feed_url', array($this, 'lastfm_station_artist_bang_to_url'));
+        add_filter('wpsstm_feed_url', array($this, 'lastfm_station_user_bang_to_url'));
+        add_filter('wpsstm_remote_presets',array($this,'register_lastfm_presets'));
+        
 
         add_filter( 'wpsstm_wizard_input',array(__class__,'wizard_no_url_input'));
-        add_action('wpsstm_before_remote_response',array(__class__,'register_lastfm_preset'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_lastfm_service_links'));
         
         add_action( 'wp', array($this,'after_app_auth') );
@@ -64,6 +70,67 @@ class WPSSTM_LastFM{
         add_action('wp_ajax_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
 
+    }
+    
+    function lastfm_artist_bang_to_url($url){
+        $pattern = '~^lastfm:artist:([\w\d]+)(?::([\w\d]+))?~i';
+        preg_match($pattern, $url, $matches);
+        $artist = isset($matches[1]) ? $matches[1] : null;
+        $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
+
+        if ( $artist ){
+            $url = sprintf('https://www.last.fm/music/%s',urlencode($artist));
+            if ($subpage){
+                switch($subpage){
+                    
+                    case 'similar':
+                        $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
+                    break;
+                        
+                    default:
+                        $url = trailingslashit($url) . '+' . $subpage;
+                    break;
+                }
+                
+            }
+        }
+        return $url;
+    }
+    function lastfm_station_artist_bang_to_url($url){
+        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
+        preg_match($pattern, $url, $matches);
+        $page = isset($matches[1]) ? $matches[1] : null;
+        $artist = isset($matches[2]) ? $matches[2] : null;
+
+        if ( ( $page == 'music' )  && $artist ){
+            $url = sprintf('https://www.last.fm/player/station/music/%s',urlencode($artist));
+        }
+        return $url;
+    }
+    function lastfm_station_user_bang_to_url($url){
+        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
+        preg_match($pattern, $url, $matches);
+        $page = isset($matches[1]) ? $matches[1] : null;
+        $user = isset($matches[2]) ? $matches[2] : null;
+        $subpage = isset($matches[3]) ? $matches[3] : 'library';
+
+        if ( ( $page == 'user' )  && $user ){
+            $url = sprintf('https://www.last.fm/player/station/user/%s',$user);
+            if ($subpage){
+                $url = trailingslashit($url) . $subpage;
+            }
+        }
+        return $url;
+    }
+
+    function register_lastfm_presets($presets){
+
+        $presets[] = new WPSSTM_LastFM_Music_URL_Preset();
+        $presets[] = new WPSSTM_LastFM_User_URL_Preset();
+        $presets[] = new WPSSTM_LastFM_User_Station_Preset();
+        $presets[] = new WPSSTM_LastFM_Music_Station_Preset();
+
+        return $presets;
     }
     
     function get_options($keys = null){
@@ -626,13 +693,6 @@ class WPSSTM_LastFM{
         return true;
     }
 
-    
-    //register presets
-    static function register_lastfm_preset($remote){
-        new WPSSTM_LastFM_URL_Preset($remote);
-        new WPSSTM_LastFM_Station_Preset($remote);
-    }
-
     static function register_lastfm_service_links($links){
         $links[] = array(
             'slug'      => 'lastfm',
@@ -663,232 +723,6 @@ class WPSSTM_LastFM{
     }
     
 }
-
-class WPSSTM_LastFM_URL_Preset{
-
-    function __construct($remote){
-
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_track_artist',array($this,'artist_header_track_artist'), 10, 3 );
-        
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'lastfm_artist_bangs'), 1, 8 );
-
-        
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'artist_top_tracks_url') );
-    }
-    
-    function can_handle_url($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm(?!/player/)~i';
-        preg_match($pattern, $url, $matches);
-        return ( !empty($matches) );
-    }
-    
-    function artist_top_tracks_url($url){
-        if ( !$this->can_handle_url($url) ) return $url;
-        if ( !$artist_slug = $this->get_artist_slug($url) ) return $url;
-        
-        $artist_page = $this->get_artist_page($url);
-        if (!$artist_page){
-             $url = trailingslashit($url) . '+tracks';
-        }
-        
-        return $url;
-    }
-    
-    function lastfm_artist_bangs($url){
-        $pattern = '~^lastfm:artist:([\w\d]+)(?::([\w\d]+))?~i';
-        preg_match($pattern, $url, $matches);
-        $artist = isset($matches[1]) ? $matches[1] : null;
-        $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
-
-        if ( $artist ){
-            $url = sprintf('https://www.last.fm/music/%s',urlencode($artist));
-            if ($subpage){
-                switch($subpage){
-                    
-                    case 'similar':
-                        $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
-                    break;
-                        
-                    default:
-                        $url = trailingslashit($url) . '+' . $subpage;
-                    break;
-                }
-                
-            }
-        }
-        return $url;
-    }
-
-    function get_user_slug($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?(?:user/([^/]+))~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-                   
-    function get_artist_slug($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
-    function get_user_page($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/[^/]+/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
-    function get_artist_page($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
-    function get_album_name($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/(?!\+)([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-             
-    function set_selectors($remote){
-        
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-
-        $remote->options['selectors'] = array(
-            'tracks'           => array('path'=>'table.chartlist tbody tr'),
-            'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
-            'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-            'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-            'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
-        );
-        
-    }
-    
-    //on artists and album pages; artist is displayed in a header on the top of the page
-    function artist_header_track_artist($artist,$track_node,$remote){
-        
-        if ( $this->can_handle_url($remote->redirect_url) && $this->get_artist_slug($remote->url) ){
-
-            if ( $album_slug = $this->get_album_name($remote->url) ){
-                $selector = array('path'=>'[itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
-            }else{
-                $selector = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
-            }
-
-            $artist = $remote->parse_node($remote->body_node,$selector);
-            
-        }
- 
-        return $artist;
-    }
-
-}
-
-class WPSSTM_LastFM_Station_Preset{
-
-    function __construct($remote){
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter('wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'lastfm_artist_stations_bangs'), 1, 8 );
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'lastfm_user_station_bangs'), 1, 8 );
-    }
-    
-    
-    function can_handle_url($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station~i';
-        preg_match($pattern, $url, $matches);
-        return ( !empty($matches) );
-    }
-    
-    //eg. music, user, ...
-    function get_station_type($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
-    function get_artist_slug($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/music/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
-    function get_user_slug($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/user/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : 'library';
-    }
-    
-    function get_user_page($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/user/[^/]+/([^/]+)~i';
-        preg_match($pattern, $url, $matches);
-        return isset($matches[1]) ? $matches[1] : 'library';
-    }
-    
-    function set_selectors($remote){
-
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-
-        $remote->options['selectors'] = array(
-            'tracks'            => array('path'=>'>playlist'),
-            'track_artist'      => array('path'=>'artists > name'),
-            'track_title'       => array('path'=>'playlist > name'),
-            'track_source_urls' => array('path'=>'playlinks url'),
-        );
-            
-    }
-
-    function get_remote_title($title,$remote){
-        if ( !$this->can_handle_url($remote->redirect_url) ) return $title;
-        
-        $type = $this->get_station_type($remote->url);
-        
-        switch($type){
-            case 'music':
-                $artist_slug = get_artist_slug($url);
-                $title = sprintf( __('Last.fm stations (similar artist): %s','wpsstm'),$artist_slug );
-            break;
-            case 'user':
-                $user_slug = $this->get_user_slug($remote->url);
-                $page_slug = $this->get_user_page($remote->url);
-                $title = sprintf( __('Last.fm station for %s - %s','wpsstm'),$user_slug,$page_slug );
-            break;
-        }
-
-        return $title;
-    }
-    
-    function lastfm_artist_stations_bangs($url){
-        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
-        preg_match($pattern, $url, $matches);
-        $page = isset($matches[1]) ? $matches[1] : null;
-        $artist = isset($matches[2]) ? $matches[2] : null;
-
-        if ( ( $page == 'music' )  && $artist ){
-            $url = sprintf('https://www.last.fm/player/station/music/%s',urlencode($artist));
-        }
-        return $url;
-    }
-    
-    function lastfm_user_station_bangs($url){
-        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
-        preg_match($pattern, $url, $matches);
-        $page = isset($matches[1]) ? $matches[1] : null;
-        $user = isset($matches[2]) ? $matches[2] : null;
-        $subpage = isset($matches[3]) ? $matches[3] : 'library';
-
-        if ( ( $page == 'user' )  && $user ){
-            $url = sprintf('https://www.last.fm/player/station/user/%s',$user);
-            if ($subpage){
-                $url = trailingslashit($url) . $subpage;
-            }
-        }
-        return $url;
-    }
-
-}
-
-
 //https://github.com/matt-oakes/PHP-Last.fm-API/
 //TO FIX handle when session is no mor evalid (eg. app has been revoked by user)
 
@@ -1211,6 +1045,190 @@ class WPSSTM_LastFM_User{
         return $results;
     }
     
+}
+
+abstract class WPSSTM_LastFM_URL_Preset extends WPSSTM_Remote_Tracklist{
+    
+    function __construct(){
+        
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
+            'tracks'           => array('path'=>'table.chartlist tbody tr'),
+            'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
+            'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
+            'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+            'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
+        );
+
+    }
+    
+}
+
+class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
+    
+    var $artist_slug;
+    var $artist_page;
+    var $album_name;
+
+    function init_url($url){
+        $this->artist_slug = self::get_artist_slug($url);
+        $this->artist_page = self::get_artist_page($url);
+        $this->album_name = self::get_album_name($url);
+        
+        return (bool)$this->artist_slug;
+    }
+    
+    function get_remote_request_url(){
+        if ( $this->artist_page ) { //artist top tracks
+            return trailingslashit($this->url) . '+tracks';
+        }
+    }
+             
+    static function get_artist_slug($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    static function get_artist_page($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+    static function get_album_name($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/(?!\+)([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    //on artists and album pages; artist is displayed in a header on the top of the page
+    function get_track_artist($track_node){
+        
+        $artist = null;
+
+        $this->options['selectors']['track_artist'] = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
+        if ($this->album_slug){
+            $this->options['selectors']['track_artist'] = array('path'=>'[itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
+        }
+        
+        $selectors = $this->get_selectors( array('track_artist'));
+        $artist = $this->parse_node($this->body_node,$selectors);
+ 
+        return $artist;
+    }
+
+}
+
+class WPSSTM_LastFM_User_URL_Preset extends WPSSTM_LastFM_URL_Preset{
+
+    var $user_slug;
+    var $user_page;
+
+    function init_url($url){
+        $this->user_slug = self::get_user_slug($url);
+        $this->user_page = self::get_user_page($url);
+        
+        return (bool)$this->user_slug;
+    }
+
+    static function get_user_slug($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?(?:user/([^/]+))~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    static function get_user_page($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/[^/]+/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+
+}
+
+abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_Remote_Tracklist{
+  
+    var $station_type;
+    
+    function __construct() {
+        
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
+            'tracks'            => array('path'=>'>playlist'),
+            'track_artist'      => array('path'=>'artists > name'),
+            'track_title'       => array('path'=>'playlist > name'),
+            'track_source_urls' => array('path'=>'playlinks url'),
+        );
+    }
+    
+    static function get_station_type($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+    
+}
+
+class WPSSTM_LastFM_User_Station_Preset extends WPSSTM_LastFM_Station_Preset{
+
+    var $user_slug;
+    var $user_page;
+
+    function init_url($url){
+        
+        $this->station_type = self::get_station_type($url);
+        $this->user_slug = self::get_user_slug($url);
+        $this->user_page = self::get_user_page($url);
+        
+        return ( ($this->station_type == 'user') && $this->user_slug );
+
+    }
+
+    static function get_user_slug($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/user/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : 'library';
+    }
+    
+    static function get_user_page($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/user/[^/]+/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : 'library';
+    }
+
+    function get_remote_title(){
+        return sprintf( __('Last.fm station for %s - %s','wpsstm'),$this->user_slug,$this->user_page );
+    }
+}
+
+class WPSSTM_LastFM_Music_Station_Preset extends WPSSTM_LastFM_Station_Preset{
+
+    var $artist_slug;
+
+    function init_url($url){
+        
+        $this->station_type = self::get_station_type($url);
+        $this->artist_slug = self::get_artist_slug($url);
+        
+        return ( ($this->station_type == 'music') & $this->artist_slug );
+
+    }
+
+    static function get_artist_slug($url){
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/player/station/music/([^/]+)~i';
+        preg_match($pattern, $url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    function get_remote_title(){
+        
+        $title = sprintf( __('Last.fm stations (similar artist): %s','wpsstm'),$this->artist_slug );
+
+        return $title;
+    }
 }
 
 function wpsstm_lastfm_init(){

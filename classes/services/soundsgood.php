@@ -3,13 +3,14 @@
 class WPSSTM_SoundsGood{
     function __construct(){
         if ( self::get_client_id() ){
-            add_action('wpsstm_before_remote_response',array($this,'register_soundsgood_preset'));
+            add_filter('wpsstm_remote_presets',array($this,'register_soundsgood_preset'));
             add_filter('wpsstm_wizard_services_links',array($this,'register_soundsgood_service_links'));
         }
     }
     //register preset
-    function register_soundsgood_preset($tracklist){
-        new WPSSTM_Soundsgood_Api_Preset($tracklist);
+    function register_soundsgood_preset($presets){
+        $presets[] = new WPSSTM_Soundsgood_Api_Preset();
+        return $presets;
     }
     function register_soundsgood_service_links($links){
         $links[] = array(
@@ -31,40 +32,32 @@ class WPSSTM_SoundsGood{
     }
 }
 
-class WPSSTM_Soundsgood_Api_Preset{
-
-    function __construct($remote){
-        
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,3 );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
-        
-    }
-
-    function can_handle_url($url){
-        $station_slug = $this->get_station_slug($url);
-        if ( !$station_slug ) return;
-        return true;
-    }
-
-    function get_remote_url($url){
-        if ( $this->can_handle_url($url) ){
-            $station_slug = $this->get_station_slug($url);
-            $url = sprintf('https://api.soundsgood.co/playlists/%s/tracks',$station_slug);
-        }
-        return $url;
-    }
+class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
     
-    function set_selectors($remote){
+    var $station_slug;
+
+    function __construct(){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
             'track_title'       => array('path'=>'title'),
             'track_source_urls' => array('path'=>'sources permalink')
         );
+        
+        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,2 );//TOUFIX
+        
+    }
+
+    function init_url($url){
+        $this->station_slug = $this->get_station_slug($url);
+        return $this->station_slug;
+    }
+
+    function get_remote_request_url(){
+        return sprintf('https://api.soundsgood.co/playlists/%s/tracks',$this->station_slug);
     }
 
     function get_station_slug($url){
@@ -73,20 +66,16 @@ class WPSSTM_Soundsgood_Api_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function remote_request_args($args,$url,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
+    function remote_request_args($args,$remote){
+        if ( $this->can_handle_url($remote->remote_request_url) ){
             $client_id = WPSSTM_SoundsGood::get_client_id();
             $args['headers']['client'] = $client_id;
         }
         return $args;
     }
     
-    function get_remote_title($title,$remote){
-        if ( $this->can_handle_url($remote->redirect_url) ){
-            $station_slug = $this->get_station_slug($remote->url);
-            $url = sprintf(__('%s on Soundsgood','wpsstm'),$station_slug);
-        }
-        return $title;
+    function get_remote_title(){
+        return sprintf(__('%s on Soundsgood','wpsstm'),$this->station_slug);
     }
     
 }

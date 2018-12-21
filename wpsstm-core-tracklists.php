@@ -74,6 +74,10 @@ class WPSSTM_Core_Tracklists{
         add_action( 'before_delete_post', array($this,'delete_subtrack_tracklist_id') );
         add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
         
+        //
+        
+        add_filter( 'wpsstm_remote_presets', array($this,'register_default_remote_preset'), 999 );
+        
 
     }
 
@@ -826,6 +830,11 @@ class WPSSTM_Core_Tracklists{
 
         return $flushed_ids;
 
+    }
+    
+    function register_default_remote_preset($presets){
+        $presets[] = new WPSSTM_Remote_Tracklist();
+        return $presets;
     }
     
 }

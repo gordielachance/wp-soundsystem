@@ -3,11 +3,12 @@
 class WPSSTM_OnlineRadioBox{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_onlineradiobox_service_link'));
-        add_action('wpsstm_before_remote_response',array(__class__,'register_onlineradiobox_preset'));
+        add_filter('wpsstm_remote_presets',array($this,'register_onlineradiobox_preset'));
     }
     //register preset
-    static function register_onlineradiobox_preset($remote){
-        new WPSSTM_OnlineRadioBox_Preset($remote);
+    function register_onlineradiobox_preset($presets){
+        $presets[] = new WPSSTM_OnlineRadioBox_Preset();
+        return $presets;
     }
     static function register_onlineradiobox_service_link($links){
         $links[] = array(
@@ -26,35 +27,29 @@ class WPSSTM_OnlineRadioBox{
     }
 }
 
-class WPSSTM_OnlineRadioBox_Preset{
+class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
+    
+    var $station_slug;
 
-    function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
+    function __construct(){
         
-    }
-    
-    function can_handle_url($url){
-        if ( !$this->get_station_slug($url) ) return;
-        return true;
-    }
-    
-    function get_remote_url($url){
-        if ( $this->can_handle_url($url) ){
-            $station_slug = $this->get_station_slug($url);
-            $url = sprintf('http://onlineradiobox.com/gr/%s/playlist',$station_slug);
-        }
-        return $url;
-    }
-    
-    function set_selectors($remote){
+        parent::__construct();
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'.tablelist-schedule tr'),
             'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
             'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
         );
+
+    }
+    
+    function init_url($url){
+        $this->station_slug = $this->get_station_slug($url);
+        return $this->station_slug;
+    }
+    
+    function get_remote_request_url(){
+        return sprintf('http://onlineradiobox.com/gr/%s/playlist',$this->station_slug);
     }
 
     function get_station_slug($url){

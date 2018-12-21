@@ -2,12 +2,13 @@
 
 class WPSSTM_BBC{
     function __construct(){
-        add_action('wpsstm_before_remote_response',array(__class__,'register_bbc_presets'));
+        add_filter('wpsstm_remote_presets',array($this,'register_bbc_presets'));
         add_filter('wpsstm_wizard_services_links',array(__class__,'register_bbc_service_links'));
     }
-    static function register_bbc_presets($remote){
-        new WPSSTM_BBC_Station_Preset($remote);
-        new WPSSTM_BBC_Playlist_Preset($remote);
+    static function register_bbc_presets($presets){
+        $presets[] = new WPSSTM_BBC_Station_Preset();
+        $presets[] = new WPSSTM_BBC_Playlist_Preset();
+        return $presets;
     }
 
     static function register_bbc_service_links($links){
@@ -33,18 +34,25 @@ class WPSSTM_BBC{
     }
 }
 
-class WPSSTM_BBC_Station_Preset{
-    private $this;
+class WPSSTM_BBC_Station_Preset extends WPSSTM_Remote_Tracklist{
+    var $station_slug;
 
-    function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
+    function __construct(){
+        
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
+            'tracks'            => array('path'=>'.music-track'),
+            'track_artist'      => array('path'=>'.music-track__artist'),
+            'track_title'       => array('path'=>'.music-track__title'),
+            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+        );
         
     }
     
-    function can_handle_url($url){
-        $station_slug = $this->get_station_slug($url);
-        if ( $station_slug ) return true;
+    function init_url($url){
+        $this->station_slug = $this->get_station_slug($url);
+        return $this->station_slug;
     }
     
     function get_station_slug($url){
@@ -53,49 +61,30 @@ class WPSSTM_BBC_Station_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_remote_url($url){
-        if ( $this->can_handle_url($url) ){
-            $station_slug = $this->get_station_slug($url);
-            $url = sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$station_slug );
-        }
-        return $url;
-    }
-    
-    function set_selectors($remote){
-        
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
-            'tracks'            => array('path'=>'.music-track'),
-            'track_artist'      => array('path'=>'.music-track__artist'),
-            'track_title'       => array('path'=>'.music-track__title'),
-            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
-        );
-    }
-    
-
+    function get_remote_request_url(){
+        return sprintf( 'https://www.bbc.co.uk/music/tracks/find/%s',$this->station_slug );
+    }    
 }
-class WPSSTM_BBC_Playlist_Preset{
+class WPSSTM_BBC_Playlist_Preset extends WPSSTM_Remote_Tracklist{
     
-    function __construct($remote){
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-    }
+    var $playlist_id;
     
-    function can_handle_url($url){
-        $playlist_id = $this->get_playlist_id($url);
-        if ( !$playlist_id ) return;
-        return true;
-    }
-    
-    function set_selectors($remote){
+    function __construct(){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        $remote->options['selectors'] = array(
+        parent::__construct();
+        
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
             'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
             'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
         );
+        
     }
     
+    function init_url($url){
+        $this->playlist_id = $this->get_playlist_id($url);
+        return $this->playlist_id;
+    }
 
     function get_playlist_id($url){
         $pattern = '~^https?://(?:www.)?bbc.co.uk/music/playlists/([^/]+)~i';

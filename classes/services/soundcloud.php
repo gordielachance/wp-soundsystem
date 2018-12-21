@@ -19,7 +19,7 @@ class WPSSTM_Souncloud{
         add_filter('wpsstm_get_source_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
         if ( $this->get_options('client_id') ){
             add_filter('wpsstm_wizard_services_links',array($this,'register_soundcloud_service_links'));
-            add_action('wpsstm_before_remote_response',array($this,'register_soundcloud_preset'));
+            add_filter('wpsstm_remote_presets',array($this,'register_soundcloud_preset'));
         }
         
         /*backend*/
@@ -105,8 +105,9 @@ class WPSSTM_Souncloud{
     }
     
     //register preset
-    function register_soundcloud_preset($tracklist){
-        new WPSSTM_Soundcloud_User_Api_Preset($tracklist);
+    function register_soundcloud_preset($presets){
+        $presets[] = new WPSSTM_Soundcloud_User_Api_Preset();
+        return $presets;
     }
     function register_soundcloud_service_links($links){
         $links[] = array(
@@ -238,60 +239,52 @@ class WPSSTM_Souncloud{
     }
 }
 
-class WPSSTM_Soundcloud_User_Api_Preset{
+class WPSSTM_Soundcloud_User_Api_Preset extends WPSSTM_Remote_Tracklist{
+    var $user_slug;
+    var $page_slug;
+    var $user_id;
 
-    function __construct($remote){
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
-
-    }
-
-    function can_handle_url($url){
-        $user_slug = $this->get_user_slug($url);
-        if ( !$user_slug ) return;
-        return true;
-    }
-
-    function get_remote_url($url){
+    function __construct(){
         
-        if ( $this->can_handle_url($url) ){
-
-            if ( !$user_id = $this->get_user_id($url) ){
-                return new WP_Error( 'wpsstm_soundcloud_missing_user_id', __('Required user ID missing.','wpsstm') );
-            }
-
-            $api_page = null;
-            $page_slug = $this->get_user_page($url);
-            $client_id = $this->get_options('client_id');
-
-            switch($page_slug){
-                case 'likes':
-                    $this->api_page = 'favorites';
-                break;
-                default:
-                    $this->api_page = 'tracks';
-                break;
-            }
-
-            $url = sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$this->api_page,$client_id);
-        }
+        parent::__construct();
         
-        return $url;
-
-    }
-    
-    function set_selectors($remote){
-        
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
-        
-        $remote->options['selectors'] = array(
+        $this->options['selectors'] = array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),
             'track_title'       => array('path'=>'title'),
             'track_image'       => array('path'=>'artwork_url')
         );
+
     }
+
+    function init_url($url){
+        $this->user_slug = $this->get_user_slug($url);
+        $this->page_slug = $this->get_user_page($url);
+        $this->user_id = $this->get_user_id($this->user_slug);
+        return $this->user_id;
+    }
+
+    function get_remote_request_url(){
+        global $wpsstm_souncloud;
+        
+        $api_page = null;
+        $client_id = $wpsstm_souncloud->get_options('client_id');
+
+        switch($this->page_slug){
+            case 'likes':
+                $this->api_page = 'favorites';
+            break;
+            default:
+                $this->api_page = 'tracks';
+            break;
+        }
+
+        $url = sprintf('http://api.soundcloud.com/users/%s/%s?client_id=%s',$user_id,$this->api_page,$client_id);
+
+        return $url;
+
+    }
+
 
     function get_user_slug($url){
         $pattern = '~^http(?:s)?://(?:www\.)?soundcloud.com/([^/]+)~i';
@@ -305,16 +298,14 @@ class WPSSTM_Soundcloud_User_Api_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_user_id($url){
+    function get_user_id($user_slug){
+        global $wpsstm_souncloud;
 
-        $user_slug = $this->get_user_slug($url);
-        if (!$user_slug) return;
-        
         $transient_name = 'wpsstm-soundcloud-' . $user_slug . '-userid';
 
         if ( false === ( $user_id = get_transient($transient_name ) ) ) {
 
-            $client_id = $this->get_options('client_id');
+            $client_id = $wpsstm_souncloud->get_options('client_id');
 
             $api_url = sprintf('http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/%s&client_id=%s',$user_slug,$client_id);
             $response = wp_remote_get( $api_url );
@@ -338,28 +329,22 @@ class WPSSTM_Soundcloud_User_Api_Preset{
 
     }
     
-    function get_remote_title($title,$remote){
-        
-        if ( $this->can_handle_url($remote->redirect_url) ){
-            
-            $user_slug = $this->get_user_slug($remote->url);
-            $page_slug = $this->get_user_page($remote->url);
-            $title = sprintf(__('%s on Soundcloud','wpsstm'),$user_slug);
-            $subtitle = null;
+    function get_remote_title(){
 
-            switch($page_slug){
-                case 'likes':
-                    $subtitle = __('Favorite tracks','wpsstm');
-                break;
-                default: //tracks
-                    $subtitle = __('Tracks','wpsstm');
-                break;
-            }
+        $title = sprintf(__('%s on Soundcloud','wpsstm'),$this->user_slug);
+        $subtitle = null;
 
-            if ($subtitle){
-                $title = $title . ' - ' . $subtitle;
-            }
+        switch($this->page_slug){
+            case 'likes':
+                $subtitle = __('Favorite tracks','wpsstm');
+            break;
+            default: //tracks
+                $subtitle = __('Tracks','wpsstm');
+            break;
+        }
 
+        if ($subtitle){
+            $title = $title . ' - ' . $subtitle;
         }
 
         return $title;

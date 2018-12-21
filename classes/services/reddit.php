@@ -3,12 +3,14 @@
 class WPSSTM_Reddit{
     function __construct(){
         add_filter('wpsstm_wizard_services_links',array($this,'register_reddit_service_links'));
-        add_action('wpsstm_before_remote_response',array($this,'register_reddit_preset'));
+        add_filter('wpsstm_remote_presets',array($this,'register_reddit_preset'));
     }
     //register preset
-    function register_reddit_preset($tracklist){
-        new WPSSTM_Reddit_Api_Preset($tracklist);
+    function register_reddit_preset($presets){
+        $presets[] = new WPSSTM_Reddit_Api_Preset();
+        return $presets;
     }
+    
     function register_reddit_service_links($links){
         $links[] = array(
             'slug'      => 'reddit',
@@ -27,43 +29,15 @@ class WPSSTM_Reddit{
 
 }
 
-class WPSSTM_Reddit_Api_Preset{
-
-    function __construct($remote){
-        
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        add_action( 'wpsstm_did_remote_response',array($this,'set_selectors') );
-        add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
-        
-        add_filter('wpsstm_remote_tracks', array($this,'filter_remote_tracks'),10,2);
-
-    }
+class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
     
-    function can_handle_url($url){
-        $subreddit_slug = $this->get_subreddit_slug($url);
-        if (!$subreddit_slug ) return;
-        return true;
-    }
+    var $subreddit_slug;
 
-    function get_remote_url($url){
-        if ( $this->can_handle_url($url) ){
-            $subreddit_slug = $this->get_subreddit_slug($url);
-            $url = sprintf( 'https://www.reddit.com/r/%s.json',$subreddit_slug );
-            
-            //https://www.reddit.com/dev/api/
-            $args = array(
-                'limit' => 25, //default:25
-            );
-            $url = add_query_arg($args,$url);
-        }
-        return $url;
-    }
-    
-    function set_selectors($remote){
+    function __construct(){
         
-        if ( !$this->can_handle_url($remote->redirect_url) ) return;
+        parent::__construct();
         
-        $remote->options['selectors'] = array(
+        $this->options['selectors'] = array(
             //in HTML
             'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
             //in JSON
@@ -73,6 +47,24 @@ class WPSSTM_Reddit_Api_Preset{
             //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'url'),
         );
+        
+        //TOUFIXadd_filter('wpsstm_remote_tracks', array($this,'filter_remote_tracks'),10,2);
+
+    }
+    
+    function init_url($url){
+        $this->subreddit_slug = $this->get_subreddit_slug($url);
+        return $this->subreddit_slug;
+    }
+
+    function get_remote_request_url(){
+        $url = sprintf( 'https://www.reddit.com/r/%s.json',$this->subreddit_slug );
+
+        //https://www.reddit.com/dev/api/
+        $args = array(
+            'limit' => 25, //default:25
+        );
+        return add_query_arg($args,$url);
     }
 
     function get_subreddit_slug($url){
@@ -81,42 +73,40 @@ class WPSSTM_Reddit_Api_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function get_remote_title($title,$remote){ //because we've got no title in the JSON
-        if ( $this->can_handle_url($remote->redirect_url) ){
-            
-            $subreddit_slug = $this->get_subreddit_slug($remote->url);
+    function get_remote_title(){ //because we've got no title in the JSON
+        
+        if (!$this->subreddit_slug) return;
 
-            $transient_name = 'wpsstm-reddit-' .$subreddit_slug . '-title';
+        $transient_name = 'wpsstm-reddit-' .$this->subreddit_slug . '-title';
 
-            if ( false === ( $remote_title = get_transient($transient_name ) ) ) {
+        if ( false === ( $remote_title = get_transient($transient_name ) ) ) {
 
-                $remote_title = null;
+            $remote_title = null;
 
-                $url = sprintf( 'https://www.reddit.com/r/%s',$subreddit_slug );
-                $response = wp_remote_get( $url );
+            $url = sprintf( 'https://www.reddit.com/r/%s',$this->subreddit_slug );
+            $response = wp_remote_get( $url );
 
-                if ( is_wp_error($response) ) return $title;
+            if ( is_wp_error($response) ) return $title;
 
-                $response_code = wp_remote_retrieve_response_code( $response );
-                if ($response_code != 200) return $title;
+            $response_code = wp_remote_retrieve_response_code( $response );
+            if ($response_code != 200) return $title;
 
-                $content = wp_remote_retrieve_body( $response );
+            $content = wp_remote_retrieve_body( $response );
 
-                //QueryPath
-                try{
-                    $remote_title = htmlqp( $content, 'title', WPSSTM_Remote_Datas::$querypath_options )->innerHTML();
-                }catch(Exception $e){
-                    return $title;
-                }
-
-                libxml_clear_errors();
-
-                if ( $remote_title ){
-                    set_transient( $transient_name, $remote_title, 3 * DAY_IN_SECONDS );
-                    $title = $remote_title;
-                }
-
+            //QueryPath
+            try{
+                $remote_title = htmlqp( $content, 'title', WPSSTM_Remote_Tracklist::$querypath_options )->innerHTML();
+            }catch(Exception $e){
+                return $title;
             }
+
+            libxml_clear_errors();
+
+            if ( $remote_title ){
+                set_transient( $transient_name, $remote_title, 3 * DAY_IN_SECONDS );
+                $title = $remote_title;
+            }
+
         }
         
         return $title;
@@ -186,7 +176,7 @@ class WPSSTM_Reddit_Api_Preset{
 
     function filter_remote_tracks($tracks,$remote){
         
-        if ( $this->can_handle_url($remote->redirect_url) ){
+        if ( $this->can_handle_url($remote->remote_request_url) ){
             foreach((array)$tracks as $key=>$track){
                 $track->artist = $this->filter_string($track->artist);
                 $track->title = $this->filter_string($track->title);

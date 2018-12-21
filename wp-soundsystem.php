@@ -136,6 +136,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
+        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         //require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
