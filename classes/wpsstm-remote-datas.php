@@ -298,7 +298,7 @@ class WPSSTM_Remote_Tracklist{
             case 'text/xml':
 
                 $xml = simplexml_load_string($response_body);
-                
+
                 //maybe libxml will output error but will work; do not abord here.
                 $xml_errors = libxml_get_errors();
                 
@@ -351,7 +351,7 @@ class WPSSTM_Remote_Tracklist{
         if ( (!$result || ($result->length == 0)) ){
             return new WP_Error( 'querypath', __('We were unable to populate the page node') );
         }
-        
+
         return $this->body_node = $result;
 
     }
@@ -378,6 +378,8 @@ class WPSSTM_Remote_Tracklist{
     }
 
     protected function get_track_nodes($body_node){
+        
+        
 
         $selector = $this->get_selectors( array('tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
@@ -388,7 +390,7 @@ class WPSSTM_Remote_Tracklist{
         }catch(Exception $e){
             return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
         }
-        
+
         if ( $track_nodes->length == 0 ){
             return new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist.','spiff') );
         }
@@ -411,19 +413,13 @@ class WPSSTM_Remote_Tracklist{
         
         foreach($track_nodes as $key=>$single_track_node) {
 
-            //format response
-            $artist =   $this->get_track_artist($single_track_node);
-            $title =    $this->get_track_title($single_track_node);
-            $album =    $this->get_track_album($single_track_node);
-
             $args = array(
-                'artist'        => $artist,
-                'title'         => $title,
-                'album'         => $album,
+                'artist'        => $this->get_track_artist($single_track_node),
+                'title'         => $this->get_track_title($single_track_node),
+                'album'         => $this->get_track_album($single_track_node),
                 'image_url'     => $this->get_track_image($single_track_node),
                 'source_urls'   => $this->get_track_source_urls($single_track_node),
             );
-
 
             $tracks_arr[] = array_filter($args);
 
@@ -435,27 +431,23 @@ class WPSSTM_Remote_Tracklist{
     
     protected function get_track_artist($track_node){
         $selectors = $this->get_selectors( array('track_artist'));
-        $artist = $this->parse_node($track_node,$selectors);
-        return apply_filters('wpsstm_live_tracklist_track_artist',$artist,$track_node,$this);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_title($track_node){
         $selectors = $this->get_selectors( array('track_title'));
-        $title = $this->parse_node($track_node,$selectors);
-        return apply_filters('wpsstm_live_tracklist_track_title',$title,$track_node,$this);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_album($track_node){
         $selectors = $this->get_selectors( array('track_album'));
-        $album = $this->parse_node($track_node,$selectors);
-        return apply_filters('wpsstm_live_tracklist_track_album',$album,$track_node,$this);
+        return $this->parse_node($track_node,$selectors);
     }
     
     protected function get_track_image($track_node){
         $selectors = $this->get_selectors( array('track_image'));
         $image = $this->parse_node($track_node,$selectors);
-        $image = apply_filters('wpsstm_live_tracklist_track_image',$image,$track_node,$this);
-        
+
         if (filter_var((string)$image, FILTER_VALIDATE_URL) === false) return false;
         
         return $image;
@@ -464,7 +456,6 @@ class WPSSTM_Remote_Tracklist{
     protected function get_track_source_urls($track_node){
         $selectors = $this->get_selectors( array('track_source_urls'));
         $source_urls = $this->parse_node($track_node,$selectors,false);
-        $source_urls = apply_filters('wpsstm_live_tracklist_source_urls',$source_urls,$track_node,$this);
 
         foreach ((array)$source_urls as $key=>$url){
             if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
@@ -476,16 +467,31 @@ class WPSSTM_Remote_Tracklist{
         
     }
 
-    public function parse_node($track_node,$selectors,$single_value=true){
+    public function parse_node($current_node,$selectors,$single_value=true){
         $pattern = null;
         $strings = array();
         $result = array();
-        
-        if (!$track_node) return;
 
         $selector_css   = wpsstm_get_array_value('path',$selectors);
         $selector_regex = wpsstm_get_array_value('regex',$selectors);
         $selector_attr  = wpsstm_get_array_value('attr',$selectors);
+        $in_track_node = wpsstm_get_array_value('in_track_node',$selectors);
+        
+        /*
+        Use top level node instead of current node if path starts with '/'
+        */
+        $root_prefix = '/';
+        if (substr($selector_css, 0, strlen($root_prefix)) == $root_prefix) {
+            
+            //update path
+            $selector_css = substr($selector_css, strlen($root_prefix));
+            $selector_css = trim($selector_css);
+            
+            //switch node
+            $current_node = $this->body_node;
+        }
+        
+        if (!$current_node) return;
 
         //abord
         if ( !$selector_css && !$selector_regex && !$selector_attr ){
@@ -496,9 +502,9 @@ class WPSSTM_Remote_Tracklist{
         try{
 
             if ($selector_css){
-                $nodes = $track_node->find($selector_css);
+                $nodes = $current_node->find($selector_css);
             }else{
-                $nodes = $track_node;
+                $nodes = $current_node;
             }
 
             //get the first tag found only
