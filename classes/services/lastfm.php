@@ -1069,20 +1069,29 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
     
     var $artist_slug;
     var $artist_page;
-    var $album_name;
+    var $album_slug;
 
     function init_url($url){
         $this->artist_slug = self::get_artist_slug($url);
         $this->artist_page = self::get_artist_page($url);
-        $this->album_name = self::get_album_name($url);
+        $this->album_slug = self::get_album_slug($url);
         
-        return (bool)$this->artist_slug;
-    }
-    
-    function get_remote_request_url(){
-        if ( $this->artist_page ) { //artist top tracks
-            return trailingslashit($this->url) . '+tracks';
+        //update track artist selector
+        if($this->album_slug){
+            $this->options['selectors']['track_artist'] = array('path'=>'/ [itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
+        }else{
+            $this->options['selectors']['track_artist'] = array('path'=>'/ [data-page-resource-type="artist"]','attr'=>'data-page-resource-name');
         }
+
+        return $this->artist_slug;
+    }
+
+    function get_remote_request_url(){
+        $url = parent::get_remote_request_url();
+        if ( $this->artist_slug && !$this->artist_page ) { //force artist top tracks
+            $url = sprintf('https://www.last.fm/music/%s/+tracks',$this->artist_slug);
+        }
+        return $url;
     }
              
     static function get_artist_slug($url){
@@ -1097,26 +1106,10 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    static function get_album_name($url){
+    static function get_album_slug($url){
         $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?music/[^/]+/(?!\+)([^/]+)~i';
         preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
-    }
-
-    //on artists and album pages; artist is displayed in a header on the top of the page
-    function get_track_artist($track_node){
-        
-        $artist = null;
-
-        $this->options['selectors']['track_artist'] = array('path'=>'[data-page-resource-type="artist"]','regex'=>null,'attr'=>'data-page-resource-name');
-        if ($this->album_slug){
-            $this->options['selectors']['track_artist'] = array('path'=>'[itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
-        }
-        
-        $selectors = $this->get_selectors( array('track_artist'));
-        $artist = $this->parse_node($this->body_node,$selectors);
- 
-        return $artist;
     }
 
 }
