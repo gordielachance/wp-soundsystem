@@ -803,17 +803,6 @@ class WPSSTM_Spotify{
             case 'reload':
                 $this->reload_spotify_datas($post_id);
             break;
-            /*
-            TOUFIX    
-            case 'fill':
-                $field_slugs = isset($_POST['wpsstm-spotify-data-fill-fields']) ? $_POST['wpsstm-spotify-data-fill-fields'] : array();
-
-                if ( !empty($field_slugs) ){
-                    $this->fill_with_mbdatas($post_id,$field_slugs,true);
-                }
-
-            break;
-            */
         }
         
     }

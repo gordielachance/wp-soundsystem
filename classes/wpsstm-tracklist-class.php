@@ -56,12 +56,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->scraper_options = array(
             'selectors' => array(
                 'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="track"]'
-                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="byArtist"]'
-                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="name"]'
-                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="inAlbum"]'
+                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
+                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
                 'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null), //'[itemprop="thumbnailUrl"]'
+                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
             ),
             'tracks_order'              => 'desc'
         );

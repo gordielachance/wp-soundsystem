@@ -44,8 +44,7 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
             'track_title'       => array('path'=>'title'),
             'track_image'       => array('path'=>'cover'),
         );
-            
-        add_filter( 'wpsstm_live_tracklist_track_image',array($this,'get_remote_track_image'),10,3 );
+
     }
     
     function init_url($url){
@@ -88,12 +87,11 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     function get_remote_title(){
         return wpsstm_get_array_value(array('name'), $this->station_data);
     }
-    
-    //TOUFIX TOUCHECK
-    protected function get_remote_track_image($image,$track_node,$remote){
-        $selectors = $remote->get_selectors( array('track_image'));
+
+    protected function get_track_image($node){
+        $selectors = $this->get_selectors( array('track_image'));
         
-        if ( $image_id = $this->parse_node($track_node,$selectors) ){
+        if ( $image_id = $this->parse_node($node,$selectors) ){
            $image = sprintf('https://www.radioking.com/api/track/cover/%s?width=55&height=55',$image_id);
         }
 

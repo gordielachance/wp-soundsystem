@@ -74,7 +74,7 @@ class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
         return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_remote_url($url){
+    function get_remote_request_url(){
         $mix_id = wpsstm_get_array_value(array('id'), $this->mix_data);
         return sprintf('https://8tracks.com/mixes/%s/tracks_for_international.jsonh',$mix_id);
     }
