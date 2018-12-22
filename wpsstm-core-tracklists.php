@@ -6,7 +6,6 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WPSSTM_Core_Tracklists{
 
-    static $qvar_loved_tracklists = 'loved-tracklists';
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
 
@@ -82,7 +81,7 @@ class WPSSTM_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = self::$qvar_loved_tracklists;
+        $vars[] = 'tracklists-favorited-by';
         $vars[] = 'tracklist_id';
         $vars[] = 'subtrack_position';
         $vars[] = 'tracklists_manager';
@@ -602,19 +601,26 @@ class WPSSTM_Core_Tracklists{
         return $template;
     }
     
-    static function get_all_favorite_tracklist_ids(){
+    static function get_favorited_tracklist_ids($user_id = null){
         global $wpdb;
         //get all subtracks metas
         $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
+        
+        if ($user_id){
+            $querystr .= $wpdb->prepare( " AND user_id = '%s'", $user_id );
+        }
+
         $ids = $wpdb->get_col( $querystr);
         return $ids;
     }
 
     function pre_get_posts_loved_tracklists( $query ) {
 
-        if ( $query->get( self::$qvar_loved_tracklists ) ){
+        if ( $user_id = $query->get( 'tracklists-favorited-by' ) ){
             
-            $ids = get_all_favorite_tracklist_ids();
+            if($user_id === true) $user_id = null; //no specific user ID set
+            
+            $ids = self::get_favorited_tracklist_ids($user_id);
             
             $query->set ( 'post__in', $ids ); 
             

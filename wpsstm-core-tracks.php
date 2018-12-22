@@ -482,15 +482,14 @@ class WPSSTM_Core_Tracks{
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
 
         if ( !$query->get( self::$qvar_favorite_tracks ) ) return $where;
-        
-        
-        //get all favorites tracklists
+
+        //get all favorited tracklists
         $query_args = array(
-            'post_type' =>      wpsstm()->post_type_playlist,
+            'post_type' =>      wpsstm()->tracklist_post_types,
             'posts_per_page' => -1,
             'post_status' =>    array('publish','private','future','pending','draft'),
             'fields' =>         'ids',
-            WPSSTM_Core_Tracklists::$qvar_loved_tracklists => true,
+            'tracklists-favorited-by' => true,
         );
         $query = new WP_Query( $query_args );
         $ids = $query->posts;
