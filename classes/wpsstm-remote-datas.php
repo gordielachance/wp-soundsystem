@@ -8,7 +8,7 @@ class WPSSTM_Remote_Tracklist{
 
     //url request
     var $url = null;
-    var $remote_request_url = null; //url in the end, after filters have been applied
+    var $remote_request_url = null;
     
     var $default_request_args = array(
         'headers'   => array(
@@ -23,7 +23,7 @@ class WPSSTM_Remote_Tracklist{
     //response
     var $request_pagination = array(
         'total_pages'       => 1,
-        'page_items_limit'  => null, //When possible (eg. APIs), set the limit of tracks each request can get
+        'tracks_per_page'   => null, //When possible (eg. APIs), set the limit of tracks each request can get
         'current_page'      => 0
     );
     public $response = null;
@@ -48,7 +48,6 @@ class WPSSTM_Remote_Tracklist{
     public function __construct($url = null,$options = null) {
         
         $this->url = trim($url);
-        
         $this->options = (array)$options; //last one has priority
     }
     
@@ -56,12 +55,18 @@ class WPSSTM_Remote_Tracklist{
         return (filter_var($url, FILTER_VALIDATE_URL) !== FALSE);
     }
     
-    function get_all_remote_tracks(){
+    function get_remote_tracks(){
         
-        $page_tracks = $this->get_remote_page_tracks();
-        if ( is_wp_error($page_tracks) ) return $page_tracks;
+        while ( $this->request_pagination['current_page'] < $this->request_pagination['total_pages'] ){
+            $page_tracks = $this->get_remote_page_tracks();
+            if ( !is_wp_error($page_tracks) ){
+                $this->tracks = array_merge($this->tracks,(array)$page_tracks);
+            }
+
+            $this->request_pagination['current_page']++;
+        }
         
-        $this->tracks = array_merge($this->tracks,(array)$page_tracks);
+
 
         //sort
         if ($this->get_options('tracks_order') == 'asc'){
@@ -73,7 +78,7 @@ class WPSSTM_Remote_Tracklist{
     }
     
     private function get_remote_page_tracks(){
-        
+
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
         
         /*
@@ -106,9 +111,6 @@ class WPSSTM_Remote_Tracklist{
         
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
-        
-        //update pagination
-        $this->request_pagination['current_page']++;
 
         return $this->get_parsed_page_tracks();
 

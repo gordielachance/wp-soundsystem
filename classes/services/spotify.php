@@ -897,6 +897,9 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
             'track_album'      => array('path'=>'track > album > name'),
             'track_title'      => array('path'=>'track > name'),
         );
+        
+        $this->request_pagination['tracks_per_page'] = 100; //spotify API
+        
 
     }
     
@@ -905,6 +908,11 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
         if ( $this->playlist_id = self::get_playlist_id_from_url($url) ){
             $this->playlist_data = $wpsstm_spotify->get_spotify_api_entry('playlists',$this->playlist_id);
+            
+            //update pagination
+            $total_tracks = wpsstm_get_array_value(array('tracks','total'),$this->playlist_data);
+            $this->request_pagination['total_pages'] = ceil($total_tracks / $this->request_pagination['tracks_per_page']);
+
         }
 
         return (bool)$this->playlist_id;
@@ -924,20 +932,14 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     function get_remote_request_url(){
         $url = sprintf('https://api.spotify.com/v1/playlists/%s/tracks',$this->playlist_id);
-        
-        /*
-        $default_args = arra
 
         $pagination_args = array(
-            'limit'     => $limit,
-            'offset'    => ($this->tracklist->request_pagination['current_page'] - 1) * $limit
+            'limit'     => $this->request_pagination['tracks_per_page'],
+            'offset'    => $this->request_pagination['current_page'] * $this->request_pagination['tracks_per_page']
         );
-        */
-
-        $pagination_args = array();
 
         $url = add_query_arg($pagination_args,$url);
- 
+
         return $url;
     }
 
@@ -953,33 +955,6 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
         return $args;
     }
-
-    /*
-    function get_remote_pagination(){
-        global $wpsstm_spotify;
- 
-        $data = $wpsstm_spotify->get_spotify_api_entry('playlists',$this->playlist_id);
-
-        if ( is_wp_error($data) ){
-            return $data;
-        }
-        
-        print_r("SPOTIFY PAGINATION");die();
-
-        $pagination['limit'] = 100; //spotify default
-        
-
-        //TO FIX not very clean ? Should we remove track_count and use pagination variable only ?
-        //TOUFIX TOUCHECK
-        //$this->tracklist->track_count = wpsstm_get_array_value(array('tracks','total'), $data);
-
-        //init pagination before request
-        $pagination['page_items_limit'] = 100;
-
-        return $pagination;
-
-    }
-    */
 
     function get_remote_title(){
         $title = wpsstm_get_array_value('name', $this->playlist_data);

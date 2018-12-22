@@ -675,6 +675,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
+        
+        $live = true;
 
         $refresh_delay = $this->get_human_next_refresh_time();
         
@@ -717,7 +719,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
             $preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
 
-            $tracks = $preset->get_all_remote_tracks();
+            $tracks = $preset->get_remote_tracks();
             
         }else{
             $tracks = $this->get_static_subtracks();
