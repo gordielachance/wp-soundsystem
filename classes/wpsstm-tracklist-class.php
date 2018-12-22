@@ -700,8 +700,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 }
             }
 
-            do_action('wpsstm_before_remote_response',$this);
-
             $remote_request_url = $preset->get_remote_request_url();
             if ( $this->feed_url != $remote_request_url){
                 $preset->remote_log($this->feed_url,'original URL' );
