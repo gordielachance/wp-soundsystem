@@ -675,23 +675,30 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
-        $live = true;//TOUFIXTOUREMOVE
-        
+
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
             
             /*
             redirect URL
+            Hook to filter bangs, etc.
             */
-            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url); //filter for bangs, etc.
+            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
             
             //build presets
             $preset = null;
             $presets = array();
+            
+            /*
+            Hook presets here.  The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
+            */
+            
             $presets = apply_filters('wpsstm_remote_presets',$presets);
 
-            //select pre-request preset
+            /*
+            Select a preset based on the tracklist URL
+            */
             foreach((array)$presets as $test_preset){
                 if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
                     $preset = $test_preset;
@@ -699,14 +706,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     break;
                 }
             }
+            
+            /*
+            feed URL debug
+            */
 
             $remote_request_url = $preset->get_remote_request_url();
             if ( $this->feed_url != $remote_request_url){
                 $preset->remote_log($this->feed_url,'original URL' );
             }
             $preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
-            
-            
+
             $tracks = $preset->get_all_remote_tracks();
             
         }else{

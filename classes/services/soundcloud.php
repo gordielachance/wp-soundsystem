@@ -336,7 +336,7 @@ class WPSSTM_Soundcloud_User_Api_Preset extends WPSSTM_Remote_Tracklist{
 
         switch($this->page_slug){
             case 'likes':
-                $subtitle = __('Favorite tracks','wpsstm');
+                $subtitle = __('Favorited tracks','wpsstm');
             break;
             default: //tracks
                 $subtitle = __('Tracks','wpsstm');
