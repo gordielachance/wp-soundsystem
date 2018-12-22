@@ -35,6 +35,7 @@ class WPSSTM_SoundsGood{
 class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
     
     var $station_slug;
+    var $client_id;
 
     function __construct(){
         
@@ -46,14 +47,13 @@ class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
             'track_title'       => array('path'=>'title'),
             'track_source_urls' => array('path'=>'sources permalink')
         );
-        
-        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,2 );//TOUFIX
-        
+
     }
 
     function init_url($url){
         $this->station_slug = $this->get_station_slug($url);
-        return $this->station_slug;
+        $this->client_id = WPSSTM_SoundsGood::get_client_id();
+        return ($this->station_slug && $this->client_id);
     }
 
     function get_remote_request_url(){
@@ -66,11 +66,9 @@ class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function remote_request_args($args,$remote){
-        if ( $this->can_handle_url($remote->remote_request_url) ){
-            $client_id = WPSSTM_SoundsGood::get_client_id();
-            $args['headers']['client'] = $client_id;
-        }
+    function get_remote_request_args(){
+        $args = parent::get_remote_request_args();
+        $args['headers']['client'] = $this->client_id;
         return $args;
     }
     

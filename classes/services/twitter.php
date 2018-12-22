@@ -20,8 +20,6 @@ class WPSSTM_Twitter_Timeline_Preset extends WPSSTM_Remote_Tracklist{
         
         $this->options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
 
-        add_filter( 'wpsstm_live_tracklist_request_args',array($this,'remote_request_args'),10,2 );
-        
     }
     
     function init_url($url){
@@ -39,11 +37,9 @@ class WPSSTM_Twitter_Timeline_Preset extends WPSSTM_Remote_Tracklist{
         return isset($matches[1]) ? $matches[1] : null;
     }
     
-    function remote_request_args($args,$remote){
-        if ( $this->can_handle_url($remote->remote_request_url) ){
-            //it seems that the request fails with our default user agent, remove it.
-            $args['headers']['User-Agent'] = '';
-        }
+    function get_remote_request_args(){
+        $args = parent::get_remote_request_args();
+        $args['headers']['User-Agent'] = ''; //it seems that the request fails with our default user agent, remove it.
 
         return $args;
     }

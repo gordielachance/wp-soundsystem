@@ -175,7 +175,7 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
     }
 
     function filter_remote_tracks($tracks,$remote){
-        
+        //TOUFIX
         if ( $this->can_handle_url($remote->remote_request_url) ){
             foreach((array)$tracks as $key=>$track){
                 $track->artist = $this->filter_string($track->artist);
