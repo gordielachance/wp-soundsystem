@@ -188,15 +188,15 @@ class WPSSTM_Core_Wizard{
             <?php
 
             //path
-            $path = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'path') );
+            $path = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'path') );
             $path = ( $path ? htmlentities($path) : null);
 
             //regex
-            $regex = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'regex') );
+            $regex = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'regex') );
             $regex = ( $regex ? htmlentities($regex) : null);
         
             //attr
-            $attr = $wpsstm_tracklist->get_scraper_options(array('selectors',$selector,'attr') );
+            $attr = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'attr') );
             $attr = ( $attr ? htmlentities($attr) : null);
             
 
@@ -238,7 +238,7 @@ class WPSSTM_Core_Wizard{
             }
             
             if ($selector!='tracks'){
-                $tracks_prefix = $wpsstm_tracklist->get_scraper_options(array('selectors','tracks','path'));
+                $tracks_prefix = $wpsstm_tracklist->preset->get_options(array('selectors','tracks','path'));
 
                 if ($tracks_prefix){
                     printf(

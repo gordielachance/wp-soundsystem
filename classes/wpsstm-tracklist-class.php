@@ -49,22 +49,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'is_expired'                => false,
         );
         
-        /*
-        scraper options
-        */
 
-        $this->scraper_options = array(
-            'selectors' => array(
-                'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-                'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
-                'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
-            ),
-            'tracks_order'              => 'desc'
-        );
         
 
 
@@ -109,7 +94,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //scraper options
         $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $this->scraper_options = array_replace_recursive($this->scraper_options,(array)$scraper_db);
+        
         
         //location
         $this->location = get_permalink($this->post_id);
@@ -124,13 +109,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return wpsstm_get_array_value($keys, $this->options);
         }else{
             return $this->options;
-        }
-    }
-    function get_scraper_options($keys=null){
-        if ($keys){
-            return wpsstm_get_array_value($keys, $this->scraper_options);
-        }else{
-            return $this->scraper_options;
         }
     }
 
@@ -689,7 +667,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
             
             //build presets
-            $preset = null;
             $presets = array();
             
             /*
@@ -703,8 +680,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             */
             foreach((array)$presets as $test_preset){
                 if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
-                    $preset = $test_preset;
-                    $this->tracklist_log($preset->get_preset_name(),'preset found');
+                    $this->preset = $test_preset;
+                    $this->tracklist_log($this->preset->get_preset_name(),'preset found');
                     break;
                 }
             }
@@ -713,13 +690,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             feed URL debug
             */
 
-            $remote_request_url = $preset->get_remote_request_url();
+            $remote_request_url = $this->preset->get_remote_request_url();
             if ( $this->feed_url != $remote_request_url){
-                $preset->remote_log($this->feed_url,'original URL' );
+                $this->preset->remote_log($this->feed_url,'original URL' );
             }
-            $preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
+            $this->preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
 
-            $tracks = $preset->get_remote_tracks();
+            $tracks = $this->preset->get_remote_tracks();
             
         }else{
             $tracks = $this->get_static_subtracks();
@@ -738,7 +715,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
         //update live tracklist
         if ($live){
-            $updated = $this->set_live_datas($preset);
+            $updated = $this->set_live_datas($this->preset);
             if ( is_wp_error($updated) ) return $updated;
         }
  

@@ -65,7 +65,7 @@ $body_classes = array(
                             <h4 class="wpsstm-wizard-row-label"><?php _e('Order','wpsstm');?></h4>
                             <div class="wpsstm-wizard-row-content">
                                 <?php
-                                $option = $wpsstm_tracklist->get_scraper_options('tracks_order');
+                                $option = $wpsstm_tracklist->preset->get_options('tracks_order');
 
                                 $desc_text = sprintf(
                                     '<input type="radio" name="%1$s[tracks_order]" value="desc" %2$s /><span class="wizard-field-desc">%3$s</span>',

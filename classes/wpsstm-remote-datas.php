@@ -4,7 +4,19 @@ use \ForceUTF8\Encoding;
 
 class WPSSTM_Remote_Tracklist{
     
-    var $options;
+    var $default_options = array(
+        'selectors' => array(
+            'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+            'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
+        ),
+        'tracks_order'              => 'desc'
+    );
+    var $options = array();
 
     //url request
     var $url = null;
@@ -17,8 +29,6 @@ class WPSSTM_Remote_Tracklist{
     );
     
     var $remote_request_args;
-    
-    var $scraper_options = array();
 
     //response
     var $request_pagination = array(
@@ -48,7 +58,7 @@ class WPSSTM_Remote_Tracklist{
     public function __construct($url = null,$options = null) {
         
         $this->url = trim($url);
-        $this->options = (array)$options; //last one has priority
+        $this->options = array_replace_recursive($this->default_options,(array)$options); //last one has priority
     }
     
     function init_url($url){
