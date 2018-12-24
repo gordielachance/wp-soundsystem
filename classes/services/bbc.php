@@ -37,9 +37,9 @@ class WPSSTM_BBC{
 class WPSSTM_BBC_Station_Preset extends WPSSTM_Remote_Tracklist{
     var $station_slug;
 
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'            => array('path'=>'.music-track'),
@@ -69,9 +69,9 @@ class WPSSTM_BBC_Playlist_Preset extends WPSSTM_Remote_Tracklist{
     
     var $playlist_id;
     
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),

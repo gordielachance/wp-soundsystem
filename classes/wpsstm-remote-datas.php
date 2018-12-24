@@ -4,6 +4,13 @@ use \ForceUTF8\Encoding;
 
 class WPSSTM_Remote_Tracklist{
     
+    //url request
+    var $url = null; //url requested
+    var $remote_request_url = null; //url filtered by preset
+    
+    var $options = array();
+    var $remote_request_args;
+    
     var $default_options = array(
         'selectors' => array(
             'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
@@ -16,36 +23,18 @@ class WPSSTM_Remote_Tracklist{
         ),
         'tracks_order'              => 'desc'
     );
-    var $options = array();
 
-    //url request
-    var $url = null;
-    var $remote_request_url = null;
-    
     var $default_request_args = array(
         'headers'   => array(
             'User-Agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
         )
     );
-    
-    var $remote_request_args;
 
-    //response
     var $request_pagination = array(
         'total_pages'       => 1,
         'tracks_per_page'   => null, //When possible (eg. APIs), set the limit of tracks each request can get
         'current_page'      => 0
     );
-    public $response = null;
-    public $response_type = null;
-    public $response_body = null;
-    public $body_node = null;
-    public $track_nodes = array();
-    public $tracks = array();
-
-    public $datas = null;
-
-    public $notices = array();
 
     //request
     static $querypath_options = array(
@@ -54,15 +43,44 @@ class WPSSTM_Remote_Tracklist{
         'convert_from_encoding'     => 'UTF-8', //our input is always UTF8 - look for fixUTF8() in code
         //'convert_to_encoding'       => 'UTF-8' //match WP database (or transients won't save)
     );
+    
+    public $response = null;
+    public $response_type = null;
+    public $response_body = null;
+    public $body_node = null;
+    public $track_nodes = array();
+    public $tracks = array();
+
+    public $notices = array();
 
     public function __construct($url = null,$options = null) {
-        
         $this->url = trim($url);
         $this->options = array_replace_recursive($this->default_options,(array)$options); //last one has priority
     }
     
+    /*
+    Test if this URL can be handled by the preset
+    */
     function init_url($url){
         return (filter_var($url, FILTER_VALIDATE_URL) !== FALSE);
+    }
+    
+    /*
+    Filter the preset URL if needed (redirect to api, etc)
+    You could eventually rely on $this->request_pagination for pagination purposes.
+    */
+    
+    function get_remote_request_url(){
+        return $this->url;
+    }
+    
+    /*
+    Filter the preset URL args if needed
+    You could eventually rely on $this->request_pagination for pagination purposes.
+    */
+
+    function get_remote_request_args(){
+        return $this->default_request_args;
     }
     
     function get_remote_tracks(){
@@ -75,8 +93,6 @@ class WPSSTM_Remote_Tracklist{
 
             $this->request_pagination['current_page']++;
         }
-        
-
 
         //sort
         if ($this->get_options('tracks_order') == 'asc'){
@@ -92,22 +108,28 @@ class WPSSTM_Remote_Tracklist{
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
         
         /*
-        redirect URL
+        init request data
         */
         $this->remote_request_url = $this->get_remote_request_url();
-
-        /*
-        URL args
-        */
-
         $this->remote_request_args = $this->get_remote_request_args();
+        
+        /*
+        some debug on first page
+        */
+        
+        $this->remote_log($this->request_pagination['current_page'],'***GET REMOTE PAGE***' );
+
+        if ( $this->url != $this->remote_request_url){
+            $this->remote_log($this->url,'original URL' );
+        }
+        $this->remote_log($this->remote_request_url,'redirect URL' );
 
         if ($this->remote_request_args != $this->default_request_args){
-            $this->remote_log($this->remote_request_args,'***  URL ARGS***' );
+            $this->remote_log($this->remote_request_args,'URL args' );
         }
 
         /* POPULATE PAGE */
-        $response = $this->populate_remote_response();
+        $response = $this->populate_remote_response($this->remote_request_url,$this->remote_request_args);
         $response_code = wp_remote_retrieve_response_code( $response );
 
         if ( is_wp_error($response) ) return $response;
@@ -150,22 +172,10 @@ class WPSSTM_Remote_Tracklist{
         $this->remote_log(count($tracks),'found tracks' );
         return $tracks;
     }
-    
-    function get_remote_request_url(){
-        return $this->url;
-    }
 
-    function get_remote_request_args(){
-        return $this->default_request_args;
-    }
+    private function populate_remote_response($url,$args){
 
-    private function populate_remote_response(){
-
-        if( $this->response !== null ) return $this->response; //already populated
-
-        $response = null;
-
-        $response = wp_remote_get( $this->remote_request_url, $this->remote_request_args );
+        $response = wp_remote_get($url,$args);
 
         //errors
         if ( !is_wp_error($response) ){
@@ -194,8 +204,6 @@ class WPSSTM_Remote_Tracklist{
     }
 
     private function populate_response_type(){
-        
-        if ( $this->response_type !== null ) return $this->response_type; //already populated
 
         $type = null;
         $response = $this->response;
@@ -242,9 +250,7 @@ class WPSSTM_Remote_Tracklist{
     }
     
     protected function populate_response_body(){
-        
-        if ( $this->response_body !== null ) return $this->response_body; //already populated
-        
+
         $content = null;
 
         //response
@@ -266,8 +272,6 @@ class WPSSTM_Remote_Tracklist{
     }
     
     protected function populate_body_node(){
-        
-        if ( $this->body_node !== null ) return $this->body_node; //already populated
 
         $result = null;
 
@@ -390,8 +394,6 @@ class WPSSTM_Remote_Tracklist{
     }
 
     protected function get_track_nodes($body_node){
-        
-        
 
         $selector = $this->get_selectors( array('tracks','path') );
         if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
@@ -601,7 +603,6 @@ class WPSSTM_Remote_Tracklist{
         $title = '[remote] ' . $title;
         
         wpsstm()->debug_log($message,$title);
-        
 
     }
     

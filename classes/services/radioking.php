@@ -33,9 +33,9 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     var $station_id;
     var $station_data;
 
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'            => array('path'=>'root > data'),

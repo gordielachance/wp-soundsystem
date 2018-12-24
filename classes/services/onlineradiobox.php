@@ -31,9 +31,9 @@ class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
     
     var $station_slug;
 
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'            => array('path'=>'.tablelist-schedule tr'),

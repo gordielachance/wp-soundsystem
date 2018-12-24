@@ -29,9 +29,9 @@ https://www.indieshuffle.com/songs/hip-hop/
 
 class WPSSTM_IndieShuffle_Preset extends WPSSTM_Remote_Tracklist{
 
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'           => array('path'=>'#mainContainer .commontrack'),

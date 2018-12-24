@@ -33,9 +33,9 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
     
     var $subreddit_slug;
 
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             //in HTML
@@ -174,18 +174,19 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
         return $str;
     }
 
+    /*
+    TOUFIX
     function filter_remote_tracks($tracks,$remote){
-        //TOUFIX
-        if ( $this->can_handle_url($remote->remote_request_url) ){
-            foreach((array)$tracks as $key=>$track){
-                $track->artist = $this->filter_string($track->artist);
-                $track->title = $this->filter_string($track->title);
-                $tracks[$key] = $track;
-            }
+
+        foreach((array)$tracks as $key=>$track){
+            $track->artist = $this->filter_string($track->artist);
+            $track->title = $this->filter_string($track->title);
+            $tracks[$key] = $track;
         }
-        
+
         return $tracks;
     }
+    */
 
 }
 

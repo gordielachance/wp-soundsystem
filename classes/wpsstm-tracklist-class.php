@@ -7,7 +7,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $tracklist_type = 'static';
     
     var $options = array();
-    var $scraper_options = array();
+    var $preset_options = array(); //stored preset options
     
     var $updated_time = null;
     private $is_expired = null;
@@ -48,10 +48,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'remote_delay_min'          => 5,
             'is_expired'                => false,
         );
-        
-
-        
-
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -93,7 +89,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //$this->options = array_replace_recursive($this->options,(array)$options_db);
         
         //scraper options
-        $scraper_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        $this->preset_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
         
         
         //location
@@ -653,8 +649,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
-        
-        $live = true;
 
         $refresh_delay = $this->get_human_next_refresh_time();
         
@@ -665,14 +659,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             Hook to filter bangs, etc.
             */
             $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
-            
-            //build presets
-            $presets = array();
-            
+
             /*
-            Hook presets here.  The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
+            Build presets.
+            The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
             */
-            
+            $presets = array();
             $presets = apply_filters('wpsstm_remote_presets',$presets);
 
             /*
@@ -681,23 +673,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             foreach((array)$presets as $test_preset){
                 if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
                     $this->preset = $test_preset;
-                    $this->tracklist_log($this->preset->get_preset_name(),'preset found');
                     break;
                 }
             }
             
             /*
-            feed URL debug
+            Now that we have a preset, init it.
             */
-
-            $remote_request_url = $this->preset->get_remote_request_url();
-            if ( $this->feed_url != $remote_request_url){
-                $this->preset->remote_log($this->feed_url,'original URL' );
+            if ($this->preset){
+                $this->preset->__construct($feed_url,$this->preset_options);
+                $this->tracklist_log($this->preset->get_preset_name(),'preset found');
+                $tracks = $this->preset->get_remote_tracks();
+            }else{
+                return new WP_Error( 'wpsstm_missing_remote_preset', __('No remote preset selected.','wpsstm') );
             }
-            $this->preset->remote_log($remote_request_url,'*** REDIRECT URL ***' );
 
-            $tracks = $this->preset->get_remote_tracks();
-            
         }else{
             $tracks = $this->get_static_subtracks();
         }

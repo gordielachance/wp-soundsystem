@@ -1049,9 +1049,9 @@ class WPSSTM_LastFM_User{
 
 abstract class WPSSTM_LastFM_URL_Preset extends WPSSTM_Remote_Tracklist{
     
-    function __construct(){
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
@@ -1145,9 +1145,9 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_Remote_Tracklist{
   
     var $station_type;
     
-    function __construct() {
+    function __construct($url = null,$options = null) {
         
-        parent::__construct();
+        parent::__construct($url,$options);
         
         $this->options['selectors'] = array(
             'tracks'            => array('path'=>'>playlist'),
