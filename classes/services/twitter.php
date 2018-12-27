@@ -16,9 +16,9 @@ class WPSSTM_Twitter_Timeline_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
+        $this->default_options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
         
-        $this->options['selectors']['tracks']['path'] = '#main_content .timeline .tweet .tweet-text div';
+        parent::__construct($url,$options);
 
     }
     

@@ -1051,15 +1051,15 @@ abstract class WPSSTM_LastFM_URL_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'           => array('path'=>'table.chartlist tbody tr'),
             'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
             'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
             'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
         );
+        
+        parent::__construct($url,$options);
 
     }
     
@@ -1078,10 +1078,11 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
         
         //update track artist selector
         if($this->album_slug){
-            $this->options['selectors']['track_artist'] = array('path'=>'/ [itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
+            $this->default_options['selectors']['track_artist'] = array('path'=>'/ [itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
         }else{
-            $this->options['selectors']['track_artist'] = array('path'=>'/ [data-page-resource-type="artist"]','attr'=>'data-page-resource-name');
+            $this->default_options['selectors']['track_artist'] = array('path'=>'/ [data-page-resource-type="artist"]','attr'=>'data-page-resource-name');
         }
+        $this->options['selectors']['track_artist'] = $this->default_options['selectors']['track_artist'];
 
         return $this->artist_slug;
     }
@@ -1149,7 +1150,7 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_Remote_Tracklist{
         
         parent::__construct($url,$options);
         
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'>playlist'),
             'track_artist'      => array('path'=>'artists > name'),
             'track_title'       => array('path'=>'playlist > name'),

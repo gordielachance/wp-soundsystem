@@ -16,16 +16,14 @@ class WPSSTM_RTBF_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'li.radio-thread__entry'),
             'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
             'track_title'       => array('path'=>'span[itemprop="name"]'),
             'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
         );
-            
-        add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
+        
+        parent::__construct($url,$options);
     }
     
     function init_url($url){

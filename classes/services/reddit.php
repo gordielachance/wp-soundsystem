@@ -35,9 +35,7 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             //in HTML
             'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
             //in JSON
@@ -47,6 +45,8 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
             //'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
             'track_source_urls' => array('path'=>'url'),
         );
+        
+        parent::__construct($url,$options);
         
         //TOUFIXadd_filter('wpsstm_remote_tracks', array($this,'filter_remote_tracks'),10,2);
 

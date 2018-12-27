@@ -38,13 +38,13 @@ class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'>tracks'),
             'track_artist'      => array('path'=>'performer'),
             'track_title'       => array('path'=>'name')
         );
+        
+        parent::__construct($url,$options);
 
         //add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
         //add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );

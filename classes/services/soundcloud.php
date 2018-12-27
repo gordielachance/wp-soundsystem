@@ -246,14 +246,14 @@ class WPSSTM_Soundcloud_User_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'element'),
             'track_artist'      => array('path'=>'user username'),
             'track_title'       => array('path'=>'title'),
             'track_image'       => array('path'=>'artwork_url')
         );
+        
+        parent::__construct($url,$options);
 
     }
 

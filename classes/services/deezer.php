@@ -33,14 +33,14 @@ class WPSSTM_Deezer_Preset extends WPSSTM_Remote_Tracklist{
     var $playlist_id;
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'#tab_tracks_content [itemprop="track"]'),
             'track_artist'      => array('path'=>'[itemprop="byArtist"]'),
             'track_title'       => array('path'=>'span[itemprop="name"]'),
             'track_album'       => array('path'=>'[itemprop="inAlbum"]')
         );
+        
+        parent::__construct($url,$options);
         
     }
     

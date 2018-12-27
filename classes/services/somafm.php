@@ -34,14 +34,14 @@ class WPSSTM_SomaFM_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'            => array('path'=>'song'),
             'track_artist'      => array('path'=>'artist'),
             'track_title'       => array('path'=>'title'),
             'track_album'       => array('path'=>'album'),
         );
+        
+        parent::__construct($url,$options);
 
     }
     

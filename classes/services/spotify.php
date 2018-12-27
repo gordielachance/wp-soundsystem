@@ -889,14 +889,14 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        parent::__construct($url,$options);
-        
-        $this->options['selectors'] = array(
+        $this->default_options['selectors'] = array(
             'tracks'           => array('path'=>'root > items'),
             'track_artist'     => array('path'=>'track > artists > name'),
             'track_album'      => array('path'=>'track > album > name'),
             'track_title'      => array('path'=>'track > name'),
         );
+        
+        parent::__construct($url,$options);
         
         $this->request_pagination['tracks_per_page'] = 100; //spotify API
         
