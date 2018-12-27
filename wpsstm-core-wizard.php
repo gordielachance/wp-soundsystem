@@ -183,22 +183,24 @@ class WPSSTM_Core_Wizard{
     
     static function css_selector_block($selector){
         global $wpsstm_tracklist;
+        
+        //path
+        $path = $wpsstm_tracklist->preset->get_selectors(array($selector,'path') );
+        $path_default = wpsstm_get_array_value(array('selectors',$selector,'path'),$wpsstm_tracklist->preset->default_options);
+        $disabled = ($path_default) ? disabled( $path, $path_default, false ) : null;
+        $path = ( $path ? htmlentities($path) : null);
+
+        //regex
+        $regex = $wpsstm_tracklist->preset->get_selectors(array($selector,'regex') );
+        $regex = ( $regex ? htmlentities($regex) : null);
+
+        //attr
+        $attr = $wpsstm_tracklist->preset->get_selectors(array($selector,'attr') );
+        $attr = ( $attr ? htmlentities($attr) : null);
+
         ?>
         <div class="wpsstm-wizard-selector">
             <?php
-
-            //path
-            $path = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'path') );
-            $path = ( $path ? htmlentities($path) : null);
-
-            //regex
-            $regex = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'regex') );
-            $regex = ( $regex ? htmlentities($regex) : null);
-        
-            //attr
-            $attr = $wpsstm_tracklist->preset->get_options(array('selectors',$selector,'attr') );
-            $attr = ( $attr ? htmlentities($attr) : null);
-            
 
             //build info
         
@@ -248,12 +250,17 @@ class WPSSTM_Core_Wizard{
                 }
 
             }
+        
+            // if this is a preset default, set as readonly
+        
+            
             
             printf(
-                '<input type="text" class="wpsstm-wizard-selector-jquery" name="%1$s[selectors][%2$s][path]" value="%3$s" />',
+                '<input type="text" class="wpsstm-wizard-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
                 'wpsstm_wizard',
                 $selector,
-                $path
+                $path,
+                $disabled
             );
 
             //regex
@@ -274,10 +281,11 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s"/></span>',
+                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
                                         'wpsstm_wizard',
                                         $selector,
-                                        $attr
+                                        $attr,
+                                        $disabled
                                     );
                                     ?>
                                 </div>
@@ -290,10 +298,11 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-regex"><input class="regex" name="%1$s[selectors][%2$s][regex]" type="text" value="%3$s"/></span>',
+                                        '<span class="wpsstm-wizard-selector-regex"><input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s /></span>',
                                         'wpsstm_wizard',
                                         $selector,
-                                        $regex
+                                        $regex,
+                                        $disabled
                                     );
                                     ?>
                                 </div>

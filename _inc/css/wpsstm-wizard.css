@@ -103,55 +103,59 @@
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-section-label {
   margin: 1em;
 }
-/* line 104, ../scss/wpsstm-wizard.scss */
+/* line 105, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector input[type="text"] {
   width: 100%;
 }
-/* line 107, ../scss/wpsstm-wizard.scss */
+/* line 108, ../scss/wpsstm-wizard.scss */
+#wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector input:disabled {
+  color: #CCC;
+}
+/* line 113, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced {
   display: none;
 }
-/* line 109, ../scss/wpsstm-wizard.scss */
+/* line 115, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced.active {
   display: block;
 }
-/* line 112, ../scss/wpsstm-wizard.scss */
+/* line 118, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc {
   padding: 1em;
   font-style: italic;
 }
-/* line 115, ../scss/wpsstm-wizard.scss */
+/* line 121, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc code {
   font-style: normal;
 }
-/* line 120, ../scss/wpsstm-wizard.scss */
+/* line 126, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table td {
   color: #999;
   padding: 5px;
   font-family: Consolas, Monaco, monospace;
 }
-/* line 126, ../scss/wpsstm-wizard.scss */
+/* line 132, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:before {
   text-align: center;
   width: 20px;
   content: '~';
 }
-/* line 131, ../scss/wpsstm-wizard.scss */
+/* line 137, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:after {
   text-align: center;
   width: 20px;
   content: '~m';
 }
-/* line 136, ../scss/wpsstm-wizard.scss */
+/* line 142, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex input {
   width: 90%;
   color: #999;
 }
-/* line 146, ../scss/wpsstm-wizard.scss */
+/* line 152, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .wpsstm-wizard-section#wpsstm-wizard-step-tracks-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 100%;
 }
-/* line 153, ../scss/wpsstm-wizard.scss */
+/* line 159, ../scss/wpsstm-wizard.scss */
 #wizard-wrapper .ui-tabs-panel > h3:first-of-type {
   display: none;
 }

@@ -101,9 +101,15 @@
         }
 
         .wpsstm-wizard-selector{
-            input[type="text"]{
-                width:100%;
+            input{
+                &[type="text"]{
+                    width:100%;
+                }
+                &:disabled{
+                    color:#CCC;
+                }
             }
+
             .wpsstm-wizard-selector-advanced{
                 display: none;
                 &.active{
