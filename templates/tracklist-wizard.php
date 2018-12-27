@@ -66,18 +66,22 @@ $body_classes = array(
                             <div class="wpsstm-wizard-row-content">
                                 <?php
                                 $option = $wpsstm_tracklist->preset->get_options('tracks_order');
+                                $default_option = wpsstm_get_array_value('tracks_order',$wpsstm_tracklist->preset->default_options);
+                                $disabled = ($default_option) ? disabled( $option, $default_option, false ) : null;
 
                                 $desc_text = sprintf(
-                                    '<input type="radio" name="%1$s[tracks_order]" value="desc" %2$s /><span class="wizard-field-desc">%3$s</span>',
+                                    '<input type="radio" name="%1s[tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
                                     'wpsstm_wizard',
                                     checked($option, 'desc', false),
+                                    $disabled,
                                     __('Descending','spiff')
                                 );
 
                                 $asc_text = sprintf(
-                                    '<input type="radio" name="%1$s[tracks_order]" value="asc" %2$s /><span class="wizard-field-desc">%3$s</span>',
+                                    '<input type="radio" name="%s[tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
                                     'wpsstm_wizard',
                                     checked($option, 'asc', false),
+                                    $disabled,
                                     __('Ascending','spiff')
                                 );
 
@@ -137,6 +141,8 @@ $body_classes = array(
                                 <?php
 
                                 $option = $wpsstm_tracklist->get_options('remote_delay_min');
+                                $default_option = wpsstm_get_array_value('remote_delay_min',$wpsstm_tracklist->preset->default_options);
+                                $disabled = ($default_option) ? disabled( true, true, false ) : null;
 
                                 $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
                                 $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
@@ -144,9 +150,10 @@ $body_classes = array(
                                 $desc = implode("<br/>",$desc);
 
                                 printf(
-                                    '<input type="number" name="%s[remote_delay_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
+                                    '<input type="number" name="%s[remote_delay_min]" size="4" min="0" value="%s" %s /> %s<br/><small>%s</small>',
                                     'wpsstm_wizard',
                                     $option,
+                                    $disabled,
                                     __('minutes','spiff'),
                                     $desc
                                 );

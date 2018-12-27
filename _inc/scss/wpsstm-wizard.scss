@@ -99,17 +99,16 @@
         .wpsstm-wizard-section-label{
             margin:1em;
         }
+        
+        input:disabled{
+            color:#CCC;
+        }
 
         .wpsstm-wizard-selector{
-            input{
-                &[type="text"]{
+            input[type="text"]{
                     width:100%;
-                }
-                &:disabled{
-                    color:#CCC;
-                }
             }
-
+            
             .wpsstm-wizard-selector-advanced{
                 display: none;
                 &.active{
