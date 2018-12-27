@@ -26,6 +26,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $scraper_meta_name = '_wpsstm_scraper_options';
     public $feed_url = null;
+    
+    var $preset;
 
     function __construct($post_id = null ){
         
@@ -641,6 +643,42 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         return array_filter(array_unique($classes));
     }
+    
+    function populate_preset(){
+        /*
+        redirect URL
+        Hook to filter bangs, etc.
+        */
+        $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
+
+        /*
+        Build presets.
+        The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
+        */
+        $presets = array();
+        $presets = apply_filters('wpsstm_remote_presets',$presets);
+
+        /*
+        Select a preset based on the tracklist URL
+        */
+        foreach((array)$presets as $test_preset){
+            if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
+                $this->preset = $test_preset;
+                break;
+            }
+        }
+        
+        //default presset
+        if (!$this->preset){
+            $this->preset = new WPSSTM_Remote_Tracklist();
+        }
+
+        /*
+        Now that we have a preset, init it.
+        */
+        $this->preset->__construct($feed_url,$this->preset_options);
+        $this->tracklist_log($this->preset->get_preset_name(),'preset found');
+    }
 
 
     function populate_subtracks(){
@@ -653,40 +691,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
-            
-            /*
-            redirect URL
-            Hook to filter bangs, etc.
-            */
-            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
-
-            /*
-            Build presets.
-            The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
-            */
-            $presets = array();
-            $presets = apply_filters('wpsstm_remote_presets',$presets);
-
-            /*
-            Select a preset based on the tracklist URL
-            */
-            foreach((array)$presets as $test_preset){
-                if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
-                    $this->preset = $test_preset;
-                    break;
-                }
-            }
-            
-            /*
-            Now that we have a preset, init it.
-            */
-            if ($this->preset){
-                $this->preset->__construct($feed_url,$this->preset_options);
-                $this->tracklist_log($this->preset->get_preset_name(),'preset found');
-                $tracks = $this->preset->get_remote_tracks();
-            }else{
-                return new WP_Error( 'wpsstm_missing_remote_preset', __('No remote preset selected.','wpsstm') );
-            }
+            $this->populate_preset();
+            $tracks = $this->preset->get_remote_tracks();
 
         }else{
             $tracks = $this->get_static_subtracks();

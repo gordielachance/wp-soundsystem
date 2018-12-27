@@ -29,7 +29,7 @@ $body_classes = array(
         while (have_posts()) {
             
             the_post();
-
+            $wpsstm_tracklist->populate_preset();
 
             ?>
 
