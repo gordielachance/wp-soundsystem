@@ -689,7 +689,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function metabox_track_playlists_content( $post ){
-        wpsstm_locate_template( 'append-track.php',true );
+        wpsstm_locate_template( 'tracklists-manager.php',true );
     }
 
     function mb_populate_trackid( $post_id ) {
