@@ -11,7 +11,7 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
 <?php if ( $recent_wizard_q->have_posts() ) { 
     ?>
     <section id="wpsstm-frontend-wizard-recent">
-        <h2><?php _e('Recently');?></h2>
+        <h3><?php _e('Recently');?></h3>
         <ul>
             <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post();
                 $tracklist = new WPSSTM_Post_Tracklist(get_the_ID());

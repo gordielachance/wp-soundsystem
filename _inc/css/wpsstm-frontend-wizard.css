@@ -8,16 +8,16 @@
 }
 
 /* line 8, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list {
+ul.comma-list, #wpsstm-wizard-services ul {
   list-style: none;
   display: inline;
 }
 /* line 11, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li {
+ul.comma-list > li, #wpsstm-wizard-services ul > li {
   display: inline;
 }
 /* line 13, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li:not(:last-child):after, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list > li:not(:last-child):after, #wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list > li:not(:last-child):after {
+ul.comma-list > li:not(:last-child):after, #wpsstm-wizard-services ul > li:not(:last-child):after {
   content: ", ";
 }
 
@@ -52,58 +52,12 @@ ul.comma-list > li:not(:last-child):after, #wpsstm-wizard-widgets .wpsstm-wizard
   margin-right: .25em;
 }
 
-/* line 49, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets {
-  list-style: none;
-  font-size: .75em;
-  position: relative;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  text-align: center;
-}
-/* line 56, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget {
-  width: calc(33% - 1em);
-  margin: .5em;
-  box-sizing: border-box;
-  padding: 1em;
-  -webkit-flex-grow: 1;
-  flex-grow: 1;
-  background-color: #f7f7f7;
-  border: 1px solid #eaeaea;
-}
-/* line 64, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services {
-  width: calc(100% - 1em);
-}
-/* line 68, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list {
+/* line 50, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-services {
   font-size: .8em;
+}
+/* line 52, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-services ul {
   margin: 0;
   padding: 0;
-}
-/* line 72, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget#wpsstm-wizard-widget-services ul#wpsstm-wizard-services-list ul.wpsstm-wizard-child-service-list:before {
-  content: ":\00a0";
-}
-/* line 79, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget h3 {
-  margin-top: 0;
-}
-/* line 82, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget ul {
-  list-style: none;
-}
-/* line 85, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget input[type=text] {
-  font-size: 1em;
-  text-align: center;
-  background-color: white;
-}
-/* line 92, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-widgets .wpsstm-wizard-widget:not(.wpsstm-wizard-widget-success) a {
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
-  opacity: 0.5;
 }

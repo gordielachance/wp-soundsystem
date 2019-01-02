@@ -46,52 +46,12 @@ ul.comma-list{
     }
 }
 
-#wpsstm-wizard-widgets{
-    list-style: none;
-    font-size:.75em;
-    position: relative;
-    @include display-flex();
-    @include flex-wrap(wrap);
-    text-align:center;
-    .wpsstm-wizard-widget{
-        width:calc(33% - 1em);
-        margin:.5em;
-        box-sizing: border-box;
-        padding:1em;  
-        @include flex-grow(1);
-        background-color:#f7f7f7;
-        border: 1px solid #eaeaea;
-        &#wpsstm-wizard-widget-services{
-            width:calc(100% - 1em);
-            ul#wpsstm-wizard-services-list{
-                @extend .comma-list;
-                ul.wpsstm-wizard-child-service-list{
-                    font-size:.8em;
-                    margin:0;
-                    padding:0;
-                    &:before{
-                        content:":\00a0";
-                    }
-                    @extend .comma-list;
-                }
-            }
-        }
-        h3{
-            margin-top:0;
-        }
-        ul{
-            list-style: none;
-        }
-        input[type=text]{
-            font-size:1em;
-            text-align:center;
-            background-color:white;
-        }
 
-        &:not(.wpsstm-wizard-widget-success){
-            a{
-                @include opacity(.5);
-            }
-        }
+#wpsstm-wizard-services{
+    font-size:.8em;
+    ul{
+        margin:0;
+        padding:0;
+        @extend .comma-list;
     }
 }

@@ -495,44 +495,5 @@ class WPSSTM_Core_Wizard{
         echo $output;
 
     }
-    
-    static function get_available_widgets(){
-        $class_names = array();
-        $widgets = array();
-        $widgets_output = array();
-        
-        $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/wizard-widgets' );
-        require_once($presets_path . 'default.php'); //default class
-        
-        //get all files in /presets directory
-        $preset_files = glob( $presets_path . '*.php' ); 
-
-        foreach ($preset_files as $file) {
-            require_once($file);
-        }
-        $class_names = apply_filters('wpsstm_get_wizard_widgets',$class_names);
-
-        //check and run
-        foreach((array)$class_names as $class_name){
-            if ( !class_exists($class_name) ) continue;
-            $widgets[] = new $class_name();
-            
-        }
-        
-        foreach((array)$widgets as $widget){
-            $widget_title = ($widget->name) ? sprintf('<h3>%s</h3>',$widget->name) : null;
-            $widget_desc = ($widget->desc) ? sprintf('<p>%s</p>',$widget->desc) : null;
-            
-            if ( $content = $widget->get_output() ){
-                $widget_content = ($content = $widget->get_output()) ? sprintf('<div class="wpsstm-wizard-widget-content">%s</div>',$content) : null;
-
-                $widgets_output[] = sprintf('<li class="wpsstm-wizard-widget" id="wpsstm-wizard-widget-%s">%s%s%s</li>',$widget->slug,$widget_title,$widget_desc,$widget_content);
-            }
-
-        }
-
-        if ($widgets_output) return sprintf('<ul id="wpsstm-wizard-widgets">%s</ul>',implode("\n",$widgets_output));
-
-    }
 
 }

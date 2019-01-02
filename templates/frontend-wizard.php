@@ -35,11 +35,6 @@ if ( is_wp_error($can_wizard) ){ //TOUFIX TOUCHECK
 
 
                 printf('<p class="wpsstm-icon-input" id="wpsstm-wizard-search">%s%s</p>',$text_input,$submit_input);
-
-                //wizard widgets
-                if ( $widgets = WPSSTM_Core_Wizard::get_available_widgets() ){
-                    echo $widgets;
-                }
                 ?>
             </div>
 
@@ -64,6 +59,8 @@ if ( is_wp_error($can_wizard) ){ //TOUFIX TOUCHECK
 }
 ?>
 <?php
+wpsstm_locate_template( 'wizard-services.php', true);
+
 //recent
 if ( wpsstm()->get_options('recent_wizard_entries') ) {
     wpsstm_locate_template( 'wizard-recent-entries.php', true, false );
