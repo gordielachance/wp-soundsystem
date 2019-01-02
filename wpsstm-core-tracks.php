@@ -1044,11 +1044,10 @@ class WPSSTM_Core_Tracks{
         //post type check
         $post_type = get_post_type($post_id);
         if ( $post_type !== wpsstm()->post_type_track ) return $title;
-
-        $title = get_post_meta( $post_id, self::$title_metakey, true );
-        $artist = get_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, true );
         
-        return sprintf('"%s" - %s',$title,$artist);
+        $track = new WPSSTM_Track($post_id);
+
+        return $track->get_formatted_title();
     }
     
 }

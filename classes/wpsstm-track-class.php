@@ -395,6 +395,7 @@ class WPSSTM_Track{
         $meta_input = array_filter($meta_input);
         
         $required_args = array(
+            'post_title'    => $this->get_formatted_title(),
             'post_type'     => wpsstm()->post_type_track,
             'meta_input'    => $meta_input,
         );
@@ -1205,6 +1206,10 @@ class WPSSTM_Track{
             $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[tracklist_id]" value="%s" />',esc_attr($this->tracklist->post_id));
         }
         return implode("\n",$fields);
+    }
+    
+    function get_formatted_title(){
+        return sprintf('"%s" - %s',$this->title,$this->artist);
     }
     
 }
