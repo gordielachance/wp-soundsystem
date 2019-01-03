@@ -13,7 +13,7 @@ class WPSSTM_Remote_Tracklist{
     
     var $default_options = array(
         'selectors' => array(
-            'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+            'tracklist_title'   => array('path'=>'head title','regex'=>null,'attr'=>null),
             'tracks'            => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
@@ -111,7 +111,17 @@ class WPSSTM_Remote_Tracklist{
         init request data
         */
         $this->remote_request_url = $this->get_remote_request_url();
+        if ( is_wp_error($this->remote_request_url) ){
+            $this->remote_log( $this->remote_request_url->get_error_message(),'Request URL error' );
+            return $this->remote_request_url;
+        }
+        
         $this->remote_request_args = $this->get_remote_request_args();
+        if ( is_wp_error($this->remote_request_args) ){
+            $this->remote_log( $this->remote_request_url->get_error_message(),'Request ARGS error' );
+            return $this->remote_request_args;
+        }
+            
         
         /*
         some debug on first page
@@ -131,7 +141,6 @@ class WPSSTM_Remote_Tracklist{
         /* POPULATE PAGE */
         $response = $this->populate_remote_response($this->remote_request_url,$this->remote_request_args);
         $response_code = wp_remote_retrieve_response_code( $response );
-
         if ( is_wp_error($response) ) return $response;
         
         $response_type = $this->populate_response_type();
@@ -378,6 +387,7 @@ class WPSSTM_Remote_Tracklist{
     
     public function get_remote_title(){
         $title = null;
+        
         if ( $selector_title = $this->get_selectors( array('tracklist_title') ) ){
             $title = $this->parse_node($this->body_node,$selector_title);
         }
@@ -554,7 +564,7 @@ class WPSSTM_Remote_Tracklist{
 
                 $pattern = sprintf('~%s~m',$pattern);
                 preg_match($pattern, $string, $matches);
-                
+
                 $matches = array_filter($matches);
                 $matches = array_values($matches);
 

@@ -692,7 +692,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if ($live){
             $this->populate_preset();
-            $tracks = $this->preset->get_remote_tracks();
+            $tracks =       $this->preset->get_remote_tracks();
+            $this->title =  $this->preset->get_remote_title();
+            $this->author = $this->preset->get_remote_author();
 
         }else{
             $tracks = $this->get_static_subtracks();
@@ -747,8 +749,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $datas->get_remote_title(),
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $datas->get_remote_author(),
+            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->title,
+            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->author,
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
         );
 

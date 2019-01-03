@@ -158,7 +158,7 @@ class WPSSTM_Spotify{
         return $links;
     }
     
-    function get_access_token(){
+    private function get_access_token(){
         
         $can_api = $this->can_spotify_api();
         if ( is_wp_error($can_api) ) return $can_api;
@@ -182,18 +182,23 @@ class WPSSTM_Spotify{
         $response = wp_remote_post( 'https://accounts.spotify.com/api/token', $args );
 
         if ( is_wp_error($response) ){
-            wpsstm()->debug_log($response->get_error_message(),'Error getting Spotify Token' ); 
-            return $response;
+            return new WP_Error('spotify_missing_token',$response->get_error_message());
         }
+            
         $body = wp_remote_retrieve_body($response);
         $body = json_decode($body);
-        $token = $body->access_token;
 
-        return $token;
+        if ( property_exists($body, 'access_token') ){
+            return $body->access_token;
+        }elseif ( property_exists($body, 'error') ){
+            return new WP_Error('spotify_missing_token',$body->error);
+        }else{
+            return new WP_Error('spotify_missing_token','Error getting Spotify Token');
+        }
 
     }
     
-    function get_spotify_request_args(){
+    public function get_spotify_request_args(){
         $token = $this->get_access_token();
         if ( is_wp_error( $token ) ) return $token;
         
@@ -617,14 +622,18 @@ class WPSSTM_Spotify{
         $transient_url_name = self::$spotify_data_by_url_transient_prefix.md5($transient_url_name); //WARNING should be 172 characters or less or less !  md5 returns 32 chars.
         
         // check if we should try to load cached data
+
         if ( $days_cache = wpsstm()->get_options('cache_api_results') ){
             $api_results = $cached_results = get_transient( $transient_url_name );
         }
+
         
         if ( !$api_results ){
             
-            $spotify_request_args = $this->get_spotify_request_args();
-            $request = wp_remote_get($url,$spotify_request_args);
+            $spotify_args = $this->get_spotify_request_args();
+            if (is_wp_error($spotify_args) ) return $spotify_args;
+            
+            $request = wp_remote_get($url,$spotify_args);
             if (is_wp_error($request)) return $request;
 
             $response = wp_remote_retrieve_body( $request );
@@ -945,13 +954,10 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
         global $wpsstm_spotify;
         
         $args = parent::get_remote_request_args();
-
         $spotify_args = $wpsstm_spotify->get_spotify_request_args();
-        if ( !is_wp_error($spotify_args) ){
-            $args = array_merge($args,$spotify_args);
-        }
-
-        return $args;
+        
+        if (is_wp_error($spotify_args) ) return $spotify_args;
+        return array_merge($args,$spotify_args);
     }
 
     function get_remote_title(){
