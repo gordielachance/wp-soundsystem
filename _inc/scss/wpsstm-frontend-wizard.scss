@@ -23,9 +23,35 @@ ul.comma-list{
     }
 }
 
+#wpsstm-wizard-shortcuts{
+    ul{
+        list-style: none;
+    }
+    .wpsstm-bang-desc{
+        font-size:.8em;
+    }
+}
+
+#wpsstm-wizard-services{
+    ul{
+        margin:0;
+        padding:0;
+        li{
+            width:100px;
+            height:100px;
+            display:inline-block;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            img{
+                width:100%;
+                height:auto;
+            }
+
+        }
+    }
+}
+
 #wpsstm-frontend-wizard-recent{
-    font-size:.8em;
-    > ul{
+    ul{
         list-style: none;
         padding:0;
         margin:0;
@@ -43,15 +69,5 @@ ul.comma-list{
                 }
             }
         }
-    }
-}
-
-
-#wpsstm-wizard-services{
-    font-size:.8em;
-    ul{
-        margin:0;
-        padding:0;
-        @extend .comma-list;
     }
 }

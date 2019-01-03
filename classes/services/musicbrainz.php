@@ -28,6 +28,8 @@ class WPSSTM_MusicBrainz {
         
         add_filter('wpsstm_remote_presets',array($this,'register_musicbrainz_preset'));
         
+        add_filter('wpsstm_wizard_service_links',array($this,'register_musicbrainz_service_links'), 8);
+        
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 7);
         add_action( 'save_post', array($this,'auto_mbid_on_post_save'), 8);
@@ -958,6 +960,12 @@ class WPSSTM_MusicBrainz {
             return $data;
         }
 
+    }
+    
+    static function register_musicbrainz_service_links($links){
+        $item = sprintf('<a href="https://www.musicbrainz.org" target="_blank" title="%s"><img src="%s" /></a>','Musicbrainz',wpsstm()->plugin_url . '_inc/img/musicbrainz-icon.png');
+        $links[] = $item;
+        return $links;
     }
     
 }

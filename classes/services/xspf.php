@@ -2,7 +2,7 @@
 
 class WPSSTM_XSPF{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_xspf_service_link'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_xspf_service_link'));
         add_action( 'wpsstm_did_remote_response',array($this,'set_selectors'),20); //lower priority
     }
     function set_selectors($remote){
@@ -25,18 +25,8 @@ class WPSSTM_XSPF{
     }
 
     function register_xspf_service_link($links){
-        $links[] = array(
-            'slug'      => 'xspf',
-            'name'      => 'XSPF',
-            'url'       => false,
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'http://.../FILE.xspf',
-                ),
-            )
-        );
+        $item = sprintf('<span title="%s"><img src="%s" /></span>',__('XSPF files','wpsstm'),wpsstm()->plugin_url . '_inc/img/xspf-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

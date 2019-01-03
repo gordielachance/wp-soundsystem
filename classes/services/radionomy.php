@@ -2,7 +2,7 @@
 
 class WPSSTM_Radionomy{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_radionomy_service_links'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_radionomy_service_links'), 8);
         add_filter('wpsstm_remote_presets',array($this,'register_radionomy_preset'));
     }
     
@@ -13,21 +13,10 @@ class WPSSTM_Radionomy{
     }
     
     function register_radionomy_service_links($links){
-        $links[] = array(
-            'slug'      => 'radionomy',
-            'name'      => 'Radionomy',
-            'url'       => 'https://www.radionomy.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'stations',
-                    'name'      => __('stations','wpsstm'),
-                    'example'   => 'https://www.radionomy.com/LANG/radio/RADIO_SLUG',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.radionomy.com" target="_blank" title="%s"><img src="%s" /></a>',__('Radionomy stations','wpsstm'),wpsstm()->plugin_url . '_inc/img/radionomy-icon.jpg');
+        $links[] = $item;
         return $links;
     }
-    
 }
 
 class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{

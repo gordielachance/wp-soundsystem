@@ -2,7 +2,7 @@
 class WPSSTM_Hypem{
     function __construct(){
         add_filter('wpsstm_remote_presets',array($this,'register_hypem_preset'));
-        add_filter('wpsstm_wizard_services_links',array($this,'register_hypem_service_links'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_hypem_service_links'), 9);
     }
     //register preset
     function register_hypem_preset($presets){
@@ -11,11 +11,8 @@ class WPSSTM_Hypem{
     }
 
     function register_hypem_service_links($links){
-        $links[] = array(
-            'slug'      => 'hypem',
-            'name'      => 'Hypem',
-            'url'       => 'https://www.hypem.com',
-        );
+        $item = sprintf('<a href="https://www.hypem.com" target="_blank" title="%s"><img src="%s" /></a>','Hypem',wpsstm()->plugin_url . '_inc/img/hypem-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

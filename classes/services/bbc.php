@@ -3,7 +3,7 @@
 class WPSSTM_BBC{
     function __construct(){
         add_filter('wpsstm_remote_presets',array($this,'register_bbc_presets'));
-        add_filter('wpsstm_wizard_services_links',array(__class__,'register_bbc_service_links'));
+        add_filter('wpsstm_wizard_service_links',array(__class__,'register_bbc_service_links'));
     }
     static function register_bbc_presets($presets){
         $presets[] = new WPSSTM_BBC_Station_Preset();
@@ -12,25 +12,10 @@ class WPSSTM_BBC{
     }
 
     static function register_bbc_service_links($links){
-        $links[] = array(
-            'slug'      => 'bbc',
-            'name'      => 'BBC',
-            'url'       => 'https://www.bbc.co.uk',
-            'pages'     => array(
-                array(
-                    'slug'          => 'stations',
-                    'name'          => __('stations','wpsstm'),
-                    'example'       => 'https://www.bbc.co.uk/STATION',
-                ),
-                array(
-                    'slug'          => 'playlists',
-                    'name'          => __('playlists','wpsstm'),
-                    'example'       => 'http://www.bbc.co.uk/music/playlists/PLAYLIST_ID',
-                ),
-            )
-        );
-
+        $item = sprintf('<a href="https://www.bbc.co.uk" target="_blank" title="%s"><img src="%s" /></a>',__('BBC stations & playlists','wpsstm'),wpsstm()->plugin_url . '_inc/img/bbc-icon.png');
+        $links[] = $item;
         return $links;
+        
     }
 }
 

@@ -1,7 +1,7 @@
 <?php
 class WPSSTM_Slacker{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_slacker_service_links'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_slacker_service_links'));
         add_filter('wpsstm_remote_presets',array($this,'register_slacker_preset'));
     }
     //register preset
@@ -10,19 +10,9 @@ class WPSSTM_Slacker{
         return $presets;
     }
     
-    function register_slacker_service_links($links){
-        $links[] = array(
-            'slug'      => 'slacker',
-            'name'      => 'Slacker',
-            'url'       => 'http://www.slacker.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'stations',
-                    'name'      => __('stations','wpsstm'),
-                    'example'   => 'http://www.slacker.com/station/STATION_SLUG',
-                ),
-            )
-        );
+    static function register_deezer_service_links($links){
+        $item = sprintf('<a href="https://www.slacker.com" target="_blank" title="%s"><img src="%s" /></a>','Slacker',wpsstm()->plugin_url . '_inc/img/slacker-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

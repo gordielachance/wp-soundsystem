@@ -2,7 +2,7 @@
 
 class WPSSTM_RadioKing{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_radioking_service_link'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_radioking_service_link'));
         add_filter('wpsstm_remote_presets',array($this,'register_radioking_preset'));
     }
     //register preset
@@ -11,18 +11,8 @@ class WPSSTM_RadioKing{
         return $presets;
     }
     function register_radioking_service_link($links){
-        $links[] = array(
-            'slug'      => 'radioking',
-            'name'      => 'RadioKing',
-            'url'       => 'https://www.radioking.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'https://www.radioking.com/radio/RADIO_SLUG',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.radioking.com" target="_blank" title="%s"><img src="%s" /></a>','RadioKing',wpsstm()->plugin_url . '_inc/img/radioking-icon.jpg');
+        $links[] = $item;
         return $links;
     }
 }

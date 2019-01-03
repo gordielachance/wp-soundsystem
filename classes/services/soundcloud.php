@@ -18,7 +18,7 @@ class WPSSTM_Souncloud{
         add_filter('wpsstm_get_source_mimetype',array($this,'get_soundcloud_source_type'),10,2);
         add_filter('wpsstm_get_source_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
         if ( $this->get_options('client_id') ){
-            add_filter('wpsstm_wizard_services_links',array($this,'register_soundcloud_service_links'));
+            add_filter('wpsstm_wizard_service_links',array($this,'register_soundcloud_service_links'), 7);
             add_filter('wpsstm_remote_presets',array($this,'register_soundcloud_preset'));
         }
         
@@ -110,11 +110,8 @@ class WPSSTM_Souncloud{
         return $presets;
     }
     function register_soundcloud_service_links($links){
-        $links[] = array(
-            'slug'      => 'soundcloud',
-            'name'      => 'SoundCloud',
-            'url'       => 'https://soundcloud.com'
-        );
+        $item = sprintf('<a href="https://www.soundcloud.com" target="_blank" title="%s"><img src="%s" /></a>','SoundCloud',wpsstm()->plugin_url . '_inc/img/soundcloud-icon.png');
+        $links[] = $item;
         return $links;
     }
 

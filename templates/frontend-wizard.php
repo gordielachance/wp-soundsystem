@@ -59,7 +59,12 @@ if ( is_wp_error($can_wizard) ){ //TOUFIX TOUCHECK
 }
 ?>
 <?php
+
+//services
 wpsstm_locate_template( 'wizard-services.php', true);
+
+//bangs
+wpsstm_locate_template( 'wizard-bangs.php', true);
 
 //recent
 if ( wpsstm()->get_options('recent_wizard_entries') ) {

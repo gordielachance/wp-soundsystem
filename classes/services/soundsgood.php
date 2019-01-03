@@ -4,7 +4,7 @@ class WPSSTM_SoundsGood{
     function __construct(){
         if ( self::get_client_id() ){
             add_filter('wpsstm_remote_presets',array($this,'register_soundsgood_preset'));
-            add_filter('wpsstm_wizard_services_links',array($this,'register_soundsgood_service_links'));
+            add_filter('wpsstm_wizard_service_links',array($this,'register_soundsgood_service_links'));
         }
     }
     //register preset
@@ -13,18 +13,8 @@ class WPSSTM_SoundsGood{
         return $presets;
     }
     function register_soundsgood_service_links($links){
-        $links[] = array(
-            'slug'      => 'soundsgood',
-            'name'      => 'Soundsgood',
-            'url'       => 'https://soundsgood.co/',
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'https://play.soundsgood.co/playlist/TRACKLIST_SLUG',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.soundsgood.co" target="_blank" title="%s"><img src="%s" /></a>','Soundsgood',wpsstm()->plugin_url . '_inc/img/soundsgood-icon.jpg');
+        $links[] = $item;
         return $links;
     }
     static function get_client_id(){

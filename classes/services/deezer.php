@@ -3,7 +3,7 @@
 class WPSSTM_Deezer{
     function __construct(){
         add_filter('wpsstm_remote_presets',array($this,'register_deezer_preset'));
-        add_filter('wpsstm_wizard_services_links',array(__class__,'register_deezer_service_links'));
+        add_filter('wpsstm_wizard_service_links',array(__class__,'register_deezer_service_links'), 8);
     }
     //register preset
     static function register_deezer_preset($presets){
@@ -12,19 +12,8 @@ class WPSSTM_Deezer{
     }
 
     static function register_deezer_service_links($links){
-        $links[] = array(
-            'slug'      => 'deezer',
-            'name'      => 'Deezer',
-            'url'       => 'https://www.deezer.com',
-            'pages'     => array(
-                array(
-                    'slug'          => 'playlists',
-                    'name'          => __('playlists','wpsstm'),
-                    'example'       => 'http://www.deezer.com/fr/playlist/PLAYLIST_ID',
-                )
-            )
-        );
-
+        $item = sprintf('<a href="https://www.deeer.com" target="_blank" title="%s"><img src="%s" /></a>',__('Deezer playlists','wpsstm'),wpsstm()->plugin_url . '_inc/img/deezer-icon.jpeg');
+        $links[] = $item;
         return $links;
     }
 }

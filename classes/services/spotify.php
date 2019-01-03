@@ -41,7 +41,8 @@ class WPSSTM_Spotify{
             add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'spotify_columns_content'), 10, 2 );
             add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'spotify_columns_content'), 10, 2 );
 
-            add_filter('wpsstm_wizard_services_links',array($this,'register_spotify_service_links'));
+            add_filter('wpsstm_wizard_service_links',array($this,'register_spotify_service_links'), 6);
+            add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
             
             add_action( 'save_post', array($this,'metabox_spotify_id_save'), 7);
             add_action( 'save_post', array($this,'auto_spotify_id_on_post_save'), 8);
@@ -145,18 +146,15 @@ class WPSSTM_Spotify{
     }
 
     function register_spotify_service_links($links){
-        $links[] = array(
-            'slug'      => 'spotify',
-            'name'      => 'Spotify',
-            'url'       => 'https://www.spotify.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'https://open.spotify.com/user/USER_SLUG/playlist/PLAYLIST_ID',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.spotify.com" target="_blank" title="%s"><img src="%s" /></a>','Spotify',wpsstm()->plugin_url . '_inc/img/spotify-icon.png');
+        $links[] = $item;
+        return $links;
+    }
+    
+    function register_spotify_bang_links($links){
+        $bang_playlist = '<label><code>spotify:user:USER:playlist:PLAYLIST_ID</code></label>';
+        //$bang_playlist .= sprintf('<div id="wpsstm-spotify-playlist-bang" class="wpsstm-bang-desc">%s</div>',$desc);
+        $links[] = $bang_playlist;
         return $links;
     }
     

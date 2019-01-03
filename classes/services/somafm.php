@@ -2,8 +2,8 @@
 
 class WPSSTM_SomaFM{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_somafm_service_link'));
-        add_filter('wpsstm_remote_presets',array($this,'register_somafm_preset'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_somafm_service_link'));
+        add_filter('wpsstm_remote_presets',array($this,'register_somafm_preset'), 9);
     }
     //register preset
     function register_somafm_preset($presets){
@@ -12,18 +12,8 @@ class WPSSTM_SomaFM{
     }
     
     function register_somafm_service_link($links){
-        $links[] = array(
-            'slug'      => 'somafm',
-            'name'      => 'SomaFM',
-            'url'       => 'https://somafm.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'stations',
-                    'name'      => __('stations','wpsstm'),
-                    'example'   => 'https://somafm.com/STATION_SLUG',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://somafm.com" target="_blank" title="%s"><img src="%s" /></a>',__('SomaFM stations','wpsstm'),wpsstm()->plugin_url . '_inc/img/somafm-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

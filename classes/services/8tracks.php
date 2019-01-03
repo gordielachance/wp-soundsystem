@@ -3,7 +3,7 @@
 class WPSSTM_8tracks{
     function __construct(){
         add_filter('wpsstm_remote_presets',array($this,'register_8tracks_presets'));
-        add_filter('wpsstm_wizard_services_links',array(__class__,'register_8tracks_service_link'));
+        add_filter('wpsstm_wizard_service_links',array(__class__,'register_8tracks_service_link'));
     }
     
     //register preset
@@ -13,18 +13,8 @@ class WPSSTM_8tracks{
     }
 
     static function register_8tracks_service_link($links){
-        $links[] = array(
-            'slug'      => '8tracks',
-            'name'      => '8tracks',
-            'url'       => 'https://8tracks.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'https://8tracks.com/USER/PLAYLIST',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.8tracks.com" target="_blank" title="%s"><img src="%s" /></a>',__('8tracks playlists','wpsstm'),wpsstm()->plugin_url . '_inc/img/8tracks-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

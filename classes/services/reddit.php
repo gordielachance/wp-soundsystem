@@ -2,7 +2,7 @@
 
 class WPSSTM_Reddit{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array($this,'register_reddit_service_links'));
+        add_filter('wpsstm_wizard_service_links',array($this,'register_reddit_service_links'));
         add_filter('wpsstm_remote_presets',array($this,'register_reddit_preset'));
     }
     //register preset
@@ -12,18 +12,8 @@ class WPSSTM_Reddit{
     }
     
     function register_reddit_service_links($links){
-        $links[] = array(
-            'slug'      => 'reddit',
-            'name'      => 'Reddit',
-            'url'       => 'https://www.reddit.com',
-            'pages'     => array(
-                array(
-                    'slug'      => 'subreddit',
-                    'name'      => __('Music subreddit','wpsstm'),
-                    'example'   => 'https://www.reddit.com/r/SUBREDDIT',
-                ),
-            )
-        );
+        $item = sprintf('<a href="https://www.reddit.com" target="_blank" title="%s"><img src="%s" /></a>',__('Music subreddits','wpsstm'),wpsstm()->plugin_url . '_inc/img/reddit-icon.png');
+        $links[] = $item;
         return $links;
     }
 

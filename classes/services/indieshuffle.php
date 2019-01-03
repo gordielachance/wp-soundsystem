@@ -3,7 +3,7 @@
 class WPSSTM_IndieShuffle{
     function __construct(){
         add_filter('wpsstm_remote_presets',array($this,'register_indieshuffle_preset'));
-        add_filter('wpsstm_wizard_services_links',array(__class__,'register_indieshuffle_service_links'));
+        add_filter('wpsstm_wizard_service_links',array(__class__,'register_indieshuffle_service_links'));
     }
     //register preset
     function register_hypem_preset($presets){
@@ -11,12 +11,9 @@ class WPSSTM_IndieShuffle{
         return $presets;
     }
 
-    static function register_indieshuffle_service_links($links){
-        $links[] = array(
-            'slug'      => 'indieshuffle',
-            'name'      => 'indie shuffle',
-            'url'       => 'https://www.indieshuffle.com/',
-        );
+    static function register_deezer_service_links($links){
+        $item = sprintf('<a href="https://www.indieshuffle.com" target="_blank" title="%s"><img src="%s" /></a>','indieshuffle',wpsstm()->plugin_url . '_inc/img/indieshuffle-icon.png');
+        $links[] = $item;
         return $links;
     }
 }

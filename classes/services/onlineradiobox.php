@@ -2,7 +2,7 @@
 
 class WPSSTM_OnlineRadioBox{
     function __construct(){
-        add_filter('wpsstm_wizard_services_links',array(__class__,'register_onlineradiobox_service_link'));
+        add_filter('wpsstm_wizard_service_links',array(__class__,'register_onlineradiobox_service_link'));
         add_filter('wpsstm_remote_presets',array($this,'register_onlineradiobox_preset'));
     }
     //register preset
@@ -11,18 +11,8 @@ class WPSSTM_OnlineRadioBox{
         return $presets;
     }
     static function register_onlineradiobox_service_link($links){
-        $links[] = array(
-            'slug'      => 'onlineradiobox',
-            'name'      => 'Online Radio Box',
-            'url'       => 'http://onlineradiobox.com/',
-            'pages'     => array(
-                array(
-                    'slug'      => 'playlists',
-                    'name'      => __('playlists','wpsstm'),
-                    'example'   => 'http://onlineradiobox.com/COUNTRY/RADIO_SLUG',
-                ),
-            )
-        );
+        $item = sprintf('<a href="http://onlineradiobox.com" target="_blank" title="%s"><img src="%s" /></a>',__('Online Radio Box playlists','wpsstm'),wpsstm()->plugin_url . '_inc/img/onlineradiobox-icon.jpg');
+        $links[] = $item;
         return $links;
     }
 }
