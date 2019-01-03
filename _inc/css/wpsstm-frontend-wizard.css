@@ -1,5 +1,5 @@
 /* line 5, ../scss/wpsstm-frontend-wizard.scss */
-.wpsstm-ellipsis, #wpsstm-frontend-wizard-recent > ul li a > * {
+.wpsstm-ellipsis, #wpsstm-frontend-wizard-recent ul li a > * {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;
@@ -8,16 +8,16 @@
 }
 
 /* line 8, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list, #wpsstm-wizard-services ul {
+ul.comma-list {
   list-style: none;
   display: inline;
 }
 /* line 11, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li, #wpsstm-wizard-services ul > li {
+ul.comma-list > li {
   display: inline;
 }
 /* line 13, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li:not(:last-child):after, #wpsstm-wizard-services ul > li:not(:last-child):after {
+ul.comma-list > li:not(:last-child):after {
   content: ", ";
 }
 
@@ -26,38 +26,51 @@ ul.comma-list > li:not(:last-child):after, #wpsstm-wizard-services ul > li:not(:
   padding: .25em;
 }
 
-/* line 26, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard-recent {
+/* line 27, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-shortcuts ul {
+  list-style: none;
+}
+/* line 30, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-shortcuts .wpsstm-bang-desc {
   font-size: .8em;
 }
-/* line 28, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard-recent > ul {
+
+/* line 36, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-services ul {
+  margin: 0;
+  padding: 0;
+}
+/* line 39, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-services ul li {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+/* line 44, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-services ul li img {
+  width: 100%;
+  height: auto;
+}
+
+/* line 54, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-frontend-wizard-recent ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 32, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard-recent > ul li {
+/* line 58, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-frontend-wizard-recent ul li {
   position: relative;
   line-height: 1em;
   line-height: 1.5em;
 }
-/* line 36, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard-recent > ul li a {
+/* line 62, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-frontend-wizard-recent ul li a {
   display: -webkit-flex;
   display: flex;
 }
-/* line 38, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard-recent > ul li a strong {
+/* line 64, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-frontend-wizard-recent ul li a strong {
   margin-right: .25em;
-}
-
-/* line 50, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-services {
-  font-size: .8em;
-}
-/* line 52, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-services ul {
-  margin: 0;
-  padding: 0;
 }
