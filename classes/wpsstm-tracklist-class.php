@@ -853,21 +853,53 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $track->validate_track($strict);
     }
     
-    function add_subtrack($track){
+    function queue_track($track){
         //unset some subtracks vars or subtrack will be moved instead of added
         $new_track = clone $track;
         $new_track->subtrack_id = null;
         
         $success = $this->save_subtrack($new_track);
         
-        //favorites ?
-        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-        if ( $success && ($this->post_id == $tracklist_id) ){
-            do_action('wpsstm_love_track',$track->post_id);
+        if ( $success && !is_wp_error($success) ){
+            do_action('wpsstm_queue_track',$track,$this->post_id);
+            
+            //favorites ?
+            $favorites_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+            if ( $this->post_id == $favorites_id ){
+                do_action('wpsstm_love_track',$track);
+            }
         }
-        
+
         return $success;
 
+    }
+    
+    function dequeue_track($track){
+        
+        $subtrack_ids = $track->get_subtrack_matches($this->post_id);
+        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
+        
+        foreach ($subtrack_ids as $subtrack_id){
+            $subtrack = new WPSSTM_Track();
+            $subtrack->populate_subtrack($subtrack_id);
+            $success = $subtrack->remove_subtrack();
+
+            if ( is_wp_error($success) ) return $success;
+
+        }
+        
+        if ( $success && !is_wp_error($success) ){
+            do_action('wpsstm_dequeue_track',$track,$this->post_id);
+            
+            //favorites ?
+            $favorites_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
+            if ( $this->post_id == $favorites_id ){
+                do_action('wpsstm_unlove_track',$track);
+            }
+        }
+
+        return true;
+        
     }
     
     function save_subtrack($track){
@@ -939,30 +971,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         return $success;
 
-    }
-    
-    function dequeue_track($track){
-        
-        $subtrack_ids = $track->get_subtrack_matches($this->post_id);
-        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
-        
-        foreach ($subtrack_ids as $subtrack_id){
-            $subtrack = new WPSSTM_Track();
-            $subtrack->populate_subtrack($subtrack_id);
-            $success = $subtrack->remove_subtrack();
-
-            if ( is_wp_error($success) ) return $success;
-
-        }
-        
-        //favorites ?
-        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-        if ($this->post_id == $tracklist_id){
-            do_action('wpsstm_unlove_track',$track->post_id);
-        }
-        
-        return true;
-        
     }
 
     private function tracklist_autosource(){
@@ -1067,7 +1075,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     $track->from_array($url_track);
                 }
 
-                $success = $this->add_subtrack($track);
+                $success = $this->queue_track($track);
                 
             break;
                 

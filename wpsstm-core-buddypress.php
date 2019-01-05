@@ -8,7 +8,7 @@ class WPSSTM_Core_BuddyPress{
         define("WPSSTM_FAVORITE_TRACKLISTS_SLUG", "favorite-tracklists");
         
         add_action( 'bp_setup_nav', array($this,'register_music_menu'), 99 );
-        add_action( 'wpsstm_love_track', array($this,'love_track_activity') );
+        add_action( 'wpsstm_queue_track', array($this,'queue_track_activity'), 10, 2 );
         add_action( 'wpsstm_love_tracklist', array($this,'love_tracklist_activity') );
     }
     
@@ -185,19 +185,22 @@ class WPSSTM_Core_BuddyPress{
         echo $wpsstm_tracklist->get_tracklist_html();
     }
     
-    function love_track_activity($track_id){
+    function queue_track_activity($track,$tracklist_id){
+        
         $user_link = bp_core_get_userlink( get_current_user_id() );
-        $track_link = sprintf('<a href="%s">%s</a>',get_permalink($track_id),get_the_title($track_id));
+        $track_title = sprintf('<strong>%s</strong>',$track->get_formatted_title());
+        $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+
         $args = array(
             //'id' =>
-            'action' =>         sprintf(__('%s loved the track %s','wpsstm'),$user_link,$track_link),
+            'action' =>         sprintf(__('%s added the track %s to the playlist %s','wpsstm'),$user_link,$track_title,$tracklist_title),
             //'content' =>
             'component' =>      WPSSTM_BASE_SLUG,
-            'type' =>           'loved_track',
+            'type' =>           'queue_track',
             'primary_link' =>   get_permalink($track_id),
             //'user_id' =>        
-            'item_id' =>        $track_id,
-            //'secondary_item_id' =>
+            'item_id' =>        $track->subtrack_id,
+            'secondary_item_id' => $tracklist_id,
             //'recorded_time' =>
             //'hide_sitewide' =>
             //'is_spam' =>

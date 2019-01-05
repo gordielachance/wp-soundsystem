@@ -427,7 +427,7 @@ class WPSSTM_Core_Tracklists{
                     if ( !is_wp_error($success) ){
                         $tracklist_id = $success;
                         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                        $success = $tracklist->add_subtrack($subtrack);
+                        $success = $tracklist->queue_track($subtrack);
                     }
                     $redirect_url = $subtrack->get_tracklists_manager_url();
                 }
@@ -477,7 +477,7 @@ class WPSSTM_Core_Tracklists{
                 /*append*/
                 foreach ($add_to_ids as $id){
                     $tracklist = new WPSSTM_Post_Tracklist($id);
-                    $success = $tracklist->add_subtrack($subtrack);
+                    $success = $tracklist->queue_track($subtrack);
 
                     if ( is_wp_error($success) ){
                         break; //break at first error
