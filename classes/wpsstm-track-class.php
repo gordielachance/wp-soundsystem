@@ -779,7 +779,7 @@ class WPSSTM_Track{
         if (!$tracklist_id) return;
         
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        $url = $tracklist->get_tracklist_action_url($action);
+        $url = $tracklist->get_tracklist_action_url($action,$ajax);
 
         $track_args = $this->to_url();
         $url = add_query_arg(
