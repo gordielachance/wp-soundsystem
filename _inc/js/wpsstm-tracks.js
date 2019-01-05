@@ -59,6 +59,7 @@ $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
             dataType:   'json',
 
             beforeSend: function() {
+                link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
             success: function(data){

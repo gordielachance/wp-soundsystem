@@ -85,6 +85,7 @@ $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
             data:ajax_data,
             dataType:   'json',
             beforeSend: function() {
+                link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
             success: function(data){
@@ -290,6 +291,7 @@ class WpsstmTracklist {
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');
+                link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
             success: function(data){
@@ -328,6 +330,7 @@ class WpsstmTracklist {
             dataType: 'json',
             beforeSend: function() {
                 track_el.addClass('track-loading');
+                link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
             success: function(data){

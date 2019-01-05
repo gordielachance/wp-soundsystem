@@ -701,8 +701,8 @@ class WPSSTM_LastFM{
     }
     
     function register_lastfm_bang_links($links){
-        $bang_artist = '<label for="wpsstm-lastfm-artist-bang"><code>artist:ARTIST</code></label>';
-        $desc = sprintf(__('Will fetch the top tracks by %s, while %s will load a station based on that artist.','wpsstm'),'<code>ARTIST</code>','<code>artist:ARTIST:similar</code>');
+        $bang_artist = '<label for="wpsstm-lastfm-artist-bang"><code>artist:NAME</code></label>';
+        $desc = sprintf(__('Will fetch the top tracks by %s, while %s will load a station based on that artist.','wpsstm'),'<code>NAME</code>','<code>artist:NAME:similar</code>');
         $desc.= '  '.__('Powered by Last.fm.','wpsstm');
         $bang_artist .= sprintf('<div id="wpsstm-lastfm-artist-bang" class="wpsstm-bang-desc">%s</div>',$desc);
         $links[] = $bang_artist;
