@@ -356,28 +356,25 @@ class WPSSTM_LastFM{
     Get the URL of the app authentification at last.fm.
     */
     
-    private static function get_app_auth_url(){
-        $url = 'http://www.last.fm/api/auth/';
-        
-        if ( !$callback_url = get_permalink() ){
-            $callback_url = home_url();
-        }
+    private static function get_app_auth_url($redirect_url = null){
+
+        if ( !$redirect_url ) $redirect_url = home_url();
         
         //add qvar_after_app_auth variable so we can intercept the token when returning to our website
         $callback_args = array(
             self::$qvar_after_app_auth => true
         );
 
-        $callback_url = add_query_arg($callback_args,$callback_url);
+        $redirect_url = add_query_arg($callback_args,$redirect_url);
         
         $args = array(
             'api_key'   => $this->get_options('client_id'),
-            'cb'        => $callback_url
+            'cb'        => $redirect_url
         );
         
         $args = array_filter($args);
         
-        $url = add_query_arg($args,$url);
+        $url = add_query_arg($args,'http://www.last.fm/api/auth/');
         return $url;
     }
     
@@ -484,7 +481,7 @@ class WPSSTM_LastFM{
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
         }else{
-            $is_lastfm_auth = (int)$this->lastfm_user->is_user_api_logged();
+            $is_lastfm_auth = ( $this->lastfm_user->is_user_api_logged() === true );
             
             if (!$is_lastfm_auth){
                 $lastfm_auth_url = self::get_app_auth_url();
@@ -798,7 +795,7 @@ class WPSSTM_LastFM_User{
     Get the user metas stored after a last.fm session has been initialized.
     */
     
-    private function get_lastfm_user_api_metas($keys=null){
+    public function get_lastfm_user_api_metas($keys=null){
         if (!$this->user_id) return false;
         
         if ( $this->user_api_metas === null ) {
