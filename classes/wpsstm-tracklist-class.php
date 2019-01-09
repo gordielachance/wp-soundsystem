@@ -379,15 +379,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 );
             }
         }
-        
-        //wizard
-        if ( $can_edit_tracklist ){
-            $actions['wizard'] = array(
-                'text' =>       __('Wizard'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-tracklist-popup'),
-                'href' =>      $this->get_tracklist_action_url('wizard'),
-            );
-        }
 
         //edit backend
         if ( $can_edit_tracklist ){

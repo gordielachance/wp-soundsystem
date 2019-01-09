@@ -358,11 +358,6 @@ class WPSSTM_Core_Tracklists{
         $success = $wpsstm_tracklist->do_tracklist_action($action,$tracklist_data);
         
         switch($action){
-            case 'wizard':
-                if ( !$data = wpsstm_get_array_value('wpsstm_wizard',$_POST) ) break;
-                $success = WPSSTM_Core_Wizard::save_wizard($wpsstm_tracklist,$data);
-                
-            break;
             case 'live':
             case 'static':
                 $redirect_url = get_permalink($wpsstm_tracklist->post_id);
@@ -583,9 +578,6 @@ class WPSSTM_Core_Tracklists{
         if(!$action) return $template;
         
         switch($action){
-            case 'wizard':
-                $template = wpsstm_locate_template( 'tracklist-wizard.php' );
-            break;
             case 'export':
                 $template = wpsstm_locate_template( 'tracklist-xspf.php' );
             break;

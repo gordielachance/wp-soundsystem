@@ -8,11 +8,14 @@ class WPSSTM_Core_Wizard{
 
         //frontend
         add_action( 'wp', array($this,'handle_frontend_wizard' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_scripts_styles' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_frontend_scripts_styles' ) );
         add_filter( 'the_content', array($this,'frontend_wizard_content'));
 
         //backend
         add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register'), 11 );
+        add_action( 'save_post', array($this,'metabox_save_scraper_wizard') );
+        
+        add_action( 'admin_enqueue_scripts', array( $this, 'wizard_register_backend_scripts_styles' ) );
 
     }
 
@@ -30,37 +33,42 @@ class WPSSTM_Core_Wizard{
         return $content . $wizard;
     }
 
-    function wizard_register_scripts_styles(){
+    function wizard_register_frontend_scripts_styles(){
         
         // JS
-        wp_register_script( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-frontend-wizard.js',array('jquery'),wpsstm()->version);
         wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js',array('jquery'),wpsstm()->version);
         
         //CSS
         wp_register_style( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend-wizard.css',null,wpsstm()->version );
-        wp_register_style( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-wizard.css',null,wpsstm()->version );
-        
-        ///
 
-        if ( did_action('wpsstm-wizard-iframe') ){
-            wp_enqueue_script('wpsstm-wizard');
-            wp_enqueue_style('wpsstm-wizard');
-        }
-        
         if ( is_page(wpsstm()->get_options('frontend_scraper_page_id')) ){
             wp_enqueue_script('wpsstm-frontend-wizard');
             wp_enqueue_style('wpsstm-frontend-wizard');
         }
-
-
+    }
+    
+    function wizard_register_backend_scripts_styles(){
         
+        // JS
+        wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js',array('jquery'),wpsstm()->version);
+        
+        //CSS
+        wp_register_style( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-wizard.css',null,wpsstm()->version );
+        
+        ///
+
+        $screen = get_current_screen();
+        if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_live_playlist )  ){
+            wp_enqueue_script('wpsstm-wizard');
+            wp_enqueue_style('wpsstm-wizard');
+        }
     }
 
     function metabox_scraper_wizard_register(){
 
         add_meta_box( 
-            'wpsstm-metabox-scraper', 
-            __('Remote Tracklist Manager','wpsstm'),
+            'wpsstm-metabox-wizard', 
+            __('Remote Tracklist Wizard','wpsstm'),
             array($this,'metabox_wizard_display'),
             wpsstm()->tracklist_post_types, 
             'normal', //context
@@ -71,19 +79,32 @@ class WPSSTM_Core_Wizard{
 
     function metabox_wizard_display(){
         global $wpsstm_tracklist;
+        wpsstm_locate_template( 'tracklist-wizard.php', true );
+    }
+    
+    function metabox_save_scraper_wizard( $post_id ) {
 
-        $attr = array(
-            'id' =>     'wpsstm-backend-wizard',
-            'class' => "wpsstm-iframe-autoheight",
-            'width' =>  '100%',
-            'scrolling' => 'no',
-            'frameborder' => 0,
-            'src' => $wpsstm_tracklist->get_tracklist_action_url('wizard'),
-        );
+        //check save status
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $is_revision = wp_is_post_revision( $post_id );
+        $is_metabox = isset($_POST['wpsstm_scraper_wizard_meta_box_nonce']);
+        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
-        $attr_str = wpsstm_get_html_attr($attr);
+        //check post type
+        $post_type = get_post_type($post_id);
+        if ( $post_type != wpsstm()->post_type_live_playlist ) return;
+
+        //nonce
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_scraper_wizard_meta_box_nonce'], 'wpsstm_scraper_wizard_meta_box' ) );
+        if ( !$is_valid_nonce ) return;
         
-        printf('<iframe %s></iframe>',$attr_str);
+        if ( !$data = wpsstm_get_array_value('wpsstm_wizard',$_POST) ) return;
+        
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
+
+        $success = self::save_wizard($tracklist,$data);
+
     }
 
     /*
@@ -337,7 +358,7 @@ class WPSSTM_Core_Wizard{
         return WPSSTM_Core_Live_Playlists::is_community_user_ready();
     }
 
-    static function save_wizard(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
+    static private function save_wizard(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
         $post_id = $tracklist->post_id;
         $post_type = get_post_type($post_id);
 
