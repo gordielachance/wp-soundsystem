@@ -7,7 +7,7 @@
 }
 //shared#end//
 
-#wizard-wrapper{
+#wpsstm-metabox-wizard{
     
     h3{
         font-weight: bold;
@@ -27,6 +27,7 @@
             }
             &.wpsstm-wizard-row-content{
                 @include flex-grow(1);
+                margin-left:2em;
             }
         }
 
@@ -75,8 +76,7 @@
         overflow-y: auto;
     }
     
-    border-bottom: 1px solid #eee;
-    margin-bottom: 1em;
+
     #wpsstm-wizard-sections-header{
         clear:both;
         overflow:auto;
@@ -94,6 +94,7 @@
         padding: 1em 0;
         margin-top: 0;
         padding-top: 0;
+
         border-bottom: 1px solid #ddd;
         
         .wpsstm-wizard-section-label{

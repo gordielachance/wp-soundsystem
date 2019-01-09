@@ -151,7 +151,7 @@ class WPSSTM_Core_Tracks{
             if ( is_wp_error($success) ){
                 $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
             }else{
-                $wpsstm_track->add_notice('success',__('Success!','wpsstm'));
+                $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
             }
             
         }
