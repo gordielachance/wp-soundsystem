@@ -1365,15 +1365,15 @@ body.wpsstm-iframe.wpsstm-tracklist-manager-iframe form button[type="submit"] {
   text-align: center;
 }
 /* line 122, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper {
+.postbox#wpsstm-metabox-wizard {
   position: relative;
 }
 /* line 124, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper .inside {
+.postbox#wpsstm-metabox-wizard .inside {
   overflow: auto;
 }
 /* line 126, ../scss/_wpsstm-backend.scss */
-.postbox#wpsstm-metabox-scraper .inside #wpsstm-wizard-preview-feed-url {
+.postbox#wpsstm-metabox-wizard .inside #wpsstm-wizard-preview-feed-url {
   font-size: 1.2em;
   text-align: center;
 }
