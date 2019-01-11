@@ -34,6 +34,11 @@ class WPSSTM_Sputnik_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
+    function init_url($url){
+        $domain = wpsstm_get_url_domain( $url );
+        return ( $domain == 'sputnikmusic.com');
+    }
+    
 
 }
 
