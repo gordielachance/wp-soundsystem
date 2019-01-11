@@ -688,6 +688,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             // handle remote errors
             if ( is_wp_error($success) ){
                 $this->add_notice($success->get_error_code(), $success->get_error_message() );                
+            }else{
+                $this->add_tracks($tracks);
+                $updated = $this->set_live_datas($this->preset);
             }
             
             //link to wizard if we have a remote response (request did succeed) but no tracks
@@ -702,20 +705,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         }else{
             $tracks = $this->get_static_subtracks();
+            $this->add_tracks($tracks);
         }
-
-        //populate tracks
-        
-        $this->add_tracks($tracks);
         
         $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
-            
-        //update live tracklist
-        if ($live){
-            $updated = $this->set_live_datas($this->preset);
-            if ( is_wp_error($updated) ) return $updated;
-        }
- 
+
         if ( !$this->get_options('ajax_autosource') ){ //TOUFIX MOVE ELSEWHERE ?
             $this->tracklist_autosource();
         }
@@ -1143,7 +1137,7 @@ class WPSSTM_Tracklist{
     
     var $track;
     var $current_track = -1;
-    var $track_count = -1; //-1 when not yet populated
+    var $track_count = 0;
     var $in_subtracks_loop = false;
 
     function __construct($post_id = null){
