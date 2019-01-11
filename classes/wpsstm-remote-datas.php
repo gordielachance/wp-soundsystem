@@ -51,8 +51,6 @@ class WPSSTM_Remote_Tracklist{
     public $track_nodes = array();
     public $tracks = array();
 
-    public $notices = array();
-
     public function __construct($url = null,$options = null) {
         $this->url = trim($url);
         $this->options = array_replace_recursive($this->default_options,(array)$options); //last one has priority
@@ -83,14 +81,26 @@ class WPSSTM_Remote_Tracklist{
         return $this->default_request_args;
     }
     
-    function get_remote_tracks(){
+    /*
+    Populate remote tracks.
+    Returns success, or first WP Error.
+    
+    */
+    
+    function populate_remote_tracks(){
+        
+        $success = true;
         
         while ( $this->request_pagination['current_page'] < $this->request_pagination['total_pages'] ){
+            
             $page_tracks = $this->get_remote_page_tracks();
-            if ( !is_wp_error($page_tracks) ){
-                $this->tracks = array_merge($this->tracks,(array)$page_tracks);
-            }
 
+            if ( is_wp_error($page_tracks) ){
+                $success = $page_tracks;
+                break;
+            }
+            
+            $this->tracks = array_merge($this->tracks,(array)$page_tracks);
             $this->request_pagination['current_page']++;
         }
 
@@ -99,7 +109,7 @@ class WPSSTM_Remote_Tracklist{
             $this->tracks = array_reverse($this->tracks);
         }
         
-        return $this->tracks;
+        return $success;
     
     }
     

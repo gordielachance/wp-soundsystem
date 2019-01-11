@@ -635,7 +635,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return array_filter(array_unique($classes));
     }
     
-    function populate_preset(){
+    public function populate_preset(){
         /*
         redirect URL
         Hook to filter bangs, etc.
@@ -678,22 +678,25 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->did_query_tracks ) return true;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
-
+        $live = true;
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
+            
             $this->populate_preset();
-            $tracks =       $this->preset->get_remote_tracks();
+            $success =       $this->preset->populate_remote_tracks();
+            
+            $tracks = $this->preset->tracks;
             $this->title =  $this->preset->get_remote_title();
             $this->author = $this->preset->get_remote_author();
+            
+            if ( is_wp_error($success) ){
+                $this->add_notice($success->get_error_code(), $success->get_error_message() );
+            }
+            
 
         }else{
             $tracks = $this->get_static_subtracks();
-        }
-
-        if ( is_wp_error($tracks) ){
-            $this->add_notice('populate_subtracks', $tracks->get_error_message() );
-            return $tracks;
         }
 
         //populate tracks
