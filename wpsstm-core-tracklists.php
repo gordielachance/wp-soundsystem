@@ -383,8 +383,6 @@ class WPSSTM_Core_Tracklists{
             
             if ( is_wp_error($success) ){
                 $wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
-            }else{
-                $wpsstm_tracklist->add_notice('success',__('Tracklist action success!','wpsstm'));
             }
             
         }

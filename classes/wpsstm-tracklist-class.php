@@ -19,9 +19,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     );
 
     var $paged_var = 'tracklist_page';
-    
-    var $did_query_tracks = false; // so we know if the tracks have been requested yet or not
-    
+
     //live
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $scraper_meta_name = '_wpsstm_scraper_options';
@@ -675,10 +673,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function populate_subtracks(){
         global $wpdb;
 
-        if ( $this->did_query_tracks ) return true;
-
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
-        $live = true;
         $refresh_delay = $this->get_human_next_refresh_time();
         
         if ($live){
@@ -690,17 +685,27 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->title =  $this->preset->get_remote_title();
             $this->author = $this->preset->get_remote_author();
             
+            // handle remote errors
             if ( is_wp_error($success) ){
-                $this->add_notice($success->get_error_code(), $success->get_error_message() );
+                $this->add_notice($success->get_error_code(), $success->get_error_message() );                
             }
             
+            //link to wizard if we have a remote response (request did succeed) but no tracks
+            if ( !is_wp_error($this->preset->response_body) && !$tracks ){
+                $wizard_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-wizard';
+                $wizard_link = sprintf('<a href="%s">%s</a>',$wizard_url,__('here','wpsstm'));
+                $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
+            }
+            
+
+
 
         }else{
             $tracks = $this->get_static_subtracks();
         }
 
         //populate tracks
-        $this->did_query_tracks = true;
+        
         $this->add_tracks($tracks);
         
         $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');

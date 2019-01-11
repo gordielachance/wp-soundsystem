@@ -57,7 +57,8 @@ class WPSSTM_Remote_Tracklist{
     }
     
     /*
-    Test if this URL can be handled by the preset
+    Test if this URL can be handled by the preset.
+    Your preset class SHOULD override this funtion.
     */
     function init_url($url){
         return (filter_var($url, FILTER_VALIDATE_URL) !== FALSE);
@@ -351,7 +352,7 @@ class WPSSTM_Remote_Tracklist{
                 try{
                     $result = qp( $xml, null, self::$querypath_options );
                 }catch(Exception $e){
-                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','wpsstm'),$e->getCode(),$e->getMessage()) );
+                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%s] : %s','wpsstm'),$e->getCode(),$e->getMessage()) );
                 }
 
             break;
@@ -362,7 +363,7 @@ class WPSSTM_Remote_Tracklist{
                 try{
                     $result = htmlqp( $response_body, null, self::$querypath_options );
                 }catch(Exception $e){
-                    return WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+                    return WP_Error( 'querypath', sprintf(__('QueryPath Error [%s] : %s','wpsstm'),$e->getCode(),$e->getMessage()) );
                 }
 
             break;
@@ -374,7 +375,7 @@ class WPSSTM_Remote_Tracklist{
                 try{
                     $result = qp( $response_body, 'body', self::$querypath_options );
                 }catch(Exception $e){
-                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+                    return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%s] : %s','wpsstm'),$e->getCode(),$e->getMessage()) );
                 }
                 
             break;
@@ -416,17 +417,17 @@ class WPSSTM_Remote_Tracklist{
     protected function get_track_nodes($body_node){
 
         $selector = $this->get_selectors( array('tracks','path') );
-        if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','spiff') );
+        if (!$selector) return new WP_Error( 'no_track_selector', __('Required tracks selector is missing.','wpsstm') );
 
         //QueryPath
         try{
             $track_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
         }catch(Exception $e){
-            return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+            return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%s] while parsing tracks : %s','wpsstm'),$e->getCode(),$e->getMessage()) );
         }
 
         if ( $track_nodes->length == 0 ){
-            return new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist.','spiff') );
+            return new WP_Error( 'no_track_nodes', __('Either the tracks selector is invalid, or there is actually no tracks in the playlist.','wpsstm') );
         }
 
         return $track_nodes;
@@ -555,7 +556,7 @@ class WPSSTM_Remote_Tracklist{
             }
 
         }catch(Exception $e){
-            return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%1$s] : %2$s','spiff'),$e->getCode(),$e->getMessage()) );
+            return new WP_Error( 'querypath', sprintf(__('QueryPath Error [%s] : %s','wpsstm'),$e->getCode(),$e->getMessage()) );
         }
 
         foreach($strings as $key=>$string){
