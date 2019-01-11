@@ -1140,10 +1140,6 @@ class WPSSTM_Tracklist{
     var $track_count = 0;
     var $in_subtracks_loop = false;
 
-    function __construct($post_id = null){
- 
-    }
-
     /*
     $input_tracks = array of tracks objects or array of track IDs
     */
