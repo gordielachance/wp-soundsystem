@@ -38,9 +38,9 @@
     .wpsstm-track-info{
         @include display-flex();
         @include flex-shrink(1);
+        @include flex-grow(1);
+        min-width:0;
         > *{
-            @include display-flex();
-            @include flex-shrink(1);
             @extend .wpsstm-ellipsis;
             text-align:left;
             margin-right:.5em;
