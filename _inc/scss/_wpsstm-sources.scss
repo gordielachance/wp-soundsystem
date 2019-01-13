@@ -43,6 +43,7 @@
 
             &.wpsstm-source-actions{
                 padding-right: .5em;
+                @include display-flex();
                 @include flex-shrink(0);
 
                 .wpsstm-source-action{

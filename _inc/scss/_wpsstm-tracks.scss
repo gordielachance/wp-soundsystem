@@ -63,8 +63,7 @@
     }
     
     .wpsstm-track-actions{
-         @include display-flex();
-        @include flex-shrink(0);
+        display:none;
         margin-left: auto;
         li.wpsstm-action{
             display:inline;
@@ -149,7 +148,8 @@
 
     &:hover,&.track-active{
         ul.wpsstm-track-actions{
-             display:inherit;
+            @include display-flex();
+            @include flex-shrink(0);
         }
     }
 
