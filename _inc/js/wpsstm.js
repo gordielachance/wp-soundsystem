@@ -80,13 +80,16 @@ $( document ).ready(function() {
     */
     $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
         var document = tracklist_obj.tracklist_el.context.ownerDocument;
-        var newHeight = $(document).outerHeight();
-        tracklist_obj.debug("resizing  iframe #" + tracklist_obj.index + "to pixels: " + newHeight);
+        tracklist_obj.debug("resizing  iframe #" + tracklist_obj.index);
         var iframe = $('iframe.wpsstm-tracklist-iframe').get(tracklist_obj.index);
-        $(iframe).css('height',newHeight);
+        wpsstmAutoTracklistHeight( iframe );
     });
 
 });
+
+function wpsstmAutoTracklistHeight( iFrame ) {
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
+}
 
 /*
 resize iframes
