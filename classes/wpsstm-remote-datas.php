@@ -163,8 +163,14 @@ class WPSSTM_Remote_Tracklist{
         
         $body_node = $this->populate_body_node();
         if ( is_wp_error($body_node) ) return $body_node;
-
-        return $this->get_parsed_page_tracks();
+        
+        $track_nodes = $this->populate_track_nodes();
+        if ( is_wp_error($track_nodes) ) return $track_nodes;
+            
+        //tracks
+        $tracks = $this->parse_track_nodes();
+        $this->remote_log(count($tracks),'found tracks' );
+        return $tracks;
 
     }
 
@@ -177,7 +183,7 @@ class WPSSTM_Remote_Tracklist{
         return $this->get_options($keys);
     }
 
-    private function get_parsed_page_tracks(){
+    private function populate_track_nodes(){
         //tracks HTML
         $track_nodes = $this->get_track_nodes($this->body_node);
         if ( is_wp_error($track_nodes) ){
@@ -185,12 +191,7 @@ class WPSSTM_Remote_Tracklist{
             return $track_nodes;
         }
         
-        $this->track_nodes = $track_nodes;
-
-        //tracks
-        $tracks = $this->parse_track_nodes($track_nodes);
-        $this->remote_log(count($tracks),'found tracks' );
-        return $tracks;
+        return $this->track_nodes = $track_nodes;
     }
 
     private function populate_remote_response($url,$args){
@@ -434,9 +435,10 @@ class WPSSTM_Remote_Tracklist{
 
     }
 
-    protected function parse_track_nodes($track_nodes){
+    protected function parse_track_nodes(){
         
-        if (!$track_nodes) return new WP_Error( 'no_track_nodes', __('No track nodes found.','wpsstm') );
+        if ( is_wp_error($this->track_nodes) ) return $this->track_nodes;
+        if (!$this->track_nodes) return new WP_Error( 'no_track_nodes', __('No track nodes found.','wpsstm') );
 
         $selector_artist = $this->get_selectors( array('track_artist') );
         if (!$selector_artist) return new WP_Error( 'no_track_selector', __('Required track artist selector is missing.','wpsstm') );
@@ -446,7 +448,7 @@ class WPSSTM_Remote_Tracklist{
 
         $tracks_arr = array();
         
-        foreach($track_nodes as $key=>$single_track_node) {
+        foreach($this->track_nodes as $key=>$single_track_node) {
 
             $args = array(
                 'artist'        => $this->get_track_artist($single_track_node),
