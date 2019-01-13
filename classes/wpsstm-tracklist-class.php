@@ -699,9 +699,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $wizard_link = sprintf('<a href="%s">%s</a>',$wizard_url,__('here','wpsstm'));
                 $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
             }
-            
-
-
 
         }else{
             $tracks = $this->get_static_subtracks();
@@ -1156,12 +1153,12 @@ class WPSSTM_Tracklist{
             if ( !is_a($track, 'WPSSTM_Track') ){
                 if ( is_array($track) ){
                     $track_args = $track;
-                    $track = new WPSSTM_Track(null);
+                    $track = new WPSSTM_Track(null,$this);
                     $track->from_array($track_args);
                 }else{ //track ID
                     $track_id = $track;
                     //TO FIX check for int ?
-                    $track = new WPSSTM_Track($track_id);
+                    $track = new WPSSTM_Track($track_id,$this);
                 }
             }
             
