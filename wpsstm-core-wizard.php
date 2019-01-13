@@ -36,8 +36,7 @@ class WPSSTM_Core_Wizard{
     function wizard_register_frontend_scripts_styles(){
         
         // JS
-        wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js',array('jquery'),wpsstm()->version);
-        
+        wp_register_script( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-frontend-wizard.js',array('jquery'),wpsstm()->version);
         //CSS
         wp_register_style( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend-wizard.css',null,wpsstm()->version );
 

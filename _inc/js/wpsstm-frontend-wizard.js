@@ -14,13 +14,12 @@ $( document ).ready(function() {
         var title_el = $(this).find('label');
         var desc_el = $(this).find('.wpsstm-bang-desc');
         title_el.addClass('wpsstm-can-click');
-        desc_el.hide();
     });
     
     
     clickable_shortcuts.on( "click", function(e) {
         var desc_el = $(this).find('.wpsstm-bang-desc');
-        desc_el.toggle();
+        desc_el.toggleClass('expanded');
     });
 
 });
