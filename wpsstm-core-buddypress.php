@@ -246,7 +246,7 @@ class WPSSTM_Core_BuddyPress{
             //'content' =>
             'component' =>      WPSSTM_BASE_SLUG,
             'type' =>           'queue_track',
-            'primary_link' =>   get_permalink($track_id),
+            'primary_link' =>   get_permalink($track->post_id),
             //'user_id' =>        
             'item_id' =>        $track->subtrack_id,
             'secondary_item_id' => $tracklist_id,

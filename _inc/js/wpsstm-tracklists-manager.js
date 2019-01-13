@@ -57,7 +57,7 @@ formNewTracklist.find('input[type="text"]').on('keyup', function(e){
 //toggle track in playlist
 
 formToggleTracklist.find('button[type="submit"]').hide(); //hide since form is sent through JS
-formToggleTracklist.on( "click",'input[type="radio"]', function(e){
+formToggleTracklist.on( "click",'input[type="checkbox"]', function(e){
     var form = $(this).closest('form#wpsstm-toggle-tracklists');
     form.addClass('wpsstm-freeze');
     form.submit();
