@@ -1133,18 +1133,17 @@ class WPSSTM_LastFM_User_URL_Preset extends WPSSTM_LastFM_URL_Preset{
     function init_url($url){
         $this->user_slug = self::get_user_slug($url);
         $this->user_page = self::get_user_page($url);
-        
         return (bool)$this->user_slug;
     }
 
     static function get_user_slug($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?(?:user/([^/]+))~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/user/([^/]+)~i';
         preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
 
     static function get_user_page($url){
-        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/(?:.*/)?user/[^/]+/([^/]+)~i';
+        $pattern = '~^http(?:s)?://(?:www\.)?last.fm/user/[^/]+/([^/]+)~i';
         preg_match($pattern, $url, $matches);
         return isset($matches[1]) ? $matches[1] : null;
     }
