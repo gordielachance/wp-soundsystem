@@ -157,8 +157,8 @@ class WPSSTM_Track{
             'post_status' =>    'any',
             'posts_per_page'=>  -1,
             'fields' =>         'ids',
-            WPSSTM_Core_Artists::$qvar_artist_lookup => $this->artist,
-            WPSSTM_Core_Tracks::$qvar_track_lookup =>   $this->title
+            'lookup_artist' =>  $this->artist,
+            'lookup_track' =>   $this->title
         );
 
         if ($this->post_id){
@@ -166,7 +166,7 @@ class WPSSTM_Track{
         }
 
         if ($this->album){
-            $query_args[WPSSTM_Core_Albums::$qvar_album_lookup] = $this->album;
+            $query_args['lookup_album'] = $this->album;
         }
 
         $query = new WP_Query( $query_args );

@@ -3,7 +3,6 @@
 class WPSSTM_Core_Artists{
 
     static $artist_metakey = '_wpsstm_artist';
-    static $qvar_artist_lookup = 'lookup_artist';
 
     function __construct(){
 
@@ -46,7 +45,7 @@ class WPSSTM_Core_Artists{
 
     function pre_get_posts_by_artist( $query ) {
 
-        if ( $search = $query->get( self::$qvar_artist_lookup ) ){
+        if ( $search = $query->get( 'lookup_artist' ) ){
             
             $query->set( 'meta_query', array(
                 array(
@@ -165,7 +164,7 @@ class WPSSTM_Core_Artists{
     }
     
     function add_query_var_artist( $qvars ) {
-        $qvars[] = self::$qvar_artist_lookup;
+        $qvars[] = 'lookup_artist';
         return $qvars;
     }
     

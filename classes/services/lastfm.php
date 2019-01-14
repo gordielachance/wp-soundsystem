@@ -10,7 +10,6 @@ class WPSSTM_LastFM{
     
     static $lastfm_options_meta_name = 'wpsstm_lastfm_options';
     static $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
-    static $qvar_after_app_auth = 'wpsstm_lastfm_after_app_auth';
     
     public $lastfm_user = null;
     
@@ -323,7 +322,7 @@ class WPSSTM_LastFM{
     */
     
     public function after_app_auth(){
-        if ( !isset($_GET[self::$qvar_after_app_auth]) ) return;
+        if ( !isset($_GET['wpsstm_lastfm_after_app_auth']) ) return;
         $token = ( isset($_GET['token']) ) ? $_GET['token'] : null;
         if (!$token) return;
         $this->lastfm_user->set_user_token($token);
@@ -360,9 +359,9 @@ class WPSSTM_LastFM{
 
         if ( !$redirect_url ) $redirect_url = home_url();
         
-        //add qvar_after_app_auth variable so we can intercept the token when returning to our website
+        //add variable so we can intercept the token when returning to our website
         $callback_args = array(
-            self::$qvar_after_app_auth => true
+            'wpsstm_lastfm_after_app_auth' => true
         );
 
         $redirect_url = add_query_arg($callback_args,$redirect_url);

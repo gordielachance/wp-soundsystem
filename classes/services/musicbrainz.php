@@ -13,8 +13,7 @@ class WPSSTM_MusicBrainz {
     static $mbdata_metakey = '_wpsstm_mbdata'; //to store the musicbrainz datas
     static $mbdata_time_metakey = '_wpsstm_mbdata_time'; //to store the musicbrainz datas
     static $mb_data_by_url_transient_prefix = 'wpsstm_mb_by_url_'; //to cache the musicbrainz API results
-    static $qvar_mbid = 'mbid';
-    
+
     public $options = array();
 
     function __construct(){
@@ -136,7 +135,7 @@ class WPSSTM_MusicBrainz {
 
     public static function pre_get_posts_mbid( $query ) {
 
-        if ( $search = $query->get( self::$qvar_mbid ) ){
+        if ( $search = $query->get( 'mbid' ) ){
             
             $query->set( 'meta_key', self::$mbid_metakey );
             $query->set( 'meta_query', array(

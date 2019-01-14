@@ -3,7 +3,6 @@
 class WPSSTM_Core_Albums{
 
     static $album_metakey = '_wpsstm_release';
-    static $qvar_album_lookup = 'lookup_release';
 
     
     function __construct() {
@@ -83,7 +82,7 @@ class WPSSTM_Core_Albums{
 
     function pre_get_posts_by_album( $query ) {
 
-        if ( $album = $query->get( self::$qvar_album_lookup ) ){
+        if ( $album = $query->get( 'lookup_album' ) ){
 
             $query->set( 'meta_query', array(
                 array(
@@ -202,7 +201,7 @@ class WPSSTM_Core_Albums{
     }
     
     function add_query_var_album( $qvars ) {
-        $qvars[] = self::$qvar_album_lookup;
+        $qvars[] = 'lookup_album';
         return $qvars;
     }
     

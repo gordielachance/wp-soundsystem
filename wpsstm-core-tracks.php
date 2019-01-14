@@ -5,8 +5,6 @@ class WPSSTM_Core_Tracks{
     static $title_metakey = '_wpsstm_track';
     static $length_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
-    static $qvar_track_lookup = 'lookup_track';
-    static $qvar_favorite_tracks = 'loved-tracks';
 
     function __construct() {
         global $wpsstm_track;
@@ -378,7 +376,7 @@ class WPSSTM_Core_Tracks{
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
 
-        if ( $track = $query->get( self::$qvar_track_lookup ) ){
+        if ( $track = $query->get( 'lookup_track' ) ){
 
             $query->set( 'meta_query', array(
                 array(
@@ -481,7 +479,7 @@ class WPSSTM_Core_Tracks{
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
 
-        if ( !$query->get( self::$qvar_favorite_tracks ) ) return $where;
+        if ( !$query->get( 'loved_tracks' ) ) return $where;
 
         //get all favorited tracklists
         $query_args = array(
@@ -618,8 +616,8 @@ class WPSSTM_Core_Tracks{
     }
     
     function add_query_vars_track( $qvars ) {
-        $qvars[] = self::$qvar_track_lookup;
-        $qvars[] = self::$qvar_favorite_tracks;
+        $qvars[] = 'lookup_track';
+        $qvars[] = 'loved_tracks';
         $qvars[] = 'in_subtracks';
         $qvars[] = 'subtrack_id';
         
