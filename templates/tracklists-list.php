@@ -3,7 +3,7 @@ global $wpdb;
 global $wpsstm_tracklist;
 global $wpsstm_track;
 
-//get logged user static playlists
+//tracklists manager query
 $args = array(
     'post_type' =>      get_post_type(),
     'author' =>         get_current_user_id(),
@@ -13,27 +13,26 @@ $args = array(
 );
 
 //self playlists, allow any post stati
-if ( isset($args['author']) && ( $args['author'] == get_current_user_id() ) ){
+//TOUFIX TOUCHECK
+if ( isset($args['author']) && ( $args['author'] === get_current_user_id() ) ){
     $args['post_status'] = array('publish','private','future','pending','draft');
 }
 
 $args = apply_filters('wpsstm_tracklists_manager_query',$args);
-$manager_query = new WP_Query( $args );
 
-if ( $manager_query->have_posts() ) {
+$manager_tracklists = new WP_Query( $args );
+
+if ( $manager_tracklists->have_posts() ) {
+
     ?>
     <ul id="tracklists-manager">
         <?php
-        while ( $manager_query->have_posts() ) {
+        while ( $manager_tracklists->have_posts() ) {
 
-            $manager_query->the_post();
-            
-            //TO FIX TO CHECK or use get_tracklist_class() here ?
-            $row_classes = array('tracklist-row','wpsstm-tracklist');
-            if ($wpsstm_tracklist->tracklist_type=='live') $row_classes[] = 'wpsstm-live-tracklist';
+            $manager_tracklists->the_post();
 
             ?>
-            <li class="<?php echo implode(' ',$row_classes);?>">
+            <li class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('tracklist-row'));?>">
                 <span class="tracklist-row-action">
                     <?php
 

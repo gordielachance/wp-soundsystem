@@ -336,7 +336,7 @@ class WPSSTM_Core_Tracklists{
         global $wpsstm_tracklist;
         if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
             //set global $wpsstm_tracklist
-            
+
             $is_already_populated = ($wpsstm_tracklist && ($wpsstm_tracklist->post_id == $post->ID) );
             if ($is_already_populated) return;
             
@@ -584,30 +584,43 @@ class WPSSTM_Core_Tracklists{
         return $template;
     }
     
-    static function get_favorited_tracklist_ids($user_id = null){
+    /*
+    Get the IDs of all the "favorite" tracklists for every user
+    For a single user, use get_user_option( WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $user_id )
+    */
+    
+    static function get_favorite_tracks_tracklist_ids(){
         global $wpdb;
         //get all subtracks metas
         $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
-        
-        if ($user_id){
-            $querystr .= $wpdb->prepare( " AND user_id = '%s'", $user_id );
-        }
 
         $ids = $wpdb->get_col( $querystr);
         return $ids;
     }
+    
+    static function get_favorited_tracklist_ids($user_id = null){
+        global $wpdb;
+        //get all subtracks metas
+        $querystr = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '%s'", self::$loved_tracklist_meta_key );
+
+        if ($user_id){
+            $querystr .= $wpdb->prepare( " AND meta_value = '%s'", $user_id );
+        }
+
+        $ids = $wpdb->get_col( $querystr);
+        return $ids;
+        
+    }
 
     function pre_get_posts_loved_tracklists( $query ) {
 
-        if ( $user_id = $query->get( 'tracklists-favorited-by' ) ){
+        if ( !$user_id = $query->get( 'tracklists-favorited-by' ) ) return $query;
             
-            if($user_id === true) $user_id = null; //no specific user ID set
-            
-            $ids = self::get_favorited_tracklist_ids($user_id);
-            
-            $query->set ( 'post__in', $ids ); 
-            
-        }
+        if($user_id === true) $user_id = null; //no specific user ID set, get every favorited tracklists
+        
+        $ids = self::get_favorited_tracklist_ids($user_id);
+        
+        $query->set ( 'post__in', $ids ); 
 
         return $query;
     }
@@ -705,7 +718,7 @@ class WPSSTM_Core_Tracklists{
     }
     
     /*
-    Get the ID of the favorites tracklist for a user, or create it
+    Get the ID of the favorites tracklist for a user, or create it and store option
     */
     
     static function get_user_favorites_id($user_id = null){
@@ -714,7 +727,7 @@ class WPSSTM_Core_Tracklists{
 
         $love_id = get_user_option( WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $user_id );
         
-        //tracklist doesn't exists
+        //usermeta exists but tracklist does not
         if ( $love_id && !get_post_type($love_id) ){
             delete_user_option( $user_id, WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key );
             $love_id = null;
