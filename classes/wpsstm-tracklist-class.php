@@ -111,7 +111,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     public function get_title(){
         $title = $this->title;
         if (!$title && $this->post_id){
-            $title = sprintf(__('(playlist #%d)','wpsstm'),$this->post_id);
+            $title = sprintf(__('(tracklist #%d)','wpsstm'),$this->post_id);
         }
         return $title;
     }
@@ -847,7 +847,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //unset some subtracks vars or subtrack will be moved instead of added
         $new_track = clone $track;
         $new_track->subtrack_id = null;
-        
+
         $success = $this->save_subtrack($new_track);
         
         if ( $success && !is_wp_error($success) ){
@@ -931,7 +931,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $track_data = array_merge($track_data,$subtrack_data);
         }
 
-        //update or insert ?
+        //is an update
         if ($track->subtrack_id){
             
             $success = $wpdb->update( 
@@ -945,11 +945,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if ( is_wp_error($success) ){
                 $track->track_log($track->to_array(),"Error while updating subtrack" ); 
             }
-
+        //is a new entry
         }else{
             $success = $wpdb->insert($subtracks_table,$track_data);
-            
-            
+
             if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
                 $track->subtrack_id = $wpdb->insert_id;
                 //$track->track_log($track->to_array(),"Subtrack inserted" ); 
