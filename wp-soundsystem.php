@@ -137,7 +137,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
-        //require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
@@ -174,7 +174,6 @@ class WP_SoundSystem {
         //TOUFIX should be better to hook this on a wpsstm_init action
         new WPSSTM_Core_Albums();
         new WPSSTM_Core_Artists();
-        //new WPSSTM_Core_BuddyPress();
         new WPSSTM_Core_Live_Playlists();
         new WPSSTM_Core_Playlists();
         new WPSSTM_Core_Sources();
@@ -182,7 +181,7 @@ class WP_SoundSystem {
         new WPSSTM_Core_Tracks();
         new WPSSTM_Core_Wizard();
         new WPSSTM_Player();
-
+        new WPSSTM_Core_BuddyPress();
         ////
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
@@ -202,6 +201,7 @@ class WP_SoundSystem {
         
         add_action( 'init', array($this, 'wpsstm_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+
     }
     
     function wpsstm_rewrite_rules(){
@@ -601,7 +601,7 @@ class WP_SoundSystem {
         
         return implode("\n",$output);
     }
-    
+
 }
 
 function wpsstm() {

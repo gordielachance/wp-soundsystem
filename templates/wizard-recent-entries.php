@@ -1,4 +1,6 @@
 <?php
+
+//TOUFIX display only successful tracklists ? (or at least, tracklists that have a tracks count ?)
 $recent_wizard_args = array(
     'post_type'         => wpsstm()->post_type_live_playlist,
     'posts_per_page'    => (int)wpsstm()->get_options('recent_wizard_entries'),
