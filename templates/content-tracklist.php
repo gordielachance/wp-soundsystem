@@ -43,15 +43,15 @@ global $wpsstm_tracklist;
                 </a>
                 <?php
             }
+        
+            //actions
+            if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
+                $list = get_actions_list($actions,'tracklist');
+                echo $list;
+            }
         ?>
     </div>
-    <?php
-    
-    if ( $actions = $wpsstm_tracklist->get_tracklist_links() ){
-        $list = get_actions_list($actions,'tracklist');
-        echo $list;
-    }
-    
+    <?php    
     /*
     tracks list
     */

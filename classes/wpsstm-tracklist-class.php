@@ -200,7 +200,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $attr = array(
             'class' => "wpsstm-tracklist-iframe wpsstm-iframe-autoheight",
             'width' =>  '100%',
-            'scrolling' => 'no',
             'frameborder' => 0,
             'src' => $this->get_tracklist_action_url('render'),
         );
@@ -282,7 +281,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return in_array($user_id,(array)$favorited_by);
     }
     
-    function get_tracklist_links(){
+    function get_tracklist_actions(){
         
         $tracklist_post_type = get_post_type($this->post_id);
         

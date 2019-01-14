@@ -1,11 +1,5 @@
 @import "compass";
 
-.tracklist-list{ //output a simplier style
-    .tracklist-header{
-        display:none!important;
-    }
-}
-
 .wpsstm-tracklist{
     
     .wpsstm-tracks-list{
@@ -23,6 +17,7 @@
             margin: 1em 0;
             list-style: none;
             line-height: 2.8em;
+            text-align:center;
 
             .wpsstm-tracklist-action{
 

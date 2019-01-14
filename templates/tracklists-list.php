@@ -65,7 +65,7 @@ if ( $manager_tracklists->have_posts() ) {
                 </span>
                 <span class="wpsstm-tracklist-actions">
                     <?php
-                    if ( $actions = $wpsstm_tracklist->get_tracklist_links() ){
+                    if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
                         echo get_actions_list($actions,'tracklist');
                     }
                     ?>

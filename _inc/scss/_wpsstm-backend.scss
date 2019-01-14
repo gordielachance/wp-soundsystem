@@ -72,14 +72,6 @@
 }
 
 .wp-list-table{
-    .column-tracklist{
-        .wpsstm-tracklist{
-            @extend .tracklist-list;
-        }
-    } 
-}
-
-.wp-list-table{
     .mbz-id{
         color:silver;
         font-size:0.8em;
