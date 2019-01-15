@@ -419,8 +419,13 @@ a.toggle-children-link, .toggle-children-link a{
 
 /*iframes*/
 
+.wpsstm-no-admin-bar{
+    margin-top:0!important;
+}
+
 .wpsstm-iframe-container{
     width:100%;
+    border: 1px solid rgba(0,0,0,0.1);
     
     .wpsstm-loading-notice{
         display:none;
@@ -439,9 +444,7 @@ a.toggle-children-link, .toggle-children-link a{
             display:inherit;
         }
         iframe{
-            margin: 0px;
-            padding: 0px;
-            width:100%;
+            display:none;
         }
     } 
 }

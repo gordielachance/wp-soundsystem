@@ -115,6 +115,10 @@
     .wpsstm-track-unique-value{
         display:none!important;
     }
+    
+    .wpsstm-track-icon{
+        color:inherit;
+    }
 
     &.track-loading .wpsstm-track-icon{
         @extend .wpsstm-loading-icon;
@@ -134,14 +138,9 @@
     &.wpsstm-invalid-track{
         background:rgba(255, 0, 0, 0.10);
     }
-
-    &:hover{
-        background: rgba(0,0,0,0.02);
-
-    }
-
-    &:not(:last-child){
-        border-bottom: 1px solid #eee;
+    
+    &:nth-child(odd){
+        background: rgba(0, 0, 0, 0.03);
     }
 
     &:hover,&.track-active{
@@ -184,12 +183,13 @@
 }
 
 .wpsstm-track-actions{
-    > * {
-        @include opacity(.5);
+    a{
+        @include opacity(.8);
         &:hover{
             @include opacity(1);
         }
     }
+
 }
 .wpsstm-track-action{
     a{

@@ -84,7 +84,7 @@ resize iframes with iframeResizer
 
 if (typeof iFrameResize === "function") { //check that fn is available
     $('.wpsstm-iframe-autoheight').iFrameResize({
-        log:true,
+        //log:true,
     });
 }
 

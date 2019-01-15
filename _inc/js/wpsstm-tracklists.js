@@ -39,6 +39,17 @@ $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklis
 });
 
 $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
+    
+    /*
+    Advanced header
+    */
+    var advancedHeaderContent = tracklist_obj.tracklist_el.find('.tracklist-advanced-header');
+    advancedHeaderContent.hide();
+    tracklist_obj.tracklist_el.find('.tracklist-advanced-header-bt').click(function(e) {
+        e.preventDefault();
+        $(this).hide();
+        advancedHeaderContent.show();
+    });
 
     /*
     New subtracks

@@ -23,7 +23,7 @@ if ($action=='render'){
 ?>
 
 <!DOCTYPE html>
-<html class="no-js" <?php language_attributes(); ?>>
+<html class="no-js wpsstm-no-admin-bar" <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
@@ -56,17 +56,19 @@ if ($action=='render'){
             }
             ?>
     
-            <div class="wpsstm-tracklist-notices">
+            
                 <?php
                 /*
                 Notices
                 */
                 if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
-                    echo $notices_el;
+                    ?>
+                    <div class="wpsstm-tracklist-notices">
+                        <?php echo $notices_el; ?>
+                    </div>
+                    <?php
                 }
                 ?>
-                
-            </div>
             <?php
             switch($action){
                 case 'share':

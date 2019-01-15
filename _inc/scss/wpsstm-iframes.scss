@@ -4,28 +4,32 @@ Popup, modals, etc.
 
 @import "compass";
 
-body.wpsstm-iframe{
+html,body{
+    /*fixes iframeResizer infinite expansion*/
+    height:initial!important;
+    min-height:initial!important;
     
-    margin:.5em!important;
-    background:rgba(255,255,255,.8);
+    margin:0;
+    padding:0;
+    background:rgba(255,255,255,.8)!important;
+}
 
-    &.wpsstm-tracklist-iframe,
-    &.wpsstm-track-iframe{
-        margin:.5em!important;
-    }
-    &.wpsstm-tracklist-manager-iframe{
-        form{
-            &#wpsstm-new-tracklist{
-                 margin:2em;
-            }
-            &#wpsstm-toggle-tracklists{
-                margin:1em;
-            }
-            button[type="submit"]{
-                margin: 1em auto;
-                display: block;
-            }
+body{
+    margin:.5em!important;
+    background:none!important;
+}
+
+.wpsstm-tracklist-manager-iframe{
+    form{
+        &#wpsstm-new-tracklist{
+             margin:2em;
+        }
+        &#wpsstm-toggle-tracklists{
+            margin:1em;
+        }
+        button[type="submit"]{
+            margin: 1em auto;
+            display: block;
         }
     }
-    
 }
