@@ -1,0 +1,31 @@
+/*
+Popup, modals, etc.
+*/
+
+@import "compass";
+
+body.wpsstm-iframe{
+    
+    margin:.5em!important;
+    background:rgba(255,255,255,.8);
+
+    &.wpsstm-tracklist-iframe,
+    &.wpsstm-track-iframe{
+        margin:.5em!important;
+    }
+    &.wpsstm-tracklist-manager-iframe{
+        form{
+            &#wpsstm-new-tracklist{
+                 margin:2em;
+            }
+            &#wpsstm-toggle-tracklists{
+                margin:1em;
+            }
+            button[type="submit"]{
+                margin: 1em auto;
+                display: block;
+            }
+        }
+    }
+    
+}

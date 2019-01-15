@@ -325,6 +325,100 @@ a.toggle-children-link, .toggle-children-link a{
     }
 }
 
+/*popups*/
+.wpsstm-dialog{
+    z-index:11;
+    background:rgba(255,255,255,.8);
+    border:1px solid #F7F7F7;
+    
+    position:relative;
+    
+    .wpsstm-dialog-loader{
+        @extend .wpsstm-loading-icon;
+    }
+    
+    button.ui-dialog-titlebar-close{
+        background: none;
+        color: black;
+    }
+
+    .ui-dialog-content{
+        
+        #wpsstm-popup-iframe{
+            background-color: white;
+        }
+        .wpsstm-dialog-loader{
+            font-size:3em;
+        }
+        
+        @include display-flex(flex!important);
+        > * {
+            margin: auto;
+        }
+        #wpsstm-dialog-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f19a";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
+        #wpsstm-dialog-lastfm-auth-notice{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f202";
+                font-size:2em;
+                margin-right: .25em;
+            }
+        }
+        .wpsstm-dialog-loader{
+            display:none;
+        }
+        #wpsstm-popup-iframe{
+            width: 100%;
+            height: 100%;
+        }
+
+    }
+
+    &.dialog-loading{
+
+        .ui-dialog-content{
+            > *{
+                display:none;
+            }
+            .wpsstm-dialog-loader{
+                display:inherit;
+            }
+        }
+
+    }
+
+    .ui-dialog-titlebar-close{
+        position: absolute;
+        right: 0;
+        top: 0;
+        .ui-icon-closethick{
+            @extend .wpsstm-icon;
+            &:before{
+                content:"\f00d";//.fa-times
+            }
+        }
+        .ui-button-text{
+            display:none;
+        }
+
+    }
+    
+    iframe{
+        width:100%;
+        height:100%;
+    }
+
+}
+
+/*iframes*/
+
 .wpsstm-iframe-container{
     width:100%;
     
@@ -345,24 +439,15 @@ a.toggle-children-link, .toggle-children-link a{
             display:inherit;
         }
         iframe{
-            //TOUFIX breaks JS resizing of iframes display:none;
+            margin: 0px;
+            padding: 0px;
+            width:100%;
         }
     } 
-}
-
-iframe{
-    margin: 0px;
-    padding: 0px;
-    width:100%;
-    &.wpsstm-iframe-autoheight{
-        @include transition-property(height);
-        @include transition-duration(.4s);
-    }
 }
 
 @import "wpsstm-tracklists";
 @import "wpsstm-tracks";
 @import "wpsstm-sources";
 @import "wpsstm-player";
-@import "wpsstm-popups";
 @import "wpsstm-backend";

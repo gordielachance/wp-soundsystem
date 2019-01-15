@@ -396,7 +396,9 @@ class WP_SoundSystem {
         if( !did_action('wpsstm-iframe') ){
             wp_enqueue_script( 'iframeResizer', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.min.js',null,'3.6.3');
         }else{
+            wp_enqueue_style( 'wpsstm-iframes', wpsstm()->plugin_url . '_inc/css/wpsstm-iframes.css',null,wpsstm()->version );
             wp_enqueue_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'3.6.3',true);
+ 
         }
 
 
