@@ -3,6 +3,7 @@
  * @file
  * Test the Scanner. This requires the InputStream tests are all good.
  */
+
 namespace Masterminds\HTML5\Tests\Parser;
 
 use Masterminds\HTML5\Parser\StringInputStream;
@@ -10,21 +11,33 @@ use Masterminds\HTML5\Parser\Scanner;
 
 class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 {
-
     /**
      * A canary test to make sure the basics are setup and working.
      */
-    public function testConstruct()
+    public function testConstructDeprecated()
     {
-        $is = new StringInputStream("abc");
+        $is = new StringInputStream('abc');
         $s = new Scanner($is);
 
         $this->assertInstanceOf('\Masterminds\HTML5\Parser\Scanner', $s);
     }
 
+    public function testConstruct()
+    {
+        $this->assertInstanceOf('\Masterminds\HTML5\Parser\Scanner', new Scanner('abc'));
+    }
+
+    public function testNextDeprecated()
+    {
+        $s = new Scanner(new StringInputStream('abc'));
+
+        $this->assertEquals('b', $s->next());
+        $this->assertEquals('c', $s->next());
+    }
+
     public function testNext()
     {
-        $s = new Scanner(new StringInputStream("abc"));
+        $s = new Scanner('abc');
 
         $this->assertEquals('b', $s->next());
         $this->assertEquals('c', $s->next());
@@ -32,7 +45,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testPosition()
     {
-        $s = new Scanner(new StringInputStream("abc"));
+        $s = new Scanner('abc');
 
         $this->assertEquals(0, $s->position());
 
@@ -42,7 +55,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testPeek()
     {
-        $s = new Scanner(new StringInputStream("abc"));
+        $s = new Scanner('abc');
 
         $this->assertEquals('b', $s->peek());
 
@@ -52,7 +65,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testCurrent()
     {
-        $s = new Scanner(new StringInputStream("abc"));
+        $s = new Scanner('abc');
 
         // Before scanning the string begins the current is empty.
         $this->assertEquals('a', $s->current());
@@ -67,7 +80,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testUnconsume()
     {
-        $s = new Scanner(new StringInputStream("abcdefghijklmnopqrst"));
+        $s = new Scanner('abcdefghijklmnopqrst');
 
         // Get initial position.
         $s->next();
@@ -75,7 +88,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
         // Move forward a bunch of positions.
         $amount = 7;
-        for ($i = 0; $i < $amount; $i ++) {
+        for ($i = 0; $i < $amount; ++$i) {
             $s->next();
         }
 
@@ -87,7 +100,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testGetHex()
     {
-        $s = new Scanner(new StringInputStream("ab13ck45DE*"));
+        $s = new Scanner('ab13ck45DE*');
 
         $this->assertEquals('ab13c', $s->getHex());
 
@@ -97,7 +110,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testGetAsciiAlpha()
     {
-        $s = new Scanner(new StringInputStream("abcdef1%mnop*"));
+        $s = new Scanner('abcdef1%mnop*');
 
         $this->assertEquals('abcdef', $s->getAsciiAlpha());
 
@@ -109,7 +122,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testGetAsciiAlphaNum()
     {
-        $s = new Scanner(new StringInputStream("abcdef1ghpo#mn94op"));
+        $s = new Scanner('abcdef1ghpo#mn94op');
 
         $this->assertEquals('abcdef1ghpo', $s->getAsciiAlphaNum());
 
@@ -120,7 +133,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testGetNumeric()
     {
-        $s = new Scanner(new StringInputStream("1784a 45 9867 #"));
+        $s = new Scanner('1784a 45 9867 #');
 
         $this->assertEquals('1784', $s->getNumeric());
 
@@ -132,7 +145,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testCurrentLine()
     {
-        $s = new Scanner(new StringInputStream("1784a\n45\n9867 #\nThis is a test."));
+        $s = new Scanner("1784a\n45\n9867 #\nThis is a test.");
 
         $this->assertEquals(1, $s->currentLine());
 
@@ -144,7 +157,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
 
     public function testColumnOffset()
     {
-        $s = new Scanner(new StringInputStream("1784a a\n45 9867 #\nThis is a test."));
+        $s = new Scanner("1784a a\n45 9867 #\nThis is a test.");
 
         // Move the pointer to the space.
         $s->getAsciiAlphaNum();
@@ -163,7 +176,7 @@ class ScannerTest extends \Masterminds\HTML5\Tests\TestCase
     public function testRemainingChars()
     {
         $string = "\n45\n9867 #\nThis is a test.";
-        $s = new Scanner(new StringInputStream("1784a\n45\n9867 #\nThis is a test."));
+        $s = new Scanner("1784a\n45\n9867 #\nThis is a test.");
 
         $s->getAsciiAlphaNum();
         $this->assertEquals($string, $s->remainingChars());

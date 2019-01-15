@@ -45,23 +45,23 @@
     },
     {
         "name": "neitanod/forceutf8",
-        "version": "v2.0.1",
-        "version_normalized": "2.0.1.0",
+        "version": "v2.0.2",
+        "version_normalized": "2.0.2.0",
         "source": {
             "type": "git",
             "url": "https://github.com/neitanod/forceutf8.git",
-            "reference": "47c883ab2739e7938a8bb0bfd1c29d48c88858de"
+            "reference": "30980a8ca2787a7730d370eac310b8987eb68229"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/47c883ab2739e7938a8bb0bfd1c29d48c88858de",
-            "reference": "47c883ab2739e7938a8bb0bfd1c29d48c88858de",
+            "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/30980a8ca2787a7730d370eac310b8987eb68229",
+            "reference": "30980a8ca2787a7730d370eac310b8987eb68229",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.0"
         },
-        "time": "2017-05-22T18:50:57+00:00",
+        "time": "2018-10-10T23:03:52+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -70,6 +70,9 @@
             }
         },
         "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD-3-Clause"
+        ],
         "authors": [
             {
                 "name": "Sebastián Grignoli",
@@ -81,33 +84,35 @@
     },
     {
         "name": "masterminds/html5",
-        "version": "2.3.0",
-        "version_normalized": "2.3.0.0",
+        "version": "2.5.0",
+        "version_normalized": "2.5.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Masterminds/html5-php.git",
-            "reference": "2c37c6c520b995b761674de3be8455a381679067"
+            "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/2c37c6c520b995b761674de3be8455a381679067",
-            "reference": "2c37c6c520b995b761674de3be8455a381679067",
+            "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/b5d892a4bd058d61f736935d32a9c248f11ccc93",
+            "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93",
             "shasum": ""
         },
         "require": {
+            "ext-ctype": "*",
+            "ext-dom": "*",
             "ext-libxml": "*",
             "php": ">=5.3.0"
         },
         "require-dev": {
-            "phpunit/phpunit": "4.*",
+            "phpunit/phpunit": "^4.8.35",
             "sami/sami": "~2.0",
             "satooshi/php-coveralls": "1.0.*"
         },
-        "time": "2017-09-04T12:26:28+00:00",
+        "time": "2018-12-27T22:03:43+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.2-dev"
+                "dev-master": "2.4-dev"
             }
         },
         "installation-source": "dist",
@@ -153,12 +158,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
-            "reference": "b257bb96f547f169f4ade2d23bd11514f588c383"
+            "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/b257bb96f547f169f4ade2d23bd11514f588c383",
-            "reference": "b257bb96f547f169f4ade2d23bd11514f588c383",
+            "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/3226fd44eb4c9ed45899210c666d0a333aa0d626",
+            "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626",
             "shasum": ""
         },
         "require": {
@@ -166,10 +171,10 @@
         },
         "require-dev": {
             "php": ">=5.3.3",
-            "phpunit/phpunit": "~4.8",
+            "phpunit/phpunit": "7.4.0",
             "vlucas/phpdotenv": "*"
         },
-        "time": "2017-08-03T06:23:22+00:00",
+        "time": "2018-12-27T07:57:18+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {

@@ -3,12 +3,12 @@
  * @file
  * Test the Tree Builder's special-case rules.
  */
+
 namespace Masterminds\HTML5\Tests\Parser;
 
 use Masterminds\HTML5\Parser\TreeBuildingRules;
 use Masterminds\HTML5\Parser\Tokenizer;
 use Masterminds\HTML5\Parser\Scanner;
-use Masterminds\HTML5\Parser\StringInputStream;
 use Masterminds\HTML5\Parser\DOMTreeBuilder;
 
 /**
@@ -16,7 +16,6 @@ use Masterminds\HTML5\Parser\DOMTreeBuilder;
  */
 class TreeBuildingRulesTest extends \Masterminds\HTML5\Tests\TestCase
 {
-
     const HTML_STUB = '<!DOCTYPE html><html><head><title>test</title></head><body>%s</body></html>';
 
     /**
@@ -25,29 +24,31 @@ class TreeBuildingRulesTest extends \Masterminds\HTML5\Tests\TestCase
     protected function parse($string)
     {
         $treeBuilder = new DOMTreeBuilder();
-        $scanner = new Scanner(new StringInputStream($string));
+        $scanner = new Scanner($string);
         $parser = new Tokenizer($scanner, $treeBuilder);
 
         $parser->parse();
+
         return $treeBuilder->document();
     }
+
     /**
      * Convenience function for parsing fragments.
      */
     protected function parseFragment($string)
     {
         $events = new DOMTreeBuilder(true);
-        $scanner = new Scanner(new StringInputStream($string));
+        $scanner = new Scanner($string);
         $parser = new Tokenizer($scanner, $events);
 
         $parser->parse();
+
         return $events->fragment();
     }
 
     public function testTDFragment()
     {
-
-        $frag = $this->parseFragment("<td>This is a test of the HTML5 parser</td>");
+        $frag = $this->parseFragment('<td>This is a test of the HTML5 parser</td>');
 
         $td = $frag->childNodes->item(0);
 
