@@ -1181,6 +1181,22 @@ class WPSSTM_Track{
         return $success;
     }
     
+    function get_tracklists_manager_iframe(){
+        $attr = array(
+            'class' => "wpsstm-tracklist-manager-iframe wpsstm-iframe-autoheight",
+            'width' =>  '100%',
+            'frameborder' => 0,
+            'src' => $this->get_tracklists_manager_url(),
+        );
+        
+        $attr_str = wpsstm_get_html_attr($attr);
+
+        $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
+        $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
+        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s%s</div>',$notice_el,$iframe_el);
+        return $el;
+    }
+    
     function get_track_hidden_form_fields(){
         $fields = array();
         if ($this->post_id){

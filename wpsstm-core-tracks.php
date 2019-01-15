@@ -636,9 +636,9 @@ class WPSSTM_Core_Tracks{
         );
 
         add_meta_box( 
-            'wpsstm-track-playlists', 
-            __('Playlists','wpsstm'),
-            array($this,'metabox_track_playlists_content'),
+            'wpsstm-track-tracklists', 
+            __('Tracklists','wpsstm'),
+            array($this,'metabox_track_tracklists_content'),
             wpsstm()->post_type_track, 
             'side', //context
             'default' //priority
@@ -686,8 +686,9 @@ class WPSSTM_Core_Tracks{
         return wpsstm_get_backend_form_input($input_attr);
     }
     
-    function metabox_track_playlists_content( $post ){
-        wpsstm_locate_template( 'tracklists-manager.php',true );
+    function metabox_track_tracklists_content( $post ){
+        global $wpsstm_track;
+        echo $wpsstm_track->get_tracklists_manager_iframe();
     }
 
     function mb_populate_trackid( $post_id ) {
@@ -793,7 +794,7 @@ class WPSSTM_Core_Tracks{
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
             $track = new WPSSTM_Track( $atts['post_id'] );
             $wpsstm_tracklist->add_tracks($track);
-            $output = $wpsstm_tracklist->get_tracklist_html();
+            $output = $wpsstm_tracklist->get_tracklist_iframe();
         }
 
         return $output;
