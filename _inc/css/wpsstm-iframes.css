@@ -1,0 +1,32 @@
+/*
+Popup, modals, etc.
+*/
+/* line 7, ../scss/wpsstm-iframes.scss */
+html, body {
+  /*fixes iframeResizer infinite expansion*/
+  height: initial !important;
+  min-height: initial !important;
+  margin: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* line 17, ../scss/wpsstm-iframes.scss */
+body {
+  margin: 0.5em !important;
+  background: none !important;
+}
+
+/* line 24, ../scss/wpsstm-iframes.scss */
+.wpsstm-tracklist-manager-iframe form#wpsstm-new-tracklist {
+  margin: 2em;
+}
+/* line 27, ../scss/wpsstm-iframes.scss */
+.wpsstm-tracklist-manager-iframe form#wpsstm-toggle-tracklists {
+  margin: 1em;
+}
+/* line 30, ../scss/wpsstm-iframes.scss */
+.wpsstm-tracklist-manager-iframe form button[type="submit"] {
+  margin: 1em auto;
+  display: block;
+}
