@@ -195,7 +195,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function get_tracklist_html(){
+    function get_tracklist_iframe(){
 
         $attr = array(
             'class' => "wpsstm-tracklist-iframe wpsstm-iframe-autoheight",

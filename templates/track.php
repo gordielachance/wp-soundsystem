@@ -71,8 +71,8 @@ $body_classes = array(
                     if ( $playlists_list = $wpsstm_track->get_parents_list() ){
 
                         ?>
-                        <div class="wpsstm-track-playlists">
-                            <strong><?php _e('In playlists:','wpsstm');?></strong>
+                        <div class="wpsstm-track-tracklists">
+                            <strong><?php _e('In tracklists:','wpsstm');?></strong>
                             <?php echo $playlists_list; ?>
                         </div>
                         <?php

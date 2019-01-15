@@ -120,7 +120,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
-echo $tracklist->get_tracklist_html();
+echo $tracklist->get_tracklist_iframe();
 ?>`
 
 = What are community tracks and when are they created ? =
@@ -158,7 +158,6 @@ There is an option in the plugin settings to flush those community tracks : they
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
 * new filter 'wpsstm_pre_save_autosources'
 * [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
-* TOFIX remote request pagination
 
 = 1.9.4 =
 * Better settings page errors
