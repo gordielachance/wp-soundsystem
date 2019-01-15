@@ -74,33 +74,20 @@ $( document ).ready(function() {
     iframes.one( "load", function() {
         $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
     });
-    
-    /*
-    Set height of tracklist Iframe once it has init.
-    */
-    $(document).on("wpsstmTracklistInit", function( event, tracklist_obj ) {
-        var document = tracklist_obj.tracklist_el.context.ownerDocument;
-        tracklist_obj.debug("resizing  iframe #" + tracklist_obj.index);
-        var iframe = $('iframe.wpsstm-tracklist-iframe').get(tracklist_obj.index);
-        wpsstmAutoTracklistHeight( iframe );
-    });
 
 });
 
-function wpsstmAutoTracklistHeight( iFrame ) {
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
-}
 
 /*
-resize iframes
+resize iframes with iframeResizer
 */
-/*
+
 if (typeof iFrameResize === "function") { //check that fn is available
     $('.wpsstm-iframe-autoheight').iFrameResize({
-        //log:true,
+        log:true,
     });
 }
-*/
+
 
 function wpsstm_dialog_notice(notice){
 
