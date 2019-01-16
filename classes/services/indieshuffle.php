@@ -6,7 +6,7 @@ class WPSSTM_IndieShuffle{
         add_filter('wpsstm_wizard_service_links',array(__class__,'register_indieshuffle_service_links'));
     }
     //register preset
-    function register_hypem_preset($presets){
+    function register_indieshuffle_preset($presets){
         $presets[] = new WPSSTM_IndieShuffle_Preset();
         return $presets;
     }
@@ -51,4 +51,4 @@ function wpsstm_indieshuffle(){
     new WPSSTM_IndieShuffle();
 }
 
-add_action('wpsstm_init','wpsstm_hypem');
+add_action('wpsstm_init','wpsstm_indieshuffle');
