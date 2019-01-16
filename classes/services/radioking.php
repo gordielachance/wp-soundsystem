@@ -6,12 +6,12 @@ class WPSSTM_RadioKing{
         add_filter('wpsstm_remote_presets',array($this,'register_radioking_preset'));
     }
     //register preset
-    function register_hypem_preset($presets){
+    function register_radioking_preset($presets){
         $presets[] = new WPSSTM_RadioKing_Api_Preset();
         return $presets;
     }
     function register_radioking_service_link($links){
-        $item = sprintf('<a href="https://www.radioking.com" target="_blank" title="%s"><img src="%s" /></a>','RadioKing',wpsstm()->plugin_url . '_inc/img/radioking-icon.jpg');
+        $item = sprintf('<a href="https://www.radioking.com" target="_blank" title="%s"><img src="%s" /></a>','RadioKing',wpsstm()->plugin_url . '_inc/img/radioking-icon.png');
         $links[] = $item;
         return $links;
     }
@@ -26,7 +26,7 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     function __construct($url = null,$options = null) {
         
         $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'root > data'),
+            'tracks'            => array('path'=>'root > element'),
             'track_artist'      => array('path'=>'artist'),
             'track_album'       => array('path'=>'album'),
             'track_title'       => array('path'=>'title'),
@@ -38,7 +38,11 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     }
     
     function init_url($url){
-        if ( ( $this->station_slug = $this->get_station_slug($url) ) && ( $this->station_data = $this->get_station_data($this->station_id) ) ){
+        
+        $this->station_slug = $this->get_station_slug($url);
+        $this->station_data = ($this->station_slug) ? $this->get_station_data($this->station_slug) : null;
+        
+        if ( $this->station_data ){
             $this->station_id = wpsstm_get_array_value(array('idradio'),$this->station_data);
         }
         
@@ -46,7 +50,7 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
     }
 
     function get_remote_request_url(){
-        return sprintf('https://www.radioking.com/api/radio/%s/track/ckoi?limit=20',$station_id);
+        return sprintf('https://www.radioking.com/widgets/api/v1/radio/%s/track/ckoi?limit=8',$this->station_id);
     }
 
     function get_station_slug($url){
@@ -62,7 +66,8 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
         $transient_name = 'wpsstm-radioking-' . $station_slug . '-data';
 
         if ( false === ( $station_data = get_transient($transient_name ) ) ) {
-            $response = wp_remote_get( sprintf('https://www.radioking.com/api/radio/slug/%s',$station_slug) );
+            $data_url = sprintf('https://www.radioking.com/api/radio/slug/%s',$station_slug);
+            $response = wp_remote_get( $data_url );
             $json = wp_remote_retrieve_body($response);
             if ( is_wp_error($json) ) return $json;
             $api = json_decode($json,true);
@@ -95,4 +100,4 @@ function wpsstm_radioking_init(){
     new WPSSTM_RadioKing();
 }
 
-add_action('wpsstm_init','wpsstm_onlineradiobox_init');
+add_action('wpsstm_init','wpsstm_radioking_init');
