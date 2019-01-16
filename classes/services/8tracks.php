@@ -36,8 +36,6 @@ class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
         
         parent::__construct($url,$options);
 
-        //add_filter( 'wpsstm_live_tracklist_url',array($this,'get_remote_url') );
-        //add_filter( 'wpsstm_live_tracklist_title',array($this,'get_remote_title'),10,2 );
     }
     
     function init_url($url){
