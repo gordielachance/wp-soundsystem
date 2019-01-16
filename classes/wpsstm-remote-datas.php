@@ -49,7 +49,10 @@ class WPSSTM_Remote_Tracklist{
     public $response_body = null;
     public $body_node = null;
     public $track_nodes = array();
+    
     public $tracks = array();
+    public $title;
+    public $author;
 
     public function __construct($url = null,$options = null) {
         $this->url = trim($url);
@@ -99,6 +102,12 @@ class WPSSTM_Remote_Tracklist{
             if ( is_wp_error($page_tracks) ){
                 $success = $page_tracks;
                 break;
+            }
+            
+            //first page
+            if ($this->request_pagination['current_page'] == 0){
+                $this->title = $this->get_remote_title();
+                $this->author = $this->get_remote_author();
             }
             
             $this->tracks = array_merge($this->tracks,(array)$page_tracks);
@@ -397,22 +406,22 @@ class WPSSTM_Remote_Tracklist{
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */
     
-    public function get_remote_title(){
+    protected function get_remote_title(){
         $title = null;
         
         if ( $selector_title = $this->get_selectors( array('tracklist_title') ) ){
             $title = $this->parse_node($this->body_node,$selector_title);
         }
-        return apply_filters('wpsstm_live_tracklist_title',$title,$this);
+        return $title;
     }
     
     /*
     Get the playlist author.  Could be overriden in presets.
     */
     
-    public function get_remote_author(){
+    protected function get_remote_author(){
         $author = null;
-        return apply_filters('wpsstm_live_tracklist_author',$author,$this);
+        return $author;
     }
 
     protected function get_track_nodes($body_node){

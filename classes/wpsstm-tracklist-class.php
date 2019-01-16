@@ -674,15 +674,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
         $refresh_delay = $this->get_human_next_refresh_time();
-        
+
         if ($live){
             
             $this->populate_preset();
             $success =       $this->preset->populate_remote_tracks();
             
             $tracks = $this->preset->tracks;
-            $this->title =  $this->preset->get_remote_title();
-            $this->author = $this->preset->get_remote_author();
+            
+            // if post title is empty, use the remote title
+            $remote_title = $this->preset->title;
+            $this->title = (!$this->title && $remote_title) ? $remote_title : null;
+
+            //if remote author exists, use it
+            $remote_author = $this->preset->author;
+            $this->author = ($remote_author) ? $remote_author : $this->author;
             
             // handle remote errors
             if ( is_wp_error($success) ){
@@ -735,12 +741,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
                
         //update tracklist
-        $this->updated_time = current_time( 'timestamp', true );//set the time tracklist has been updated
 
         $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->title,
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->author,
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time,
+            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->preset->title,
+            WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->preset->author,
+            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  current_time( 'timestamp', true ),//set the time tracklist has been updated
         );
 
         $tracklist_post = array(
