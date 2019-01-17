@@ -2,13 +2,13 @@
 
 global $wpsstm_track;
 $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID)
-$can_play_track = $wpsstm_track->can_play_track();
+$has_player = wpsstm()->get_options('player_enabled');
 
 ?>
 <li class="<?php echo implode(' ',$wpsstm_track->get_track_class());?>" <?php echo $wpsstm_track->get_track_attr();?>>
     <div class="wpsstm-track-row">
         <div class="wpsstm-track-pre">
-            <?php if ( $can_play_track && !is_wp_error($can_play_track) ){ ?>
+            <?php if ( $has_player ){ ?>
                 <span class="wpsstm-track-play-bt">
                     <a class="wpsstm-track-icon wpsstm-icon" href="#"></a>
                 </span>
