@@ -107,8 +107,6 @@ class WPSSTM_Settings {
                 $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
         }
 
-        //$new_input = array_filter($new_input); //disabled here because this will remove '0' values
-
         return $new_input;
         
         

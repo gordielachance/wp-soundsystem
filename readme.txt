@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 5
+Tested up to: 5.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -144,19 +144,17 @@ There is an option in the plugin settings to flush those community tracks : they
 
 == Changelog ==
 
-= 1.9.9 =
+= 2.0.0 =
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
-* tracklists are now inserted as iframes (faster and better for styling)
-* loved tracks are now regular subtracks, part of a regular tracklist that is created for each user
+* tracklists loaded as iframes (faster and better for styling)
+* loved tracks are now regular subtracks, part of a simple tracklist that is created for each user
 * Improved autosource
 * Improved wizard
 * Improved templates
 * Better tracks source GUI
 * Spotify metabox
-* Static track dequeue action
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
-* new filter 'wpsstm_pre_save_autosources'
 * [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
 
 = 1.9.4 =
