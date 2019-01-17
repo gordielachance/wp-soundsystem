@@ -11,7 +11,7 @@ class WPSSTM_IndieShuffle{
         return $presets;
     }
 
-    static function register_deezer_service_links($links){
+    static function register_indieshuffle_service_links($links){
         $item = sprintf('<a href="https://www.indieshuffle.com" target="_blank" title="%s"><img src="%s" /></a>','indieshuffle',wpsstm()->plugin_url . '_inc/img/indieshuffle-icon.png');
         $links[] = $item;
         return $links;
