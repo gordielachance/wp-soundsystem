@@ -65,7 +65,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return;
         }
 
-        $this->title = get_the_title($this->post_id);
+        $this->title = get_post_field( 'title', $this->post_id );
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
