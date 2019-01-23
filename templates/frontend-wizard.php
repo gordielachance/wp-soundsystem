@@ -61,12 +61,12 @@ if ( is_wp_error($can_wizard) ){ //TOUFIX TOUCHECK
 <?php
 
 //services
-wpsstm_locate_template( 'wizard-services.php', true);
+wpsstm_locate_template( 'wizard-services.php', true, false); //we need $require_once = false here or Jetpack will fuck up
 
 //bangs
-wpsstm_locate_template( 'wizard-bangs.php', true);
+wpsstm_locate_template( 'wizard-bangs.php', true, false); //we need $require_once = false here or Jetpack will fuck up
 
 //recent
 if ( wpsstm()->get_options('recent_wizard_entries') ) {
-    wpsstm_locate_template( 'wizard-recent-entries.php', true, false );
+    wpsstm_locate_template( 'wizard-recent-entries.php', true, false );  //we need $require_once = false here or Jetpack will fuck up
 }
