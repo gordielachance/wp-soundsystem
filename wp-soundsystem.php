@@ -185,12 +185,14 @@ class WP_SoundSystem {
         new WPSSTM_Player();
         new WPSSTM_Core_BuddyPress();
         ////
+	    
+	// activation
+	register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
+
+	// deactivation
+	register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
-
-        //roles & capabilities
-        register_activation_hook( $this->file, array( $this, 'add_custom_capabilites' ) );
-        register_deactivation_hook( $this->file, array( $this, 'remove_custom_capabilities' ) );
 
         add_action( 'admin_init', array($this,'load_textdomain'));
 
@@ -207,8 +209,7 @@ class WP_SoundSystem {
     }
     
     function wpsstm_rewrite_rules(){
-        flush_rewrite_rules(); //TOUFIX elsewhere
-        
+
         add_rewrite_tag(
             '%wpsstm_action%',
             '([^&]+)'
@@ -233,6 +234,16 @@ class WP_SoundSystem {
 
     function load_textdomain() {
         load_plugin_textdomain( 'wpsstm', false, $this->plugin_dir . '/languages' );
+    }
+	
+    function activate_wpsstm() {
+	$this->add_custom_capabilites();
+        flush_rewrite_rules();
+    }
+
+    function deactivate_wpsstm() {
+	$this->remove_custom_capabilites();
+        flush_rewrite_rules();
     }
 
     function upgrade(){
