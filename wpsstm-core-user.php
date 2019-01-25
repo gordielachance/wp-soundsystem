@@ -4,6 +4,7 @@ class WPSSTM_Core_User{
 
     var $user_id;
     var $favorites_id;
+    var $can_subtracks;
 
     function __construct($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
