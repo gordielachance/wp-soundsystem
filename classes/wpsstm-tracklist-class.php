@@ -304,7 +304,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
         $can_request = WPSSTM_Core_Live_Playlists::is_community_user_ready();
         $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && !is_wp_error($can_request) );
-        $can_favorite = $this->post_id; //call to action TO FIX to CHECK
 
         $actions = array();
 
@@ -334,7 +333,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
         
         //favorite / unfavorite
-        if ($can_favorite){
+        if ( get_current_user_id() ){
 
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
@@ -351,15 +350,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'classes' =>    array('action-unfavorite'),
             );
 
-        }else{
-            if ( !get_current_user_id() ){ //call to action
-                $actions['favorite'] = array(
-                    'text' =>      __('Favorite','wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('action-favorite')
-                );
-            }
+        }else{ //call to action
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       '#',
+                'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                'classes' =>    array('action-favorite')
+            );
         }
 
         //toggle type
