@@ -766,19 +766,27 @@ class WPSSTM_Track{
     
     function get_subtrack_action_url($action,$ajax = false){
         
-        if ( in_array($action,array('favorite','unfavorite')) ){
-            
-            $action = ($action=='favorite') ? 'queue' : 'dequeue';
-            
-            //TOUFIX this should be put elsewhere so it isn't populated for each track ?
-            $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-        }else{
-            $tracklist_id = $this->tracklist->post_id;
+        $tracklist = $this->tracklist;
+        
+        switch($action){
+                
+                
+            case 'favorite':
+            case 'unfavorite':
+                
+                $action = ($action=='favorite') ? 'queue' : 'dequeue';
+
+                if ( $tracklist_id = wpsstm()->user->favorites_id ){
+                    $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+                }
+
+            break;
+                
+            default:
+            break;
+                
         }
 
-        if (!$tracklist_id) return;
-        
-        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         $url = $tracklist->get_tracklist_action_url($action,$ajax);
 
         $track_args = $this->to_url();
@@ -806,10 +814,6 @@ class WPSSTM_Track{
         
         $actions = array();
 
-        /*
-        Tracklist
-        //TO FIX this should be reworked. Either tracks should have a ->in_playlist_id property, either filter the track actions, either have a tracklist_track_links() fn instead of this one, something like that.
-        */
         $tracklist_id =             $this->tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
@@ -822,12 +826,10 @@ class WPSSTM_Track{
         $can_open_track =           ($this->post_id);
         $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
-        $can_favorite_track =       true;//call to action
-        $can_playlists_manager =    true;//call to action
         
-        /*
-        Subtrack
-        */
+        $can_favorite_track =       ( wpsstm()->user->can_subtracks && wpsstm()->user->favorites_id);
+        $can_playlists_manager =    ( wpsstm()->user->can_subtracks );
+
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
@@ -859,7 +861,17 @@ class WPSSTM_Track{
                 'classes' =>    array('action-unfavorite'),
             );
 
+        }else{
+            if ( !get_current_user_id() ){ //call to action
+                $actions['favorite'] = array(
+                    'text' =>      __('Favorite','wpsstm'),
+                    'href' =>       '#',
+                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                    'classes' =>    array('action-favorite')
+                );
+            }
         }
+        
         //track details
         if ($can_open_track){
             $actions['about'] = array(
@@ -899,6 +911,14 @@ class WPSSTM_Track{
                 'href' =>       $this->get_tracklists_manager_url(),
                 'classes' =>    array('wpsstm-track-popup'),
             );
+        }else{
+            if ( !get_current_user_id() ){ //call to action
+                $actions['toggle-tracklists'] = array(
+                    'text' =>      __('Playlists manager','wpsstm'),
+                    'href' =>       '#',
+                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                );
+            }
         }
 
         //delete track

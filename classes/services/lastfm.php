@@ -651,10 +651,20 @@ class WPSSTM_LastFM{
     function get_lastfm_actions($actions = null){
         
         //enable scrobbler
-        if ( $this->get_options('scrobble') ){
-            $actions['scrobbler'] = array(
-                'text' =>       __('Last.fm scrobble', 'wpsstm'),
-            );
+        if ( !$this->get_options('scrobble') ){
+            if ( !get_current_user_id() ){
+                $actions['scrobbler'] = array(
+                    'text' =>       __('Last.fm scrobble', 'wpsstm'),
+                    'href' =>       '#',
+                );
+            }else{
+                $actions['scrobbler'] = array(
+                    'text' =>       __('Last.fm scrobble', 'wpsstm'),
+                    'href' =>       '#',
+                    'desc' =>       __('This action requires you to be logged.','wpsstm')
+                );
+            }
+
         }
         
         return $actions;

@@ -335,9 +335,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //favorite / unfavorite
         if ($can_favorite){
-            
-            $classes = array();
-            
+
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('favorite'),
@@ -353,6 +351,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'classes' =>    array('action-unfavorite'),
             );
 
+        }else{
+            if ( !get_current_user_id() ){ //call to action
+                $actions['favorite'] = array(
+                    'text' =>      __('Favorite','wpsstm'),
+                    'href' =>       '#',
+                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                    'classes' =>    array('action-favorite')
+                );
+            }
         }
 
         //toggle type
@@ -858,8 +865,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             do_action('wpsstm_queue_track',$track,$this->post_id);
             
             //favorites ?
-            $favorites_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-            if ( $this->post_id == $favorites_id ){
+            if ( $this->post_id == wpsstm()->user->favorites_id ){
                 do_action('wpsstm_love_track',$track);
             }
         }
@@ -886,8 +892,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             do_action('wpsstm_dequeue_track',$track,$this->post_id);
             
             //favorites ?
-            $favorites_id = WPSSTM_Core_Tracklists::get_user_favorites_id();
-            if ( $this->post_id == $favorites_id ){
+            if ( $this->post_id == wpsstm()->user->favorites_id ){
                 do_action('wpsstm_unlove_track',$track);
             }
         }
