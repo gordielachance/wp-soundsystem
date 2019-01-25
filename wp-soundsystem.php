@@ -40,6 +40,7 @@ class WP_SoundSystem {
     public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
+    public $user;
 
     /**
     * @var The one true Instance
@@ -136,6 +137,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
+        require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';

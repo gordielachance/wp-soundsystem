@@ -201,7 +201,7 @@ class WPSSTM_Core_BuddyPress{
     
     function user_favorite_tracks_subnav_title(){
         $user_id = bp_displayed_user_id();
-        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id($user_id);
+        $tracklist_id = wpsstm()->user->favorites_id;
         echo get_the_title($tracklist_id);
     }
 
@@ -210,7 +210,7 @@ class WPSSTM_Core_BuddyPress{
         
         //set global $wpsstm_tracklist
         $user_id = bp_displayed_user_id();
-        $tracklist_id = WPSSTM_Core_Tracklists::get_user_favorites_id($user_id);
+        $tracklist_id = wpsstm()->user->favorites_id;
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         echo $wpsstm_tracklist->get_tracklist_iframe();
     }
