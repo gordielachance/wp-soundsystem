@@ -18,7 +18,7 @@ class WPSSTM_Core_Tracklists{
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
         
         //rewrite rules
-        add_action( 'init', array($this, 'tracklists_rewrite_rules') );
+        add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         add_action( 'parse_query', array($this,'populate_global_tracklist'));
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2); //TOUFIX needed but breaks notices
@@ -265,7 +265,6 @@ class WPSSTM_Core_Tracklists{
             '([^&]+)'
         );
 
-        //all tracklists (static,live,album)
         foreach((array)wpsstm()->tracklist_post_types as $post_type){
 
             $obj = get_post_type_object( $post_type );

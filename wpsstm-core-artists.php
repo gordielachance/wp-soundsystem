@@ -6,7 +6,7 @@ class WPSSTM_Core_Artists{
 
     function __construct(){
 
-        add_action( 'init', array($this,'register_post_type_artist' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_artist' ));
         
         add_filter( 'query_vars', array($this,'add_query_var_artist') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );

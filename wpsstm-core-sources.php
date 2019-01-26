@@ -10,7 +10,7 @@ class WPSSTM_Core_Sources{
         //initialize global (blank) $wpsstm_source so plugin never breaks when calling it.
         $wpsstm_source = new WPSSTM_Source();
         
-        add_action( 'init', array($this,'register_post_type_sources' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_sources' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_sources_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_source_register'));

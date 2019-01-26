@@ -6,7 +6,7 @@ class WPSSTM_Core_Albums{
 
     
     function __construct() {
-        add_action( 'init', array($this,'register_post_type_album' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
         add_filter( 'query_vars', array($this,'add_query_var_album') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
         

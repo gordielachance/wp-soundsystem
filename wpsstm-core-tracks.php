@@ -12,13 +12,13 @@ class WPSSTM_Core_Tracks{
         //initialize global (blank) $wpsstm_track so plugin never breaks when calling it.
         $wpsstm_track = new WPSSTM_Track();
 
-        add_action( 'init', array($this,'register_post_type_track' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_track' ));
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'parse_query', array($this,'populate_global_track'));
         //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
 
         //rewrite rules
-        add_action('init', array($this, 'tracks_rewrite_rules'), 100 );
+        add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
 
         add_action( 'wp', array($this,'handle_track_action'), 8);
         add_filter( 'template_include', array($this,'handle_ajax_track_action'), 5);

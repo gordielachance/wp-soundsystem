@@ -4,7 +4,7 @@ class WPSSTM_Core_Playlists{
 
     function __construct() {
         
-        add_action( 'init', array($this,'register_post_type_playlist' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
         
         /*

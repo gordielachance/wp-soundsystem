@@ -8,7 +8,7 @@ class WPSSTM_Core_Live_Playlists{
 
     function __construct() {
 
-        add_action( 'init', array($this,'register_post_type_live_playlist' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );

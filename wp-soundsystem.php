@@ -186,15 +186,17 @@ class WP_SoundSystem {
         new WPSSTM_Core_BuddyPress();
         ////
 	    
-	// activation
-	register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
+        // activation
+        register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
 
-	// deactivation
-	register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
+        // deactivation
+        register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
 
         add_action( 'admin_init', array($this,'load_textdomain'));
+        
+        add_action( 'init', array($this,'init_post_types'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
@@ -203,25 +205,13 @@ class WP_SoundSystem {
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
-        add_action( 'init', array($this, 'wpsstm_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
 
     }
-    
-    function wpsstm_rewrite_rules(){
 
-        add_rewrite_tag(
-            '%wpsstm_action%',
-            '([^&]+)'
-        );
-        
-        add_rewrite_tag(
-            '%wpsstm_ajax_action%',
-            '([^&]+)'
-        );
-    }
-    
     function add_wpsstm_query_vars($qvars){
+        $qvars[] = 'wpsstm_action';
+        $qvars[] = 'wpsstm_ajax_action';
         return $qvars;
     }
 
@@ -237,12 +227,30 @@ class WP_SoundSystem {
     }
 	
     function activate_wpsstm() {
-	$this->add_custom_capabilites();
+        $this->debug_log('activation');
+        $this->init_post_types();
+        $this->add_custom_capabilites();
+        $this->init_rewrite();
         flush_rewrite_rules();
+    }
+    
+    function init_post_types(){
+        $this->debug_log('init post types');
+        do_action('wpsstm_init_post_types');
+    }
+    
+    /*
+    Hook for rewrite rules.
+    */
+    function init_rewrite(){
+        $this->debug_log('set rewrite rules');
+
+        do_action('wpsstm_init_rewrite');
     }
 
     function deactivate_wpsstm() {
-	$this->remove_custom_capabilites();
+        $this->debug_log('deactivation');
+        $this->remove_custom_capabilities();
         flush_rewrite_rules();
     }
 
