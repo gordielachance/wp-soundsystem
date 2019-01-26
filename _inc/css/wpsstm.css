@@ -1038,7 +1038,7 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   z-index: 50;
 }
 /* line 20, ../scss/_wpsstm-player.scss */
-.wpsstm-player a {
+.wpsstm-player a, .wpsstm-player a:hover, .wpsstm-player a:focus {
   color: #FFF;
 }
 /* line 24, ../scss/_wpsstm-player.scss */

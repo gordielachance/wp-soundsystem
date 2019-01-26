@@ -17,7 +17,7 @@ $player-text-color:#FFF;
     display:none;
     background:$player-bg-color;
     color:$player-text-color;
-    a{
+    a,a:hover,a:focus{
         color:$player-text-color;
     }
 
