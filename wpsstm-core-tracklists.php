@@ -26,8 +26,8 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp', array($this,'handle_manager_action'), 8);
         
         add_filter( 'template_include', array($this,'handle_ajax_tracklist_action'), 5);
-        add_filter('template_include', array($this,'tracklists_manager') );
-        add_filter('template_include', array($this,'tracklist_template') );
+        add_filter( 'template_include', array($this,'tracklist_template') );
+        add_filter( 'template_include', array($this,'tracklists_manager') );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         
@@ -302,7 +302,7 @@ class WPSSTM_Core_Tracklists{
             
             add_rewrite_rule( 
                 sprintf('^%s/%s/?',$obj->rewrite['slug'],WPSSTM_MANAGER_SLUG), // /music/TRACKLIST_TYPE/manager
-                sprintf('index.php?post_type=%s&p=$matches[1]&tracklists_manager',$post_type),
+                sprintf('index.php?post_type=%s&p=$matches[1]&tracklists_manager=true',$post_type),
                 'top'
             );
             
@@ -554,8 +554,9 @@ class WPSSTM_Core_Tracklists{
         if ( is_single() ) return $template;
         $post_type = get_query_var( 'post_type' );
         if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $template; //post does not exists
-        
+
         $template = wpsstm_locate_template( 'tracklists-manager.php' );
+
         return $template;
     }
 

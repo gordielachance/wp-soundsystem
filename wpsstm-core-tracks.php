@@ -219,16 +219,6 @@ class WPSSTM_Core_Tracks{
 
         $track_post_type_obj = get_post_type_object( wpsstm()->post_type_track );
 
-        add_rewrite_tag(
-            '%wpsstm_track_data%',
-            '([^&]+)'
-        );
-        
-        add_rewrite_tag(
-            '%subtrack_id%', //TOUFIX TOUCHECK
-            '(\d+)'
-        );
-        
         //single NEW subtrack action
         add_rewrite_rule(
             sprintf('^%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
@@ -616,6 +606,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function add_query_vars_track( $qvars ) {
+        $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'lookup_track';
         $qvars[] = 'loved_tracks';
         $qvars[] = 'in_subtracks';
