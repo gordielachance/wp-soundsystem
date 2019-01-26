@@ -867,7 +867,7 @@ class WPSSTM_Track{
                     'text' =>      __('Favorite','wpsstm'),
                     'href' =>       '#',
                     'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('action-favorite')
+                    'classes' =>    array('action-favorite','wpsstm-tooltip','wpsstm-requires-login'),
                 );
             }
         }
@@ -917,6 +917,7 @@ class WPSSTM_Track{
                     'text' =>      __('Playlists manager','wpsstm'),
                     'href' =>       '#',
                     'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                    'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
                 );
             }
         }

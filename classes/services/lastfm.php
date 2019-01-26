@@ -651,8 +651,8 @@ class WPSSTM_LastFM{
     function get_lastfm_actions($actions = null){
         
         //enable scrobbler
-        if ( !$this->get_options('scrobble') ){
-            if ( !get_current_user_id() ){
+        if ( $this->get_options('scrobble') ){
+            if ( get_current_user_id() ){
                 $actions['scrobbler'] = array(
                     'text' =>       __('Last.fm scrobble', 'wpsstm'),
                     'href' =>       '#',
@@ -661,7 +661,8 @@ class WPSSTM_LastFM{
                 $actions['scrobbler'] = array(
                     'text' =>       __('Last.fm scrobble', 'wpsstm'),
                     'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm')
+                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                    'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
                 );
             }
 

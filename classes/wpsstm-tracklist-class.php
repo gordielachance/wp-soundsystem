@@ -108,14 +108,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
 
-    public function get_title(){
-        $title = $this->title;
-        if (!$title && $this->post_id){
-            $title = sprintf(__('(tracklist #%d)','wpsstm'),$this->post_id);
-        }
-        return $title;
-    }
-
     function validate_playlist(){
         if(!$this->title){
             return new WP_Error( 'wpsstm_playlist_title_missing', __('Please enter a title for this playlist.','wpsstm') );
@@ -355,7 +347,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       '#',
                 'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                'classes' =>    array('action-favorite')
+                'classes' =>    array('action-favorite','wpsstm-tooltip','wpsstm-requires-login'),
             );
         }
 

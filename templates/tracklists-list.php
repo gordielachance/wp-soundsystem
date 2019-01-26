@@ -49,8 +49,8 @@ if ( $manager_tracklists->have_posts() ) {
             
                     ?>
                 </span>
-                <span class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->get_title();?>">
-                    <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->get_title();?></a>
+                <span class="wpsstm-tracklist-title" itemprop="name" title="<?php echo get_the_title();?>">
+                    <a href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo get_the_title();?></a>
                 <?php
                     $post_status = get_post_status();
                     ?>
