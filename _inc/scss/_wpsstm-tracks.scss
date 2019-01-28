@@ -45,12 +45,14 @@
             margin-right:.5em;
             &[itemprop="byArtist"]{
                 font-weight: bold;
+                &:after{
+                    content: "—";
+                    margin-left:.5em;
+                    font-weight: normal;
+                }
             }
             &[itemprop="name"]{
-                &:before{
-                    content: "—";
-                    margin-right:.5em;
-                }
+
             }
             &[itemprop="inAlbum"]{
                 font-size:.8em;
