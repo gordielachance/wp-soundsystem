@@ -646,6 +646,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         Select a preset based on the tracklist URL
         */
         foreach((array)$presets as $test_preset){
+            
+            $test_preset->__construct($feed_url,$this->preset_options);
+            
             if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
                 $this->preset = $test_preset;
                 break;
@@ -657,10 +660,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->preset = new WPSSTM_Remote_Tracklist();
         }
 
-        /*
-        Now that we have a preset, init it.
-        */
-        $this->preset->__construct($feed_url,$this->preset_options);
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');
     }
 
