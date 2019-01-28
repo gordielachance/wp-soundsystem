@@ -28,12 +28,14 @@ class WPSSTM_IndieShuffle_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'           => array('path'=>'#mainContainer .commontrack'),
-            'track_artist'     => array('attr'=>'data-track-artist'),
-            'track_title'      => array('attr'=>'data-track-title'),
-            'track_image'      => array('path'=>'img','attr'=>'src'),
-            'track_source_urls' => array('attr'=>'data-source'),
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'           => array('path'=>'#mainContainer .commontrack'),
+                'track_artist'     => array('attr'=>'data-track-artist'),
+                'track_title'      => array('attr'=>'data-track-title'),
+                'track_image'      => array('path'=>'img','attr'=>'src'),
+                'track_source_urls' => array('attr'=>'data-source'),
+            )
         );
         
         parent::__construct($url,$options);

@@ -23,10 +23,12 @@ class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'.tablelist-schedule tr'),
-            'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
-            'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'.tablelist-schedule tr'),
+                'track_artist'      => array('path'=>'a','regex'=>'(.+?)(?= - )'),
+                'track_title'       => array('path'=>'a','regex'=>' - (.*)'),
+            )
         );
         
         parent::__construct($url,$options);

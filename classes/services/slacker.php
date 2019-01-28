@@ -22,10 +22,12 @@ class WPSSTM_Slacker_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
-            'track_artist'      => array('path'=>'span.artist'),
-            'track_title'       => array('path'=>'span.title')
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'ol.playlistList li.row:not(.heading)'),
+                'track_artist'      => array('path'=>'span.artist'),
+                'track_title'       => array('path'=>'span.title')
+            )
         );
         
         parent::__construct($url,$options);

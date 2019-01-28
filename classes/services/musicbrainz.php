@@ -1156,14 +1156,17 @@ class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'           => array('path'=>'track'),
+                'track_artist'     => array('path'=>'artist > name'),
+                'track_title'      => array('path'=>'recording > title'),
+                'track_album'      => array('path'=>'/ release > title'),
+            )
+        );
+        
         parent::__construct($url,$options);
         
-        $this->options['selectors'] = array(
-            'tracks'           => array('path'=>'track'),
-            'track_artist'     => array('path'=>'artist > name'),
-            'track_title'      => array('path'=>'recording > title'),
-            'track_album'      => array('path'=>'/ release > title'),
-        );
     }
 
     function init_url($url){

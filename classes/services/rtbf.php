@@ -16,11 +16,13 @@ class WPSSTM_RTBF_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'li.radio-thread__entry'),
-            'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
-            'track_title'       => array('path'=>'span[itemprop="name"]'),
-            'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'li.radio-thread__entry'),
+                'track_artist'      => array('path'=>'span[itemprop="byArtist"]'),
+                'track_title'       => array('path'=>'span[itemprop="name"]'),
+                'track_image'       => array('path'=>'img[itemprop="inAlbum"]','attr'=>'data-src')
+            )
         );
         
         parent::__construct($url,$options);

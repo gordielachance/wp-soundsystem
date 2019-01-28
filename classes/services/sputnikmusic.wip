@@ -23,11 +23,13 @@ class WPSSTM_Sputnik_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            //'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
-            'tracks'           => array('path'=>'table[cellpadding="8"] td.alt1'),
-            'track_artist'     => array('path'=>'a:nth-child(2) b'),
-            'track_title'      => array('path'=>'.mediumtext','regex'=>'(.*?)(?:<br/>|<br>)'),
+        $this->preset_options = array(
+            'selectors' => array(
+                //'tracklist_title'   => array('path'=>'title','regex'=>null,'attr'=>null),
+                'tracks'           => array('path'=>'table[cellpadding="8"] td.alt1'),
+                'track_artist'     => array('path'=>'a:nth-child(2) b'),
+                'track_title'      => array('path'=>'.mediumtext','regex'=>'(.*?)(?:<br/>|<br>)')
+            )
         );
         
         parent::__construct($url,$options);

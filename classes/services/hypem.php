@@ -21,11 +21,13 @@ class WPSSTM_Hypem_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'.section-track'),
-            'track_artist'      => array('path'=>'.track_name .artist'),
-            'track_title'       => array('path'=>'.track_name .track'),
-            //'track_image'       => array('path'=>'a.thumb','attr'=>'src')
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'.section-track'),
+                'track_artist'      => array('path'=>'.track_name .artist'),
+                'track_title'       => array('path'=>'.track_name .track'),
+                //'track_image'       => array('path'=>'a.thumb','attr'=>'src')
+            )
         );
         
         parent::__construct($url,$options);

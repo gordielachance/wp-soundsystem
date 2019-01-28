@@ -26,12 +26,14 @@ class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'tracks track'),
-            'track_artist'      => array('path'=>'artists'),
-            'track_title'       => array('path'=>'title'),
-            'track_image'       => array('path'=>'cover'),
-            //playduration
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'tracks track'),
+                'track_artist'      => array('path'=>'artists'),
+                'track_title'       => array('path'=>'title'),
+                'track_image'       => array('path'=>'cover'),
+                //playduration
+            )
         );
         
         parent::__construct($url,$options);

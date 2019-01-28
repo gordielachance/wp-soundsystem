@@ -24,11 +24,13 @@ class WPSSTM_BBC_Station_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'.music-track'),
-            'track_artist'      => array('path'=>'.music-track__artist'),
-            'track_title'       => array('path'=>'.music-track__title'),
-            'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'.music-track'),
+                'track_artist'      => array('path'=>'.music-track__artist'),
+                'track_title'       => array('path'=>'.music-track__title'),
+                'track_image'       => array('path'=>'.music-track__image','attr'=>'src')
+            )
         );
         
         parent::__construct($url,$options);
@@ -56,10 +58,12 @@ class WPSSTM_BBC_Playlist_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
-            'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
-            'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'ul.plr-playlist-trackslist li'),
+                'track_artist'      => array('path'=>'.plr-playlist-trackslist-track-name-artistlink'),
+                'track_title'       => array('path'=>'.plr-playlist-trackslist-track-name-title'),
+            )
         );
         
         parent::__construct($url,$options);

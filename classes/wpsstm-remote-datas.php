@@ -8,7 +8,7 @@ class WPSSTM_Remote_Tracklist{
     var $url = null; //url requested
     var $remote_request_url = null; //url filtered by preset
     
-    var $options = array();
+    
     var $remote_request_args;
     
     var $default_options = array(
@@ -23,6 +23,11 @@ class WPSSTM_Remote_Tracklist{
         ),
         'tracks_order'              => 'desc'
     );
+    
+    var $preset_options = array();
+    
+    var $options = array();
+    
 
     var $default_request_args = array(
         'headers'   => array(
@@ -56,7 +61,8 @@ class WPSSTM_Remote_Tracklist{
 
     public function __construct($url = null,$options = null) {
         $this->url = trim($url);
-        $this->options = wpsstm_parse_args_deep($this->default_options,(array)$options); //last one has priority
+        $this->default_options = wpsstm_parse_args_deep($this->preset_options,$this->default_options);
+        $this->options = wpsstm_parse_args_deep($this->default_options,(array)$options);
     }
     
     /*

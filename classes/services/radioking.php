@@ -25,12 +25,14 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'root > element'),
-            'track_artist'      => array('path'=>'artist'),
-            'track_album'       => array('path'=>'album'),
-            'track_title'       => array('path'=>'title'),
-            'track_image'       => array('path'=>'cover'),
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'root > element'),
+                'track_artist'      => array('path'=>'artist'),
+                'track_album'       => array('path'=>'album'),
+                'track_title'       => array('path'=>'title'),
+                'track_image'       => array('path'=>'cover'),
+            )
         );
         
         parent::__construct($url,$options);

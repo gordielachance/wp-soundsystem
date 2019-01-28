@@ -28,10 +28,12 @@ class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'>tracks'),
-            'track_artist'      => array('path'=>'performer'),
-            'track_title'       => array('path'=>'name')
+        $this->preset_options = array(
+                'selectors' => array(
+                'tracks'            => array('path'=>'>tracks'),
+                'track_artist'      => array('path'=>'performer'),
+                'track_title'       => array('path'=>'name')
+            )
         );
         
         parent::__construct($url,$options);

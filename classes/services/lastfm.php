@@ -1071,12 +1071,14 @@ abstract class WPSSTM_LastFM_URL_Preset extends WPSSTM_Remote_Tracklist{
     
     function __construct($url = null,$options = null) {
         
-        $this->default_options['selectors'] = array(
-            'tracks'           => array('path'=>'table.chartlist tbody tr'),
-            'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
-            'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-            'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-            'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'           => array('path'=>'table.chartlist tbody tr'),
+                'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
+                'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
+                'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
+                'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
+            )
         );
         
         parent::__construct($url,$options);
@@ -1093,16 +1095,20 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
 
     function init_url($url){
         $this->artist_slug = self::get_artist_slug($url);
-        $this->artist_page = self::get_artist_page($url);
-        $this->album_slug = self::get_album_slug($url);
         
-        //update track artist selector
-        if($this->album_slug){
-            $this->default_options['selectors']['track_artist'] = array('path'=>'/ [itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
-        }else{
-            $this->default_options['selectors']['track_artist'] = array('path'=>'/ [data-page-resource-type="artist"]','attr'=>'data-page-resource-name');
+        if ($this->artist_slug){
+            
+            $this->artist_page = self::get_artist_page($url);
+            $this->album_slug = self::get_album_slug($url);
+            
+            //update track artist selector
+            if($this->album_slug){
+                $this->preset_options['selectors']['track_artist'] = array('path'=>'/ [itemtype="http://schema.org/MusicGroup"] [itemprop="name"]');
+            }else{
+                $this->preset_options['selectors']['track_artist'] = array('path'=>'/ [data-page-resource-type="artist"]','attr'=>'data-page-resource-name');
+            }
+            $this->options['selectors']['track_artist'] = $this->preset_options['selectors']['track_artist'];
         }
-        $this->options['selectors']['track_artist'] = $this->default_options['selectors']['track_artist'];
 
         return $this->artist_slug;
     }
@@ -1166,15 +1172,17 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_Remote_Tracklist{
     var $station_type;
     
     function __construct($url = null,$options = null) {
+
+        $this->preset_options = array(
+            'selectors' => array(
+                'tracks'            => array('path'=>'>playlist'),
+                'track_artist'      => array('path'=>'artists > name'),
+                'track_title'       => array('path'=>'playlist > name'),
+                'track_source_urls' => array('path'=>'playlinks url'),
+            )
+        );
         
         parent::__construct($url,$options);
-        
-        $this->default_options['selectors'] = array(
-            'tracks'            => array('path'=>'>playlist'),
-            'track_artist'      => array('path'=>'artists > name'),
-            'track_title'       => array('path'=>'playlist > name'),
-            'track_source_urls' => array('path'=>'playlinks url'),
-        );
     }
     
     static function get_station_type($url){
