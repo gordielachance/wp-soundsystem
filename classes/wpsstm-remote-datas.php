@@ -56,7 +56,7 @@ class WPSSTM_Remote_Tracklist{
 
     public function __construct($url = null,$options = null) {
         $this->url = trim($url);
-        $this->options = array_replace_recursive($this->default_options,(array)$options); //last one has priority
+        $this->options = wpsstm_parse_args_deep($this->default_options,(array)$options); //last one has priority
     }
     
     /*

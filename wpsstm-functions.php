@@ -120,6 +120,20 @@ function wpsstm_get_url_domain($url){
     return false;
 }
 
+function wpsstm_parse_args_deep( &$a, $b ) {
+	$a = (array) $a;
+	$b = (array) $b;
+	$result = $b;
+	foreach ( $a as $k => &$v ) {
+		if ( is_array( $v ) && isset( $result[ $k ] ) ) {
+			$result[ $k ] = wpsstm_parse_args_deep( $v, $result[ $k ] );
+		} else {
+			$result[ $k ] = $v;
+		}
+	}
+	return $result;
+	}
+
 function wpsstm_array_recursive_diff($aArray1, $aArray2) {
   $aReturn = array();
 
