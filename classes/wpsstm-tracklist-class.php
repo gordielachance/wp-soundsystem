@@ -679,7 +679,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             // if post title is empty, use the remote title
             $remote_title = $this->preset->title;
-            $this->title = (!$this->title && $remote_title) ? $remote_title : null;
+
+            if (!$this->title && $remote_title){
+                $this->title = $remote_title;
+            }
 
             //if remote author exists, use it
             $remote_author = $this->preset->author;
@@ -728,6 +731,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //capability check
         $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
         if ( is_wp_error($can) ) return $can;
+        
+        $this->tracklist_log('SET LIVE DATAS'); 
 
         //save subtracks
         if ($this->tracks){
@@ -1192,7 +1197,13 @@ class WPSSTM_Tracklist{
         
         if ( $rejected_tracks ){
             $error_codes = array_unique($error_codes);
-            $this->tracklist_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>json_encode(array($rejected_tracks)) ), "WPSSTM_Tracklist::validate_tracks");
+            
+            $cleared_tracks = array();
+            foreach ($rejected_tracks as $track){
+                $cleared_tracks[] = $track->to_array();
+            }
+            
+            $this->tracklist_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>array($cleared_tracks) ), "WPSSTM_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
