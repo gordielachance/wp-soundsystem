@@ -61,8 +61,8 @@ class WPSSTM_Remote_Tracklist{
 
     public function __construct($url = null,$options = null) {
         $this->url = trim($url);
-        $this->default_options = wpsstm_parse_args_deep($this->preset_options,$this->default_options);
-        $this->options = wpsstm_parse_args_deep($this->default_options,(array)$options);
+        $this->default_options = array_replace_recursive($this->preset_options,$this->default_options);
+        $this->options = array_replace_recursive($this->default_options,(array)$options);
     }
     
     /*
