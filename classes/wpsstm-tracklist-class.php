@@ -657,7 +657,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //default presset
         if (!$this->preset){
-            $this->preset = new WPSSTM_Remote_Tracklist();
+            $this->preset = new WPSSTM_Remote_Tracklist($feed_url,$this->preset_options);
         }
 
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');
