@@ -104,20 +104,16 @@ $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
 
     //sources
     var toggleSourcesEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a');
-    if (!track_obj.sources.length){
-        toggleSourcesEl.hide();
-    }else{
-        var sourceCountEl = $('<span class="wpsstm-sources-count">'+track_obj.sources.length+'</span>');
-        toggleSourcesEl.append(sourceCountEl);
+    var sourceCountEl = $('<span class="wpsstm-sources-count">'+track_obj.sources.length+'</span>');
+    toggleSourcesEl.append(sourceCountEl);
 
-        //toggle sources
-        toggleSourcesEl.click(function(e) {
-            e.preventDefault();
+    //toggle sources
+    toggleSourcesEl.click(function(e) {
+        e.preventDefault();
 
-            $(this).toggleClass('active');
-            $(this).parents('.wpsstm-track').find('.wpsstm-track-sources-list').toggleClass('active');
-        });            
-    }
+        $(this).toggleClass('active');
+        $(this).parents('.wpsstm-track').find('.wpsstm-track-sources-list').toggleClass('active');
+    });
 
 });
 
