@@ -643,7 +643,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $presets = apply_filters('wpsstm_remote_presets',$presets);
 
         /*
-        Select a preset based on the tracklist URL
+        Select a preset based on the tracklist URL, or use the default preset
         */
         foreach((array)$presets as $test_preset){
             
