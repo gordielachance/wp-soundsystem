@@ -824,7 +824,8 @@ class WPSSTM_Track{
         */
         $track_type_obj =           get_post_type_object(wpsstm()->post_type_track);
         $can_open_track =           ($this->post_id);
-        $can_edit_track =           current_user_can($track_type_obj->cap->edit_post,$this->post_id);
+        $can_create_track =         current_user_can($track_type_obj->cap->edit_posts);
+        $can_edit_track =           ( $this->post_id && current_user_can($track_type_obj->cap->edit_post,$this->post_id) );
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
         
         $can_favorite_track =       ( wpsstm()->user->can_subtracks && wpsstm()->user->favorites_id);
@@ -937,9 +938,16 @@ class WPSSTM_Track{
         //backend
         if ($can_edit_track){
             $actions['edit-backend'] = array(
-                'text' =>      __('Edit'),
+                'text' =>      __('Edit Track','wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action','wpsstm-track-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
+            );
+        }else if($can_create_track){
+            //TOUFIX handle track creation with redirection
+            $actions['edit-backend'] = array(
+                'text' =>      __('Edit Track','wpsstm'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-track-popup'),
+                'href' =>       $this->get_track_action_url('create'),
             );
         }
         
