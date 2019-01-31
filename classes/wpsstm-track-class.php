@@ -641,11 +641,13 @@ class WPSSTM_Track{
             }
         }
 
-        //$autosources_arr = WPSSTM_Tuneefy::get_track_autosources($this);
-        $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
         
+        ///
+        $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
         if ( is_wp_error($autosources_arr) ) return $autosources_arr;
-
+        ///
+        
+        
         foreach((array)$autosources_arr as $key=>$source_arr){
             $source = new WPSSTM_Source(null);
             $source->from_array($source_arr);
