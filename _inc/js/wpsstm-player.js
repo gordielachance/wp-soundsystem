@@ -75,6 +75,9 @@ class WpsstmPlayer {
         });
         
         $(document).on( "wpsstmPlayerTrackReady", function( event, track_obj ) {
+            
+            //append track to player queue
+            self.tracks.push(track_obj);
 
             //play button
             track_obj.track_el.find('.wpsstm-track-play-bt').click(function(e) {
@@ -654,22 +657,6 @@ class WpsstmPlayer {
         }
         
     }
-    
-    append_tracks(new_tracks,reset){
-        var self = this;
-        
-        if (reset === undefined){
-            self.tracks = self.tracks.concat(new_tracks); 
-        }else{
-            self.tracks = new_tracks;
-        }
-
-        //self.debug('added tracks: ' + new_tracks.length +', total:' + self.tracks.length);
-        
-        //set the shuffle order
-        self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
- 
-    }
 
     get_maybe_shuffle_track_idx(idx){
         var self = this;
@@ -841,8 +828,6 @@ $( document ).ready(function() {
         console.log("wpsstmIframeTracklistReady");
         
         if ( tracklist_obj.tracks.length ){
-            bottomPlayer.append_tracks(tracklist_obj.tracks);
-
             //autoplay if container has flag
             if ( iframe.hasClass('wpsstm-tracklist-autoplay') ){
                 var first_track = tracklist_obj.tracks[0];
@@ -850,13 +835,11 @@ $( document ).ready(function() {
             }
         }
 
-        
         //refresh bt
-        var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
-        refresh_bts.click(function(e) {
+        var refresh_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a");
+        refresh_bt.click(function(e) {
             tracklist_obj.debug("clicked 'refresh' bt");
             bottomPlayer.end_track();
-            bottomPlayer.current_track = undefined; //unset current player track so the player won't try to go to the next track
             bottomPlayer.dequeue_tracklist_tracks(tracklist_obj);
 
         });
