@@ -188,16 +188,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_iframe(){
+        
+        $classes = array('wpsstm-tracklist-iframe','wpsstm-iframe-autoheight');
+        
+        $is_first_iframe = !did_action('wpsstm_load_player');
+        if ($is_first_iframe){
+            $classes[] = 'wpsstm-tracklist-autoplay';
+        }
 
         $attr = array(
-            'class' => "wpsstm-tracklist-iframe wpsstm-iframe-autoheight",
+            'class' => implode(' ',$classes),
             'width' =>  '100%',
             'frameborder' => 0,
             'src' => $this->get_tracklist_action_url('render'),
         );
         
         $attr_str = wpsstm_get_html_attr($attr);
-        
+
         do_action('wpsstm_load_player');
         $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
         $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
@@ -771,7 +778,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
-        
+
         return $expiration_time - $now;
     }
 

@@ -396,7 +396,7 @@ class WP_SoundSystem {
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
 
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable'),$this->version, true);
 
         $datas = array(
             'debug'             => (WP_DEBUG),
@@ -419,7 +419,6 @@ class WP_SoundSystem {
         }else{
             wp_enqueue_style( 'wpsstm-iframes', wpsstm()->plugin_url . '_inc/css/wpsstm-iframes.css',null,wpsstm()->version );
             wp_enqueue_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'3.6.3',true);
- 
         }
 
 

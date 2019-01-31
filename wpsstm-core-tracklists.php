@@ -31,10 +31,8 @@ class WPSSTM_Core_Tracklists{
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles_shared' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ), 9 );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_frontend' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_tracklists_scripts_styles_backend' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'tracks_count_column_register') );
@@ -84,16 +82,15 @@ class WPSSTM_Core_Tracklists{
         return $vars;
     }
 
-    function register_tracklists_scripts_styles_shared(){
-        
+    function register_tracklists_scripts_styles(){
+
         //JS
         wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','jquery-ui-sortable','jquery-ui-dialog','jquery.toggleChildren','wpsstm-tracks'),wpsstm()->version, true );
-        
-        
+
+
         //JS
         wp_register_script( 'wpsstm-tracklists-manager', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists-manager.js', array('jquery'),wpsstm()->version, true );
-        
-        
+
     }
     
     function the_single_backend_tracklist(){ //TOUFIX TOUCHECK TOUREMOVE ?
@@ -113,21 +110,12 @@ class WPSSTM_Core_Tracklists{
         if ( did_action('wpsstm-tracklists-manager-iframe') ) {
             wp_enqueue_script( 'wpsstm-tracklists-manager' );
         }
-
-        //TO FIX TO CHECK post types ?
-        wp_enqueue_script( 'wpsstm-tracklists' );
+        
+        if( did_action('wpsstm-tracklist-iframe') ){
+            wp_enqueue_script( 'wpsstm-tracklists' );
+        }
     }
 
-    function enqueue_tracklists_scripts_styles_backend(){
-        
-        if ( !wpsstm()->is_admin_page() ) return;
-        
-        //TO FIX TO CHECK post types ?
-        wp_enqueue_script( 'wpsstm-tracklists' );
-
-    }
-
-    
     function ajax_update_subtrack_position(){
         $ajax_data = wp_unslash($_POST);
         

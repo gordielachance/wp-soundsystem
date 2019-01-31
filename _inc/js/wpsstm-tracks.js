@@ -38,6 +38,28 @@ $('body.wpsstm-tracklist-iframe').on('click', 'a.wpsstm-track-popup,li.wpsstm-tr
 
 });
 
+
+$(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
+    
+        // load tracklist tracks
+
+        var tracks_html = tracklist_obj.tracklist_el.find('[itemprop="track"]');
+
+        if ( tracks_html.length ){
+            $.each(tracks_html, function( index, track_html ) {
+                var new_track = new WpsstmTrack(track_html,tracklist_obj);
+                tracklist_obj.tracks.push(new_track);
+            });
+        }
+
+        /* tracks count */
+        tracklist_obj.tracks_count = $(tracklist_obj.tracks).length;
+        tracklist_obj.can_play =     (tracklist_obj.tracks_count > 0);
+    
+        tracklist_obj.debug("wpsstmTracklistInit");
+    
+});
+
 $(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
 
     //toggle favorite

@@ -1,7 +1,6 @@
 var $ = jQuery.noConflict();
 var wpsstm = {};
 var isInIframe = (window.location != window.parent.location) ? true : false;
-wpsstm.tracklists = [];
 
 //artist autocomplete
 $('.wpsstm-artist-autocomplete').each(function() {
@@ -46,30 +45,6 @@ $('.wpsstm-artist-autocomplete').each(function() {
 $( document ).ready(function() {
 
     var iframes = $('iframe.wpsstm-tracklist-iframe');
-
-    /*
-    Fire an event from within the iframe to its parent.
-    */
-
-    $('body.wpsstm-iframe .wpsstm-tracklist').each(function(index,tracklist_html) {
-        if (!isInIframe) return false;//break
-        //send to parent
-        var iframe = wpsstm_get_tracklist_iframe();
-        parent.$( iframe ).trigger('wpsstmIframeTracklistReady',[tracklist_html]);
-        
-
-    });
-    
-    /*
-    Catch the event fired from within the iframe, and init its tracklist.
-    */
-    
-    $('iframe.wpsstm-tracklist-iframe').on("wpsstmIframeTracklistReady", function( event, tracklist_html ) {
-        var tracklistIndex = $('iframe.wpsstm-tracklist-iframe').index( $(this) );
-        wpsstm_debug("wpsstmIframeTracklistReady: #" + tracklistIndex);
-        var tracklist_obj = new WpsstmTracklist(tracklist_html,tracklistIndex);
-        wpsstm.tracklists.push(tracklist_obj);
-    });
 
     iframes.one( "load", function() {
         $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');

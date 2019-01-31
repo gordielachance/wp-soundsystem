@@ -20,7 +20,7 @@ class WpsstmPlayer {
         var self = this;
 
         if ( !self.player_el.length ) return;
-        this.debug("new Wpsstm player(): #" +id);
+        this.debug("CREATE player: #" +id);
         
         ///
 
@@ -111,27 +111,10 @@ class WpsstmPlayer {
 
         $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
             if ( tracklist_obj.isExpired ){
-                tracklist_obj.debug("cache expired, refresh tracklist");
+                tracklist_obj.debug("cache expired, force refresh tracklist");
 
-                self.end_track();
-                self.current_track = undefined; //unset current player track so the player won't try to go to the next track
-                var reloaded = self.reload_tracklist(tracklist_obj);
-
-                reloaded.done(function(v) {
-                    self.debug("restart tracklist");
-
-                    var tracklist_tracks = self.tracks.filter(function (track_obj) {
-                        return (track_obj.tracklist.index === tracklist_obj.index);
-                    });
-                    
-                    //play first track of this tracklist
-                    var first_track = tracklist_tracks[0];
-                    if (first_track){
-                        self.play_track(first_track);
-                    }
-                    
-                })
-                
+                var refresh_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a");
+                refresh_bt.trigger('click');                
             }
         });
         
@@ -266,7 +249,7 @@ class WpsstmPlayer {
         wpsstm_debug(msg,prefix);
     }
     
-    reload_tracklist(tracklist_obj){
+    dequeue_tracklist_tracks(tracklist_obj){
         var self = this;
         var success = $.Deferred();
         
@@ -280,6 +263,7 @@ class WpsstmPlayer {
         var subtracks = self.tracks.filter(function (track_obj) {
             return (track_obj.tracklist.index === tracklist_obj.index);
         });
+        self.debug(subtracks.length + ' subtracks to remove from player queue');
 
         //get index of first (tracklist) track within player tracks
         var first_track_idx = $(self.tracks).index( $(subtracks[0]) );
@@ -287,38 +271,9 @@ class WpsstmPlayer {
         //build new player queue
         var tracks_before = self.tracks.slice(0,first_track_idx);
         var tracks_after = self.tracks.slice(first_track_idx + subtracks.length);
+        self.tracks = tracks_before.concat(tracks_after);
 
-        iframe.contentWindow.location.reload(true);
-
-        /*
-        reload tracklist at refresh (fires only once)
-        */
-        $(iframe).one( "load", function() {
-            
-            $(iframe).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-            var content = $(iframe.contentWindow.document.body);
-            var playlist_html = $(content).find( ".wpsstm-tracklist" ).get(0);
-            tracklist_obj.populate_html(playlist_html);
-            
-            /*
-            update player tracks
-            */
-
-            var new_queue = tracks_before.concat(tracklist_obj.tracks,tracks_after);
-
-            self.debug('was '+old_tracks_count+' tracks, removed tracks:' + subtracks.length +', new tracks:'+tracklist_obj.tracks.length+', new total:' + new_queue.length);
-            
-            self.append_tracks(new_queue,true);
-            
-            success.resolve();
-            
-        });
-
-        success.done(function(v) {
-            self.debug("reload successful");
-        })
-        
-        return success.promise();
+        self.debug('new subtracks count:' + self.tracks.length);
         
     }
 
@@ -715,18 +670,6 @@ class WpsstmPlayer {
         self.tracks_shuffle_order = wpsstm_shuffle( Object.keys(self.tracks).map(Number) );
  
     }
-    
-    autoplay(){
-        var self = this;
-        var has_autoplay = self.audio_el.get(0).autoplay;
-        var is_media_playing = ( (self.current_media !==undefined) && self.current_media.onplaying );
-        
-        if (has_autoplay && !is_media_playing){
-            var first_track_idx = self.get_maybe_unshuffle_track_idx(0);
-            var first_track = self.tracks[first_track_idx];
-            self.play_track(first_track);
-        }
-    }
 
     get_maybe_shuffle_track_idx(idx){
         var self = this;
@@ -882,51 +825,41 @@ class WpsstmPlayer {
 $( document ).ready(function() {
 
     var iframes = $('iframe.wpsstm-tracklist-iframe');
-
-    /*
-    wait for all iframes before initializing player
-    */
-
-    var iframesLoaded = $.Deferred();
-    var loadedIFramesCount = 0;
-
-    iframes.one( "load", function() {
-
-        ++loadedIFramesCount;//increment
-        var iframe_el = $(this).get(0);
-
-        var content = $(iframe_el.contentWindow.document.body);
-
-        //all frames are loaded
-        if ( loadedIFramesCount == iframes.length ){
-            iframesLoaded.resolve();
-        }
-
-    });
-
-    /*
-    init player
-    */
     var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
-    iframesLoaded.done(function(v) {
-        bottomPlayer.debug('all iframes have been loaded, init player');
+    
+    iframes.on( "load", function() {
+        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
+    });
+    
+    /*
+    Catch the event fired from within the iframe, and queue its tracklist.
+    */
+    
+    iframes.on("wpsstmIframeTracklistReady", function( event, tracklist_obj ) {
+        var iframe = $(this);
+        
+        console.log("wpsstmIframeTracklistReady");
+        
+        if ( tracklist_obj.tracks.length ){
+            bottomPlayer.append_tracks(tracklist_obj.tracks);
 
-        //sort tracklists by tracklist index
-        function compare_tracklist_idx(a,b) {
-            if (a.index > b.index) return 1;
-            if (b.index > a.index) return -1;
-            return 0;
+            //autoplay if container has flag
+            if ( iframe.hasClass('wpsstm-tracklist-autoplay') ){
+                var first_track = tracklist_obj.tracks[0];
+                bottomPlayer.play_track(first_track);
+            }
         }
 
-        wpsstm.tracklists.sort(compare_tracklist_idx);
+        
+        //refresh bt
+        var refresh_bts = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a,a.wpsstm-refresh-tracklist");
+        refresh_bts.click(function(e) {
+            tracklist_obj.debug("clicked 'refresh' bt");
+            bottomPlayer.end_track();
+            bottomPlayer.current_track = undefined; //unset current player track so the player won't try to go to the next track
+            bottomPlayer.dequeue_tracklist_tracks(tracklist_obj);
 
-        var allTracks = [];
-        $(wpsstm.tracklists).each(function(index,tracklist) {
-            allTracks = allTracks.concat(tracklist.tracks);
         });
-
-        bottomPlayer.append_tracks(allTracks);
-        bottomPlayer.autoplay();
 
     });
 
