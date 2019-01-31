@@ -235,7 +235,7 @@ class WP_SoundSystem {
     }
     
     function init_post_types(){
-        $this->debug_log('init post types');
+        //$this->debug_log('init post types');
         do_action('wpsstm_init_post_types');
     }
     

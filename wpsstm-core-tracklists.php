@@ -27,7 +27,6 @@ class WPSSTM_Core_Tracklists{
         
         add_filter( 'template_include', array($this,'handle_ajax_tracklist_action'), 5);
         add_filter( 'template_include', array($this,'tracklist_template') );
-        add_filter( 'template_include', array($this,'tracklists_manager') );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         
@@ -78,7 +77,6 @@ class WPSSTM_Core_Tracklists{
         $vars[] = 'tracklists-favorited-by';
         $vars[] = 'tracklist_id';
         $vars[] = 'subtrack_position';
-        $vars[] = 'tracklists_manager';
         return $vars;
     }
 
@@ -380,7 +378,6 @@ class WPSSTM_Core_Tracklists{
     function handle_manager_action(){
         global $wp_query;
         // since the query variable does not require a value, we need to check for its existence
-        if( !array_key_exists( 'tracklists_manager', $wp_query->query_vars ) ) return;
         if( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
         if( !$action = get_query_var( 'wpsstm_action' ) ) return;
 
@@ -410,64 +407,10 @@ class WPSSTM_Core_Tracklists{
                         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
                         $success = $tracklist->queue_track($subtrack);
                     }
-                    $redirect_url = $subtrack->get_tracklists_manager_url();
+                    $redirect_url = $subtrack->get_track_action_url('manage');
                 }
             break;
-                
-            case 'toggle':
-                
-                /*
-                $valid = $subtrack->validate_track();
-                if ( is_wp_error($valid) ){
-                    $success = $valid;
-                    break;
-                }
-                */
 
-                $add_to_ids = array();
-                $remove_from_ids = array();
-                $new_values = (array)wpsstm_get_array_value(array('wpsstm_tracklists_manager_new'),$_REQUEST);
-                $old_values = (array)wpsstm_get_array_value(array('wpsstm_tracklists_manager_old'),$_REQUEST);
-                $edit_values = array();
-                
-                //give a value to all unchecked items
-
-                foreach((array)$old_values as $key=>$old_value){
-                    if ( array_key_exists($key,$new_values) ) continue;
-                    $new_values[$key] = -1;
-                }
-                $edit_values = array_diff_assoc($new_values,$old_values);
-
-                foreach((array)$edit_values as $id=>$value){
-                    switch($value){
-                        case '1':
-                            $add_to_ids[] = $id;
-                        break;
-                        case '-1':
-                            $remove_from_ids[] = $id;
-                        break;
-                    }
-                }
-
-                /*remove*/
-                foreach ($remove_from_ids as $tracklist_id){
-                    $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                    $success = $tracklist->dequeue_track($subtrack);
-                }
-
-                /*append*/
-                foreach ($add_to_ids as $id){
-                    $tracklist = new WPSSTM_Post_Tracklist($id);
-                    $success = $tracklist->queue_track($subtrack);
-
-                    if ( is_wp_error($success) ){
-                        break; //break at first error
-                    }
-                }
-
-                $redirect_url = $subtrack->get_tracklists_manager_url();
-                
-            break;
         }
         
         /*
@@ -531,21 +474,6 @@ class WPSSTM_Core_Tracklists{
         
         wp_send_json( $result );  
         
-    }
-    
-    function tracklists_manager($template){
-        global $wp_query;
-        // since the query variable does not require a value, we need to check for its existence
-        if( !array_key_exists( 'tracklists_manager', $wp_query->query_vars ) ) return $template;
-        
-        //we need a a valid playlist type to display the manager
-        if ( is_single() ) return $template;
-        $post_type = get_query_var( 'post_type' );
-        if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $template; //post does not exists
-
-        $template = wpsstm_locate_template( 'tracklists-manager.php' );
-
-        return $template;
     }
 
     function tracklist_template($template){
@@ -703,29 +631,7 @@ class WPSSTM_Core_Tracklists{
         );
         
     }
-    
-    public static function get_manager_url($post_type = null){
-        
-        if (!$post_type) $post_type = get_post_type();
-        
-        $track_post_type_obj = get_post_type_object( $post_type );
-        if (!$track_post_type_obj) return;
-        
-        $url = home_url();
-        if ( !get_option('permalink_structure') ){
-            $url = add_query_arg(
-                array(
-                'post_type' => $post_type,
-                'tracklists_manager'=>true
-                ),
-                $url
-            );
-        }else{
-            $url .= sprintf('/%s/%s/',$track_post_type_obj->rewrite['slug'],WPSSTM_MANAGER_SLUG);
-        }
-        return $url;
-    }
-    
+
     static function get_temporary_tracklists_ids(){
         $community_user_id = wpsstm()->get_options('community_user_id');
         if ( !$community_user_id ) return;

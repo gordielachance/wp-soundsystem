@@ -208,6 +208,9 @@ class WPSSTM_Core_Tracks{
         if(!$action) return $template;
 
         switch($action){
+            case 'manage':
+                $template = wpsstm_locate_template( 'tracklists-manager.php' );
+            break;
             default:
                 $template = wpsstm_locate_template( 'track.php' );
             break;

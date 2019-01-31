@@ -11,8 +11,6 @@ $body_classes = array(
     'wpsstm-tracklist-manager-iframe'
 );
 
-$manager_redirect_url = WPSSTM_Core_Tracklists::get_manager_url();
-
 /*
 capabilities
 */
@@ -23,28 +21,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
 /*
 populate track
 */
-$track = new WPSSTM_Track();
-
-if ( $url_track =  get_query_var( 'wpsstm_track_data' ) ){
-    $track->from_array($url_track);
-}
-    
-//init new subtrack
-$subtrack = new WPSSTM_Track();
-$subtrack->from_tracklist = $track->tracklist->post_id;
-$subtrack->post_id = $track->post_id;
-$subtrack->artist = $track->artist;
-$subtrack->album = $track->album;
-$subtrack->title = $track->title;
-
-$valid = $subtrack->validate_track();
-
-if ( !is_wp_error($valid) ){
-    global $wpsstm_track;
-    $wpsstm_track = $subtrack;
-    $manager_redirect_url = $wpsstm_track->get_tracklists_manager_url();
-}
-
+$manager_redirect_url = $wpsstm_track->get_track_action_url('manage')
 
 ?>
 
@@ -69,17 +46,14 @@ if ( !is_wp_error($valid) ){
         /*
         Track header if any
         */
-        if ( $subtrack->validate_track() === true ){
-            wpsstm_locate_template( 'track-header.php', true, false );
-        }
+        wpsstm_locate_template( 'track-header.php', true, false );
 
-        
         if ( current_user_can($create_cap) ){
 
             ?>
-            <form action="<?php echo WPSSTM_Core_Tracklists::get_manager_url();?>" id="wpsstm-new-tracklist" method="post">
+            <form action="<?php echo $manager_redirect_url;?>" id="wpsstm-new-tracklist" method="post">
                 <input name="wpsstm_tracklist_data[title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
-                <?php echo $wpsstm_track->get_track_hidden_form_fields();?>
+                <?php echo $wpsstm_track->get_subtrack_hidden_form_fields();?>
                 <input name="wpsstm_action" type="hidden" value='new' />
                 <button type="submit" class="button button-primary wpsstm-icon-button">
                     <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
@@ -89,11 +63,25 @@ if ( !is_wp_error($valid) ){
         }
         
         if ( current_user_can($edit_cap) ){
+            
+                function current_user_playlists_manager_args($args){
+                    //member static playlists
+                    $new = array(
+                        'post_type' =>      wpsstm()->post_type_playlist,
+                        'author' =>         get_current_user_id(),
+                        'posts_per_page' => -1,
+                    );
+
+                    return wp_parse_args($new,$args);
+                }
+
+                add_filter( 'wpsstm_tracklists_manager_query','current_user_playlists_manager_args' );
+            
+            
             ?>
-            <form action="<?php echo WPSSTM_Core_Tracklists::get_manager_url();?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
+            <form action="<?php echo $manager_redirect_url;?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
                 <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
-                <?php echo $wpsstm_track->get_track_hidden_form_fields();?>
-                <input name="wpsstm_action" type="hidden" value='toggle' />
+                <?php echo $wpsstm_track->get_subtrack_hidden_form_fields();?>
                 <button type="submit" class="button button-primary wpsstm-icon-button">
                     <?php _e('Save');?>
                 </button>
