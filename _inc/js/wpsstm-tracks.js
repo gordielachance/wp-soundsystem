@@ -207,7 +207,6 @@ class WpsstmTrack {
         self.album =                self.track_el.find('[itemprop="inAlbum"]').text();
         self.post_id =              Number(self.track_el.attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number(self.track_el.attr('data-wpsstm-subtrack-id'));
-        //self.autosource_time =      Number(self.track_el.attr('data-wpsstm-autosource-time'));
 
         //populate existing sources
         self.populate_html_sources();
