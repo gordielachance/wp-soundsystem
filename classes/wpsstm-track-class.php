@@ -612,7 +612,7 @@ class WPSSTM_Track{
         if ( !$this->title ){
             return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
         }
-        
+
         /*
         Create community post :
         if track does not exists yet, create it as a community track - we need a post ID to store various metadatas
@@ -631,6 +631,13 @@ class WPSSTM_Track{
                 return $success;
             }else{
                 $this->track_log($success,'Community track created');
+            }
+        }else{
+            //ignore autosource if it has been tested recently
+            $last_autosourced = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
+            //TOUFIX TOUIMPROVE TOUCHECK NOTWORKNG
+            if ($last_autosourced){
+                return new WP_Error( 'wpsstm_track_autosource_delay', __('This track as alreay been autosourced recently.','wpsstm') );
             }
         }
 
@@ -971,7 +978,6 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'data-wpsstm-sources-count' =>      $this->source_count,
-            'data-wpsstm-autosource-time' =>    get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true ),
         );
 
         return wpsstm_get_html_attr($attr);
