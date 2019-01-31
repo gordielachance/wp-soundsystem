@@ -26,11 +26,13 @@ $has_player = wpsstm()->get_options('player_enabled');
                 ?>
             </span>
         </div>
+        <div class="wpsstm-track-info">
+            <span class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $wpsstm_track->artist;?>"><?php echo $wpsstm_track->artist;?></span>
+            <span class="wpsstm-track-title" itemprop="name" title="<?php echo $wpsstm_track->title;?>"><?php echo $wpsstm_track->title;?></span>
+            <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $wpsstm_track->album;?>"><?php echo $wpsstm_track->album;?></span>
+        </div>
         <?php 
-        
-        //track header
-        wpsstm_locate_template( 'track-header.php', true, false );
-        
+
         //track actions
         if ( $actions = $wpsstm_track->get_track_links() ){
             echo get_actions_list($actions,'track');
