@@ -18,11 +18,6 @@ $post_type_obj = get_post_type_object( get_post_type() );
 $create_cap = $post_type_obj->cap->create_posts;
 $edit_cap = $post_type_obj->cap->edit_posts;
 
-/*
-populate track
-*/
-$manager_redirect_url = $wpsstm_track->get_track_action_url('manage')
-
 ?>
 
 <!DOCTYPE html>
@@ -51,10 +46,10 @@ $manager_redirect_url = $wpsstm_track->get_track_action_url('manage')
         if ( current_user_can($create_cap) ){
 
             ?>
-            <form action="<?php echo $manager_redirect_url;?>" id="wpsstm-new-tracklist" method="post">
-                <input name="wpsstm_tracklist_data[title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
+            <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-new-tracklist" method="post">
+                <input name="wpsstm_manager_data[new_tracklist_title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
                 <?php echo $wpsstm_track->get_subtrack_hidden_form_fields();?>
-                <input name="wpsstm_action" type="hidden" value='new' />
+                <input name="wpsstm_manager_action" type="hidden" value='init_tracklist' />
                 <button type="submit" class="button button-primary wpsstm-icon-button">
                     <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
                 </button>
@@ -79,12 +74,13 @@ $manager_redirect_url = $wpsstm_track->get_track_action_url('manage')
             
             
             ?>
-            <form action="<?php echo $manager_redirect_url;?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
+            <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
                 <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
                 <?php echo $wpsstm_track->get_subtrack_hidden_form_fields();?>
                 <button type="submit" class="button button-primary wpsstm-icon-button">
                     <?php _e('Save');?>
                 </button>
+                <input name="wpsstm_manager_action" type="hidden" value='toggle_tracklists' />
             </form>
             <?php
         }

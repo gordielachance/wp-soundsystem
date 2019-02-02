@@ -1164,64 +1164,19 @@ class WPSSTM_Track{
         );
 
     }
-    
+
     function do_track_action($action){
         global $wp_query;
 
         $success = null;
-        
+
         //action
         switch($action){
             case 'trash':
                 $success = $this->trash_track();
             break;
-            case 'manage':
+
                 
-                $checked_tracklists = wpsstm_get_array_value(array('wpsstm_tracklists_manager_new'),$_REQUEST);
-                $previous_values = wpsstm_get_array_value(array('wpsstm_tracklists_manager_old'),$_REQUEST);
-                $edit_values = array();
-                
-                if (!$previous_values) break; //no range to compare to
-                
-                //use bool values instead of strings
-                foreach((array)$previous_values as $key => $value){
-                    $previous_values[$key] = ($value === '1') ? true : false;
-                }
-
-                foreach((array)$checked_tracklists as $key => $value){
-                    $checked_tracklists[$key] = true;
-                }
-
-                //build an array containing the tracklists IDs that have been updated
-                foreach((array)$previous_values as $key => $value){
-                    if ( $value && !array_key_exists($key,$checked_tracklists) ){//item has been unchecked
-                        $edit_values[$key] = false;
-                    }elseif ( !$value && array_key_exists($key,$checked_tracklists) ){//item has been checked
-                        $edit_values[$key] = true;
-                    }
-                }
-                
-                //process changed values
-                if ($edit_values){
-
-                    foreach($edit_values as $tracklist_id => $is_child){
-                        
-                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                        
-                        if ($is_child){
-                            $success = $tracklist->queue_track($this);
-                        }else{
-                            $success = $tracklist->dequeue_track($this);
-                        }
-
-                        if ( is_wp_error($success) ){
-                            break; //break at first error
-                        }
-                    }
-                    
-                }
-
-            break;
         }
         
         return $success;

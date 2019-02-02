@@ -20,7 +20,7 @@ class WPSSTM_Core_Tracks{
         //rewrite rules
         add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
 
-        add_action( 'wp', array($this,'handle_track_action'), 8);
+        add_action( 'wp', array($this,'handle_subtrack_manager'), 8);
         add_filter( 'template_include', array($this,'handle_ajax_track_action'), 5);
         add_filter( 'template_include', array($this,'track_template'), 8);
 
@@ -118,40 +118,97 @@ class WPSSTM_Core_Tracks{
         }
     }
 
-    function handle_track_action(){
+    function handle_subtrack_manager(){
         global $wpsstm_track;
         $success = null;
         $action_feedback = null;
-        $redirect_url = null;
 
-        if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
+        if ( 'manage' !== get_query_var( 'wpsstm_action' ) ) return; //action does not exist
 
-        $success = $wpsstm_track->do_track_action($action);
+        $manager_action = wpsstm_get_array_value(array('wpsstm_manager_action'),$_REQUEST);
+        $manager_data = wpsstm_get_array_value(array('wpsstm_manager_data'),$_REQUEST);
+        
+        
+        switch ($manager_action){
+            case 'toggle_tracklists':
 
-        /*
-        Redirect or notice
-        */
-        if ($redirect_url){
-            
-            $redirect_args = array(
-                'wpsstm_did_action' =>  $action,
-                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
-            );
-            
-            $redirect_url = add_query_arg($redirect_args, $redirect_url);
-            
-            wp_safe_redirect($redirect_url);
-            die($redirect_url);
-            
+                $checked_tracklists = wpsstm_get_array_value(array('new_tids'),$manager_data);
+                $previous_values = wpsstm_get_array_value(array('old_tids'),$manager_data);
+                $edit_values = array();
+
+                if (!$previous_values) break; //no range to compare to
+
+                //use bool values instead of strings
+                foreach((array)$previous_values as $key => $value){
+                    $previous_values[$key] = ($value === '1') ? true : false;
+                }
+
+                foreach((array)$checked_tracklists as $key => $value){
+                    $checked_tracklists[$key] = true;
+                }
+
+                //build an array containing the tracklists IDs that have been updated
+                foreach((array)$previous_values as $key => $value){
+                    if ( $value && !array_key_exists($key,$checked_tracklists) ){//item has been unchecked
+                        $edit_values[$key] = false;
+                    }elseif ( !$value && array_key_exists($key,$checked_tracklists) ){//item has been checked
+                        $edit_values[$key] = true;
+                    }
+                }
+
+                //process changed values
+                if ($edit_values){
+
+                    foreach($edit_values as $tracklist_id => $is_child){
+
+                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+
+                        if ($is_child){
+                            $success = $tracklist->queue_track($wpsstm_track);
+                        }else{
+                            $success = $tracklist->dequeue_track($wpsstm_track);
+                        }
+
+                        if ( is_wp_error($success) ){
+                            break; //break at first error
+                        }
+                    }
+
+                }
+                
+                
+
+            break;
+
+            case 'init_tracklist':
+                $tracklist_title = wpsstm_get_array_value(array('new_tracklist_title'),$manager_data);
+                if (!$tracklist_title){
+                    $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
+                }else{
+
+                    //create new tracklist
+                    $tracklist = new WPSSTM_Post_Tracklist();
+                    $tracklist->title = $tracklist_title;
+                    $success = $tracklist->save_tracklist();
+
+                    //append subtrack if any
+                    if ( !is_wp_error($success) ){
+                        $tracklist_id = $success;
+                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+                        $success = $tracklist->queue_track($wpsstm_track);
+                    }
+                }
+                
+                
+                
+            break;
+        }
+
+        if ( is_wp_error($success) ){
+            $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
         }else{
-            
-            if ( is_wp_error($success) ){
-                $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
-            }else{
-                $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
-            }
-            
+            $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
         }
 
     }
@@ -201,7 +258,10 @@ class WPSSTM_Core_Tracks{
         //check query
         if ( !is_single() ) return $template;
         $post_type = get_query_var( 'post_type' );
-        if( $post_type != wpsstm()->post_type_track ) return $template; //post does not exists
+        if( $post_type != wpsstm()->post_type_track ) return $template;
+        
+        //TOUFIX what if no $wpsstm_track ID ? Manager should not be accessible.
+        
         
         //check action
         $action = get_query_var( 'wpsstm_action' );

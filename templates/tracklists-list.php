@@ -42,8 +42,8 @@ if ( $manager_tracklists->have_posts() ) {
                         $old_value = ($checked) ? 1 : -1;
                         $checked_str = checked($checked,true,false);
                         ?>
-                        <input name="wpsstm_tracklists_manager_new[<?php echo $wpsstm_tracklist->post_id;?>]" type="checkbox" value="1" <?php checked($checked,true);?> />
-                        <input name="wpsstm_tracklists_manager_old[<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
+                        <input name="wpsstm_manager_data[new_tids][<?php echo $wpsstm_tracklist->post_id;?>]" type="checkbox" value="1" <?php checked($checked,true);?> />
+                        <input name="wpsstm_manager_data[old_tids][<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
                         <?php
                     }
             

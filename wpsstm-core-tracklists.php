@@ -23,7 +23,6 @@ class WPSSTM_Core_Tracklists{
         add_action( 'parse_query', array($this,'populate_global_tracklist'));
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2); //TOUFIX needed but breaks notices
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
-        add_action( 'wp', array($this,'handle_manager_action'), 8);
         
         add_filter( 'template_include', array($this,'handle_ajax_tracklist_action'), 5);
         add_filter( 'template_include', array($this,'tracklist_template') );
@@ -284,15 +283,6 @@ class WPSSTM_Core_Tracklists{
                 'top'
             );
             
-            //tracklists manager
-            
-            add_rewrite_rule( 
-                sprintf('^%s/%s/?',$obj->rewrite['slug'],WPSSTM_MANAGER_SLUG), // /music/TRACKLIST_TYPE/manager
-                sprintf('index.php?post_type=%s&p=$matches[1]&tracklists_manager=true',$post_type),
-                'top'
-            );
-            
-            
         }
     }
     
@@ -369,69 +359,6 @@ class WPSSTM_Core_Tracklists{
             
             if ( is_wp_error($success) ){
                 $wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
-            }
-            
-        }
-
-    }
-    
-    function handle_manager_action(){
-        global $wp_query;
-        // since the query variable does not require a value, we need to check for its existence
-        if( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
-        if( !$action = get_query_var( 'wpsstm_action' ) ) return;
-
-        $url_track = get_query_var( 'wpsstm_track_data' );
-        $subtrack = new WPSSTM_Track();
-        $subtrack->from_array($url_track);
-
-        $tracklist_data = get_query_var( 'wpsstm_tracklist_data' );
-        $redirect_url = null;
-        $success = null;
-
-        switch($action){
-            case 'new':
-                $tracklist_title = wpsstm_get_array_value('title',$tracklist_data);
-                if (!$tracklist_title){
-                    $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
-                }else{
-
-                    //create new tracklist
-                    $tracklist = new WPSSTM_Post_Tracklist();
-                    $tracklist->title = $tracklist_title;
-                    $success = $tracklist->save_tracklist();
-
-                    //append subtrack if any
-                    if ( !is_wp_error($success) ){
-                        $tracklist_id = $success;
-                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                        $success = $tracklist->queue_track($subtrack);
-                    }
-                    $redirect_url = $subtrack->get_track_action_url('manage');
-                }
-            break;
-
-        }
-        
-        /*
-        Redirect or notice
-        */
-        if ($redirect_url){
-            
-            $redirect_args = array(
-                'wpsstm_did_action' =>  $action,
-                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
-            );
-            
-            $redirect_url = add_query_arg($redirect_args, $redirect_url);
-            
-            wp_safe_redirect($redirect_url);
-            die();
-            
-        }else{
-            
-            if ( is_wp_error($success) ){
-                //$wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
             }
             
         }
