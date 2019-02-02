@@ -901,7 +901,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function save_subtrack($track){
+    function save_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
