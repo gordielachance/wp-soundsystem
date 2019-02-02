@@ -1248,8 +1248,8 @@ class WPSSTM_Track{
         if ($this->subtrack_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[subtrack_id]" value="%s" />',esc_attr($this->subtrack_id));
         }
-        if ($this->from_tracklist){
-            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[from_tracklist]" value="%s" />',esc_attr($this->from_tracklist));
+        if ($this->tracklist->post_id){
+            $fields[] = sprintf('<input type="hidden" name="wpsstm_track_data[from_tracklist]" value="%s" />',esc_attr($this->tracklist->post_id));
         }
         return implode("\n",$fields);
     }
