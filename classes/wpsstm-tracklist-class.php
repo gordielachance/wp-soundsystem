@@ -847,14 +847,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function validate_subtrack($track,$strict = true){
+    function validate_subtrack(WPSSTM_Track $track,$strict = true){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
         }
         return $track->validate_track($strict);
     }
     
-    function queue_track($track){
+    function queue_track(WPSSTM_Track $track){
         //unset some subtracks vars or subtrack will be moved instead of added
         $new_track = clone $track;
         $new_track->subtrack_id = null;
@@ -874,7 +874,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    function dequeue_track($track){
+    function dequeue_track(WPSSTM_Track $track){
         
         $subtrack_ids = $track->get_subtrack_matches($this->post_id);
         if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
