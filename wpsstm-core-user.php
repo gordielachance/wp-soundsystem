@@ -91,10 +91,10 @@ class WPSSTM_Core_User{
         $post_types = wpsstm()->static_tracklist_post_types;
         foreach ($post_types as $post_type){
             $post_type_obj = get_post_type_object($post_type);
-            $can = ( $post_type_obj && current_user_can($post_type_obj->cap->edit_posts) );
+            $can = user_can( $this->user_id, $post_type_obj->cap->edit_posts);
             if ( $can ) break;
         }
-        
+
         return $can;
     }
 
@@ -104,4 +104,4 @@ function wpsstm_user_init(){
     wpsstm()->user = new WPSSTM_Core_User();
 }
 
-add_action('wp','wpsstm_user_init',5); //when user is ready
+add_action('init','wpsstm_user_init'); //when user is ready
