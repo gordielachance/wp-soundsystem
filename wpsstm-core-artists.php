@@ -287,3 +287,9 @@ class WPSSTM_Core_Artists{
     }
 
 }
+
+function wpsstm_artists_init(){
+    new WPSSTM_Core_Artists();
+}
+
+add_action('wpsstm_init','wpsstm_artists_init');

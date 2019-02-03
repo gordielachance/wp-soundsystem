@@ -48,4 +48,4 @@ function wpsstm_sputnik_init(){
     new WPSSTM_sputnik();
 }
 
-add_action('wpsstm_init','wpsstm_sputnik_init');
+add_action('wpsstm_load_services','wpsstm_sputnik_init');

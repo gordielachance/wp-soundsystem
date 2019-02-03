@@ -54,4 +54,4 @@ function wpsstm_slacker_init(){
     new WPSSTM_Slacker();
 }
 
-//TO FIX TO REPAIR add_action('wpsstm_init','wpsstm_reddit_init');
+//TO FIX TO REPAIR add_action('wpsstm_load_services','wpsstm_reddit_init');

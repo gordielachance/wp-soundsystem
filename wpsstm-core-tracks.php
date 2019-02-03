@@ -1122,3 +1122,9 @@ class WPSSTM_Core_Tracks{
     }
     
 }
+
+function wpsstm_tracks_init(){
+    new WPSSTM_Core_Tracks();
+}
+
+add_action('wpsstm_init','wpsstm_tracks_init');

@@ -184,4 +184,4 @@ function wpsstm_reddit_init(){
     new WPSSTM_Reddit();
 }
 
-add_action('wpsstm_init','wpsstm_reddit_init');
+add_action('wpsstm_load_services','wpsstm_reddit_init');

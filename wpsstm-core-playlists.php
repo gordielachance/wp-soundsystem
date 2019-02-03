@@ -135,3 +135,9 @@ class WPSSTM_Core_Playlists{
     }
     
 }
+
+function wpsstm_playlists_init(){
+    new WPSSTM_Core_Playlists();
+}
+
+add_action('wpsstm_init','wpsstm_playlists_init');

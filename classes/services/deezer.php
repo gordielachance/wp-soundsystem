@@ -53,4 +53,4 @@ function wpsstm_deezer_init(){
     new WPSSTM_Deezer();
 }
 
-add_action('wpsstm_init','wpsstm_deezer_init');
+add_action('wpsstm_load_services','wpsstm_deezer_init');

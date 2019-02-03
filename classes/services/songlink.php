@@ -76,4 +76,4 @@ function wpsstm_songlink_init(){
     new WPSSTM_SongLink();
 }
 
-add_action('wpsstm_init','wpsstm_songlink_init');
+add_action('wpsstm_load_services','wpsstm_songlink_init');

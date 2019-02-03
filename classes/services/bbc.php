@@ -87,4 +87,4 @@ function wpsstm_BBC_init(){
     new WPSSTM_BBC();
 }
 
-add_action('wpsstm_init','wpsstm_BBC_init');
+add_action('wpsstm_load_services','wpsstm_BBC_init');

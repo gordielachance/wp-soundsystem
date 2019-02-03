@@ -54,4 +54,4 @@ function wpsstm_twitter_init(){
     new WPSSTM_Twitter();
 }
 
-add_action('wpsstm_init','wpsstm_twitter_init');
+add_action('wpsstm_load_services','wpsstm_twitter_init');

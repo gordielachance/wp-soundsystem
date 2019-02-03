@@ -166,26 +166,11 @@ class WP_SoundSystem {
         foreach ($preset_files as $file) {
             require_once($file);
         }
+        
+        do_action('wpsstm_load_services');
     }
     
     function setup_actions(){
-
-        do_action('wpsstm_init');
-        
-        /* Now that files have been loaded, init all core classes */
-        //TOUFIX should be better to hook this on a wpsstm_init action
-        new WPSSTM_Core_Albums();
-        new WPSSTM_Core_Artists();
-        new WPSSTM_Core_Live_Playlists();
-        new WPSSTM_Core_Playlists();
-        new WPSSTM_Core_Sources();
-        new WPSSTM_Core_Tracklists();
-        new WPSSTM_Core_Tracks();
-        new WPSSTM_Core_Wizard();
-        new WPSSTM_Player();
-        new WPSSTM_Core_BuddyPress();
-        ////
-	    
         // activation
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
 
@@ -196,7 +181,7 @@ class WP_SoundSystem {
 
         add_action( 'admin_init', array($this,'load_textdomain'));
         
-        add_action( 'init', array($this,'init_post_types'));
+        add_action( 'init', array($this,'init_post_types'), 5);
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
@@ -206,6 +191,10 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        ///
+        
+        do_action('wpsstm_init');
 
     }
 

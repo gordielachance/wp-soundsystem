@@ -53,4 +53,4 @@ function wpsstm_indieshuffle(){
     new WPSSTM_IndieShuffle();
 }
 
-add_action('wpsstm_init','wpsstm_indieshuffle');
+add_action('wpsstm_load_services','wpsstm_indieshuffle');

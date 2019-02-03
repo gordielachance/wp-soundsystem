@@ -1257,4 +1257,4 @@ function wpsstm_lastfm_init(){
     $wpsstm_lastfm = new WPSSTM_LastFM();
 }
 
-add_action('wpsstm_init','wpsstm_lastfm_init');
+add_action('wpsstm_load_services','wpsstm_lastfm_init');

@@ -283,3 +283,9 @@ class WPSSTM_Core_BuddyPress{
     }
     
 }
+
+function wpsstm_buddypress_init(){
+    new WPSSTM_Core_BuddyPress();
+}
+
+add_action('wpsstm_init','wpsstm_buddypress_init');

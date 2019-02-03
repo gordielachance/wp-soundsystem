@@ -79,3 +79,9 @@ class WPSSTM_Player{
     }
     
 }
+
+function wpsstm_player_init(){
+    new WPSSTM_Player();
+}
+
+add_action('wpsstm_init','wpsstm_player_init');

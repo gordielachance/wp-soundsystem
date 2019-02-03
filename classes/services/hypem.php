@@ -46,4 +46,4 @@ function wpsstm_hypem(){
     new WPSSTM_Hypem();
 }
 
-add_action('wpsstm_init','wpsstm_hypem');
+add_action('wpsstm_load_services','wpsstm_hypem');

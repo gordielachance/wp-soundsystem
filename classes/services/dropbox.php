@@ -22,4 +22,4 @@ function wpsstm_dropbox(){
     new WPSSTM_Dropbox();
 }
 
-add_action('wpsstm_init','wpsstm_dropbox');
+add_action('wpsstm_load_services','wpsstm_dropbox');

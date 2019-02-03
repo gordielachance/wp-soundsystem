@@ -585,3 +585,9 @@ class WPSSTM_Core_Sources{
         return $sources;
     }
 }
+
+function wpsstm_sources_init(){
+    new WPSSTM_Core_Sources();
+}
+
+add_action('wpsstm_init','wpsstm_sources_init');

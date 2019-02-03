@@ -32,4 +32,4 @@ function wpsstm_youtube_init(){
     new WPSSTM_Youtube();
 }
 
-add_action('wpsstm_init','wpsstm_youtube_init');
+add_action('wpsstm_load_services','wpsstm_youtube_init');

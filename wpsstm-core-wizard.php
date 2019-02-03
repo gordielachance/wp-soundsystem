@@ -519,3 +519,9 @@ class WPSSTM_Core_Wizard{
     }
 
 }
+
+function wpsstm_wizard_init(){
+    new WPSSTM_Core_Wizard();
+}
+
+add_action('wpsstm_init','wpsstm_wizard_init');

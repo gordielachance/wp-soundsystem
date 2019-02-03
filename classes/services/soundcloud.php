@@ -356,4 +356,4 @@ function wpsstm_souncloud_init(){
     $wpsstm_souncloud = new WPSSTM_Souncloud();
 }
 
-add_action('wpsstm_init','wpsstm_souncloud_init');
+add_action('wpsstm_load_services','wpsstm_souncloud_init');

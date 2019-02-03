@@ -183,3 +183,9 @@ class WPSSTM_Core_Live_Playlists{
     }
 
 }
+
+function wpsstm_live_playlists_init(){
+    new WPSSTM_Core_Live_Playlists();
+}
+
+add_action('wpsstm_init','wpsstm_live_playlists_init');

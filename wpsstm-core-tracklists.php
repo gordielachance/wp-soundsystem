@@ -599,3 +599,9 @@ class WPSSTM_Core_Tracklists{
     }
 
 }
+
+function wpsstm_tracklists_init(){
+    new WPSSTM_Core_Tracklists();
+}
+
+add_action('wpsstm_init','wpsstm_tracklists_init');
