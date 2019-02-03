@@ -138,7 +138,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
-        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
+        require $this->plugin_dir . 'wpsstm-core-wizard.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
@@ -146,6 +146,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();

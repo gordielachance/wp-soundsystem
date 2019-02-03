@@ -11,8 +11,6 @@ class WPSSTM_Core_Tracklists{
 
     function __construct() {
         global $wpsstm_tracklist;
-        
-        require_once(wpsstm()->plugin_dir . 'wpsstm-core-wizard.php');
 
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
