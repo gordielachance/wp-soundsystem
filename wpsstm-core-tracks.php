@@ -139,7 +139,6 @@ class WPSSTM_Core_Tracks{
     function handle_subtrack_manager(){
         global $wpsstm_track;
         $success = null;
-        $action_feedback = null;
 
         if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return;
         if ( 'manage' !== get_query_var( 'wpsstm_action' ) ) return; //action does not exist
@@ -222,11 +221,13 @@ class WPSSTM_Core_Tracks{
                 
             break;
         }
-
-        if ( is_wp_error($success) ){
-            $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
-        }else{
-            $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
+        
+        if ($success){
+            if ( is_wp_error($success) ){
+                $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
+            }else{
+                $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
+            }
         }
 
     }

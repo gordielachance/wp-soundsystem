@@ -58,21 +58,6 @@ $edit_cap = $post_type_obj->cap->edit_posts;
         }
         
         if ( current_user_can($edit_cap) ){
-            
-                function current_user_playlists_manager_args($args){
-                    //member static playlists
-                    $new = array(
-                        'post_type' =>      wpsstm()->post_type_playlist,
-                        'author' =>         get_current_user_id(),
-                        'posts_per_page' => -1,
-                    );
-
-                    return wp_parse_args($new,$args);
-                }
-
-                add_filter( 'wpsstm_tracklists_manager_query','current_user_playlists_manager_args' );
-            
-            
             ?>
             <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
                 <?php wpsstm_locate_template( 'tracklists-list.php', true, false );?>
