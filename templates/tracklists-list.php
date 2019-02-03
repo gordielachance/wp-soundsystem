@@ -5,7 +5,7 @@ global $wpsstm_track;
 
 //tracklists manager query
 $args = array(
-    'post_type' =>      get_post_type(),
+    'post_type' =>      wpsstm()->post_type_playlist,
     'author' =>         get_current_user_id(),
     'posts_per_page' => -1,
     'orderby' =>        'title',
@@ -13,13 +13,12 @@ $args = array(
 );
 
 //self playlists, allow any post stati
-//TOUFIX TOUCHECK
+//TOUFIX TOUCHECK move in filter ?
 if ( isset($args['author']) && ( $args['author'] === get_current_user_id() ) ){
     $args['post_status'] = array('publish','private','future','pending','draft');
 }
 
 $args = apply_filters('wpsstm_tracklists_manager_query',$args);
-
 $manager_tracklists = new WP_Query( $args );
 
 if ( $manager_tracklists->have_posts() ) {
