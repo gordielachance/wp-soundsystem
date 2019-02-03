@@ -19,8 +19,8 @@ class WPSSTM_Core_Sources{
         add_action( 'save_post', array($this,'metabox_source_url_save'));
         add_action( 'save_post', array($this,'metabox_save_track_sources') );
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_source), array(__class__,'source_columns_register'), 10, 2 );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_source), array(__class__,'source_columns_content'), 10, 2 );
@@ -418,7 +418,7 @@ class WPSSTM_Core_Sources{
     }
     
     
-    function register_sources_scripts_styles_shared(){
+    function register_sources_scripts_styles(){
         //CSS
         //JS
         wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );

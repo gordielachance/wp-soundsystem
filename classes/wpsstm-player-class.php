@@ -7,8 +7,8 @@ class WPSSTM_Player{
     function __construct() {
 
         if ( wpsstm()->get_options('player_enabled') ){
-            add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
+            add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
             add_action( 'wp_footer', array($this,'bottom_player'));
             add_action( 'admin_footer', array($this,'player_html'));
         }
@@ -35,7 +35,7 @@ class WPSSTM_Player{
         wpsstm_locate_template( 'player.php', true, false );
     }
     
-    function enqueue_player_scripts_styles_shared(){
+    function enqueue_player_scripts_styles(){
         //TO FIX load only if player is loaded (see hook wpsstm_load_player ) ?
 
         //CSS

@@ -25,8 +25,8 @@ class WPSSTM_Core_Tracks{
         add_filter( 'template_include', array($this,'handle_ajax_track_action'), 5);
         add_filter( 'template_include', array($this,'track_template'), 8);
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles_shared' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
 
@@ -366,7 +366,7 @@ class WPSSTM_Core_Tracks{
         
     }
 
-    function register_tracks_scripts_styles_shared(){
+    function register_tracks_scripts_styles(){
         wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','jquery-ui-tabs','wpsstm-sources'),wpsstm()->version, true );
         
     }

@@ -184,8 +184,8 @@ class WP_SoundSystem {
         
         add_action( 'init', array($this,'init_post_types'), 5);
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
@@ -375,7 +375,7 @@ class WP_SoundSystem {
         return wpsstm_get_array_value($keys,$this->options);
     }
 
-    function register_scripts_styles_shared(){
+    function register_scripts_styles(){
 
         //TO FIX conditional / move code ?
         
