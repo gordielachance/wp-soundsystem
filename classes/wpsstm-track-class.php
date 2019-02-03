@@ -39,8 +39,7 @@ class WPSSTM_Track{
 
         //has track ID
         if ( $track_id = intval($post_id) ) {
-            $this->post_id = $track_id;
-            $this->populate_track_post();
+            $this->populate_track_post($track_id);
         }
         
         if ($tracklist){
@@ -54,13 +53,12 @@ class WPSSTM_Track{
         
     }
     
-    function populate_track_post(){
+    function populate_track_post($track_id){
         
-        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track ) ){
-            $this->track_log('Invalid track post');
-            return;
+        if ( get_post_type($track_id) != wpsstm()->post_type_track ){
+            return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
-        
+        $this->post_id      = $track_id;
         $this->title        = wpsstm_get_post_track($this->post_id);
         $this->artist       = wpsstm_get_post_artist($this->post_id);
         $this->album        = wpsstm_get_post_album($this->post_id);
@@ -76,12 +74,12 @@ class WPSSTM_Track{
 
         $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE ID = %s",$subtrack_id);
         $subtrack = $wpdb->get_row($query);
-        if (!$subtrack) return;
+        if (!$subtrack) return new WP_Error( 'wpsstm_invalid_subtrack_entry', __("This is not a valid subtrack entry.",'wpsstm') );
 
         //track
         if ($track_id = $subtrack->track_id){
-            $this->post_id = $track_id;
-            $this->populate_track_post();
+            $success = $this->populate_track_post($track_id);
+            if ( is_wp_error($success) ) return $success;
         }else{
             $this->title =  $subtrack->title;
             $this->artist = $subtrack->artist;
@@ -136,12 +134,10 @@ class WPSSTM_Track{
 
         //subtrack or track id ?
         if ($this->subtrack_id){
-            $this->populate_subtrack($this->subtrack_id);
+            return $this->populate_subtrack($this->subtrack_id);
         }elseif ( $this->post_id ){
-            $this->populate_track_post();
+            return $this->populate_track_post($this->post_id);
         }
-        
-        
     }
     
     /*

@@ -407,6 +407,7 @@ class WPSSTM_Core_Tracklists{
         global $wpsstm_tracklist;
 
         //check query
+        if ( is_404() ) return $template;
         if ( !is_single() ) return $template;
         $post_type = get_query_var( 'post_type' );
         if( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $template; //post does not exists

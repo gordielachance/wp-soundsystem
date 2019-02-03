@@ -14,6 +14,7 @@ class WPSSTM_Core_Tracks{
 
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_track' ));
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
+        add_action( 'parse_query', array($this,'populate_global_subtrack'));
         add_action( 'parse_query', array($this,'populate_global_track'));
         //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
 
@@ -83,31 +84,48 @@ class WPSSTM_Core_Tracks{
     /*
     Set global $wpsstm_track 
     */
+    function populate_global_subtrack($query){
+        global $wpsstm_track;
+        $subtrack_id = $query->get( 'subtrack_id' );
+        
+        /*
+        Subtrack ID
+        */
+        
+        if ( $subtrack_id ){
+            $success = $wpsstm_track->populate_subtrack($subtrack_id);
+            if ( !is_wp_error($success) ){
+                //set global track post
+                $post_id = $query->set( 'p', $wpsstm_track->post_id );
+                $post_type = $query->get( 'post_type', wpsstm()->post_type_track );
+            }else{
+                /*
+                Handle 404
+                */
+                $error_msg = $success->get_error_message();
+                $wpsstm_track->track_log($error_msg,'error populating subtrack');
+                ///
+                $query->set_404();
+                status_header( 404 );
+                nocache_headers();
+            }
+        }
+
+    }
+    
+
     function populate_global_track($query){
 
         global $wpsstm_track;
         
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
+        $success = null;
         
-        
-        /*
-        Track ID
-        */
-            
-        if( $post_id && ( $post_type == wpsstm()->post_type_track ) ){
-            $wpsstm_track = new WPSSTM_Track($post_id);
-        }
-        
-        /*
-        Subtrack ID //TOUFIX should not this be in tracklists ? since subtrack doesn't always have a track but always have a tracklist...
-        */
-        
-        if ( $subtrack_id = get_query_var( 'subtrack_id' ) ){
-            $wpsstm_track->populate_subtrack($subtrack_id);
-        }
+        if ( !$post_id ) return;
+        if ( $post_type != wpsstm()->post_type_track ) return;
 
-
+        $success = $wpsstm_track->populate_track_post($post_id);
     }
     
     function populate_loop_track($post,$query){
@@ -255,10 +273,9 @@ class WPSSTM_Core_Tracks{
     function track_template($template){
         global $wpsstm_track;
 
-        //check query
+        if ( is_404() ) return $template;
         if ( !is_single() ) return $template;
-        $post_type = get_query_var( 'post_type' );
-        if( $post_type != wpsstm()->post_type_track ) return $template;
+        if( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
         
         //TOUFIX what if no $wpsstm_track ID ? Manager should not be accessible.
         
