@@ -288,4 +288,4 @@ function wpsstm_buddypress_init(){
     new WPSSTM_Core_BuddyPress();
 }
 
-add_action('wpsstm_init','wpsstm_buddypress_init');
+add_action('bp_include','wpsstm_buddypress_init');
