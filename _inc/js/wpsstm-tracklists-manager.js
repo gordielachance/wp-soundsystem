@@ -33,7 +33,7 @@ formNewTracklist.find('input[type="text"]').on('keyup', function(e){
     var toggleForm = $('form#wpsstm-toggle-tracklists');
 
 
-    var tracklist_items = toggleForm.find('#tracklists-manager .tracklist-row');
+    var tracklist_items = toggleForm.find('#tracklist-list .tracklist-row');
 
 
     var has_results = false;

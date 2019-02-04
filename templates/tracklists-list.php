@@ -24,7 +24,7 @@ $manager_tracklists = new WP_Query( $args );
 if ( $manager_tracklists->have_posts() ) {
 
     ?>
-    <ul id="tracklists-manager">
+    <ul id="tracklist-list">
         <?php
         while ( $manager_tracklists->have_posts() ) {
 
