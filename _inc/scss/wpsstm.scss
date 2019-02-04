@@ -1,93 +1,6 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
-
-@include keyframes(opacityPulse){
-    0% {opacity: 1;}
-    50% {opacity: 0.5; }
-    100% {opacity: 1;}
-}
-
-@keyframes barberpole {
-    from { background-position: 0 0; }
-    to   { background-position: 60px 30px; }
-}
-
-@keyframes spin {
-    from {transform:rotate(0deg);}
-    to {transform:rotate(360deg);}
-}
-
-@keyframes highlight {
-    0% {background-color: rgba(224,255,226,0);}
-    25% {background-color: rgba(224,255,226,1);}
-    100% {background-color: rgba(224,255,226,0);}
-}
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-
-@mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
-    background-size: 30px 30px;
-    background-image: linear-gradient(
-        $direction, 
-        $color-a    25%, 
-        $color-b    25%, 
-        $color-b    50%, 
-        $color-a    50%, 
-        $color-a    75%, 
-        $color-b    75%, 
-        $color-b
-    );
-    animation: barberpole 0.5s linear infinite;
-}
-
-.wpsstm-no-underline{
-    text-decoration:none;
-    border-bottom:none!important; //fix for twentyfifteen
-}
-
-.wpsstm-can-click{
-    cursor: pointer;
-    cursor: hand;
-}
-
-.wpsstm-freeze{
-    pointer-events: none;
-    @include opacity(.5);
-}
-
-.wpsstm-icon{
-    &:before{
-        font-weight: normal;
-        font-style: normal;
-        font-family: 'FontAwesome';
-        width: 1.28571429em;
-        text-align: center;
-        display: inline-block;
-    }
-}
-
-.wpsstm-loading-icon{
-    @extend .wpsstm-icon;
-    &:before{
-        animation: spin 2s linear infinite;
-        content: "\f1ce"!important; //.fa-circle-o-notch;
-    }
-}
+@import "_wpsstm-shared";
 
 ul.wpsstm-actions-list{
     margin:0;
@@ -114,18 +27,6 @@ ul.wpsstm-actions-list{
         a:before{
             margin-right:.5em;
         }
-
-        &.wpsstm-action-icon{
-            a{
-                @extend .wpsstm-icon;
-                &:before{
-                    margin-right:0;
-                }
-                > span{
-                    display:none;
-                }
-            }
-        }
         
         &.action-favorite a:before,
         &.action-unfavorite:hover a:before
@@ -139,46 +40,6 @@ ul.wpsstm-actions-list{
         }
     }
     
-}
-
-.wpsstm-ellipsis{
-    @include ellipsis($no-wrap: true);
-}
-
-input{
-    &.input-loading{
-        @extend .wpsstm-freeze;
-        @include striped-bg();
-    }
-
-    &.wpsstm-fullwidth{
-        width:100%;
-    }
-}
-
-.wpsstm-icon-input{
-    position:relative;
-    margin: 0.5em;
-    input{
-        padding: 0.5em;
-        &[type="text"]{
-            padding-right:4em;
-        }
-
-    }
-    [type="submit"]{ //input & button
-        position: absolute;
-        top:0;
-        right: 0;
-        border: none;
-        @extend .wpsstm-can-click;
-        &.wpsstm-icon-button{
-            display: block;
-            height: 100%;
-            box-sizing: border-box;
-            padding: 0 2em;
-        }
-    }
 }
 
 .wpsstm-tracklist-notices{
