@@ -55,7 +55,7 @@ $has_player = wpsstm()->get_options('player_enabled');
                     <p>
                         <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
                             <i class="fa fa-link" aria-hidden="true"></i> 
-                            <?php echo wpsstm_get_short_url($wpsstm_tracklist_url);?>
+                            <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
                         </a>
                     </p>
 

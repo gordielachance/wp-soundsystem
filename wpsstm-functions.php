@@ -147,15 +147,15 @@ function wpsstm_is_ajax(){
     return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
 }
 
-function wpsstm_get_short_url($url,$skiptext = ' ... '){
-    $length = strlen($url);
+function wpsstm_shorten_text($str,$skiptext = ' ... '){
+    $length = strlen($str);
     if($length > 45){
         $length = $length - 30;
-        $first = substr($url, 0, -$length);
-        $last = substr($url, -15);
+        $first = substr($str, 0, -$length);
+        $last = substr($str, -15);
         $new = $first.$skiptext.$last;
         return $new;
     }else{
-        return $url;
+        return $str;
     }
 }

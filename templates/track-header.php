@@ -1,6 +1,16 @@
 <?php
 global $wpsstm_track;
 ?>
+<?php
+/*
+Notices
+*/
+if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
+    ?>
+    <div class="wpsstm-track-notices"><?php echo $notices_el;?></div>
+    <?php
+}
+?>
 <header>
 <div class="wpsstm-track-info">
     <h1 class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $wpsstm_track->artist;?>"><?php echo $wpsstm_track->artist;?></h1>
@@ -10,10 +20,12 @@ global $wpsstm_track;
     <?php 
     /*
 if ($wpsstm_track->from_tracklist){
+    $from_title = get_the_title($wpsstm_track->from_tracklist);
+    $from_title_short = wpsstm_shorten_text( $from_title );
     ?>
     <div class="wpsstm-from-tracklist">
         <label><?php _e('From:','wpsstm');?></label>
-        <a target="_parent" href="<?php echo get_permalink($wpsstm_track->from_tracklist);?>"><?php echo get_the_title($wpsstm_track->from_tracklist);?></a>
+        <a target="_parent" href="<?php echo get_permalink($wpsstm_track->from_tracklist);?>" title="<?php echo $from_title;?>"><?php echo $from_title_short;?></a>
     </div>
     <?php
 }
@@ -43,15 +55,3 @@ if ( $loved_list = $wpsstm_track->get_favorited_by_list() ){
 }
 ?>
 </header>
-
-
-    <?php
-    /*
-    Notices
-    */
-    if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
-        ?>
-        <div class="wpsstm-track-notices"><?php echo $notices_el;?></div>
-        <?php
-    }
-    ?>

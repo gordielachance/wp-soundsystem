@@ -221,9 +221,10 @@ class WPSSTM_Track{
             $tracklist_post_type = get_post_type($tracklist_id);
 
             $playlist_url = get_permalink($tracklist_id);
-            $playlist_name = ( $title = get_the_title($tracklist_id) ) ? $title : sprintf('#%s',$tracklist_id);
+            $title = get_the_title($tracklist_id);
+            $title_short = wpsstm_shorten_text($title);
 
-            $links[] = sprintf('<li><a href="%s">%s</a></li>',$playlist_url,$playlist_name);
+            $links[] = sprintf('<li><a href="%s" title="%s">%s</a></li>',$playlist_url,$title,$title_short);
         }
         
         if ($links){
