@@ -1189,9 +1189,8 @@ class WPSSTM_Track{
         
         $attr_str = wpsstm_get_html_attr($attr);
 
-        $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
         $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
-        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s%s</div>',$notice_el,$iframe_el);
+        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s</div>',$iframe_el);
         return $el;
     }
     

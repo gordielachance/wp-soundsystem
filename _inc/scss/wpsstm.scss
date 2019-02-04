@@ -288,23 +288,10 @@ a.toggle-children-link, .toggle-children-link a{
 .wpsstm-iframe-container{
     width:100%;
     border: 1px solid rgba(0,0,0,0.1);
-    
-    .wpsstm-loading-notice{
-        display:none;
-        position:relative;
-        text-align:center;
-        span{
-            display:inline-block;
-            padding: .5em 0;
-            @include animation(opacityPulse 2s infinite ease-out);
-            @extend .wpsstm-loading-icon;
-        }
-    }
-    
+
     &.wpsstm-iframe-loading{
-        .wpsstm-loading-notice{
-            display:inherit;
-        }
+        @include striped-bg();
+        height:1em;
         iframe{
             display:none;
         }
