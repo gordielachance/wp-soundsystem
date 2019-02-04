@@ -1181,8 +1181,6 @@ class WPSSTM_Tracklist{
 
     protected function validate_tracks($tracks){
 
-        //array unique
-        $pending_tracks = array_unique($tracks, SORT_REGULAR);
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
         $use_strict = $this->get_options('tracks_strict');
