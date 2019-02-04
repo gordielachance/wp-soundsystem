@@ -1,7 +1,237 @@
+@charset "UTF-8";
 /*
 Popup, modals, etc.
 */
-/* line 7, ../scss/wpsstm-iframes.scss */
+@-moz-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes barberpole {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 30px;
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes highlight {
+  0% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+  25% {
+    background-color: #e0ffe2;
+  }
+  100% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+/* line 55, ../scss/_wpsstm-shared.scss */
+ul.comma-list {
+  list-style: none;
+  display: inline;
+}
+/* line 58, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li {
+  display: inline;
+}
+/* line 60, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li:not(:last-child):after {
+  content: ", ";
+}
+
+/* line 67, ../scss/_wpsstm-shared.scss */
+input.input-loading {
+  background-size: 30px 30px;
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0));
+  animation: barberpole 0.5s linear infinite;
+}
+/* line 72, ../scss/_wpsstm-shared.scss */
+input.wpsstm-fullwidth {
+  width: 100%;
+}
+
+/* line 77, ../scss/_wpsstm-shared.scss */
+.wpsstm-no-underline {
+  text-decoration: none;
+  border-bottom: none !important;
+}
+
+/* line 82, ../scss/_wpsstm-shared.scss */
+.wpsstm-can-click, .wpsstm-icon-input [type="submit"] {
+  cursor: pointer;
+  cursor: hand;
+}
+
+/* line 87, ../scss/_wpsstm-shared.scss */
+.wpsstm-freeze, input.input-loading {
+  pointer-events: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+
+/* line 93, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon:before, .wpsstm-loading-icon:before, .wpsstm-action-icon a:before, .tracklist-list > li > *.wpsstm-tracklist-actions ul li a:before {
+  font-weight: normal;
+  font-style: normal;
+  font-family: 'FontAwesome';
+  width: 1.28571429em;
+  text-align: center;
+  display: inline-block;
+}
+
+/* line 105, ../scss/_wpsstm-shared.scss */
+.wpsstm-loading-icon:before {
+  animation: spin 2s linear infinite;
+  content: "" !important;
+}
+
+/* line 114, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a:before, .tracklist-list > li > *.wpsstm-tracklist-actions ul li a:before {
+  margin-right: 0;
+}
+/* line 117, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a > span, .tracklist-list > li > *.wpsstm-tracklist-actions ul li a > span {
+  display: none;
+}
+
+/* line 123, ../scss/_wpsstm-shared.scss */
+.wpsstm-ellipsis, .tracklist-list > li > *.wpsstm-tracklist-title a {
+  white-space: nowrap;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+
+/* line 127, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input {
+  position: relative;
+  margin: 0.5em;
+}
+/* line 130, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input {
+  padding: 0.5em;
+}
+/* line 132, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input[type="text"] {
+  padding-right: 4em;
+}
+/* line 137, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+}
+/* line 143, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"].wpsstm-icon-button {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 2em;
+}
+
+/* line 3, ../scss/_wpsstm-tracklist-manager.scss */
+body.wpsstm-tracklist-manager-iframe header {
+  padding: 1em;
+  text-align: center;
+}
+/* line 6, ../scss/_wpsstm-tracklist-manager.scss */
+body.wpsstm-tracklist-manager-iframe header .wpsstm-track-info {
+  margin-bottom: 1em;
+}
+
+/* line 13, ../scss/_wpsstm-tracklist-manager.scss */
+.tracklist-list > li {
+  border-bottom: 1px solid rgba(51, 51, 51, 0.1);
+  display: -webkit-flex;
+  display: flex;
+  height: 1em;
+  padding: 1em 0;
+}
+/* line 18, ../scss/_wpsstm-tracklist-manager.scss */
+.tracklist-list > li > * {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+  align-items: center;
+  padding: 0 .25em;
+  box-sizing: border-box;
+  max-width: 50%;
+}
+/* line 30, ../scss/_wpsstm-tracklist-manager.scss */
+.tracklist-list > li > *.wpsstm-tracklist-title .wpsstm-tracklist-post-state.wpsstm-tracklist-post-state-publish {
+  display: none;
+}
+/* line 35, ../scss/_wpsstm-tracklist-manager.scss */
+.tracklist-list > li > *.wpsstm-tracklist-actions {
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  -webkit-flex-grow: 0;
+  flex-grow: 0;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  text-align: right;
+  visibility: hidden;
+}
+/* line 49, ../scss/_wpsstm-tracklist-manager.scss */
+.tracklist-list > li:hover .wpsstm-tracklist-actions {
+  visibility: visible;
+}
+
+/* line 8, ../scss/wpsstm-iframes.scss */
 html, body {
   /*fixes iframeResizer infinite expansion*/
   height: initial !important;
@@ -11,21 +241,21 @@ html, body {
   background: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* line 17, ../scss/wpsstm-iframes.scss */
+/* line 18, ../scss/wpsstm-iframes.scss */
 body {
   margin: 0.5em !important;
   background: none !important;
 }
 
-/* line 24, ../scss/wpsstm-iframes.scss */
+/* line 25, ../scss/wpsstm-iframes.scss */
 .wpsstm-tracklist-manager-iframe form#wpsstm-new-tracklist {
   margin: 2em;
 }
-/* line 27, ../scss/wpsstm-iframes.scss */
+/* line 28, ../scss/wpsstm-iframes.scss */
 .wpsstm-tracklist-manager-iframe form#wpsstm-toggle-tracklists {
   margin: 1em;
 }
-/* line 30, ../scss/wpsstm-iframes.scss */
+/* line 31, ../scss/wpsstm-iframes.scss */
 .wpsstm-tracklist-manager-iframe form button[type="submit"] {
   margin: 1em auto;
   display: block;
