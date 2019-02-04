@@ -1178,7 +1178,7 @@ class WPSSTM_Track{
         return $success;
     }
     
-    function get_tracklists_manager_iframe(){
+    function get_tracklist_manager_iframe(){
         $attr = array(
             'class' => "wpsstm-tracklist-manager-iframe wpsstm-iframe-autoheight",
             'width' =>  '100%',

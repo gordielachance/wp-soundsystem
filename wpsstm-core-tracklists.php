@@ -83,10 +83,10 @@ class WPSSTM_Core_Tracklists{
 
 
         //JS
-        wp_register_script( 'wpsstm-tracklists-manager', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists-manager.js', array('jquery'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-tracklist-manager', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklist-manager.js', array('jquery'),wpsstm()->version, true );
         
-        if ( did_action('wpsstm-tracklists-manager-iframe') ) {
-            wp_enqueue_script( 'wpsstm-tracklists-manager' );
+        if ( did_action('wpsstm-tracklist-manager-iframe') ) {
+            wp_enqueue_script( 'wpsstm-tracklist-manager' );
         }
         
         if( did_action('wpsstm-tracklist-iframe') ){

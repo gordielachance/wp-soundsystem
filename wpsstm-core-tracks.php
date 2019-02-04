@@ -287,7 +287,7 @@ class WPSSTM_Core_Tracks{
 
         switch($action){
             case 'manage':
-                $template = wpsstm_locate_template( 'tracklists-manager.php' );
+                $template = wpsstm_locate_template( 'tracklist-manager.php' );
             break;
             default:
                 $template = wpsstm_locate_template( 'track.php' );
@@ -760,7 +760,7 @@ class WPSSTM_Core_Tracks{
     
     function metabox_track_tracklists_content( $post ){
         global $wpsstm_track;
-        echo $wpsstm_track->get_tracklists_manager_iframe();
+        echo $wpsstm_track->get_tracklist_manager_iframe();
     }
 
     function mb_populate_trackid( $post_id ) {

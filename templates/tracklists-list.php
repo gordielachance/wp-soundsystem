@@ -18,17 +18,17 @@ if ( isset($args['author']) && ( $args['author'] === get_current_user_id() ) ){
     $args['post_status'] = array('publish','private','future','pending','draft');
 }
 
-$args = apply_filters('wpsstm_tracklists_manager_query',$args);
-$manager_tracklists = new WP_Query( $args );
+$args = apply_filters('wpsstm_tracklist_list_query',$args);
+$tracklist_query = new WP_Query( $args );
 
-if ( $manager_tracklists->have_posts() ) {
+if ( $tracklist_query->have_posts() ) {
 
     ?>
-    <ul id="tracklist-list">
+    <ul class="tracklist-list">
         <?php
-        while ( $manager_tracklists->have_posts() ) {
+        while ( $tracklist_query->have_posts() ) {
 
-            $manager_tracklists->the_post();
+            $tracklist_query->the_post();
 
             ?>
             <li class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('tracklist-row'));?>">

@@ -113,7 +113,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_playlists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_playlists_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -148,7 +148,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_live_playlists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_live_playlists_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -172,7 +172,7 @@ class WPSSTM_Core_BuddyPress{
     }
     function user_favorite_tracklists_subnav_content(){
         
-        function displayed_user_favorite_tracklists_manager_args($args){
+        function displayed_user_favorite_tracklist_manager_args($args){
             //member static playlists
             $new = array(
                 'post_type' =>                  wpsstm()->tracklist_post_types,
@@ -185,7 +185,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_favorite_tracklists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_favorite_tracklist_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
