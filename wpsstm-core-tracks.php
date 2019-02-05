@@ -1129,7 +1129,7 @@ class WPSSTM_Core_Tracks{
         
         $track = new WPSSTM_Track($post_id);
 
-        return $track->get_formatted_title();
+        return (string)$track; // = __toString()
     }
     
 }
