@@ -52,7 +52,7 @@ class WPSSTM_Track{
 
         
     }
-    
+
     function populate_track_post($track_id){
         
         if ( get_post_type($track_id) != wpsstm()->post_type_track ){
@@ -392,7 +392,7 @@ class WPSSTM_Track{
         $meta_input = array_filter($meta_input);
         
         $required_args = array(
-            'post_title'    => $this->get_formatted_title(),
+            'post_title'    => (string)$this, // = __toString()
             'post_type'     => wpsstm()->post_type_track,
             'meta_input'    => $meta_input,
         );
@@ -1205,8 +1205,17 @@ class WPSSTM_Track{
         return implode("\n",$fields);
     }
     
-    function get_formatted_title(){
-        return sprintf('"%s" - %s',$this->title,$this->artist);
+    /*
+    Magic Method used among others by array_unique() for our tracks, be careful if you plan to change this fn.
+    */
+    
+    public function __toString() {
+        if ($this->album){
+            $title = sprintf('%s - "%s" | %s',$this->artist,$this->title,$this->album);
+        }else{
+            $title = sprintf('%s - "%s"',$this->artist,$this->title);
+        }
+        return $title;
     }
     
 }

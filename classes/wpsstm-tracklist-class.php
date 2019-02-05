@@ -1185,6 +1185,8 @@ class WPSSTM_Tracklist{
         $error_codes = array();
         $use_strict = $this->get_options('tracks_strict');
         
+        $pending_tracks = array_unique($tracks);
+        
         foreach($pending_tracks as $track){
             $valid = $track->validate_track($use_strict);
             if ( is_wp_error($valid) ){

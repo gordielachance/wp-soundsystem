@@ -236,7 +236,7 @@ class WPSSTM_Core_BuddyPress{
     function queue_track_activity($track,$tracklist_id){
         
         $user_link = bp_core_get_userlink( get_current_user_id() );
-        $track_title = sprintf('<strong>%s</strong>',$track->get_formatted_title());
+        $track_title = sprintf('<strong>%s</strong>',(string)$track);
         $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
 
         $args = array(
