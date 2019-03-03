@@ -34,11 +34,19 @@
         }
     }
 
-    &.tracklist-loading, &:not(.tracklist-expired){
+    &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
             pointer-events:none;
         }
     }
+    
+    &.tracklist-loading{
+        @include striped-bg();
+        height:1em;
+        iframe{
+            display:none;
+        }
+    } 
 
     .tracklist-header{
         margin-bottom:1em;

@@ -31,6 +31,8 @@ class WPSSTM_Player{
         
         $options = wp_parse_args($options,$defaults);
         
+        wpsstm()->debug_log($options,'init player');
+        
         $wpsstm_player->options = $options;
         wpsstm_locate_template( 'player.php', true, false );
     }
@@ -42,7 +44,7 @@ class WPSSTM_Player{
         wp_enqueue_style('wp-mediaelement');
 
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement'),wpsstm()->version, true);
+        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement','wpsstm-tracks'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(

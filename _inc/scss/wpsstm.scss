@@ -285,18 +285,6 @@ a.toggle-children-link, .toggle-children-link a{
     margin-top:0!important;
 }
 
-.wpsstm-iframe-container{
-    width:100%;
-    border: 1px solid rgba(0,0,0,0.1);
-
-    &.wpsstm-iframe-loading{
-        @include striped-bg();
-        height:1em;
-        iframe{
-            display:none;
-        }
-    } 
-}
 
 @import "wpsstm-tracklists";
 @import "wpsstm-tracks";

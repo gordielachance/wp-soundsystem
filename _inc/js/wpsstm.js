@@ -42,16 +42,6 @@ $('.wpsstm-artist-autocomplete').each(function() {
     });
 });
 
-$( document ).ready(function() {
-
-    var iframes = $('iframe.wpsstm-tracklist-iframe');
-
-    iframes.one( "load", function() {
-        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-    });
-
-});
-
 
 /*
 resize iframes with iframeResizer
@@ -89,26 +79,6 @@ function wpsstm_dialog_notice(notice){
 
     });
 
-}
-
-//https://www.webdeveloper.com/forum/d/251166-resolved-how-to-get-the-iframe-index-using-javascript-from-inside-the-iframe-window/2
-function wpsstm_get_tracklist_iframe(){
-    var return_el = undefined;
-    var parent_iframes = $(parent.document).find('iframe.wpsstm-tracklist-iframe');
-    parent_iframes.each(function(index,iframe_el) {
-        if ( iframe_el.contentWindow === self ){
-            return_el = iframe_el;
-            return false;
-        }
-    });
-    return return_el;
-}
-
-function wpsstm_get_index_tracklist_iframe(){
-    var iframe_index = -1;
-    var iframe_el = wpsstm_get_tracklist_iframe();
-    var parent_iframes = $(parent.document).find('iframe.wpsstm-tracklist-iframe');
-    return $(parent_iframes).index( $(iframe_el) );
 }
 
 function wpsstm_debug(msg,prefix){

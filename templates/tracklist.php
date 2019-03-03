@@ -76,9 +76,6 @@ if ($action=='render'){
                     $link = get_permalink($wpsstm_tracklist->post_id);
                     printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                 break;
-                default: //'render'
-                    wpsstm_locate_template( 'content-tracklist.php', true, false );
-                break;
             }
         } 
     }

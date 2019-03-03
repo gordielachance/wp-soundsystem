@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
     
 //track popups within iframe
-$('body.wpsstm-tracklist-iframe').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
+$('.wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
     e.preventDefault();
 
     var content_url = this.href;
@@ -38,7 +38,6 @@ $('body.wpsstm-tracklist-iframe').on('click', 'a.wpsstm-track-popup,li.wpsstm-tr
 
 });
 
-
 $(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
     
         // load tracklist tracks
@@ -55,8 +54,7 @@ $(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
         /* tracks count */
         tracklist_obj.tracks_count = $(tracklist_obj.tracks).length;
         tracklist_obj.can_play =     (tracklist_obj.tracks_count > 0);
-    
-        tracklist_obj.debug("wpsstmTracklistInit");
+
     
 });
 
@@ -164,8 +162,6 @@ class WpsstmTrack {
     constructor(track_html,tracklist) {
         
         this.track_el =             $([]);
-        this.tracklist =            new WpsstmTracklist();
-        
         this.position =             null;
         this.artist =               null;
         this.title =                null;
@@ -177,12 +173,7 @@ class WpsstmTrack {
         
         this.sources =              [];
         this.did_sources_request =  false;
-        
-        //tracklist
-        if ( tracklist !== undefined ){
-            this.tracklist =            tracklist;
-        }
-        
+
         //track
         if ( track_html !== undefined ){
             this.init_html(track_html);
@@ -190,7 +181,7 @@ class WpsstmTrack {
     }
 
     debug(msg){
-        var prefix = " WpsstmTracklist #"+ this.tracklist.index +" - WpsstmTrack #" + this.position;
+        var prefix = " WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
     }
     
@@ -220,15 +211,15 @@ class WpsstmTrack {
 
         var self = this;
         var success = $.Deferred();
-        var can_tracklist_autosource = this.tracklist.options.autosource;
+        var can_autosource = true; //TOUFIX should be from localized var
         
         if (self.sources.length > 0){
             
             success.resolve();
             
-        }else if ( !can_tracklist_autosource ){
+        }else if ( !can_autosource ){
             
-            success.resolve("Autosource is disabled for this tracklist");
+            success.resolve("Autosource is disabled");
             
         } else if ( self.did_sources_request ) {
             
@@ -380,8 +371,10 @@ class WpsstmTrack {
         }, {});
         
         //tracklist
-        filtered.tracklist_id = self.tracklist.post_id;
-        
+        if(typeof self.tracklist === undefined){
+            filtered.tracklist_id = self.tracklist.post_id;
+        }
+
         return filtered;
     }
     

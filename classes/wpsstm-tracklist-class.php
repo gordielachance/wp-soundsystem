@@ -189,27 +189,37 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_html(){
         
-        $classes = array('wpsstm-tracklist-iframe','wpsstm-iframe-autoheight');
+        $is_ajax = wpsstm()->get_options('ajax_load_tracklists');
+        $content = null;
         
-        $is_first_iframe = !did_action('wpsstm_load_player');
-        if ($is_first_iframe){
-            $classes[] = 'wpsstm-tracklist-autoplay';
-        }
-
-        $attr = array(
-            'class' => implode(' ',$classes),
-            'width' =>  '100%',
-            'frameborder' => 0,
-            'src' => $this->get_tracklist_action_url('render'),
-        );
-        
-        $attr_str = wpsstm_get_html_attr($attr);
-
         do_action('wpsstm_load_player');
-        $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
-        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s</div>',$iframe_el);
-        return $el;
+
+        if ($is_ajax){
+            $classes = array('wpsstm-tracklist','wpsstm-post-tracklist','tracklist-loading');
+            $attr = array(
+                'class' => implode(' ',$classes),
+                'data-wpsstm-tracklist-id' => $this->post_id,
+            );
+
+            $attr_str = wpsstm_get_html_attr($attr);
+
+            
+            $content = sprintf('<div %s>%s</div>',$attr_str,$content);
         
+        }else{
+            $content = $this->do_tracklist_action('render');
+        }
+        
+        return $content;
+
+
+    }
+    
+    function get_static_tracklist_html(){
+        ob_start();
+        $this->populate_subtracks();
+        wpsstm_locate_template( 'content-tracklist.php', true, false );
+        return ob_get_clean();
     }
 
     public function set_tracklist_pagination( $args ) {
@@ -1062,6 +1072,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //action
         switch($action){
+                
+            case 'render':
+                ob_start();
+                $this->populate_subtracks();
+                wpsstm_locate_template( 'content-tracklist.php', true, false );
+                $success = ob_get_clean();
+            break;
 
             case 'queue': //add subtrack
                 

@@ -39,15 +39,44 @@ $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklis
 });
 
 $( document ).ready(function() {
-    /*
-    Fire an event from within the iframe to its parent.
-    */
-
-    $('.wpsstm-tracklist').each(function(index,tracklist_html) {
+    $('.wpsstm-tracklist.tracklist-loading').each(function(index,tracklist_html) {
+        var current_html = $(tracklist_html);
         var tracklist_obj = new WpsstmTracklist(tracklist_html,index);
-        //send to parent
-        var iframe = wpsstm_get_tracklist_iframe();
-        parent.$( iframe ).trigger('wpsstmIframeTracklistReady',[tracklist_obj]);
+
+        var ajax_data = {
+            action:     'wpsstm_load_tracklist',
+            tracklist:      tracklist_obj.to_ajax(),   
+        };
+
+        return $.ajax({
+            type:           "post",
+            url:            wpsstmL10n.ajaxurl,
+            data:           ajax_data,
+            dataType:       'json',
+            beforeSend:     function() {
+            },
+            success: function(data){
+                console.log(data);
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    var tracklist_el = $(data.html);
+                    tracklist_el.addClass('wpsstm-tracklist-autoplay');
+                    tracklist_obj.populate_html(tracklist_el);
+                    current_html.replaceWith(tracklist_obj.tracklist_el);
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                tracklist_obj.tracklist_el.removeClass('tracklist-loading');
+            }
+        })
+        
+        
+        
     });
     
 });

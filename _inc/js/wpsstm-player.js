@@ -37,7 +37,8 @@ class WpsstmPlayer {
         $(document).trigger( "wpsstmPlayerInit",[self] ); //custom event
         
         $(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
-
+            self.queueContainer(tracklist_obj.tracklist_el);
+            
             //track popups for player
             self.player_el.on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
                 e.preventDefault();
@@ -73,33 +74,7 @@ class WpsstmPlayer {
 
             });
         });
-        
-        $(document).on( "wpsstmPlayerTrackReady", function( event, track_obj ) {
-            
-            //append track to player queue
-            self.tracks.push(track_obj);
 
-            //play button
-            track_obj.track_el.find('.wpsstm-track-play-bt').click(function(e) {
-                e.preventDefault();
-                
-                //re-click
-                if ( self.current_media && (self.current_track == track_obj) ){
-                    
-                    if ( track_obj.track_el.hasClass('track-playing') ){
-                        self.current_media.pause();
-                    }else{
-                        self.current_media.play();
-                    }
-                    
-                    return;
-                }
-
-                self.play_track(track_obj);
-                
-            });
-        });
-        
         $(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
 
             //play source
@@ -115,9 +90,7 @@ class WpsstmPlayer {
         $(document).on("wpsstmStartTracklist", function( event, tracklist_obj ) {
             if ( tracklist_obj.isExpired ){
                 tracklist_obj.debug("cache expired, force refresh tracklist");
-
-                var refresh_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a");
-                refresh_bt.trigger('click');                
+                self.reload_tracklist(tracklist_obj);            
             }
         });
         
@@ -247,19 +220,93 @@ class WpsstmPlayer {
         });
     }
     
+    /*
+    Lookup for tracks in an HTML element
+    */
+    queueContainer(el){
+        var self = this;
+        var tracks_html = el.find('[itemprop="track"]');
+
+        var el_tracks = [];
+        if ( tracks_html.length ){
+            $.each(tracks_html, function( index, track_html ) {
+                
+                var track_obj = new WpsstmTrack(track_html,el);
+                
+                //play button
+                $( track_html ).on( "click", ".wpsstm-track-play-bt", function(e) {
+                    e.preventDefault();
+
+                    //re-click
+                    if ( self.current_media && (self.current_track == track_obj) ){
+
+                        if ( track_obj.track_el.hasClass('track-playing') ){
+                            self.current_media.pause();
+                        }else{
+                            self.current_media.play();
+                        }
+
+                        return;
+                    }
+
+                    self.play_track(track_obj);
+
+                });
+                
+                
+                el_tracks.push(track_obj);
+                
+                
+            });
+            //append track to player queue
+            self.tracks.concat(el_tracks);
+        }
+        
+        //autoplay if container has flag
+        if ( el.hasClass('wpsstm-tracklist-autoplay') ){
+            
+            var first_track = el_tracks[0];
+            if(typeof first_track !== undefined){
+                self.play_track(first_track);
+            }
+        }
+
+        //refresh bt
+        var refresh_bt = el.find(".wpsstm-tracklist-action-refresh a");
+        refresh_bt.click(function(e) {
+            e.preventDefault();
+            tracklist_obj.debug("clicked 'refresh' bt");
+            self.end_track();
+            self.reload_tracklist(tracklist_obj);
+        });
+        
+        
+    }
+    
+    queueTrack(track_html){
+        
+    }
+    
     debug(msg){
         var prefix = "WpsstmPlayer";
         wpsstm_debug(msg,prefix);
     }
     
-    dequeue_tracklist_tracks(tracklist_obj){
+    reload_tracklist(tracklist_obj){
         var self = this;
-        var success = $.Deferred();
-        
         self.debug("reload tracklist #" + tracklist_obj.index);
         var iframe = $(parent.document).find('iframe.wpsstm-tracklist-iframe').get(tracklist_obj.index);
         var container = $(iframe).parents('.wpsstm-iframe-container');
-        container.addClass('wpsstm-iframe-loading');
+        container.addClass('tracklist-loading');
+        
+        self.dequeue_tracklist_tracks(tracklist_obj);
+        
+        iframe.src = iframe.src; //hackish way of reloading iframe
+    }
+    
+    dequeue_tracklist_tracks(tracklist_obj){
+        var self = this;
+
         var old_tracks_count = self.tracks.length;
         
         //select old (tracklist) tracks - to remove
@@ -276,7 +323,7 @@ class WpsstmPlayer {
         var tracks_after = self.tracks.slice(first_track_idx + subtracks.length);
         self.tracks = tracks_before.concat(tracks_after);
 
-        self.debug('new subtracks count:' + self.tracks.length);
+        self.debug('current subtracks count in queue:' + self.tracks.length);
         
     }
 
@@ -310,6 +357,8 @@ class WpsstmPlayer {
             self.end_track();
             self.current_track = track_obj;
             self.track_to_player();
+            console.log("CURR TRACK:");
+            console.log(self.current_track);
         }
         
         ///
@@ -597,6 +646,9 @@ class WpsstmPlayer {
         var current_track_idx = $(self.tracks).index( $(self.current_track) );
         if (current_track_idx == -1) return; //index not found
         
+        console.log("CURR TRACK IDX");
+        console.log(current_track_idx);
+        
         current_track_idx = self.get_maybe_unshuffle_track_idx(current_track_idx); // shuffle ?
 
         var tracks = self.get_ordered_tracks();
@@ -629,7 +681,7 @@ class WpsstmPlayer {
         if (track_obj){
             self.play_track(track_obj);
         }else{
-            console.log("no next track");
+            self.debug("no next track");
             self.end_track();
         }
 
@@ -689,6 +741,8 @@ class WpsstmPlayer {
         /*
         track infos
         */
+        
+        /*
         var tracklist_el = self.current_track.tracklist.tracklist_el;
 
         //copy attributes from the original playlist 
@@ -700,7 +754,8 @@ class WpsstmPlayer {
         //switch type
         self.trackinfo_el.removeClass('wpsstm-post-tracklist');
         self.trackinfo_el.addClass('wpsstm-player-tracklist');
-
+        */
+        
         var list = $('<ul class="wpsstm-tracks-list" />'); 
 
         var row = self.current_track.track_el.clone(true,true);
@@ -810,40 +865,5 @@ class WpsstmPlayer {
 }
 
 $( document ).ready(function() {
-
-    var iframes = $('iframe.wpsstm-tracklist-iframe');
     var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
-    
-    iframes.on( "load", function() {
-        $(this).parents('.wpsstm-iframe-container').removeClass('wpsstm-iframe-loading');
-    });
-    
-    /*
-    Catch the event fired from within the iframe, and queue its tracklist.
-    */
-    
-    iframes.on("wpsstmIframeTracklistReady", function( event, tracklist_obj ) {
-        var iframe = $(this);
-        
-        console.log("wpsstmIframeTracklistReady");
-        
-        if ( tracklist_obj.tracks.length ){
-            //autoplay if container has flag
-            if ( iframe.hasClass('wpsstm-tracklist-autoplay') ){
-                var first_track = tracklist_obj.tracks[0];
-                bottomPlayer.play_track(first_track);
-            }
-        }
-
-        //refresh bt
-        var refresh_bt = tracklist_obj.tracklist_el.find(".wpsstm-tracklist-action-refresh a");
-        refresh_bt.click(function(e) {
-            tracklist_obj.debug("clicked 'refresh' bt");
-            bottomPlayer.end_track();
-            bottomPlayer.dequeue_tracklist_tracks(tracklist_obj);
-
-        });
-
-    });
-
 });

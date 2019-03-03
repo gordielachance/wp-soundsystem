@@ -105,6 +105,7 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
+            'ajax_load_tracklists'              => true,
             'player_enabled'                    => true,
             'autoplay'                          => true,
             'autosource'                        => true,
