@@ -120,7 +120,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
-echo $tracklist->get_tracklist_iframe();
+echo $tracklist->get_tracklist_html();
 ?>`
 
 = What are community tracks and when are they created ? =

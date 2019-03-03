@@ -198,7 +198,7 @@ class WPSSTM_Core_Tracklists{
     function metabox_tracklist_content( $post ){
         global $wpsstm_tracklist;
         
-        $output = $wpsstm_tracklist->get_tracklist_iframe();
+        $output = $wpsstm_tracklist->get_tracklist_html();
         echo $output;
     }
 
@@ -209,7 +209,7 @@ class WPSSTM_Core_Tracklists{
         if( !is_singular(wpsstm()->tracklist_post_types) ) return $content;
         if (!$wpsstm_tracklist) return $content;
 
-        return  $content . $wpsstm_tracklist->get_tracklist_iframe();
+        return  $content . $wpsstm_tracklist->get_tracklist_html();
     }
     
     function shortcode_tracklist( $atts ) {
@@ -230,7 +230,7 @@ class WPSSTM_Core_Tracklists{
             //set global $wpsstm_tracklist
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($atts['post_id']);
             
-            $output = $wpsstm_tracklist->get_tracklist_iframe();
+            $output = $wpsstm_tracklist->get_tracklist_html();
         }
 
         return $output;

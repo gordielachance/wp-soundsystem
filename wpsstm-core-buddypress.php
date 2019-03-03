@@ -212,7 +212,7 @@ class WPSSTM_Core_BuddyPress{
         $user_id = bp_displayed_user_id();
         $tracklist_id = wpsstm()->user->favorites_id;
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        echo $wpsstm_tracklist->get_tracklist_iframe();
+        echo $wpsstm_tracklist->get_tracklist_html();
     }
     
     /*

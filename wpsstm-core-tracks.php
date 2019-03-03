@@ -877,7 +877,7 @@ class WPSSTM_Core_Tracks{
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
             $track = new WPSSTM_Track( $atts['post_id'] );
             $wpsstm_tracklist->add_tracks($track);
-            $output = $wpsstm_tracklist->get_tracklist_iframe();
+            $output = $wpsstm_tracklist->get_tracklist_html();
         }
 
         return $output;
