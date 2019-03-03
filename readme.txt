@@ -15,7 +15,7 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 
 = Several new post types =
 
-Playlists, Live Playlists, Albums, Artists, Tracks and Track Sources each uses a custom post type, so you can easily manage/extend them.
+Playlists, Live Playlists, Albums, Artists, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
 
 = Playlists =
 
@@ -30,7 +30,7 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 
 **Supported sources**: Youtube, Soundcloud, regular audio files.
 
-= Track Sources =
+= Sources =
 
 If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
