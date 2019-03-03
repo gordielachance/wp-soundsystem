@@ -223,7 +223,7 @@ class WpsstmTracklist {
 
         this.init_tracklist_expiration();
 
-        console.log("init tracklist #" + this.index);
+        console.log("INIT tracklist #" + this.index);
         $(document).trigger("wpsstmTracklistInit",[this]); //custom event
     }
     

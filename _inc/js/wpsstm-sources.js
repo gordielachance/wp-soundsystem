@@ -37,7 +37,7 @@ class WpsstmTrackSource {
     }
     
     debug(msg){
-        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index;
+        var prefix = "WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index;
         wpsstm_debug(msg,prefix);
     }
 
