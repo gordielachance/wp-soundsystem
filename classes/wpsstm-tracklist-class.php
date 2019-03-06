@@ -22,6 +22,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     //live
     static $feed_url_meta_name = '_wpsstm_scraper_url';
+    private static $remote_title_meta_name = 'wpsstm_remote_title';
     static $scraper_meta_name = '_wpsstm_scraper_options';
     public $feed_url = null;
     
@@ -59,19 +60,28 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function populate_tracklist_post(){
+        
+        $post_type = get_post_type($this->post_id);
 
-        if ( !$this->post_id || ( !in_array(get_post_type($this->post_id),wpsstm()->tracklist_post_types) ) ){
+        if ( !$this->post_id || ( !in_array($post_type,wpsstm()->tracklist_post_types) ) ){
             $this->tracklist_log('Invalid tracklist post');
             return;
         }
 
-        $this->title = get_post_field( 'title', $this->post_id );
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
         //type
-        $post_type = get_post_type($this->post_id);
+        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
+        
+        //title
+        $this->title = get_post_field( 'title', $this->post_id );
+        
+        //if no title has been set, use the cached title if any
+        if ( ( $this->tracklist_type == 'live') && !$this->title ){
+            $this->title = get_post_meta($this->post_id,self::$remote_title_meta_name,true);
+        }
         
         //time updated
         $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
@@ -195,7 +205,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         do_action('wpsstm_load_player');
 
         if ($is_ajax){
-            $classes = array('wpsstm-tracklist','wpsstm-post-tracklist','tracklist-loading');
+            $classes = array('wpsstm-tracklist','wpsstm-post-tracklist','tracklist-reloading');
             $attr = array(
                 'class' => implode(' ',$classes),
                 'data-wpsstm-tracklist-id' => $this->post_id,
@@ -758,7 +768,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //update tracklist
 
         $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->preset->title,
+            self::$remote_title_meta_name =>  $this->preset->title,
             WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->preset->author,
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  current_time( 'timestamp', true ),//set the time tracklist has been updated
         );

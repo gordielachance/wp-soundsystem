@@ -1,7 +1,5 @@
 <?php
 class WPSSTM_Core_Live_Playlists{
-
-    static $remote_title_meta_name = 'wpsstm_remote_title';
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_updated_meta_name = 'wpsstm_remote_query_time';
     public $presets;
@@ -12,9 +10,7 @@ class WPSSTM_Core_Live_Playlists{
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
-        
-        add_filter( 'the_title', array($this, 'the_cached_remote_title'), 9, 2 );
-        
+
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
 
     }
@@ -157,22 +153,6 @@ class WPSSTM_Core_Live_Playlists{
             return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));
         }
         return true;
-    }
-    
-    //for live tracklists; if the WP post does not have a title, return the original tracklist title (stored in meta).
-    function the_cached_remote_title($title,$post_id){
-
-        //post type check
-        $post_type = get_post_type($post_id);
-        if ( $post_type !== wpsstm()->post_type_live_playlist ) return $title;
-
-        //only if no WP post title set
-        if ( !$title ){
-            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
-        }
-        
-        return $title;
-        
     }
     
     function live_tracklist_classes($classes,$tracklist){
