@@ -18,7 +18,7 @@ class WPSSTM_Core_Tracklists{
         //rewrite rules
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
-        add_action( 'parse_query', array($this,'populate_global_tracklist'));
+        add_action( 'wp', array($this,'populate_global_tracklist'), 1);
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2); //TOUFIX needed but breaks notices
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
@@ -304,15 +304,12 @@ class WPSSTM_Core_Tracklists{
         }
     }
     
-    function populate_global_tracklist($query){
+    function populate_global_tracklist(){
         global $wpsstm_tracklist;
         global $post;
 
-        if( $post_id = $query->get( 'p' ) ){
-            $post_type = get_post_type($post_id);
-            if( in_array($post_type,wpsstm()->tracklist_post_types) ){
-                $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-            }
+        if( in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ){
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
         }
 
         if ( $tracklist_id = get_query_var( 'tracklist_id' ) ){
@@ -433,7 +430,7 @@ class WPSSTM_Core_Tracklists{
         //check action
         $action = get_query_var( 'wpsstm_action' );
         if(!$action) return $template;
-        
+
         switch($action){
             case 'export':
                 $template = wpsstm_locate_template( 'tracklist-xspf.php' );
@@ -442,6 +439,7 @@ class WPSSTM_Core_Tracklists{
                 $template = wpsstm_locate_template( 'tracklist.php' );
             break;
         }
+
         return $template;
     }
     

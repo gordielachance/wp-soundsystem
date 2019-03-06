@@ -1,5 +1,6 @@
 <?php
 global $wpsstm_tracklist;
+$wpsstm_tracklist->populate_subtracks();
 $has_player = wpsstm()->get_options('player_enabled');
 ?>
 <div class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('wpsstm-post-tracklist'));?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>

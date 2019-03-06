@@ -217,7 +217,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_static_tracklist_html(){
         ob_start();
-        $this->populate_subtracks();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
         return ob_get_clean();
     }
@@ -1075,7 +1074,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 
             case 'render':
                 ob_start();
-                $this->populate_subtracks();
                 wpsstm_locate_template( 'content-tracklist.php', true, false );
                 $success = ob_get_clean();
             break;

@@ -14,12 +14,6 @@ $body_classes = array(
     ($action) ? sprintf('wpsstm-tracklist-action-%s',$action) : null,
 );
 
-//populate subtracks ?
-//we do this here since we want to be able to catch the notices if tracks don't populate.
-if ($action=='render'){
-    $wpsstm_tracklist->populate_subtracks();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -76,8 +70,13 @@ if ($action=='render'){
                     $link = get_permalink($wpsstm_tracklist->post_id);
                     printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                 break;
+                default://render
+                    wpsstm_locate_template( 'content-tracklist.php', true, false );
+                break;
             }
         } 
+    }else{
+        die("tata");
     }
     ?>
     <?php
