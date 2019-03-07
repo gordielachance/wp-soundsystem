@@ -47,6 +47,17 @@ $player-text-color:#FFF;
                         display:none;
                     }
                 }
+                
+                &.wpsstm-player-action-queue{
+                    a{
+                        &:before{
+                            content: "\f078";//.chevron-down;
+                        }
+                        &.active:before{
+                            content: "\f077";//.fa-chevron-up;
+                        }
+                    }
+                }
 
                 &.wpsstm-player-action-scrobbler{
                     @include opacity(.25);
@@ -82,6 +93,16 @@ $player-text-color:#FFF;
 
         .mejs-container{
             width:100%!important;
+        }
+    }
+    
+    .player-queue{
+        background-color: rgba(255, 255, 255, .1);
+        padding:1em;
+        max-height: 100vh;
+        overflow: auto;
+        &:not(.active){
+            display:none;
         }
     }
 
