@@ -118,7 +118,7 @@ class WPSSTM_Core_Tracklists{
         $html = $wpsstm_tracklist->get_tracklist_html();
 
         $result = array(
-            'success' =>    $success,
+            'success' =>    true,
             'message' =>    null,
             'input' =>      $ajax_data,
             'tracklist' =>  $wpsstm_tracklist->to_array(),
