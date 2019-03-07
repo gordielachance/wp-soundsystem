@@ -141,10 +141,7 @@ function wpsstm_array_recursive_diff($aArray1, $aArray2) {
 } 
 
 function wpsstm_is_backend(){
-    return ( is_admin() && !wpsstm_is_ajax() );
-}
-function wpsstm_is_ajax(){
-    return ( defined( 'DOING_AJAX' ) && DOING_AJAX );
+    return ( is_admin() && !wp_doing_ajax() );
 }
 
 function wpsstm_shorten_text($str,$skiptext = ' ... '){
