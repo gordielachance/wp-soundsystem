@@ -115,9 +115,8 @@ class WPSSTM_Core_Tracklists{
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         
-        $html = $wpsstm_tracklist->do_tracklist_action('render');
-        $success = ( !is_wp_error($html) );
-        
+        $html = $wpsstm_tracklist->get_tracklist_html();
+
         $result = array(
             'success' =>    $success,
             'message' =>    null,
@@ -346,7 +345,7 @@ class WPSSTM_Core_Tracklists{
         if ( !in_array(get_query_var( 'post_type' ),wpsstm()->tracklist_post_types) ) return;
         $tracklist_data = get_query_var( 'wpsstm_tracklist_data' );
 
-        $success = $wpsstm_tracklist->do_tracklist_action($action,$tracklist_data);
+        $success = $wpsstm_tracklist->do_tracklist_action($action);
         
         switch($action){
             case 'live':
@@ -399,7 +398,7 @@ class WPSSTM_Core_Tracklists{
             'item' =>   $wpsstm_tracklist->to_array(),
         );
         
-        $success = $wpsstm_tracklist->do_tracklist_action($action,$tracklist_data);
+        $success = $wpsstm_tracklist->do_tracklist_action($action);
 
         if ( is_wp_error($success) ){
             $result['success'] = false;

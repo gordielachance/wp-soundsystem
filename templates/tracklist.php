@@ -71,7 +71,7 @@ $body_classes = array(
                     printf('<div><p>%s</p><p class="wpsstm-notice">%s</p></div>',$text,$link);
                 break;
                 default://render
-                    wpsstm_locate_template( 'content-tracklist.php', true, false );
+                    echo $wpsstm_tracklist->get_tracklist_html();
                 break;
             }
         } 
