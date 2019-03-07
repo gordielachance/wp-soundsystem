@@ -38,128 +38,8 @@ $('.wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a
 
 });
 
-$(document).on( "wpsstmTracklistInit", function( event, tracklist_obj ) {
-    
-        // load tracklist tracks
-
-        var tracks_html = tracklist_obj.tracklist_el.find('[itemprop="track"]');
-
-        if ( tracks_html.length ){
-            $.each(tracks_html, function( index, track_html ) {
-                var new_track = new WpsstmTrack(track_html,tracklist_obj);
-                tracklist_obj.tracks.push(new_track);
-            });
-        }
-
-        /* tracks count */
-        tracklist_obj.tracks_count = $(tracklist_obj.tracks).length;
-        tracklist_obj.can_play =     (tracklist_obj.tracks_count > 0);
-
-    
-});
-
-$(document).on( "wpsstmTrackDomReady", function( event, track_obj ) {
-
-    //toggle favorite
-    track_obj.track_el.find('.wpsstm-track-action.action-favorite a,.wpsstm-track-action.action-unfavorite a').click(function(e) {
-
-        e.preventDefault();
-
-        var link_el = $(this);
-        var action_el = link_el.parents('.wpsstm-track-action');
-        var do_love = action_el.hasClass('action-favorite');
-        var action_url = link_el.data('wpsstm-ajax-url');
-        var ajax_data = {};
-
-        return $.ajax({
-
-            type:       "post",
-            url:        action_url,
-            data:       ajax_data,
-            dataType:   'json',
-
-            beforeSend: function() {
-                link_el.removeClass('action-error');
-                link_el.addClass('action-loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    link_el.addClass('action-error');
-                    if (data.notice){
-                        wpsstm_dialog_notice(data.notice);
-                    }
-                }else{
-                    if (do_love){
-                        track_obj.track_el.addClass('favorited-track');
-                    }else{
-                        track_obj.track_el.removeClass('favorited-track');
-                    }
-                    $(document).trigger("wpsstmTrackLove", [track_obj,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-                link_el.addClass('action-error');
-            },
-            complete: function() {
-                link_el.removeClass('action-loading');
-            }
-        })
-
-    });
-
-    //dequeue
-    track_obj.track_el.find('.wpsstm-track-action-dequeue a').click(function(e) {
-        e.preventDefault();
-        track_obj.tracklist.dequeue_track(track_obj);
-    });
-
-    //delete
-    track_obj.track_el.find('.wpsstm-track-action-trash a').click(function(e) {
-        e.preventDefault();
-        track_obj.delete_track();
-    });
-
-    //sources
-    var toggleSourcesEl = track_obj.track_el.find('.wpsstm-track-action-toggle-sources a');
-    var sourceCountEl = $('<span class="wpsstm-sources-count">'+track_obj.sources.length+'</span>');
-    toggleSourcesEl.append(sourceCountEl);
-
-    //toggle sources
-    toggleSourcesEl.click(function(e) {
-        e.preventDefault();
-
-        $(this).toggleClass('active');
-        $(this).parents('.wpsstm-track').find('.wpsstm-track-sources-list').toggleClass('active');
-    });
-
-});
-
-$(document).on( "wpsstmQueueTrack", function( event, track_obj ) {
-
-    //expand tracklist
-    var track_el = track_obj.track_el;
-    if ( track_el.is(":visible") ) return;
-
-    var tracklist_obj = track_obj.tracklist;
-    var visibleTracksCount = tracklist_obj.tracklist_el.find('[itemprop="track"]:visible').length;
-    var newTracksCount = track_obj.position + 1;
-
-    if ( newTracksCount <= visibleTracksCount ) return;
-
-    if ( tracklist_obj.options.toggle_tracklist ){
-        track_obj.tracklist.showMoreLessTracks({
-            childrenToShow:newTracksCount
-        });
-    }
-
-});
-
-
 class WpsstmTrack {
-    constructor(track_html,tracklist) {
+    constructor(track_html) {
         
         this.track_el =             $([]);
         this.position =             null;
@@ -202,8 +82,82 @@ class WpsstmTrack {
         //populate existing sources
         self.populate_html_sources();
 
-        $(document).trigger("wpsstmTrackDomReady",[self]); //custom event
-        parent.$('body').trigger("wpsstmPlayerTrackReady",[self]); //fire custom event in iframe parent
+        //toggle favorite
+        self.track_el.find('.wpsstm-track-action.action-favorite a,.wpsstm-track-action.action-unfavorite a').click(function(e) {
+
+            e.preventDefault();
+
+            var link_el = $(this);
+            var action_el = link_el.parents('.wpsstm-track-action');
+            var do_love = action_el.hasClass('action-favorite');
+            var action_url = link_el.data('wpsstm-ajax-url');
+            var ajax_data = {};
+
+            return $.ajax({
+
+                type:       "post",
+                url:        action_url,
+                data:       ajax_data,
+                dataType:   'json',
+
+                beforeSend: function() {
+                    link_el.removeClass('action-error');
+                    link_el.addClass('action-loading');
+                },
+                success: function(data){
+                    if (data.success === false) {
+                        console.log(data);
+                        link_el.addClass('action-error');
+                        if (data.notice){
+                            wpsstm_dialog_notice(data.notice);
+                        }
+                    }else{
+                        if (do_love){
+                            self.track_el.addClass('favorited-track');
+                        }else{
+                            self.track_el.removeClass('favorited-track');
+                        }
+                        $(document).trigger("wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                    link_el.addClass('action-error');
+                },
+                complete: function() {
+                    link_el.removeClass('action-loading');
+                }
+            })
+
+        });
+
+        //dequeue
+        self.track_el.find('.wpsstm-track-action-dequeue a').click(function(e) {
+            e.preventDefault();
+            self.dequeue_track();
+        });
+
+        //delete
+        self.track_el.find('.wpsstm-track-action-trash a').click(function(e) {
+            e.preventDefault();
+            self.delete_track();
+        });
+
+        //sources
+        var toggleSourcesEl = self.track_el.find('.wpsstm-track-action-toggle-sources a');
+        var sourceCountEl = $('<span class="wpsstm-sources-count">'+self.sources.length+'</span>');
+        toggleSourcesEl.append(sourceCountEl);
+
+        //toggle sources
+        toggleSourcesEl.click(function(e) {
+            e.preventDefault();
+
+            $(this).toggleClass('active');
+            $(this).parents('.wpsstm-track').find('.wpsstm-track-sources-list').toggleClass('active');
+        });
+
+        $(document).trigger("wpsstmTrackDomReady",[self]); //fire custom event in iframe parent
         
     }
     
@@ -369,19 +323,55 @@ class WpsstmTrack {
             obj[key] = self[key];
             return obj;
         }, {});
-        
-        //tracklist
-        if(typeof self.tracklist === undefined){
-            filtered.tracklist_id = self.tracklist.post_id;
-        }
 
         return filtered;
     }
     
-    delete_track(track_obj){
+    dequeue_track(){
         
         var self = this;
-        var track_el = track_obj.track_el;
+        var track_el = self.track_el;
+        var link_el = track_el.find('.wpsstm-track-action-dequeue a');
+        var action_url = link_el.data('wpsstm-ajax-url');
+        var ajax_data = {};
+
+        $.ajax({
+            type: "post",
+            url: action_url,
+            data:ajax_data,
+            dataType: 'json',
+            beforeSend: function() {
+                track_el.addClass('track-loading');
+                link_el.removeClass('action-error');
+                link_el.addClass('action-loading');
+            },
+            success: function(data){
+                
+                if (data.success === false) {
+                    link_el.addClass('action-error');
+                    console.log(data);
+                }else{
+                    $(track_el).remove();
+                    self.refresh_tracks_positions();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                link_el.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                track_el.removeClass('track-loading');
+                link_el.removeClass('action-loading');
+            }
+        })
+
+    }
+    
+    delete_track(){
+        
+        var self = this;
+        var track_el = self.track_el;
         var link_el = $(track_el).find('.wpsstm-track-action-trash a');
         var action_url = link_el.data('wpsstm-ajax-url');
 

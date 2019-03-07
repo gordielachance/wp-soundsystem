@@ -2,6 +2,7 @@
 global $wpsstm_player;
 ?>
 <div class="wpsstm-player" id="<?php echo $wpsstm_player->options['id'];?>">
+    <div class="player-queue"></div>
     <div class="player-row">
         <span id="wpsstm-player-track"></span>
         <?php

@@ -1,6 +1,5 @@
 var $ = jQuery.noConflict();
 var wpsstm = {};
-var isInIframe = (window.location != window.parent.location) ? true : false;
 
 //artist autocomplete
 $('.wpsstm-artist-autocomplete').each(function() {
@@ -41,18 +40,6 @@ $('.wpsstm-artist-autocomplete').each(function() {
         minLength: 2,
     });
 });
-
-
-/*
-resize iframes with iframeResizer
-*/
-
-if (typeof iFrameResize === "function") { //check that fn is available
-    $('.wpsstm-iframe-autoheight').iFrameResize({
-        //log:true,
-    });
-}
-
 
 function wpsstm_dialog_notice(notice){
 
@@ -109,3 +96,56 @@ function wpsstm_shuffle(array) {
 
   return array;
 }
+
+$( document ).ready(function() {
+    var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
+    var trackContainers = $('.wpsstm-tracklist');
+    
+    $(document).on( "wpsstmTracklistReload", function( event, tracklist_obj ) {
+        bottomPlayer.unQueueContainer(tracklist_obj);
+    });
+    
+    /* At init, set autoplay for first matched container */
+    $(document).one( "wpsstmTracklistReady", function( event, tracklist_obj ) {
+        if ( tracklist_obj.tracklist_el.is(trackContainers[0]) ){
+            tracklist_obj.tracklist_el.addClass('tracklist-playing');
+        }
+    });
+    
+    $(document).on( "wpsstmTracklistReady", function( event, tracklist_obj ) {
+        bottomPlayer.queueContainer(tracklist_obj);
+
+        /* autoplay ? */
+        if ( tracklist_obj.tracklist_el.hasClass('tracklist-playing') ){
+            console.log("AUTOPLAY!");
+            var firstTrack = tracklist_obj.tracks[0];
+            if(typeof firstTrack !== undefined){
+                bottomPlayer.play_track(firstTrack);
+            }
+        }
+
+    });
+    
+    trackContainers.each(function(index,tracklist_html) {
+        
+        var tracklist_obj = new WpsstmTracklist(tracklist_html);
+        
+        //should we refresh this playlist ?
+        if (tracklist_obj.isExpired){
+             var reloaded = tracklist_obj.reload();
+                /*
+              reloaded.done(function() {
+                alert( "success" );
+              })
+              .fail(function() {
+                alert( "error" );
+              })
+              .always(function() {
+                alert( "complete" );
+              });
+              */
+        }
+
+    });
+    
+});

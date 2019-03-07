@@ -5,23 +5,19 @@ class WPSSTM_Player{
     var $options = array();
 
     function __construct() {
-
-        if ( wpsstm()->get_options('player_enabled') ){
-            add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
-            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
-            add_action( 'wp_footer', array($this,'bottom_player'));
-            add_action( 'admin_footer', array($this,'player_html'));
-        }
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+        add_action( 'wp_footer', array($this,'bottom_player'));
+        add_action( 'admin_footer', array($this,'bottom_player'));
 
     }
     
     function bottom_player(){
-        if ( !did_action('wpsstm_load_player') ) return;
         $options=array('id'=>'wpsstm-bottom-player');
-        $this->player_html($options);
+        echo $this->get_player_html($options);
     }
 
-    function player_html( $options = array() ){
+    function get_player_html( $options = array() ){
         global $wpsstm_player;
         $wpsstm_player = $this;
         
@@ -34,7 +30,12 @@ class WPSSTM_Player{
         wpsstm()->debug_log($options,'init player');
         
         $wpsstm_player->options = $options;
+        
+        ob_start();
         wpsstm_locate_template( 'player.php', true, false );
+        $html = ob_get_clean();
+        
+        return $html;
     }
     
     function enqueue_player_scripts_styles(){
@@ -66,6 +67,12 @@ class WPSSTM_Player{
     
     function get_player_links(){
         $actions = array();
+        
+        $actions['queue'] = array(
+            'text' =>       __('Player queue', 'wpsstm'),
+            'href' =>       '#',
+        );
+        
         return apply_filters('wpsstm_get_player_actions',$actions);
     }
     
@@ -83,6 +90,7 @@ class WPSSTM_Player{
 }
 
 function wpsstm_player_init(){
+    if ( !wpsstm()->get_options('player_enabled') ) return;
     new WPSSTM_Player();
 }
 
