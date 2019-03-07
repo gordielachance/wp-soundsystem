@@ -94,9 +94,10 @@ $edit_cap = $post_type_obj->cap->edit_posts;
                         while ( $tracklist_query->have_posts() ) {
 
                             $tracklist_query->the_post();
+                            $wpsstm_tracklist->classes[] = 'tracklist-row':
 
                             ?>
-                            <li class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('tracklist-row'));?>">
+                            <li class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>">
                                 <span class="tracklist-row-action">
                                     <?php
 
