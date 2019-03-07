@@ -6,10 +6,6 @@ Popup, modals, etc.
 @import "_wpsstm-tracklist-manager";
 
 html,body{
-    /*fixes iframeResizer infinite expansion*/
-    height:initial!important;
-    min-height:initial!important;
-    
     margin:0;
     padding:0;
     background:rgba(255,255,255,.8)!important;

@@ -93,7 +93,6 @@ This would be very appreciated — Thanks !
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
-* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer)
 
 = Contributors =
 
@@ -155,7 +154,6 @@ There is an option in the plugin settings to flush those community tracks : they
 * Spotify metabox
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
-* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
 
 = 1.9.4 =
 * Better settings page errors
