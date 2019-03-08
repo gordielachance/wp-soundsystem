@@ -948,11 +948,12 @@ class WPSSTM_Core_Tracks{
         $track->from_array($ajax_data['track']);
         
         $result = array(
-            'input'     => $ajax_data,
-            'timestamp' => current_time('timestamp'),
-            'message'   => null,
-            'success'   => false,
-            'track'     => $track->to_array(),
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'success'       => false,
+            'track'         => $track->to_array(),
         );
    
         //autosource
@@ -961,6 +962,7 @@ class WPSSTM_Core_Tracks{
         $new_ids = $track->autosource();
 
         if ( is_wp_error($new_ids) ){
+            $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
         }else{
             $result['success'] = true;
