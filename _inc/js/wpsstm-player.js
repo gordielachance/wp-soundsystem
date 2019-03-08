@@ -287,8 +287,19 @@ class WpsstmPlayer {
         self.debug("Queued tracks: " + newTracks.length );
         
         $.merge(self.tracks,newTracks);
-
         self.queueUpdateGUI();
+        
+        /* autoplay ? */
+        if ( newTracks.length && tracklist_obj.tracklist_el.hasClass('tracklist-playing') ){
+            var firstTrack = tracklist_obj.tracks[0];
+            if(typeof firstTrack !== undefined){
+                tracklist_obj.debug("AUTOPLAY!");
+                self.play_track(firstTrack);
+            }else{
+                tracklist_obj.tracklist_el.removeClass('tracklist-playing');
+            }
+        }
+        
     }
     
     queueUpdateGUI(){

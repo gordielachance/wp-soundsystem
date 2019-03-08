@@ -114,16 +114,6 @@ $( document ).ready(function() {
     
     $(document).on( "wpsstmTracklistReady", function( event, tracklist_obj ) {
         bottomPlayer.queueContainer(tracklist_obj);
-
-        /* autoplay ? */
-        if ( tracklist_obj.tracklist_el.hasClass('tracklist-playing') ){
-            console.log("AUTOPLAY!");
-            var firstTrack = tracklist_obj.tracks[0];
-            if(typeof firstTrack !== undefined){
-                bottomPlayer.play_track(firstTrack);
-            }
-        }
-
     });
     
     trackContainers.each(function(index,tracklist_html) {
