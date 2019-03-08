@@ -576,8 +576,8 @@ class WpsstmPlayer {
         var self = this;
 
         var max_items = 4; //number of following tracks to preload
-        var rtrack_in = self.current_track.index + 1;
-        var rtrack_out = self.current_track.index + max_items + 1;
+        var rtrack_in = self.current_track.position + 1;
+        var rtrack_out = self.current_track.position + max_items + 1;
 
         var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
 
