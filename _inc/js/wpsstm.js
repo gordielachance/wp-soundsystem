@@ -139,3 +139,39 @@ $( document ).ready(function() {
     });
     
 });
+
+//https://developers.google.com/web/fundamentals/web-components/customelements
+
+let tracklistTemplate = document.createElement('template');
+tracklistTemplate.innerHTML = "<b>I'm in shadow dom!</b><slot></slot>";
+
+class WpsstmTracklist2 extends HTMLElement{
+    constructor() {
+        super(); // always call super() first in the constructor.
+
+        // Attach a shadow root to the element.
+        this._shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.appendChild(tracklistTemplate.content.cloneNode(true));
+
+        console.log("INIT WpsstmTracklist2");
+
+    }
+
+    reload(){
+        console.log("RELOAD WpsstmTracklist2");
+        this._shadowRoot.appendChild("RELOAD");
+    }
+    
+}
+let tracklist2 = document.querySelector("wpsstm-tracklist2");
+const shadowRoot = tracklist2.attachShadow({mode: "open"});
+
+// put something in shadow DOM
+tracklist2.shadowRoot.innerHTML = "Hi I am shadowed!";
+
+let tracklist3 = document.querySelector("wpsstm-tracklist3");
+tracklist3.attachShadow({mode: "open"});
+
+// put something in shadow DOM
+tracklist3.shadowRoot = tracklist2.shadowRoot;
+
