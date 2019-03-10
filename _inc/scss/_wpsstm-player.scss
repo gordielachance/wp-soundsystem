@@ -109,7 +109,7 @@ $player-text-color:#FFF;
 }
 
 //tracklists inside posts //TOFIXDDD
-:not(#wpsstm-player-track-container) .wpsstm-tracklist.tracklist-template-table{
+:not(#wpsstm-player-track-container) wpsstm-tracklist.tracklist-template-table{
 
     border:1px solid #F7F7F7;
     padding:.5em 1em;

@@ -6,9 +6,7 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 $has_player = wpsstm()->get_options('player_enabled');
 
 ?>
-<wpsstm-tracklist2></wpsstm-tracklist2>
-<wpsstm-tracklist3></wpsstm-tracklist3>
-<div class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
+<wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->title;?>">
@@ -121,4 +119,4 @@ $has_player = wpsstm()->get_options('player_enabled');
     }
 
     ?>
-</div>
+</wpsstm-tracklist>

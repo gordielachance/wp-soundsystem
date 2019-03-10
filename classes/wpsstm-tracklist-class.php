@@ -28,7 +28,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $preset;
     
-    public $classes = array('wpsstm-tracklist');
+    public $classes = array();
 
     function __construct($post_id = null ){
         

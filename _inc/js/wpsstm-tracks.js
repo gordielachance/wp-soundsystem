@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
     
 //track popups within iframe
-$('.wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
+$('wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
     e.preventDefault();
 
     var content_url = this.href;

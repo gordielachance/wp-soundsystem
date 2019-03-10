@@ -246,13 +246,13 @@ class WpsstmPlayer {
         wpsstm_debug(msg,prefix);
     }
 
-    unQueueContainer(tracklist_obj){
+    unQueueContainer(tracklist){
         var self = this;
         
         /*
         Stop current track if it is part of this tracklist
         */
-        if ( self.current_track && tracklist_obj.tracklist_el.find(self.current_track.track_el).length ){
+        if ( self.current_track && $(tracklist).find(self.current_track.track_el).length ){
             self.debug("current track is being unqueued, stop it");
             self.end_track(self.current_track);
         }
@@ -261,42 +261,42 @@ class WpsstmPlayer {
         Keep only tracks that do not belong to the current tracklist
         */
         var cleanedTracks = self.tracks.filter(function( track_obj ) {
-            return !tracklist_obj.tracklist_el.find(track_obj.track_el).length;
+            return !$(tracklist).find(track_obj.track_el).length;
           })
         
         var newTrackCount = cleanedTracks.length;
         var oldTrackCount = self.tracks.length;
         var removedTrackCount = oldTrackCount - newTrackCount;
 
-        tracklist_obj.debug( 'remove tracks from #' + self.player_el.attr('id') );
+        tracklist.debug( 'remove tracks from #' + self.player_el.attr('id') );
         self.debug("unQueued " + removedTrackCount + " tracks, still in queue: " + newTrackCount);
         
         self.tracks = cleanedTracks;
 
     }
     
-    queueContainer(tracklist_obj){
+    queueContainer(tracklist){
         var self = this;
         var newTracks = [];
         
-        $(tracklist_obj.tracks).each(function(index, track_obj) {
+        $(tracklist.tracks).each(function(index, track_obj) {
             newTracks.push(track_obj);
         });
         
-        tracklist_obj.debug( 'append tracks to #' + self.player_el.attr('id') );
+        tracklist.debug( 'append tracks to #' + self.player_el.attr('id') );
         self.debug("Queued tracks: " + newTracks.length );
         
         $.merge(self.tracks,newTracks);
         self.queueUpdateGUI();
         
         /* autoplay ? */
-        if ( newTracks.length && tracklist_obj.tracklist_el.hasClass('tracklist-playing') ){
-            var firstTrack = tracklist_obj.tracks[0];
+        if ( newTracks.length && $(tracklist).hasClass('tracklist-playing') ){
+            var firstTrack = tracklist.tracks[0];
             if(typeof firstTrack !== undefined){
-                tracklist_obj.debug("AUTOPLAY!");
+                tracklist.debug("AUTOPLAY!");
                 self.play_track(firstTrack);
             }else{
-                tracklist_obj.tracklist_el.removeClass('tracklist-playing');
+                $(tracklist).removeClass('tracklist-playing');
             }
         }
         
@@ -316,12 +316,6 @@ class WpsstmPlayer {
         //show in not done yet
         var showPlayer = ( $(self.tracks).length > 0);
         self.player_el.toggle(showPlayer);
-    }
-    
-    dequeue_tracklist_tracks(tracklist_obj){
-        var self = this;
-        
-        console.log("DEQUEUE TRACKLISt tRACKS");
     }
 
     play_track(track_obj){
@@ -448,7 +442,7 @@ class WpsstmPlayer {
         var track_el = $([]);
         track_el.push(track_obj.track_el.get(0) );
         track_el.push( self.trackinfo_el.find('.wpsstm-track').get(0) );
-        var tracklist_el = track_el.parents('.wpsstm-tracklist');
+        var tracklist_el = track_el.parents('wpsstm-tracklist');
         var source_el = track_el.find('[data-wpsstm-source-idx='+source_obj.index+']');
         
         /*
@@ -809,7 +803,7 @@ class WpsstmPlayer {
 
         //TOUFIX TO CHECK should be hookend on events ?
         //tracklists
-        var tracklist_instances = source_obj.track.track_el.parents('.wpsstm-tracklist');
+        var tracklist_instances = source_obj.track.track_el.parents('wpsstm-tracklist');
 
         //sources
         var sources_instances = source_obj.track.track_el.find('[data-wpsstm-source-idx='+source_obj.index+']');

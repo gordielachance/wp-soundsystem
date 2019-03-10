@@ -97,33 +97,31 @@ function wpsstm_shuffle(array) {
   return array;
 }
 
+var bottomPlayer;
+var trackContainers;
 $( document ).ready(function() {
-    var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
-    var trackContainers = $('.wpsstm-tracklist');
     
-    $(document).on( "wpsstmTracklistReload", function( event, tracklist_obj ) {
-        bottomPlayer.unQueueContainer(tracklist_obj);
-    });
+    bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
+    var trackContainers = $('wpsstm-tracklist');
     
-    /* At init, set autoplay for first matched container */
-    $(document).one( "wpsstmTracklistReady", function( event, tracklist_obj ) {
-        if ( tracklist_obj.tracklist_el.is(trackContainers[0]) ){
-            tracklist_obj.tracklist_el.addClass('tracklist-playing');
+    trackContainers.each(function(index,tracklist) {
+        if ( index === 0 ){
+            $(tracklist).addClass('tracklist-playing');
         }
+        bottomPlayer.queueContainer(tracklist);
     });
-    
-    $(document).on( "wpsstmTracklistReady", function( event, tracklist_obj ) {
-        bottomPlayer.queueContainer(tracklist_obj);
-    });
+
     
     trackContainers.each(function(index,tracklist_html) {
         
+        //TOUFIX URGENT
+        /*
         var tracklist_obj = new WpsstmTracklist(tracklist_html);
         
         //should we refresh this playlist ?
         if (tracklist_obj.isExpired){
              var reloaded = tracklist_obj.reload();
-                /*
+
               reloaded.done(function() {
                 alert( "success" );
               })
@@ -133,45 +131,19 @@ $( document ).ready(function() {
               .always(function() {
                 alert( "complete" );
               });
-              */
+
         }
+         */
 
     });
     
 });
 
+//TOUFIX
+$(document).on( "wpsstmTracklistReload", function( event, tracklist_obj ) {
+    console.log("wpsstmTracklistReload");
+    bottomPlayer.unQueueContainer(tracklist_obj);
+});
+
+
 //https://developers.google.com/web/fundamentals/web-components/customelements
-
-let tracklistTemplate = document.createElement('template');
-tracklistTemplate.innerHTML = "<b>I'm in shadow dom!</b><slot></slot>";
-
-class WpsstmTracklist2 extends HTMLElement{
-    constructor() {
-        super(); // always call super() first in the constructor.
-
-        // Attach a shadow root to the element.
-        this._shadowRoot = this.attachShadow({mode: 'open'});
-        shadowRoot.appendChild(tracklistTemplate.content.cloneNode(true));
-
-        console.log("INIT WpsstmTracklist2");
-
-    }
-
-    reload(){
-        console.log("RELOAD WpsstmTracklist2");
-        this._shadowRoot.appendChild("RELOAD");
-    }
-    
-}
-let tracklist2 = document.querySelector("wpsstm-tracklist2");
-const shadowRoot = tracklist2.attachShadow({mode: "open"});
-
-// put something in shadow DOM
-tracklist2.shadowRoot.innerHTML = "Hi I am shadowed!";
-
-let tracklist3 = document.querySelector("wpsstm-tracklist3");
-tracklist3.attachShadow({mode: "open"});
-
-// put something in shadow DOM
-tracklist3.shadowRoot = tracklist2.shadowRoot;
-
