@@ -84,7 +84,7 @@ class WpsstmTracklistCE extends HTMLElement{
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
-        this.populate_html();
+        this.render();
     }
 
     disconnectedCallback(){
@@ -104,7 +104,7 @@ class WpsstmTracklistCE extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['id', 'my-custom-attribute', 'data-something', 'disabled'];
+        //return ['id', 'my-custom-attribute', 'data-something', 'disabled'];
     }
     
     ///
@@ -115,7 +115,7 @@ class WpsstmTracklistCE extends HTMLElement{
         wpsstm_debug(msg,prefix);
     }
     
-    populate_html(){
+    render(){
         
         var self = this;
         self.tracks =                   []; //unset current tracks
@@ -295,7 +295,7 @@ class WpsstmTracklistCE extends HTMLElement{
                     $(self).toggleClass('tracklist-active',wasActive);
                     $(self).toggleClass('tracklist-playing',wasPlaying);
 
-                    self.populate_html();
+                    self.render();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
