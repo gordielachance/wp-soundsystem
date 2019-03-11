@@ -5,7 +5,7 @@ $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
 $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
 
 if ( $wpsstm_track->have_sources() ) { ?>
-    <ul class="wpsstm-track-sources-list" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>">
+    <ul class="wpsstm-track-sources-list">
         <?php
         while ( $wpsstm_track->have_sources() ) {
             

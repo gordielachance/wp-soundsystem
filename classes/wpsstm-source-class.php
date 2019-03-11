@@ -220,7 +220,6 @@ class WPSSTM_Source{
         
         $attr = array(
             'data-wpsstm-source-id' =>              $this->post_id,
-            'data-wpsstm-track-id' =>               $this->track->post_id,
             'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
             'data-wpsstm-source-idx' =>             $this->track->current_source,
             'data-wpsstm-source-src' =>             $this->get_stream_url(),

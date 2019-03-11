@@ -64,7 +64,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
         
         if ( current_user_can($edit_cap) ){
             ?>
-            <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-toggle-tracklists" data-wpsstm-track-id="<?php echo $wpsstm_track->post_id;?>" method="post">
+            <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-toggle-tracklists" method="post">
                 <?php
 
 
