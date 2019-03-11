@@ -97,21 +97,13 @@ function wpsstm_shuffle(array) {
   return array;
 }
 
-var bottomPlayer;
-var trackContainers;
+var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
+var trackContainers = $('wpsstm-tracklist');
 $( document ).ready(function() {
     
-    bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
-    var trackContainers = $('wpsstm-tracklist');
-    
-    trackContainers.each(function(index,tracklist) {
-        if ( index === 0 ){
-            $(tracklist).addClass('tracklist-playing');
-        }
-        bottomPlayer.queueContainer(tracklist);
-    });
 
-    
+
+
     trackContainers.each(function(index,tracklist_html) {
         
         //TOUFIX URGENT
@@ -138,11 +130,22 @@ $( document ).ready(function() {
     });
     
 });
-
-//TOUFIX
-$(document).on( "wpsstmTracklistReload", function( event, tracklist_obj ) {
+$(document).on( "wpsstmTracklistReload", function( event,tracklist ) {
     console.log("wpsstmTracklistReload");
-    bottomPlayer.unQueueContainer(tracklist_obj);
+
+    var index = trackContainers.index( $(tracklist) );
+
+    if ( index === 0 ){
+        $(tracklist).addClass('tracklist-playing');
+    }
+
+    bottomPlayer.queueContainer(tracklist);
+
+});
+
+$(document).on( "wpsstmTracklistBeforeReload", function( event,tracklist ) {
+    console.log("wpsstmTracklistBeforeReload");
+    bottomPlayer.unQueueContainer(tracklist);
 });
 
 

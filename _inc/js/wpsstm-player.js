@@ -215,7 +215,7 @@ class WpsstmPlayer {
 
     unQueueContainer(tracklist){
         var self = this;
-        
+
         /*
         Stop current track if it is part of this tracklist
         */
@@ -245,7 +245,7 @@ class WpsstmPlayer {
     queueContainer(tracklist){
         var self = this;
         var newTracks = [];
-        
+
         $(tracklist.tracks).each(function(index, track_obj) {
             newTracks.push(track_obj);
         });
@@ -255,7 +255,7 @@ class WpsstmPlayer {
         
         $.merge(self.tracks,newTracks);
         self.queueUpdateGUI();
-        
+
         /* autoplay ? */
         if ( newTracks.length && $(tracklist).hasClass('tracklist-playing') ){
             var firstTrack = tracklist.tracks[0];
@@ -268,7 +268,7 @@ class WpsstmPlayer {
         }
         
         //play/pause track button
-        $(tracklist.tracks).on( "click", ".wpsstm-track-play-bt", function(e) {
+        $(tracklist).on( "click", ".wpsstm-track-play-bt", function(e) {
             e.preventDefault();
             
             var track = $(this).parents('wpsstm-track').get(0);
@@ -330,6 +330,19 @@ class WpsstmPlayer {
         }
         self.current_track = track;
         self.render_playing_track();
+        
+        /*
+        If this is the first tracklist track, check if tracklist is expired.
+        */
+        var tracklist = track.tracklist;
+        var track_index = $(tracklist).find('wpsstm-track').index( track );
+        if ( (track_index === 0) && tracklist.isExpired ){
+            tracklist.debug("First track requested but tracklist is expired,reload it!");
+
+            tracklist.reload();
+            return;
+        }
+        
 
         ///
 
@@ -599,17 +612,6 @@ class WpsstmPlayer {
         return previous_track;
     }
     
-    previous_track_jump(){
-        
-        var self = this;
-        
-        var track_obj = self.get_previous_track();
-
-        if (track_obj){
-            self.play_track(track_obj);
-        }
-    }
-    
     get_next_track(){
         var self = this;
 
@@ -632,6 +634,13 @@ class WpsstmPlayer {
             return (track_obj.can_play !== false);
         });
         
+        var tracks_unplayable = tracks_after.filter(function (track_obj) {
+            return (track_obj.can_play === false);
+        });
+        
+        
+        
+        
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? $(self.tracks).index( next_track ) : undefined;
 
@@ -640,13 +649,65 @@ class WpsstmPlayer {
         return next_track;
     }
     
+    previous_track_jump(){
+        
+        var self = this;
+        
+        var track = self.get_previous_track();
+
+        if (track){
+            
+            var tracklist = track.tracklist;
+            
+            /*
+            check if we need to reload the tracklist
+            */
+            if (tracklist.isExpired){
+                var current_track_idx = $(tracklist).find('wpsstm-track').index( $(self.current_track) );
+                var new_track_idx = $(tracklist).find('wpsstm-track').index( track );
+
+                if (new_track_idx > current_track_idx){
+                    tracklist.debug("tracklist backward loop and it is expired, refresh it!");
+                    self.end_track();
+                    tracklist.reload();
+                    return;
+                }
+            }
+
+
+            self.play_track(track);
+        }else{
+            self.debug("no previous track");
+            self.end_track();
+        }
+    }
+    
     next_track_jump(){
         var self = this;
 
-        var track_obj = self.get_next_track();
+        var track = self.get_next_track();
 
-        if (track_obj){
-            self.play_track(track_obj);
+        if (track){
+            
+            var tracklist = track.tracklist;
+            
+            /*
+            check if we need to reload the tracklist
+            */
+            if (tracklist.isExpired){
+                var current_track_idx = $(tracklist).find('wpsstm-track').index( $(self.current_track) );
+                var new_track_idx = $(tracklist).find('wpsstm-track').index( track );
+
+                if (new_track_idx < current_track_idx){
+                    tracklist.debug("tracklist forward loop and it is expired, refresh it!");
+                    self.end_track();
+                    tracklist.reload();
+                    return;
+                }
+            }
+
+
+            self.play_track(track);
         }else{
             self.debug("no next track");
             self.end_track();

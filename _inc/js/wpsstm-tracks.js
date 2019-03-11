@@ -328,8 +328,10 @@ class WpsstmTrack extends HTMLElement{
 
         sources_request.done(function(data) {
             if ( data.html ){
-                self.innerHTML = data.html;
-                self.render();
+                
+                //swap content
+                self.replaceWith( data.html );
+                
                 success.resolve();
             }else{
                 self.debug("track refresh failed: " + data.message);

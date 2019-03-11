@@ -115,7 +115,7 @@ class WpsstmTracklist extends HTMLElement{
     }
     
     render(){
-        
+
         var self = this;
         self.tracks =                   []; //unset current tracks
 
@@ -256,6 +256,8 @@ class WpsstmTracklist extends HTMLElement{
         self.checkTracksIdenticalValues();
 
         console.log("Tracklist #" + self.index + " is ready");
+        
+        $(document).trigger("wpsstmTracklistReload",[self]); //custom event
     }
 
     reload(){
@@ -278,22 +280,22 @@ class WpsstmTracklist extends HTMLElement{
             dataType:       'json',
             beforeSend:     function() {
                 $(self).addClass('tracklist-reloading');
-                $(document).trigger("wpsstmTracklistReload",[self]); //custom event
+                $(document).trigger("wpsstmTracklistBeforeReload",[self]); //custom event
             },
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
                 }else{
                     
-                    self.innerHTML = data.html;
-                    
                     /*
                     If the tracklist WAS playing, keep those classes (used for autoplay).
                     */
-                    $(self).toggleClass('tracklist-active',wasActive);
-                    $(self).toggleClass('tracklist-playing',wasPlaying);
-
-                    self.render();
+                    var newTracklist = $(data.html);
+                    newTracklist.toggleClass('tracklist-active',wasActive);
+                    newTracklist.toggleClass('tracklist-playing',wasPlaying);
+                    
+                    //swap content
+                    self.replaceWith( newTracklist.get(0) );
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
