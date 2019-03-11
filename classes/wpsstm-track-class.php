@@ -30,6 +30,8 @@ class WPSSTM_Track{
     
     public $notices = array();
     
+    public $autosourced = null;
+    
     function __construct( $post_id = null, $tracklist = null ){
         
         /*
