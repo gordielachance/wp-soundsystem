@@ -210,8 +210,10 @@ class WpsstmTrack extends HTMLElement{
 
         //sources
         var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
-        var sourceCountEl = $('<span class="wpsstm-sources-count">'+self.sources.length+'</span>');
-        toggleSourcesEl.append(sourceCountEl);
+        if ( !$(self).find('.wpsstm-sources-count').length ){ //not yet appened
+            var sourceCountEl = $('<span class="wpsstm-sources-count">'+self.sources.length+'</span>');
+            toggleSourcesEl.append(sourceCountEl);            
+        }
 
         //toggle sources
         toggleSourcesEl.click(function(e) {
