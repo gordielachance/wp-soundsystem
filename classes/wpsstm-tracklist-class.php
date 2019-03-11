@@ -60,6 +60,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
+    static function get_tracklist_title($post_id){
+        //title
+        $title = get_post_field( 'title', $post_id );
+        $post_type = get_post_type($post_id);
+        
+        //if no title has been set, use the cached title if any
+        if ( ($post_type == wpsstm()->post_type_live_playlist) && !$title ){
+            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
+        }
+        
+        return $title;
+    }
+    
     function populate_tracklist_post(){
         
         $post_type = get_post_type($this->post_id);
@@ -77,12 +90,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
         //title
-        $this->title = get_post_field( 'title', $this->post_id );
+        $this->title = self::get_tracklist_title($this->post_id);
         
-        //if no title has been set, use the cached title if any
-        if ( ( $this->tracklist_type == 'live') && !$this->title ){
-            $this->title = get_post_meta($this->post_id,self::$remote_title_meta_name,true);
-        }
         
         //time updated
         $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
