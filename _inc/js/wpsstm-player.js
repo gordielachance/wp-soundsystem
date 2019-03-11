@@ -227,8 +227,9 @@ class WpsstmPlayer {
         /*
         Keep only tracks that do not belong to the current tracklist
         */
-        var cleanedTracks = self.tracks.filter(function( track_obj ) {
-            return !$(tracklist).find($(self.current_track)).length;
+        var cleanedTracks = self.tracks.filter(function( track ) {
+            var track_idx = $(self.tracks).index( $(track) );
+            return (track_idx === -1);
           })
         
         var newTrackCount = cleanedTracks.length;
@@ -239,7 +240,7 @@ class WpsstmPlayer {
         self.debug("unQueued " + removedTrackCount + " tracks, still in queue: " + newTrackCount);
         
         self.tracks = cleanedTracks;
-
+        self.queueUpdateGUI();
     }
     
     queueContainer(tracklist){
@@ -257,7 +258,8 @@ class WpsstmPlayer {
         self.queueUpdateGUI();
 
         /* autoplay ? */
-        if ( newTracks.length && $(tracklist).hasClass('tracklist-playing') ){
+        if ( newTracks.length && $(tracklist).hasClass('tracklist-autoplay') ){
+            $(tracklist).removeClass('tracklist-autoplay');
             var firstTrack = tracklist.tracks[0];
             if(typeof firstTrack !== undefined){
                 tracklist.debug("AUTOPLAY!");
@@ -338,8 +340,7 @@ class WpsstmPlayer {
         var track_index = $(tracklist).find('wpsstm-track').index( track );
         if ( (track_index === 0) && tracklist.isExpired ){
             tracklist.debug("First track requested but tracklist is expired,reload it!");
-
-            tracklist.reload();
+            tracklist.reload_tracklist(true);
             return;
         }
         
@@ -669,7 +670,7 @@ class WpsstmPlayer {
                 if (new_track_idx > current_track_idx){
                     tracklist.debug("tracklist backward loop and it is expired, refresh it!");
                     self.end_track();
-                    tracklist.reload();
+                    tracklist.reload_tracklist(true);
                     return;
                 }
             }
@@ -701,7 +702,7 @@ class WpsstmPlayer {
                 if (new_track_idx < current_track_idx){
                     tracklist.debug("tracklist forward loop and it is expired, refresh it!");
                     self.end_track();
-                    tracklist.reload();
+                    tracklist.reload_tracklist(true);
                     return;
                 }
             }

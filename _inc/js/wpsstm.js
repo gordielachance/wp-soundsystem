@@ -99,52 +99,32 @@ function wpsstm_shuffle(array) {
 
 var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
 var trackContainers = $('wpsstm-tracklist');
-$( document ).ready(function() {
-    
 
-
-
-    trackContainers.each(function(index,tracklist_html) {
-        
-        //TOUFIX URGENT
-        /*
-        var tracklist_obj = new WpsstmTracklist(tracklist_html);
-        
-        //should we refresh this playlist ?
-        if (tracklist_obj.isExpired){
-             var reloaded = tracklist_obj.reload();
-
-              reloaded.done(function() {
-                alert( "success" );
-              })
-              .fail(function() {
-                alert( "error" );
-              })
-              .always(function() {
-                alert( "complete" );
-              });
-
-        }
-         */
-
-    });
-    
-});
-$(document).on( "wpsstmTracklistReload", function( event,tracklist ) {
-    console.log("wpsstmTracklistReload");
+/*
+Reload expired tracklists at init
+*/
+trackContainers.each(function(index,tracklist) {
 
     var index = trackContainers.index( $(tracklist) );
+    var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
 
-    if ( index === 0 ){
-        $(tracklist).addClass('tracklist-playing');
+    $(tracklist).toggleClass('tracklist-autoplay',autoplay);
+
+    if (tracklist.isExpired){
+        alert("tracklist is expired");
+        tracklist.reload_tracklist(autoplay);
     }
 
+});
+
+$(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
+    console.log("***wpsstmTracklistReady");
     bottomPlayer.queueContainer(tracklist);
 
 });
 
 $(document).on( "wpsstmTracklistBeforeReload", function( event,tracklist ) {
-    console.log("wpsstmTracklistBeforeReload");
+    console.log("***wpsstmTracklistBeforeReload");
     bottomPlayer.unQueueContainer(tracklist);
 });
 

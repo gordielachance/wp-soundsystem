@@ -156,7 +156,9 @@ class WpsstmTracklist extends HTMLElement{
         refresh_bt.click(function(e) {
             e.preventDefault();
             self.debug("clicked 'refresh' bt");
-            self.reload();
+            
+            var thenPlay = $(self).hasClass('tracklist-playing');
+            self.reload_tracklist(thenPlay);
         });
 
         /*
@@ -257,10 +259,10 @@ class WpsstmTracklist extends HTMLElement{
 
         console.log("Tracklist #" + self.index + " is ready");
         
-        $(document).trigger("wpsstmTracklistReload",[self]); //custom event
+        $(document).trigger("wpsstmTracklistReady",[self]); //custom event
     }
 
-    reload(){
+    reload_tracklist(autoplay){
         var self = this;
         
         self.debug("reload tracklist");
@@ -269,9 +271,6 @@ class WpsstmTracklist extends HTMLElement{
             action:     'wpsstm_load_tracklist',
             tracklist:      self.to_ajax(),   
         };
-        
-        var wasActive = $(self).hasClass('tracklist-active');
-        var wasPlaying = $(self).hasClass('tracklist-playing');
 
         return $.ajax({
             type:           "post",
@@ -291,8 +290,10 @@ class WpsstmTracklist extends HTMLElement{
                     If the tracklist WAS playing, keep those classes (used for autoplay).
                     */
                     var newTracklist = $(data.html);
-                    newTracklist.toggleClass('tracklist-active',wasActive);
-                    newTracklist.toggleClass('tracklist-playing',wasPlaying);
+
+                    if (autoplay===true){
+                        newTracklist.addClass('tracklist-autoplay');
+                    }
                     
                     //swap content
                     self.replaceWith( newTracklist.get(0) );

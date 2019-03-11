@@ -228,7 +228,7 @@ class WpsstmTrack extends HTMLElement{
         var self = this;
         var success = $.Deferred();
         var can_autosource = true; //TOUFIX should be from localized var
-        
+
         if (self.sources.length > 0){
             
             success.resolve();
@@ -328,9 +328,11 @@ class WpsstmTrack extends HTMLElement{
 
         sources_request.done(function(data) {
             if ( data.html ){
-                
+
+                var newTrack = $(data.html);
+
                 //swap content
-                self.replaceWith( data.html );
+                self.replaceWith( newTrack.get(0) );
                 
                 success.resolve();
             }else{
