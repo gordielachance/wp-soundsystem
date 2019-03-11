@@ -73,7 +73,7 @@ class WpsstmPlayer {
         /*
         Track popups for player
         TOUFIX TOUCHECK
-        */
+        
         self.player_el.on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
             e.preventDefault();
 
@@ -107,6 +107,7 @@ class WpsstmPlayer {
             });
 
         });
+        */
         
         /*
         Shuffle button

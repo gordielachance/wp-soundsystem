@@ -1,42 +1,4 @@
 var $ = jQuery.noConflict();
-    
-//track popups within iframe
-$('wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
-    e.preventDefault();
-
-    var content_url = this.href;
-
-    console.log("track popup");
-    console.log(content_url);
-
-
-    var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
-    var popup = $('<div></div>').append(loader_el);
-
-    var popup_w = $(window).width();
-    var popup_h = $(window).height();
-
-    popup.dialog({
-        width:popup_w,
-        height:popup_h,
-        modal: true,
-        dialogClass: 'wpsstm-track-dialog wpsstm-dialog dialog-loading',
-
-        open: function(ev, ui){
-            var dialog = $(this).closest('.ui-dialog');
-            var dialog_content = dialog.find('.ui-dialog-content');
-            var iframe = $('<iframe src="'+content_url+'"></iframe>');
-            dialog_content.append(iframe);
-            iframe.load(function(){
-                dialog.removeClass('dialog-loading');
-            });
-        },
-        close: function(ev, ui){
-        }
-
-    });
-
-});
 
 class WpsstmTrack extends HTMLElement{
     constructor() {
@@ -56,6 +18,7 @@ class WpsstmTrack extends HTMLElement{
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
         });
+
     }
     connectedCallback(){
         console.log("TRACK CONNECTED!");
@@ -123,7 +86,7 @@ class WpsstmTrack extends HTMLElement{
             $(self).addClass('track-error');
         }
         
-        //sources manager
+        //manage single source
         $(self).find('.wpsstm-track-sources').each(function() {
             var sources_container = $(this);
             var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
@@ -142,6 +105,44 @@ class WpsstmTrack extends HTMLElement{
                     var reordered = self.update_sources_order(sourceOrder); //TOUFIX bad logic
 
                 }
+            });
+
+        });
+
+        //track popups within iframe
+        $(self).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
+            e.preventDefault();
+
+            var content_url = this.href;
+
+            console.log("track popup");
+            console.log(content_url);
+
+
+            var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
+            var popup = $('<div></div>').append(loader_el);
+
+            var popup_w = $(window).width();
+            var popup_h = $(window).height();
+
+            popup.dialog({
+                width:popup_w,
+                height:popup_h,
+                modal: true,
+                dialogClass: 'wpsstm-track-dialog wpsstm-dialog dialog-loading',
+
+                open: function(ev, ui){
+                    var dialog = $(this).closest('.ui-dialog');
+                    var dialog_content = dialog.find('.ui-dialog-content');
+                    var iframe = $('<iframe src="'+content_url+'"></iframe>');
+                    dialog_content.append(iframe);
+                    iframe.load(function(){
+                        dialog.removeClass('dialog-loading');
+                    });
+                },
+                close: function(ev, ui){
+                }
+
             });
 
         });
