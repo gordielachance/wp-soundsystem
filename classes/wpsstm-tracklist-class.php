@@ -47,7 +47,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_autosource'           => true, //whether or not autosource is fired through ajax or through PHP
             'remote_delay_min'          => 5,
             'is_expired'                => false,
         );
@@ -717,10 +716,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
 
-        if ( !$this->get_options('ajax_autosource') ){ //TOUFIX MOVE ELSEWHERE ?
-            $this->tracklist_autosource();
-        }
-        
         return true;
     }
     
@@ -973,16 +968,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function tracklist_autosource(){
-        $this->tracklist_log('tracklist autosource'); 
-        foreach((array)$this->tracks as $track){
-            $track->populate_sources();
-            if (!$track->sources){
-                $success = $track->autosource();
-            }
-        }
-    }
-    
     private function get_static_subtracks(){
         global $wpdb;
         //get subtracks

@@ -66,6 +66,7 @@ class WPSSTM_Track{
         $this->spotify_id   = wpsstm_get_post_spotify_id($this->post_id);
         $this->image_url    = wpsstm_get_post_image_url($this->post_id);
         $this->duration     = wpsstm_get_post_length($this->post_id);
+        $this->autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
     }
     
     function populate_subtrack($subtrack_id){
@@ -586,8 +587,30 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
+        
+        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+
+        if ( !$this->sources && !$is_ajax_refresh ){
+            $success = $this->autosource();
+        }
+        
     }
     
+    function is_autosource_lock(){
+        /*
+        Check if a track has been autosourced recently
+        */
+        
+        if (!$this->autosourced) return false;
+        
+        $now = current_time( 'timestamp' );
+        $seconds = $now - $this->autosourced;
+        $hours = $seconds / HOUR_IN_SECONDS;
+        
+        return ($hours < 48);
+ 
+    }
+
     /*
     Retrieve autosources for a track
     */
@@ -630,15 +653,7 @@ class WPSSTM_Track{
             }else{
                 $this->track_log($success,'Community track created');
             }
-        }else{
-            //ignore autosource if it has been tested recently
-            $last_autosourced = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
-            //TOUFIX TOUIMPROVE TOUCHECK NOTWORKNG
-            if ($last_autosourced){
-                return new WP_Error( 'wpsstm_track_autosource_delay', __('This track as alreay been autosourced recently.','wpsstm') );
-            }
         }
-
         
         ///
         $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
@@ -956,9 +971,10 @@ class WPSSTM_Track{
         $classes = array(
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
+            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
+            $this->is_autosource_lock() ? 'track-autosourced' : null,
+
         );
-        
-        $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
 
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
         return array_filter(array_unique($classes));

@@ -48,11 +48,10 @@ class WpsstmTrack extends HTMLElement{
         this.album =                null;
         this.subtrack_id =          null;
         this.post_id =              null;
-        //this.autosource_time =    null;
         this.can_play =             null;
         
         this.sources =              [];
-        this.did_sources_request =  false;
+        this.did_sources_request =  null;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -105,6 +104,7 @@ class WpsstmTrack extends HTMLElement{
         self.album =                $(self).find('[itemprop="inAlbum"]').text();
         self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
+        self.did_sources_request =  $(self).hasClass('track-autosourced');
         self.sources =              [];//reset array
 
         /*
@@ -118,6 +118,10 @@ class WpsstmTrack extends HTMLElement{
         });
       
         $(self).attr('data-wpsstm-sources-count',self.sources.length);
+        
+        if (!self.sources.length && self.did_sources_request){
+            $(self).addClass('track-error');
+        }
         
         //sources manager
         $(self).find('.wpsstm-track-sources').each(function() {
@@ -234,7 +238,6 @@ class WpsstmTrack extends HTMLElement{
             success.resolve("Autosource is disabled");
             
         } else if ( self.did_sources_request ) {
-            
             success.resolve("already did sources auto request for track #" + self.position);
             
         } else{
@@ -271,6 +274,7 @@ class WpsstmTrack extends HTMLElement{
         sources_request.done(function(data) {
 
             self.did_sources_request = true;
+            $(self).addClass('track-autosourced');
             
             if ( data.success === true ){
                 

@@ -363,10 +363,17 @@ class WpsstmPlayer {
             var track_index = $(self.tracks).index( track );
             if (track_index < 0) return; //index not found
 
+            //keep only tracks after this one
             var rtrack_in = track_index + 1;
-            var rtrack_out = track_index + max_items + 1;
-
-            var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
+            var next_tracks = $(self.tracks).slice( rtrack_in );
+            
+            //remove tracks that have already been autosourced
+            var next_tracks = next_tracks.filter(function (track) {
+                return (track.did_sources_request !== false);
+            });
+            
+            //reduce to X tracks
+            var tracks_slice = next_tracks.slice( 0, max_items );
 
             $(tracks_slice).each(function(index, track_to_preload) {
                 if ( track_to_preload.sources.length > 0 ) return true; //continue;
