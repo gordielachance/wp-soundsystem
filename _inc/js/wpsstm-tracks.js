@@ -223,6 +223,11 @@ class WpsstmTrack extends HTMLElement{
 
     }
     
+    get_instances(){
+        var self = this;
+        return $(document).find('wpsstm-track[data-wpsstm-subtrack-id="'+self.subtrack_id+'"]');
+    }
+    
     maybe_load_sources(){
 
         var self = this;

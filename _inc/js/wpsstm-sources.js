@@ -56,6 +56,11 @@ class WpsstmSource extends HTMLElement{
         wpsstm_debug(msg,prefix);
     }
     
+    get_instances(){
+        var self = this;
+        return $(document).find('wpsstm-source[data-wpsstm-source-id="'+self.post_id+'"]');
+    }
+    
     render(){
         var self = this;
         //delete source

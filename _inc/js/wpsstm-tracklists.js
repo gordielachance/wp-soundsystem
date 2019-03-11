@@ -261,6 +261,11 @@ class WpsstmTracklist extends HTMLElement{
         
         $(document).trigger("wpsstmTracklistReady",[self]); //custom event
     }
+    
+    get_instances(){
+        var self = this;
+        return $(document).find('wpsstm-tracklist[data-wpsstm-tracklist-id="'+self.post_id+'"]');
+    }
 
     reload_tracklist(autoplay){
         var self = this;
@@ -354,13 +359,16 @@ class WpsstmTracklist extends HTMLElement{
 
     update_subtrack_position(track,new_pos){
         var self = this;
-        var link_el = $(track).find('.wpsstm-track-action-move a');
+        var track_instances = track.get_instances();
+        var link_el = track_instances.find('.wpsstm-track-action-move a');
         var action_url = link_el.data('wpsstm-ajax-url');
 
         //ajax update order
         var ajax_data = {
             new_pos:    new_pos,
         };
+        
+        
 
         $.ajax({
             type: "post",
@@ -368,7 +376,7 @@ class WpsstmTracklist extends HTMLElement{
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                $(track).addClass('track-loading');
+                track_instances.addClass('track-loading');
                 link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
@@ -386,7 +394,7 @@ class WpsstmTracklist extends HTMLElement{
                 console.log(thrownError);
             },
             complete: function() {
-                $(track).removeClass('track-loading');
+                track_instances.removeClass('track-loading');
                 link_el.removeClass('action-loading');
             }
         })
