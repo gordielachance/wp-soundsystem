@@ -6,9 +6,6 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WPSSTM_Core_Tracklists{
 
-    static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
-    static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
-
     function __construct() {
         global $wpsstm_tracklist;
 
@@ -442,13 +439,13 @@ class WPSSTM_Core_Tracklists{
     
     /*
     Get the IDs of all the "favorite" tracklists for every user
-    For a single user, use get_user_option( WPSSTM_Core_Tracklists::$favorites_tracklist_usermeta_key, $user_id )
+    For a single user, use get_user_option( WPSSTM_Core_User::$favorites_tracklist_usermeta_key, $user_id )
     */
     
     static function get_favorite_tracks_tracklist_ids(){
         global $wpdb;
         //get all subtracks metas
-        $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
+        $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . WPSSTM_Core_User::$favorites_tracklist_usermeta_key );
 
         $ids = $wpdb->get_col( $querystr);
         return $ids;
@@ -457,7 +454,7 @@ class WPSSTM_Core_Tracklists{
     static function get_favorited_tracklist_ids($user_id = null){
         global $wpdb;
         //get all subtracks metas
-        $querystr = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '%s'", self::$loved_tracklist_meta_key );
+        $querystr = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '%s'", WPSSTM_Core_User::$loved_tracklist_meta_key );
 
         if ($user_id){
             $querystr .= $wpdb->prepare( " AND meta_value = '%s'", $user_id );

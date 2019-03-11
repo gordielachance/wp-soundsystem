@@ -279,10 +279,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
 
         if ($do_love){
-            $success = add_post_meta( $this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = add_post_meta( $this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_love_tracklist',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id,WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id,WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
         }
         return $success;
@@ -290,7 +290,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_tracklist_favorited_by(){
         if ( !$this->post_id ) return false;
-        return get_post_meta($this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key);
+        return get_post_meta($this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key);
     }
     
     function is_tracklist_favorited_by($user_id = null){
