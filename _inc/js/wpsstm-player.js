@@ -171,13 +171,15 @@ class WpsstmPlayer {
         Confirmation popup is a media is playing and that we leave the page
         //TO FIX TO improve ?
         */
+
         $(window).bind('beforeunload', function(){
 
-            if (self.current_media && !self.current_media.paused){
+            if (self.current_source && !self.current_media.paused){
                 return wpsstmPlayer.leave_page_text;
             }
 
         });
+
         
         self.audio_el.mediaelementplayer({
             classPrefix: 'mejs-',
@@ -858,7 +860,7 @@ class WpsstmPlayer {
         //TOUFIX TO CHECK should be hookend on events ?
 
         //sources
-        $(source).removeClass('source-playing source-active source-loading');
+        source.get_instances().removeClass('source-playing source-active source-loading');
         
         
         self.current_source = undefined;
