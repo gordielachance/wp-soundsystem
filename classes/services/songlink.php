@@ -19,7 +19,7 @@ class WPSSTM_SongLink{
         }
         
         if (!$track->spotify_id){
-            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify ID','wpsstm'));
+            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify Track ID','wpsstm'));
         }
 
         $sources = array();
