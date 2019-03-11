@@ -5,7 +5,7 @@ $wpsstm_track->local_track_lookup(); //check for this track in the database (if 
 $has_player = wpsstm()->get_options('player_enabled');
 
 ?>
-<li class="<?php echo implode(' ',$wpsstm_track->get_track_class());?>" <?php echo $wpsstm_track->get_track_attr();?>>
+<wpsstm-track class="<?php echo implode(' ',$wpsstm_track->get_track_class());?>" <?php echo $wpsstm_track->get_track_attr();?>>
     <div class="wpsstm-track-row">
         <div class="wpsstm-track-pre">
             <?php if ( $has_player ){ ?>
@@ -45,4 +45,4 @@ $has_player = wpsstm()->get_options('player_enabled');
     $wpsstm_track->populate_sources();
     wpsstm_locate_template( 'content-sources.php', true, false );
     ?>
-</li>
+</wpsstm-track>

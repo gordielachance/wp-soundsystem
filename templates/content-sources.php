@@ -12,7 +12,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             $wpsstm_track->the_source();
             global $wpsstm_source;
             ?>
-            <li <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
+            <wpsstm-source <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
                 <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>
                 <?php
                 if ( $actions = $wpsstm_source->get_source_links('page') ){
@@ -20,7 +20,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
                 }
                 ?>
                 <label class="wpsstm-source-title wpsstm-can-click"><?php echo $wpsstm_source->get_source_title();?></label>
-            </li>
+            </wpsstm-source>
             <?php
 
         }

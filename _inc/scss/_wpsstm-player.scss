@@ -114,7 +114,7 @@ $player-text-color:#FFF;
     border:1px solid #F7F7F7;
     padding:.5em 1em;
 
-    [itemprop="track"]{
+    wpsstm-track{
         .wpsstm-track-sources{
             display:none;
         }
@@ -129,7 +129,7 @@ $player-text-color:#FFF;
         }
         .wpsstm-track-sources{
             @include opacity(.6);
-            [data-wpsstm-source-idx]{
+            wpsstm-source{
                 @include opacity(.6);
                 &.source-playing{
                     @include opacity(.8);

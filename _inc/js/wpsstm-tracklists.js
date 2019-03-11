@@ -43,12 +43,11 @@ $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklis
 $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
 
     //expand tracklist
-    var track_el = track_obj.track_el;
-    if ( track_el.is(":visible") ) return;
+    if ( $(track_obj).is(":visible") ) return;
 
     var tracklist_obj = $(track_obj).parents('wpsstm-tracklist');
     var tracklist_el = tracklist_obj.get(0);
-    var visibleTracksCount = tracklist.find('[itemprop="track"]:visible').length;
+    var visibleTracksCount = tracklist.find('wpsstm-track:visible').length;
     var newTracksCount = track_obj.position + 1;
 
     if ( newTracksCount <= visibleTracksCount ) return;
@@ -80,7 +79,7 @@ class WpsstmTracklistCE extends HTMLElement{
         });
     }
     connectedCallback(){
-        console.log("CONNECTED!");
+        console.log("TRACKLIST CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -217,12 +216,11 @@ class WpsstmTracklistCE extends HTMLElement{
         Subtracks
         */
 
-        var tracks_html = $(self).find('[itemprop="track"]');
+        var tracks_html = $(self).find('wpsstm-track');
 
         if ( tracks_html.length ){
             $.each(tracks_html, function( index, track_html ) {
-                var new_track = new WpsstmTrack(track_html);
-                self.tracks.push(new_track);
+                self.tracks.push(track_html);
             });
         }
 
@@ -240,15 +238,15 @@ class WpsstmTracklistCE extends HTMLElement{
             },
             update: function(event, ui) {
                 endSortIdx = ui.item.index();
-                var track_obj = self.tracks[startSortIdx];
-                var old_position = Number(track_obj.track_el.attr('data-wpsstm-subtrack-position'));
+                var track = self.tracks[startSortIdx];
+                var old_position = Number($(track).attr('data-wpsstm-subtrack-position'));
                 var new_position = ui.item.index() + 1;
 
 
-                if (track_obj){
+                if (track){
                     //new position
-                    track_obj.position = ui.item.index();
-                    self.update_subtrack_position(track_obj,new_position);
+                    track.position = ui.item.index();
+                    self.update_subtrack_position(track,new_position);
                 }
 
             }
@@ -344,17 +342,16 @@ class WpsstmTracklistCE extends HTMLElement{
 
     refresh_tracks_positions(){
         var self = this;
-        var all_rows = $(self).find( '[itemprop="track"]' );
+        var all_rows = $(self).find( 'wpsstm-track' );
         jQuery.each( all_rows, function( key, value ) {
             var position = jQuery(this).find('.wpsstm-track-position [itemprop="position"]');
             position.text(key + 1);
         });
     }
 
-    update_subtrack_position(track_obj,new_pos){
+    update_subtrack_position(track,new_pos){
         var self = this;
-        var track_el = track_obj.track_el;
-        var link_el = track_el.find('.wpsstm-track-action-move a');
+        var link_el = $(track).find('.wpsstm-track-action-move a');
         var action_url = link_el.data('wpsstm-ajax-url');
 
         //ajax update order
@@ -368,7 +365,7 @@ class WpsstmTracklistCE extends HTMLElement{
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                track_el.addClass('track-loading');
+                $(track).addClass('track-loading');
                 link_el.removeClass('action-error');
                 link_el.addClass('action-loading');
             },
@@ -386,7 +383,7 @@ class WpsstmTracklistCE extends HTMLElement{
                 console.log(thrownError);
             },
             complete: function() {
-                track_el.removeClass('track-loading');
+                $(track).removeClass('track-loading');
                 link_el.removeClass('action-loading');
             }
         })
@@ -401,7 +398,7 @@ class WpsstmTracklistCE extends HTMLElement{
         var defaults = {
             childrenShowCount:  true,
             childrenToShow:        3,
-            childrenSelector:   '[itemprop="track"]',
+            childrenSelector:   'wpsstm-track',
             btMore:             '<li><i class="fa fa-angle-down" aria-hidden="true"></i></li>',
             lessText:           '<li><i class="fa fa-angle-up" aria-hidden="true"></i></li>',
         };
@@ -422,7 +419,7 @@ class WpsstmTracklistCE extends HTMLElement{
 
         if (self.tracks.length <= 1) return;
         
-        var track_els = $($(self)).find('[itemprop="track"]');
+        var track_els = $($(self)).find('wpsstm-track');
         
         var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
         var values_by_selector = [];
