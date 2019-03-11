@@ -118,7 +118,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 93, ../scss/_wpsstm-shared.scss */
-.wpsstm-icon:before, .wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, .wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before, .wpsstm-action-icon a:before, wpsstm-track .wpsstm-track-actions li.wpsstm-action a:before, ul.wpsstm-actions-list .wpsstm-action a:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, wpsstm-tracklist.wpsstm-live-tracklist .tracklist-advanced-header-bt:before, .wpsstm-track-sources-list wpsstm-source .wpsstm-source-title:before {
+.wpsstm-icon:before, .wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before, .wpsstm-action-icon a:before, wpsstm-track .wpsstm-track-actions li.wpsstm-action a:before, ul.wpsstm-actions-list .wpsstm-action a:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, wpsstm-tracklist.wpsstm-live-tracklist .tracklist-advanced-header-bt:before, .wpsstm-track-sources-list wpsstm-source .wpsstm-source-title:before {
   font-weight: normal;
   font-style: normal;
   font-family: 'FontAwesome';
@@ -128,7 +128,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 105, ../scss/_wpsstm-shared.scss */
-.wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, .wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before {
+.wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before {
   animation: spin 2s linear infinite;
   content: "" !important;
 }
@@ -989,13 +989,13 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
 }
 
 /* line 6, ../scss/_wpsstm-player.scss */
-.wpsstm-player {
+wpsstm-player {
   display: none;
   background: #222;
   color: #FFF;
 }
 /* line 8, ../scss/_wpsstm-player.scss */
-.wpsstm-player#wpsstm-bottom-player {
+wpsstm-player#wpsstm-bottom-player {
   position: fixed;
   width: 100%;
   padding: 0;
@@ -1004,11 +1004,11 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
   z-index: 50;
 }
 /* line 20, ../scss/_wpsstm-player.scss */
-.wpsstm-player a, .wpsstm-player a:hover, .wpsstm-player a:focus {
+wpsstm-player a, wpsstm-player a:hover, wpsstm-player a:focus {
   color: #FFF;
 }
 /* line 24, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row {
+wpsstm-player .player-row {
   width: 100%;
   padding: 0;
   margin: 0;
@@ -1017,7 +1017,7 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
   display: flex;
 }
 /* line 30, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row > * {
+wpsstm-player .player-row > * {
   padding: 0;
   margin: 0;
   border: none;
@@ -1031,7 +1031,7 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
   align-items: center;
 }
 /* line 39, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions {
+wpsstm-player .player-row .wpsstm-player-actions {
   margin-right: .5em;
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
@@ -1039,44 +1039,44 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
   flex-grow: 0;
 }
 /* line 46, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action a span {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action a span {
   display: none;
 }
 /* line 53, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-queue a:before {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-queue a:before {
   content: "\f078";
 }
 /* line 56, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-queue a.active:before {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-queue a.active:before {
   content: "\f077";
 }
 /* line 62, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
 /* line 64, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler a:before {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler a:before {
   content: "\f202";
 }
 /* line 70, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.scrobbler-error a:before {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.scrobbler-error a:before {
   content: "\f071";
 }
 /* line 73, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.active {
+wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.active {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;
 }
 /* line 81, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row #wpsstm-audio-container {
+wpsstm-player .player-row #wpsstm-audio-container {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-grow: 1;
   flex-grow: 1;
 }
 /* line 85, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-extra {
+wpsstm-player .player-row .wpsstm-player-extra {
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
   -webkit-flex-grow: 0;
@@ -1084,23 +1084,23 @@ wpsstm-track .wpsstm-source-actions > *:not(.wpsstm-source-action-provider) {
   padding: 0 .5em;
 }
 /* line 89, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .wpsstm-player-extra:not(.active) {
+wpsstm-player .player-row .wpsstm-player-extra:not(.active) {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
   opacity: 0.3;
 }
 /* line 94, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-row .mejs-container {
+wpsstm-player .player-row .mejs-container {
   width: 100% !important;
 }
 /* line 99, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-queue {
+wpsstm-player .player-queue {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 1em;
   max-height: 100vh;
   overflow: auto;
 }
 /* line 104, ../scss/_wpsstm-player.scss */
-.wpsstm-player .player-queue:not(.active) {
+wpsstm-player .player-queue:not(.active) {
   display: none;
 }
 
