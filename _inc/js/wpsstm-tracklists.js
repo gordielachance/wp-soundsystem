@@ -61,7 +61,7 @@ $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
 });
 */
 
-class WpsstmTracklistCE extends HTMLElement{
+class WpsstmTracklist extends HTMLElement{
     constructor() {
         super(); //required to be first
         
@@ -468,4 +468,4 @@ class WpsstmTracklistCE extends HTMLElement{
     
 }
 
-window.customElements.define('wpsstm-tracklist', WpsstmTracklistCE);
+window.customElements.define('wpsstm-tracklist', WpsstmTracklist);

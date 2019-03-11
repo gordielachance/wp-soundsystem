@@ -38,7 +38,7 @@ $('wpsstm-tracklist').on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a'
 
 });
 
-class WpsstmTrackCE extends HTMLElement{
+class WpsstmTrack extends HTMLElement{
     constructor() {
         super(); //required to be first
         
@@ -491,4 +491,4 @@ class WpsstmTrackCE extends HTMLElement{
     
 }
 
-window.customElements.define('wpsstm-track', WpsstmTrackCE);
+window.customElements.define('wpsstm-track', WpsstmTrack);

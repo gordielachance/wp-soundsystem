@@ -1,6 +1,6 @@
 var $ = jQuery.noConflict();
 
-class WpsstmSourceCE extends HTMLElement{
+class WpsstmSource extends HTMLElement{
     constructor() {
         super(); //required to be first
         
@@ -132,7 +132,7 @@ class WpsstmSourceCE extends HTMLElement{
 
 }
 
-window.customElements.define('wpsstm-source', WpsstmSourceCE);
+window.customElements.define('wpsstm-source', WpsstmSource);
 
 /*
 metabox
