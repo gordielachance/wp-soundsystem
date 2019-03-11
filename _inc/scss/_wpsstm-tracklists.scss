@@ -83,10 +83,11 @@ wpsstm-tracklist{
     }
     
     &.tracklist-reloading{
+        @extend .wpsstm-freeze;
         @include striped-bg();
-        height:1em;
+        min-height:1em;
         > *{
-            display:none;
+            @include opacity(.25);
         }
     } 
 

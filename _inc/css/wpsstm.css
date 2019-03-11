@@ -111,7 +111,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 87, ../scss/_wpsstm-shared.scss */
-.wpsstm-freeze, input.input-loading, ul.wpsstm-actions-list .wpsstm-action a.action-loading {
+.wpsstm-freeze, input.input-loading, ul.wpsstm-actions-list .wpsstm-action a.action-loading, wpsstm-tracklist.tracklist-reloading {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
@@ -529,48 +529,49 @@ wpsstm-tracklist.tracklist-reloading {
   background-size: 30px 30px;
   background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0));
   animation: barberpole 0.5s linear infinite;
-  height: 1em;
+  min-height: 1em;
 }
-/* line 88, ../scss/_wpsstm-tracklists.scss */
+/* line 89, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist.tracklist-reloading > * {
-  display: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
+  opacity: 0.25;
 }
-/* line 100, ../scss/_wpsstm-tracklists.scss */
+/* line 101, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist:not(.tracklist-playing) .wpsstm-tracklist-icon:before, wpsstm-tracklist.tracklist-pause .wpsstm-tracklist-icon:before {
   content: "\f04b";
 }
-/* line 104, ../scss/_wpsstm-tracklists.scss */
+/* line 105, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist.tracklist-playing .wpsstm-tracklist-icon:before {
   content: "\f04c";
 }
-/* line 108, ../scss/_wpsstm-tracklists.scss */
+/* line 109, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist.tracklist-error .wpsstm-tracklist-icon:before {
   content: "\f071";
 }
-/* line 113, ../scss/_wpsstm-tracklists.scss */
+/* line 114, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist:not(.tracklist-expired) .wpsstm-tracklist-action-refresh {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
-/* line 119, ../scss/_wpsstm-tracklists.scss */
+/* line 120, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist.favorited-tracklist .wpsstm-tracklist-action.action-favorite {
   display: none;
 }
-/* line 124, ../scss/_wpsstm-tracklists.scss */
+/* line 125, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist:not(.favorited-tracklist) .wpsstm-tracklist-action.action-unfavorite {
   display: none;
 }
-/* line 129, ../scss/_wpsstm-tracklists.scss */
+/* line 130, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack {
   margin: 1em 0;
   padding: 1em;
 }
-/* line 133, ../scss/_wpsstm-tracklists.scss */
+/* line 134, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack label {
   margin-bottom: 1em;
   display: block;
 }
-/* line 138, ../scss/_wpsstm-tracklists.scss */
+/* line 139, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack .wpsstm-new-subtrack-fields {
   display: -webkit-flex;
   display: flex;
@@ -578,57 +579,57 @@ wpsstm-tracklist form.wpsstm-new-subtrack .wpsstm-new-subtrack-fields {
   justify-content: center;
   align-items: center;
 }
-/* line 142, ../scss/_wpsstm-tracklists.scss */
+/* line 143, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack .wpsstm-new-subtrack-fields > * {
   margin: 0 .5em;
 }
-/* line 148, ../scss/_wpsstm-tracklists.scss */
+/* line 149, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack.wpsstm-new-subtrack-simple label {
   display: none;
 }
-/* line 151, ../scss/_wpsstm-tracklists.scss */
+/* line 152, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack.wpsstm-new-subtrack-simple .wpsstm-new-subtrack-fields > *:not(button) {
   display: none;
 }
-/* line 155, ../scss/_wpsstm-tracklists.scss */
+/* line 156, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack:not(.wpsstm-new-subtrack-simple) {
   background: #fcf8e3;
 }
-/* line 157, ../scss/_wpsstm-tracklists.scss */
+/* line 158, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist form.wpsstm-new-subtrack:not(.wpsstm-new-subtrack-simple) button span {
   display: none;
 }
 
-/* line 169, ../scss/_wpsstm-tracklists.scss */
+/* line 170, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-refresh a:before {
   content: "\f021";
 }
-/* line 172, ../scss/_wpsstm-tracklists.scss */
+/* line 173, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-share a:before {
   content: "\f1e0";
 }
-/* line 175, ../scss/_wpsstm-tracklists.scss */
+/* line 176, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-export a:before {
   content: "\f019";
 }
-/* line 180, ../scss/_wpsstm-tracklists.scss */
+/* line 181, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-new-subtrack a:before {
   content: "\f055";
 }
-/* line 186, ../scss/_wpsstm-tracklists.scss */
+/* line 187, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-live a:before, .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-static a:before {
   content: "\f09e";
 }
-/* line 190, ../scss/_wpsstm-tracklists.scss */
+/* line 191, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-live.wpsstm-tracklist-action-live a:before, .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-static.wpsstm-tracklist-action-live a:before {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=25);
   opacity: 0.25;
 }
-/* line 195, ../scss/_wpsstm-tracklists.scss */
+/* line 196, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-edit-backend a:before {
   content: "\f084";
 }
-/* line 198, ../scss/_wpsstm-tracklists.scss */
+/* line 199, ../scss/_wpsstm-tracklists.scss */
 .wpsstm-tracklist-actions .wpsstm-tracklist-action.wpsstm-tracklist-action-trash a:before {
   content: "\f1f8";
 }
