@@ -46,7 +46,7 @@ $(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
     if ( $(track_obj).is(":visible") ) return;
 
     var tracklist_obj = $(track_obj).parents('wpsstm-tracklist');
-    var tracklist_el = tracklist_obj.get(0);
+    var tracklist_el = track_obj.tracklist;
     var visibleTracksCount = tracklist.find('wpsstm-track:visible').length;
     var newTracksCount = track_obj.position + 1;
 

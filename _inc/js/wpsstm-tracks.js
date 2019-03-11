@@ -98,6 +98,7 @@ class WpsstmTrackCE extends HTMLElement{
         
         var self = this;
 
+        self.tracklist =            $(self).parents('wpsstm-tracklist').get(0);
         self.position =             Number($(self).attr('data-wpsstm-subtrack-position')); //index in tracklist
         self.artist =               $(self).find('[itemprop="byArtist"]').text();
         self.title =                $(self).find('[itemprop="name"]').text();
