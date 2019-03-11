@@ -327,6 +327,7 @@ class WpsstmPlayer {
 
         /*
         set current track
+        //TOUFIX TOUCHECK there is already an occurence of this code in play_souce ?  Need it only once ?
         */
         if ( self.current_track && ( track !== self.current_track ) ){
             self.end_track();
@@ -447,10 +448,8 @@ class WpsstmPlayer {
         var previous_track = self.current_track;
         
         self.current_source = source;
-        self.current_track = track;
-        
-        var track = $(source).parents('wpsstm-track').get(0);
-        var tracklist = $(track).parents('wpsstm-tracklist').get(0);
+        self.current_track = source.track;
+        var tracklist = $(self.current_track).parents('wpsstm-tracklist').get(0);
         
         /*
         handle current (previous) source
@@ -467,18 +466,18 @@ class WpsstmPlayer {
 
         source.debug("play source: " + source.src);
         $(source).addClass('source-active source-loading');
-        $(track).addClass('track-active track-loading');
+        $(self.current_track).addClass('track-active track-loading');
         $(tracklist).addClass('tracklist-active tracklist-loading');
         
         /*
         display current track
         */
-        if ( track !== previous_track ){
+        if ( self.current_track !== previous_track ){
             self.render_playing_track();
         }
 
         //hide sources if it is expanded //TOUFIX not working
-        var toggleEl = $(track).find('.wpsstm-track-action-toggle-sources a');
+        var toggleEl = $(self.current_track).find('.wpsstm-track-action-toggle-sources a');
         if ( toggleEl.hasClass('.active') ){
             toggleEl.click();
         }
@@ -508,7 +507,7 @@ class WpsstmPlayer {
             
             $(source).addClass('source-playing source-has-played');
             $(tracklist).addClass('tracklist-playing tracklist-has-played');
-            $(track).addClass('track-playing track-has-played');
+            $(self.current_track).addClass('track-playing track-has-played');
 
         });
 
@@ -518,7 +517,7 @@ class WpsstmPlayer {
             //tracklists
             $(tracklist).removeClass('tracklist-playing');
             //tracks
-            $(track).removeClass('track-playing');
+            $(self.current_track).removeClass('track-playing');
             //sources
             $(source).removeClass('source-playing');
         });
@@ -530,7 +529,7 @@ class WpsstmPlayer {
             //tracklists
             $(tracklist).removeClass('tracklist-playing');
             //tracks
-            $(track).removeClass('track-active track-playing');
+            $(self.current_track).removeClass('track-active track-playing');
             //sources
             $(source).removeClass('source-playing source-active');
 
@@ -540,12 +539,12 @@ class WpsstmPlayer {
         
         success.always(function(data, textStatus, jqXHR) {
             $(source).removeClass('source-loading');
-            $(track).removeClass('track-loading');
+            $(self.current_track).removeClass('track-loading');
         })
         success.done(function(v) {
             source.can_play = true;
             $(tracklist).removeClass('tracklist-loading');
-            $(track).removeClass('track-error track-loading');
+            $(self.current_track).removeClass('track-error track-loading');
             
         })
         success.fail(function() {
@@ -554,8 +553,8 @@ class WpsstmPlayer {
             $(source).removeClass('source-active');
             $(source).addClass('source-error');
             //tracks
-            $(track).removeClass('track-active');
-            $(track).addClass('track-error');
+            $(self.current_track).removeClass('track-active');
+            $(self.current_track).addClass('track-error');
         })
 
         ////
