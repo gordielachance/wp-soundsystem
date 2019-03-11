@@ -215,9 +215,9 @@ class WpsstmLastFM {
     
 }
 
-$(document).on( "wpsstmPlayerInit", function( event, player_obj ) {
+$(document).on( "wpsstmPlayerInit", function( event, player ) {
 
-    wpsstm_lastfm.scrobble_icon =     player_obj.player_el.find('.wpsstm-player-action-scrobbler');
+    wpsstm_lastfm.scrobble_icon =     $(player).find('.wpsstm-player-action-scrobbler');
 
     //enable scrobbler at init
     if (wpsstm_lastfm.scrobbler_enabled){

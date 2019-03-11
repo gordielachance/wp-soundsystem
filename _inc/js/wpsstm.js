@@ -1,5 +1,4 @@
 var $ = jQuery.noConflict();
-var wpsstm = {};
 
 //artist autocomplete
 $('.wpsstm-artist-autocomplete').each(function() {
@@ -41,91 +40,44 @@ $('.wpsstm-artist-autocomplete').each(function() {
     });
 });
 
-function wpsstm_dialog_notice(notice){
 
-    var popup = $('<div></div>').append(notice);
+$( document ).ready(function() {
+    console.log("DOM READY!");
+    
+    var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
+    var trackContainers = $('wpsstm-tracklist');
 
-    popup.dialog({
-        autoOpen: true,
-        width:800,
-        height:500,
-        modal: true,
-        dialogClass: 'wpsstm-dialog',
+    /*
+    Handle page init
+    */
+    trackContainers.each(function(index,tracklist) {
 
-        open: function(ev, ui){
-            var dialog = $(this).closest('.ui-dialog');
-            var dialog_content = dialog.find('.ui-dialog-content');
-            var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
-            dialog_content.append(iframe);
-            iframe.load(function(){
-                dialog.removeClass('dialog-loading');
-            });
-        },
-        close: function(ev, ui){
+        var index = trackContainers.index( $(tracklist) );
+        var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
+
+        $(tracklist).toggleClass('tracklist-autoplay',autoplay);
+
+        if (tracklist.isExpired){
+            alert("tracklist is expired");
+            tracklist.reload_tracklist(autoplay);
+        }else{
+            bottomPlayer.queueContainer(tracklist);   
         }
 
     });
+    
+    //queue on refresh
+    $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
+        console.log("***wpsstmTracklistReady");
+        bottomPlayer.queueContainer(tracklist);
 
-}
+    });
 
-function wpsstm_debug(msg,prefix){
-    if (!wpsstmL10n.debug) return;
-    if (typeof msg === 'object'){
-        console.log(msg);
-    }else{
-        if (!prefix) prefix = 'wpsstm';
-        console.log(prefix + ': ' + msg);
-    }
-}
-
-function wpsstm_shuffle(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-}
-
-var bottomPlayer = new WpsstmPlayer('wpsstm-bottom-player');
-var trackContainers = $('wpsstm-tracklist');
-
-/*
-Reload expired tracklists at init
-*/
-trackContainers.each(function(index,tracklist) {
-
-    var index = trackContainers.index( $(tracklist) );
-    var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
-
-    $(tracklist).toggleClass('tracklist-autoplay',autoplay);
-
-    if (tracklist.isExpired){
-        alert("tracklist is expired");
-        tracklist.reload_tracklist(autoplay);
-    }
-
-});
-
-$(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-    console.log("***wpsstmTracklistReady");
-    bottomPlayer.queueContainer(tracklist);
-
-});
-
-$(document).on( "wpsstmTracklistBeforeReload", function( event,tracklist ) {
-    console.log("***wpsstmTracklistBeforeReload");
-    bottomPlayer.unQueueContainer(tracklist);
+    $(document).on( "wpsstmTracklistBeforeReload", function( event,tracklist ) {
+        console.log("***wpsstmTracklistBeforeReload");
+        bottomPlayer.unQueueContainer(tracklist);
+    });
+    
 });
 
 

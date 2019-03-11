@@ -421,7 +421,7 @@ class WPSSTM_Core_Sources{
     function register_sources_scripts_styles(){
         //CSS
         //JS
-        wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable','wpsstm-functions'),wpsstm()->version, true );
     }
 
     
