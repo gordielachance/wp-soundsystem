@@ -325,10 +325,6 @@ class WpsstmPlayer {
 
         $(track).addClass('track-active track-loading');
 
-        /*
-        set current track
-        //TOUFIX TOUCHECK there is already an occurence of this code in play_souce ?  Need it only once ?
-        */
         if ( self.current_track && ( track !== self.current_track ) ){
             self.end_track();
         }
@@ -364,8 +360,11 @@ class WpsstmPlayer {
             
             
             var max_items = 4; //number of following tracks to preload
-            var rtrack_in = track.position + 1;
-            var rtrack_out = track.position + max_items + 1;
+            var track_index = $(self.tracks).index( track );
+            if (track_index < 0) return; //index not found
+
+            var rtrack_in = track_index + 1;
+            var rtrack_out = track_index + max_items + 1;
 
             var tracks_slice = $(self.tracks).slice( rtrack_in, rtrack_out );
 
@@ -449,7 +448,7 @@ class WpsstmPlayer {
         
         self.current_source = source;
         self.current_track = source.track;
-        var tracklist = $(self.current_track).parents('wpsstm-tracklist').get(0);
+        var tracklist = self.current_track.tracklist;
         
         /*
         handle current (previous) source
