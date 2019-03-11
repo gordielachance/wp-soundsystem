@@ -58,7 +58,6 @@ $( document ).ready(function() {
         $(tracklist).toggleClass('tracklist-autoplay',autoplay);
 
         if (tracklist.isExpired){
-            alert("tracklist is expired");
             tracklist.reload_tracklist(autoplay);
         }else{
             bottomPlayer.queueContainer(tracklist);   

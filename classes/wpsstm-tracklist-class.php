@@ -90,8 +90,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
-        //title
-        $this->title = self::get_tracklist_title($this->post_id);
+        //title (will be filtered)
+        $this->title = get_the_title($this->post_id);
         
         
         //time updated
@@ -772,8 +772,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function seconds_before_refresh(){
-        
-        return 10;//TOUFIX TOUREMOVE
 
         if ($this->tracklist_type != 'live') return false;
 
