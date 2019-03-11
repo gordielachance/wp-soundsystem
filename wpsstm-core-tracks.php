@@ -835,7 +835,7 @@ class WPSSTM_Core_Tracks{
         WPSSTM_Core_Albums::save_meta_album($post_id, $album);
 
         /*length*/
-        $length = ( isset($_POST[ 'wpsstm_length' ]) ) ? ( $_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
+        $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
         self::save_meta_track_length($post_id, $length);
 
     }
