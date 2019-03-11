@@ -62,7 +62,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     static function get_tracklist_title($post_id){
         //title
-        $title = get_post_field( 'title', $post_id );
+        $title = get_post_field( 'post_title', $post_id );
+
         $post_type = get_post_type($post_id);
         
         //if no title has been set, use the cached title if any
