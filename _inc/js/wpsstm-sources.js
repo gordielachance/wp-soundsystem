@@ -64,8 +64,24 @@ class WpsstmSource extends HTMLElement{
     render(){
         var self = this;
         var track = $(self).parents('wpsstm-track').get(0);
-        track.populateSource(self);
-        
+
+        //update track
+        var trackSources = $(track).find('wpsstm-source');
+
+        if (!trackSources.length && track.did_sources_request){
+            $(track).addClass('track-error');
+        }
+
+        var toggleSourcesEl = $(track).find('.wpsstm-track-action-toggle-sources a');
+        var sourceCountEl = toggleSourcesEl.find('.wpsstm-sources-count');
+        if ( !sourceCountEl.length ){ //create item
+            sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
+            toggleSourcesEl.append(sourceCountEl);            
+        }
+
+        $(track).attr('data-wpsstm-sources-count',trackSources.length);
+        sourceCountEl.text(trackSources.length);
+
         //delete source
         $(self).find('.wpsstm-source-action-trash a').click(function(e) {
             e.preventDefault();

@@ -55,27 +55,6 @@ class WpsstmTrack extends HTMLElement{
         var prefix = " WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
     }
-    
-    populateSource(source){
-        self = this;
-        var sources = $(self).find('wpsstm-source');
-
-        if (!sources.length && self.did_sources_request){
-            $(self).addClass('track-error');
-        }
-
-        var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
-        var sourceCountEl = toggleSourcesEl.find('.wpsstm-sources-count');
-        if ( !sourceCountEl.length ){ //create item
-            sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
-            toggleSourcesEl.append(sourceCountEl);            
-        }
-        
-        $(self).attr('data-wpsstm-sources-count',sources.length);
-        sourceCountEl.text(sources.length);
-        
-
-    }
 
     render(){
         
