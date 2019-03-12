@@ -170,7 +170,6 @@ class WpsstmTracklist extends HTMLElement{
         refresh_bt.click(function(e) {
             e.preventDefault();
             self.debug("clicked 'refresh' bt");
-
             self.reload_tracklist();
         });
 
@@ -179,51 +178,13 @@ class WpsstmTracklist extends HTMLElement{
         */
 
         //toggle favorite
-        $(self).find('.wpsstm-tracklist-action.action-favorite a,.wpsstm-tracklist-action.action-unfavorite a').click(function(e) {
+        $(self).find('.wpsstm-tracklist-action-favorite a,.wpsstm-tracklist-action-unfavorite a').click(function(e) {
             e.preventDefault();
+            
+            var action_el = $(this).parents('.wpsstm-tracklist-action');
+            var do_love = action_el.hasClass('wpsstm-tracklist-action-favorite');
 
-            var link_el = $(this);
-            var action_el = link_el.parents('.wpsstm-tracklist-action');
-            var do_love = action_el.hasClass('action-favorite');
-            var action_url = link_el.data('wpsstm-ajax-url');
-
-            var ajax_data = {};
-
-            self.debug("toggle favorite tracklist:");
-
-            return $.ajax({
-                type:       "post",
-                url: action_url,
-                data:ajax_data,
-                dataType:   'json',
-                beforeSend: function() {
-                    link_el.removeClass('action-error');
-                    link_el.addClass('action-loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                        link_el.addClass('action-error');
-                        if (data.notice){
-                            wpsstm_dialog_notice(data.notice);
-                        }
-                    }else{
-                        if (do_love){
-                            $(self).addClass('favorited-tracklist');
-                        }else{
-                            $(self).removeClass('favorited-tracklist');
-                        }
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    link_el.addClass('action-error');
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                },
-                complete: function() {
-                    link_el.removeClass('action-loading');
-                }
-            })
+            self.toggle_favorite_tracklist(do_love);
         });
 
 
@@ -327,6 +288,57 @@ class WpsstmTracklist extends HTMLElement{
             },
             complete: function() {
                 $(self).removeClass('tracklist-reloading');
+            }
+        })
+    }
+    
+    toggle_favorite_tracklist(do_love){
+        var self = this;
+        
+        if (do_love){
+            var link_el = $(self).find('.wpsstm-tracklist-action-favorite a');
+        }else{
+            var link_el = $(self).find('.wpsstm-tracklist-action-unfavorite a');
+        }
+
+        var ajax_data = {
+            action:     'wpsstm_tracklist_toggle_favorite',
+            tracklist:  self.to_ajax(),   
+            do_love:    do_love,
+        };
+
+        return $.ajax({
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+            beforeSend: function() {
+                link_el.removeClass('action-error');
+                link_el.addClass('action-loading');
+            },
+            success: function(data){
+
+                if (data.success === false) {
+                    console.log(data);
+                    link_el.addClass('action-error');
+                    if (data.notice){
+                        wpsstm_dialog_notice(data.notice);
+                    }
+                }else{
+                    if (do_love){
+                        $(self).addClass('favorited-tracklist');
+                    }else{
+                        $(self).removeClass('favorited-tracklist');
+                    }
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                link_el.addClass('action-error');
+                console.log(xhr.status);
+                console.log(thrownError);
+            },
+            complete: function() {
+                link_el.removeClass('action-loading');
             }
         })
     }

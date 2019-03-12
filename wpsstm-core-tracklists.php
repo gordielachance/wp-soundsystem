@@ -57,6 +57,7 @@ class WPSSTM_Core_Tracklists{
         
         add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
         add_action('wp_ajax_nopriv_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
+        add_action('wp_ajax_wpsstm_tracklist_toggle_favorite', array($this,'ajax_toggle_favorite'));
 
         //subtracks
         add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
@@ -125,6 +126,37 @@ class WPSSTM_Core_Tracklists{
         header('Content-type: application/json');
         wp_send_json( $result ); 
         
+    }
+    
+    function ajax_toggle_favorite(){
+        $ajax_data = wp_unslash($_POST);
+        $do_love = wpsstm_get_array_value('do_love',$ajax_data);
+        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
+
+        $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
+
+        $result = array(
+            'input'         => $ajax_data,
+            'do_love'       => $do_love,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'success'       => false,
+            'tracklist'     => $tracklist->to_array(),
+        );
+
+        $success = $tracklist->love_tracklist($do_love);
+
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = true;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
     }
 
     function ajax_update_subtrack_position(){
