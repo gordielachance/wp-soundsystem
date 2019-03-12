@@ -21,7 +21,7 @@ class WpsstmTrack extends HTMLElement{
 
     }
     connectedCallback(){
-        console.log("TRACK CONNECTED!");
+        //console.log("TRACK CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -60,7 +60,7 @@ class WpsstmTrack extends HTMLElement{
         
         var self = this;
 
-        self.tracklist =            $(self).parents('wpsstm-tracklist').get(0);
+        self.tracklist =            self.closest('wpsstm-tracklist');
         self.position =             Number($(self).attr('data-wpsstm-subtrack-position')); //index in tracklist
         self.track_artist =         $(self).find('[itemprop="byArtist"]').text();
         self.track_title =          $(self).find('[itemprop="name"]').text();

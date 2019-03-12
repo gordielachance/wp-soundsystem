@@ -232,12 +232,11 @@ $(document).on( "wpsstmPlayerInit", function( event, player ) {
 $(document).on( "wpsstmSourceInit", function( event, player_obj ) {
     
     var source = player_obj.current_source;
-    var track = $(source).parents('wpsstm-track').get(0);
 
     var nowPlayingTrack = function(){
         if (!wpsstm_lastfm.scrobbler_enabled) return;
 
-        wpsstm_lastfm.updateNowPlaying(track);
+        wpsstm_lastfm.updateNowPlaying(source.track);
         $(player_obj.current_media).off('play', nowPlayingTrack); //run it only once
     }
 
@@ -245,11 +244,11 @@ $(document).on( "wpsstmSourceInit", function( event, player_obj ) {
         if ( source.duration < 30) return;
 
         if (wpsstm_lastfm.scrobbler_enabled){
-            wpsstm_lastfm.user_scrobble(track);
+            wpsstm_lastfm.user_scrobble(source.track);
         }
         //bot scrobble
         if (wpsstm_lastfm.lastfm_scrobble_along){
-            wpsstm_lastfm.community_scrobble(track);
+            wpsstm_lastfm.community_scrobble(source.track);
         }
 
         $(player_obj.current_media).off('ended', ScrobbleTrack); //run it only once

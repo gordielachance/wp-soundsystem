@@ -79,7 +79,7 @@ class WpsstmTracklist extends HTMLElement{
         });
     }
     connectedCallback(){
-        console.log("TRACKLIST CONNECTED!");
+        //console.log("TRACKLIST CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -244,11 +244,11 @@ class WpsstmTracklist extends HTMLElement{
     reload_tracklist(autoplay){
         var self = this;
         
-        if(typeof autoplay === undefined){        
+        if (typeof autoplay === 'undefined'){
             autoplay = $(self).hasClass('tracklist-playing');
         }
-        
-        self.debug("reload tracklist");
+
+        self.debug("reload tracklist... autoplay ?" + autoplay);
 
         var ajax_data = {
             action:     'wpsstm_load_tracklist',
@@ -277,7 +277,7 @@ class WpsstmTracklist extends HTMLElement{
                     if (autoplay===true){
                         newTracklist.addClass('tracklist-autoplay');
                     }
-                    
+
                     //swap content
                     self.replaceWith( newTracklist.get(0) );
                 }

@@ -4,24 +4,20 @@ class WpsstmSource extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.track =            $(this).parents('wpsstm-track').get(0);
-        this.index =            Number($(this).attr('data-wpsstm-source-idx'));
-        this.post_id =          Number($(this).attr('data-wpsstm-source-id'));
-        this.src =              $(this).attr('data-wpsstm-source-src');
-        this.type =             $(this).attr('data-wpsstm-source-type');
-        this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
+        this.track =            undefined;
+        this.index =            undefined;
+        this.post_id =          undefined;
+        this.src =              undefined;
+        this.type =             undefined;
+        this.can_play =         undefined;
         this.duration =         undefined;
-
-        if (!this.can_play){
-            $(this).addClass('source-error');
-        }
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
         });
     }
     connectedCallback(){
-        console.log("SOURCE CONNECTED!");
+        //console.log("SOURCE CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -52,7 +48,9 @@ class WpsstmSource extends HTMLElement{
     ///
     
     debug(msg){
-        var prefix = "WpsstmTrack #" + this.track.position+" - WpsstmTrackSource #" + this.index;
+        var self = this;
+        var track = self.track;
+        var prefix = "WpsstmTrack #" + track.position+" - WpsstmTrackSource #" + this.index;
         wpsstm_debug(msg,prefix);
     }
     
@@ -63,23 +61,35 @@ class WpsstmSource extends HTMLElement{
     
     render(){
         var self = this;
-        var track = $(self).parents('wpsstm-track').get(0);
+        
+        self.track =            self.closest('wpsstm-track');
 
-        //update track
-        var trackSources = $(track).find('wpsstm-source');
+        self.index =            Number($(self).attr('data-wpsstm-source-idx'));
+        self.post_id =          Number($(self).attr('data-wpsstm-source-id'));
+        self.src =              $(self).attr('data-wpsstm-source-src');
+        self.type =             $(self).attr('data-wpsstm-source-type');
+        self.can_play =         ( Boolean(self.type) && Boolean(self.src) );
+        self.duration =         undefined;
 
-        if (!trackSources.length && track.did_sources_request){
-            $(track).addClass('track-error');
+        if (!this.can_play){
+            $(this).addClass('source-error');
         }
 
-        var toggleSourcesEl = $(track).find('.wpsstm-track-action-toggle-sources a');
+        //update track
+        var trackSources = $(self.track).find('wpsstm-source');
+
+        if (!trackSources.length && track.did_sources_request){
+            $(self.track).addClass('track-error');
+        }
+
+        var toggleSourcesEl = $(self.track).find('.wpsstm-track-action-toggle-sources a');
         var sourceCountEl = toggleSourcesEl.find('.wpsstm-sources-count');
         if ( !sourceCountEl.length ){ //create item
             sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
             toggleSourcesEl.append(sourceCountEl);            
         }
 
-        $(track).attr('data-wpsstm-sources-count',trackSources.length);
+        $(self.track).attr('data-wpsstm-sources-count',trackSources.length);
         sourceCountEl.text(trackSources.length);
 
         //delete source

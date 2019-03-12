@@ -19,7 +19,7 @@ class WpsstmPlayer extends HTMLElement{
         });
     }
     connectedCallback(){
-        console.log("PLAYER CONNECTED!");
+        //console.log("PLAYER CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -275,8 +275,8 @@ class WpsstmPlayer extends HTMLElement{
         var self = this;
         var newTracks = [];
 
-        $(tracklist.tracks).each(function(index, track_obj) {
-            newTracks.push(track_obj);
+        $(tracklist.tracks).each(function(index, track) {
+            newTracks.push(track);
         });
         
         tracklist.debug( 'append tracks to #' + $(self).attr('id') );
@@ -286,22 +286,34 @@ class WpsstmPlayer extends HTMLElement{
         self.queueUpdateGUI();
 
         /* autoplay ? */
-        if ( newTracks.length && $(tracklist).hasClass('tracklist-autoplay') ){
-            $(tracklist).removeClass('tracklist-autoplay');
-            var firstTrack = tracklist.tracks[0];
-            if(typeof firstTrack !== undefined){
-                tracklist.debug("AUTOPLAY!");
-                self.play_track(firstTrack);
-            }else{
-                $(tracklist).removeClass('tracklist-playing');
+        function autoPlayFN(){
+            if ( newTracks.length && $(tracklist).hasClass('tracklist-autoplay') ){
+                $(tracklist).removeClass('tracklist-autoplay');
+                var firstTrack = tracklist.tracks[0];
+                if(typeof firstTrack !== undefined){
+                    tracklist.debug("AUTOPLAY!");
+                    self.play_track(firstTrack);
+                }else{
+                    $(tracklist).removeClass('tracklist-playing');
+                }
             }
         }
+        
+        /*
+        TOUFIX 
+        When a tracklist is refreshed and has autoplay enabled, a bug occurs:
+        In play_source, the source track is not defined.
+        It works with a little timeout but this should be investigated.
+        */
+        
+        setTimeout(autoPlayFN, 250);
+
         
         //play/pause track button
         $(tracklist).on( "click", ".wpsstm-track-play-bt", function(e) {
             e.preventDefault();
             
-            var track = $(this).parents('wpsstm-track').get(0);
+            var track = this.closest('wpsstm-track');
 
             //re-click
             if ( self.current_media && (self.current_track == track) ){
@@ -322,12 +334,11 @@ class WpsstmPlayer extends HTMLElement{
         //play source
         $(self).on('click', '.wpsstm-source-title', function(e) {
             e.preventDefault();
-            var source = $(this).get(0);
-            var track = $(this).parents('wpsstm-track').get(0);
+            var source = this;
             
             self.play_source(source);
             //toggle tracklist sources
-            $(track).removeClass('wpsstm-sources-expanded');
+            $(source.track).removeClass('wpsstm-sources-expanded');
         });
         
     }
@@ -359,8 +370,6 @@ class WpsstmPlayer extends HTMLElement{
         if ( self.current_track && ( track !== self.current_track ) ){
             self.end_track();
         }
-        self.current_track = track;
-        self.render_playing_track();
         
         /*
         If this is the first tracklist track, check if tracklist is expired.
@@ -372,13 +381,12 @@ class WpsstmPlayer extends HTMLElement{
             tracklist.reload_tracklist(true);
             return;
         }
-        
 
         ///
 
         track.maybe_load_sources().then(
             function(success_msg){
-
+                
                 var source_play = self.play_first_available_source(track);
 
                 source_play.done(function(v) {
@@ -442,7 +450,7 @@ class WpsstmPlayer extends HTMLElement{
     }
     
     play_first_available_source(track){
-        
+
         var self = this;
         var success = $.Deferred();
 
@@ -501,11 +509,11 @@ class WpsstmPlayer extends HTMLElement{
         
         var previous_source = self.current_source;
         var previous_track = self.current_track;
-        
+
         self.current_source = source;
         self.current_track = source.track;
-        var tracklist = self.current_track.tracklist;
-        
+        var tracklist = source.track.tracklist;
+
         var tracklist_instances = tracklist.get_instances();
         var track_instances = self.current_track.get_instances();
         var source_instances = source.get_instances();
