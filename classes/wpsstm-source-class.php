@@ -151,48 +151,48 @@ class WPSSTM_Source{
         if ( !empty($duplicates) ){
             $source_id = $duplicates[0];
             $this->post_id = $source_id;
-            return new WP_Error( 'wpsstm_source_duplicate', sprintf(__("This source already exists as post #%s",'wpsstm'),$source_id) );
-        }
-
-        $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
-        
-        //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
-
-        if ( !user_can($post_author,$required_cap) ){
-            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this souce.",'wpsstm') );
-        }
-
-        $args = array(
-            'post_author' =>    $post_author,
-            'post_status' =>    'publish',
-        );
- 
-        $required_args = array(
-            'post_title' =>     $this->title,
-            'post_type' =>      wpsstm()->post_type_source,
-            'post_parent' =>    $this->track->post_id,
-            'meta_input' =>     array(
-                WPSSTM_Core_Sources::$source_url_metakey => $this->permalink_url
-            )
-        );
-            
-        $args = wp_parse_args($required_args,$args);
-
-        if (!$this->post_id){
-            $success = wp_insert_post( $args, true );
+            //$this->source_log($source_id,'This source already exists, do not create it');
         }else{
-            $success = wp_update_post( $args, true );
-        }
-        
-        if ( is_wp_error($success) ) return $success;
-        $this->post_id = $success;
+            $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
 
-        $this->source_log(
-            json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
-            "WPSSTM_Source::save_source()
-        ");
+            //capability check
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+            $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
+
+            if ( !user_can($post_author,$required_cap) ){
+                return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this souce.",'wpsstm') );
+            }
+
+            $args = array(
+                'post_author' =>    $post_author,
+                'post_status' =>    'publish',
+            );
+
+            $required_args = array(
+                'post_title' =>     $this->title,
+                'post_type' =>      wpsstm()->post_type_source,
+                'post_parent' =>    $this->track->post_id,
+                'meta_input' =>     array(
+                    WPSSTM_Core_Sources::$source_url_metakey => $this->permalink_url
+                )
+            );
+
+            $args = wp_parse_args($required_args,$args);
+
+            if (!$this->post_id){
+                $success = wp_insert_post( $args, true );
+            }else{
+                $success = wp_update_post( $args, true );
+            }
+
+            if ( is_wp_error($success) ) return $success;
+            $this->post_id = $success;
+
+            $this->source_log(
+                json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
+                "WPSSTM_Source::save_source()
+            ");
+        }
         
         return $this->post_id;
     }
