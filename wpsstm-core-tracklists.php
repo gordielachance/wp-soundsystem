@@ -382,7 +382,7 @@ class WPSSTM_Core_Tracklists{
                     $track->from_array($url_track);
                 }
 
-                $success = $this->queue_track($track);
+                $success = $wpsstm_tracklist->queue_track($track);
                 
             break;
                 
@@ -395,7 +395,7 @@ class WPSSTM_Core_Tracklists{
                     $track->from_array($url_track);
                 }
                 
-                $success = $this->dequeue_track($track);
+                $success = $wpsstm_tracklist->dequeue_track($track);
                 
                 
             break;
@@ -403,25 +403,25 @@ class WPSSTM_Core_Tracklists{
             case 'favorite':
             case 'unfavorite':
                 $do_love = ( $action == 'favorite');
-                $success = $this->love_tracklist($do_love);
+                $success = $wpsstm_tracklist->love_tracklist($do_love);
             break;
 
             case 'trash':
-                $success = $this->trash_tracklist();
+                $success = $wpsstm_tracklist->trash_tracklist();
             break;
 
             case 'live':
             case 'static':
                 $live = ( $action == 'live');
-                $success = $this->toggle_live($live);
+                $success = $wpsstm_tracklist->toggle_live($live);
                 $redirect_url = get_permalink($wpsstm_tracklist->post_id);
             break;
             case 'refresh':
                 //remove updated time
-                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+                $success = delete_post_meta($wpsstm_tracklist->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
             break;
             case 'get-autorship':
-                $success = $this->get_autorship();
+                $success = $wpsstm_tracklist->get_autorship();
             break;
         }
 
