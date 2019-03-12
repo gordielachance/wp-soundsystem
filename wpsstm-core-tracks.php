@@ -265,12 +265,13 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         if ( is_404() ) return $template;
         if ( !is_single() ) return $template;
-        if ( !$subtrack_id = get_query_var('subtrack_id') ) return $template;
-        
+
+        if ( !$wpsstm_track->subtrack_id && !$wpsstm_track->post_id ) return $template;
+
         //check action
         $action = get_query_var( 'wpsstm_action' );
         if($action != 'manage') return $template;
-        
+
         return wpsstm_locate_template( 'tracklist-manager.php' );
         
         
