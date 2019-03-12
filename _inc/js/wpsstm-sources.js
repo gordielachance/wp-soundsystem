@@ -66,7 +66,7 @@ class WpsstmSource extends HTMLElement{
         //delete source
         $(self).find('.wpsstm-source-action-trash a').click(function(e) {
             e.preventDefault();
-            source.trash_source();
+            self.trash_source();
         });
     }
 
@@ -109,12 +109,12 @@ class WpsstmSource extends HTMLElement{
         ajax_request.done(function(data){
             if (data.success === true){
 
-                source_obj.can_play = false;
+                self.can_play = false;
 
                 //skip current source as it was playibg
                 if ( $(self).hasClass('source-playing') ){
-                    source_obj.debug('source was playing, skip it !');
-                    source_obj.debug(source_obj);
+                    self.debug('source was playing, skip it !');
+                    self.debug(self);
                 }
 
                 ///
