@@ -70,11 +70,12 @@ class WPSSTM_Core_Tracks{
         
         add_action('wp_ajax_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
         add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
+
+        add_action('wp_ajax_nopriv_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
+        add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         
         add_action('wp_ajax_wpsstm_track_toggle_favorite', array($this,'ajax_track_toggle_favorite'));
-        
         add_action('wp_ajax_wpsstm_subtrack_dequeue', array($this,'ajax_subtrack_dequeue'));
-        
         add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
 
         //add_action('wp', array($this,'test_autosource_ajax') );
@@ -981,6 +982,35 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
         
+    }
+    
+    function ajax_update_subtrack_position(){
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'message'   => null,
+            'success'   => false,
+            'input'     => $ajax_data
+        );
+        
+        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
+        $result['new_pos'] = $new_pos;
+        
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($subtrack_id);
+        $result['track'] = $track->to_array();
+
+        $success = $track->move_subtrack($new_pos);
+
+        if ( is_wp_error($success) ){
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
     function ajax_track_trash(){

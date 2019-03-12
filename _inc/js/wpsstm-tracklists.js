@@ -390,19 +390,17 @@ class WpsstmTracklist extends HTMLElement{
         var self = this;
         var track_instances = track.get_instances();
         var link_el = track_instances.find('.wpsstm-track-action-move a');
-        var action_url = link_el.data('wpsstm-ajax-url');
 
-        //ajax update order
         var ajax_data = {
+            action:     'wpsstm_update_subtrack_position',
             new_pos:    new_pos,
+            track:      track.to_ajax(),
         };
-        
-        
 
         $.ajax({
             type: "post",
-            url: action_url,
-            data:ajax_data,
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
             dataType: 'json',
             beforeSend: function() {
                 track_instances.addClass('track-loading');
@@ -410,6 +408,7 @@ class WpsstmTracklist extends HTMLElement{
                 link_el.addClass('action-loading');
             },
             success: function(data){
+
                 if (data.success === false) {
                     link_el.addClass('action-error');
                     console.log(data);

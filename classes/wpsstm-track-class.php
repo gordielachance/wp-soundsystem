@@ -340,8 +340,13 @@ class WPSSTM_Track{
         
         //update this subtrack
         if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = %d WHERE ID = %d",$new_pos,$this->subtrack_id);
-            $result = $wpdb->get_results ( $querystr );
+            
+            $result = $wpdb->update( 
+                $subtracks_table, //table
+                array('track_order'=>$new_pos), //data
+                array('ID'=>$this->subtrack_id) //where
+            );
+            
         }
 
         if ( is_wp_error($result) ){
@@ -350,7 +355,7 @@ class WPSSTM_Track{
             $this->position = $new_pos;
             $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
         }
-
+        
         return $result;
 
     }
@@ -478,7 +483,7 @@ class WPSSTM_Track{
     }
 
     
-    function remove_subtrack(){
+    function unlink_subtrack(){
         if ( !$this->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
         }

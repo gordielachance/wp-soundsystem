@@ -168,7 +168,6 @@ function wpsstm_get_blank_action(){
         'text' =>           null,
         'desc' =>           null,
         'href' =>           '#',
-        'ajax' =>           null,
         'classes' =>        array(),
         'link_before' =>    null,
         'link_after' =>     null,
@@ -200,7 +199,6 @@ function get_actions_list($actions,$prefix){
             'title' =>                  ($action['desc']) ?$action['desc'] : $action['text'],
             'href' =>                   $action['href'],
             'target' =>                 $action['target'],
-            'data-wpsstm-ajax-url' =>   $action['ajax']
         );
         $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
