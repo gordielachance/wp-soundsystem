@@ -314,13 +314,7 @@ class WPSSTM_Core_Tracklists{
                 sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',$post_type),
                 'top'
             );
-            
-            add_rewrite_rule( 
-                sprintf('^%s/(\d+)/ajax/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/ajax/ACTION
-                sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_ajax_action=$matches[2]',$post_type),
-                'top'
-            );
-            
+
             //tracklist ID
             
             add_rewrite_rule( 

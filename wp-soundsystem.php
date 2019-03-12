@@ -202,7 +202,6 @@ class WP_SoundSystem {
 
     function add_wpsstm_query_vars($qvars){
         $qvars[] = 'wpsstm_action';
-        $qvars[] = 'wpsstm_ajax_action';
         return $qvars;
     }
 

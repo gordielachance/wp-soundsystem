@@ -445,13 +445,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $url;
     }
 
-    function get_tracklist_action_url($action = null,$ajax=false){
+    function get_tracklist_action_url($action = null){
 
         $url = $this->get_tracklist_url();
         if ( !$url ) return false;
 
-        $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
-        $action_permavar = ($ajax) ? 'ajax' : 'action';
+        $action_var = 'wpsstm_action';
+        $action_permavar = 'action';
         
 
         if ( !get_option('permalink_structure') ){

@@ -790,13 +790,13 @@ class WPSSTM_Track{
         return $url;
     }
 
-    function get_track_action_url($action,$ajax = false){
+    function get_track_action_url($action){
 
         $url = $this->get_track_url();
         if (!$url) return false;
         
-        $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
-        $action_permavar = ($ajax) ? 'ajax' : 'action';
+        $action_var = 'wpsstm_action';
+        $action_permavar = 'action';
         
         if ( !get_option('permalink_structure') ){
             $args = array(
@@ -890,7 +890,6 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Remove from playlist','wpsstm'),
                 'href' =>       $this->get_track_action_url('dequeue'),
-                'ajax' =>       $this->get_track_action_url('dequeue',true),
             );
         }
         
@@ -900,7 +899,6 @@ class WPSSTM_Track{
                 'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'href' =>       $this->get_track_action_url('move'),
-                'ajax' =>       $this->get_track_action_url('move',true),
             );
         }
         
@@ -930,7 +928,6 @@ class WPSSTM_Track{
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Trash this track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
-                'ajax' =>       $this->get_track_action_url('trash',true),
             );
         }
         
