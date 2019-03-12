@@ -984,7 +984,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->is_autosource_lock() ? 'track-autosourced' : null,
+            //$this->is_autosource_lock() ? 'track-autosourced' : null,
 
         );
 

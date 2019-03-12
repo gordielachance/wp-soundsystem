@@ -231,7 +231,6 @@ class WpsstmTrack extends HTMLElement{
             track_instances.addClass('track-autosourced');
             
             if ( data.success === true ){
-                
                 self.reload_track().then(
                     function(success_msg){
                         success.resolve();
@@ -240,7 +239,6 @@ class WpsstmTrack extends HTMLElement{
                         success.reject(error_msg);
                     }
                 );
-
             }else{
                 self.debug("track sources request failed: " + data.message);
                 success.reject(data.message);
@@ -279,12 +277,13 @@ class WpsstmTrack extends HTMLElement{
             data:       ajax_data,
             dataType:   'json',
         });
+        
+
 
         sources_request.done(function(data) {
             if ( data.html ){
-
-                self.get_instances().html( data.html );
-
+                //update with new attributes & content
+                wpsstmSwapNode(self,data.html);
                 success.resolve();
             }else{
                 self.debug("track refresh failed: " + data.message);

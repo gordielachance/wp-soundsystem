@@ -55,3 +55,40 @@ function wpsstm_shuffle(array) {
 
   return array;
 }
+
+/*
+Because we can't (?) switch the outerHTML of nodes, custom-hackish method to update attributes and content.
+*/
+
+function wpsstmSwapNode(oldNode,newHTML){
+    
+    //create new node from HTML
+    var template = document.createElement('template');
+    newHTML = newHTML.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = newHTML;
+    var newNode = template.content.firstChild;
+    
+    //check both nodes have the same tag
+    if (oldNode.tagName !== newNode.tagName){
+        console.log("wpsstmSwapNode - tags do not match, abord.");
+        return false;
+    }
+
+    //remove all old attributes
+    while(oldNode.attributes.length > 0){
+        oldNode.removeAttribute(oldNode.attributes[0].name);
+    }
+
+    //add new attributes
+    let attr;
+    let attributes = Array.prototype.slice.call(newNode.attributes);
+    while(attr = attributes.pop()) {
+        oldNode.setAttribute(attr.nodeName, attr.nodeValue);
+    }
+    
+    //switch HTML
+    oldNode.innerHTML = newNode.innerHTML;
+
+    return true;
+
+}
