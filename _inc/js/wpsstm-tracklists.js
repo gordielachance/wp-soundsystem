@@ -279,7 +279,7 @@ class WpsstmTracklist extends HTMLElement{
                     }
                     
                     //swap content
-                    self.replaceWith( newTracklist.get(0) );
+                    self.html( newTracklist.get(0) );
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

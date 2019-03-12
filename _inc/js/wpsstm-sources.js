@@ -63,6 +63,9 @@ class WpsstmSource extends HTMLElement{
     
     render(){
         var self = this;
+        var track = $(self).parents('wpsstm-track').get(0);
+        track.populateSource(self);
+        
         //delete source
         $(self).find('.wpsstm-source-action-trash a').click(function(e) {
             e.preventDefault();

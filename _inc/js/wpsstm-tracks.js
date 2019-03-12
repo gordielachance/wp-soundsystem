@@ -13,7 +13,6 @@ class WpsstmTrack extends HTMLElement{
         this.post_id =              undefined;
         this.can_play =             undefined;
         
-        this.sources =              [];
         this.did_sources_request =  undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
@@ -56,6 +55,27 @@ class WpsstmTrack extends HTMLElement{
         var prefix = " WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
     }
+    
+    populateSource(source){
+        self = this;
+        var sources = $(self).find('wpsstm-source');
+
+        if (!sources.length && self.did_sources_request){
+            $(self).addClass('track-error');
+        }
+
+        var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
+        var sourceCountEl = toggleSourcesEl.find('.wpsstm-sources-count');
+        if ( !sourceCountEl.length ){ //create item
+            sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
+            toggleSourcesEl.append(sourceCountEl);            
+        }
+        
+        $(self).attr('data-wpsstm-sources-count',sources.length);
+        sourceCountEl.text(sources.length);
+        
+
+    }
 
     render(){
         
@@ -69,24 +89,11 @@ class WpsstmTrack extends HTMLElement{
         self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
         self.did_sources_request =  $(self).hasClass('track-autosourced');
-        self.sources =              [];//reset array
 
         /*
         populate existing sources
         */
 
-        var source_els = $(self).find('wpsstm-source');
-
-        $.each(source_els, function( index, source ) {
-            self.sources.push(source);
-        });
-      
-        $(self).attr('data-wpsstm-sources-count',self.sources.length);
-        
-        if (!self.sources.length && self.did_sources_request){
-            $(self).addClass('track-error');
-        }
-        
         //manage single source
         $(self).find('.wpsstm-track-sources').each(function() {
             var sources_container = $(this);
@@ -174,12 +181,7 @@ class WpsstmTrack extends HTMLElement{
 
         //sources
         var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
-        if ( !$(self).find('.wpsstm-sources-count').length ){ //not yet appened
-            var sourceCountEl = $('<span class="wpsstm-sources-count">'+self.sources.length+'</span>');
-            toggleSourcesEl.append(sourceCountEl);            
-        }
 
-        //toggle sources
         toggleSourcesEl.click(function(e) {
             e.preventDefault();
 
@@ -199,8 +201,9 @@ class WpsstmTrack extends HTMLElement{
         var self = this;
         var success = $.Deferred();
         var can_autosource = true; //TOUFIX should be from localized var
+        var sources = $(self).find('wpsstm-source');
 
-        if (self.sources.length > 0){
+        if (sources.length > 0){
             
             success.resolve();
             
@@ -217,7 +220,7 @@ class WpsstmTrack extends HTMLElement{
         
         //set .can_play property
         success.always(function() {
-            self.can_play = (self.sources.length > 0);
+            self.can_play = (sources.length > 0);
         });
 
         return success.promise();
@@ -226,9 +229,10 @@ class WpsstmTrack extends HTMLElement{
     get_track_sources_request() {
 
         var self = this;
+        var track_instances = self.get_instances();
         var success = $.Deferred();
 
-        $(self).addClass('track-loading');
+        track_instances.addClass('track-loading');
 
         var ajax_data = {
             action:     'wpsstm_track_autosource',
@@ -245,7 +249,7 @@ class WpsstmTrack extends HTMLElement{
         sources_request.done(function(data) {
 
             self.did_sources_request = true;
-            $(self).addClass('track-autosourced');
+            track_instances.addClass('track-autosourced');
             
             if ( data.success === true ){
                 
@@ -266,11 +270,11 @@ class WpsstmTrack extends HTMLElement{
         });
 
         success.fail(function() {
-            $(self).addClass('track-error');
+            track_instances.addClass('track-error');
         });
 
         success.always(function() {
-            $(self).removeClass('track-loading');
+            track_instances.removeClass('track-loading');
         });
         
         return success.promise();
@@ -281,8 +285,8 @@ class WpsstmTrack extends HTMLElement{
         
         var self = this;
         var success = $.Deferred();
+        var track_instances = self.get_instances();
 
-        self.debug("reload_track");
         $(self).addClass('track-loading');
         
         var ajax_data = {
@@ -300,11 +304,8 @@ class WpsstmTrack extends HTMLElement{
         sources_request.done(function(data) {
             if ( data.html ){
 
-                var newTrack = $(data.html);
+                self.get_instances().html( data.html );
 
-                //swap content
-                self.replaceWith( newTrack.get(0) );
-                
                 success.resolve();
             }else{
                 self.debug("track refresh failed: " + data.message);
@@ -321,15 +322,6 @@ class WpsstmTrack extends HTMLElement{
         });
         
         return success.promise();
-    }
-
-    get_source_obj(source_idx){
-        var self = this;
-
-        source_idx = Number(source_idx);
-        var source_obj = self.sources[source_idx];
-        if(typeof source_obj === undefined) return;
-        return source_obj;
     }
 
     //reduce object for communication between JS & PHP

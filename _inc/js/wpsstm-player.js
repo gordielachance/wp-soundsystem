@@ -387,6 +387,8 @@ class WpsstmPlayer extends HTMLElement{
                 source_play.fail(function(reason) {
                     success.reject(reason);
                 })
+                
+
 
             },
             function(error_msg){
@@ -419,7 +421,6 @@ class WpsstmPlayer extends HTMLElement{
             var tracks_slice = next_tracks.slice( 0, max_items );
 
             $(tracks_slice).each(function(index, track_to_preload) {
-                if ( track_to_preload.sources.length > 0 ) return true; //continue;
                 track_to_preload.maybe_load_sources();
             });
             
@@ -446,19 +447,24 @@ class WpsstmPlayer extends HTMLElement{
         var success = $.Deferred();
 
         var source_idx = 0;
+        var sources_playable = [];
 
         /*
         This function will loop until a promise is resolved
         */
-        
-        var sources_after = track.sources.slice(source_idx); //including this one
-        var sources_before = track.sources.slice(0,source_idx - 1);
+        var sources = $(track).find('wpsstm-source');
 
-        //which one should we play?
-        var sources_reordered = sources_after.concat(sources_before);
-        var sources_playable = sources_reordered.filter(function (source) {
-            return (source.can_play !== false);
-        });
+        if (sources.length){
+            var sources_after = sources.slice(source_idx); //including this one
+            var sources_before = sources.slice(0,source_idx - 1);
+
+            //which one should we play?
+            var sources_reordered = $.merge(sources_after,sources_before);
+            var sources_playable = sources_reordered.filter(function (source) {
+                return (source.can_play !== false);
+            });
+
+        }
 
         if (!sources_playable.length){
             success.reject("no playable sources to iterate");
@@ -508,7 +514,7 @@ class WpsstmPlayer extends HTMLElement{
         handle current (previous) source
         */
         //we're trying to play the same source again
-        if ( source === previous_source ){ 
+        if ( source === previous_source ){
             success.reject("we've already playing this soure");
             return success.promise();
         }
@@ -797,7 +803,8 @@ class WpsstmPlayer extends HTMLElement{
         self.current_track.debug("track > player");
 
         //audio sources
-        self.set_player_sources(self.current_track.sources);
+        var sources = $(self.current_track).find('wpsstm-source');
+        self.set_player_sources(sources);
 
         var list = $('<ul class="wpsstm-tracks-list" />'); 
 
