@@ -67,10 +67,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $post_type = get_post_type($post_id);
         
         //if no title has been set, use the cached title if any
-        if ( ($post_type == wpsstm()->post_type_live_playlist) && !$title ){
+        if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
             $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
         }
-        
+
         return $title;
     }
     

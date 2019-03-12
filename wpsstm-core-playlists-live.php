@@ -165,7 +165,7 @@ class WPSSTM_Core_Live_Playlists{
     }
     
     function filter_live_playlist_title( $title, $post_id = null ) {
-        if ( get_post_type($post_id) == wpsstm()->post_type_live_playlist ){
+        if ( in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){
             $title = WPSSTM_Post_Tracklist::get_tracklist_title($post_id);
         }
         return $title;
