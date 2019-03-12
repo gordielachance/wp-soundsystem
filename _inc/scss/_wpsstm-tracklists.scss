@@ -127,7 +127,7 @@ wpsstm-tracklist{
         }
     }
     
-    form.wpsstm-new-subtrack{
+    .wpsstm-new-subtrack{
         margin: 1em 0;
         padding: 1em;
         
@@ -158,6 +158,18 @@ wpsstm-tracklist{
             button span{
                 display:none;
             }
+        }
+        
+        &.action-loading{
+            @extend .wpsstm-freeze;
+            @include striped-bg();
+            > *{
+                @include opacity(.25);
+            }
+        }
+        
+        &.action-error{
+            border:1px solid red;
         }
 
     }

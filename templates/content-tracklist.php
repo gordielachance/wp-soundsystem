@@ -105,7 +105,7 @@ $has_player = wpsstm()->get_options('player_enabled');
     
     if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
         ?>
-        <form class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
+        <div class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
             <label><?php _e('New track','wpsstm');?></label>
             <p class="wpsstm-new-subtrack-fields">
             <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
@@ -114,7 +114,7 @@ $has_player = wpsstm()->get_options('player_enabled');
             <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
             </p>
             <input type="hidden" name="tracklist_id" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
-        </form>
+        </div>
         <?php
     }
 

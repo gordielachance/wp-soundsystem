@@ -4,16 +4,17 @@ class WpsstmTrack extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.position =             null;
-        this.track_artist =               null;
-        this.track_title =                null;
-        this.track_album =                null;
-        this.subtrack_id =          null;
-        this.post_id =              null;
-        this.can_play =             null;
+        this.tracklist =            undefined;
+        this.position =             undefined;
+        this.track_artist =         undefined;
+        this.track_title =          undefined;
+        this.track_album =          undefined;
+        this.subtrack_id =          undefined;
+        this.post_id =              undefined;
+        this.can_play =             undefined;
         
         this.sources =              [];
-        this.did_sources_request =  null;
+        this.did_sources_request =  undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -62,9 +63,9 @@ class WpsstmTrack extends HTMLElement{
 
         self.tracklist =            $(self).parents('wpsstm-tracklist').get(0);
         self.position =             Number($(self).attr('data-wpsstm-subtrack-position')); //index in tracklist
-        self.track_artist =               $(self).find('[itemprop="byArtist"]').text();
-        self.track_title =                $(self).find('[itemprop="name"]').text();
-        self.track_album =                $(self).find('[itemprop="inAlbum"]').text();
+        self.track_artist =         $(self).find('[itemprop="byArtist"]').text();
+        self.track_title =          $(self).find('[itemprop="name"]').text();
+        self.track_album =          $(self).find('[itemprop="inAlbum"]').text();
         self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
         self.did_sources_request =  $(self).hasClass('track-autosourced');

@@ -142,11 +142,25 @@ class WpsstmTracklist extends HTMLElement{
         var new_subtrack_el = $(self).find('.wpsstm-new-subtrack');
         new_subtrack_el.addClass('wpsstm-new-subtrack-simple');
         var new_subtrack_bt = new_subtrack_el.find('button');
+        
         new_subtrack_bt.click(function(e) {
-            if ( new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple') ){
-                e.preventDefault();
+            
+             e.preventDefault();
+            
+            var isExpanded = !new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple');
+            
+            if (!isExpanded){
                 new_subtrack_el.removeClass('wpsstm-new-subtrack-simple');
+            }else{
+                var track = new WpsstmTrack();
+                track.track_artist = new_subtrack_el.find('input[name="wpsstm_track_data[artist]"]').val();
+                track.track_title = new_subtrack_el.find('input[name="wpsstm_track_data[title]"]').val();
+                track.track_album = new_subtrack_el.find('input[name="wpsstm_track_data[album]"]').val();
+                
+                self.new_subtrack(track);
+                
             }
+
         });
 
         /*
@@ -156,9 +170,8 @@ class WpsstmTracklist extends HTMLElement{
         refresh_bt.click(function(e) {
             e.preventDefault();
             self.debug("clicked 'refresh' bt");
-            
-            var thenPlay = $(self).hasClass('tracklist-playing');
-            self.reload_tracklist(thenPlay);
+
+            self.reload_tracklist();
         });
 
         /*
@@ -269,6 +282,10 @@ class WpsstmTracklist extends HTMLElement{
 
     reload_tracklist(autoplay){
         var self = this;
+        
+        if(typeof autoplay === undefined){        
+            autoplay = $(self).hasClass('tracklist-playing');
+        }
         
         self.debug("reload tracklist");
 
@@ -476,6 +493,48 @@ class WpsstmTracklist extends HTMLElement{
         }, {});
         return filtered;
     }
+    
+    new_subtrack(track){
+        
+        var self = this;
+        var container_el = $(self).find('.wpsstm-new-subtrack');
+        var tracklist = container_el.parents('wpsstm-tracklist').get(0);
+
+        var ajax_data = {
+            action:         'wpsstm_tracklist_new_subtrack',
+            track:          track.to_ajax(),
+            tracklist_id:   self.post_id
+        };
+
+        return $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+
+            beforeSend: function() {
+                container_el.removeClass('action-error').addClass('action-loading');
+            },
+            success: function(data){
+
+                if (data.success === false) {
+                    console.log(data);
+                }else{
+                    tracklist.reload_tracklist();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+                container_el.addClass('action-error');
+            },
+            complete: function() {
+                container_el.removeClass('action-loading');
+            }
+        })
+    }
+    
     
 }
 

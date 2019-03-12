@@ -1061,68 +1061,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         wpsstm()->debug_log($data,$title);
     }
-    
-    function do_tracklist_action($action){
-        global $wp_query;
-        
-        $success = null;
-        
-        //action
-        switch($action){
 
-            case 'queue': //add subtrack
-                
-                $track = new WPSSTM_Track();
-                
-                //build track from request
-                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $track->from_array($url_track);
-                }
-
-                $success = $this->queue_track($track);
-                
-            break;
-                
-            case 'dequeue':
-                
-                $track = new WPSSTM_Track();
-                
-                //build track from request
-                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $track->from_array($url_track);
-                }
-                
-                $success = $this->dequeue_track($track);
-                
-                
-            break;
-
-            case 'favorite':
-            case 'unfavorite':
-                $do_love = ( $action == 'favorite');
-                $success = $this->love_tracklist($do_love);
-            break;
-
-            case 'trash':
-                $success = $this->trash_tracklist();
-            break;
-
-            case 'live':
-            case 'static':
-                $live = ( $action == 'live');
-                $success = $this->toggle_live($live);
-            break;
-            case 'refresh':
-                //remove updated time
-                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
-            break;
-            case 'get-autorship':
-                $success = $this->get_autorship();
-            break;
-        }
-        return $success;
-    }
-    
     function get_tracklist_hidden_form_fields(){
         if ($this->post_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[post_id]" value="%s" />',esc_attr($this->post_id));
