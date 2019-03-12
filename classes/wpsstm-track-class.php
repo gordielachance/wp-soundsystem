@@ -1190,21 +1190,6 @@ class WPSSTM_Track{
 
     }
 
-    function get_tracklist_manager_iframe(){
-        $attr = array(
-            'class' => "wpsstm-tracklist-manager-iframe wpsstm-iframe-autoheight",
-            'width' =>  '100%',
-            'frameborder' => 0,
-            'src' => $this->get_track_action_url('manage'),
-        );
-        
-        $attr_str = wpsstm_get_html_attr($attr);
-
-        $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
-        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s</div>',$iframe_el);
-        return $el;
-    }
-    
     function get_subtrack_hidden_form_fields(){
         $fields = array();
         if ($this->subtrack_id){
