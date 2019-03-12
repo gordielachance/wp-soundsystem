@@ -779,7 +779,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$cache_min) return false;
         
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        if ( !$updated_time ) return false;
         
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
