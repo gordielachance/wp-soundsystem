@@ -974,7 +974,7 @@ class WPSSTM_LastFM_User{
     
     public function love_lastfm_track(WPSSTM_Track $track,$do_love = null){
 
-        if ( !$this->is_user_api_logged() ) return false;
+        if ( !$this->is_user_api_logged() ) return false; //TOUFIX should return an error
         if ($do_love === null) return;
 
         $results = null;

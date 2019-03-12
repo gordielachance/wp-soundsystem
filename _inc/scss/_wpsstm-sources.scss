@@ -1,4 +1,4 @@
-[data-wpsstm-source-idx]{
+wpsstm-source{
     @include display-flex();
     label{
         @extend .wpsstm-can-click;
@@ -20,7 +20,7 @@
 
     &.active{
         margin-bottom:.5em!important;
-        [data-wpsstm-source-idx]{
+        wpsstm-source{
             .wpsstm-source-actions{
                 .wpsstm-action{
                     display:inline-block;
@@ -33,7 +33,7 @@
         @extend .wpsstm-no-underline;
     }
 
-    [data-wpsstm-source-idx]{ //single source
+    wpsstm-source{ //single source
 
         position:relative;
         padding: 0 .75em;
@@ -112,7 +112,7 @@
     }
 }
 
-[itemprop="track"]{
+wpsstm-track{
     .wpsstm-track-sources-list:not(.active){
         display:none;
     }

@@ -30,6 +30,8 @@ class WPSSTM_Track{
     
     public $notices = array();
     
+    public $autosourced = null;
+    
     function __construct( $post_id = null, $tracklist = null ){
         
         /*
@@ -66,6 +68,7 @@ class WPSSTM_Track{
         $this->spotify_id   = wpsstm_get_post_spotify_id($this->post_id);
         $this->image_url    = wpsstm_get_post_image_url($this->post_id);
         $this->duration     = wpsstm_get_post_length($this->post_id);
+        $this->autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
     }
     
     function populate_subtrack($subtrack_id){
@@ -426,6 +429,36 @@ class WPSSTM_Track{
         
     }
     
+    function toggle_favorite($bool){
+        
+        if ( !is_bool($bool) ){
+            return new WP_Error( 'wpsstm_missing_bool', __("Missing valid bool.",'wpsstm') );
+        }
+        
+        if ( !get_current_user_id() ){
+            return new WP_Error( 'wpsstm_missing_user_id', __("Missing user ID.",'wpsstm') );
+        }
+
+        if (!$tracklist_id = wpsstm()->user->favorites_id){
+            return new WP_Error( 'wpsstm_missing_favorites_tracklist', __("Missing favorites tracklist ID.",'wpsstm') );
+        }
+        
+        ///
+        
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+
+        if ($bool){
+            $success = $tracklist->queue_track($this);
+        }else{
+            $success = $tracklist->dequeue_track($this);
+        }
+        
+        $this->track_log(array('track'=>$this->to_array(),'do_love'=>$bool,'success'=>$success),"toggle_favorite");
+        
+        return $success;
+        
+    }
+    
     function trash_track(){
 
         //capability check
@@ -488,14 +521,7 @@ class WPSSTM_Track{
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
             
         }else{
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s'", $this->artist,$this->title);
-            
-            //TO FIX - this specific thing is needed because of the SQL structure ? Is there a way to avoid this ?
-            if ($this->album){
-                $querystr.=  $wpdb->prepare( " AND album = '%s'",$this->album );
-            }else{
-                $querystr.=  " AND album IS NULL";
-            }
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' AND album = '%s'", $this->artist,$this->title,$this->album);
         }
         
         if($tracklist_id){
@@ -586,8 +612,30 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
+        
+        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+
+        if ( !$this->sources && !$is_ajax_refresh ){
+            $success = $this->autosource();
+        }
+        
     }
     
+    function is_autosource_lock(){
+        /*
+        Check if a track has been autosourced recently
+        */
+        
+        if (!$this->autosourced) return false;
+        
+        $now = current_time( 'timestamp' );
+        $seconds = $now - $this->autosourced;
+        $hours = $seconds / HOUR_IN_SECONDS;
+        
+        return ($hours < 48);
+ 
+    }
+
     /*
     Retrieve autosources for a track
     */
@@ -630,15 +678,7 @@ class WPSSTM_Track{
             }else{
                 $this->track_log($success,'Community track created');
             }
-        }else{
-            //ignore autosource if it has been tested recently
-            $last_autosourced = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
-            //TOUFIX TOUIMPROVE TOUCHECK NOTWORKNG
-            if ($last_autosourced){
-                return new WP_Error( 'wpsstm_track_autosource_delay', __('This track as alreay been autosourced recently.','wpsstm') );
-            }
         }
-
         
         ///
         $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
@@ -767,20 +807,6 @@ class WPSSTM_Track{
         }else{
             $url .= sprintf('%s/%s/',$action_permavar,$action);
         }
-        
-        
-        /*
-            case 'favorite':
-            case 'unfavorite':
-                
-                $action = ($action=='favorite') ? 'queue' : 'dequeue';
-
-                if ( $tracklist_id = wpsstm()->user->favorites_id ){
-                    $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                }
-
-            break;
-        */
 
         return $url;
     }
@@ -824,7 +850,6 @@ class WPSSTM_Track{
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite'),
-                'ajax' =>       $this->get_track_action_url('favorite',true),
                 'desc' =>       __('Add track to favorites','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
@@ -832,7 +857,6 @@ class WPSSTM_Track{
             $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite'),
-                'ajax' =>       $this->get_track_action_url('unfavorite',true),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
@@ -942,6 +966,7 @@ class WPSSTM_Track{
             'itemscope' =>                      true,
             'itemtype' =>                       "http://schema.org/MusicRecording",
             'itemprop' =>                       'track',
+            'class' =>                          implode( ' ',$this->get_track_class() ),
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
@@ -956,9 +981,10 @@ class WPSSTM_Track{
         $classes = array(
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
+            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
+            $this->is_autosource_lock() ? 'track-autosourced' : null,
+
         );
-        
-        $classes[] = is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null;
 
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
         return array_filter(array_unique($classes));
@@ -1162,23 +1188,6 @@ class WPSSTM_Track{
 
     }
 
-    function do_track_action($action){
-        global $wp_query;
-
-        $success = null;
-
-        //action
-        switch($action){
-            case 'trash':
-                $success = $this->trash_track();
-            break;
-
-                
-        }
-        
-        return $success;
-    }
-    
     function get_tracklist_manager_iframe(){
         $attr = array(
             'class' => "wpsstm-tracklist-manager-iframe wpsstm-iframe-autoheight",

@@ -154,6 +154,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Spotify metabox
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
+* uses HTML5 custom elements
 
 = 1.9.4 =
 * Better settings page errors

@@ -28,7 +28,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $preset;
     
-    public $classes = array('wpsstm-tracklist');
+    public $classes = array();
 
     function __construct($post_id = null ){
         
@@ -47,7 +47,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_autosource'           => true, //whether or not autosource is fired through ajax or through PHP
             'remote_delay_min'          => 5,
             'is_expired'                => false,
         );
@@ -59,6 +58,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->post_id = $tracklist_id;
             $this->populate_tracklist_post();
         }
+    }
+    
+    static function get_tracklist_title($post_id){
+        //title
+        $title = get_post_field( 'post_title', $post_id );
+
+        $post_type = get_post_type($post_id);
+        
+        //if no title has been set, use the cached title if any
+        if ( ($post_type == wpsstm()->post_type_live_playlist) && !$title ){
+            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
+        }
+        
+        return $title;
     }
     
     function populate_tracklist_post(){
@@ -77,13 +90,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
-        //title
-        $this->title = get_post_field( 'title', $this->post_id );
+        //title (will be filtered)
+        $this->title = get_the_title($this->post_id);
         
-        //if no title has been set, use the cached title if any
-        if ( ( $this->tracklist_type == 'live') && !$this->title ){
-            $this->title = get_post_meta($this->post_id,self::$remote_title_meta_name,true);
-        }
         
         //time updated
         $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
@@ -270,10 +279,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
 
         if ($do_love){
-            $success = add_post_meta( $this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = add_post_meta( $this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_love_tracklist',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id,WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id,WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
         }
         return $success;
@@ -281,7 +290,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_tracklist_favorited_by(){
         if ( !$this->post_id ) return false;
-        return get_post_meta($this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key);
+        return get_post_meta($this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key);
     }
     
     function is_tracklist_favorited_by($user_id = null){
@@ -717,10 +726,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
 
-        if ( !$this->get_options('ajax_autosource') ){ //TOUFIX MOVE ELSEWHERE ?
-            $this->tracklist_autosource();
-        }
-        
         return true;
     }
     
@@ -767,8 +772,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function seconds_before_refresh(){
-        
-        return 10;//TOUFIX TOUREMOVE
 
         if ($this->tracklist_type != 'live') return false;
 
@@ -776,7 +779,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$cache_min) return false;
         
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        if ( !$updated_time ) return false;
         
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
@@ -878,8 +880,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function dequeue_track(WPSSTM_Track $track){
         
+        $this->tracklist_log("DEQUEUE TRACK FROM #" . $this->post_id);
+        $this->tracklist_log($track);
+        
         $subtrack_ids = $track->get_subtrack_matches($this->post_id);
         if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
+        
+        if (!$subtrack_ids){
+            return new WP_Error( 'wpsstm_no_track_matches', __('No matches for this track in the tracklist.','wpsstm') );
+        }
         
         foreach ($subtrack_ids as $subtrack_id){
             $subtrack = new WPSSTM_Track();
@@ -973,31 +982,26 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function tracklist_autosource(){
-        $this->tracklist_log('tracklist autosource'); 
-        foreach((array)$this->tracks as $track){
-            $track->populate_sources();
-            if (!$track->sources){
-                $success = $track->autosource();
-            }
-        }
-    }
-    
     private function get_static_subtracks(){
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
-        $subtrack_ids = $wpdb->get_col( $querystr);
-        
-        //TOUFIX should we pass the subtrack IDS in a regular WP Query ?
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
+        $rows = $wpdb->get_results( $querystr);
 
+        /*
+        TOUFIX
+        Since we have subtracks that have a track_id and others that don't,
+        we can use a regulat track posts query to grab this.
+        BUT when a post is trashed, it still appears here since it is not filtered by the posts query.
+        TOUFIX !
+        */
+        
         $tracks = array();
-        foreach((array)$subtrack_ids as $subtrack_id){
-            
+        foreach($rows as $row){
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($subtrack_id);
+            $subtrack->populate_subtrack($row->ID);
             $tracks[] = $subtrack;
         }
 
