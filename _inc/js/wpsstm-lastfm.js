@@ -179,8 +179,6 @@ class WpsstmLastFM {
             do_love:    do_love
         };
 
-        self.debug(ajax_data);
-
         return $.ajax({
 
             type: "post",

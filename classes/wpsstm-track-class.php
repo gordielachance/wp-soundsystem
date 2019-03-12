@@ -429,6 +429,36 @@ class WPSSTM_Track{
         
     }
     
+    function toggle_favorite($bool){
+        
+        if ( !is_bool($bool) ){
+            return new WP_Error( 'wpsstm_missing_bool', __("Missing valid bool.",'wpsstm') );
+        }
+        
+        if ( !get_current_user_id() ){
+            return new WP_Error( 'wpsstm_missing_user_id', __("Missing user ID.",'wpsstm') );
+        }
+
+        if (!$tracklist_id = wpsstm()->user->favorites_id){
+            return new WP_Error( 'wpsstm_missing_favorites_tracklist', __("Missing favorites tracklist ID.",'wpsstm') );
+        }
+        
+        ///
+        
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+
+        if ($bool){
+            $success = $tracklist->queue_track($this);
+        }else{
+            $success = $tracklist->dequeue_track($this);
+        }
+        
+        $this->track_log(array('track'=>$this->to_array(),'do_love'=>$bool,'success'=>$success),"toggle_favorite");
+        
+        return $success;
+        
+    }
+    
     function trash_track(){
 
         //capability check
@@ -491,14 +521,7 @@ class WPSSTM_Track{
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
             
         }else{
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s'", $this->artist,$this->title);
-            
-            //TO FIX - this specific thing is needed because of the SQL structure ? Is there a way to avoid this ?
-            if ($this->album){
-                $querystr.=  $wpdb->prepare( " AND album = '%s'",$this->album );
-            }else{
-                $querystr.=  " AND album IS NULL";
-            }
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' AND album = '%s'", $this->artist,$this->title,$this->album);
         }
         
         if($tracklist_id){
@@ -784,20 +807,6 @@ class WPSSTM_Track{
         }else{
             $url .= sprintf('%s/%s/',$action_permavar,$action);
         }
-        
-        
-        /*
-            case 'favorite':
-            case 'unfavorite':
-                
-                $action = ($action=='favorite') ? 'queue' : 'dequeue';
-
-                if ( $tracklist_id = wpsstm()->user->favorites_id ){
-                    $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                }
-
-            break;
-        */
 
         return $url;
     }
@@ -841,7 +850,6 @@ class WPSSTM_Track{
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('favorite'),
-                'ajax' =>       $this->get_track_action_url('favorite',true),
                 'desc' =>       __('Add track to favorites','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
@@ -849,7 +857,6 @@ class WPSSTM_Track{
             $actions['unfavorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_track_action_url('unfavorite'),
-                'ajax' =>       $this->get_track_action_url('unfavorite',true),
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
@@ -1181,23 +1188,6 @@ class WPSSTM_Track{
 
     }
 
-    function do_track_action($action){
-        global $wp_query;
-
-        $success = null;
-
-        //action
-        switch($action){
-            case 'trash':
-                $success = $this->trash_track();
-            break;
-
-                
-        }
-        
-        return $success;
-    }
-    
     function get_tracklist_manager_iframe(){
         $attr = array(
             'class' => "wpsstm-tracklist-manager-iframe wpsstm-iframe-autoheight",

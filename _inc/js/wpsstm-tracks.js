@@ -5,9 +5,9 @@ class WpsstmTrack extends HTMLElement{
         super(); //required to be first
         
         this.position =             null;
-        this.artist =               null;
-        this.title =                null;
-        this.album =                null;
+        this.track_artist =               null;
+        this.track_title =                null;
+        this.track_album =                null;
         this.subtrack_id =          null;
         this.post_id =              null;
         this.can_play =             null;
@@ -62,9 +62,9 @@ class WpsstmTrack extends HTMLElement{
 
         self.tracklist =            $(self).parents('wpsstm-tracklist').get(0);
         self.position =             Number($(self).attr('data-wpsstm-subtrack-position')); //index in tracklist
-        self.artist =               $(self).find('[itemprop="byArtist"]').text();
-        self.title =                $(self).find('[itemprop="name"]').text();
-        self.album =                $(self).find('[itemprop="inAlbum"]').text();
+        self.track_artist =               $(self).find('[itemprop="byArtist"]').text();
+        self.track_title =                $(self).find('[itemprop="name"]').text();
+        self.track_album =                $(self).find('[itemprop="inAlbum"]').text();
         self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
         self.did_sources_request =  $(self).hasClass('track-autosourced');
@@ -148,65 +148,27 @@ class WpsstmTrack extends HTMLElement{
         });
 
         //toggle favorite
-        $(self).find('.wpsstm-track-action.action-favorite a,.wpsstm-track-action.action-unfavorite a').click(function(e) {
+        $(self).on('click','.wpsstm-track-action-favorite a,.wpsstm-track-action-unfavorite a', function(e) {
 
             e.preventDefault();
 
-            var link_el = $(this);
-            var action_el = link_el.parents('.wpsstm-track-action');
+            var action_el = $(this).parents('.wpsstm-track-action');
             var do_love = action_el.hasClass('action-favorite');
-            var action_url = link_el.data('wpsstm-ajax-url');
-            var ajax_data = {};
-
-            return $.ajax({
-
-                type:       "post",
-                url:        action_url,
-                data:       ajax_data,
-                dataType:   'json',
-
-                beforeSend: function() {
-                    link_el.removeClass('action-error');
-                    link_el.addClass('action-loading');
-                },
-                success: function(data){
-                    if (data.success === false) {
-                        console.log(data);
-                        link_el.addClass('action-error');
-                        if (data.notice){
-                            wpsstm_dialog_notice(data.notice);
-                        }
-                    }else{
-                        if (do_love){
-                            $(self).addClass('favorited-track');
-                        }else{
-                            $(self).removeClass('favorited-track');
-                        }
-                        $(document).trigger("wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console.log(xhr.status);
-                    console.log(thrownError);
-                    link_el.addClass('action-error');
-                },
-                complete: function() {
-                    link_el.removeClass('action-loading');
-                }
-            })
+            
+            self.toggle_favorite(do_love);        
 
         });
 
         //dequeue
-        $(self).find('.wpsstm-track-action-dequeue a').click(function(e) {
+        $(self).on('click','.wpsstm-track-action-dequeue a', function(e) {
             e.preventDefault();
             self.dequeue_track();
         });
 
         //delete
-        $(self).find('.wpsstm-track-action-trash a').click(function(e) {
+        $(self).on('click','.wpsstm-track-action-trash a', function(e) {
             e.preventDefault();
-            self.delete_track();
+            self.trash_track();
         });
 
         //sources
@@ -372,33 +334,90 @@ class WpsstmTrack extends HTMLElement{
     //reduce object for communication between JS & PHP
     to_ajax(){
         var self = this;
-        var allowed = ['position','subtrack_id','post_id','artist', 'title','album','duration'];
-        var filtered = Object.keys(self)
-        .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
-            obj[key] = self[key];
-            return obj;
-        }, {});
+        
+        var output = {
+            position:       self.position,
+            subtrack_id:    self.subtrack_id,
+            artist:         self.track_artist,
+            title:          self.track_title,
+            album:          self.track_album,
+            duration:       self.duration,
+        }
 
-        return filtered;
+        return output;
+    }
+    
+    toggle_favorite(do_love){
+        var self = this;
+        var track_instances = self.get_instances();
+
+        if (do_love){
+            var link_el = track_instances.find('.wpsstm-track-action-favorite a');
+        }else{
+            var link_el = track_instances.find('.wpsstm-track-action-unfavorite a');
+        }
+
+        var ajax_data = {
+            action:     'wpsstm_track_toggle_favorite',
+            track:      self.to_ajax(),   
+            do_love:    do_love,
+        };
+
+        return $.ajax({
+
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+
+            beforeSend: function() {
+                link_el.removeClass('action-error').addClass('action-loading');
+            },
+            success: function(data){
+
+                if (data.success === false) {
+                    console.log(data);
+                    link_el.addClass('action-error');
+                    if (data.notice){
+                        wpsstm_dialog_notice(data.notice);
+                    }
+                }else{
+                    if (do_love){
+                        track_instances.addClass('favorited-track');
+                    }else{
+                        track_instances.removeClass('favorited-track');
+                    }
+                    $(document).trigger("wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+                link_el.addClass('action-error');
+            },
+            complete: function() {
+                link_el.removeClass('action-loading');
+            }
+        })
     }
     
     dequeue_track(){
-        
         var self = this;
-        var link_el = $(self).find('.wpsstm-track-action-dequeue a');
-        var action_url = link_el.data('wpsstm-ajax-url');
-        var ajax_data = {};
+        var track_instances = self.get_instances();
+        var link_el = track_instances.find('.wpsstm-track-action-dequeue a');
+        
+        var ajax_data = {
+            action:         'wpsstm_subtrack_dequeue',
+            track:          self.to_ajax(),
+        };
 
         $.ajax({
-            type: "post",
-            url: action_url,
-            data:ajax_data,
-            dataType: 'json',
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
             beforeSend: function() {
-                $(self).addClass('track-loading');
-                link_el.removeClass('action-error');
-                link_el.addClass('action-loading');
+                link_el.removeClass('action-error').addClass('action-loading');
             },
             success: function(data){
                 
@@ -406,8 +425,8 @@ class WpsstmTrack extends HTMLElement{
                     link_el.addClass('action-error');
                     console.log(data);
                 }else{
-                    $(self).remove();
-                    self.refresh_tracks_positions();
+                    track_instances.remove();
+                    self.tracklist.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -416,36 +435,38 @@ class WpsstmTrack extends HTMLElement{
                 console.log(thrownError);
             },
             complete: function() {
-                $(self).removeClass('track-loading');
                 link_el.removeClass('action-loading');
             }
         })
 
     }
     
-    delete_track(){
+    trash_track(){
         
         var self = this;
-        var link_el = $(track_el).find('.wpsstm-track-action-trash a');
-        var action_url = link_el.data('wpsstm-ajax-url');
+        var track_instances = self.get_instances();
+        var link_el = track_instances.find('.wpsstm-track-action-trash a');
 
-        var ajax_data = {};
+        var ajax_data = {
+            action:     'wpsstm_track_trash',
+            track:      self.to_ajax(),
+        };
 
         $.ajax({
-            type: "post",
-            url: action_url,
-            data:ajax_data,
-            dataType: 'json',
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
             beforeSend: function() {
-                $(self).addClass('track-loading');
+                link_el.removeClass('action-error').addClass('action-loading');
             },
             success: function(data){
                 if (data.success === false) {
                     link_el.addClass('action-error');
                     console.log(data);
                 }else{
-                    $(self).remove();
-                    self.refresh_tracks_positions();
+                    track_instances.remove();
+                    self.tracklist.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -454,7 +475,7 @@ class WpsstmTrack extends HTMLElement{
                 console.log(thrownError);
             },
             complete: function() {
-                $(self).removeClass('track-loading');
+                link_el.removeClass('action-loading');
             }
         })
 

@@ -881,8 +881,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function dequeue_track(WPSSTM_Track $track){
         
+        $this->tracklist_log("DEQUEUE TRACK FROM #" . $this->post_id);
+        $this->tracklist_log($track);
+        
         $subtrack_ids = $track->get_subtrack_matches($this->post_id);
         if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
+        
+        if (!$subtrack_ids){
+            return new WP_Error( 'wpsstm_no_track_matches', __('No matches for this track in the tracklist.','wpsstm') );
+        }
         
         foreach ($subtrack_ids as $subtrack_id){
             $subtrack = new WPSSTM_Track();
@@ -981,16 +988,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
-        $subtrack_ids = $wpdb->get_col( $querystr);
-        
-        //TOUFIX should we pass the subtrack IDS in a regular WP Query ?
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
+        $rows = $wpdb->get_results( $querystr);
 
+        /*
+        TOUFIX
+        Since we have subtracks that have a track_id and others that don't,
+        we can use a regulat track posts query to grab this.
+        BUT when a post is trashed, it still appears here since it is not filtered by the posts query.
+        TOUFIX !
+        */
+        
         $tracks = array();
-        foreach((array)$subtrack_ids as $subtrack_id){
-            
+        foreach($rows as $row){
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($subtrack_id);
+            $subtrack->populate_subtrack($row->ID);
             $tracks[] = $subtrack;
         }
 

@@ -21,8 +21,6 @@ class WPSSTM_Core_Tracks{
         //rewrite rules
         add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
 
-        
-        add_filter( 'template_include', array($this,'handle_ajax_track_action'), 5);
         add_filter( 'template_include', array($this,'track_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
@@ -50,13 +48,13 @@ class WPSSTM_Core_Tracks{
         
         add_action( 'current_screen',  array($this, 'the_single_backend_track'));
         
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_track_title') );
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_subtrack_id') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_tracks_by_title') );
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         
         add_filter( 'posts_join', array($this,'tracks_query_join_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_subtrack_in'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
@@ -72,6 +70,13 @@ class WPSSTM_Core_Tracks{
         
         add_action('wp_ajax_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
         add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
+        
+        add_action('wp_ajax_wpsstm_track_toggle_favorite', array($this,'ajax_track_toggle_favorite'));
+        
+        add_action('wp_ajax_wpsstm_subtrack_dequeue', array($this,'ajax_subtrack_dequeue'));
+        
+        add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
+
         //add_action('wp', array($this,'test_autosource_ajax') );
 
         add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
@@ -229,45 +234,6 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-    }
-
-    function handle_ajax_track_action($template){
-        global $wp_query;
-        global $wpsstm_track;
-        
-        $success = null;
-
-        if ( !$action = get_query_var( 'wpsstm_ajax_action' ) ) return $template; //action does not exist
-        if ( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
-
-        wpsstm()->debug_log($action,"handle_ajax_track_action");
-
-        $result = array(
-            'input' =>  $_REQUEST,
-            'message'=> null,
-            'success'=> null,
-            'item' =>   $wpsstm_track->to_array(),
-        );
-
-        $success = $wpsstm_track->do_track_action($action);
-
-        if ( is_wp_error($success) ){
-            $result['success'] = false;
-            $result['message'] = $success->get_error_message();
-            
-        }else{
-            $result['success'] = $success;
-        }
-        
-        $wpsstm_track->track_log($result);
-
-        header('Content-type: application/json');
-        send_nosniff_header();
-        header('Cache-Control: no-cache');
-        header('Pragma: no-cache');
-        
-        wp_send_json( $result );  
-        
     }
 
     function track_template($template){
@@ -454,7 +420,7 @@ class WPSSTM_Core_Tracks{
         }
     }
 
-    function pre_get_posts_by_track_title( $query ) {
+    function pre_get_tracks_by_title( $query ) {
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
 
@@ -471,11 +437,6 @@ class WPSSTM_Core_Tracks{
 
         return $query;
     }
-    
-    function pre_get_posts_by_subtrack_id( $query ){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        if ( !$subtrack_id = $query->get('subtrack_id') ) return $query;
-    }
 
     function tracks_query_join_subtracks($join,$query){
         global $wpdb;
@@ -483,12 +444,13 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $subtracks_query =              $query->get('in_subtracks');
+        $subtracks_exclude_query =      $query->get('exclude_subtracks');
         $subtrack_id_query =            $query->get('subtrack_id');
+        $subtrack_in_query =            $query->get('subtrack__in');
         $subtrack_position_query =      $query->get('subtrack_position');
         $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
 
-        $join_subtracks = ( $subtracks_query || $subtrack_id_query || $subtrack_sort_query || $subtrack_position_query  );
+        $join_subtracks = ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_sort_query || $subtrack_position_query  );
         
         if ($join_subtracks){
             $join .= sprintf("INNER JOIN %s AS subtracks ON (%s.ID = subtracks.track_id)",$subtracks_table,$wpdb->posts);
@@ -503,7 +465,7 @@ class WPSSTM_Core_Tracks{
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $no_subtracks = ( $query->get('in_subtracks') === 0);
+        $no_subtracks = $query->get('exclude_subtracks');
         
         if ($no_subtracks){
             $where .= sprintf(" AND ID NOT IN (SELECT track_id FROM %s)",$subtracks_table);
@@ -538,25 +500,19 @@ class WPSSTM_Core_Tracks{
         return $where;
     }
     
-    /*
-    function pre_get_posts_by_subtrack_id( $query ){
-        global $wpdb;
+    function track_query_where_subtrack_in($where,$query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$ids_str = $query->get('subtrack__in') ) return $where;
         
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        if ( !$subtrack_id = $query->get('subtrack_id') ) return $query;
+        if ( is_array($ids_str) ){
+            $ids_str = implode(',',$ids_str);
+        }
         
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $subtrack_query = "SELECT * FROM `$subtracks_table` WHERE ID = $subtrack_id";
-        $subtrack = $wpdb->get_row($subtrack_query);
-        $track_id = $subtrack->track_id;
-        
-        $query->set('p',$track_id);
-        $query->is_single = true;
-        
-        return $query;
+        $where .= sprintf(" AND subtracks.ID IN (%s)",$ids_str);
+
+        return $where;
     }
-    */
+
     function track_query_where_favorited($where,$query){
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
@@ -701,8 +657,9 @@ class WPSSTM_Core_Tracks{
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'lookup_track';
         $qvars[] = 'loved_tracks';
-        $qvars[] = 'in_subtracks';
         $qvars[] = 'subtrack_id';
+        $qvars[] = 'subtrack__in';
+        $qvars[] = 'exclude_subtracks';
         
         return $qvars;
     }
@@ -973,6 +930,95 @@ class WPSSTM_Core_Tracks{
 
     }
     
+    function ajax_track_toggle_favorite(){
+        $ajax_data = wp_unslash($_POST);
+        $do_love = wpsstm_get_array_value('do_love',$ajax_data);
+        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'do_love'       => $do_love,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'success'       => false,
+            'track'         => $track->to_array(),
+        );
+
+        $success = $track->toggle_favorite($do_love);
+
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = true;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+    }
+    
+    function ajax_subtrack_dequeue(){
+        $ajax_data = wp_unslash($_POST);
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+        $tracklist = $track->tracklist;
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'success'       => false,
+            'track'         => $track->to_array(),
+        );
+
+        $success = $tracklist->dequeue_track($track);
+        
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = true;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+        
+    }
+    
+    function ajax_track_trash(){
+        $ajax_data = wp_unslash($_POST);
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'success'       => false,
+            'track'         => $track->to_array(),
+        );
+
+        $success = $track->trash_track();
+
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = true;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+    }
+    
     function test_autosource_ajax(){
         
         if ( is_admin() ) return;
@@ -1094,7 +1140,7 @@ class WPSSTM_Core_Tracks{
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
-            'in_subtracks' =>           0,
+            'exclude_subtracks' =>      true,
         );
         
         $query = new WP_Query( $orphan_tracks_args );
