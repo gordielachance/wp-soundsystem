@@ -1,21 +1,6 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
-
-//shared//
-.wpsstm-ellipsis{
-    @include ellipsis($no-wrap: true);
-}
-ul.comma-list{
-    list-style: none;
-    display:inline;
-    > li{
-        display:inline;
-        &:not(:last-child):after {
-          content: ", ";
-        }
-    }
-}
-//shared#end//
+@import "_wpsstm-shared";
 
 #wpsstm-frontend-wizard{
     p.submit{
@@ -29,10 +14,6 @@ ul.comma-list{
     }
     .wpsstm-bang-desc{
         font-size:.8em;
-        &:not(.expanded){
-            display:none;
-        }
-        
     }
 }
 

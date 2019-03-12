@@ -981,4 +981,4 @@ function wpsstm_spotify_init(){
     $wpsstm_spotify = new WPSSTM_Spotify();
 }
 
-add_action('wpsstm_init','wpsstm_spotify_init');
+add_action('wpsstm_load_services','wpsstm_spotify_init');

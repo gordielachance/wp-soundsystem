@@ -1,4 +1,148 @@
-/* line 5, ../scss/wpsstm-frontend-wizard.scss */
+@charset "UTF-8";
+@-moz-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes barberpole {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 30px;
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes highlight {
+  0% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+  25% {
+    background-color: #e0ffe2;
+  }
+  100% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+/* line 55, ../scss/_wpsstm-shared.scss */
+ul.comma-list {
+  list-style: none;
+  display: inline;
+}
+/* line 58, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li {
+  display: inline;
+}
+/* line 60, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li:not(:last-child):after {
+  content: ", ";
+}
+
+/* line 67, ../scss/_wpsstm-shared.scss */
+input.input-loading {
+  background-size: 30px 30px;
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0));
+  animation: barberpole 0.5s linear infinite;
+}
+/* line 72, ../scss/_wpsstm-shared.scss */
+input.wpsstm-fullwidth {
+  width: 100%;
+}
+
+/* line 77, ../scss/_wpsstm-shared.scss */
+.wpsstm-no-underline {
+  text-decoration: none;
+  border-bottom: none !important;
+}
+
+/* line 82, ../scss/_wpsstm-shared.scss */
+.wpsstm-can-click, .wpsstm-icon-input [type="submit"] {
+  cursor: pointer;
+  cursor: hand;
+}
+
+/* line 87, ../scss/_wpsstm-shared.scss */
+.wpsstm-freeze, input.input-loading {
+  pointer-events: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+
+/* line 93, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon:before, .wpsstm-loading-icon:before, .wpsstm-action-icon a:before {
+  font-weight: normal;
+  font-style: normal;
+  font-family: 'FontAwesome';
+  width: 1.28571429em;
+  text-align: center;
+  display: inline-block;
+}
+
+/* line 105, ../scss/_wpsstm-shared.scss */
+.wpsstm-loading-icon:before {
+  animation: spin 2s linear infinite;
+  content: "" !important;
+}
+
+/* line 114, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a:before {
+  margin-right: 0;
+}
+/* line 117, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a > span {
+  display: none;
+}
+
+/* line 123, ../scss/_wpsstm-shared.scss */
 .wpsstm-ellipsis, #wpsstm-frontend-wizard-recent ul li a > * {
   white-space: nowrap;
   overflow: hidden;
@@ -7,74 +151,84 @@
   text-overflow: ellipsis;
 }
 
-/* line 8, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list {
-  list-style: none;
-  display: inline;
+/* line 127, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input {
+  position: relative;
+  margin: 0.5em;
 }
-/* line 11, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li {
-  display: inline;
+/* line 130, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input {
+  padding: 0.5em;
 }
-/* line 13, ../scss/wpsstm-frontend-wizard.scss */
-ul.comma-list > li:not(:last-child):after {
-  content: ", ";
+/* line 132, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input[type="text"] {
+  padding-right: 4em;
+}
+/* line 137, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+}
+/* line 143, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"].wpsstm-icon-button {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 2em;
 }
 
-/* line 21, ../scss/wpsstm-frontend-wizard.scss */
+/* line 6, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;
 }
 
-/* line 27, ../scss/wpsstm-frontend-wizard.scss */
+/* line 12, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-shortcuts ul {
   list-style: none;
 }
-/* line 30, ../scss/wpsstm-frontend-wizard.scss */
+/* line 15, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-shortcuts .wpsstm-bang-desc {
   font-size: .8em;
 }
-/* line 32, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-shortcuts .wpsstm-bang-desc:not(.expanded) {
-  display: none;
-}
 
-/* line 40, ../scss/wpsstm-frontend-wizard.scss */
+/* line 21, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul {
   margin: 0;
   padding: 0;
 }
-/* line 43, ../scss/wpsstm-frontend-wizard.scss */
+/* line 24, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul li {
   width: 100px;
   height: 100px;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
-/* line 48, ../scss/wpsstm-frontend-wizard.scss */
+/* line 29, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul li img {
   width: 100%;
   height: auto;
 }
 
-/* line 58, ../scss/wpsstm-frontend-wizard.scss */
+/* line 39, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 62, ../scss/wpsstm-frontend-wizard.scss */
+/* line 43, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li {
   position: relative;
   line-height: 1em;
   line-height: 1.5em;
 }
-/* line 66, ../scss/wpsstm-frontend-wizard.scss */
+/* line 47, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li a {
   display: -webkit-flex;
   display: flex;
 }
-/* line 68, ../scss/wpsstm-frontend-wizard.scss */
+/* line 49, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li a strong {
   margin-right: .25em;
 }

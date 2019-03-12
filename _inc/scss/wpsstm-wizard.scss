@@ -1,11 +1,6 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
-
-//shared//
-.wpsstm-ellipsis{
-    @include ellipsis($no-wrap: true);
-}
-//shared#end//
+@import "_wpsstm-shared";
 
 #wpsstm-metabox-wizard{
     
@@ -129,19 +124,10 @@
                         font-family: Consolas, Monaco, monospace;
                     }
                     .wpsstm-wizard-selector-regex {
-                        &:before {
-                                text-align: center;
-                                width: 20px;
-                                content: '~';
-                        }
-                        &:after {
-                                text-align: center;
-                                width: 20px;
-                                content: '~m';
-                        }
+                        @include display-flex();
+                        color:lightgrey;
                         input {
-                                width: 90%;
-                                color: #999;
+                            color: #999;
                         }
                     }
                 }

@@ -19,8 +19,8 @@ class WPSSTM_Core_Sources{
         add_action( 'save_post', array($this,'metabox_source_url_save'));
         add_action( 'save_post', array($this,'metabox_save_track_sources') );
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles_shared' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_sources_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_sources_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_source), array(__class__,'source_columns_register'), 10, 2 );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_source), array(__class__,'source_columns_content'), 10, 2 );
@@ -47,22 +47,22 @@ class WPSSTM_Core_Sources{
     function register_post_type_sources() {
 
         $labels = array(
-            'name'                  => _x( 'Track Sources', 'Track Sources General Name', 'wpsstm' ),
-            'singular_name'         => _x( 'Track Source', 'Track Source Singular Name', 'wpsstm' ),
-            'menu_name'             => __( 'Track Sources', 'wpsstm' ),
-            'name_admin_bar'        => __( 'Track Source', 'wpsstm' ),
-            'archives'              => __( 'Track Source Archives', 'wpsstm' ),
-            'attributes'            => __( 'Track Source Attributes', 'wpsstm' ),
+            'name'                  => _x( 'Sources', 'Sources General Name', 'wpsstm' ),
+            'singular_name'         => _x( 'Source', 'Source Singular Name', 'wpsstm' ),
+            'menu_name'             => __( 'Sources', 'wpsstm' ),
+            'name_admin_bar'        => __( 'Source', 'wpsstm' ),
+            'archives'              => __( 'Source Archives', 'wpsstm' ),
+            'attributes'            => __( 'Source Attributes', 'wpsstm' ),
             'parent_item_colon'     => __( 'Parent Track:', 'wpsstm' ),
-            'all_items'             => __( 'All Track Sources', 'wpsstm' ),
-            'add_new_item'          => __( 'Add New Track Source', 'wpsstm' ),
+            'all_items'             => __( 'All Sources', 'wpsstm' ),
+            'add_new_item'          => __( 'Add New Source', 'wpsstm' ),
             //'add_new'               => __( 'Add New', 'wpsstm' ),
-            'new_item'              => __( 'New Track Source', 'wpsstm' ),
-            'edit_item'             => __( 'Edit Track Source', 'wpsstm' ),
-            'update_item'           => __( 'Update Track Source', 'wpsstm' ),
-            'view_item'             => __( 'View Track Source', 'wpsstm' ),
-            'view_items'            => __( 'View Track Sources', 'wpsstm' ),
-            'search_items'          => __( 'Search Track Sources', 'wpsstm' ),
+            'new_item'              => __( 'New Source', 'wpsstm' ),
+            'edit_item'             => __( 'Edit Source', 'wpsstm' ),
+            'update_item'           => __( 'Update Source', 'wpsstm' ),
+            'view_item'             => __( 'View Source', 'wpsstm' ),
+            'view_items'            => __( 'View Sources', 'wpsstm' ),
+            'search_items'          => __( 'Search Sources', 'wpsstm' ),
             //'not_found'             => __( 'Not found', 'wpsstm' ),
             //'not_found_in_trash'    => __( 'Not found in Trash', 'wpsstm' ),
             //'featured_image'        => __( 'Featured Image', 'wpsstm' ),
@@ -71,8 +71,8 @@ class WPSSTM_Core_Sources{
             //'use_featured_image'    => __( 'Use as featured image', 'wpsstm' ),
             'insert_into_item'      => __( 'Insert into track source', 'wpsstm' ),
             'uploaded_to_this_item' => __( 'Uploaded to this track source', 'wpsstm' ),
-            'items_list'            => __( 'Track Sources list', 'wpsstm' ),
-            'items_list_navigation' => __( 'Track Sources list navigation', 'wpsstm' ),
+            'items_list'            => __( 'Sources list', 'wpsstm' ),
+            'items_list_navigation' => __( 'Sources list navigation', 'wpsstm' ),
             'filter_items_list'     => __( 'Filter track sources list', 'wpsstm' ),
         );
 
@@ -317,7 +317,6 @@ class WPSSTM_Core_Sources{
         }
 
         //track sources
-        $wpsstm_track->populate_sources();
         ?>
         <div class="wpsstm-track-sources">
             <?php wpsstm_locate_template( 'content-sources.php', true, false );?>
@@ -418,10 +417,10 @@ class WPSSTM_Core_Sources{
     }
     
     
-    function register_sources_scripts_styles_shared(){
+    function register_sources_scripts_styles(){
         //CSS
         //JS
-        wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-sources', wpsstm()->plugin_url . '_inc/js/wpsstm-sources.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable','wpsstm-functions'),wpsstm()->version, true );
     }
 
     
@@ -585,3 +584,9 @@ class WPSSTM_Core_Sources{
         return $sources;
     }
 }
+
+function wpsstm_sources_init(){
+    new WPSSTM_Core_Sources();
+}
+
+add_action('wpsstm_init','wpsstm_sources_init');

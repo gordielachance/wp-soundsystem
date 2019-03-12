@@ -5,7 +5,7 @@ global $wpsstm_track;
 
 //tracklists manager query
 $args = array(
-    'post_type' =>      get_post_type(),
+    'post_type' =>      wpsstm()->post_type_playlist,
     'author' =>         get_current_user_id(),
     'posts_per_page' => -1,
     'orderby' =>        'title',
@@ -13,26 +13,26 @@ $args = array(
 );
 
 //self playlists, allow any post stati
-//TOUFIX TOUCHECK
+//TOUFIX TOUCHECK move in filter ?
 if ( isset($args['author']) && ( $args['author'] === get_current_user_id() ) ){
     $args['post_status'] = array('publish','private','future','pending','draft');
 }
 
-$args = apply_filters('wpsstm_tracklists_manager_query',$args);
+$args = apply_filters('wpsstm_tracklist_list_query',$args);
+$tracklist_query = new WP_Query( $args );
 
-$manager_tracklists = new WP_Query( $args );
-
-if ( $manager_tracklists->have_posts() ) {
+if ( $tracklist_query->have_posts() ) {
 
     ?>
-    <ul id="tracklists-manager">
+    <ul class="tracklist-list">
         <?php
-        while ( $manager_tracklists->have_posts() ) {
+        while ( $tracklist_query->have_posts() ) {
 
-            $manager_tracklists->the_post();
+            $tracklist_query->the_post();
+            $wpsstm_tracklist->classes[] = 'tracklist-row';
 
             ?>
-            <li class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('tracklist-row'));?>">
+            <li class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>">
                 <span class="tracklist-row-action">
                     <?php
 
@@ -42,8 +42,8 @@ if ( $manager_tracklists->have_posts() ) {
                         $old_value = ($checked) ? 1 : -1;
                         $checked_str = checked($checked,true,false);
                         ?>
-                        <input name="wpsstm_tracklists_manager_new[<?php echo $wpsstm_tracklist->post_id;?>]" type="checkbox" value="1" <?php checked($checked,true);?> />
-                        <input name="wpsstm_tracklists_manager_old[<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
+                        <input name="wpsstm_manager_data[new_tids][<?php echo $wpsstm_tracklist->post_id;?>]" type="checkbox" value="1" <?php checked($checked,true);?> />
+                        <input name="wpsstm_manager_data[old_tids][<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
                         <?php
                     }
             

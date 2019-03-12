@@ -49,4 +49,4 @@ function wpsstm_rtbf_init(){
     new WPSSTM_RTBF();
 }
 
-add_action('wpsstm_init','wpsstm_reddit_init');
+add_action('wpsstm_load_services','wpsstm_reddit_init');

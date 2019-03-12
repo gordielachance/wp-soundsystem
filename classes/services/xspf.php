@@ -35,4 +35,4 @@ function wpsstm_xspf_init(){
     new WPSSTM_XSPF();
 }
 
-add_action('wpsstm_init','wpsstm_xspf_init');
+add_action('wpsstm_load_services','wpsstm_xspf_init');

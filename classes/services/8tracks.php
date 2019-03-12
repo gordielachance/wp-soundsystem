@@ -101,4 +101,4 @@ function wpsstm_8tracks_init(){
     new WPSSTM_8tracks();
 }
 
-add_action('wpsstm_init','wpsstm_8tracks_init');
+add_action('wpsstm_load_services','wpsstm_8tracks_init');

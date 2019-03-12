@@ -19,7 +19,7 @@ class WPSSTM_SongLink{
         }
         
         if (!$track->spotify_id){
-            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify ID','wpsstm'));
+            return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify Track ID','wpsstm'));
         }
 
         $sources = array();
@@ -46,12 +46,12 @@ class WPSSTM_SongLink{
         libxml_use_internal_errors($internalErrors);//restore error level
         
         $xpath = new DOMXPath($dom);
-        $listen_link_els = $xpath->query("//a[starts-with(@data-test, 'listen:')]");
+        $listen_link_els = $xpath->query("//a[starts-with(@data-test, 'click:')]");
         
         foreach ($listen_link_els as $link_el) {
 
             $provider_attr = $link_el->getAttribute('data-test');
-            $provider = preg_replace('/^' . preg_quote('listen:', '/') . '/', '', $provider_attr); //remove 'listen:' prefix
+            $provider = preg_replace('/^' . preg_quote('click:', '/') . '/', '', $provider_attr); //remove 'click:' prefix
             
             $url = $link_el->getAttribute('href');
             $title = $link_el->getAttribute('aria-label');
@@ -76,4 +76,4 @@ function wpsstm_songlink_init(){
     new WPSSTM_SongLink();
 }
 
-add_action('wpsstm_init','wpsstm_songlink_init');
+add_action('wpsstm_load_services','wpsstm_songlink_init');

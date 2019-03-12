@@ -41,13 +41,13 @@ class WPSSTM_LastFM{
         
         add_action( 'wp', array($this,'after_app_auth') );
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
-        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
+        add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         
         add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
         
         /*backend*/
         add_action( 'admin_init', array( $this, 'lastfm_settings_init' ) );
-        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles_shared'));
+        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         
         /*
         AJAX
@@ -299,7 +299,7 @@ class WPSSTM_LastFM{
         $this->lastfm_user = new WPSSTM_LastFM_User();
     }
     
-    function enqueue_lastfm_scripts_styles_shared(){
+    function enqueue_lastfm_scripts_styles(){
 
         //CSS
         //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . '_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
@@ -974,7 +974,7 @@ class WPSSTM_LastFM_User{
     
     public function love_lastfm_track(WPSSTM_Track $track,$do_love = null){
 
-        if ( !$this->is_user_api_logged() ) return false;
+        if ( !$this->is_user_api_logged() ) return false; //TOUFIX should return an error
         if ($do_love === null) return;
 
         $results = null;
@@ -1257,4 +1257,4 @@ function wpsstm_lastfm_init(){
     $wpsstm_lastfm = new WPSSTM_LastFM();
 }
 
-add_action('wpsstm_init','wpsstm_lastfm_init');
+add_action('wpsstm_load_services','wpsstm_lastfm_init');

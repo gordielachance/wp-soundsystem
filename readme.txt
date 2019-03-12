@@ -15,7 +15,7 @@ Manage a music library within Wordpress; including playlists, tracks, artists, a
 
 = Several new post types =
 
-Playlists, Live Playlists, Albums, Artists, Tracks and Track Sources each uses a custom post type, so you can easily manage/extend them.
+Playlists, Live Playlists, Albums, Artists, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
 
 = Playlists =
 
@@ -30,7 +30,7 @@ When viewing a post that contains a tracklist, an audio player will show up to p
 
 **Supported sources**: Youtube, Soundcloud, regular audio files.
 
-= Track Sources =
+= Sources =
 
 If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
 
@@ -93,7 +93,6 @@ This would be very appreciated — Thanks !
 * [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
 * [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
-* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer)
 
 = Contributors =
 
@@ -120,7 +119,7 @@ Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the
 
 `<?php
 $tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
-echo $tracklist->get_tracklist_iframe();
+echo $tracklist->get_tracklist_html();
 ?>`
 
 = What are community tracks and when are they created ? =
@@ -155,7 +154,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * Spotify metabox
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
-* [iframeResizer](https://github.com/davidjbradshaw/iframe-resizer) dependency
+* uses HTML5 custom elements
 
 = 1.9.4 =
 * Better settings page errors

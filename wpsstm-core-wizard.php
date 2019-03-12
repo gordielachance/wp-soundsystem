@@ -303,7 +303,7 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-attr"><input class="regex" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        '<span class="wpsstm-wizard-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
                                         'wpsstm_wizard',
                                         $selector,
                                         $attr,
@@ -320,7 +320,11 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-regex"><input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s /></span>',
+                                        '<p class="wpsstm-wizard-selector-regex">
+                                        <span>~</span>
+                                        <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
+                                        <span>~m</span>
+                                        </p>',
                                         'wpsstm_wizard',
                                         $selector,
                                         $regex,
@@ -519,3 +523,9 @@ class WPSSTM_Core_Wizard{
     }
 
 }
+
+function wpsstm_wizard_init(){
+    new WPSSTM_Core_Wizard();
+}
+
+add_action('wpsstm_init','wpsstm_wizard_init');

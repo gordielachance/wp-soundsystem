@@ -1,49 +1,76 @@
 var $ = jQuery.noConflict();
 
-class WpsstmTrackSource {
-    constructor(source_html,track) {
+class WpsstmSource extends HTMLElement{
+    constructor() {
+        super(); //required to be first
         
-        this.source_el =        $([]);
-        this.track =            (track !== undefined) ? track : new WpsstmTrack();
-        
-        this.index =            undefined;
-        this.post_id =          undefined;
-        this.src =              undefined;
-        this.type =             undefined;
-        this.can_play =         undefined;
+        this.track =            $(this).parents('wpsstm-track').get(0);
+        this.index =            Number($(this).attr('data-wpsstm-source-idx'));
+        this.post_id =          Number($(this).attr('data-wpsstm-source-id'));
+        this.src =              $(this).attr('data-wpsstm-source-src');
+        this.type =             $(this).attr('data-wpsstm-source-type');
+        this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
         this.duration =         undefined;
-        
-        //tracklist
-        if ( track !== undefined ){
-            this.track =        track;
-        }
-        
-        //track
-        if ( source_html !== undefined ){
-            this.source_el =        $(source_html);
-            this.index =            Number(this.source_el.attr('data-wpsstm-source-idx'));
-            this.post_id =          Number(this.source_el.attr('data-wpsstm-source-id'));
-            this.src =              this.source_el.attr('data-wpsstm-source-src');
-            this.type =             this.source_el.attr('data-wpsstm-source-type');
-            this.can_play =         ( Boolean(this.type) && Boolean(this.src) );
-        }
-        
-        //this.debug("new WpsstmTrackSource");
-        
+
         if (!this.can_play){
-            this.source_el.addClass('source-error');
+            $(this).addClass('source-error');
         }
 
+        // Setup a click listener on <wpsstm-tracklist> itself.
+        this.addEventListener('click', e => {
+        });
+    }
+    connectedCallback(){
+        console.log("SOURCE CONNECTED!");
+        /*
+        Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
+        */
+        this.render();
+    }
+
+    disconnectedCallback(){
+        /*
+        Called every time the element is removed from the DOM. Useful for running clean up code.
+        */
+    }
+    attributeChangedCallback(attrName, oldVal, newVal){
+        /*
+        Called when an observed attribute has been added, removed, updated, or replaced. Also called for initial values when an element is created by the parser, or upgraded. Note: only attributes listed in the observedAttributes property will receive this callback.
+        */
+    }
+    adoptedCallback(){
+        /*
+        The custom element has been moved into a new document (e.g. someone called document.adoptNode(el)).
+        */
     }
     
+    static get observedAttributes() {
+        //return ['id', 'my-custom-attribute', 'data-something', 'disabled'];
+    }
+    
+    ///
+    ///
+    
     debug(msg){
-        var prefix = "WpsstmTracklist #"+ this.track.tracklist.index +" - WpsstmTrack #" + this.track.index+" - WpsstmTrackSource #" + this.index;
+        var prefix = "WpsstmTrack #" + this.track.position+" - WpsstmTrackSource #" + this.index;
         wpsstm_debug(msg,prefix);
     }
-
-    get_track_el(){
+    
+    get_instances(){
         var self = this;
-        return self.track_el.closest('[data-wpsstm-subtrack-position="'+self.track.index+'"]');
+        return $(document).find('wpsstm-source[data-wpsstm-source-id="'+self.post_id+'"]');
+    }
+    
+    render(){
+        var self = this;
+        var track = $(self).parents('wpsstm-track').get(0);
+        track.populateSource(self);
+        
+        //delete source
+        $(self).find('.wpsstm-source-action-trash a').click(function(e) {
+            e.preventDefault();
+            self.trash_source();
+        });
     }
 
     //reduce object for communication between JS & PHP
@@ -65,7 +92,7 @@ class WpsstmTrackSource {
     
     trash_source(){
         var self = this;
-        var source_action_links = self.source_el.find('.wpsstm-source-action-trash a');
+        var source_action_links = $(self).find('.wpsstm-source-action-trash a');
 
         var ajax_data = {
             action:         'wpsstm_trash_source',
@@ -85,16 +112,16 @@ class WpsstmTrackSource {
         ajax_request.done(function(data){
             if (data.success === true){
 
-                source_obj.can_play = false;
+                self.can_play = false;
 
                 //skip current source as it was playibg
-                if ( self.source_el.hasClass('source-playing') ){
-                    source_obj.debug('source was playing, skip it !');
-                    source_obj.debug(source_obj);
+                if ( $(self).hasClass('source-playing') ){
+                    self.debug('source was playing, skip it !');
+                    self.debug(self);
                 }
 
                 ///
-                self.source_el.remove();
+                $(self).remove();
 
             }else{
                 source_action_links.addClass('action-error');
@@ -113,42 +140,7 @@ class WpsstmTrackSource {
 
 }
 
-$(document).on( "wpsstmTrackSourcesDomReady", function( event, track_obj ) {
-
-    //sources manager
-    track_obj.track_el.find('.wpsstm-track-sources').each(function() {
-        var sources_container = $(this);
-        var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
-
-        // sort track sources
-        sources_list_el.sortable({
-            axis: "y",
-            items : "[data-wpsstm-source-id]",
-            handle: '.wpsstm-source-action-move a',
-            update: function(event, ui) {
-
-                var sourceOrder = sources_list_el.sortable('toArray', {
-                    attribute: 'data-wpsstm-source-id'
-                });
-
-                var reordered = WpsstmTrack.update_sources_order(track_obj.post_id,sourceOrder); //TOUFIX bad logic
-
-            }
-        });
-
-    });
-
-});
-
-$(document).on( "wpsstmTrackSingleSourceDomReady", function( event, source_obj ) {
-
-    //delete source
-    source_obj.source_el.find('.wpsstm-source-action-trash a').click(function(e) {
-        e.preventDefault();
-        source_obj.trash_source();
-    });
-
-});
+window.customElements.define('wpsstm-source', WpsstmSource);
 
 /*
 metabox

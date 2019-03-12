@@ -3,7 +3,7 @@
 $player-bg-color:#222;
 $player-text-color:#FFF;
 
-.wpsstm-player{
+wpsstm-player{
     
     &#wpsstm-bottom-player{
         position:fixed;
@@ -47,6 +47,17 @@ $player-text-color:#FFF;
                         display:none;
                     }
                 }
+                
+                &.wpsstm-player-action-queue{
+                    a{
+                        &:before{
+                            content: "\f078";//.chevron-down;
+                        }
+                        &.active:before{
+                            content: "\f077";//.fa-chevron-up;
+                        }
+                    }
+                }
 
                 &.wpsstm-player-action-scrobbler{
                     @include opacity(.25);
@@ -84,16 +95,26 @@ $player-text-color:#FFF;
             width:100%!important;
         }
     }
+    
+    .player-queue{
+        background-color: rgba(255, 255, 255, .1);
+        padding:1em;
+        max-height: 100vh;
+        overflow: auto;
+        &:not(.active){
+            display:none;
+        }
+    }
 
 }
 
 //tracklists inside posts //TOFIXDDD
-:not(#wpsstm-player-track-container) .wpsstm-tracklist.tracklist-template-table{
+:not(#wpsstm-player-track-container) wpsstm-tracklist.tracklist-template-table{
 
     border:1px solid #F7F7F7;
     padding:.5em 1em;
 
-    [itemprop="track"]{
+    wpsstm-track{
         .wpsstm-track-sources{
             display:none;
         }
@@ -108,7 +129,7 @@ $player-text-color:#FFF;
         }
         .wpsstm-track-sources{
             @include opacity(.6);
-            [data-wpsstm-source-idx]{
+            wpsstm-source{
                 @include opacity(.6);
                 &.source-playing{
                     @include opacity(.8);

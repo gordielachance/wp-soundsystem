@@ -62,4 +62,4 @@ function wpsstm_somafm_init(){
     new WPSSTM_SomaFM();
 }
 
-add_action('wpsstm_init','wpsstm_somafm_init');
+add_action('wpsstm_load_services','wpsstm_somafm_init');

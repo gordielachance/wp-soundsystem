@@ -5,23 +5,19 @@ class WPSSTM_Player{
     var $options = array();
 
     function __construct() {
-
-        if ( wpsstm()->get_options('player_enabled') ){
-            add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-            add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles_shared' ) );
-            add_action( 'wp_footer', array($this,'bottom_player'));
-            add_action( 'admin_footer', array($this,'player_html'));
-        }
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+        add_action( 'wp_footer', array($this,'bottom_player'));
+        add_action( 'admin_footer', array($this,'bottom_player'));
 
     }
     
     function bottom_player(){
-        if ( !did_action('wpsstm_load_player') ) return;
         $options=array('id'=>'wpsstm-bottom-player');
-        $this->player_html($options);
+        echo $this->get_player_html($options);
     }
 
-    function player_html( $options = array() ){
+    function get_player_html( $options = array() ){
         global $wpsstm_player;
         $wpsstm_player = $this;
         
@@ -31,18 +27,25 @@ class WPSSTM_Player{
         
         $options = wp_parse_args($options,$defaults);
         
+        wpsstm()->debug_log($options,'init player');
+        
         $wpsstm_player->options = $options;
+        
+        ob_start();
         wpsstm_locate_template( 'player.php', true, false );
+        $html = ob_get_clean();
+        
+        return $html;
     }
     
-    function enqueue_player_scripts_styles_shared(){
+    function enqueue_player_scripts_styles(){
         //TO FIX load only if player is loaded (see hook wpsstm_load_player ) ?
 
         //CSS
         wp_enqueue_style('wp-mediaelement');
 
         //JS
-        wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement'),wpsstm()->version, true);
+        wp_register_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement','wpsstm-functions'),wpsstm()->version, true);
         
         //localize vars
         $localize_vars=array(
@@ -64,6 +67,12 @@ class WPSSTM_Player{
     
     function get_player_links(){
         $actions = array();
+        
+        $actions['queue'] = array(
+            'text' =>       __('Player queue', 'wpsstm'),
+            'href' =>       '#',
+        );
+        
         return apply_filters('wpsstm_get_player_actions',$actions);
     }
     
@@ -79,3 +88,10 @@ class WPSSTM_Player{
     }
     
 }
+
+function wpsstm_player_init(){
+    if ( !wpsstm()->get_options('player_enabled') ) return;
+    new WPSSTM_Player();
+}
+
+add_action('wpsstm_init','wpsstm_player_init');

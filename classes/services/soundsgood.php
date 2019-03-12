@@ -74,4 +74,4 @@ function wpsstm_soundsgood_init(){
     new WPSSTM_SoundsGood();
 }
 
-add_action('wpsstm_init','wpsstm_soundsgood_init');
+add_action('wpsstm_load_services','wpsstm_soundsgood_init');

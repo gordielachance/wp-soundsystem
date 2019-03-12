@@ -113,7 +113,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_playlists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_playlists_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -148,7 +148,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_live_playlists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_live_playlists_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -172,7 +172,7 @@ class WPSSTM_Core_BuddyPress{
     }
     function user_favorite_tracklists_subnav_content(){
         
-        function displayed_user_favorite_tracklists_manager_args($args){
+        function displayed_user_favorite_tracklist_manager_args($args){
             //member static playlists
             $new = array(
                 'post_type' =>                  wpsstm()->tracklist_post_types,
@@ -185,7 +185,7 @@ class WPSSTM_Core_BuddyPress{
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklists_manager_query','displayed_user_favorite_tracklists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_favorite_tracklist_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -212,7 +212,7 @@ class WPSSTM_Core_BuddyPress{
         $user_id = bp_displayed_user_id();
         $tracklist_id = wpsstm()->user->favorites_id;
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        echo $wpsstm_tracklist->get_tracklist_iframe();
+        echo $wpsstm_tracklist->get_tracklist_html();
     }
     
     /*
@@ -236,7 +236,7 @@ class WPSSTM_Core_BuddyPress{
     function queue_track_activity($track,$tracklist_id){
         
         $user_link = bp_core_get_userlink( get_current_user_id() );
-        $track_title = sprintf('<strong>%s</strong>',$track->get_formatted_title());
+        $track_title = sprintf('<strong>%s</strong>',(string)$track);
         $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
 
         $args = array(
@@ -283,3 +283,9 @@ class WPSSTM_Core_BuddyPress{
     }
     
 }
+
+function wpsstm_buddypress_init(){
+    new WPSSTM_Core_BuddyPress();
+}
+
+add_action('bp_include','wpsstm_buddypress_init');

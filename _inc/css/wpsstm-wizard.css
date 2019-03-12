@@ -1,4 +1,148 @@
-/* line 5, ../scss/wpsstm-wizard.scss */
+@charset "UTF-8";
+@-moz-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes opacityPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes barberpole {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 30px;
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes highlight {
+  0% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+  25% {
+    background-color: #e0ffe2;
+  }
+  100% {
+    background-color: rgba(224, 255, 226, 0);
+  }
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+/* line 55, ../scss/_wpsstm-shared.scss */
+ul.comma-list {
+  list-style: none;
+  display: inline;
+}
+/* line 58, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li {
+  display: inline;
+}
+/* line 60, ../scss/_wpsstm-shared.scss */
+ul.comma-list > li:not(:last-child):after {
+  content: ", ";
+}
+
+/* line 67, ../scss/_wpsstm-shared.scss */
+input.input-loading {
+  background-size: 30px 30px;
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0));
+  animation: barberpole 0.5s linear infinite;
+}
+/* line 72, ../scss/_wpsstm-shared.scss */
+input.wpsstm-fullwidth {
+  width: 100%;
+}
+
+/* line 77, ../scss/_wpsstm-shared.scss */
+.wpsstm-no-underline {
+  text-decoration: none;
+  border-bottom: none !important;
+}
+
+/* line 82, ../scss/_wpsstm-shared.scss */
+.wpsstm-can-click, .wpsstm-icon-input [type="submit"] {
+  cursor: pointer;
+  cursor: hand;
+}
+
+/* line 87, ../scss/_wpsstm-shared.scss */
+.wpsstm-freeze, input.input-loading {
+  pointer-events: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+
+/* line 93, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon:before, .wpsstm-loading-icon:before, .wpsstm-action-icon a:before {
+  font-weight: normal;
+  font-style: normal;
+  font-family: 'FontAwesome';
+  width: 1.28571429em;
+  text-align: center;
+  display: inline-block;
+}
+
+/* line 105, ../scss/_wpsstm-shared.scss */
+.wpsstm-loading-icon:before {
+  animation: spin 2s linear infinite;
+  content: "" !important;
+}
+
+/* line 114, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a:before {
+  margin-right: 0;
+}
+/* line 117, ../scss/_wpsstm-shared.scss */
+.wpsstm-action-icon a > span {
+  display: none;
+}
+
+/* line 123, ../scss/_wpsstm-shared.scss */
 .wpsstm-ellipsis {
   white-space: nowrap;
   overflow: hidden;
@@ -7,38 +151,66 @@
   text-overflow: ellipsis;
 }
 
-/* line 12, ../scss/wpsstm-wizard.scss */
+/* line 127, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input {
+  position: relative;
+  margin: 0.5em;
+}
+/* line 130, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input {
+  padding: 0.5em;
+}
+/* line 132, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input input[type="text"] {
+  padding-right: 4em;
+}
+/* line 137, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+}
+/* line 143, ../scss/_wpsstm-shared.scss */
+.wpsstm-icon-input [type="submit"].wpsstm-icon-button {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 2em;
+}
+
+/* line 7, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard h3 {
   font-weight: bold;
 }
-/* line 19, ../scss/wpsstm-wizard.scss */
+/* line 14, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-row {
   display: -webkit-flex;
   display: flex;
   padding: .25em 0;
 }
-/* line 23, ../scss/wpsstm-wizard.scss */
+/* line 18, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-row > *.wpsstm-wizard-row-label {
   padding-right: 1em;
   width: 30%;
 }
-/* line 28, ../scss/wpsstm-wizard.scss */
+/* line 23, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-row > *.wpsstm-wizard-row-content {
   -webkit-flex-grow: 1;
   flex-grow: 1;
   margin-left: 2em;
 }
-/* line 36, ../scss/wpsstm-wizard.scss */
+/* line 31, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard input[type="text"], #wpsstm-metabox-wizard input[type="number"] {
   font-size: 1em;
   padding: .25em;
 }
-/* line 41, ../scss/wpsstm-wizard.scss */
+/* line 36, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard button[type="submit"] {
   margin: 1em auto;
   display: block;
 }
-/* line 46, ../scss/wpsstm-wizard.scss */
+/* line 41, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard pre.wpsstm-raw, #wpsstm-metabox-wizard pre.wpsstm-raw code {
   box-sizing: border-box;
   webkit-box-sizing: border-box;
@@ -49,45 +221,45 @@
   width: 100%;
   overflow: auto;
 }
-/* line 57, ../scss/wpsstm-wizard.scss */
+/* line 52, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard pre.wpsstm-raw {
   max-height: 200px;
   border: 1px solid lightgrey;
   padding: 10px;
 }
-/* line 61, ../scss/wpsstm-wizard.scss */
+/* line 56, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard pre.wpsstm-raw code {
   background: none;
 }
-/* line 66, ../scss/wpsstm-wizard.scss */
+/* line 61, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .tracks-selector-prefix {
   color: lightgrey;
   padding-right: 0.5em;
 }
-/* line 70, ../scss/wpsstm-wizard.scss */
+/* line 65, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-selector-toggle-advanced {
   text-decoration: none;
 }
-/* line 74, ../scss/wpsstm-wizard.scss */
+/* line 69, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard #wpsstm-tracks-raw {
   max-height: calc(3 * 211px);
   overflow-y: auto;
 }
-/* line 80, ../scss/wpsstm-wizard.scss */
+/* line 75, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard #wpsstm-wizard-sections-header {
   clear: both;
   overflow: auto;
 }
-/* line 83, ../scss/wpsstm-wizard.scss */
+/* line 78, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard #wpsstm-wizard-sections-header li {
   display: inline-block;
 }
-/* line 85, ../scss/wpsstm-wizard.scss */
+/* line 80, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard #wpsstm-wizard-sections-header li.ui-tabs-active a {
   background: white;
   border-bottom: 0;
 }
-/* line 92, ../scss/wpsstm-wizard.scss */
+/* line 87, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section {
   margin: 1em 0;
   padding: 1em 0;
@@ -95,63 +267,56 @@
   padding-top: 0;
   border-bottom: 1px solid #ddd;
 }
-/* line 100, ../scss/wpsstm-wizard.scss */
+/* line 95, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-section-label {
   margin: 1em;
 }
-/* line 104, ../scss/wpsstm-wizard.scss */
+/* line 99, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section input:disabled {
   color: #CCC;
 }
-/* line 109, ../scss/wpsstm-wizard.scss */
+/* line 104, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector input[type="text"] {
   width: 100%;
 }
-/* line 113, ../scss/wpsstm-wizard.scss */
+/* line 108, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced {
   display: none;
 }
-/* line 115, ../scss/wpsstm-wizard.scss */
+/* line 110, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced.active {
   display: block;
 }
-/* line 118, ../scss/wpsstm-wizard.scss */
+/* line 113, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc {
   padding: 1em;
   font-style: italic;
 }
-/* line 121, ../scss/wpsstm-wizard.scss */
+/* line 116, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced .wpsstm-wizard-track-selector-desc code {
   font-style: normal;
 }
-/* line 126, ../scss/wpsstm-wizard.scss */
+/* line 121, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table td {
   color: #999;
   padding: 5px;
   font-family: Consolas, Monaco, monospace;
 }
-/* line 132, ../scss/wpsstm-wizard.scss */
-#wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:before {
-  text-align: center;
-  width: 20px;
-  content: '~';
+/* line 126, ../scss/wpsstm-wizard.scss */
+#wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex {
+  display: -webkit-flex;
+  display: flex;
+  color: lightgrey;
 }
-/* line 137, ../scss/wpsstm-wizard.scss */
-#wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex:after {
-  text-align: center;
-  width: 20px;
-  content: '~m';
-}
-/* line 142, ../scss/wpsstm-wizard.scss */
+/* line 129, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section .wpsstm-wizard-selector .wpsstm-wizard-selector-advanced table .wpsstm-wizard-selector-regex input {
-  width: 90%;
   color: #999;
 }
-/* line 152, ../scss/wpsstm-wizard.scss */
+/* line 138, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .wpsstm-wizard-section#wpsstm-wizard-step-tracks-content .wpsstm-wizard-selector input[type="text"] {
   min-width: 100%;
 }
-/* line 159, ../scss/wpsstm-wizard.scss */
+/* line 145, ../scss/wpsstm-wizard.scss */
 #wpsstm-metabox-wizard .ui-tabs-panel > h3:first-of-type {
   display: none;
 }

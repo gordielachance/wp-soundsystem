@@ -57,4 +57,4 @@ function wpsstm_onlineradiobox_init(){
     new WPSSTM_OnlineRadioBox();
 }
 
-add_action('wpsstm_init','wpsstm_onlineradiobox_init');
+add_action('wpsstm_load_services','wpsstm_onlineradiobox_init');

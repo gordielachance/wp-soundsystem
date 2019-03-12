@@ -1203,4 +1203,4 @@ function wpsstm_musicbrainz_init(){
     $wpsstm_musicbrainz = new WPSSTM_MusicBrainz();
 }
 
-add_action('wpsstm_init','wpsstm_musicbrainz_init');
+add_action('wpsstm_load_services','wpsstm_musicbrainz_init');

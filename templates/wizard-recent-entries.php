@@ -27,7 +27,7 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
                         <?php
                     }
                     ?>
-                    <span><?php echo wpsstm_get_short_url($tracklist->feed_url);?></span>
+                    <span><?php echo wpsstm_shorten_text($tracklist->feed_url);?></span>
                     </a>
                 </li>
             <?php endwhile; ?><!-- end of the loop -->

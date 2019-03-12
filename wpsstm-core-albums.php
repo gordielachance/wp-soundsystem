@@ -302,3 +302,9 @@ class WPSSTM_Core_Albums{
     }
     
 }
+
+function wpsstm_albums_init(){
+    new WPSSTM_Core_Albums();
+}
+
+add_action('wpsstm_init','wpsstm_albums_init');

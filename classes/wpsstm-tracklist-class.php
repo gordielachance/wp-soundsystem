@@ -22,10 +22,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     //live
     static $feed_url_meta_name = '_wpsstm_scraper_url';
+    private static $remote_title_meta_name = 'wpsstm_remote_title';
     static $scraper_meta_name = '_wpsstm_scraper_options';
     public $feed_url = null;
     
     var $preset;
+    
+    public $classes = array();
 
     function __construct($post_id = null ){
         
@@ -44,7 +47,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
-            'ajax_autosource'           => true, //whether or not autosource is fired through ajax or through PHP
             'remote_delay_min'          => 5,
             'is_expired'                => false,
         );
@@ -58,20 +60,39 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
     }
     
-    function populate_tracklist_post(){
+    static function get_tracklist_title($post_id){
+        //title
+        $title = get_post_field( 'post_title', $post_id );
 
-        if ( !$this->post_id || ( !in_array(get_post_type($this->post_id),wpsstm()->tracklist_post_types) ) ){
+        $post_type = get_post_type($post_id);
+        
+        //if no title has been set, use the cached title if any
+        if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
+            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
+        }
+
+        return $title;
+    }
+    
+    function populate_tracklist_post(){
+        
+        $post_type = get_post_type($this->post_id);
+
+        if ( !$this->post_id || ( !in_array($post_type,wpsstm()->tracklist_post_types) ) ){
             $this->tracklist_log('Invalid tracklist post');
             return;
         }
 
-        $this->title = get_post_field( 'title', $this->post_id );
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
         //type
-        $post_type = get_post_type($this->post_id);
+        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
+        
+        //title (will be filtered)
+        $this->title = get_the_title($this->post_id);
+        
         
         //time updated
         $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
@@ -97,6 +118,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type == 'live' ){
             $this->location = $this->feed_url;
         }
+        
+        //classes
+        if( $this->is_expired ) {
+            $this->classes[] = 'tracklist-expired';
+        }
+        if( $this->is_tracklist_favorited_by() ) {
+            $this->classes[] = 'favorited-tracklist';
+        }
+        
 
     }
     
@@ -187,23 +217,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function get_tracklist_iframe(){
+    function get_tracklist_html(){
+        
+        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
 
-        $attr = array(
-            'class' => "wpsstm-tracklist-iframe wpsstm-iframe-autoheight",
-            'width' =>  '100%',
-            'frameborder' => 0,
-            'src' => $this->get_tracklist_action_url('render'),
-        );
+        if ( $is_ajax_refresh && !wp_doing_ajax() ){
+            $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
+            $this->is_expired = false;
+        }
+
+        ob_start();
+        wpsstm_locate_template( 'content-tracklist.php', true, false );
+        $content = ob_get_clean();
         
-        $attr_str = wpsstm_get_html_attr($attr);
-        
-        do_action('wpsstm_load_player');
-        $notice_el = sprintf('<div class="wpsstm-loading-notice"><span>%s</span></div>',__('Loading...','wpsstm'));
-        $iframe_el = sprintf('<iframe %s></iframe>',$attr_str);
-        $el = sprintf('<div class="wpsstm-iframe-container wpsstm-iframe-loading">%s%s</div>',$notice_el,$iframe_el);
-        return $el;
-        
+        return $content;
+
+
     }
 
     public function set_tracklist_pagination( $args ) {
@@ -250,10 +279,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
 
         if ($do_love){
-            $success = add_post_meta( $this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = add_post_meta( $this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_love_tracklist',$this->post_id,$this);
         }else{
-            $success = delete_post_meta( $this->post_id,WPSSTM_Core_Tracklists::$loved_tracklist_meta_key, $user_id );
+            $success = delete_post_meta( $this->post_id,WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
             do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
         }
         return $success;
@@ -261,7 +290,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_tracklist_favorited_by(){
         if ( !$this->post_id ) return false;
-        return get_post_meta($this->post_id, WPSSTM_Core_Tracklists::$loved_tracklist_meta_key);
+        return get_post_meta($this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key);
     }
     
     function is_tracklist_favorited_by($user_id = null){
@@ -330,14 +359,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $actions['favorite'] = array(
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('favorite'),
-                'ajax' =>       $this->get_tracklist_action_url('favorite',true),
                 'desc' =>       __('Add tracklist to favorites','wpsstm'),
                 'classes' =>    array('action-favorite'),
             );
             $actions['unfavorite'] = array(
                 'text' =>      __('Unfavorite','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('unfavorite'),
-                'ajax' =>       $this->get_tracklist_action_url('unfavorite',true),
                 'desc' =>       __('Remove tracklist from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
@@ -416,13 +443,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $url;
     }
 
-    function get_tracklist_action_url($action = null,$ajax=false){
+    function get_tracklist_action_url($action = null){
 
         $url = $this->get_tracklist_url();
         if ( !$url ) return false;
 
-        $action_var = ($ajax) ? 'wpsstm_ajax_action' : 'wpsstm_action';
-        $action_permavar = ($ajax) ? 'ajax' : 'action';
+        $action_var = 'wpsstm_action';
+        $action_permavar = 'action';
         
 
         if ( !get_option('permalink_structure') ){
@@ -611,22 +638,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         return wpsstm_get_html_attr($values_attr);
     }
-
-    function get_tracklist_class($extra_classes = null){
-
-        $classes = array(
-            'wpsstm-tracklist',
-            ( $this->is_tracklist_favorited_by() ) ? 'favorited-tracklist' : null,
-        );
-        
-        if($extra_classes){
-            $classes = array_merge($classes,(array)$extra_classes);
-        }
-
-        $classes = apply_filters('wpsstm_tracklist_classes',$classes,$this);
-
-        return array_filter(array_unique($classes));
-    }
     
     public function populate_preset(){
         /*
@@ -683,6 +694,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if (!$this->title && $remote_title){
                 $this->title = $remote_title;
             }
+            
+            //time updated
+            $this->updated_time = current_time( 'timestamp', true );
 
             //if remote author exists, use it
             $remote_author = $this->preset->author;
@@ -710,10 +724,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
 
-        if ( !$this->get_options('ajax_autosource') ){ //TOUFIX MOVE ELSEWHERE ?
-            $this->tracklist_autosource();
-        }
-        
         return true;
     }
     
@@ -743,9 +753,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //update tracklist
 
         $meta_input = array(
-            WPSSTM_Core_Live_Playlists::$remote_title_meta_name =>  $this->preset->title,
+            self::$remote_title_meta_name =>  $this->preset->title,
             WPSSTM_Core_Live_Playlists::$remote_author_meta_name => $this->preset->author,
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  current_time( 'timestamp', true ),//set the time tracklist has been updated
+            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>  $this->updated_time
         );
 
         $tracklist_post = array(
@@ -767,11 +777,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$cache_min) return false;
         
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        if ( !$updated_time ) return false;
         
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
-        
+
         return $expiration_time - $now;
     }
 
@@ -840,14 +849,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function validate_subtrack($track,$strict = true){
+    function validate_subtrack(WPSSTM_Track $track,$strict = true){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
         }
         return $track->validate_track($strict);
     }
     
-    function queue_track($track){
+    function queue_track(WPSSTM_Track $track){
         //unset some subtracks vars or subtrack will be moved instead of added
         $new_track = clone $track;
         $new_track->subtrack_id = null;
@@ -867,15 +876,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
     
-    function dequeue_track($track){
+    function dequeue_track(WPSSTM_Track $track){
+        
+        $this->tracklist_log("DEQUEUE TRACK FROM #" . $this->post_id);
+        $this->tracklist_log($track);
         
         $subtrack_ids = $track->get_subtrack_matches($this->post_id);
         if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
         
+        if (!$subtrack_ids){
+            return new WP_Error( 'wpsstm_no_track_matches', __('No matches for this track in the tracklist.','wpsstm') );
+        }
+        
         foreach ($subtrack_ids as $subtrack_id){
             $subtrack = new WPSSTM_Track();
             $subtrack->populate_subtrack($subtrack_id);
-            $success = $subtrack->remove_subtrack();
+            $success = $subtrack->unlink_subtrack();
 
             if ( is_wp_error($success) ) return $success;
 
@@ -894,7 +910,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function save_subtrack($track){
+    function save_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -964,31 +980,26 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function tracklist_autosource(){
-        $this->tracklist_log('tracklist autosource'); 
-        foreach((array)$this->tracks as $track){
-            $track->populate_sources();
-            if (!$track->sources){
-                $success = $track->autosource();
-            }
-        }
-    }
-    
     private function get_static_subtracks(){
         global $wpdb;
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
-        $subtrack_ids = $wpdb->get_col( $querystr);
-        
-        //TOUFIX should we pass the subtrack IDS in a regular WP Query ?
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
+        $rows = $wpdb->get_results( $querystr);
 
+        /*
+        TOUFIX
+        Since we have subtracks that have a track_id and others that don't,
+        we can use a regulat track posts query to grab this.
+        BUT when a post is trashed, it still appears here since it is not filtered by the posts query.
+        TOUFIX !
+        */
+        
         $tracks = array();
-        foreach((array)$subtrack_ids as $subtrack_id){
-            
+        foreach($rows as $row){
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($subtrack_id);
+            $subtrack->populate_subtrack($row->ID);
             $tracks[] = $subtrack;
         }
 
@@ -1048,68 +1059,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         wpsstm()->debug_log($data,$title);
     }
-    
-    function do_tracklist_action($action,$tracklist_data = null){
-        global $wp_query;
-        
-        $success = null;
-        
-        //action
-        switch($action){
 
-            case 'queue': //add subtrack
-                
-                $track = new WPSSTM_Track();
-                
-                //build track from request
-                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $track->from_array($url_track);
-                }
-
-                $success = $this->queue_track($track);
-                
-            break;
-                
-            case 'dequeue':
-                
-                $track = new WPSSTM_Track();
-                
-                //build track from request
-                if( $url_track = $wp_query->get( 'wpsstm_track_data' ) ){
-                    $track->from_array($url_track);
-                }
-                
-                $success = $this->dequeue_track($track);
-                
-                
-            break;
-
-            case 'favorite':
-            case 'unfavorite':
-                $do_love = ( $action == 'favorite');
-                $success = $this->love_tracklist($do_love);
-            break;
-
-            case 'trash':
-                $success = $this->trash_tracklist();
-            break;
-
-            case 'live':
-            case 'static':
-                $live = ( $action == 'live');
-                $success = $this->toggle_live($live);
-            break;
-            case 'refresh':
-                //remove updated time
-                $success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
-            break;
-            case 'get-autorship':
-                $success = $this->get_autorship();
-            break;
-        }
-        return $success;
-    }
-    
     function get_tracklist_hidden_form_fields(){
         if ($this->post_id){
             $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[post_id]" value="%s" />',esc_attr($this->post_id));
@@ -1175,11 +1125,11 @@ class WPSSTM_Tracklist{
 
     protected function validate_tracks($tracks){
 
-        //array unique
-        $pending_tracks = array_unique($tracks, SORT_REGULAR);
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
         $use_strict = $this->get_options('tracks_strict');
+        
+        $pending_tracks = array_unique($tracks);
         
         foreach($pending_tracks as $track){
             $valid = $track->validate_track($use_strict);

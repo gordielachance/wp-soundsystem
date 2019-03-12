@@ -14,7 +14,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.0.0';
+    public $version = '2.1.0';
     /**
     * @public string plugin DB version
     */
@@ -105,6 +105,7 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
+            'ajax_load_tracklists'              => true,
             'player_enabled'                    => true,
             'autoplay'                          => true,
             'autosource'                        => true,
@@ -138,7 +139,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
-        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
+        require $this->plugin_dir . 'wpsstm-core-wizard.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         
@@ -146,6 +147,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();
@@ -166,26 +168,11 @@ class WP_SoundSystem {
         foreach ($preset_files as $file) {
             require_once($file);
         }
+        
+        do_action('wpsstm_load_services');
     }
     
     function setup_actions(){
-
-        do_action('wpsstm_init');
-        
-        /* Now that files have been loaded, init all core classes */
-        //TOUFIX should be better to hook this on a wpsstm_init action
-        new WPSSTM_Core_Albums();
-        new WPSSTM_Core_Artists();
-        new WPSSTM_Core_Live_Playlists();
-        new WPSSTM_Core_Playlists();
-        new WPSSTM_Core_Sources();
-        new WPSSTM_Core_Tracklists();
-        new WPSSTM_Core_Tracks();
-        new WPSSTM_Core_Wizard();
-        new WPSSTM_Player();
-        new WPSSTM_Core_BuddyPress();
-        ////
-	    
         // activation
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
 
@@ -196,22 +183,25 @@ class WP_SoundSystem {
 
         add_action( 'admin_init', array($this,'load_textdomain'));
         
-        add_action( 'init', array($this,'init_post_types'));
+        add_action( 'init', array($this,'init_post_types'), 5);
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles_shared' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        ///
+        
+        do_action('wpsstm_init');
 
     }
 
     function add_wpsstm_query_vars($qvars){
         $qvars[] = 'wpsstm_action';
-        $qvars[] = 'wpsstm_ajax_action';
         return $qvars;
     }
 
@@ -235,7 +225,7 @@ class WP_SoundSystem {
     }
     
     function init_post_types(){
-        $this->debug_log('init post types');
+        //$this->debug_log('init post types');
         do_action('wpsstm_init_post_types');
     }
     
@@ -385,7 +375,7 @@ class WP_SoundSystem {
         return wpsstm_get_array_value($keys,$this->options);
     }
 
-    function register_scripts_styles_shared(){
+    function register_scripts_styles(){
 
         //TO FIX conditional / move code ?
         
@@ -395,35 +385,23 @@ class WP_SoundSystem {
 
         //JS
         wp_register_script( 'jquery.toggleChildren', $this->plugin_url . '_inc/js/jquery.toggleChildren.js', array('jquery'),'1.36', true);
+        wp_register_script( 'wpsstm-functions', $this->plugin_url . '_inc/js/wpsstm-functions.js', array('jquery'),$this->version, true);
 
-        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable','wpsstm-tracklists'),$this->version, true);
+        wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-functions','wpsstm-player','wpsstm-tracklists','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable'),$this->version, true);
 
         $datas = array(
             'debug'             => (WP_DEBUG),
             'ajaxurl'           => admin_url( 'admin-ajax.php' ),
         );
 
-        wp_localize_script( 'wpsstm', 'wpsstmL10n', $datas );
+        wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );
         
         //JS
         wp_enqueue_script( 'wpsstm' );
         
         //CSS
         wp_enqueue_style( 'wpsstm' );
-        
-
-        //resize iframes with iframeResizer
-
-        if( !did_action('wpsstm-iframe') ){
-            wp_enqueue_script( 'iframeResizer', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.min.js',null,'3.6.3');
-        }else{
-            wp_enqueue_style( 'wpsstm-iframes', wpsstm()->plugin_url . '_inc/css/wpsstm-iframes.css',null,wpsstm()->version );
-            wp_enqueue_script( 'iframeResizerContentWindow', $this->plugin_url . '_inc/js/iframe-resizer/iframeResizer.contentWindow.min.js', null,'3.6.3',true);
  
-        }
-
-
-        
     }
 
     /*

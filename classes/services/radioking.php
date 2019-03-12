@@ -102,4 +102,4 @@ function wpsstm_radioking_init(){
     new WPSSTM_RadioKing();
 }
 
-add_action('wpsstm_init','wpsstm_radioking_init');
+add_action('wpsstm_load_services','wpsstm_radioking_init');

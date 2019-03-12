@@ -33,68 +33,9 @@ $body_classes = array(
             the_post();
             
             ///
-            
+            wpsstm_locate_template( 'track-header.php', true, false );
             ?>
-            <header>
-                    <div class="wpsstm-track-notices">
-                        <?php
-                        /*
-                        Notices
-                        */
-                        if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
-                            echo $notices_el;
-                        }
-                        ?>
-                    </div>
-                    <p id="single-track-header">
-                        <h2 class="wpsstm-track-title"><?php echo $wpsstm_track->title;?></h2>
-                        <h3 class="wpsstm-track-artist"><?php echo $wpsstm_track->artist;?></h3>
-                        <h3 class="wpsstm-track-album"><?php echo $wpsstm_track->album;?></h3>
-                    </p>
-                    <p>
-                        <?php
-                        /*
-                        Track actions
-                        */
-                        if ( $actions = $wpsstm_track->get_track_links($wpsstm_tracklist) ){
-                            $list = get_actions_list($actions,'track');
-                            echo $list;
-                        }
-                        ?>
-                    </p>
-                    <p>
-                    <?php
-
-                    /*
-                    Parent playlists
-                    */
-                    if ( $playlists_list = $wpsstm_track->get_parents_list() ){
-
-                        ?>
-                        <div class="wpsstm-track-tracklists">
-                            <strong><?php _e('In tracklists:','wpsstm');?></strong>
-                            <?php echo $playlists_list; ?>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                    </p>
-                    <p>
-                    <?php
-                    /*
-                    Favorited by
-                    */
-                    if ( $loved_list = $wpsstm_track->get_favorited_by_list() ){
-                        ?>
-                        <div class="wpsstm-track-loved-by">
-                            <strong><?php _e('Loved by:','wpsstm');?></strong>
-                            <?php echo $loved_list; ?>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                    </p>
-                </header>
+            
                 <div>
                     <?php
 

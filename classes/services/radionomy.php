@@ -114,4 +114,4 @@ function wpsstm_radionomy_init(){
     new WPSSTM_Radionomy();
 }
 
-add_action('wpsstm_init','wpsstm_radionomy_init');
+add_action('wpsstm_load_services','wpsstm_radionomy_init');

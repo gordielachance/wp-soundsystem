@@ -1,15 +1,19 @@
 <?php
+
 global $wpsstm_tracklist;
+$wpsstm_tracklist->populate_subtracks();
+$wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 $has_player = wpsstm()->get_options('player_enabled');
+
 ?>
-<div class="<?php echo implode(' ',$wpsstm_tracklist->get_tracklist_class('wpsstm-post-tracklist'));?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
+<wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
-        <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo get_the_title();?>">
+        <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->title;?>">
             <?php if ( $has_player ){ ?>
                 <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
             <?php } ?>
-            <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo get_the_title();?></a>
+            <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->title;?></a>
                 <?php
                 //live playlist icon
                 if ($wpsstm_tracklist->tracklist_type == 'live'){
@@ -55,7 +59,7 @@ $has_player = wpsstm()->get_options('player_enabled');
                     <p>
                         <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
                             <i class="fa fa-link" aria-hidden="true"></i> 
-                            <?php echo wpsstm_get_short_url($wpsstm_tracklist_url);?>
+                            <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
                         </a>
                     </p>
 
@@ -101,18 +105,18 @@ $has_player = wpsstm()->get_options('player_enabled');
     
     if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
         ?>
-        <form class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
+        <div class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
             <label><?php _e('New track','wpsstm');?></label>
             <p class="wpsstm-new-subtrack-fields">
             <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
             <input type="text" name="wpsstm_track_data[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
             <input type="text" name="wpsstm_track_data[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
-            <input type="hidden" name="tracklist_id" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
             <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
             </p>
-        </form>
+            <input type="hidden" name="tracklist_id" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
+        </div>
         <?php
     }
 
     ?>
-</div>
+</wpsstm-tracklist>

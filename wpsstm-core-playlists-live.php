@@ -1,7 +1,5 @@
 <?php
 class WPSSTM_Core_Live_Playlists{
-
-    static $remote_title_meta_name = 'wpsstm_remote_title';
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_updated_meta_name = 'wpsstm_remote_query_time';
     public $presets;
@@ -12,10 +10,10 @@ class WPSSTM_Core_Live_Playlists{
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
-        
-        add_filter( 'the_title', array($this, 'the_cached_remote_title'), 9, 2 );
-        
+
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
+        
+        add_filter( 'the_title', array($this, 'filter_live_playlist_title'), 10, 2 );
 
     }
 
@@ -159,27 +157,24 @@ class WPSSTM_Core_Live_Playlists{
         return true;
     }
     
-    //for live tracklists; if the WP post does not have a title, return the original tracklist title (stored in meta).
-    function the_cached_remote_title($title,$post_id){
-
-        //post type check
-        $post_type = get_post_type($post_id);
-        if ( $post_type !== wpsstm()->post_type_live_playlist ) return $title;
-
-        //only if no WP post title set
-        if ( !$title ){
-            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
-        }
-        
-        return $title;
-        
-    }
-    
     function live_tracklist_classes($classes,$tracklist){
         if ( get_post_type($tracklist->post_id) == wpsstm()->post_type_live_playlist ){
             $classes[] = 'wpsstm-live-tracklist';
         }
         return $classes;
     }
+    
+    function filter_live_playlist_title( $title, $post_id = null ) {
+        if ( in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){
+            $title = WPSSTM_Post_Tracklist::get_tracklist_title($post_id);
+        }
+        return $title;
+    }
 
 }
+
+function wpsstm_live_playlists_init(){
+    new WPSSTM_Core_Live_Playlists();
+}
+
+add_action('wpsstm_init','wpsstm_live_playlists_init');
