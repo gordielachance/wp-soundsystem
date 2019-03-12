@@ -317,7 +317,6 @@ class WPSSTM_Core_Sources{
         }
 
         //track sources
-        $wpsstm_track->populate_sources();
         ?>
         <div class="wpsstm-track-sources">
             <?php wpsstm_locate_template( 'content-sources.php', true, false );?>
