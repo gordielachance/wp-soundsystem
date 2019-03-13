@@ -55,27 +55,29 @@ $( document ).ready(function() {
         var index = trackContainers.index( $(tracklist) );
         var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
 
-        $(tracklist).toggleClass('tracklist-autoplay',autoplay);
+        /* autoplay ? */
+        if (autoplay){
+            $(tracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
+        }
+        
+        //queue on init
+        $(tracklist).one( "wpsstmTracklistReady", function( event ) {
+            console.log("***wpsstmTracklistReady");
+            bottomPlayer.queueContainer(this);
+        });
 
         if (tracklist.isExpired){
             tracklist.reload_tracklist(autoplay);
         }else{
             bottomPlayer.queueContainer(tracklist);   
         }
+        
+
+        
 
     });
     
-    //queue on refresh
-    $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-        console.log("***wpsstmTracklistReady");
-        bottomPlayer.queueContainer(tracklist);
 
-    });
-
-    $(document).on( "wpsstmTracklistBeforeReload", function( event,tracklist ) {
-        console.log("***wpsstmTracklistBeforeReload");
-        bottomPlayer.unQueueContainer(tracklist);
-    });
     
 });
 

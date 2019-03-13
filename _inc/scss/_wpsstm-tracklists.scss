@@ -91,7 +91,7 @@ wpsstm-tracklist{
         }
     } 
 
-    &.tracklist-loading,&.tracklist-autoplay{
+    &.tracklist-loading{
         .wpsstm-tracklist-icon{
             @extend .wpsstm-loading-icon;
         }

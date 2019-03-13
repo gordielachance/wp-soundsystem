@@ -118,7 +118,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 93, ../scss/_wpsstm-shared.scss */
-.wpsstm-icon:before, .wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-tracklist.tracklist-autoplay .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before, .wpsstm-action-icon a:before, wpsstm-track .wpsstm-track-actions li.wpsstm-action a:before, ul.wpsstm-actions-list .wpsstm-action a:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, wpsstm-tracklist.wpsstm-live-tracklist .tracklist-advanced-header-bt:before, .wpsstm-track-sources-list wpsstm-source .wpsstm-source-title:before {
+.wpsstm-icon:before, .wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before, .wpsstm-action-icon a:before, wpsstm-track .wpsstm-track-actions li.wpsstm-action a:before, ul.wpsstm-actions-list .wpsstm-action a:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-auth-notice:before, .wpsstm-dialog .ui-dialog-content #wpsstm-dialog-lastfm-auth-notice:before, .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before, wpsstm-tracklist.wpsstm-live-tracklist .tracklist-advanced-header-bt:before, .wpsstm-track-sources-list wpsstm-source .wpsstm-source-title:before {
   font-weight: normal;
   font-style: normal;
   font-family: 'FontAwesome';
@@ -128,7 +128,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 105, ../scss/_wpsstm-shared.scss */
-.wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-tracklist.tracklist-autoplay .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before {
+.wpsstm-loading-icon:before, ul.wpsstm-actions-list .wpsstm-action a.action-loading:before, .wpsstm-dialog .wpsstm-dialog-loader:before, wpsstm-tracklist.tracklist-loading .wpsstm-tracklist-icon:before, wpsstm-track.track-loading .wpsstm-track-icon:before, .wpsstm-track-sources-list wpsstm-source.source-loading .wpsstm-source-action-provider a:before, wpsstm-player .player-row .wpsstm-player-actions .wpsstm-player-action.wpsstm-player-action-scrobbler.lastfm-loading a:before {
   animation: spin 2s linear infinite;
   content: "" !important;
 }

@@ -199,10 +199,13 @@ class WpsstmSource extends HTMLElement{
             playingSources.removeClass('source-active');
             //previous_source.end_source();
         }
-        
 
+        player.current_source = source;
+        player.current_track = track;
         $(source).addClass('source-active');
         $(track).addClass('track-active');
+        
+        player.render_playing_track();
 
         var track_instances = source.track.get_instances();
 
@@ -213,21 +216,13 @@ class WpsstmSource extends HTMLElement{
         handle current (previous) source
         */
 
-        
-
-
         source.debug("play source: " + source.src);
         source_instances.addClass('source-active source-loading');
         track_instances.addClass('track-loading track-active');
         
         tracklist_instances.addClass('tracklist-active tracklist-loading');
         
-        /*
-        display current track
-        */
-        if ( !$(track).hasClass('track-active') ){
-            player.render_playing_track();
-        }
+
 
         //hide sources if it is expanded //TOUFIX not working
         var toggleEl = $(player.current_track).find('.wpsstm-track-action-toggle-sources a');

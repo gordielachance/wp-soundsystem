@@ -23,7 +23,7 @@ class WpsstmTrack extends HTMLElement{
 
     }
     connectedCallback(){
-        console.log("TRACK CONNECTED!");
+        //console.log("TRACK CONNECTED!");
         //console.log(this);
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
@@ -79,11 +79,7 @@ class WpsstmTrack extends HTMLElement{
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
         self.did_sources_request =  $(self).hasClass('track-autosourced');
         self.did_sources_request = false;//TOUFIX TOUREMOVE URGENT
-        
-        var sources = $(self).find('wpsstm-source');
-        self.can_play = (sources.length > 0);
-        
-        
+
         var player = self.closest('wpsstm-player');
         
         if (self.pageNode){ //track is in queue
@@ -225,14 +221,7 @@ class WpsstmTrack extends HTMLElement{
 
 
     }
-    
-    get_track_index(){
-        var self = this;
-        var tracksContainer = $(self.parentNode);
-        var allTracks = tracksContainer.find('wpsstm-track');
-        return allTracks.index( $(self) );
-    }
-    
+
     get_queued(){
         var self = this;
         
@@ -277,6 +266,11 @@ class WpsstmTrack extends HTMLElement{
         } else{
             success = self.get_track_sources_request();
         }
+        
+        success.always(function() {
+            var sources = $(self).find('wpsstm-source');
+            self.can_play = (sources.length > 0);    
+        });
 
         return success.promise();
     }
@@ -309,7 +303,6 @@ class WpsstmTrack extends HTMLElement{
             if ( data.success === true ){
                 self.reload_track().then(
                     function(success_msg){
-                        
                         success.resolve();
                     },
                     function(error_msg){
@@ -629,7 +622,7 @@ class WpsstmTrack extends HTMLElement{
 
         /*Get index before track is reloaded*/
         var tracksContainer = $(track.parentNode);
-        var trackIndex = track.get_track_index();
+        var trackIndex = tracksContainer.find('wpsstm-track').index( $(track) );
 
         track.maybe_load_sources().then(
             function(success_msg){
@@ -637,18 +630,18 @@ class WpsstmTrack extends HTMLElement{
                 /* at this point, if the track has been reloaded, it is no more the same node. So get the new one
                 */
 
-                var track = tracksContainer.find('wpsstm-track').get(trackIndex);
-                var source_play = track.play_first_available_source();
+                player.current_track = tracksContainer.find('wpsstm-track').get(trackIndex);
+                
+                console.log(player.current_track);
+                
+                var source_play = player.current_track.play_first_available_source();
 
                 source_play.done(function(v) {
-                    console.log("YOW");
-                    console.log(track);
                     success.resolve();
                 })
                 source_play.fail(function(reason) {
-                    success.reject(reason);
-                    console.log("YAW");
                     console.log(reason);
+                    success.reject(reason);
                 })
 
             },
@@ -759,17 +752,16 @@ class WpsstmTrack extends HTMLElement{
     end_track(){
         var track = this;
         var player = track.player;
-        
-        if (!player) return;
-        
+
         track.debug("end_track");
 
         track.get_instances().removeClass('track-loading track-playing track-active');
         
-        console.log("TEST-YO");
-        player.current_source.end_source();
-        
-        track.player.current_track = undefined;
+        if(player){
+            player.current_source.end_source();
+            track.player.current_track = undefined;
+        }
+
 
     }
     
