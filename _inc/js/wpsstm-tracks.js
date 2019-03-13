@@ -604,6 +604,7 @@ class WpsstmTrack extends HTMLElement{
             player.current_track.end_track();
         }
         player.current_track = track;
+        player.render_queue_controls();
         
         /*
         If this is the first tracklist track, check if tracklist is expired.

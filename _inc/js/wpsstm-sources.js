@@ -205,7 +205,7 @@ class WpsstmSource extends HTMLElement{
         $(source).addClass('source-active');
         $(track).addClass('track-active');
         
-        player.render_playing_track();
+        player.render_queue_controls();
 
         var track_instances = source.track.get_instances();
 

@@ -180,6 +180,8 @@ class WpsstmPlayer extends HTMLElement{
                 localStorage.setItem("wpsstm-player-loop", false);
                 self.loop_el.removeClass('active');
             }
+            
+            self.render_queue_controls();
 
         });
 
@@ -458,18 +460,7 @@ class WpsstmPlayer extends HTMLElement{
 
     }
 
-    render_playing_track(){
-
-        var self = this;
-
-        if (!self.current_track) return;
-        self.current_track.debug("track > player");
-
-        self.render_previous_next_bts();
-
-    }
-    
-    render_previous_next_bts(){
+    render_queue_controls(){
         
         var self = this;
         
