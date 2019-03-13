@@ -5,13 +5,13 @@ class WpsstmPlayer extends HTMLElement{
         super(); //required to be first
         
         this.tracks =                   [];
-        this.trackinfo_el =             undefined;
         this.shuffle_el =               undefined;
         this.loop_el =                  undefined;
         this.current_source =           undefined;
         this.current_track =            undefined;
         this.is_shuffle =               ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         this.can_repeat =               ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
+        this.current_media =            undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -59,8 +59,6 @@ class WpsstmPlayer extends HTMLElement{
         this.debug("LOAD player: #" +$(self).attr('id'));
         
         ///
-
-        self.trackinfo_el = $(self).find('#wpsstm-player-track');
         self.shuffle_el =   $('#wpsstm-player-shuffle');
         self.loop_el =      $('#wpsstm-player-loop');
 
@@ -225,6 +223,7 @@ class WpsstmPlayer extends HTMLElement{
             success: function(mediaElement, originalNode, player) {
                 self.current_media = mediaElement;
                 self.debug("MediaElementJS ready");
+                $(self).trigger( "wpsstmPlayerInit" ); //custom event
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
@@ -235,9 +234,7 @@ class WpsstmPlayer extends HTMLElement{
                 */
             }
         });
-        
-        $(document).trigger( "wpsstmPlayerInit",[self] ); //custom event
-        
+
     }
 
     unQueueContainer(tracklist){
@@ -267,29 +264,46 @@ class WpsstmPlayer extends HTMLElement{
         self.debug("unQueued " + removedTrackCount + " tracks, still in queue: " + newTrackCount);
         
         self.tracks = cleanedTracks;
-        self.queueUpdateGUI();
+        //TOUFIX URGENT self.queueUpdateGUI();
+    }
+    
+    queueTrack(track){
+        var self = this;
+        var playerQueue = $(self).find('.player-queue');
+        var playerQueueTracks = $(playerQueue).find('wpsstm-track');
+        var playerQueueCount = playerQueueTracks.length;
+
+        //queue track
+        var queueTrack = $(track).clone().get(0);
+        queueTrack.pageNode = track;
+        
+        //post track
+        track.queueNode = queueTrack;
+
+        $(self).find('.player-queue').append(queueTrack);
+        
     }
     
     queueContainer(tracklist){
         var self = this;
-        var newTracks = [];
         
+        //update player queue
+        
+        var appendCount = 0;
 
-        $(tracklist.tracks).each(function(index, track) {
-            //set player
-            track.player = self;
-            newTracks.push(track);
+        $(tracklist).find('wpsstm-track').each(function(index, track) {
+            self.queueTrack(track);
+            appendCount = appendCount + 1;
         });
-        
+
         tracklist.debug( 'append tracks to #' + $(self).attr('id') );
-        self.debug("Queued tracks: " + newTracks.length );
+        self.debug("Queued tracks: " + appendCount );
         
-        $.merge(self.tracks,newTracks);
         self.queueUpdateGUI();
 
         /* autoplay ? */
         function autoPlayFN(){
-            if ( newTracks.length && $(tracklist).hasClass('tracklist-autoplay') ){
+            if ( appendCount && $(tracklist).hasClass('tracklist-autoplay') ){
                 $(tracklist).removeClass('tracklist-autoplay');
                 var firstTrack = $(tracklist).find('wpsstm-track').get(0);
 
@@ -310,44 +324,14 @@ class WpsstmPlayer extends HTMLElement{
         
         setTimeout(autoPlayFN, 250);
 
-        
-        //play/pause track button
-        $(tracklist).on( "click", ".wpsstm-track-play-bt", function(e) {
-            e.preventDefault();
-            
-            var track = this.closest('wpsstm-track');
-
-            //re-click
-            if ( self.current_media && (self.current_track == track) ){
-
-                if ( $(track).hasClass('track-playing') ){
-                    self.current_media.pause();
-                }else{
-                    self.current_media.play();
-                }
-
-                return;
-            }
-            
-            track.play_track();
-
-        });
-
     }
     
     queueUpdateGUI(){
         var self = this;
-        var queueEl = $(self).find('.player-queue');
-        
-        queueEl.empty();
-
-        $(self.tracks).each(function(index, track) {
-            var el = $(track).clone(true,true);
-            $(self).find('.player-queue').append(el);
-        });
+        var queueTracks = $(self).find('.player-queue');
 
         //show in not done yet
-        var showPlayer = ( $(self.tracks).length > 0);
+        var showPlayer = ( queueTracks.length > 0);
         $(self).toggle(showPlayer);
     }
     get_previous_track(){
@@ -521,17 +505,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //audio sources
         var sources = $(self.current_track).find('wpsstm-source');
-        self.set_player_sources(sources);
-
-        var list = $('<ul class="wpsstm-tracks-list" />'); 
-
-        var row = $(self.current_track).clone(true,true);
-        row.find('.wpsstm-track-sources').removeClass('wpsstm-sources-expanded');
-
-        $(list).append(row);
-
-        self.trackinfo_el.html(list);
-        
+        self.set_player_sources(sources);        
         ///
         
         /*

@@ -12,7 +12,8 @@ class WpsstmTrack extends HTMLElement{
         this.subtrack_id =          undefined;
         this.post_id =              undefined;
         this.can_play =             undefined;
-        this.player =               undefined;
+        this.pageNode =             undefined;
+        this.queueNode =            [];
         
         this.did_sources_request =  undefined;
 
@@ -22,7 +23,8 @@ class WpsstmTrack extends HTMLElement{
 
     }
     connectedCallback(){
-        //console.log("TRACK CONNECTED!");
+        console.log("TRACK CONNECTED!");
+        //console.log(this);
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -34,11 +36,17 @@ class WpsstmTrack extends HTMLElement{
         Called every time the element is removed from the DOM. Useful for running clean up code.
         */
         //console.log("TRACK DISCONNECTED!");
+        //console.log(this);
     }
     attributeChangedCallback(attrName, oldVal, newVal){
-        /*
-        Called when an observed attribute has been added, removed, updated, or replaced. Also called for initial values when an element is created by the parser, or upgraded. Note: only attributes listed in the observedAttributes property will receive this callback.
-        */
+        
+        console.log(this);
+        console.log(`Value ${attrName} changed from ${oldVal} to ${newVal}`);
+
+        switch (attrName) {
+            case 'track-active':
+            break;
+        }
     }
     adoptedCallback(){
         /*
@@ -47,12 +55,12 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        //return ['id', 'my-custom-attribute', 'data-something', 'disabled'];
+        //return ['track-active'];
     }
     
     ///
     ///
-    
+
     debug(msg){
         var prefix = " WpsstmTrack #" + this.position;
         wpsstm_debug(msg,prefix);
@@ -75,6 +83,14 @@ class WpsstmTrack extends HTMLElement{
         var sources = $(self).find('wpsstm-source');
         self.can_play = (sources.length > 0);
         
+        
+        var player = self.closest('wpsstm-player');
+        
+        if (self.pageNode){ //track is in queue
+            console.log("IS IN QUEUE!");
+        }else{ //track is in page
+            console.log("IS IN PAGE!");
+        }
 
         /*
         populate existing sources
@@ -175,11 +191,69 @@ class WpsstmTrack extends HTMLElement{
             $(this).parents('.wpsstm-track').find('.wpsstm-track-sources-list').toggleClass('active');
         });
 
+        //play/pause track button
+        var bt = $(self).find(".wpsstm-track-play-bt");
+        bt.click(function(e) {
+            
+            e.preventDefault();
+            var playerTrack;
+
+            if (self.pageNode){ //is a queue track
+                playerTrack = self;
+            }else{ //is a page track
+                playerTrack = self.queueNode;
+            }
+
+            var player = playerTrack.closest('wpsstm-player');
+
+            if ( player.current_media && (player.current_track == playerTrack) ){
+                
+                console.log("reclicked on the current track");
+
+                if ( $(playerTrack).hasClass('track-playing') ){
+                    player.current_media.pause();
+                }else{
+                    player.current_media.play();
+                }
+            }else{
+                playerTrack.play_track();
+            }
+
+        });
+
+        
+
+
+    }
+    
+    get_track_index(){
+        var self = this;
+        var tracksContainer = $(self.parentNode);
+        var allTracks = tracksContainer.find('wpsstm-track');
+        return allTracks.index( $(self) );
+    }
+    
+    get_queued(){
+        var self = this;
+        
+        if (!self.queue_id || !self.player) return; //this is not a page track
+        
+        var playerTracks = $(self.player).find('wpsstm-track');
+        return playerTracks.get(self.queue_id);
+        
     }
     
     get_instances(){
         var self = this;
-        return $(document).find('wpsstm-track[data-wpsstm-subtrack-id="'+self.subtrack_id+'"]');
+        var instances = [];
+        
+        instances.push(self);
+        instances.push(self.pageNode);
+        instances.push(self.queueNode);
+        
+        instances = instances.filter(Boolean); //remove falsy
+        
+        return $(instances);
     }
     
     maybe_load_sources(){
@@ -280,29 +354,26 @@ class WpsstmTrack extends HTMLElement{
             data:       ajax_data,
             dataType:   'json',
         });
-        
-
 
         sources_request.done(function(data) {
             if ( data.html ){
-
-                //self.outerHTML = data.html;
-                wpsstmSwapNode(self,data.html);
-
-                var newEl = $(data.html);
-                if ( $(self).hasClass('track-active') ){
-                    newEl.addClass('track-active');
-                }
-
-                var newNode = newEl.get(0);
-                //newNode.innerHTML = "<wpsstm-track>caca</wpsstm-track>";
-
-                var parent = self.parentNode;
-
-                parent.insertBefore(newNode,self);
-                var oldNode = parent.removeChild(self);
                 
+                /*delete old nodes, and and new ones with pageNode/queueNode properties*/
+                
+                var newQueueTrack = $(data.html).get(0);
+                var newPageTrack = $(newQueueTrack).clone().get(0);
+                
+                var oldQueueNode = self.parentNode;
+                var oldPageNode = self.pageNode;
+                
+                oldQueueNode.replaceChild(newQueueTrack, self); //replace in queue
+                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
+                
+                newQueueTrack.pageNode = newPageTrack;
+                newPageTrack.queueNode = newQueueTrack;
+
                 success.resolve();
+                
             }else{
                 self.debug("track refresh failed: " + data.message);
                 success.reject(data.message);
@@ -518,7 +589,7 @@ class WpsstmTrack extends HTMLElement{
     play_track(){
 
         var track = this;
-        var player = track.player;
+        var player = track.closest('wpsstm-player');
         var success = $.Deferred();
         
         if (!player){
@@ -526,37 +597,58 @@ class WpsstmTrack extends HTMLElement{
             return success.promise();
         }
         
+        console.log("play_track");
+
         var track_instances = track.get_instances();
 
-        track_instances.addClass('track-active track-loading');
+        var playingTracks = $(player).find('wpsstm-track.track-active');
+        playingTracks.removeClass('track-active');
+        
+        track_instances.addClass('track-loading track-active');
 
-        if ( player && player.current_track && ( track !== player.current_track ) ){
+        //handle current track
+        if ( player.current_track && ( track !== player.current_track ) ){
             player.current_track.end_track();
         }
+        player.current_track = track;
         
         /*
         If this is the first tracklist track, check if tracklist is expired.
         */
-        var tracklist = track.tracklist;
-        var track_index = $(tracklist).find('wpsstm-track').index( track );
+        
+        /* TOUFIX URGENT
+        var tracksContainer = $(track.parentNode);
+        var allTracks = tracksContainer.find('wpsstm-track');
+        var track_index = allTracks.index( $(track) );
         if ( (track_index === 0) && tracklist.isExpired ){
             tracklist.debug("First track requested but tracklist is expired,reload it!");
             tracklist.reload_tracklist(true);
             return;
         }
+        */
 
-        ///
+        /*Get index before track is reloaded*/
+        var tracksContainer = $(track.parentNode);
+        var trackIndex = track.get_track_index();
 
         track.maybe_load_sources().then(
             function(success_msg){
+                
+                /* at this point, if the track has been reloaded, it is no more the same node. So get the new one
+                */
 
+                var track = tracksContainer.find('wpsstm-track').get(trackIndex);
                 var source_play = track.play_first_available_source();
 
                 source_play.done(function(v) {
+                    console.log("YOW");
+                    console.log(track);
                     success.resolve();
                 })
                 source_play.fail(function(reason) {
                     success.reject(reason);
+                    console.log("YAW");
+                    console.log(reason);
                 })
 
             },
@@ -613,7 +705,7 @@ class WpsstmTrack extends HTMLElement{
     play_first_available_source(){
 
         var track = this;
-        var player = track.player;
+        var player = track.closest('wpsstm-player');
         var success = $.Deferred();
 
         var source_idx = 0;
@@ -642,7 +734,7 @@ class WpsstmTrack extends HTMLElement{
             (function iterateSources(index) {
 
                 if (index >= sources_playable.length) {
-                    success.reject();
+                    success.reject("finished source iteration");
                     return;
                 }
 
@@ -668,15 +760,13 @@ class WpsstmTrack extends HTMLElement{
         var track = this;
         var player = track.player;
         
-        if (!player){
-            success.reject("no player");
-            return success.promise();
-        }
+        if (!player) return;
         
         track.debug("end_track");
 
-        track.get_instances().removeClass('track-loading track-active track-playing');
+        track.get_instances().removeClass('track-loading track-playing track-active');
         
+        console.log("TEST-YO");
         player.current_source.end_source();
         
         track.player.current_track = undefined;

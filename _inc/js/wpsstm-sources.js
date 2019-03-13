@@ -175,7 +175,8 @@ class WpsstmSource extends HTMLElement{
     
     play_source(){
         var source = this;
-        var player = this.track.player;
+        var track = this.closest('wpsstm-track');
+        var player = this.closest('wpsstm-player');
         var success = $.Deferred();
         
         if (!player){
@@ -183,40 +184,48 @@ class WpsstmSource extends HTMLElement{
             return success.promise();
         }
         
-        var previous_source = player.current_source;
-        var previous_track = player.current_track;
-        player.current_source = source;
-        player.current_track = source.track;
-
-
-        var tracklist = source.track.tracklist;
-
-        var tracklist_instances = tracklist.get_instances();
-        var track_instances = source.track.get_instances();
-        var source_instances = source.get_instances();
+        var playingSources = $(player).find('wpsstm-source.source-active');
+        var playingTracks = $(player).find('wpsstm-track.track-active');
         
-        /*
-        handle current (previous) source
-        */
         //we're trying to play the same source again
-        if ( source === previous_source ){
+        if ( $(source).hasClass('source-active') ){
             success.reject("we've already playing this soure");
             return success.promise();
         }
         
-        if (previous_source){ //a source is currently playing
-            previous_source.end_source();
+        //another source is playing
+        
+        if ( playingSources.length ){ //a source is currently playing
+            playingSources.removeClass('source-active');
+            //previous_source.end_source();
         }
+        
+
+        $(source).addClass('source-active');
+        $(track).addClass('track-active');
+
+        var track_instances = source.track.get_instances();
+
+        var source_instances = track_instances.find('wpsstm-source');
+        var tracklist_instances = track_instances.parent();
+        
+        /*
+        handle current (previous) source
+        */
+
+        
+
 
         source.debug("play source: " + source.src);
         source_instances.addClass('source-active source-loading');
-        track_instances.addClass('track-active track-loading');
+        track_instances.addClass('track-loading track-active');
+        
         tracklist_instances.addClass('tracklist-active tracklist-loading');
         
         /*
         display current track
         */
-        if ( player.current_track !== previous_track ){
+        if ( !$(track).hasClass('track-active') ){
             player.render_playing_track();
         }
 
@@ -273,7 +282,7 @@ class WpsstmSource extends HTMLElement{
             //tracklists
             tracklist_instances.removeClass('tracklist-playing');
             //tracks
-            track_instances.removeClass('track-active track-playing');
+            track_instances.removeClass('track-playing track-active');
             //sources
             source_instances.removeClass('source-playing source-active');
 
@@ -296,7 +305,8 @@ class WpsstmSource extends HTMLElement{
             //sources
             source_instances.removeClass('source-active').addClass('source-error');
             //tracks
-            track_instances.removeClass('track-active').addClass('track-error');
+            track_instances.addClass('track-error');
+            track_instances.removeClass('track-active');
         })
 
         ////
