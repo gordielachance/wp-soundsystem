@@ -221,7 +221,7 @@ class WpsstmSource extends HTMLElement{
         */
         
         $(player.current_media).off(); //remove old events
-        $(source).trigger( "wpsstmSourceInit" );
+        $(document).trigger( "wpsstmSourceInit", [source] );
 
         $(player.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmSourceLoaded",[player,source] ); //custom event

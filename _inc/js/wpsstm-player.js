@@ -234,7 +234,7 @@ class WpsstmPlayer extends HTMLElement{
             success: function(mediaElement, originalNode, player) {
                 self.current_media = mediaElement;
                 self.debug("MediaElementJS ready");
-                $(self).trigger( "wpsstmPlayerInit" ); //custom event
+                $(document).trigger( "wpsstmPlayerInit", [self] ); //custom event
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?

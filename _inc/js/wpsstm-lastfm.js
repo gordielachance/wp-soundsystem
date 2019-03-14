@@ -213,9 +213,11 @@ class WpsstmLastFM {
     
 }
 
-$('wpsstm-player').on( "wpsstmPlayerInit", function( event ) {
+$(document).on( "wpsstmPlayerInit", function( event,player ) {
+    
+    var player = this;
 
-    wpsstm_lastfm.scrobble_icon =     $(this).find('.wpsstm-player-action-scrobbler');
+    wpsstm_lastfm.scrobble_icon =     $(player).find('.wpsstm-player-action-scrobbler');
 
     //enable scrobbler at init
     if (wpsstm_lastfm.scrobbler_enabled){
@@ -229,11 +231,10 @@ $('wpsstm-player').on( "wpsstmPlayerInit", function( event ) {
     });
 });
 
-$('wpsstm-source').on( "wpsstmSourceInit", function( event ) {
-    
-    var source = this;
+$(document).on( "wpsstmSourceInit", function( event, source ) {
+
     var track = source.closest('wpsstm-track');
-    var player = this.closest('wpsstm-player');
+    var player = source.closest('wpsstm-player');
 
     var nowPlayingTrack = function(){
         if (!wpsstm_lastfm.scrobbler_enabled) return;

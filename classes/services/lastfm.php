@@ -58,7 +58,8 @@ class WPSSTM_LastFM{
         add_action('wp_ajax_nopriv_wpsstm_lastfm_enable_scrobbler', array($this,'ajax_lastm_enable_scrobbler')); //so we can output the non-logged user notice
 
         //love & unlove
-        add_action('wp_ajax_wpsstm_lastfm_user_toggle_love_track',array($this,'ajax_lastm_toggle_love_track') );
+        add_action('wpsstm_love_track',array($this,'user_love_track'), 10, 2 );
+        
         
         //updateNowPlaying
         add_action('wp_ajax_wpsstm_user_update_now_playing_lastfm_track', array($this,'ajax_lastfm_now_playing_track'));
@@ -496,34 +497,8 @@ class WPSSTM_LastFM{
         wp_send_json( $result ); 
     }
     
-    function ajax_lastm_toggle_love_track(){
-        
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input'     => $ajax_data,
-            'success'   => false,
-            'message'   => null
-        );
-        
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
-        
-        $do_love = $result['do_love'] = filter_var($ajax_data['do_love'], FILTER_VALIDATE_BOOLEAN); //ajax do send strings
-        $success = $this->lastfm_user->love_lastfm_track($track,$do_love);
-        $result['track'] = $track->to_array();
-        
-        if ( $success ){
-            if ( is_wp_error($success) ){
-                $code = $success->get_error_code();
-                $result['message'] = $success->get_error_message($code); 
-            }else{
-                $result['success'] = true;
-            }
-        }
-        
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
+    function user_love_track($track,$do_love){
+        return $this->lastfm_user->love_lastfm_track($track,$do_love);
     }
     
     function ajax_lastfm_now_playing_track(){
@@ -998,6 +973,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
         $debug_args['success'] = $results;
+        $debug_args['do_love'] = $do_love;
         
         wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::lastfm_love_track()");
         
