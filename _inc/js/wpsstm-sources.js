@@ -184,17 +184,13 @@ class WpsstmSource extends HTMLElement{
     play_source(){
         var source = this;
         var track = this.closest('wpsstm-track').getQueueTrack();
+        var track_instances = track.get_instances();
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
         
-        console.log("PLAYSOURCE?");
+        player.setup_track(track);
+        track_instances.addClass('track-loading');
         
-        if (!player){
-            success.reject("no player");
-            return success.promise();
-        }
-        
-        console.log("PLAYSOURCE!");
         
         var playingSources = $(player).find('wpsstm-source.source-active');
         
@@ -216,11 +212,7 @@ class WpsstmSource extends HTMLElement{
         source.setAttribute('requestSourcePlay',true);
 
         player.current_source = source;
-        player.current_track = track;
         $(source).addClass('source-active');
-        $(track).addClass('track-active');
-        
-        player.render_queue_controls();
 
         var track_instances = source.track.get_instances();
 
@@ -233,17 +225,8 @@ class WpsstmSource extends HTMLElement{
 
         source.debug("play source: " + source.src);
         source_instances.addClass('source-active source-loading');
-        track_instances.addClass('track-loading track-active');
         
         tracklist_instances.addClass('tracklist-active tracklist-loading');
-        
-
-
-        //hide sources if it is expanded //TOUFIX not working
-        var toggleEl = $(player.current_track).find('.wpsstm-track-action-toggle-sources a');
-        if ( toggleEl.hasClass('.active') ){
-            toggleEl.click();
-        }
 
         /*
         register new events

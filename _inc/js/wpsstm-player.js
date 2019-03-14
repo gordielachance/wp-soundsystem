@@ -361,26 +361,35 @@ class WpsstmPlayer extends HTMLElement{
         var self = this;
         var populated = $.Deferred();
         
-        var track = $(self).find('.player-queue wpsstm-track').get(track_idx);
+        var requestedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
         
         //handle current track
-        if ( self.current_track && ( track !== self.current_track ) ){
+        if ( self.current_track && ( requestedTrack !== self.current_track ) ){
             self.current_track.end_track();
         }
-        self.current_track = track;
-        self.render_queue_controls();
         
-        track.maybe_load_sources().then(function() {
+        self.setup_track(requestedTrack);
+
+        requestedTrack.maybe_load_sources().then(function() {
             /* node has been swapped so fetch the track again*/
-            track = $(self).find('.player-queue wpsstm-track').get(track_idx);
-            populated.resolve(track);
+            var updatedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
+            populated.resolve(updatedTrack);
         });
         
         populated.done(function(track) {
-            self.current_track = track;
-            self.current_track.play_track();
+            //check that it still the same track that is requested
+            if (self.current_track !== requestedTrack) return;
+            track.play_track();
         })
 
+    }
+    
+    setup_track(track){
+        var self = this;
+        self.current_track = track;
+        self.render_queue_controls();
+        track.get_instances().addClass('track-active');
+        track.get_instances().attr('trackstatus','request');
     }
 
     render_queue_controls(){

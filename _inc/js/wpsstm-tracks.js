@@ -612,6 +612,7 @@ class WpsstmTrack extends HTMLElement{
     play_track(source_idx){
         var track = this;
         var player = track.closest('wpsstm-player');
+        player.setup_track(track);
 
         var success = $.Deferred();
         
@@ -623,14 +624,8 @@ class WpsstmTrack extends HTMLElement{
         }
 
         var track_instances = track.get_instances();
-        $(track_instances).attr('trackstatus','request');
 
-        var playingTracks = $(player).find('wpsstm-track.track-active');
-        playingTracks.removeClass('track-active');
-        
-        track_instances.addClass('track-loading track-active');
-
-        var source_play = player.current_track.play_first_available_source(source_idx);
+        var source_play = track.play_first_available_source(source_idx);
 
         source_play.done(function(v) {
             success.resolve();
