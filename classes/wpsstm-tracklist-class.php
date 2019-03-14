@@ -45,7 +45,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->options = array(
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
-            'toggle_tracklist'          => (int)wpsstm()->get_options('toggle_tracklist'),
             'tracks_strict'             => true, //requires a title AND an artist
             'remote_delay_min'          => 5,
             'is_expired'                => false,
@@ -640,7 +639,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-tracklist-options' =>      json_encode($this->get_options()),
-            'data-wpsstm-toggle-tracklist' =>       $this->get_options('toggle_tracklist'),
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
         );
 

@@ -79,11 +79,6 @@ class WPSSTM_Settings {
         $new_input['autoplay'] = isset($input['autoplay']);
         $new_input['autosource'] = isset($input['autosource']);
 
-        //shorten tracklist
-        if ( isset ($input['toggle_tracklist']) && ctype_digit($input['toggle_tracklist']) ){
-            $new_input['toggle_tracklist'] = $input['toggle_tracklist'];
-        }
-
         /*
         Sources
         */
@@ -229,13 +224,6 @@ class WPSSTM_Settings {
             'wpsstm-settings-page' // Page
         );
 
-        add_settings_field(
-            'toggle_tracklist', 
-            __('Shorten tracklist','wpsstm'), 
-            array( $this, 'toggle_tracklist_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_styling'
-        );
 
     }
     
@@ -336,22 +324,6 @@ class WPSSTM_Settings {
         //display errors
         settings_errors('autosource');
 
-    }
-
-    function toggle_tracklist_callback(){
-        $option = (int)wpsstm()->get_options('toggle_tracklist');
-
-        $desc = __("When the tracklist loads, only show a limited amout of tracks and display a button to expand it.","wpsstm");
-        $help = __("0 = Disabled.","wpsstm");
-        $help = sprintf("<small>%s</small>",$help);
-
-        printf(
-            '<input type="number" name="%s[toggle_tracklist]" size="4" min="0" value="%s" />%s %s',
-            wpsstm()->meta_name_options,
-            $option,
-            $desc,
-            $help
-        );
     }
 
     function section_community_user_desc(){

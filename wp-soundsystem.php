@@ -110,7 +110,6 @@ class WP_SoundSystem {
             'autoplay'                          => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
-            'toggle_tracklist'                  => 3, //shorten tracklist to X visible tracks
         );
         
         $db_option = get_option( $this->meta_name_options);
