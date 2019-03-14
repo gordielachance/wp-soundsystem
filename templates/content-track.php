@@ -42,9 +42,9 @@ $has_player = wpsstm()->get_options('player_enabled');
     </div>
     <?php
     //track sources
-    if ( wp_doing_ajax() ){ //TOFIX URGENT
+    //if ( wp_doing_ajax() ){
         wpsstm_locate_template( 'content-sources.php', true, false );
-    }
+    //}
     
     ?>
 </wpsstm-track>

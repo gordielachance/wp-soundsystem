@@ -481,6 +481,10 @@ wpsstm-tracklist.wpsstm-post-tracklist .wpsstm-tracklist-actions .wpsstm-trackli
   border-color: #F7F7F7;
   background: rgba(0, 0, 0, 0.025);
 }
+/* line 38, ../scss/_wpsstm-tracklists.scss */
+wpsstm-tracklist:not(.tracklist-expired) .wpsstm-tracklist-action-refresh {
+  pointer-events: none;
+}
 /* line 43, ../scss/_wpsstm-tracklists.scss */
 wpsstm-tracklist .tracklist-header {
   margin-bottom: 1em;

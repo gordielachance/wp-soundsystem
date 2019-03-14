@@ -271,10 +271,12 @@ class WpsstmTracklist extends HTMLElement{
         
         //stop player
         var activeTrack = $(self).find('wpsstm-track.track-active').get(0);
-        activeTrack.removeAttribute('trackstatus');
         
-        if ( (typeof autoplay === 'undefined') && activeTrack){
-            autoplay = true;
+        if (activeTrack){
+            activeTrack.removeAttribute('trackstatus');
+            if (typeof autoplay === 'undefined'){
+                autoplay = true;
+            }
         }
 
         self.debug("reload tracklist... autoplay ?" + autoplay);

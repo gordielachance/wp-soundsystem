@@ -99,7 +99,6 @@ class WpsstmTrack extends HTMLElement{
         self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
         self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
         self.did_sources_request =  $(self).hasClass('track-autosourced');
-        self.did_sources_request = false;//TOUFIX TOUREMOVE URGENT
 
         var player = self.closest('wpsstm-player');
         
@@ -670,7 +669,7 @@ class WpsstmTrack extends HTMLElement{
             var tracks_slice = next_tracks.slice( 0, max_items );
 
             $(tracks_slice).each(function(index, track_to_preload) {
-                //TOUFIX URGENT track_to_preload.maybe_load_sources();
+                track_to_preload.maybe_load_sources();
             });
             
         })
