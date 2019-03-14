@@ -398,7 +398,11 @@ class WPSSTM_Core_Sources{
         $track = new WPSSTM_Track($post_id);
         
         //new source URLs
-        $source_urls = isset($_POST['wpsstm_new_track_sources']) ? $_POST['wpsstm_new_track_sources'] : array();
+        $source_urls = isset($_POST['wpsstm_new_track_sources']) ? array_filter($_POST['wpsstm_new_track_sources']) : null;
+
+        //abord
+        if ( empty($source_urls) ) return;
+
         $new_sources = array();
 
         foreach((array)$source_urls as $url){
