@@ -202,14 +202,17 @@ class WpsstmTracklist extends HTMLElement{
         
         //at init
         var firstTrack = $(self).find('wpsstm-track').first().get(0);
-        var firstTrackObserver = new MutationObserver(self.firstTrackWatch);
-        firstTrackObserver.observe(firstTrack,{attributes: true});
-        
+        if (firstTrack){
+            var firstTrackObserver = new MutationObserver(self.firstTrackWatch);
+            firstTrackObserver.observe(firstTrack,{attributes: true});
+        }
+
         //at queue update
         var queue = $(self).find('.wpsstm-tracks-list').get(0);
-        var firstTrackObserver = new MutationObserver(self.queueWatch);
-        firstTrackObserver.observe(queue,{childList: true});
-
+        if (queue){
+            var firstTrackObserver = new MutationObserver(self.queueWatch);
+            firstTrackObserver.observe(queue,{childList: true});
+        }
 
         /*
         Tracklist actions
