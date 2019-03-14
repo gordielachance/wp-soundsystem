@@ -54,10 +54,6 @@ class WpsstmTrack extends HTMLElement{
         switch (attrName) {
             case 'track-active':
             break;
-            case 'playtrackrequest':
-                if (!isValueChanged) break;
-                console.log("PLAYTRACKEQUEST!");
-            break;
         }
     }
     adoptedCallback(){
@@ -67,7 +63,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['playtrackrequest'];
+        return ['trackstatus'];
     }
     
     ///
@@ -246,7 +242,7 @@ class WpsstmTrack extends HTMLElement{
                 
                 console.log("reclicked on the current track");
 
-                if ( $(self).hasClass('track-playing') ){
+                if ( self.getAttribute("trackstatus") == 'playing' ){
                     player.current_media.pause();
                 }else{
                     player.current_media.play();
@@ -384,9 +380,12 @@ class WpsstmTrack extends HTMLElement{
                 /*delete old nodes, and and new ones with pageNode/queueNode properties*/
                 
                 var newContent = $(data.html);
+                var currentStatus = self.getAttribute('trackstatus');
                 
                 //add custom attributes
-                newContent.get(0).setAttribute('playtrackrequest',self.getAttribute('playtrackrequest'));
+                newContent.get(0).setAttribute('trackstatus',currentStatus);
+                
+                alert("CLONE STATUS:" + currentStatus);
                 
 
                 var newQueueTrack = newContent.get(0);
@@ -397,6 +396,8 @@ class WpsstmTrack extends HTMLElement{
                 
                 newQueueTrack.pageNode = newPageTrack;
                 newPageTrack.queueNode = newQueueTrack;
+                
+                console.log("YAAAW");
                 
                 oldQueueNode.replaceChild(newQueueTrack, self); //replace in queue
                 oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
@@ -623,16 +624,14 @@ class WpsstmTrack extends HTMLElement{
         var success = $.Deferred();
         
         //we're trying to play the same source again
-        if ( $(track).hasClass('track-playing') ){
+        if ( track.getAttribute("trackstatus") == 'playing' ){
             track.debug("track already playing!");
             success.resolve();
             return success.promise();
         }
 
-        console.log("PLAY TRACK");
-
         var track_instances = track.get_instances();
-        $(track_instances).attr('playtrackrequest',true);
+        $(track_instances).attr('trackstatus','request');
 
         var playingTracks = $(player).find('wpsstm-track.track-active');
         playingTracks.removeClass('track-active');
@@ -645,21 +644,6 @@ class WpsstmTrack extends HTMLElement{
         }
         player.current_track = track;
         player.render_queue_controls();
-        
-        /*
-        If this is the first tracklist track, check if tracklist is expired.
-        */
-        
-        /* TOUFIX URGENT
-        var tracksContainer = $(track.parentNode);
-        var allTracks = tracksContainer.find('wpsstm-track');
-        var track_index = allTracks.index( $(track) );
-        if ( (track_index === 0) && tracklist.isExpired ){
-            tracklist.debug("First track requested but tracklist is expired,reload it!");
-            tracklist.reload_tracklist(true);
-            return;
-        }
-        */
 
         /*Get index before track is reloaded*/
         var tracksContainer = $(track.parentNode);
@@ -672,8 +656,17 @@ class WpsstmTrack extends HTMLElement{
                 */
 
                 player.current_track = tracksContainer.find('wpsstm-track').get(trackIndex);
+                var status = player.current_track.getAttribute('status');
                 
-                if ( player.current_track.hasAttribute('playtrackrequest') ){
+                console.log("LOADED");
+                console.log(player.current_track);
+                console.log("STATUS:" + status);
+                console.log(status);
+                
+                
+                alert("NOW STATUS:" + player.current_track.getAttribute('status'));
+                
+                if ( status == 'request' ){
                     var source_play = player.current_track.play_first_available_source(source_idx);
                 }
 
@@ -800,7 +793,7 @@ class WpsstmTrack extends HTMLElement{
         track.debug("end_track");
 
         track_instances.removeClass('track-loading track-playing track-active');
-        track_instances.removeAttr('playtrackrequest');
+        track_instances.removeAttr('trackstatus');
         
         if(player){
             player.current_source.end_source();

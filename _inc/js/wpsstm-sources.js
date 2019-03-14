@@ -271,7 +271,8 @@ class WpsstmSource extends HTMLElement{
             source_instances.addClass('source-playing source-has-played');
             tracklist_instances.addClass('tracklist-playing tracklist-has-played');
             track_instances.addClass('track-playing track-has-played');
-
+            
+            $(track_instances).attr('trackstatus','playing');
         });
 
         $(player.current_media).on('pause', function() {
@@ -281,6 +282,7 @@ class WpsstmSource extends HTMLElement{
             tracklist_instances.removeClass('tracklist-playing');
             //tracks
             track_instances.removeClass('track-playing');
+            $(track_instances).attr('trackstatus','paused');
             //sources
             source_instances.removeClass('source-playing');
         });
@@ -293,6 +295,7 @@ class WpsstmSource extends HTMLElement{
             tracklist_instances.removeClass('tracklist-playing');
             //tracks
             track_instances.removeClass('track-playing track-active');
+            $(track_instances).removeAttr('trackstatus');
             //sources
             source_instances.removeClass('source-playing source-active');
 

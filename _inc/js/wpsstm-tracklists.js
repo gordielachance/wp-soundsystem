@@ -100,16 +100,17 @@ class WpsstmTracklist extends HTMLElement{
                 var attrValue = mutation.target.getAttribute(attrName);
 
                 switch (attrName) {
-                    case 'playtrackrequest':
+                    case 'trackstatus':
                         
-                        if (!attrValue) break;
-                        
-                        var track = mutation.target;
-                        var tracklist = mutation.target.closest('wpsstm-tracklist');
-                        if (tracklist.isExpired){
-                            tracklist.debug("TRACK#1 requested but tracklist is outdated, refresh!");
-                            tracklist.reload_tracklist(true);
+                        if (attrValue == 'request'){
+                            var track = mutation.target;
+                            var tracklist = mutation.target.closest('wpsstm-tracklist');
+                            if (tracklist.isExpired){
+                                tracklist.debug("TRACK#1 requested but tracklist is outdated, refresh!");
+                                tracklist.reload_tracklist(true);
+                            }
                         }
+
                     break;
                 }
                 
