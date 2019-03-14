@@ -269,8 +269,12 @@ class WpsstmTracklist extends HTMLElement{
     reload_tracklist(autoplay){
         var self = this;
         
-        if (typeof autoplay === 'undefined'){
-            autoplay = ( $(self).find('wpsstm-track.track-active').length ); //TOUFIX TO IMPROVE ?
+        //stop player
+        var activeTrack = $(self).find('wpsstm-track.track-active').get(0);
+        activeTrack.removeAttribute('trackstatus');
+        
+        if ( (typeof autoplay === 'undefined') && activeTrack){
+            autoplay = true;
         }
 
         self.debug("reload tracklist... autoplay ?" + autoplay);
@@ -298,7 +302,7 @@ class WpsstmTracklist extends HTMLElement{
                     */
                     var newTracklist = $(data.html).get(0);
 
-                    if (autoplay===true){
+                    if (autoplay){
                         $(newTracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
                     }
 

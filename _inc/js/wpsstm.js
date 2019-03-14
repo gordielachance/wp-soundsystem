@@ -63,10 +63,9 @@ $( document ).ready(function() {
             }
         });
         
-        if (autoplayTrackIdx){
-            console.log("autoplay:");
-            console.log(autoplayTrackIdx);
-            //TOUFIX TOUREMOVE URGENT bottomPlayer.play_queue(autoplayTrackIdx);
+        if (typeof autoplayTrackIdx !== 'undefined'){
+            bottomPlayer.debug("autoplay track #" + autoplayTrackIdx);
+            bottomPlayer.play_queue(autoplayTrackIdx);
         }
         
         bottomPlayer.debug("Queued tracks: " + tracks.length );
