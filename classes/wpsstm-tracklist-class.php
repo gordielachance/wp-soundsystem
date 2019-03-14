@@ -918,6 +918,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
+    /*
+    TO FIX TO CHECK maybe we also should have a function to save multiple subtracks in one single query ?
+    I mean when we have playlists with hundreds of subtracks to save...
+    */
+    
     function save_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;

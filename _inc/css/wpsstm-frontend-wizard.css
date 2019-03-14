@@ -179,6 +179,16 @@ input.wpsstm-fullwidth {
   padding: 0 2em;
 }
 
+/* line 152, ../scss/_wpsstm-shared.scss */
+.wpsstm-align-both {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
 /* line 6, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard p.submit {
   padding: .25em;

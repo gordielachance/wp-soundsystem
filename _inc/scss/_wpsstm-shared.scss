@@ -148,3 +148,9 @@ input{
         }
     }
 }
+
+.wpsstm-align-both{
+    @include display-flex();
+    @include justify-content(center);
+    @include align-items(center);
+}

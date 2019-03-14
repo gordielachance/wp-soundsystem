@@ -33,10 +33,8 @@ wpsstm-player{
             padding:0;
             margin:0;
             border:none;
-            @include display-flex();
+            @extend .wpsstm-align-both;
             @include flex-grow(1);
-            @include justify-content(center);
-            @include align-items(center);
         }
         .wpsstm-player-actions{
             margin-right:.5em;

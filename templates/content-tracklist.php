@@ -18,7 +18,9 @@ $has_player = wpsstm()->get_options('player_enabled');
                 //live playlist icon
                 if ($wpsstm_tracklist->tracklist_type == 'live'){
                     ?>
-                    <i class="wpsstm-live-tracklist-icon fa fa-rss" aria-hidden="true" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>"></i>
+                    <span class="wpsstm-live-tracklist-icon" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">
+                        <i class="fa fa-rss" aria-hidden="true"></i>
+                    </span>
                     <?php
                 }
                 ?>

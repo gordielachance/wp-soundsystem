@@ -448,7 +448,7 @@ class WPSSTM_Settings {
     
     function trash_orphan_tracks_callback(){
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
-        $desc = sprintf(__("Delete %d tracks that do not belong to any playlists and have been created with the community user.","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
