@@ -114,6 +114,47 @@ class WpsstmTracklist extends HTMLElement{
         wpsstm_debug(msg,prefix);
     }
     
+    /*
+    Watch the first track.  If it is requested, maybe reload tracklist.
+    */
+    
+    firstTrackWatch(mutationsList) {
+        for(var mutation of mutationsList) {
+            if (mutation.type == 'attributes') {
+                var track = mutation.target;
+                var tracklist = mutation.target.closest('wpsstm-tracklist');
+                if (tracklist.isExpired){
+                    console.log("NEED REFRESH !");
+                }
+                
+                
+                var attribute = mutation.attributeName;
+                var value = mutation.target.getAttribute(attribute);
+                console.log(attribute + ' --> '+value);
+            }
+        }
+    }
+    
+    /*
+    Watch for tracklist queue update.
+    */
+    
+    queueWatch(mutationsList){
+        
+        for(var mutation of mutationsList) {
+            if (mutation.type == 'childList') {
+                
+                //Add observer on the first track.
+                
+                var queue = mutation.target;
+                var tracklist = mutation.target.closest('wpsstm-tracklist');
+                var firstTrack = $(tracklist).find('wpsstm-track').first().get(0);
+                var firstTrackObserver = new MutationObserver(tracklist.firstTrackWatch);
+                firstTrackObserver.observe(firstTrack,{attributes: true});
+            }
+        }
+    }
+
     render(){
 
         var self = this;
@@ -172,6 +213,13 @@ class WpsstmTracklist extends HTMLElement{
             self.debug("clicked 'refresh' bt");
             self.reload_tracklist();
         });
+        
+        
+        /* Reload expired if first track is playing*/
+        var queue = $(self).find('.wpsstm-tracks-list').get(0);
+        var firstTrackObserver = new MutationObserver(self.queueWatch);
+        firstTrackObserver.observe(queue,{childList: true});
+
 
         /*
         Tracklist actions

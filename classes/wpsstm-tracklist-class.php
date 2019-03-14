@@ -770,6 +770,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function seconds_before_refresh(){
+        
+        return 10;//TOUFIX URGENT
 
         if ($this->tracklist_type != 'live') return false;
 

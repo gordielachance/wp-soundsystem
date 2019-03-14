@@ -56,7 +56,7 @@ class WpsstmPlayer extends HTMLElement{
     /*
     Toggle display the player when the queue is updated
     */
-    queueUpdated(mutationsList, observer){
+    queueWatch(mutationsList){
         
         for(var mutation of mutationsList) {
             if (mutation.type == 'childList') {
@@ -80,7 +80,7 @@ class WpsstmPlayer extends HTMLElement{
         
         /* Watch for queue changes*/
         var queueNode = $(self).find('.player-queue').get(0);
-        var queueUpdated = new MutationObserver(self.queueUpdated);
+        var queueUpdated = new MutationObserver(self.queueWatch);
         queueUpdated.observe(queueNode,{childList: true});
         
 

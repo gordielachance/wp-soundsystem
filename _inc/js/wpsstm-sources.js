@@ -101,9 +101,13 @@ class WpsstmSource extends HTMLElement{
         //play source
         $(self).on('click', '.wpsstm-source-title', function(e) {
             e.preventDefault();
-            self.play_source();
+            
             //toggle tracklist sources
-            $(source.track).removeClass('wpsstm-sources-expanded');
+            var list = self.closest('.wpsstm-track-sources-list');
+            $( list ).removeClass('active');
+            
+            self.play_source();
+            
         });
         
     }
@@ -172,12 +176,15 @@ class WpsstmSource extends HTMLElement{
             source_action_links.removeClass('action-loading');
         })
     }
-    
+
     play_source(){
         var source = this;
-        var track = this.closest('wpsstm-track');
+        var track = this.closest('wpsstm-track').getQueueTrack();
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
+        
+        console.log("PLAYTSOURCE");
+        console.log(track);
         
         if (!player){
             success.reject("no player");
@@ -199,6 +206,9 @@ class WpsstmSource extends HTMLElement{
             playingSources.removeClass('source-active');
             //previous_source.end_source();
         }
+        
+        console.log("PLAY SOURCE");
+        source.setAttribute('requestSourcePlay',true);
 
         player.current_source = source;
         player.current_track = track;
