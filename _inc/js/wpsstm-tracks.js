@@ -47,12 +47,24 @@ class WpsstmTrack extends HTMLElement{
     }
     attributeChangedCallback(attrName, oldVal, newVal){
         
-        console.log(`Value ${attrName} changed from ${oldVal} to ${newVal}`);
-        
         var isValueChanged = (newVal !== oldVal);
+        if (!isValueChanged) return;
+        
+        console.log(`Value ${attrName} changed from ${oldVal} to ${newVal}`);
+        var track = this;
+        var player = track.closest('wpsstm-player');
 
         switch (attrName) {
-            case 'track-active':
+            case 'trackstatus':
+
+                if (!newVal){
+                    track.end_track();
+                }
+
+                if (newVal == 'request'){
+                    player.setup_track(track);
+                }
+
             break;
         }
     }
@@ -361,7 +373,7 @@ class WpsstmTrack extends HTMLElement{
         var success = $.Deferred();
         var track_instances = self.get_instances();
 
-        $(self).addClass('track-loading');
+        track_instances.addClass('track-loading');
         
         var ajax_data = {
             action:     'wpsstm_track_html',
@@ -381,7 +393,6 @@ class WpsstmTrack extends HTMLElement{
                 /*delete old nodes, and and new ones with pageNode/queueNode properties*/
                 
                 var newContent = $(data.html);
-                var currentStatus = self.getAttribute('trackstatus');
 
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
@@ -404,11 +415,11 @@ class WpsstmTrack extends HTMLElement{
         });
         
         success.fail(function() {
-            $(self).addClass('track-error');
+            track_instances.addClass('track-error');
         });
 
         success.always(function() {
-            $(self).removeClass('track-loading');
+            track_instances.removeClass('track-loading');
         });
         
         return success.promise();
@@ -470,7 +481,7 @@ class WpsstmTrack extends HTMLElement{
                     }else{
                         track_instances.removeClass('favorited-track');
                     }
-                    $(document).trigger("wpsstmTrackLove", [self,do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
+                    $(self).trigger("wpsstmTrackLove", [do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -567,6 +578,7 @@ class WpsstmTrack extends HTMLElement{
     static update_sources_order(source_ids){
         
         var self = this;
+        var track_instances = self.get_instances();
         var success = $.Deferred();
 
         //ajax update order
@@ -584,7 +596,7 @@ class WpsstmTrack extends HTMLElement{
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                $(self).addClass('track-loading');
+                track_instances.addClass('track-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -602,7 +614,7 @@ class WpsstmTrack extends HTMLElement{
         })
 
         ajax.always(function() {
-            $(self).removeClass('track-loading');
+            track_instances.removeClass('track-loading');
         });
         
         
@@ -612,6 +624,7 @@ class WpsstmTrack extends HTMLElement{
     play_track(source_idx){
         var track = this;
         var player = track.closest('wpsstm-player');
+        
         player.setup_track(track);
 
         var success = $.Deferred();
@@ -624,7 +637,6 @@ class WpsstmTrack extends HTMLElement{
         }
 
         var track_instances = track.get_instances();
-
         var source_play = track.play_first_available_source(source_idx);
 
         source_play.done(function(v) {
@@ -737,19 +749,21 @@ class WpsstmTrack extends HTMLElement{
     
     end_track(){
         var track = this;
-        var track_instances = track.get_instances();
-        var player = track.player;
-
-        track.debug("end_track");
-
-        track_instances.removeClass('track-loading track-playing track-active');
-        track_instances.removeAttr('trackstatus');
         
-        if(player){
-            player.current_source.end_source();
-            track.player.current_track = undefined;
-        }
+        track.debug("end_track");
+        
+        var track_instances = track.get_instances();
+        track_instances.removeClass('track-playing track-active');
 
+        var player = track.closest('wpsstm-player');
+        var allSources = $(track).find('wpsstm-source');
+
+        var currentSource = allSources.filter('.source-active').get(0);
+
+        if (currentSource){
+            player.current_media.pause();
+            track_instances.find('wpsstm-source').removeClass('source-playing source-active');
+        }
 
     }
     

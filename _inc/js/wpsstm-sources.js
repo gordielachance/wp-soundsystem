@@ -190,28 +190,18 @@ class WpsstmSource extends HTMLElement{
         
         player.setup_track(track);
         track_instances.addClass('track-loading');
-        
-        
-        var playingSources = $(player).find('wpsstm-source.source-active');
-        
+
         //we're trying to play the same source again
         if ( $(source).hasClass('source-active') ){
             source.debug("already playing!");
             success.resolve();
             return success.promise();
         }
-        
-        //another source is playing
-        
-        if ( playingSources.length ){ //a source is currently playing
-            playingSources.removeClass('source-active');
-            //previous_source.end_source();
-        }
-        
+
         console.log("PLAY SOURCE");
+        player.current_source = source;
         source.setAttribute('requestSourcePlay',true);
 
-        player.current_source = source;
         $(source).addClass('source-active');
 
         var track_instances = source.track.get_instances();
@@ -233,7 +223,7 @@ class WpsstmSource extends HTMLElement{
         */
         
         $(player.current_media).off(); //remove old events
-        $(document).trigger( "wpsstmSourceInit",[player,source] );
+        $(source).trigger( "wpsstmSourceInit" );
 
         $(player.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmSourceLoaded",[player,source] ); //custom event
@@ -255,7 +245,7 @@ class WpsstmSource extends HTMLElement{
             tracklist_instances.addClass('tracklist-playing tracklist-has-played');
             track_instances.addClass('track-playing track-has-played');
             
-            $(track_instances).attr('trackstatus','playing');
+            track.setAttribute('trackstatus','playing');
         });
 
         $(player.current_media).on('pause', function() {
@@ -265,7 +255,7 @@ class WpsstmSource extends HTMLElement{
             tracklist_instances.removeClass('tracklist-playing');
             //tracks
             track_instances.removeClass('track-playing');
-            $(track_instances).attr('trackstatus','paused');
+            track.setAttribute('trackstatus','paused');
             //sources
             source_instances.removeClass('source-playing');
         });
@@ -313,25 +303,6 @@ class WpsstmSource extends HTMLElement{
 
         return success.promise();
 
-    }
-    
-    end_source(){
-
-        var source = this;
-        var player = source.track.player;
-
-        source.debug("end_source");
-        
-        player.current_media.pause();
-
-        //TOUFIX TO CHECK should be hookend on events ?
-
-        //sources
-        source.get_instances().removeClass('source-playing source-active source-loading');
-        
-        
-        player.current_source = undefined;
-        
     }
 
 }

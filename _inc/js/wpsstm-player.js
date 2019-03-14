@@ -318,10 +318,6 @@ class WpsstmPlayer extends HTMLElement{
         var tracks_playable = tracks_after.filter(function (track_obj) {
             return (track_obj.can_play !== false);
         });
-        
-        var tracks_unplayable = tracks_after.filter(function (track_obj) {
-            return (track_obj.can_play === false);
-        });
 
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
@@ -336,11 +332,10 @@ class WpsstmPlayer extends HTMLElement{
         var self = this;
         var track_idx = self.get_previous_track_idx();
 
-        if (track_idx){
+        if (typeof track_idx !== 'undefined'){
             self.play_queue(track_idx);
         }else{
             self.debug("no previous track");
-            self.current_track.end_track();
         }
     }
     
@@ -349,7 +344,7 @@ class WpsstmPlayer extends HTMLElement{
 
         var track_idx = self.get_next_track_idx();
 
-        if (track_idx){
+        if (typeof track_idx !== 'undefined'){
             self.play_queue(track_idx);
         }else{
             self.debug("no next track");
@@ -359,28 +354,37 @@ class WpsstmPlayer extends HTMLElement{
     
     play_queue(track_idx){
         var self = this;
-        var populated = $.Deferred();
         
+        var allTracks = $(self).find('.player-queue wpsstm-track');
+        var currentTrack = allTracks.filter('.track-active').get(0);
         var requestedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
         
-        //handle current track
-        if ( self.current_track && ( requestedTrack !== self.current_track ) ){
-            self.current_track.end_track();
+        if (currentTrack){
+            currentTrack.removeAttribute('trackstatus');
         }
         
-        self.setup_track(requestedTrack);
-
-        requestedTrack.maybe_load_sources().then(function() {
-            /* node has been swapped so fetch the track again*/
-            var updatedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
-            populated.resolve(updatedTrack);
-        });
+        requestedTrack.setAttribute('trackstatus','request');
         
-        populated.done(function(track) {
-            //check that it still the same track that is requested
-            if (self.current_track !== requestedTrack) return;
-            track.play_track();
-        })
+        var trackPopulated = requestedTrack.maybe_load_sources();
+        
+        trackPopulated.then(
+            function () { //success
+                
+                /* node has been swapped so fetch the track again*/
+                var updatedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
+                
+                //check that it still the same track that is requested
+                if (self.current_track !== requestedTrack) return;
+                updatedTrack.play_track();
+                
+                
+            }, function (error) { //error
+                requestedTrack.debug('unable to play track, skipping...');
+                self.next_track_jump();
+                
+            }
+        );
+
 
     }
     
@@ -389,7 +393,6 @@ class WpsstmPlayer extends HTMLElement{
         self.current_track = track;
         self.render_queue_controls();
         track.get_instances().addClass('track-active');
-        track.get_instances().attr('trackstatus','request');
     }
 
     render_queue_controls(){
@@ -401,16 +404,18 @@ class WpsstmPlayer extends HTMLElement{
         */
 
         var previous_track_idx = self.get_previous_track_idx();
+        var hasPreviousTrack = (typeof previous_track_idx !== 'undefined');
         var previousTrackEl = $(self).find('#wpsstm-player-extra-previous-track');
 
-        previousTrackEl.toggleClass('active',previous_track_idx);
+        previousTrackEl.toggleClass('active',hasPreviousTrack);
 
         /*
         Next track bt
         */
         var next_track_idx = self.get_next_track_idx();
+        var hasNextTrack = (typeof next_track_idx !== 'undefined');
         var nextTrackEl = $(self).find('#wpsstm-player-extra-next-track');
-        nextTrackEl.toggleClass('active',next_track_idx);
+        nextTrackEl.toggleClass('active',hasNextTrack);
     }
 
 
