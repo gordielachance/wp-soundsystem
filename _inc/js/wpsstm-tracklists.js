@@ -262,7 +262,6 @@ class WpsstmTracklist extends HTMLElement{
             dataType:       'json',
             beforeSend:     function() {
                 $(self).addClass('tracklist-reloading');
-                $(self).trigger("wpsstmTracklistBeforeReload"); //custom event
             },
             success: function(data){
                 if (data.success === false) {

@@ -102,7 +102,6 @@ wpsstm-player{
     .player-queue{
         display:initial;
         overflow:auto;
-        background-color: rgba(255, 255, 255, .1);
         max-height: 50vh;
         &:not(.active){
             wpsstm-track:not(.track-active){

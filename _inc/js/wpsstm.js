@@ -53,9 +53,22 @@ $( document ).ready(function() {
     $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
         console.log("***wpsstmTracklistReady");
         var tracks = $(tracklist).find('wpsstm-track');
+        var autoplayTrack;
+        
         tracks.each(function(index, track) {
-            bottomPlayer.queueTrack(track);
+            var queueTrack = bottomPlayer.queueTrack(track);
+            
+            if ( $(track).hasClass('track-autoplay') ){
+                autoplayTrack = queueTrack;
+            }
         });
+        
+        if (autoplayTrack){
+            console.log("autoplay:");
+            console.log(autoplayTrack);
+            autoplayTrack.play_track();
+        }
+        
         bottomPlayer.debug("Queued tracks: " + tracks.length );
 
     });
@@ -67,6 +80,11 @@ $( document ).ready(function() {
         if (tracklist.isExpired){
             tracklist.reload_tracklist(autoplay);
         }else{
+            
+            if (autoplay){
+                $(tracklist).find('wpsstm-track').first().addClass('track-autoplay');
+            }
+            
             /*
             Since wpsstmTracklistReady is fired when the tracklist is inserted, it will be fired before document.ready.
             So fire it once more at init.

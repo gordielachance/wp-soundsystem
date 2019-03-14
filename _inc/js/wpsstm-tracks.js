@@ -638,9 +638,7 @@ class WpsstmTrack extends HTMLElement{
                 */
 
                 player.current_track = tracksContainer.find('wpsstm-track').get(trackIndex);
-                
-                console.log(player.current_track);
-                
+
                 var source_play = player.current_track.play_first_available_source();
 
                 source_play.done(function(v) {

@@ -249,35 +249,6 @@ class WpsstmPlayer extends HTMLElement{
 
     }
 
-    unQueueContainer(tracklist){
-        var self = this;
-
-        /*
-        Stop current track if it is part of this tracklist
-        */
-        if ( self.current_track && $(tracklist).find($(self.current_track)).length ){
-            self.debug("current track is being unqueued, stop it");
-            self.current_track.end_track();
-        }
-
-        /*
-        Keep only tracks that do not belong to the current tracklist
-        */
-        var cleanedTracks = self.tracks.filter(function( track ) {
-            var track_idx = $(self.tracks).index( $(track) );
-            return (track_idx === -1);
-          })
-        
-        var newTrackCount = cleanedTracks.length;
-        var oldTrackCount = self.tracks.length;
-        var removedTrackCount = oldTrackCount - newTrackCount;
-
-        tracklist.debug( 'remove tracks from #' + $(self).attr('id') );
-        self.debug("unQueued " + removedTrackCount + " tracks, still in queue: " + newTrackCount);
-        
-        self.tracks = cleanedTracks;
-    }
-    
     queueTrack(track){
         var self = this;
         var playerQueue = $(self).find('.player-queue');
@@ -293,40 +264,9 @@ class WpsstmPlayer extends HTMLElement{
 
         $(self).find('.player-queue').append(queueTrack);
         
+        return queueTrack;
+        
     }
-    /*
-    queueContainer(tracklist){
-        var self = this;
-        
-
-        $(tracklist).one( "wpsstmTracklistBeforeReload", function( event ) {
-            console.log("***wpsstmTracklistBeforeReload");
-            self.unQueueContainer(this);
-
-            
-        });
-
-        var appendCount = 0;
-        var firstTrack = null;
-        $(tracklist).find('wpsstm-track').each(function(index, track) {
-            self.queueTrack(track);
-            appendCount = appendCount + 1;
-        });
-        
-        tracklist.debug( 'append tracks to #' + $(self).attr('id') );
-        self.debug("Queued tracks: " + appendCount );
-        
-        
-        //autoplay
-        var autoPlayTrack = $(self).find('.player-queue wpsstm-track.track-autoplay').get(0);
-        
-        if(autoPlayTrack){
-            console.log("AUTOPLAY TRACK");
-            autoPlayTrack.play_track();
-        }
-
-    }
-    */
 
     get_previous_track(){
         var self = this;
