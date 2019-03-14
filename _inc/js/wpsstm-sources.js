@@ -102,11 +102,15 @@ class WpsstmSource extends HTMLElement{
         $(self).on('click', '.wpsstm-source-title', function(e) {
             e.preventDefault();
             
+            var source = this.closest('wpsstm-source');
+            var track = this.closest('wpsstm-track');
+            var sourceIdx = Array.from(source.parentNode.children).indexOf(source);
+            
             //toggle tracklist sources
             var list = self.closest('.wpsstm-track-sources-list');
             $( list ).removeClass('active');
-            
-            self.play_source();
+
+            track.play_track(sourceIdx);
             
         });
         
@@ -183,20 +187,22 @@ class WpsstmSource extends HTMLElement{
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
         
-        console.log("PLAYTSOURCE");
-        console.log(track);
+        console.log("PLAYSOURCE?");
         
         if (!player){
             success.reject("no player");
             return success.promise();
         }
         
+        console.log("PLAYSOURCE!");
+        
         var playingSources = $(player).find('wpsstm-source.source-active');
         var playingTracks = $(player).find('wpsstm-track.track-active');
         
         //we're trying to play the same source again
         if ( $(source).hasClass('source-active') ){
-            success.reject("we've already playing this soure");
+            source.debug("already playing!");
+            success.resolve();
             return success.promise();
         }
         

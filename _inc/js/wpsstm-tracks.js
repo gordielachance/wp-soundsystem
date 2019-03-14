@@ -217,7 +217,6 @@ class WpsstmTrack extends HTMLElement{
         //play/pause track button
         var bt = $(self).find(".wpsstm-track-play-bt");
         bt.click(function(e) {
-            alert("CLICK");
             e.preventDefault();
             self.queueNode.play_track();
         });
@@ -604,7 +603,7 @@ class WpsstmTrack extends HTMLElement{
         return success.promise();
     }
 
-    play_track(){
+    play_track(source_idx){
         var track = this.getQueueTrack();
 
         var player = track.closest('wpsstm-player');
@@ -615,7 +614,8 @@ class WpsstmTrack extends HTMLElement{
             return success.promise();
         }
         
-        console.log("play_track");
+        console.log("PLAY TRACK");
+        
 
         var track_instances = track.get_instances();
 
@@ -658,7 +658,7 @@ class WpsstmTrack extends HTMLElement{
 
                 player.current_track = tracksContainer.find('wpsstm-track').get(trackIndex);
 
-                var source_play = player.current_track.play_first_available_source();
+                var source_play = player.current_track.play_first_available_source(source_idx);
 
                 source_play.done(function(v) {
                     success.resolve();
@@ -719,13 +719,13 @@ class WpsstmTrack extends HTMLElement{
 
     }
     
-    play_first_available_source(){
+    play_first_available_source(source_idx){
 
         var track = this;
         var player = track.closest('wpsstm-player');
         var success = $.Deferred();
 
-        var source_idx = 0;
+        source_idx = (typeof source_idx !== 'undefined') ? source_idx : 0;
         var sources_playable = [];
 
         /*
