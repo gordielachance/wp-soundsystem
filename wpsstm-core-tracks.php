@@ -462,7 +462,7 @@ class WPSSTM_Core_Tracks{
         $no_subtracks = $query->get('exclude_subtracks');
         
         if ($no_subtracks){
-            $where .= sprintf(" AND ID NOT IN (SELECT track_id FROM %s)",$subtracks_table);
+            $where .= sprintf(" AND subtracks.ID NOT IN (SELECT track_id FROM %s)",$subtracks_table);
         }
 
         return $where;
