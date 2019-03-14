@@ -55,8 +55,8 @@ class WPSSTM_Core_Tracklists{
         AJAX
         */
         
-        add_action('wp_ajax_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
-        add_action('wp_ajax_nopriv_wpsstm_load_tracklist', array($this,'ajax_load_tracklist'));
+        add_action('wp_ajax_wpsstm_reload_tracklist', array($this,'ajax_reload_tracklist'));
+        add_action('wp_ajax_nopriv_wpsstm_reload_tracklist', array($this,'ajax_reload_tracklist'));
         add_action('wp_ajax_wpsstm_tracklist_toggle_favorite', array($this,'ajax_toggle_favorite'));
 
         //subtracks
@@ -104,14 +104,13 @@ class WPSSTM_Core_Tracklists{
         }
     }
     
-    function ajax_load_tracklist(){
+    function ajax_reload_tracklist(){
         global $wpsstm_tracklist;
         
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        
-        $html = $wpsstm_tracklist->get_tracklist_html();
+        $html = $wpsstm_tracklist->get_tracklist_html(true);
 
         $result = array(
             'success' =>    true,

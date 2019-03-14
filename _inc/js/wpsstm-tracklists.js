@@ -282,7 +282,7 @@ class WpsstmTracklist extends HTMLElement{
         self.debug("reload tracklist... autoplay ?" + autoplay);
 
         var ajax_data = {
-            action:     'wpsstm_load_tracklist',
+            action:     'wpsstm_reload_tracklist',
             tracklist:      self.to_ajax(),   
         };
 

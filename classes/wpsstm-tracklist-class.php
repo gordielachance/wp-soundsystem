@@ -217,14 +217,24 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function get_tracklist_html(){
+    function get_tracklist_html($force_refresh = null){
         
-        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+        if ($force_refresh === true){
+            
+            $this->is_expired = true;
+            
+        }else{
+            
+            $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
 
-        if ( $is_ajax_refresh && !wp_doing_ajax() ){
-            $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
-            $this->is_expired = false;
+            if ( $is_ajax_refresh && !wp_doing_ajax() ){
+                $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
+                $this->is_expired = false;
+            }
+            
         }
+        
+
 
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
