@@ -80,7 +80,7 @@ class WPSSTM_Core_Tracklists{
     function register_tracklists_scripts_styles(){
 
         //JS
-        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wpsstm-functions','wpsstm-tracks','wpsstm-sources','jquery-ui-sortable','jquery-ui-dialog','jquery.toggleChildren'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wpsstm-functions','wpsstm-tracks','wpsstm-sources','jquery-ui-sortable','jquery-ui-dialog'),wpsstm()->version, true );
 
 
         //JS

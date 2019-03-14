@@ -38,29 +38,6 @@ $('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklis
 
 });
 
-//TOUFIX expand tracklist to the current track / currently disabled
-/*
-$(document).on( "wpsstmRequestPlay", function( event, track_obj ) {
-
-    //expand tracklist
-    if ( $(track_obj).is(":visible") ) return;
-
-    var tracklist_obj = $(track_obj).parents('wpsstm-tracklist');
-    var tracklist_el = track_obj.tracklist;
-    var visibleTracksCount = tracklist.find('wpsstm-track:visible').length;
-    var newTracksCount = track_obj.position + 1;
-
-    if ( newTracksCount <= visibleTracksCount ) return;
-
-    if ( tracklist_el.options.toggle_tracklist ){
-        tracklist_el.showMoreLessTracks({
-            childrenToShow:newTracksCount
-        });
-    }
-
-});
-*/
-
 class WpsstmTracklist extends HTMLElement{
     constructor() {
         super(); //required to be first
@@ -68,10 +45,7 @@ class WpsstmTracklist extends HTMLElement{
         this.index =                    undefined;
         this.post_id =                  undefined;
         this.tracklist_request =        undefined;
-        this.tracks =                   [];
-        this.tracks_count =             undefined;
         this.options =                  [];
-        this.can_play =                 undefined;
         this.isExpired =                undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
@@ -121,16 +95,26 @@ class WpsstmTracklist extends HTMLElement{
     firstTrackWatch(mutationsList) {
         for(var mutation of mutationsList) {
             if (mutation.type == 'attributes') {
-                var track = mutation.target;
-                var tracklist = mutation.target.closest('wpsstm-tracklist');
-                if (tracklist.isExpired){
-                    console.log("NEED REFRESH !");
+                
+                var attrName = mutation.attributeName;
+                var attrValue = mutation.target.getAttribute(attrName);
+
+                switch (attrName) {
+                    case 'playtrackrequest':
+                        
+                        if (!attrValue) break;
+                        
+                        var track = mutation.target;
+                        var tracklist = mutation.target.closest('wpsstm-tracklist');
+                        if (tracklist.isExpired){
+                            tracklist.debug("TRACK#1 requested but tracklist is outdated, refresh!");
+                            tracklist.reload_tracklist(true);
+                        }
+                    break;
                 }
                 
                 
-                var attribute = mutation.attributeName;
-                var value = mutation.target.getAttribute(attribute);
-                console.log(attribute + ' --> '+value);
+                
             }
         }
     }
@@ -158,7 +142,6 @@ class WpsstmTracklist extends HTMLElement{
     render(){
 
         var self = this;
-        self.tracks =                   []; //unset current tracks
 
         self.post_id =                  Number( $(self).data('wpsstm-tracklist-id') );
         self.options =                  $(self).data('wpsstm-tracklist-options');
@@ -240,17 +223,7 @@ class WpsstmTracklist extends HTMLElement{
         Subtracks
         */
 
-        var tracks_html = $(self).find('wpsstm-track');
-
-        if ( tracks_html.length ){
-            $.each(tracks_html, function( index, track_html ) {
-                self.tracks.push(track_html);
-            });
-        }
-
-        /* tracks count */
-        self.tracks_count = $(self.tracks).length;
-        self.can_play =     (self.tracks_count > 0);
+        var tracks = $(self).find('wpsstm-track');
 
         //sort subtracks
         var startSortIdx, endSortIdx;
@@ -262,7 +235,7 @@ class WpsstmTracklist extends HTMLElement{
             },
             update: function(event, ui) {
                 endSortIdx = ui.item.index();
-                var track = self.tracks[startSortIdx];
+                var track = tracks.get(startSortIdx);
                 var old_position = Number($(track).attr('data-wpsstm-subtrack-position'));
                 var new_position = ui.item.index() + 1;
 
@@ -275,9 +248,6 @@ class WpsstmTracklist extends HTMLElement{
 
             }
         });
-
-        //hide a tracklist columns if all datas are the same
-        self.checkTracksIdenticalValues();
 
         console.log("Tracklist #" + self.index + " is ready");
         
@@ -475,69 +445,7 @@ class WpsstmTracklist extends HTMLElement{
         })
 
     }
-        
-    showMoreLessTracks(options){
 
-        var self = this;
-
-        // OPTIONS
-        var defaults = {
-            childrenShowCount:  true,
-            childrenToShow:        3,
-            childrenSelector:   'wpsstm-track',
-            btMore:             '<li><i class="fa fa-angle-down" aria-hidden="true"></i></li>',
-            lessText:           '<li><i class="fa fa-angle-up" aria-hidden="true"></i></li>',
-        };
-
-        var options =  $.extend(defaults, options);
-
-        if ( this.tracks_count > 0 ) {
-            return $(self).find('.wpsstm-tracks-list').toggleChildren(options);
-        }
-
-    }
-    /*
-    For each track, check if certain cells (image, artist, album...) have the same value - and hide them if yes.
-    */
-    checkTracksIdenticalValues() {
-        
-        var self = this;
-
-        if (self.tracks.length <= 1) return;
-        
-        var track_els = $($(self)).find('wpsstm-track');
-        
-        var selectors = ['.wpsstm-track-image','[itemprop="byArtist"]','[itemprop="name"]','[itemprop="inAlbum"]'];
-        var values_by_selector = [];
-        
-        function onlyUnique(value, index, self) { 
-            return self.indexOf(value) === index;
-        }
-
-        $.each( $(selectors), function() {
-            var hide_column = undefined;
-            var cells = track_els.find(this); //get all track children by selector
-            
-            var column_datas = cells.map(function() { //get all values for the matching items
-                return $(this).html();
-            }).get();
-            
-            var unique_values = column_datas.filter( onlyUnique ); //remove duplicate values
-
-            if (unique_values.length <= 1){
-                hide_column = true; //column has a single values; hide this column
-            }
-            
-            if (hide_column){
-                cells.addClass('wpsstm-track-unique-value');
-            }else{
-                cells.removeClass('wpsstm-track-unique-value');
-            }
-            
-        });
-        
-    }
-    
     //reduce object for communication between JS & PHP
     to_ajax(){
 

@@ -4,7 +4,6 @@ class WpsstmPlayer extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.tracks =                   [];
         this.shuffle_el =               undefined;
         this.loop_el =                  undefined;
         this.current_source =           undefined;
@@ -240,10 +239,6 @@ class WpsstmPlayer extends HTMLElement{
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
                 console.log("mediaElement error");
-                /*
-                source_instances.addClass('source-error');
-                source_instances.removeClass('source-active');
-                */
             }
         });
 
@@ -295,7 +290,7 @@ class WpsstmPlayer extends HTMLElement{
         });
 
         var previous_track = tracks_playable[0];
-        var previous_track_idx = ( previous_track ) ? $(self.tracks).index( previous_track ) : undefined;
+        var previous_track_idx = ( previous_track ) ? tracks.index( previous_track ) : undefined;
         
         return previous_track;
     }
@@ -329,7 +324,7 @@ class WpsstmPlayer extends HTMLElement{
         });
 
         var next_track = tracks_playable[0];
-        var next_track_idx = ( next_track ) ? $(self.tracks).index( next_track ) : undefined;
+        var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
 
         //console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
 

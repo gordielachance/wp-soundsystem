@@ -66,7 +66,7 @@ $( document ).ready(function() {
         if (autoplayTrack){
             console.log("autoplay:");
             console.log(autoplayTrack);
-            autoplayTrack.play_track();
+            //TOUFIX TOUREMOVE URGENT autoplayTrack.play_track();
         }
         
         bottomPlayer.debug("Queued tracks: " + tracks.length );

@@ -197,7 +197,6 @@ class WpsstmSource extends HTMLElement{
         console.log("PLAYSOURCE!");
         
         var playingSources = $(player).find('wpsstm-source.source-active');
-        var playingTracks = $(player).find('wpsstm-track.track-active');
         
         //we're trying to play the same source again
         if ( $(source).hasClass('source-active') ){
