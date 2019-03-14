@@ -48,8 +48,8 @@ class WpsstmPlayer extends HTMLElement{
     ///
     
     debug(msg){
-        var prefix = "WpsstmPlayer";
-        wpsstm_debug(msg,prefix);
+        var debug = {message:msg,player:this};
+        wpsstm_debug(debug);
     }
     
     /*
@@ -71,7 +71,7 @@ class WpsstmPlayer extends HTMLElement{
     render(){
 
         var self = this;
-        this.debug("LOAD player: #" +$(self).attr('id'));
+        this.debug("LOAD player");
         
         ///
         self.shuffle_el =   $('#wpsstm-player-shuffle');
@@ -358,11 +358,12 @@ class WpsstmPlayer extends HTMLElement{
         var allTracks = $(self).find('.player-queue wpsstm-track');
         var currentTrack = allTracks.filter('.track-active').get(0);
         var requestedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
-        
+
         if (currentTrack){
             currentTrack.removeAttribute('trackstatus');
         }
         
+        requestedTrack.debug('request track');
         requestedTrack.setAttribute('trackstatus','request');
         
         var trackPopulated = requestedTrack.maybe_load_sources();

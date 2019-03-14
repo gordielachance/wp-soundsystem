@@ -48,10 +48,8 @@ class WpsstmSource extends HTMLElement{
     ///
     
     debug(msg){
-        var self = this;
-        var track = self.track;
-        var prefix = "WpsstmTrack #" + track.position+" - WpsstmTrackSource #" + this.index;
-        wpsstm_debug(msg,prefix);
+        var debug = {message:msg,source:this};
+        wpsstm_debug(debug);
     }
     
     get_instances(){
@@ -198,7 +196,7 @@ class WpsstmSource extends HTMLElement{
             return success.promise();
         }
 
-        console.log("PLAY SOURCE");
+        source.debug("play");
         player.current_source = source;
         source.setAttribute('requestSourcePlay',true);
 
@@ -242,7 +240,7 @@ class WpsstmSource extends HTMLElement{
             success.resolve();
             
             source_instances.addClass('source-playing source-has-played');
-            tracklist_instances.addClass('tracklist-playing tracklist-has-played');
+            $(player).addClass('player-playing player-has-played');
             track_instances.addClass('track-playing track-has-played');
             
             track.setAttribute('trackstatus','playing');
@@ -252,7 +250,7 @@ class WpsstmSource extends HTMLElement{
             //player.debug('player - pause');
 
             //tracklists
-            tracklist_instances.removeClass('tracklist-playing');
+            $(player).removeClass('player-playing');
             //tracks
             track_instances.removeClass('track-playing');
             track.setAttribute('trackstatus','paused');
@@ -265,7 +263,7 @@ class WpsstmSource extends HTMLElement{
             player.debug('media - ended');
             
             //tracklists
-            tracklist_instances.removeClass('tracklist-playing');
+            $(player).removeClass('player-playing');
             //tracks
             track_instances.removeClass('track-playing track-active');
             $(track_instances).removeAttr('trackstatus');

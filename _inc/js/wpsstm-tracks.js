@@ -36,11 +36,11 @@ class WpsstmTrack extends HTMLElement{
         Called every time the element is removed from the DOM. Useful for running clean up code.
         */
         //console.log("TRACK DISCONNECTED!");
-        var self = this;
-        if ( self.queueNode ){
-            wpsstm_debug("remove queue node");
+        var track = this;
+        if ( track.queueNode ){
+            //track.debug("remove queue node");
             //Track removed from page, remove it from queue too
-            self.queueNode.remove();
+            track.queueNode.remove();
         }
         
         
@@ -50,9 +50,10 @@ class WpsstmTrack extends HTMLElement{
         var isValueChanged = (newVal !== oldVal);
         if (!isValueChanged) return;
         
-        console.log(`Value ${attrName} changed from ${oldVal} to ${newVal}`);
         var track = this;
         var player = track.closest('wpsstm-player');
+        
+        //track.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
             case 'trackstatus':
@@ -82,8 +83,8 @@ class WpsstmTrack extends HTMLElement{
     ///
 
     debug(msg){
-        var prefix = " WpsstmTrack #" + this.position;
-        wpsstm_debug(msg,prefix);
+        var debug = {message:msg,track:this};
+        wpsstm_debug(debug);
     }
 
     render(){
@@ -104,7 +105,7 @@ class WpsstmTrack extends HTMLElement{
         
         if ( this.pageNode ){ //track is in queue
             self.renderQueueTrack();
-        }else{
+        }else{ //track is in page
             self.renderPageTrack();
         }
 
@@ -198,8 +199,7 @@ class WpsstmTrack extends HTMLElement{
         });
 
         //sources
-        
-        /* Watch if track is playable */
+
         var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
 
         toggleSourcesEl.click(function(e) {
@@ -224,7 +224,6 @@ class WpsstmTrack extends HTMLElement{
     }
     
     renderPageTrack(){
-        console.log("IS IN PAGE!");
         var self = this;
         
         //play/pause track button
@@ -240,8 +239,6 @@ class WpsstmTrack extends HTMLElement{
     renderQueueTrack(){
         
         var self = this;
-        
-        console.log("IS IN QUEUE!");
 
         //play/pause track button
         var bt = $(self).find(".wpsstm-track-play-bt");
@@ -249,10 +246,10 @@ class WpsstmTrack extends HTMLElement{
             
             e.preventDefault();
             var player = self.closest('wpsstm-player');
-            
-            if ( player.current_media && (player.current_track == self) ){
+
+            if ( player.current_source && (player.current_track == self) ){
                 
-                console.log("reclicked on the current track");
+                self.debug("reclick");
 
                 if ( self.getAttribute("trackstatus") == 'playing' ){
                     player.current_media.pause();

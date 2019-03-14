@@ -1113,30 +1113,30 @@ wpsstm-player .player-queue:not(.active) wpsstm-track:not(.track-active) {
   display: none;
 }
 
-/* line 117, ../scss/_wpsstm-player.scss */
+/* line 116, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track {
   display: block !important;
 }
-/* line 119, ../scss/_wpsstm-player.scss */
+/* line 118, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track .wpsstm-track-actions {
   margin-left: inherit;
 }
-/* line 122, ../scss/_wpsstm-player.scss */
+/* line 121, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track .wpsstm-track-sources {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=60);
   opacity: 0.6;
 }
-/* line 124, ../scss/_wpsstm-player.scss */
+/* line 123, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track .wpsstm-track-sources wpsstm-source {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=60);
   opacity: 0.6;
 }
-/* line 126, ../scss/_wpsstm-player.scss */
+/* line 125, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track .wpsstm-track-sources wpsstm-source.source-playing {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   opacity: 0.8;
 }
-/* line 129, ../scss/_wpsstm-player.scss */
+/* line 128, ../scss/_wpsstm-player.scss */
 .wpsstm-player-tracklist .wpsstm-track .wpsstm-track-sources wpsstm-source:hover {
   filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
   opacity: 1;

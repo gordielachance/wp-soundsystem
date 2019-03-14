@@ -44,14 +44,14 @@ $('.wpsstm-artist-autocomplete').each(function() {
 
 
 $( document ).ready(function() {
-    console.log("DOM READY!");
+    wpsstm_debug("DOM READY!");
     
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
     var trackContainers = $('wpsstm-tracklist');
     
     //queue on tracklist init/refresh
     $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-        console.log("***wpsstmTracklistReady");
+
         var tracks = $(tracklist).find('wpsstm-track');
         var autoplayTrack;
         
@@ -76,6 +76,7 @@ $( document ).ready(function() {
     trackContainers.each(function(index,tracklist) {
         
         var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
+        tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
         if (tracklist.isExpired){
             tracklist.reload_tracklist(autoplay);
