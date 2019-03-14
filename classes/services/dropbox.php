@@ -2,7 +2,7 @@
 
 class WPSSTM_Dropbox{
     function __construct(){
-        add_filter('wpsstm_live_tracklist_url',array(__class__,'wpsstm_filter_dropbox_url'), 5); //priority before presets
+        add_filter('wpsstm_feed_url',array(__class__,'wpsstm_filter_dropbox_url'), 5); //priority before presets
     }
     static function wpsstm_filter_dropbox_url($url){
 
