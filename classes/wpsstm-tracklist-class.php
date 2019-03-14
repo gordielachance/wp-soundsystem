@@ -909,7 +909,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         }
         
-        wpsstm()->debug_log($track,"***DEQUEUE***");
         do_action('wpsstm_dequeue_track',$track,$this->post_id);
 
         //favorites ?
