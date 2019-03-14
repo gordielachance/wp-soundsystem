@@ -53,6 +53,22 @@ class WpsstmPlayer extends HTMLElement{
         wpsstm_debug(msg,prefix);
     }
     
+    /*
+    Toggle display the player when the queue is updated
+    */
+    queueUpdated(mutationsList, observer){
+        
+        for(var mutation of mutationsList) {
+            if (mutation.type == 'childList') {
+                var tracks = $(mutation.target).find('wpsstm-track');
+                var player = mutation.target.closest('wpsstm-player');
+                var showPlayer = ( tracks.length > 0);
+                $(player).toggleClass('active',showPlayer);
+            }
+        }
+
+    }
+    
     render(){
 
         var self = this;
@@ -61,6 +77,12 @@ class WpsstmPlayer extends HTMLElement{
         ///
         self.shuffle_el =   $('#wpsstm-player-shuffle');
         self.loop_el =      $('#wpsstm-player-loop');
+        
+        /* Watch for queue changes*/
+        var queueNode = $(self).find('.player-queue').get(0);
+        var queueUpdated = new MutationObserver(self.queueUpdated);
+        queueUpdated.observe(queueNode,{childList: true});
+        
 
         //toggle queue
         $(self).find('.wpsstm-player-action-queue a').click(function(e) {
@@ -254,7 +276,6 @@ class WpsstmPlayer extends HTMLElement{
         self.debug("unQueued " + removedTrackCount + " tracks, still in queue: " + newTrackCount);
         
         self.tracks = cleanedTracks;
-        //TOUFIX URGENT self.queueUpdateGUI();
     }
     
     queueTrack(track){
@@ -263,7 +284,7 @@ class WpsstmPlayer extends HTMLElement{
         var playerQueueTracks = $(playerQueue).find('wpsstm-track');
         var playerQueueCount = playerQueueTracks.length;
 
-        //queue track
+        //clone page track & append to queue
         var queueTrack = $(track).clone().get(0);
         queueTrack.pageNode = track;
         
@@ -273,7 +294,7 @@ class WpsstmPlayer extends HTMLElement{
         $(self).find('.player-queue').append(queueTrack);
         
     }
-    
+    /*
     queueContainer(tracklist){
         var self = this;
         
@@ -301,7 +322,6 @@ class WpsstmPlayer extends HTMLElement{
         tracklist.debug( 'append tracks to #' + $(self).attr('id') );
         self.debug("Queued tracks: " + appendCount );
         
-        self.queueUpdateGUI();
         
         //autoplay
         var autoPlayTrack = $(self).find('.player-queue wpsstm-track.track-autoplay').get(0);
@@ -312,15 +332,8 @@ class WpsstmPlayer extends HTMLElement{
         }
 
     }
-    
-    queueUpdateGUI(){
-        var self = this;
-        var queueTracks = $(self).find('.player-queue');
+    */
 
-        //show in not done yet
-        var showPlayer = ( queueTracks.length > 0);
-        $(self).toggle(showPlayer);
-    }
     get_previous_track(){
         var self = this;
         var tracks_before = [];

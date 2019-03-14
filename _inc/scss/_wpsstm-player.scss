@@ -5,6 +5,10 @@ $player-text-color:#FFF;
 
 wpsstm-player{
     
+    &:not(.active){
+        display:none;
+    }
+    
     &#wpsstm-bottom-player{
         position:fixed;
         width:100%;
@@ -14,7 +18,6 @@ wpsstm-player{
         z-index: 50;
     }
 
-    display:none;
     background:$player-bg-color;
     color:$player-text-color;
     a,a:hover,a:focus{
@@ -39,6 +42,7 @@ wpsstm-player{
             margin-right:.5em;
             @include flex-shrink(0);
             @include flex-grow(0);
+            margin-top:auto;
             .wpsstm-player-action{
 
                 a{
