@@ -302,13 +302,7 @@ class WpsstmPlayer extends HTMLElement{
         $(tracklist).one( "wpsstmTracklistBeforeReload", function( event ) {
             console.log("***wpsstmTracklistBeforeReload");
             self.unQueueContainer(this);
-            
-            //queue on refresh
-            this.one( "wpsstmTracklistReady", function( event ) {
-                console.log("***wpsstmTracklistReady");
-                self.queueContainer(this);
 
-            });
             
         });
 

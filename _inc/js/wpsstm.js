@@ -41,42 +41,40 @@ $('.wpsstm-artist-autocomplete').each(function() {
 });
 
 
+
+
 $( document ).ready(function() {
     console.log("DOM READY!");
     
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
     var trackContainers = $('wpsstm-tracklist');
-
-    /*
-    Handle page init
-    */
-    trackContainers.each(function(index,tracklist) {
-
-        var index = trackContainers.index( $(tracklist) );
-        var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
-
-        /* autoplay ? */
-        if (autoplay){
-            $(tracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
-        }
-        
-        //queue on init
-        $(tracklist).one( "wpsstmTracklistReady", function( event ) {
-            console.log("***wpsstmTracklistReady");
-            bottomPlayer.queueContainer(this);
+    
+    //queue on tracklist init/refresh
+    $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
+        console.log("***wpsstmTracklistReady");
+        var tracks = $(tracklist).find('wpsstm-track');
+        tracks.each(function(index, track) {
+            bottomPlayer.queueTrack(track);
         });
+        bottomPlayer.debug("Queued tracks: " + tracks.length );
+
+    });
+
+    trackContainers.each(function(index,tracklist) {
+        
+        var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
 
         if (tracklist.isExpired){
             tracklist.reload_tracklist(autoplay);
         }else{
-            bottomPlayer.queueContainer(tracklist);   
+            /*
+            Since wpsstmTracklistReady is fired when the tracklist is inserted, it will be fired before document.ready.
+            So fire it once more at init.
+            */
+            $(document).trigger("wpsstmTracklistReady",[tracklist]);
         }
-        
-
-        
 
     });
-    
 
     
 });

@@ -233,7 +233,7 @@ class WpsstmTracklist extends HTMLElement{
 
         console.log("Tracklist #" + self.index + " is ready");
         
-        $(self).trigger("wpsstmTracklistReady"); //custom event
+        $(document).trigger("wpsstmTracklistReady",[self]); //custom event
     }
     
     get_instances(){
@@ -272,14 +272,14 @@ class WpsstmTracklist extends HTMLElement{
                     /*
                     If the tracklist WAS playing, keep those classes (used for autoplay).
                     */
-                    var newTracklist = $(data.html);
+                    var newTracklist = $(data.html).get(0);
 
                     if (autoplay===true){
-                        newTracklist.find('wpsstm-track:first-child').addClass('track-autoplay');
+                        $(newTracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
                     }
 
                     //swap content
-                    self.replaceWith( newTracklist.get(0) );
+                    self.replaceWith( newTracklist );
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

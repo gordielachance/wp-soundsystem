@@ -13,7 +13,7 @@ class WpsstmTrack extends HTMLElement{
         this.post_id =              undefined;
         this.can_play =             undefined;
         this.pageNode =             undefined;
-        this.queueNode =            [];
+        this.queueNode =            undefined;
         
         this.did_sources_request =  undefined;
 
@@ -36,7 +36,14 @@ class WpsstmTrack extends HTMLElement{
         Called every time the element is removed from the DOM. Useful for running clean up code.
         */
         //console.log("TRACK DISCONNECTED!");
-        //console.log(this);
+        var self = this;
+        if ( self.queueNode ){
+            wpsstm_debug("remove queue node");
+            //Track removed from page, remove it from queue too
+            self.queueNode.remove();
+        }
+        
+        
     }
     attributeChangedCallback(attrName, oldVal, newVal){
         
@@ -82,10 +89,11 @@ class WpsstmTrack extends HTMLElement{
 
         var player = self.closest('wpsstm-player');
         
-        if (self.pageNode){ //track is in queue
-            console.log("IS IN QUEUE!");
-        }else{ //track is in page
-            console.log("IS IN PAGE!");
+        if ( this.pageNode ){ //track is in queue
+            self.renderQueueTrack();
+        }
+        if (this.queueNode) { //track is in page
+            self.renderPageTrack();
         }
 
         /*
@@ -221,17 +229,15 @@ class WpsstmTrack extends HTMLElement{
 
 
     }
-
-    get_queued(){
-        var self = this;
-        
-        if (!self.queue_id || !self.player) return; //this is not a page track
-        
-        var playerTracks = $(self.player).find('wpsstm-track');
-        return playerTracks.get(self.queue_id);
-        
+    
+    renderPageTrack(){
+        //console.log("IS IN PAGE!");
     }
     
+    renderQueueTrack(){
+        console.log("IS IN QUEUE!");
+    }
+
     get_instances(){
         var self = this;
         var instances = [];
