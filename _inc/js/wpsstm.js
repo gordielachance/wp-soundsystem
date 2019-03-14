@@ -59,14 +59,14 @@ $( document ).ready(function() {
             var queueTrack = bottomPlayer.queueTrack(track);
             
             if ( $(track).hasClass('track-autoplay') ){
-                autoplayTrack = queueTrack;
+                autoplayTrackIdx = Array.from(track.parentNode.children).indexOf(track);
             }
         });
         
-        if (autoplayTrack){
+        if (autoplayTrackIdx){
             console.log("autoplay:");
-            console.log(autoplayTrack);
-            //TOUFIX TOUREMOVE URGENT autoplayTrack.play_track();
+            console.log(autoplayTrackIdx);
+            //TOUFIX TOUREMOVE URGENT bottomPlayer.play_queue(autoplayTrackIdx);
         }
         
         bottomPlayer.debug("Queued tracks: " + tracks.length );

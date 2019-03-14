@@ -248,10 +248,11 @@ class WpsstmTrack extends HTMLElement{
                     player.current_media.play();
                 }
             }else{
-                
+                var trackIdx = Array.from(self.parentNode.children).indexOf(self);
+                player.play_queue(trackIdx);
             }
-
-            self.play_track();
+            
+            
 
         });
         
@@ -381,12 +382,6 @@ class WpsstmTrack extends HTMLElement{
                 
                 var newContent = $(data.html);
                 var currentStatus = self.getAttribute('trackstatus');
-                
-                //add custom attributes
-                newContent.get(0).setAttribute('trackstatus',currentStatus);
-                
-                alert("CLONE STATUS:" + currentStatus);
-                
 
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
@@ -396,12 +391,9 @@ class WpsstmTrack extends HTMLElement{
                 
                 newQueueTrack.pageNode = newPageTrack;
                 newPageTrack.queueNode = newQueueTrack;
-                
-                console.log("YAAAW");
-                
+
                 oldQueueNode.replaceChild(newQueueTrack, self); //replace in queue
                 oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
-
 
                 success.resolve();
                 
@@ -618,7 +610,7 @@ class WpsstmTrack extends HTMLElement{
     }
 
     play_track(source_idx){
-        var track = this.getQueueTrack();
+        var track = this;
         var player = track.closest('wpsstm-player');
 
         var success = $.Deferred();
@@ -638,52 +630,15 @@ class WpsstmTrack extends HTMLElement{
         
         track_instances.addClass('track-loading track-active');
 
-        //handle current track
-        if ( player.current_track && ( track !== player.current_track ) ){
-            player.current_track.end_track();
-        }
-        player.current_track = track;
-        player.render_queue_controls();
+        var source_play = player.current_track.play_first_available_source(source_idx);
 
-        /*Get index before track is reloaded*/
-        var tracksContainer = $(track.parentNode);
-        var trackIndex = tracksContainer.find('wpsstm-track').index( $(track) );
-
-        track.maybe_load_sources().then(
-            function(success_msg){
-                
-                /* at this point, if the track has been reloaded, it is no more the same node. So get the new one
-                */
-
-                player.current_track = tracksContainer.find('wpsstm-track').get(trackIndex);
-                var status = player.current_track.getAttribute('status');
-                
-                console.log("LOADED");
-                console.log(player.current_track);
-                console.log("STATUS:" + status);
-                console.log(status);
-                
-                
-                alert("NOW STATUS:" + player.current_track.getAttribute('status'));
-                
-                if ( status == 'request' ){
-                    var source_play = player.current_track.play_first_available_source(source_idx);
-                }
-
-                source_play.done(function(v) {
-                    success.resolve();
-                })
-                source_play.fail(function(reason) {
-                    console.log(reason);
-                    success.reject(reason);
-                })
-
-            },
-            function(error_msg){
-                success.reject(error_msg);
-            }
-        );
-
+        source_play.done(function(v) {
+            success.resolve();
+        })
+        source_play.fail(function(reason) {
+            console.log(reason);
+            success.reject(reason);
+        })
 
         success.done(function(v) {
             

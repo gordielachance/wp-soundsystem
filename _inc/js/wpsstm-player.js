@@ -263,7 +263,7 @@ class WpsstmPlayer extends HTMLElement{
         
     }
 
-    get_previous_track(){
+    get_previous_track_idx(){
         var self = this;
         var tracks_before = [];
 
@@ -292,10 +292,10 @@ class WpsstmPlayer extends HTMLElement{
         var previous_track = tracks_playable[0];
         var previous_track_idx = ( previous_track ) ? tracks.index( previous_track ) : undefined;
         
-        return previous_track;
+        return previous_track_idx;
     }
     
-    get_next_track(){
+    get_next_track_idx(){
         var self = this;
         var tracks_after = [];
 
@@ -326,41 +326,18 @@ class WpsstmPlayer extends HTMLElement{
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
 
-        //console.log("get_next_track: current: " + current_track_idx + ", next;" + next_track_idx);
+        //console.log("get_next_track_idx: current: " + current_track_idx + ", next;" + next_track_idx);
 
-        return next_track;
+        return next_track_idx;
     }
     
     previous_track_jump(){
         
         var self = this;
-        
-        var track = self.get_previous_track();
+        var track_idx = self.get_previous_track_idx();
 
-        if (track){
-            
-            var tracklist = track.tracklist;
-            
-            if (tracklist){
-                /*
-                check if we need to reload the tracklist
-                */
-                if (new_track_idx > current_track_idx){
-                    if (tracklist.isExpired){
-                        var current_track_idx = $(tracklist).find('wpsstm-track').index( $(self.current_track) );
-                        var new_track_idx = $(tracklist).find('wpsstm-track').index( track );
-
-
-                        tracklist.debug("tracklist backward loop and it is expired, refresh it!");
-                        self.current_track.end_track();
-                        tracklist.reload_tracklist(true);
-                        return;
-
-                    }
-                }
-            }
-
-            track.play_track();
+        if (track_idx){
+            self.play_queue(track_idx);
         }else{
             self.debug("no previous track");
             self.current_track.end_track();
@@ -370,35 +347,39 @@ class WpsstmPlayer extends HTMLElement{
     next_track_jump(){
         var self = this;
 
-        var track = self.get_next_track();
+        var track_idx = self.get_next_track_idx();
 
-        if (track){
-            
-            var tracklist = track.tracklist;
-            
-            if (tracklist){
-                /*
-                check if we need to reload the tracklist
-                */
-                if (new_track_idx < current_track_idx){
-                    if (tracklist.isExpired){
-                        var current_track_idx = $(tracklist).find('wpsstm-track').index( $(self.current_track) );
-                        var new_track_idx = $(tracklist).find('wpsstm-track').index( track );
-
-
-                            tracklist.debug("tracklist forward loop and it is expired, refresh it!");
-                            self.current_track.end_track();
-                            tracklist.reload_tracklist(true);
-                            return;
-
-                    }
-                }
-            }
-
-            track.play_track();
+        if (track_idx){
+            self.play_queue(track_idx);
         }else{
             self.debug("no next track");
         }
+
+    }
+    
+    play_queue(track_idx){
+        var self = this;
+        var populated = $.Deferred();
+        
+        var track = $(self).find('.player-queue wpsstm-track').get(track_idx);
+        
+        //handle current track
+        if ( self.current_track && ( track !== self.current_track ) ){
+            self.current_track.end_track();
+        }
+        self.current_track = track;
+        self.render_queue_controls();
+        
+        track.maybe_load_sources().then(function() {
+            /* node has been swapped so fetch the track again*/
+            track = $(self).find('.player-queue wpsstm-track').get(track_idx);
+            populated.resolve(track);
+        });
+        
+        populated.done(function(track) {
+            self.current_track = track;
+            self.current_track.play_track();
+        })
 
     }
 
@@ -410,19 +391,17 @@ class WpsstmPlayer extends HTMLElement{
         Previous track bt
         */
 
-        var previous_track = self.get_previous_track();
-        var has_previous_track = (previous_track!==undefined);
+        var previous_track_idx = self.get_previous_track_idx();
         var previousTrackEl = $(self).find('#wpsstm-player-extra-previous-track');
 
-        previousTrackEl.toggleClass('active',has_previous_track);
+        previousTrackEl.toggleClass('active',previous_track_idx);
 
         /*
         Next track bt
         */
-        var next_track = self.get_next_track();
-        var has_next_track = (next_track!==undefined);
+        var next_track_idx = self.get_next_track_idx();
         var nextTrackEl = $(self).find('#wpsstm-player-extra-next-track');
-        nextTrackEl.toggleClass('active',has_next_track);
+        nextTrackEl.toggleClass('active',next_track_idx);
     }
 
 
