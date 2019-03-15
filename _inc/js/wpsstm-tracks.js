@@ -237,28 +237,44 @@ class WpsstmTrack extends HTMLElement{
     
     renderQueueTrack(){
         
-        var self = this;
+        var track = this;
 
         //play/pause track button
-        var bt = $(self).find(".wpsstm-track-play-bt");
+        var bt = $(track).find(".wpsstm-track-play-bt");
         bt.click(function(e) {
             
             e.preventDefault();
-            var player = self.closest('wpsstm-player');
+            var player = track.closest('wpsstm-player');
 
-            if ( player.current_source && (player.current_track == self) ){
+            if ( player.current_source && (player.current_track == track) ){
                 
-                self.debug("reclick");
+                track.debug("reclick");
 
-                if ( self.getAttribute("trackstatus") == 'playing' ){
+                if ( track.getAttribute("trackstatus") == 'playing' ){
                     player.current_media.pause();
                 }else{
                     player.current_media.play();
                 }
             }else{
-                var trackIdx = Array.from(self.parentNode.children).indexOf(self);
+                var trackIdx = Array.from(track.parentNode.children).indexOf(track);
                 player.play_queue(trackIdx);
             }
+
+        });
+        
+        /*
+        Scroll to page track
+        */
+        $(track).find('.wpsstm-track-position').click(function(e) {
+            e.preventDefault();
+            
+            var pageTrack = track.pageNode;
+
+            //https://stackoverflow.com/a/6677069/782013
+            //TOUFIX BROKEN
+            $('html, body').animate({
+                scrollTop: $(pageTrack).offset().top - ( $(window).height() / 3) //not at the very top
+            }, 500);
 
         });
 

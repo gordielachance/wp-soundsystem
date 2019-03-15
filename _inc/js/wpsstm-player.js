@@ -110,23 +110,6 @@ class WpsstmPlayer extends HTMLElement{
         });
 
         /*
-        Scroll to playlist track when clicking the player's track number
-        */
-        $(self).find('.wpsstm-track-position').click(function(e) {
-            e.preventDefault();
-            
-            var track = self.current_track;
-            var newTracksCount = track.position + 1;
-
-            //https://stackoverflow.com/a/6677069/782013
-            //TOUFIX BROKEN
-            $('html, body').animate({
-                scrollTop: $(track).offset().top - ( $(window).height() / 3) //not at the very top
-            }, 500);
-
-        });
-        
-        /*
         Track popups for player
         TOUFIX TOUCHECK
         
