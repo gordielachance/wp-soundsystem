@@ -298,6 +298,11 @@ class WpsstmPlayer extends HTMLElement{
         var tracks_playable = tracks_before.filter(function (track) {
             return (track.can_play !== false);
         });
+        
+        //shuffle ?
+        if (self.is_shuffle){
+            tracks_playable = wpsstm_shuffle(tracks_playable);
+        }
 
         var previous_track = tracks_playable[0];
         var previous_track_idx = ( previous_track ) ? tracks.index( previous_track ) : undefined;
@@ -328,6 +333,11 @@ class WpsstmPlayer extends HTMLElement{
         var tracks_playable = tracks_after.filter(function (track_obj) {
             return (track_obj.can_play !== false);
         });
+        
+        //shuffle ?
+        if (self.is_shuffle){
+            tracks_playable = wpsstm_shuffle(tracks_playable);
+        }
 
         var next_track = tracks_playable[0];
         var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
