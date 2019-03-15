@@ -237,13 +237,16 @@ class WpsstmSource extends HTMLElement{
 
         $(player.current_media).on('play', function() {
             //player.debug('media - play');
-            success.resolve();
             
+            player.tracksHistory.push(track);
+
             source_instances.addClass('source-playing source-has-played');
             $(player).addClass('player-playing player-has-played');
             track_instances.addClass('track-playing track-has-played');
             
             track.setAttribute('trackstatus','playing');
+            
+            success.resolve();
         });
 
         $(player.current_media).on('pause', function() {

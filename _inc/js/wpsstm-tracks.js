@@ -37,13 +37,13 @@ class WpsstmTrack extends HTMLElement{
         */
         //console.log("TRACK DISCONNECTED!");
         var track = this;
-        if ( track.queueNode ){
+        
+        if ( track.queueNode ){ //page track
             //track.debug("remove queue node");
             //Track removed from page, remove it from queue too
             track.queueNode.remove();
         }
-        
-        
+
     }
     attributeChangedCallback(attrName, oldVal, newVal){
         
@@ -101,12 +101,6 @@ class WpsstmTrack extends HTMLElement{
         self.did_sources_request =  $(self).hasClass('track-autosourced');
 
         var player = self.closest('wpsstm-player');
-        
-        if ( this.pageNode ){ //track is in queue
-            self.renderQueueTrack();
-        }else{ //track is in page
-            self.renderPageTrack();
-        }
 
         /*
         populate existing sources
@@ -259,12 +253,9 @@ class WpsstmTrack extends HTMLElement{
                 var trackIdx = Array.from(self.parentNode.children).indexOf(self);
                 player.play_queue(trackIdx);
             }
-            
-            
 
         });
-        
-        
+
     }
 
     get_instances(){
@@ -365,15 +356,15 @@ class WpsstmTrack extends HTMLElement{
     
     reload_track(){
         
-        var self = this;
+        var track = this;
         var success = $.Deferred();
-        var track_instances = self.get_instances();
+        var track_instances = track.get_instances();
 
         track_instances.addClass('track-loading');
         
         var ajax_data = {
             action:     'wpsstm_track_html',
-            track:      self.to_ajax(),   
+            track:      track.to_ajax(),   
         };
 
         var sources_request = $.ajax({
@@ -393,19 +384,24 @@ class WpsstmTrack extends HTMLElement{
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
 
-                var oldQueueNode = self.parentNode;
-                var oldPageNode = self.pageNode;
+                var oldQueueNode = track.parentNode;
+                var oldPageNode = track.pageNode;
+
+                oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
+                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
                 
+                //link (!once nodes have been inserted)
                 newQueueTrack.pageNode = newPageTrack;
                 newPageTrack.queueNode = newQueueTrack;
-
-                oldQueueNode.replaceChild(newQueueTrack, self); //replace in queue
-                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
+                
+                //init - TOUFIX we should have a better way to handle this
+                newQueueTrack.renderQueueTrack();
+                newPageTrack.renderPageTrack();
 
                 success.resolve();
                 
             }else{
-                self.debug("track refresh failed: " + data.message);
+                track.debug("track refresh failed: " + data.message);
                 success.reject(data.message);
             }
         });

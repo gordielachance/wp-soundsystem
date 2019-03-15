@@ -11,6 +11,7 @@ class WpsstmPlayer extends HTMLElement{
         this.is_shuffle =               ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         this.can_repeat =               ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
         this.current_media =            undefined;
+        this.tracksHistory =            [];
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -51,7 +52,7 @@ class WpsstmPlayer extends HTMLElement{
         var debug = {message:msg,player:this};
         wpsstm_debug(debug);
     }
-    
+
     /*
     Toggle display the player when the queue is updated
     */
@@ -61,8 +62,14 @@ class WpsstmPlayer extends HTMLElement{
             if (mutation.type == 'childList') {
                 var tracks = $(mutation.target).find('wpsstm-track');
                 var player = mutation.target.closest('wpsstm-player');
+                
+                //show player if it has a queue
                 var showPlayer = ( tracks.length > 0);
                 $(player).toggleClass('active',showPlayer);
+                
+                //clean tracks history
+                var queueTracks =  $(player).find('.player-queue wpsstm-track').toArray();
+                player.tracksHistory = player.tracksHistory.filter(item => queueTracks.includes(item));
             }
         }
 
@@ -249,17 +256,19 @@ class WpsstmPlayer extends HTMLElement{
         var playerQueue = $(self).find('.player-queue').get(0);
         
         //show play BT
-        $(track).find('.wpsstm-track-play-bt').show();
-
         //clone page track & append to queue
         var queueTrack = $(track).clone().get(0);
         queueTrack.pageNode = track;
         playerQueue.append(queueTrack);
         //
-        
+
         //post track
         track.queueNode = queueTrack;
         
+        //init - TOUFIX we should have a better way to handle this
+        queueTrack.renderQueueTrack();
+        track.renderPageTrack();
+
         return queueTrack;
         
     }
