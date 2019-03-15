@@ -927,7 +927,6 @@ class WPSSTM_Track{
 
         //delete track
         if ($can_delete_track){
-            $trash_action_url = $this->get_track_action_url('trash');
             $actions['trash'] = array(
                 'text' =>      __('Trash'),
                 'classes' =>    array('wpsstm-advanced-action'),
