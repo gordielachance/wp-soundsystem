@@ -10,7 +10,6 @@ class WPSSTM_LastFM{
     
     static $lastfm_options_meta_name = 'wpsstm_lastfm_options';
     static $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
-    static $lastfm_user_scrobbler_disabled_meta_name = 'wpsstm_scrobbler_disabled';
     
     public $lastfm_user = null;
     
@@ -314,7 +313,7 @@ class WPSSTM_LastFM{
         //localize vars
         $localize_vars=array(
             'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && $this->get_options('scrobble_along') ),
-            'lastfm_user_scrobbler'     => ( $this->has_user_scrobbler() === true),
+            'lastfm_user_scrobbler'     => ( $this->lastfm_user->is_lastfm_enabled() === true),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -468,18 +467,7 @@ class WPSSTM_LastFM{
         
         return $results;
     }
-    
-    function has_user_scrobbler(){
-        if ( !$user_id = get_current_user_id() ){
-            return new WP_Error( 'missing_user_id', __( "User is not logged", "wpsstm" ) );
-        }elseif ( !$this->get_options('can_scrobble') ){
-            return new WP_Error( 'cannot_scrobble', __( "Scrobbling is disabled for users", "wpsstm" ) );
-        }else{
-            if ( get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $user_id ) ) return false;
-            return $this->lastfm_user->is_user_api_logged();
-        }
-    }
-    
+
     function ajax_lastm_toggle_user_scrobbler(){
         $ajax_data = wp_unslash($_POST);
         $do_enable = wpsstm_get_array_value('do_enable',$ajax_data);
@@ -510,11 +498,11 @@ class WPSSTM_LastFM{
                     $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
                     $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
                 }else{
-                    delete_user_option( $user_id, self::$lastfm_user_scrobbler_disabled_meta_name );
+                    delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
                     $result['success'] = true;
                 }
             }else{
-                update_user_option( $user_id, self::$lastfm_user_scrobbler_disabled_meta_name, true );
+                update_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name, true );
                 $result['success'] = true;
             }
 
@@ -529,6 +517,8 @@ class WPSSTM_LastFM{
     }
     
     function ajax_lastfm_now_playing_track(){
+        
+        if ( !$this->lastfm_user->is_lastfm_enabled() ) return;
         
         $ajax_data = wp_unslash($_POST);
         
@@ -560,7 +550,7 @@ class WPSSTM_LastFM{
     }
     
     function ajax_lastfm_scrobble_track(){
-        
+
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
@@ -756,6 +746,8 @@ class WPSSTM_LastFM_User{
     var $is_user_api_logged = null;
     var $user_auth = null;
     
+    static $lastfm_user_scrobbler_disabled_meta_name = 'wpsstm_scrobbler_disabled';
+    
     function __construct($user_id = null){
 
         if (!$user_id) $user_id = get_current_user_id();
@@ -763,6 +755,19 @@ class WPSSTM_LastFM_User{
         
         $this->user_id = $user_id;
         $this->user_token_transient_name = sprintf( 'wpsstm_lastfm_usertoken_%s',$user_id ); //name of the transient that stores the token for a user ID
+    }
+    
+    function is_lastfm_enabled(){
+        global $wpsstm_lastfm;
+
+        if ( !$this->user_id ){
+            return new WP_Error( 'missing_user_id', __( "Missing user ID.", "wpsstm" ) );
+        }elseif ( !$wpsstm_lastfm->get_options('can_scrobble') ){
+            return new WP_Error( 'cannot_scrobble', __( "Scrobbling is disabled for users", "wpsstm" ) );
+        }else{
+            if ( get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $this->user_id ) ) return false;
+            return $this->is_user_api_logged();
+        }
     }
     
     /*
@@ -975,8 +980,10 @@ class WPSSTM_LastFM_User{
     }
     
     public function love_lastfm_track(WPSSTM_Track $track,$do_love = null){
+        
+        $enabled = $this->is_lastfm_enabled();
+        if ( is_wp_error($enabled) || !$enabled ) return $enabled;
 
-        if ( !$this->is_user_api_logged() ) return false; //TOUFIX should return an error
         if ($do_love === null) return;
 
         $results = null;
@@ -1002,14 +1009,15 @@ class WPSSTM_LastFM_User{
         $debug_args['success'] = $results;
         $debug_args['do_love'] = $do_love;
         
-        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::lastfm_love_track()");
+        wpsstm()->debug_log($debug_args,"lastfm love track");
         
         return $results;
     }
     
     public function now_playing_lastfm_track(WPSSTM_Track $track){
 
-        if ( !$this->is_user_api_logged() ) return new WP_Error('lastfm_not_api_logged',__("User is not logged onto Last.fm",'wpsstm'));
+        $enabled = $this->is_lastfm_enabled();
+        if ( is_wp_error($enabled) || !$enabled ) return $enabled;
 
         $results = null;
         
@@ -1034,8 +1042,13 @@ class WPSSTM_LastFM_User{
     }
     
     public function scrobble_lastfm_track(WPSSTM_Track $track, $timestamp){
-
-        if ( !$this->is_user_api_logged() ) return new WP_Error('lastfm_not_api_logged',__("User is not logged onto Last.fm",'wpsstm'));
+        
+        $enabled = $this->is_lastfm_enabled();
+        if ( is_wp_error($enabled) ) return $enabled;
+        
+        if (!$enabled) {
+            return new WP_Error('lastfm_user_scrobbler_disabled',__("User has its scrobbler disabled.",'wpsstm'));
+        }
 
         $results = null;
         
