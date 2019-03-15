@@ -59,6 +59,10 @@ class WPSSTM_Settings {
         if( isset( $input['trash-temporary-tracklists'] ) ){
             WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
+        
+        if( isset( $input['trash-unplayable-sources'] ) ){
+            //TO FIX
+        }
 
         /*
         Community user
@@ -261,6 +265,14 @@ class WPSSTM_Settings {
                 'settings_system'//section
             );
             
+            add_settings_field(
+                'trash_unplayable_sources', 
+                __('Trash unplayable sources','wpsstm'), 
+                array( $this, 'trash_unplayable_sources_callback' ), 
+                'wpsstm-settings-page', // Page
+                'settings_system'//section
+            );
+            
         }
     }
     
@@ -451,6 +463,17 @@ class WPSSTM_Settings {
         $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+             disabled($count,0,false),
+            $desc
+        );
+    }
+    
+    function trash_unplayable_sources_callback(){
+        $count = 0;
+        $desc = sprintf(__("Delete %d unplayable sources that have been created with the community user.","wpsstm"),$count);
+        printf(
+            '<input type="checkbox" name="%s[trash-unplayable-sources]" value="on" %s disabled="disabled" /> %s',
             wpsstm()->meta_name_options,
              disabled($count,0,false),
             $desc
