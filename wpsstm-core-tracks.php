@@ -470,53 +470,54 @@ class WPSSTM_Core_Tracks{
             $wpsstm_track = new WPSSTM_Track( $post_id );
         }
     }
+    
+    function pre_get_posts_by_artist( $query ) {
+
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$artist = $query->get( 'lookup_artist' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+
+        $meta_query[] = array(
+             'key'     => self::$artist_metakey,
+             'value'   => $artist,
+             'compare' => '='
+        );
+
+        $query->set( 'meta_query',$meta_query);
+
+        return $query;
+    }
 
     function pre_get_tracks_by_title( $query ) {
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$track = $query->get( 'lookup_track' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+        
+        $meta_query[] = array(
+             'key'     => self::$title_metakey,
+             'value'   => $track,
+             'compare' => '='
+        );
 
-        if ( $track = $query->get( 'lookup_track' ) ){
-
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$title_metakey,
-                     'value'   => $track,
-                     'compare' => '='
-                )
-            ));
-        }
+        $query->set( 'meta_query',$meta_query);
 
         return $query;
     }
     
     function pre_get_posts_by_album( $query ) {
 
-        if ( $album = $query->get( 'lookup_album' ) ){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$album = $query->get( 'lookup_album' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
 
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$album_metakey,
-                     'value'   => $album,
-                     'compare' => '='
-                )
-            ));
-        }
+        $meta_query[] = array(
+             'key'     => self::$album_metakey,
+             'value'   => $album,
+             'compare' => '='
+        );
 
-        return $query;
-    }
-    
-    function pre_get_posts_by_artist( $query ) {
-
-        if ( $search = $query->get( 'lookup_artist' ) ){
-            
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$artist_metakey,
-                     'value'   => $search,
-                     'compare' => '='
-                )
-            ));
-        }
+        $query->set( 'meta_query',$meta_query);
 
         return $query;
     }
