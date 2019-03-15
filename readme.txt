@@ -7,15 +7,15 @@ Tested up to: 5.1
 Stable tag: trunk
 License: GPLv2 or later
 
-Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  The perfect fit for your music blog !
+Manage a music library within Wordpress ! Build playlists, manage tracks, import/backup remote playlists from various services, and keep it in sync.  The perfect fit for your music blog !
 
 == Description ==
 
-Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  It's the perfect fit for your music blog !
+Manage a music library within Wordpress ! Build playlists, manage tracks, import/backup remote playlists from various services, and keep it in sync.  The perfect fit for your music blog !
 
 = Several new post types =
 
-Playlists, Live Playlists, Albums, Artists, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
+Playlists, Live Playlists, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
 
 = Playlists =
 
@@ -133,13 +133,11 @@ There is an option in the plugin settings to flush those community tracks : they
 == Screenshots ==
 
 1. Settings page
-2. Artists menu
-3. Tracks menu
-4. Albums menu
-5. Playlists menu
-6. Tracklist metabox
-7. Tracklist parser metabox
-8. Music sources metabox
+2. Tracks menu
+3. Playlists menu
+4. Tracklist metabox
+5. Tracklist parser metabox
+6. Music sources metabox
 
 == Changelog ==
 
@@ -155,6 +153,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * PHP : pass tracklist object  to the track object / pass track object to the source object
 * merged all playlists classes; and new class WPSSTM_Remote_Tracklist
 * uses HTML5 custom elements
+* removed Artist & Album post types
 
 = 1.9.4 =
 * Better settings page errors
