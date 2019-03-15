@@ -886,8 +886,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function dequeue_track(WPSSTM_Track $track){
         
-        $this->tracklist_log("DEQUEUE TRACK FROM #" . $this->post_id);
-        $this->tracklist_log($track);
+        $this->tracklist_log($track->to_array(),"dequeue track");
         
         $subtrack_ids = $track->get_subtrack_matches($this->post_id);
         if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
