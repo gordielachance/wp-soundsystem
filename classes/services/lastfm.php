@@ -336,7 +336,7 @@ class WPSSTM_LastFM{
     Api request for a token
     */
 
-    public static function request_auth_token(){
+    public function request_auth_token(){
         
         $can_api = $this->can_lastfm_api();
         if ( is_wp_error($can_api) ) return $can_api;
