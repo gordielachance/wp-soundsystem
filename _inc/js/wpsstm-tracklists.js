@@ -105,9 +105,10 @@ class WpsstmTracklist extends HTMLElement{
                     case 'class':
                         
                         var track = mutation.target;
-                        if ( $(track).hasClass('track-active') ){
+                        if ( $(track).hasClass('track-active') ){ //TOUFIX maybe we need something more consistant here
 
                             var tracklist = track.closest('wpsstm-tracklist');
+
                             if (tracklist.isExpired){
                                 tracklist.debug("TRACK#1 requested but tracklist is outdated, refresh!");
                                 tracklist.reload_tracklist(true);
@@ -127,15 +128,15 @@ class WpsstmTracklist extends HTMLElement{
     Watch for tracklist queue update.
     */
     
-    queueWatch(mutationsList){
+    pageQueueWatch(mutationsList){
 
         for(var mutation of mutationsList) {
             if (mutation.type == 'childList') {
                 var queue = mutation.target;
                 var tracklist = mutation.target.closest('wpsstm-tracklist');
-                var firstTrack = $(tracklist).find('wpsstm-track').first().get(0);
+                var firstPageTrack = $(tracklist).find('wpsstm-track').first().get(0);
                 var firstTrackObserver = new MutationObserver(tracklist.firstTrackWatch);
-                firstTrackObserver.observe(firstTrack,{attributes: true});
+                firstTrackObserver.observe(firstPageTrack,{attributes: true});
             }
         }
     }
@@ -189,17 +190,17 @@ class WpsstmTracklist extends HTMLElement{
         
         /* Observe first track to know if we need to update the tracklist*/
         
-        //at init
-        var firstTrack = $(self).find('wpsstm-track').first().get(0);
-        if (firstTrack){
+        //in page, at init
+        var firstPageTrack = $(self).find('wpsstm-track').first().get(0);
+        if (firstPageTrack){
             var firstTrackObserver = new MutationObserver(self.firstTrackWatch);
-            firstTrackObserver.observe(firstTrack,{attributes: true});
+            firstTrackObserver.observe(firstPageTrack,{attributes: true});
         }
 
-        //at queue update
+        //in page, at queue update
         var queue = $(self).find('.wpsstm-tracks-list').get(0);
         if (queue){
-            var firstTrackObserver = new MutationObserver(self.queueWatch);
+            var firstTrackObserver = new MutationObserver(self.pageQueueWatch);
             firstTrackObserver.observe(queue,{childList: true});
         }
 

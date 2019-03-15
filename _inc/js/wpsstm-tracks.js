@@ -101,6 +101,12 @@ class WpsstmTrack extends HTMLElement{
         self.did_sources_request =  $(self).hasClass('track-autosourced');
 
         var player = self.closest('wpsstm-player');
+        
+        if (self.pageNode){ //is a queue track
+            self.renderQueueTrack();
+        }else{ //is a page track
+            self.renderPageTrack();
+        }
 
         /*
         populate existing sources
@@ -387,16 +393,11 @@ class WpsstmTrack extends HTMLElement{
                 var oldQueueNode = track.parentNode;
                 var oldPageNode = track.pageNode;
 
-                oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
-                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
-                
-                //link (!once nodes have been inserted)
                 newQueueTrack.pageNode = newPageTrack;
                 newPageTrack.queueNode = newQueueTrack;
-                
-                //init - TOUFIX we should have a better way to handle this
-                newQueueTrack.renderQueueTrack();
-                newPageTrack.renderPageTrack();
+
+                oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
+                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
 
                 success.resolve();
                 
