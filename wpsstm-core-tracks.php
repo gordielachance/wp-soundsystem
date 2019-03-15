@@ -92,10 +92,8 @@ class WPSSTM_Core_Tracks{
         DB relationships
         */
         add_action( 'save_post', array($this,'set_subtrack_post_id'), 6);
-        
-        add_action( 'wp_trash_post', array($this,'trash_subtracks_by_track_id') );
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
-        add_action( 'before_delete_post', array($this,'delete_subtrack_by_track_id') );
+        add_action( 'before_delete_post', array($this,'unlink_subtrack_post_id') );
     }
     
     /*
@@ -1151,32 +1149,7 @@ class WPSSTM_Core_Tracks{
         
         $this->ajax_track_autosource();
     }
-    
-    /*
-    When a track post is trashed, also delete its occurences in the subtracks table
-    */
-    
-    function trash_subtracks_by_track_id($post_id){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-        $track = new WPSSTM_Track($post_id);
-        
-        $subtrack_ids = $track->get_subtrack_matches();
-        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
-        
-        if (!$subtrack_ids) return;
 
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID IN (%s)",implode(',',$subtrack_ids) );
-        
-        $track->track_log(array('post_id'=>$track->post_id,'subtrack_ids'=>$subtrack_ids),'trash subtracks by track ID'); 
-        
-        return $wpdb->get_results ( $querystr );
-        
-    }
-    
-        
     function trash_track_sources($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
@@ -1252,7 +1225,7 @@ class WPSSTM_Core_Tracks{
     Just before a track post is removed, remove post its post ID from the subtracks table and replace it by the track artist / title / album
     */
 
-    function delete_subtrack_by_track_id($post_id){
+    function unlink_subtrack_post_id($post_id){
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
