@@ -149,7 +149,8 @@ class WPSSTM_Track{
     
     function get_track_duplicates(){
         
-        if (!$this->artist || !$this->title) return;
+        $valid = $this->validate_track();
+        if ( is_wp_error($valid) ) return $valid;
         
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
@@ -157,18 +158,15 @@ class WPSSTM_Track{
             'posts_per_page'=>  -1,
             'fields' =>         'ids',
             'lookup_artist' =>  $this->artist,
-            'lookup_track' =>   $this->title
+            'lookup_track' =>   $this->title,
+            'lookup_album' =>   $this->album
         );
 
         if ($this->post_id){
             $query_args['post__not_in'] = array($this->post_id);
         }
 
-        if ($this->album){
-            $query_args['lookup_album'] = $this->album;
-        }
-
-        $query = new WP_Query( $query_args );
+        $query = new WP_Query( $query_args );        
         return $query->posts;
 
     }
