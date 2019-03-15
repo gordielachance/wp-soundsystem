@@ -150,17 +150,6 @@ class WpsstmTracklist extends HTMLElement{
         self.init_tracklist_expiration();
 
         /*
-        Advanced header
-        */
-        var advancedHeaderContent = $(self).find('.tracklist-advanced-header');
-        advancedHeaderContent.hide();
-        $(self).find('.tracklist-advanced-header-bt').click(function(e) {
-            e.preventDefault();
-            $(this).hide();
-            advancedHeaderContent.show();
-        });
-
-        /*
         New subtracks
         */
 

@@ -25,9 +25,6 @@ $has_player = wpsstm()->get_options('player_enabled');
                 }
                 ?>
         </h3>
-        <a href="#" class="tracklist-advanced-header-bt">
-            <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
-        </a>
         <div class="tracklist-advanced-header">
             <p class="wpsstm-tracklist-time">
                 <?php
