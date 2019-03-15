@@ -477,7 +477,6 @@ class WpsstmTrack extends HTMLElement{
                     }else{
                         track_instances.removeClass('favorited-track');
                     }
-                    $(self).trigger("wpsstmTrackLove", [do_love] ); //register custom event - used by lastFM for the track.updateNowPlaying call
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

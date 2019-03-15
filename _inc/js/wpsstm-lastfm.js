@@ -164,47 +164,6 @@ class WpsstmLastFM {
             },
         })
     }
-
-    /*
-    last.fm API - track.love
-    */
-
-    toggle_lastfm_love(track_obj,do_love){
-        
-        var self = this;
-
-        var ajax_data = {
-            action:     'wpsstm_lastfm_user_toggle_love_track',
-            track:      track_obj.to_ajax(),
-            do_love:    do_love
-        };
-
-        return $.ajax({
-
-            type: "post",
-            url: wpsstmL10n.ajaxurl,
-            data:ajax_data,
-            dataType: 'json',
-            beforeSend: function() {
-                $(self.scrobble_icon).addClass('lastfm-loading');
-            },
-            success: function(data){ 
-                if (data.success === true) {
-                }else{
-                    console.log(data);
-                    $(self.scrobble_icon).addClass('scrobbler-error');
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-                $(self.scrobble_icon).addClass('scrobbler-error');
-            },
-            complete: function() {
-                $(self.scrobble_icon).removeClass('lastfm-loading');
-            }
-        })
-    }
         
     debug(msg){
         var prefix = "WpsstmLastFM";
@@ -261,10 +220,6 @@ $(document).on( "wpsstmSourceInit", function( event, source ) {
     //track end
     $(player.current_media).one('ended', ScrobbleTrack);
 
-});
-
-$('wpsstm-track').on( "wpsstmTrackLove", function( event,do_love ) {
-    wpsstm_lastfm.toggle_lastfm_love(track,do_love);
 });
 
 
