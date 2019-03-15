@@ -728,7 +728,7 @@ class WPSSTM_MusicBrainz {
             case wpsstm()->post_type_artist:
                 $items['artist'] = array(
                     'name' =>       __('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Artists::$artist_metakey,
+                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
                     'mbpath' =>     array('name')
                 );
             break;
@@ -736,12 +736,12 @@ class WPSSTM_MusicBrainz {
             case wpsstm()->post_type_album:
                 $items['album'] = array(
                     'name'=>__('Album','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Albums::$album_metakey,
+                    'metaname' =>   WPSSTM_Core_Tracks::$album_metakey,
                     'mbpath' =>     array('title')
                 );
                 $items['album_artist'] = array(
                     'name'=>__('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Artists::$artist_metakey,
+                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
                     'mbpath' =>     array('artist-credit',0,'name')
                 );
                 $items['album_tracklist'] = array(
@@ -757,12 +757,12 @@ class WPSSTM_MusicBrainz {
                 );
                 $items['track_artist'] = array(
                     'name'=>__('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Artists::$artist_metakey,
+                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
                     'mbpath' =>     array('artist-credit',0,'name')
                 );
                 $items['track_album'] = array(
                     'name'=>__('Album','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Albums::$album_metakey,
+                    'metaname' =>   WPSSTM_Core_Tracks::$album_metakey,
                     'mbpath' =>     array('releases',0,'title')
                 );
                 $items['track_length'] = array(

@@ -99,7 +99,7 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WPSSTM_Core_Artists::$artist_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$artist_metakey, true );
 }
 
 function wpsstm_get_post_track($post_id = null){
@@ -113,7 +113,7 @@ function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WPSSTM_Core_Albums::$album_metakey, true );
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$album_metakey, true );
 }
 
 /**

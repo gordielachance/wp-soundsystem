@@ -85,9 +85,9 @@ class WPSSTM_Source{
         /*
         $query_meta_trackinfo = array(
             'relation' => 'AND',
-            WPSSTM_Core_Artists::$artist_metakey    => $this->track->artist,
+            WPSSTM_Core_Tracks::$artist_metakey    => $this->track->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->track->title,
-            WPSSTM_Core_Albums::$album_metakey      => $this->track->album,
+            WPSSTM_Core_Tracks::$album_metakey      => $this->track->album,
         );
         $query_meta_trackinfo = array_filter($query_meta_trackinfo);
         */

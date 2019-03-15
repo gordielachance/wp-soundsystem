@@ -2,9 +2,11 @@
 
 class WPSSTM_Core_Tracks{
 
-    static $title_metakey = '_wpsstm_track';
     static $length_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
+    static $artist_metakey = '_wpsstm_artist';
+    static $title_metakey = '_wpsstm_track';
+    static $album_metakey = '_wpsstm_release';
 
     function __construct() {
         global $wpsstm_track;
@@ -45,10 +47,13 @@ class WPSSTM_Core_Tracks{
         /*
         QUERIES
         */
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_tracks_by_title') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
         
         add_action( 'current_screen',  array($this, 'the_single_backend_track'));
         
-        add_filter( 'pre_get_posts', array($this,'pre_get_tracks_by_title') );
+        
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         
         add_filter( 'posts_join', array($this,'tracks_query_join_subtracks'), 10, 2 );
@@ -431,6 +436,38 @@ class WPSSTM_Core_Tracks{
 
         return $query;
     }
+    
+    function pre_get_posts_by_album( $query ) {
+
+        if ( $album = $query->get( 'lookup_album' ) ){
+
+            $query->set( 'meta_query', array(
+                array(
+                     'key'     => self::$album_metakey,
+                     'value'   => $album,
+                     'compare' => '='
+                )
+            ));
+        }
+
+        return $query;
+    }
+    
+    function pre_get_posts_by_artist( $query ) {
+
+        if ( $search = $query->get( 'lookup_artist' ) ){
+            
+            $query->set( 'meta_query', array(
+                array(
+                     'key'     => self::$artist_metakey,
+                     'value'   => $search,
+                     'compare' => '='
+                )
+            ));
+        }
+
+        return $query;
+    }
 
     function tracks_query_join_subtracks($join,$query){
         global $wpdb;
@@ -648,6 +685,8 @@ class WPSSTM_Core_Tracks{
     }
     
     function add_query_vars_track( $qvars ) {
+        $qvars[] = 'lookup_artist';
+        $qvars[] = 'lookup_album';
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'lookup_track';
         $qvars[] = 'loved_tracks';
@@ -683,8 +722,8 @@ class WPSSTM_Core_Tracks{
     function metabox_track_settings_content( $post ){
 
         echo self::get_edit_track_title_input($post->ID);
-        echo WPSSTM_Core_Artists::get_edit_artist_input($post->ID);
-        echo WPSSTM_Core_Albums::get_edit_album_input($post->ID);
+        echo self::get_edit_artist_input($post->ID);
+        echo self::get_edit_album_input($post->ID);
         echo self::get_edit_track_length_input($post->ID);
 
         wp_nonce_field( 'wpsstm_track_settings_meta_box', 'wpsstm_track_settings_meta_box_nonce' );
@@ -701,6 +740,36 @@ class WPSSTM_Core_Tracks{
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
             'label' => __("Track title",'wpsstm'),
             'placeholder' => __("Enter track title here",'wpsstm')
+        );
+        return wpsstm_get_backend_form_input($input_attr);
+    }
+    
+    static function get_edit_artist_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
+        
+        $input_attr = array(
+            'id' => 'wpsstm-artist',
+            'name' => 'wpsstm_artist',
+            'value' => get_post_meta( $post_id, self::$artist_metakey, true ),
+            'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
+            'label' => __("Artist",'wpsstm'),
+            'placeholder' => __("Enter artist here",'wpsstm')
+        );
+        return wpsstm_get_backend_form_input($input_attr);
+    }
+    
+    static function get_edit_album_input($post_id = null){
+        global $post;
+        if (!$post) $post_id = $post->ID;
+        
+        $input_attr = array(
+            'id' => 'wpsstm-album',
+            'name' => 'wpsstm_album',
+            'value' => get_post_meta( $post_id, self::$album_metakey, true ),
+            'icon' => '<i class="fa fa-bars" aria-hidden="true"></i>',
+            'label' => __("Album",'wpsstm'),
+            'placeholder' => __("Enter album here",'wpsstm')
         );
         return wpsstm_get_backend_form_input($input_attr);
     }
@@ -789,11 +858,11 @@ class WPSSTM_Core_Tracks{
         
         /*artist*/
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
-        WPSSTM_Core_Artists::save_meta_artist($post_id, $artist);
+        self::save_meta_artist($post_id, $artist);
         
         /*album*/
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
-        WPSSTM_Core_Albums::save_meta_album($post_id, $album);
+        self::save_meta_album($post_id, $album);
 
         /*length*/
         $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
@@ -807,6 +876,24 @@ class WPSSTM_Core_Tracks{
             delete_post_meta( $post_id, self::$title_metakey );
         }else{
             update_post_meta( $post_id, self::$title_metakey, $value );
+        }
+    }
+    
+    static function save_meta_artist($post_id, $value = null){
+        $value = trim($value);
+        if (!$value){
+            delete_post_meta( $post_id, self::$artist_metakey );
+        }else{
+            update_post_meta( $post_id, self::$artist_metakey, $value );
+        }
+    }
+    
+    static function save_meta_album($post_id, $value = null){
+        $value = trim($value);
+        if (!$value){
+            delete_post_meta( $post_id, self::$album_metakey );
+        }else{
+            update_post_meta( $post_id, self::$album_metakey, $value );
         }
     }
     

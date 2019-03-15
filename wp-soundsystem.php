@@ -131,11 +131,9 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
         require $this->plugin_dir . 'wpsstm-settings.php';
-        require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
         require $this->plugin_dir . 'wpsstm-core-sources.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
-        require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'wpsstm-core-wizard.php';
