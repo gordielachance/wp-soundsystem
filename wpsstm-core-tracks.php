@@ -25,8 +25,6 @@ class WPSSTM_Core_Tracks{
         //rewrite rules
         add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
 
-        add_filter( 'template_include', array($this,'track_template'));
-
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         
@@ -296,28 +294,6 @@ class WPSSTM_Core_Tracks{
 
     }
 
-    function track_template($template){
-        global $wpsstm_track;
-
-        if ( is_404() ) return $template;
-        if ( !is_single() ) return $template;
-        if( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
-        
-        //TOUFIX what if no $wpsstm_track ID ? Manager should not be accessible.
-        
-        
-        //check action
-        $action = get_query_var( 'wpsstm_action' );
-        if(!$action) return $template;
-
-        switch($action){
-            default:
-                $template = wpsstm_locate_template( 'track.php' );
-            break;
-        }
-        return $template;
-    }
-    
     function manager_template($template){
         global $wpsstm_track;
         if ( is_404() ) return $template;

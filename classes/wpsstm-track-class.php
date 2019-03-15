@@ -874,15 +874,6 @@ class WPSSTM_Track{
                 );
             }
         }
-        
-        //track details
-        if ($can_open_track){
-            $actions['about'] = array(
-                'text' =>      __('About', 'wpsstm'),
-                'href' =>       $this->get_track_action_url('about'),
-                'classes' =>    array('wpsstm-track-popup'),
-            );
-        }
 
         /*
         Subtracks
