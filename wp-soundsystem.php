@@ -37,7 +37,7 @@ class WP_SoundSystem {
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
-    public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
+    public $static_tracklist_post_types = array('wpsstm_playlist');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
