@@ -19,6 +19,8 @@ class WPSSTM_Core_Tracks{
         add_action( 'parse_query', array($this,'populate_global_subtrack'));
         add_action( 'parse_query', array($this,'populate_global_track'));
         //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
+        
+        add_action( 'wp', array($this,'handle_track_action'), 8);
 
         //rewrite rules
         add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
@@ -136,6 +138,58 @@ class WPSSTM_Core_Tracks{
         $success = $wpsstm_track->populate_track_post($post_id);
         
         //TOUFIX should we 404 ?
+    }
+    
+    function handle_track_action(){
+        global $wpsstm_track;
+        global $wp_query;
+        
+        $success = null;
+        $redirect_url = null;
+        $action_feedback = null;
+        
+        if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
+        if ( get_query_var('post_type') !== wpsstm()->post_type_track ) return;
+
+        switch($action){
+
+            case 'create': //create subtrack
+                
+                $tracks_args = array( //as community tracks	
+                    'post_author'   => wpsstm()->get_options('community_user_id'),	
+                );
+
+                $success = $wpsstm_track->save_track_post($tracks_args);	
+                
+                if (!is_wp_error($success)){
+                    $redirect_url = get_edit_post_link($success);
+                }
+
+            break;
+        }
+
+        /*
+        Redirect or notice
+        */
+        if ($redirect_url){
+            
+            $redirect_args = array(
+                'wpsstm_did_action' =>  $action,
+                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
+            );
+            
+            $redirect_url = add_query_arg($redirect_args, $redirect_url);
+
+            wp_safe_redirect($redirect_url);
+            die();
+            
+        }else{
+            if ( is_wp_error($success) ){
+                $wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
+            }
+            
+        }
+        
     }
     
     function populate_loop_track($post,$query){
