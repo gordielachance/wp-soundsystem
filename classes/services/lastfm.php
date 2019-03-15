@@ -10,6 +10,7 @@ class WPSSTM_LastFM{
     
     static $lastfm_options_meta_name = 'wpsstm_lastfm_options';
     static $lastfm_user_api_metas_name = '_wpsstm_lastfm_api';
+    static $lastfm_user_scrobbler_disabled_meta_name = 'wpsstm_scrobbler_disabled';
     
     public $lastfm_user = null;
     
@@ -20,10 +21,10 @@ class WPSSTM_LastFM{
         
         $options_default = array(
             'client_id' =>      null,
-            'client_secret'=>   null,
-            'scrobble'=>        true,
-            'favorites'=>       true,
-            'scrobble_along'=>  false,
+            'client_secret' =>  null,
+            'can_scrobble' =>   true,
+            'favorites' =>      true,
+            'scrobble_along' => false,
         );
         
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
@@ -54,8 +55,8 @@ class WPSSTM_LastFM{
         */
         
         //enable scrobbler
-        add_action('wp_ajax_wpsstm_lastfm_enable_scrobbler',array($this,'ajax_lastm_enable_scrobbler') );
-        add_action('wp_ajax_nopriv_wpsstm_lastfm_enable_scrobbler', array($this,'ajax_lastm_enable_scrobbler')); //so we can output the non-logged user notice
+        add_action('wp_ajax_wpsstm_lastfm_toggle_user_scrobbler',array($this,'ajax_lastm_toggle_user_scrobbler') );
+        add_action('wp_ajax_nopriv_wpsstm_lastfm_toggle_user_scrobbler', array($this,'ajax_lastm_toggle_user_scrobbler')); //for call to action
 
         //love & unlove
         add_action('wpsstm_love_track',array($this,'user_love_track'), 10, 2 );
@@ -197,7 +198,7 @@ class WPSSTM_LastFM{
         //Last.fm 
         $new_input['client_id'] = ( isset($input['client_id']) ) ? trim($input['client_id']) : null;
         $new_input['client_secret'] = ( isset($input['client_secret']) ) ? trim($input['client_secret']) : null;
-        $new_input['scrobble'] = isset($input['scrobble']);
+        $new_input['can_scrobble'] = isset($input['can_scrobble']);
         $new_input['scrobble_along'] = isset($input['scrobble_along']);
         $new_input['favorites'] = isset($input['favorites']);
 
@@ -234,10 +235,10 @@ class WPSSTM_LastFM{
     }
     
     function scrobble_callback(){
-        $option = $this->get_options('scrobble');
+        $option = $this->get_options('can_scrobble');
 
         $el = sprintf(
-            '<input type="checkbox" name="%s[scrobble]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[can_scrobble]" value="on" %s /> %s',
             self::$lastfm_options_meta_name,
             checked( $option,true, false ),
             __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
@@ -313,6 +314,7 @@ class WPSSTM_LastFM{
         //localize vars
         $localize_vars=array(
             'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && $this->get_options('scrobble_along') ),
+            'lastfm_user_scrobbler'     => ( $this->has_user_scrobbler() === true),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -467,30 +469,55 @@ class WPSSTM_LastFM{
         return $results;
     }
     
-    function ajax_lastm_enable_scrobbler(){
+    function has_user_scrobbler(){
+        if ( !$user_id = get_current_user_id() ){
+            return new WP_Error( 'missing_user_id', __( "User is not logged", "wpsstm" ) );
+        }elseif ( !$this->get_options('can_scrobble') ){
+            return new WP_Error( 'cannot_scrobble', __( "Scrobbling is disabled for users", "wpsstm" ) );
+        }else{
+            if ( get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $user_id ) ) return false;
+            return $this->lastfm_user->is_user_api_logged();
+        }
+    }
+    
+    function ajax_lastm_toggle_user_scrobbler(){
         $ajax_data = wp_unslash($_POST);
+        $do_enable = wpsstm_get_array_value('do_enable',$ajax_data);
+        $do_enable = filter_var($do_enable, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
         
         $result = array(
             'input'     => $ajax_data,
+            'do_enable' => $do_enable,
             'success'   => false,
             'message'   => null
         );
+
         
-        if ( !get_current_user_id() ){
+        if ( !$user_id = get_current_user_id() ){
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
             $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
             $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
         }else{
-            $is_lastfm_auth = ( $this->lastfm_user->is_user_api_logged() === true );
+
+            //check last.fm auth
+            if($do_enable){
             
-            if (!$is_lastfm_auth){
-                $lastfm_auth_url = self::get_app_auth_url();
-                $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
-                $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
+                $is_lastfm_auth = ( $this->lastfm_user->is_user_api_logged() === true );
+
+                if (!$is_lastfm_auth){
+                    $lastfm_auth_url = self::get_app_auth_url();
+                    $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+                    $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
+                    $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
+                }else{
+                    delete_user_option( $user_id, self::$lastfm_user_scrobbler_disabled_meta_name );
+                    $result['success'] = true;
+                }
             }else{
+                update_user_option( $user_id, self::$lastfm_user_scrobbler_disabled_meta_name, true );
                 $result['success'] = true;
             }
+
         }
         
         header('Content-type: application/json');
@@ -624,9 +651,9 @@ class WPSSTM_LastFM{
     }
     
     function get_lastfm_actions($actions = null){
-        
+
         //enable scrobbler
-        if ( $this->get_options('scrobble') ){
+        if ( $this->get_options('can_scrobble') ){
             if ( get_current_user_id() ){
                 $actions['scrobbler'] = array(
                     'text' =>       __('Last.fm scrobble', 'wpsstm'),
