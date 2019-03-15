@@ -246,18 +246,19 @@ class WpsstmPlayer extends HTMLElement{
 
     queueTrack(track){
         var self = this;
-        var playerQueue = $(self).find('.player-queue');
-        var playerQueueTracks = $(playerQueue).find('wpsstm-track');
-        var playerQueueCount = playerQueueTracks.length;
+        var playerQueue = $(self).find('.player-queue').get(0);
+        
+        //show play BT
+        $(track).find('.wpsstm-track-play-bt').show();
 
         //clone page track & append to queue
         var queueTrack = $(track).clone().get(0);
         queueTrack.pageNode = track;
+        playerQueue.append(queueTrack);
+        //
         
         //post track
         track.queueNode = queueTrack;
-
-        $(self).find('.player-queue').append(queueTrack);
         
         return queueTrack;
         

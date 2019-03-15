@@ -75,6 +75,7 @@ wpsstm-track{
     }
     
     .wpsstm-track-play-bt{
+        display:none;
         a{
             @extend .wpsstm-no-underline;
         }
