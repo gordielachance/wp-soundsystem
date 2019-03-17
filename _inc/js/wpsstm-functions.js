@@ -10,7 +10,7 @@ function wpsstm_notice(msg,preprendTo){
 
     var noticeBlock = $('<div class="wpsstm-block-notice"></div>').get(0);
     var closeNotice = $('<a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a>').get(0);
-    var noticeMessage = $('<span/>').text(msg).get(0);
+    var noticeMessage = $('<span/>').html(msg).get(0);
     noticeBlock.append(closeNotice);
     noticeBlock.append(noticeMessage);
 
