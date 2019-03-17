@@ -271,7 +271,6 @@ class WpsstmTrack extends HTMLElement{
             var pageTrack = track.pageNode;
 
             //https://stackoverflow.com/a/6677069/782013
-            //TOUFIX BROKEN
             $('html, body').animate({
                 scrollTop: $(pageTrack).offset().top - ( $(window).height() / 3) //not at the very top
             }, 500);
@@ -482,7 +481,7 @@ class WpsstmTrack extends HTMLElement{
                     console.log(data);
                     link_el.addClass('action-error');
                     if (data.notice){
-                        wpsstm_dialog_notice(data.notice);
+                        wpsstm_notice(data.notice);
                     }
                 }else{
                     if (do_love){

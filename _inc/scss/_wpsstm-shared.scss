@@ -149,6 +149,16 @@ input{
     }
 }
 
+.wpsstm-block-notice{
+    background: #fff3d4;
+    border:0px solid #f6b73c;
+    border-left-width: 5px;
+    padding:.75em;
+    .wpsstm-close-notice{
+        float:right;
+    }
+}
+
 .wpsstm-align-both{
     @include display-flex();
     @include justify-content(center);

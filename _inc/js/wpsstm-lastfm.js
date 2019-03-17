@@ -7,8 +7,8 @@ class WpsstmLastFM {
         this.scrobbler_enabled =        parseInt(wpsstmLastFM.lastfm_user_scrobbler);
     }
 
-    enable_scrobbler(do_enable,show_notice){
-        
+    enable_scrobbler(do_enable){
+
         var self = this;
 
         var ajax_data = {
@@ -32,8 +32,8 @@ class WpsstmLastFM {
                 if (data.success === false) {
                     do_enable = false;
                     $(self.scrobble_icon).addClass('scrobbler-error');
-                    if (data.notice && show_notice){
-                        wpsstm_dialog_notice(data.notice);
+                    if (data.notice){
+                        wpsstm_notice(data.notice);
                     }
                 }
             },
@@ -182,7 +182,7 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
     //click toggle scrobbling
     wpsstm_lastfm.scrobble_icon.find('a').click(function(e) {
         e.preventDefault();
-        wpsstm_lastfm.enable_scrobbler(!wpsstm_lastfm.scrobbler_enabled,true);
+        wpsstm_lastfm.enable_scrobbler(!wpsstm_lastfm.scrobbler_enabled);
     });
 });
 

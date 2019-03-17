@@ -1,29 +1,24 @@
 var $ = jQuery.noConflict();
 
-function wpsstm_dialog_notice(notice){
+function wpsstm_notice(msg,preprendTo){
+    
+    if (typeof preprendTo === 'undefined'){
+        preprendTo = $('body');
+    }
+    
+    preprendTo = preprendTo.get(0);
 
-    var popup = $('<div></div>').append(notice);
+    var noticeBlock = $('<div class="wpsstm-block-notice"></div>').get(0);
+    var closeNotice = $('<a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a>').get(0);
+    var noticeMessage = $('<span/>').text(msg).get(0);
+    noticeBlock.append(closeNotice);
+    noticeBlock.append(noticeMessage);
 
-    popup.dialog({
-        autoOpen: true,
-        width:800,
-        height:500,
-        modal: true,
-        dialogClass: 'wpsstm-dialog',
-
-        open: function(ev, ui){
-            var dialog = $(this).closest('.ui-dialog');
-            var dialog_content = dialog.find('.ui-dialog-content');
-            var iframe = $('<iframe id="wpsstm-dialog-iframe" src="'+content_url+'"></iframe>');
-            dialog_content.append(iframe);
-            iframe.load(function(){
-                dialog.removeClass('dialog-loading');
-            });
-        },
-        close: function(ev, ui){
-        }
-
-    });
+    preprendTo.prepend(noticeBlock);
+    
+    $('html, body').animate({
+        scrollTop: $(noticeBlock).offset().top - ( $(window).height() / 3) //not at the very top
+    }, 500);
 
 }
 

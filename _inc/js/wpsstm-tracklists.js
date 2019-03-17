@@ -345,7 +345,7 @@ class WpsstmTracklist extends HTMLElement{
                     console.log(data);
                     link_el.addClass('action-error');
                     if (data.notice){
-                        wpsstm_dialog_notice(data.notice);
+                        wpsstm_notice(data.notice);
                     }
                 }else{
                     if (do_love){

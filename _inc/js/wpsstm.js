@@ -40,7 +40,12 @@ $('.wpsstm-artist-autocomplete').each(function() {
     });
 });
 
+//notices
 
+$(document).on('click', 'a.wpsstm-close-notice', function(e) {
+    var notice = this.closest('.wpsstm-block-notice');
+    notice.remove();
+});
 
 
 $( document ).ready(function() {
