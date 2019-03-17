@@ -19,11 +19,11 @@ class WPSSTM_Core_Tracks{
         add_action( 'parse_query', array($this,'populate_global_subtrack'));
         add_action( 'parse_query', array($this,'populate_global_track'));
         //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
+        
+        add_action( 'wp', array($this,'handle_track_action'), 8);
 
         //rewrite rules
         add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
-
-        add_filter( 'template_include', array($this,'track_template'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
@@ -92,10 +92,8 @@ class WPSSTM_Core_Tracks{
         DB relationships
         */
         add_action( 'save_post', array($this,'set_subtrack_post_id'), 6);
-        
-        add_action( 'wp_trash_post', array($this,'trash_subtracks_by_track_id') );
         add_action( 'wp_trash_post', array($this,'trash_track_sources') );
-        add_action( 'before_delete_post', array($this,'delete_subtrack_by_track_id') );
+        add_action( 'before_delete_post', array($this,'unlink_subtrack_post_id') );
     }
     
     /*
@@ -138,6 +136,58 @@ class WPSSTM_Core_Tracks{
         $success = $wpsstm_track->populate_track_post($post_id);
         
         //TOUFIX should we 404 ?
+    }
+    
+    function handle_track_action(){
+        global $wpsstm_track;
+        global $wp_query;
+        
+        $success = null;
+        $redirect_url = null;
+        $action_feedback = null;
+        
+        if ( !$action = get_query_var( 'wpsstm_action' ) ) return; //action does not exist
+        if ( get_query_var('post_type') !== wpsstm()->post_type_track ) return;
+
+        switch($action){
+
+            case 'create': //create subtrack
+                
+                $tracks_args = array( //as community tracks	
+                    'post_author'   => wpsstm()->get_options('community_user_id'),	
+                );
+
+                $success = $wpsstm_track->save_track_post($tracks_args);	
+                
+                if (!is_wp_error($success)){
+                    $redirect_url = get_edit_post_link($success);
+                }
+
+            break;
+        }
+
+        /*
+        Redirect or notice
+        */
+        if ($redirect_url){
+            
+            $redirect_args = array(
+                'wpsstm_did_action' =>  $action,
+                'wpsstm_action_feedback' => ( is_wp_error($success) ) ? $success->get_error_code() : true,
+            );
+            
+            $redirect_url = add_query_arg($redirect_args, $redirect_url);
+
+            wp_safe_redirect($redirect_url);
+            die();
+            
+        }else{
+            if ( is_wp_error($success) ){
+                $wpsstm_tracklist->add_notice($success->get_error_code(),$success->get_error_message());
+            }
+            
+        }
+        
     }
     
     function populate_loop_track($post,$query){
@@ -244,28 +294,6 @@ class WPSSTM_Core_Tracks{
 
     }
 
-    function track_template($template){
-        global $wpsstm_track;
-
-        if ( is_404() ) return $template;
-        if ( !is_single() ) return $template;
-        if( get_query_var( 'post_type' ) != wpsstm()->post_type_track ) return $template;
-        
-        //TOUFIX what if no $wpsstm_track ID ? Manager should not be accessible.
-        
-        
-        //check action
-        $action = get_query_var( 'wpsstm_action' );
-        if(!$action) return $template;
-
-        switch($action){
-            default:
-                $template = wpsstm_locate_template( 'track.php' );
-            break;
-        }
-        return $template;
-    }
-    
     function manager_template($template){
         global $wpsstm_track;
         if ( is_404() ) return $template;
@@ -418,53 +446,54 @@ class WPSSTM_Core_Tracks{
             $wpsstm_track = new WPSSTM_Track( $post_id );
         }
     }
+    
+    function pre_get_posts_by_artist( $query ) {
+
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$artist = $query->get( 'lookup_artist' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+
+        $meta_query[] = array(
+             'key'     => self::$artist_metakey,
+             'value'   => $artist,
+             'compare' => '='
+        );
+
+        $query->set( 'meta_query',$meta_query);
+
+        return $query;
+    }
 
     function pre_get_tracks_by_title( $query ) {
         
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$track = $query->get( 'lookup_track' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+        
+        $meta_query[] = array(
+             'key'     => self::$title_metakey,
+             'value'   => $track,
+             'compare' => '='
+        );
 
-        if ( $track = $query->get( 'lookup_track' ) ){
-
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$title_metakey,
-                     'value'   => $track,
-                     'compare' => '='
-                )
-            ));
-        }
+        $query->set( 'meta_query',$meta_query);
 
         return $query;
     }
     
     function pre_get_posts_by_album( $query ) {
 
-        if ( $album = $query->get( 'lookup_album' ) ){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
+        if ( !$album = $query->get( 'lookup_album' ) ) return $query;
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
 
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$album_metakey,
-                     'value'   => $album,
-                     'compare' => '='
-                )
-            ));
-        }
+        $meta_query[] = array(
+             'key'     => self::$album_metakey,
+             'value'   => $album,
+             'compare' => '='
+        );
 
-        return $query;
-    }
-    
-    function pre_get_posts_by_artist( $query ) {
-
-        if ( $search = $query->get( 'lookup_artist' ) ){
-            
-            $query->set( 'meta_query', array(
-                array(
-                     'key'     => self::$artist_metakey,
-                     'value'   => $search,
-                     'compare' => '='
-                )
-            ));
-        }
+        $query->set( 'meta_query',$meta_query);
 
         return $query;
     }
@@ -1151,32 +1180,7 @@ class WPSSTM_Core_Tracks{
         
         $this->ajax_track_autosource();
     }
-    
-    /*
-    When a track post is trashed, also delete its occurences in the subtracks table
-    */
-    
-    function trash_subtracks_by_track_id($post_id){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-        $track = new WPSSTM_Track($post_id);
-        
-        $subtrack_ids = $track->get_subtrack_matches();
-        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
-        
-        if (!$subtrack_ids) return;
 
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID IN (%s)",implode(',',$subtrack_ids) );
-        
-        $track->track_log(array('post_id'=>$track->post_id,'subtrack_ids'=>$subtrack_ids),'trash subtracks by track ID'); 
-        
-        return $wpdb->get_results ( $querystr );
-        
-    }
-    
-        
     function trash_track_sources($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
@@ -1252,7 +1256,7 @@ class WPSSTM_Core_Tracks{
     Just before a track post is removed, remove post its post ID from the subtracks table and replace it by the track artist / title / album
     */
 
-    function delete_subtrack_by_track_id($post_id){
+    function unlink_subtrack_post_id($post_id){
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;

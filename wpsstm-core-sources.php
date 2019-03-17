@@ -335,7 +335,7 @@ class WPSSTM_Core_Sources{
         <p class="wpsstm-submit-wrapper">
             <?php
             //autosource
-            if ( ( !wpsstm()->get_options('autosource') ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
+            if ( ( wpsstm()->get_options('autosource') ) && (WPSSTM_Core_Sources::can_autosource() === true) ){
                 ?>
                 <input id="wpsstm-autosource-bt" type="submit" name="wpsstm_track_autosource" class="button" value="<?php _e('Autosource','wpsstm');?>">
                 <?php
@@ -400,19 +400,18 @@ class WPSSTM_Core_Sources{
         //new source URLs
         $source_urls = isset($_POST['wpsstm_new_track_sources']) ? array_filter($_POST['wpsstm_new_track_sources']) : null;
 
-        //abord
-        if ( empty($source_urls) ) return;
+        if ( $source_urls ) {
+            $new_sources = array();
 
-        $new_sources = array();
+            foreach((array)$source_urls as $url){
+                $source = new WPSSTM_Source(null);
+                $source->permalink_url = $url;
+                $new_sources[] = $source;
+            }
 
-        foreach((array)$source_urls as $url){
-            $source = new WPSSTM_Source(null);
-            $source->permalink_url = $url;
-            $new_sources[] = $source;
+            $track->add_sources($new_sources);
+            $track->save_new_sources();
         }
-
-        $track->add_sources($new_sources);
-        $track->save_new_sources();
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
