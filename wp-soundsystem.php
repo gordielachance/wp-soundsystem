@@ -110,6 +110,7 @@ class WP_SoundSystem {
             'autoplay'                          => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
+            'registration_notice'               => true,
         );
         
         $db_option = get_option( $this->meta_name_options);
@@ -371,6 +372,17 @@ class WP_SoundSystem {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
+    
+    private function get_registration_notice(){
+        //registration notice
+        if ( is_admin() ) return;
+        if ( get_current_user_id() ) return;
+        if ( !wpsstm()->get_options('registration_notice') ) return;
+        
+        $registration_link = sprintf('<span class="wpsstm-join-now"><a href="%s">%s</a> !</span>',wp_registration_url(),__('Join now','wpsstm'));
+        
+        return sprintf(__('Get the best out of %s : create and manage playlists, sync your account with other services, favorite tracks, and much more. %s','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$registration_link);
+    }
 
     function register_scripts_styles(){
 
@@ -384,10 +396,13 @@ class WP_SoundSystem {
         wp_register_script( 'wpsstm-functions', $this->plugin_url . '_inc/js/wpsstm-functions.js', array('jquery'),$this->version, true);
 
         wp_register_script( 'wpsstm', $this->plugin_url . '_inc/js/wpsstm.js', array('jquery','wpsstm-functions','wpsstm-player','wpsstm-tracklists','jquery-ui-autocomplete','jquery-ui-dialog','jquery-ui-sortable'),$this->version, true);
+        
+
 
         $datas = array(
-            'debug'             => (WP_DEBUG),
-            'ajaxurl'           => admin_url( 'admin-ajax.php' ),
+            'debug'                 => (WP_DEBUG),
+            'ajaxurl'               => admin_url( 'admin-ajax.php' ),
+            'registration_notice'   => $this->get_registration_notice(),
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

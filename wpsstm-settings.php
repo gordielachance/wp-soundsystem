@@ -105,6 +105,13 @@ class WPSSTM_Settings {
         if ( isset ($input['recent_wizard_entries']) && ctype_digit($input['recent_wizard_entries']) ){
                 $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
         }
+        
+        /*
+        Styling
+        */
+        
+        //recent wizard entries
+        $new_input['registration_notice'] = isset($input['registration_notice']);
 
         return $new_input;
         
@@ -226,6 +233,14 @@ class WPSSTM_Settings {
             __('Styling','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'registration_notice', 
+            __('Registration notice','wpsstm'), 
+            array( $this, 'registration_notice_callback' ), 
+            'wpsstm-settings-page', 
+            'settings_styling'
         );
 
 
@@ -414,6 +429,17 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             $option,
             $help
+        );
+    }
+    
+    function registration_notice_callback(){
+        $option = wpsstm()->get_options('registration_notice');
+
+        printf(
+            '<input type="checkbox" name="%s[registration_notice]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $option,true, false ),
+            __("Display a registration notice for non-logged users.","wpsstm")
         );
     }
     

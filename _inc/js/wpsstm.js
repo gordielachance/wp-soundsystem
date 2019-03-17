@@ -51,6 +51,11 @@ $(document).on('click', 'a.wpsstm-close-notice', function(e) {
 $( document ).ready(function() {
     wpsstm_debug("DOM READY!");
     
+    //registration notice
+    if ( registration_notice = wpsstmL10n.registration_notice){
+        wpsstm_notice(registration_notice);
+    }
+    
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
     var trackContainers = $('wpsstm-tracklist');
     
