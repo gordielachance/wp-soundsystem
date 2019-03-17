@@ -200,17 +200,18 @@ class BaseApi
 
     protected function apiGetCall($vars)
     {
-        $this->setup();
-        if ($this->connected == 1) {
-            $this->cache = new Cache($this->config);
-            if (!empty($this->cache->error)) {
-                throw new CacheException($this->cache->error);
+        $this->cache = new Cache($this->config);
+        if (!empty($this->cache->error)) {
+            throw new CacheException($this->cache->error);
+        } else {
+            if ($cache = $this->cache->get($vars)) {
+                // Cache exists
+                $this->response = $cache;
+                return $this->processResponse();
             } else {
-                if ($cache = $this->cache->get($vars)) {
-                    // Cache exists
-                    $this->response = $cache;
-                } else {
-                    // Cache doesnt exist
+                // Cache doesnt exist
+                $this->setup();
+                if ($this->connected == 1) {
                     $url = '/2.0/?';
                     foreach ($vars as $name => $value) {
                         $url .= trim(urlencode($name)) . '=' . trim(urlencode($value)) . '&';
@@ -222,13 +223,12 @@ class BaseApi
                     $out .= "Host: " . $this->host . "\r\n";
                     $out .= "\r\n";
                     $this->response = $this->socket->send($out, 'array');
+                    $processedResponse = $this->processResponse();
                     $this->cache->set($vars, $this->response);
+                    
+                    return $processedResponse;
                 }
-
-                return $this->processResponse();
             }
-        } else {
-            return false;
         }
     }
 
@@ -238,7 +238,7 @@ class BaseApi
      * @return object
      */
 
-    protected function apiPostCall($vars, $return = 'bool')
+    protected function apiPostCall($vars)
     {
         $this->setup();
         if ($this->connected == 1) {

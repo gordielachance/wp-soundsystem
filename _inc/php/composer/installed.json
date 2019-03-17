@@ -1,100 +1,17 @@
 [
     {
-        "name": "querypath/querypath",
-        "version": "3.04",
-        "version_normalized": "3.04.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/technosophos/querypath.git",
-            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/technosophos/querypath/zipball/20e8a1ea75840ad61fe2664f7d8658daa05d4348",
-            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348",
-            "shasum": ""
-        },
-        "require": {
-            "masterminds/html5": "2.*",
-            "php": ">=5.3.0"
-        },
-        "time": "2015-10-10T20:46:32+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-0": {
-                "QueryPath": "src/"
-            },
-            "files": [
-                "src/qp_functions.php"
-            ]
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "description": "HTML/XML querying (CSS 4 or XPath) and processing (like jQuery)",
-        "homepage": "https://github.com/technosophos/querypath",
-        "keywords": [
-            "css",
-            "html",
-            "jquery",
-            "xml",
-            "xslt"
-        ]
-    },
-    {
-        "name": "neitanod/forceutf8",
-        "version": "v2.0.2",
-        "version_normalized": "2.0.2.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/neitanod/forceutf8.git",
-            "reference": "30980a8ca2787a7730d370eac310b8987eb68229"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/30980a8ca2787a7730d370eac310b8987eb68229",
-            "reference": "30980a8ca2787a7730d370eac310b8987eb68229",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.3.0"
-        },
-        "time": "2018-10-10T23:03:52+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-0": {
-                "ForceUTF8\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "BSD-3-Clause"
-        ],
-        "authors": [
-            {
-                "name": "Sebastián Grignoli",
-                "email": "grignoli@gmail.com"
-            }
-        ],
-        "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
-        "homepage": "https://github.com/neitanod/forceutf8"
-    },
-    {
         "name": "masterminds/html5",
-        "version": "2.5.0",
-        "version_normalized": "2.5.0.0",
+        "version": "2.6.0",
+        "version_normalized": "2.6.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Masterminds/html5-php.git",
-            "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93"
+            "reference": "c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/b5d892a4bd058d61f736935d32a9c248f11ccc93",
-            "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93",
+            "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad",
+            "reference": "c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad",
             "shasum": ""
         },
         "require": {
@@ -108,11 +25,11 @@
             "sami/sami": "~2.0",
             "satooshi/php-coveralls": "1.0.*"
         },
-        "time": "2018-12-27T22:03:43+00:00",
+        "time": "2019-03-10T11:41:28+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.4-dev"
+                "dev-master": "2.6-dev"
             }
         },
         "installation-source": "dist",
@@ -158,12 +75,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
-            "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626"
+            "reference": "5c639597517167c49bd28419dde4d378efe5ed50"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/3226fd44eb4c9ed45899210c666d0a333aa0d626",
-            "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626",
+            "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/5c639597517167c49bd28419dde4d378efe5ed50",
+            "reference": "5c639597517167c49bd28419dde4d378efe5ed50",
             "shasum": ""
         },
         "require": {
@@ -174,7 +91,7 @@
             "phpunit/phpunit": "7.4.0",
             "vlucas/phpdotenv": "*"
         },
-        "time": "2018-12-27T07:57:18+00:00",
+        "time": "2019-01-22T07:47:02+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -203,6 +120,89 @@
             "api",
             "last.fm",
             "webservice client"
+        ]
+    },
+    {
+        "name": "neitanod/forceutf8",
+        "version": "v2.0.2",
+        "version_normalized": "2.0.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/neitanod/forceutf8.git",
+            "reference": "30980a8ca2787a7730d370eac310b8987eb68229"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/30980a8ca2787a7730d370eac310b8987eb68229",
+            "reference": "30980a8ca2787a7730d370eac310b8987eb68229",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "time": "2018-10-10T23:03:52+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "ForceUTF8\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD-3-Clause"
+        ],
+        "authors": [
+            {
+                "name": "Sebastián Grignoli",
+                "email": "grignoli@gmail.com"
+            }
+        ],
+        "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
+        "homepage": "https://github.com/neitanod/forceutf8"
+    },
+    {
+        "name": "querypath/querypath",
+        "version": "3.04",
+        "version_normalized": "3.04.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/technosophos/querypath.git",
+            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/technosophos/querypath/zipball/20e8a1ea75840ad61fe2664f7d8658daa05d4348",
+            "reference": "20e8a1ea75840ad61fe2664f7d8658daa05d4348",
+            "shasum": ""
+        },
+        "require": {
+            "masterminds/html5": "2.*",
+            "php": ">=5.3.0"
+        },
+        "time": "2015-10-10T20:46:32+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "QueryPath": "src/"
+            },
+            "files": [
+                "src/qp_functions.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "description": "HTML/XML querying (CSS 4 or XPath) and processing (like jQuery)",
+        "homepage": "https://github.com/technosophos/querypath",
+        "keywords": [
+            "css",
+            "html",
+            "jquery",
+            "xml",
+            "xslt"
         ]
     }
 ]

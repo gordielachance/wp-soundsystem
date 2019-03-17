@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "2435f2a881aea4e8f20777cfea9fd3a2",
     "packages": [
         {
             "name": "masterminds/html5",
-            "version": "2.5.0",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Masterminds/html5-php.git",
-                "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93"
+                "reference": "c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/b5d892a4bd058d61f736935d32a9c248f11ccc93",
-                "reference": "b5d892a4bd058d61f736935d32a9c248f11ccc93",
+                "url": "https://api.github.com/repos/Masterminds/html5-php/zipball/c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad",
+                "reference": "c961ca6a0a81dc6b55b6859b3f9ea7f402edf9ad",
                 "shasum": ""
             },
             "require": {
@@ -34,7 +34,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.4-dev"
+                    "dev-master": "2.6-dev"
                 }
             },
             "autoload": {
@@ -71,7 +71,7 @@
                 "serializer",
                 "xml"
             ],
-            "time": "2018-12-27T22:03:43+00:00"
+            "time": "2019-03-10T11:41:28+00:00"
         },
         {
             "name": "matto1990/lastfm-api",
@@ -79,12 +79,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/matt-oakes/PHP-Last.fm-API.git",
-                "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626"
+                "reference": "5c639597517167c49bd28419dde4d378efe5ed50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/3226fd44eb4c9ed45899210c666d0a333aa0d626",
-                "reference": "3226fd44eb4c9ed45899210c666d0a333aa0d626",
+                "url": "https://api.github.com/repos/matt-oakes/PHP-Last.fm-API/zipball/5c639597517167c49bd28419dde4d378efe5ed50",
+                "reference": "5c639597517167c49bd28419dde4d378efe5ed50",
                 "shasum": ""
             },
             "require": {
@@ -123,7 +123,7 @@
                 "last.fm",
                 "webservice client"
             ],
-            "time": "2018-12-27T07:57:18+00:00"
+            "time": "2019-01-22T07:47:02+00:00"
         },
         {
             "name": "neitanod/forceutf8",
