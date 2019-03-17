@@ -2,21 +2,6 @@
 @import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
-#wpsstm-frontend-wizard{
-    p.submit{
-        padding: .25em;
-    }
-}
-
-#wpsstm-wizard-shortcuts{
-    ul{
-        list-style: none;
-    }
-    .wpsstm-bang-desc{
-        font-size:.8em;
-    }
-}
-
 #wpsstm-wizard-services{
     ul{
         margin:0;
@@ -32,6 +17,22 @@
             }
 
         }
+    }
+}
+
+#wpsstm-wizard-bangs{
+    
+    ul{
+        list-style: none;
+    }
+
+    
+    > ul > li{
+        margin-top:1em;
+    }
+
+    .wpsstm-bang-desc{
+        font-size:.8em;
     }
 }
 

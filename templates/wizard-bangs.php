@@ -10,10 +10,10 @@ $list_els = array_map(
    $links
 );
 ?>
-<section id="wpsstm-wizard-shortcuts">
+<section id="wpsstm-wizard-bangs">
     <h3><?php _e('Bangs','wpsstm');?> (<small><?php _e('shortcuts','wpsstm');?>)</small></h3>
     <p>
-    <?php _e('You can type those shortcuts in the input box above. Click them for more information.','wpsstm');?>
+    <?php _e('You can type those shortcuts in the input box above.','wpsstm');?>
     </p>
     <ul>
         <?php echo implode("\n",$list_els); ?>
