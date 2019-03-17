@@ -53,7 +53,7 @@ $( document ).ready(function() {
     
     //registration notice
     if ( registration_notice = wpsstmL10n.registration_notice){
-        wpsstm_notice(registration_notice);
+        wpsstm_js_notice(registration_notice);
     }
     
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);

@@ -180,6 +180,18 @@ input.wpsstm-fullwidth {
 }
 
 /* line 152, ../scss/_wpsstm-shared.scss */
+.wpsstm-block-notice {
+  background: #fff3d4;
+  border: 0px solid #f6b73c;
+  border-left-width: 5px;
+  padding: .75em;
+}
+/* line 157, ../scss/_wpsstm-shared.scss */
+.wpsstm-block-notice .wpsstm-close-notice {
+  float: right;
+}
+
+/* line 162, ../scss/_wpsstm-shared.scss */
 .wpsstm-align-both {
   display: -webkit-flex;
   display: flex;
@@ -190,55 +202,54 @@ input.wpsstm-fullwidth {
 }
 
 /* line 6, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-frontend-wizard p.submit {
-  padding: .25em;
-}
-
-/* line 12, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-shortcuts ul {
-  list-style: none;
-}
-/* line 15, ../scss/wpsstm-frontend-wizard.scss */
-#wpsstm-wizard-shortcuts .wpsstm-bang-desc {
-  font-size: .8em;
-}
-
-/* line 21, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul {
   margin: 0;
   padding: 0;
 }
-/* line 24, ../scss/wpsstm-frontend-wizard.scss */
+/* line 9, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul li {
   width: 100px;
   height: 100px;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
-/* line 29, ../scss/wpsstm-frontend-wizard.scss */
+/* line 14, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-wizard-services ul li img {
   width: 100%;
   height: auto;
 }
 
-/* line 39, ../scss/wpsstm-frontend-wizard.scss */
+/* line 25, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-bangs ul {
+  list-style: none;
+}
+/* line 30, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-bangs > ul > li {
+  margin-top: 1em;
+}
+/* line 34, ../scss/wpsstm-frontend-wizard.scss */
+#wpsstm-wizard-bangs .wpsstm-bang-desc {
+  font-size: .8em;
+}
+
+/* line 40, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 43, ../scss/wpsstm-frontend-wizard.scss */
+/* line 44, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li {
   position: relative;
   line-height: 1em;
   line-height: 1.5em;
 }
-/* line 47, ../scss/wpsstm-frontend-wizard.scss */
+/* line 48, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li a {
   display: -webkit-flex;
   display: flex;
 }
-/* line 49, ../scss/wpsstm-frontend-wizard.scss */
+/* line 50, ../scss/wpsstm-frontend-wizard.scss */
 #wpsstm-frontend-wizard-recent ul li a strong {
   margin-right: .25em;
 }

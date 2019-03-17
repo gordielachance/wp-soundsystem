@@ -1,6 +1,6 @@
 var $ = jQuery.noConflict();
 
-function wpsstm_notice(msg,preprendTo){
+function wpsstm_js_notice(msg,preprendTo){
     
     if (typeof preprendTo === 'undefined'){
         preprendTo = $('body');
