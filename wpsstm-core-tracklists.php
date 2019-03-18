@@ -328,10 +328,11 @@ class WPSSTM_Core_Tracklists{
     
     function populate_global_tracklist(){
         global $wpsstm_tracklist;
-        global $post;
+        
+        $post_id = get_query_var( 'p' );
 
-        if( in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ){
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
+        if( $post_id && in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ){
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         }
 
         if ( $tracklist_id = get_query_var( 'tracklist_id' ) ){
