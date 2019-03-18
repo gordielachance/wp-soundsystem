@@ -13,7 +13,7 @@ class WPSSTM_Core_Live_Playlists{
 
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
         
-        add_filter( 'the_title', array($this, 'filter_live_playlist_title'), 10, 2 );
+        add_filter( 'the_title', array($this, 'filter_live_playlist_title'), 9, 2 );
 
     }
 
