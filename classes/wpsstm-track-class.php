@@ -654,13 +654,8 @@ class WPSSTM_Track{
         $can_autosource = WPSSTM_Core_Sources::can_autosource();
         if ( $can_autosource !== true ) return $can_autosource;
 
-        if ( !$this->artist ){
-            return new WP_Error( 'wpsstm_track_no_artist', __('Autosourcing requires track artist.','wpsstm') );
-        }
-        
-        if ( !$this->title ){
-            return new WP_Error( 'wpsstm_track_no_title', __('Autosourcing requires track title.','wpsstm') );
-        }
+        $valid = $this->validate_track();
+        if ( is_wp_error($valid) ) return $valid;
 
         /*
         Create community post :
