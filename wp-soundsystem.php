@@ -374,14 +374,21 @@ class WP_SoundSystem {
     }
     
     private function get_registration_notice(){
+        global $wp;
+        
         //registration notice
         if ( is_admin() ) return;
         if ( get_current_user_id() ) return;
         if ( !wpsstm()->get_options('registration_notice') ) return;
         
-        $registration_link = sprintf('<span class="wpsstm-join-now"><a href="%s">%s</a> !</span>',wp_registration_url(),__('Join now','wpsstm'));
         
-        return sprintf(__('Get the best out of %s : create and manage playlists, favorite tracks, sync your account with other services, and much more. %s','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$registration_link);
+        $redirect_url = home_url( $wp->request );
+        $login_link = sprintf('<a class="wpsstm-login" href="%s">%s</a>',wp_login_url($redirect_url),__('Login','wpsstm'));
+        
+        
+        $registration_link = sprintf('<a class="wpsstm-join" href="%s">%s</a>',wp_registration_url(),__('Join','wpsstm'));
+        
+        return sprintf(__('Get the best out of %s : create and manage playlists, favorite tracks, sync your account with other services, and much more. %s or %s now !','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$login_link,$registration_link);
     }
 
     function register_scripts_styles(){
