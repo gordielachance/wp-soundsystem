@@ -77,43 +77,55 @@ class WpsstmPlayer extends HTMLElement{
     
     render(){
 
-        var self = this;
+        var player = this;
         this.debug("LOAD player");
         
         ///
-        self.shuffle_el =   $('#wpsstm-player-shuffle');
-        self.loop_el =      $('#wpsstm-player-loop');
+        player.shuffle_el =   $('#wpsstm-player-shuffle');
+        player.loop_el =      $('#wpsstm-player-loop');
         
         /* Watch for queue changes*/
-        var queueNode = $(self).find('.player-queue').get(0);
-        var queueUpdated = new MutationObserver(self.queueWatch);
+        var queueNode = $(player).find('.player-queue').get(0);
+        var queueUpdated = new MutationObserver(player.queueWatch);
         queueUpdated.observe(queueNode,{childList: true});
-        
+
+        //Scroll to page track
+        $(player).on('click', '.wpsstm-track-position', function(e) {
+            e.preventDefault();
+            var track = this.closest('wpsstm-track');
+            var pageTrack = track.pageNode;
+
+            //https://stackoverflow.com/a/6677069/782013
+            $('html, body').animate({
+                scrollTop: $(pageTrack).offset().top - ( $(window).height() / 3) //not at the very top
+            }, 500);
+
+        });
 
         //toggle queue
-        $(self).find('.wpsstm-player-action-queue a').click(function(e) {
+        $(player).find('.wpsstm-player-action-queue a').click(function(e) {
             e.preventDefault();
             $(this).toggleClass('active');
-            $(self).find('.player-queue').toggleClass('active');
+            $(player).find('.player-queue').toggleClass('active');
         });
         
         //previous
-        $(self).find('#wpsstm-player-extra-previous-track').click(function(e) {
+        $(player).find('#wpsstm-player-extra-previous-track').click(function(e) {
             e.preventDefault();
-            self.previous_track_jump();
+            player.previous_track_jump();
         });
         
         //next
-        $(self).find('#wpsstm-player-extra-next-track').click(function(e) {
+        $(player).find('#wpsstm-player-extra-next-track').click(function(e) {
             e.preventDefault();
-            self.next_track_jump();
+            player.next_track_jump();
         });
 
         /*
         Track popups for player
         TOUFIX TOUCHECK
         
-        $(self).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
+        $(player).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
             e.preventDefault();
 
             var content_url = this.href;
@@ -151,22 +163,22 @@ class WpsstmPlayer extends HTMLElement{
         /*
         Shuffle button
         */
-        if ( self.is_shuffle ){
-            self.shuffle_el.addClass('active');
+        if ( player.is_shuffle ){
+            player.shuffle_el.addClass('active');
         }
 
-        self.shuffle_el.find('a').click(function(e) {
+        player.shuffle_el.find('a').click(function(e) {
             e.preventDefault();
 
-            var is_active = !self.is_shuffle;
-            self.is_shuffle = is_active;
+            var is_active = !player.is_shuffle;
+            player.is_shuffle = is_active;
 
             if (is_active){
                 localStorage.setItem("wpsstm-player-shuffle", true);
-                self.shuffle_el.addClass('active');
+                player.shuffle_el.addClass('active');
             }else{
                 localStorage.removeItem("wpsstm-player-shuffle");
-                self.shuffle_el.removeClass('active');
+                player.shuffle_el.removeClass('active');
             }            
 
         });
@@ -174,25 +186,25 @@ class WpsstmPlayer extends HTMLElement{
         /*
         Loop button
         */
-        if ( self.can_repeat ){
-            self.loop_el.addClass('active');
+        if ( player.can_repeat ){
+            player.loop_el.addClass('active');
         }
 
-        self.loop_el.find('a').click(function(e) {
+        player.loop_el.find('a').click(function(e) {
             e.preventDefault();
 
-            var is_active = !self.can_repeat;
-            self.can_repeat = is_active;
+            var is_active = !player.can_repeat;
+            player.can_repeat = is_active;
 
             if (is_active){
                 localStorage.setItem("wpsstm-player-loop", true);
-                self.loop_el.addClass('active');
+                player.loop_el.addClass('active');
             }else{
                 localStorage.setItem("wpsstm-player-loop", false);
-                self.loop_el.removeClass('active');
+                player.loop_el.removeClass('active');
             }
             
-            self.render_queue_controls();
+            player.render_queue_controls();
 
         });
 
@@ -203,13 +215,13 @@ class WpsstmPlayer extends HTMLElement{
 
         $(window).bind('beforeunload', function(){
 
-            if (self.current_source && !self.current_media.paused){
+            if (player.current_source && !player.current_media.paused){
                 return wpsstmPlayer.leave_page_text;
             }
 
         });
 
-        $(self).find('audio').mediaelementplayer({
+        $(player).find('audio').mediaelementplayer({
             classPrefix: 'mejs-',
             // All the config related to HLS
             hls: {
@@ -221,10 +233,10 @@ class WpsstmPlayer extends HTMLElement{
             stretching: 'responsive',
             features: ['playpause','loop','progress','current','duration','volume'],
             loop: false,
-            success: function(mediaElement, originalNode, player) {
-                self.current_media = mediaElement;
-                self.debug("MediaElementJS ready");
-                $(document).trigger( "wpsstmPlayerInit", [self] ); //custom event
+            success: function(mediaElement, originalNode, MEplayer) {
+                player.current_media = mediaElement;
+                player.debug("MediaElementJS ready");
+                $(document).trigger( "wpsstmPlayerInit", [player] ); //custom event
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
@@ -239,6 +251,7 @@ class WpsstmPlayer extends HTMLElement{
         
         $(container).addClass('tracks-container');
         var tracks = $(container).find('wpsstm-track');
+        var icon = $(container).find('.wpsstm-tracks-container-icon');
         var autoplayTrackIdx;
 
         tracks.each(function(index, track) {
@@ -250,16 +263,35 @@ class WpsstmPlayer extends HTMLElement{
         });
         
         player.debug("Queued tracks: " + tracks.length );
+        
+        //container play icon
+        $(container).on('click', '.wpsstm-tracks-container-icon', function(e) {
 
+            var trackIdx;
+            var container = this.closest('.tracks-container');
+            var allTracks = $(container).find('wpsstm-track');
+            var activeTrack = $(container).find('wpsstm-track.track-active').get(0);
+
+            if (activeTrack){
+                trackIdx = allTracks.index( $(activeTrack) );
+            }else{
+                trackIdx = 0;
+            }
+
+            player.play_queue(trackIdx);
+        });
+
+        //autoplay
         if (typeof autoplayTrackIdx !== 'undefined'){
             player.debug("autoplay track #" + autoplayTrackIdx);
             player.play_queue(autoplayTrackIdx);
         }
+
     }
 
     queueTrack(track){
-        var self = this;
-        var playerQueue = $(self).find('.player-queue').get(0);
+        var player = this;
+        var playerQueue = $(player).find('.player-queue').get(0);
         
         //show play BT
         //clone page track & append to queue
@@ -270,22 +302,18 @@ class WpsstmPlayer extends HTMLElement{
 
         //post track
         track.queueNode = queueTrack;
-        
-        //init - TOUFIX we should have a better way to handle this
-        queueTrack.renderQueueTrack();
-        track.renderPageTrack();
 
         return queueTrack;
         
     }
 
     get_previous_track_idx(){
-        var self = this;
+        var player = this;
         var tracks_before = [];
 
-        var queue = $(self.current_track.parentNode);
+        var queue = $(player.current_track.parentNode);
         var tracks = queue.find('wpsstm-track');
-        var current_track_idx = tracks.index( $(self.current_track) );
+        var current_track_idx = tracks.index( $(player.current_track) );
         if (current_track_idx == -1) return; //index not found
         
         if (tracks){
@@ -293,36 +321,38 @@ class WpsstmPlayer extends HTMLElement{
         }
 
         if (!tracks_before.length){
-            if (self.can_repeat){
+            if (player.can_repeat){
                 tracks_before = tracks;
             }
         }
         
         tracks_before = tracks_before.toArray().reverse();
 
+        /*
         //which one should we play?
         var tracks_playable = tracks_before.filter(function (track) {
             return (track.can_play !== false);
         });
+        */
         
         //shuffle ?
-        if (self.is_shuffle){
-            tracks_playable = wpsstm_shuffle(tracks_playable);
+        if (player.is_shuffle){
+            tracks_before = wpsstm_shuffle(tracks_before);
         }
 
-        var previous_track = tracks_playable[0];
+        var previous_track = tracks_before[0];
         var previous_track_idx = ( previous_track ) ? tracks.index( previous_track ) : undefined;
         
         return previous_track_idx;
     }
     
     get_next_track_idx(){
-        var self = this;
+        var player = this;
         var tracks_after = [];
 
-        var queue = $(self.current_track.parentNode);
+        var queue = $(player.current_track.parentNode);
         var tracks = queue.find('wpsstm-track');
-        var current_track_idx = tracks.index( $(self.current_track) );
+        var current_track_idx = tracks.index( $(player.current_track) );
         if (current_track_idx == -1) return; //index not found
 
         if (tracks){
@@ -330,22 +360,23 @@ class WpsstmPlayer extends HTMLElement{
         }
 
         if (!tracks_after.length){
-            if (self.can_repeat){
+            if (player.can_repeat){
                 tracks_after = tracks;
             }
         }
-
+        /*
         //which one should we play?
         var tracks_playable = tracks_after.filter(function (track_obj) {
             return (track_obj.can_play !== false);
         });
+        */
         
         //shuffle ?
-        if (self.is_shuffle){
-            tracks_playable = wpsstm_shuffle(tracks_playable);
+        if (player.is_shuffle){
+            tracks_after = wpsstm_shuffle(tracks_before);
         }
 
-        var next_track = tracks_playable[0];
+        var next_track = tracks_after[0];
         var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
 
         //console.log("get_next_track_idx: current: " + current_track_idx + ", next;" + next_track_idx);
@@ -355,40 +386,60 @@ class WpsstmPlayer extends HTMLElement{
     
     previous_track_jump(){
         
-        var self = this;
-        var track_idx = self.get_previous_track_idx();
+        var player = this;
+        var track_idx = player.get_previous_track_idx();
 
         if (typeof track_idx !== 'undefined'){
-            self.play_queue(track_idx);
+            player.play_queue(track_idx);
         }else{
-            self.debug("no previous track");
+            player.debug("no previous track");
         }
     }
     
     next_track_jump(){
-        var self = this;
+        var player = this;
 
-        var track_idx = self.get_next_track_idx();
+        var track_idx = player.get_next_track_idx();
+        
 
         if (typeof track_idx !== 'undefined'){
-            self.play_queue(track_idx);
+            player.play_queue(track_idx);
         }else{
-            self.debug("no next track");
+            player.debug("no next track");
         }
 
     }
     
     play_queue(track_idx){
-        var self = this;
+        var player = this;
         
-        var allTracks = $(self).find('.player-queue wpsstm-track');
+        var allTracks = $(player).find('.player-queue wpsstm-track');
         var currentTrack = allTracks.filter('.track-active').get(0);
-        var requestedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
+        var requestedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
+        var requestedTrackInstances = requestedTrack.get_instances();
 
         if (currentTrack){
+
+            //reclick
+            if ( currentTrack == requestedTrack ){
+
+                requestedTrack.debug('reclick');
+                var isPlaying = ( requestedTrack.getAttribute("trackstatus") == 'playing' );
+                
+                requestedTrack.debug('is playing ? ' + isPlaying);
+
+                if ( isPlaying ){
+                    player.current_media.pause();
+                }else{
+                    player.current_media.play();
+                }
+
+                return;
+            }
+            
             currentTrack.removeAttribute('trackstatus');
         }
-        
+
         requestedTrack.debug('request track');
         requestedTrack.setAttribute('trackstatus','request');
         
@@ -398,16 +449,17 @@ class WpsstmPlayer extends HTMLElement{
             function () { //success
                 
                 /* node has been swapped so fetch the track again*/
-                var updatedTrack = $(self).find('.player-queue wpsstm-track').get(track_idx);
-                
+                var updatedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
+
                 //check that it still the same track that is requested
-                if (self.current_track !== requestedTrack) return;
+                if (player.current_track !== requestedTrack) return;
+                
                 updatedTrack.play_track();
                 
                 
             }, function (error) { //error
                 requestedTrack.debug('unable to play track, skipping...');
-                self.next_track_jump();
+                player.next_track_jump();
                 
             }
         );
@@ -416,32 +468,32 @@ class WpsstmPlayer extends HTMLElement{
     }
     
     setup_track(track){
-        var self = this;
-        self.current_track = track;
-        self.render_queue_controls();
+        var player = this;
+        player.current_track = track;
+        player.render_queue_controls();
         track.get_instances().addClass('track-active');
     }
 
     render_queue_controls(){
         
-        var self = this;
+        var player = this;
         
         /*
         Previous track bt
         */
 
-        var previous_track_idx = self.get_previous_track_idx();
+        var previous_track_idx = player.get_previous_track_idx();
         var hasPreviousTrack = (typeof previous_track_idx !== 'undefined');
-        var previousTrackEl = $(self).find('#wpsstm-player-extra-previous-track');
+        var previousTrackEl = $(player).find('#wpsstm-player-extra-previous-track');
 
         previousTrackEl.toggleClass('active',hasPreviousTrack);
 
         /*
         Next track bt
         */
-        var next_track_idx = self.get_next_track_idx();
+        var next_track_idx = player.get_next_track_idx();
         var hasNextTrack = (typeof next_track_idx !== 'undefined');
-        var nextTrackEl = $(self).find('#wpsstm-player-extra-next-track');
+        var nextTrackEl = $(player).find('#wpsstm-player-extra-next-track');
         nextTrackEl.toggleClass('active',hasNextTrack);
     }
 

@@ -118,7 +118,9 @@ wpsstm-track{
         color:inherit;
     }
 
-    &.track-loading .wpsstm-track-icon{
+    &.track-loading .wpsstm-track-icon,
+    &.track-reloading .wpsstm-track-icon,
+    &.track-sources-loading .wpsstm-track-icon{
         @extend .wpsstm-loading-icon;
     }
     &:not(.track-playing) .wpsstm-track-icon:before{

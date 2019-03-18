@@ -158,6 +158,7 @@ wpsstm-tracklist{
 .tracks-container{
     
     .wpsstm-tracks-container-icon{
+        @extend .wpsstm-can-click;
         @include opacity(.15);
     }
     

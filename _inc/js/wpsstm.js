@@ -40,14 +40,6 @@ $('.wpsstm-artist-autocomplete').each(function() {
     });
 });
 
-//notices
-
-$(document).on('click', 'a.wpsstm-close-notice', function(e) {
-    var notice = this.closest('.wpsstm-block-notice');
-    notice.remove();
-});
-
-
 $( document ).ready(function() {
     wpsstm_debug("DOM READY!");
     
@@ -55,6 +47,13 @@ $( document ).ready(function() {
     if ( registration_notice = wpsstmL10n.registration_notice){
         wpsstm_js_notice(registration_notice);
     }
+    
+    //notices
+
+    $(document).on('click', 'a.wpsstm-close-notice', function(e) {
+        var notice = this.closest('.wpsstm-block-notice');
+        notice.remove();
+    });
     
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
     var trackContainers = $('wpsstm-tracklist');
