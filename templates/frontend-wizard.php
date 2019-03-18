@@ -27,7 +27,7 @@ if ( is_wp_error($can_wizard) ){ //TOUFIX TOUCHECK
                 $text_input = sprintf(
                     '<input type="text" name="wpsstm_frontend_wizard_url" value="%s" class="wpsstm-fullwidth" placeholder="%s" />',
                     $option,
-                    __('Type something or enter a tracklist URL','wpsstm')
+                    __('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm')
                 );
 
     
