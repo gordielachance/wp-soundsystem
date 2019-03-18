@@ -2,7 +2,7 @@
 
 class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
-    var $post_id = 0; //tracklist ID (can be an album, playlist or live playlist)
+    var $post_id = 0; //tracklist ID (can be an album, playlist or radio)
     var $index = -1;
     var $tracklist_type = 'static';
     
@@ -396,7 +396,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $actions['live'] = array(
                     'text' =>      __('Stop sync', 'wpsstm'),
                     'classes' =>    array('wpsstm-advanced-action'),
-                    'desc' =>       __('Convert this live playlist to a static playlist', 'wpsstm'),
+                    'desc' =>       __('Convert this radio to a static playlist', 'wpsstm'),
                     'href' =>       $this->get_tracklist_action_url('static'),
                     'target' =>     '_parent',
                 );
@@ -404,7 +404,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $actions['static'] = array(
                     'text' =>      __('Sync', 'wpsstm'),
                     'classes' =>    array('wpsstm-advanced-action'),
-                    'desc' =>       __('Restore this playlist back to a live playlist', 'wpsstm'),
+                    'desc' =>       __('Restore this playlist back to a radio', 'wpsstm'),
                     'href' =>       $this->get_tracklist_action_url('live'),
                     'target' =>     '_parent',
                 );

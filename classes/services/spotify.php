@@ -120,7 +120,7 @@ class WPSSTM_Spotify{
     function spotify_settings_desc(){
         $new_app_link = 'https://developer.spotify.com/my-applications/#!/applications/create';
         
-        printf(__('Required for the Live Playlists Spotify preset.  Create a Spotify application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf(__('Required for the Spotify radio preset.  Create a Spotify application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
     }
 
     function spotify_api_settings(){

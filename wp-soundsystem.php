@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WP SoundSystem
-Description: Manage a music library within Wordpress; including playlists, tracks, artists, albums and live playlists.  The perfect fit for your music blog !
+Description: Manage a music library within Wordpress; including playlists, tracks, artists, albums and radios.  The perfect fit for your music blog !
 Plugin URI: https://github.com/gordielachance/wp-soundsystem
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
@@ -509,7 +509,7 @@ class WP_SoundSystem {
         
         $all = array(
             
-            //live playlists
+            //radios
             'manage_live_playlists'     => array('editor','administrator'),
             'edit_live_playlists'       => array('contributor','author','editor','administrator'),
             'create_live_playlists'     => array('contributor','author','editor','administrator'),

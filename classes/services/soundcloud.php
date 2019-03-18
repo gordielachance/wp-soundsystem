@@ -67,7 +67,7 @@ class WPSSTM_Souncloud{
     
     function souncloud_settings_desc(){
         $new_app_link = 'http://soundcloud.com/you/apps/new';
-        printf(__('Required for the Live Playlists Soundcloud preset.  Create a Soundcloud application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        printf(__('Required for the Soundcloud radio preset.  Create a Soundcloud application %s to get the required informations.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
     }
 
     function soundcloud_api_settings(){

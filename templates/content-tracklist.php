@@ -15,7 +15,7 @@ $has_player = wpsstm()->get_options('player_enabled');
             <?php } ?>
             <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->title;?></a>
                 <?php
-                //live playlist icon
+                //radio icon
                 if ($wpsstm_tracklist->tracklist_type == 'live'){
                     ?>
                     <span class="wpsstm-live-tracklist-icon" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">

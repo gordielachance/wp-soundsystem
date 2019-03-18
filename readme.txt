@@ -15,7 +15,7 @@ Manage a music library within Wordpress ! Build playlists, manage tracks, import
 
 = Several new post types =
 
-Playlists, Live Playlists, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
+Playlists, Radios, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
 
 = Playlists =
 
@@ -52,9 +52,9 @@ You may also propose a **Frontend Tracklist Importer** to your visitors: just cr
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
 
-= Live Playlists =
+= Radios =
 
-Live Playlists lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
+Radios lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
 For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically; and eventually temporary store the tracks if tracklist cache is enabled.
 
 Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
@@ -79,7 +79,7 @@ Optional arguments: *post_id*.
 `[wpsstm-tracklist post_id="160"]`
 
 To embed the tracklist from the post #160.  
-Works for albums, playlists and live playlists.
+Works for albums, playlists and radios.
 Optional arguments: *post_id*,*max_rows*.
 
 = Donate! =
@@ -189,7 +189,7 @@ There is an option in the plugin settings to flush those community tracks : they
 * 'edit backend' action for tracklists/tracks/sources
 * improved 'services' wizard widget
 * new plugin option 'Flush Community Tracks'
-* live playlists : get_the_title() now returns the remote tracklist title if WP post title is empty ('the_cached_remote_title' hooked on 'the_title')
+* radios : get_the_title() now returns the remote tracklist title if WP post title is empty ('the_cached_remote_title' hooked on 'the_title')
 * remove title support for artist/album/track
 * some live tracklist & wizard improvements
 * fixed shuffle mode

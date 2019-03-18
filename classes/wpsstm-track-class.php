@@ -189,7 +189,7 @@ class WPSSTM_Track{
     }
 
     /*
-    Get IDs of the parent tracklists (albums / playlists / live playlists) for a track.
+    Get IDs of the parent tracklists (albums / playlists / radios) for a track.
     */
     function get_in_tracklists_ids(){
         global $wpdb;

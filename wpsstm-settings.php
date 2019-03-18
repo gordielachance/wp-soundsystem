@@ -355,7 +355,7 @@ class WPSSTM_Settings {
 
     function section_community_user_desc(){
         $desc = array();
-        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource, live playlists or frontend wizard.","wpsstm");
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource, radios or frontend wizard.","wpsstm");
 
         //wrap
         $desc = array_map(
