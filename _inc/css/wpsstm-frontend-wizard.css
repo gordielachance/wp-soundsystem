@@ -185,13 +185,15 @@ input.wpsstm-fullwidth {
   border: 0px solid #f6b73c;
   border-left-width: 5px;
   padding: .75em;
+  position: relative;
+  z-index: 10;
 }
-/* line 157, ../scss/_wpsstm-shared.scss */
+/* line 159, ../scss/_wpsstm-shared.scss */
 .wpsstm-block-notice .wpsstm-close-notice {
   float: right;
 }
 
-/* line 162, ../scss/_wpsstm-shared.scss */
+/* line 164, ../scss/_wpsstm-shared.scss */
 .wpsstm-align-both {
   display: -webkit-flex;
   display: flex;

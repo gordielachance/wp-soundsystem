@@ -82,6 +82,10 @@ To embed the tracklist from the post #160.
 Works for albums, playlists and radios.
 Optional arguments: *post_id*,*max_rows*.
 
+= BuddyPress =
+
+This plugin is BuddyPress ready, and supports a new "music" menu for users, activity, etc.
+
 = Donate! =
 
 It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
