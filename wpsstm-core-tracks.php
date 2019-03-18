@@ -18,7 +18,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'parse_query', array($this,'populate_global_subtrack'));
         add_action( 'parse_query', array($this,'populate_global_track'));
-        //add_action( 'the_post', array($this,'populate_loop_track'),10,2); //TOUFIX if enabled, notices do not work anymore
+        add_action( 'the_post', array($this,'populate_loop_track'),10,2);
         
         add_action( 'wp', array($this,'handle_track_action'), 8);
 
@@ -193,7 +193,7 @@ class WPSSTM_Core_Tracks{
     function populate_loop_track($post,$query){
         global $wpsstm_track;
         if ( $query->get('post_type') == wpsstm()->post_type_track ){
-            //set global $wpsstm_tracklist
+            //set global $wpsstm_track
             $wpsstm_track = new WPSSTM_Track($post->ID);
         }
     }
