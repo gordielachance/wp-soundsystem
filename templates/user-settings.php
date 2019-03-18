@@ -16,8 +16,8 @@ do_action( 'bp_before_member_settings_template' ); ?>
     
     <h2>Last.fm</h2>
     <?php
-    $is_lastfm_auth = ( $wpsstm_lastfm->lastfm_user->is_user_api_logged() === true);
-    if (!$is_lastfm_auth){
+    $connected = ( $wpsstm_lastfm->lastfm_user->is_user_connected() === true);
+    if (!$connected){
         $lastfm_auth_url = self::get_app_auth_url();
         $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
         ?>
@@ -32,7 +32,7 @@ do_action( 'bp_before_member_settings_template' ); ?>
     
         <?php
     }else{
-        $user_metas = $wpsstm_lastfm->lastfm_user->get_lastfm_user_api_metas();
+        $user_metas = $wpsstm_lastfm->lastfm_user->get_lastfm_user_metas();
         $lastfm_user_url = 'https://www.last.fm/user/' . $user_metas['username'];
         $lastfm_user_link = sprintf('<a href="%s" target="_blank">%s</a>',$lastfm_user_url,$user_metas['username']);
         $revoke_url = 'https://www.last.fm/settings/applications';

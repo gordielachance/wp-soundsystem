@@ -1,6 +1,7 @@
 <?php
 
 ///TO FIX use last.fm API instead of scraping ? Only downside is that we don't get the youbube sources with that.
+//TO FIX should have a way to deconnect (delete meta & transient) last.fm, since for now if the user revoke the access on his last.fm profile, there is now way to get the auth link again.
 
 use LastFmApi\Api\AuthApi;
 use LastFmApi\Api\ArtistApi;
@@ -21,9 +22,7 @@ class WPSSTM_LastFM{
         $options_default = array(
             'client_id' =>      null,
             'client_secret' =>  null,
-            'can_scrobble' =>   true,
             'favorites' =>      true,
-            'scrobble_along' => false,
         );
         
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
@@ -39,8 +38,9 @@ class WPSSTM_LastFM{
         add_filter('wpsstm_wizard_service_links',array($this,'register_lastfm_service_links'), 5);
         add_filter('wpsstm_wizard_bang_links',array($this,'register_lastfm_bang_links'));
         
-        add_action( 'wp', array($this,'after_app_auth') );
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
+        add_action( 'wp', array($this,'after_app_auth') );
+        add_action('wp_head',array($this,'app_auth_notice'),11);
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         
         add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
@@ -163,15 +163,7 @@ class WPSSTM_LastFM{
             'wpsstm-settings-page', // Page
             'lastm_service'//section
         );
-        
-        add_settings_field(
-            'lastfm_scrobble', 
-            __('Scrobble','wpsstm'), 
-            array( $this, 'scrobble_callback' ), 
-            'wpsstm-settings-page', // Page
-            'lastm_service'//section
-        );
-        
+
         add_settings_field(
             'lastfm_scrobble_along', 
             __('Scrobble Along','wpsstm'), 
@@ -197,8 +189,6 @@ class WPSSTM_LastFM{
         //Last.fm 
         $new_input['client_id'] = ( isset($input['client_id']) ) ? trim($input['client_id']) : null;
         $new_input['client_secret'] = ( isset($input['client_secret']) ) ? trim($input['client_secret']) : null;
-        $new_input['can_scrobble'] = isset($input['can_scrobble']);
-        $new_input['scrobble_along'] = isset($input['scrobble_along']);
         $new_input['favorites'] = isset($input['favorites']);
 
         return $new_input;
@@ -233,18 +223,6 @@ class WPSSTM_LastFM{
         printf('<div>%s%s</div>',$client_el,$secret_el);
     }
     
-    function scrobble_callback(){
-        $option = $this->get_options('can_scrobble');
-
-        $el = sprintf(
-            '<input type="checkbox" name="%s[can_scrobble]" value="on" %s /> %s',
-            self::$lastfm_options_meta_name,
-            checked( $option,true, false ),
-            __("Allow users to scrobble songs to their Last.fm account.","wpsstm")
-        );
-        printf('<p>%s</p>',$el);
-    }
-    
     function favorites_callback(){
         $option = $this->get_options('favorites');
         
@@ -259,37 +237,23 @@ class WPSSTM_LastFM{
     }
     
     function scrobble_along_callback(){
-        
-        $enabled = $this->get_options('scrobble_along');
+
+        $can_scrobble_along = $this->can_scrobble_along();
+        $enabled = ( $can_scrobble_along === true );
         
         /*
         form
         */
 
         $help = array();
-        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.  To enable this option, you have to login with the community user, activate the scrobbler and follow instructions.","wpsstm");
         
         $el = sprintf(
-            '<input type="checkbox" name="%s[scrobble_along]" value="on" %s /> %s',
-            self::$lastfm_options_meta_name,
+            '<input type="checkbox" value="on" disabled="disabled" %s /> %s',
             checked( $enabled,true, false ),
             implode('  ',$help)
         );
-        
-        /*
-        errors
-        */
 
-        if ( $enabled ){
-            
-            $can_scrobble_along = $this->can_scrobble_along();
-            if ( is_wp_error($can_scrobble_along) ){
-                $error = sprintf( __( 'Cannot scrobble along: %s','wpsstm'),$can_scrobble_along->get_error_message() );
-                add_settings_error('lastfm_scrobble_along', 'cannot_scrobble_along',$error,'inline');
-            }
-            
-        }
-        
         printf('<p>%s</p>',$el);
         
         //display settings errors
@@ -308,15 +272,33 @@ class WPSSTM_LastFM{
         //JS
         wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
         
-        $can_scrobble_along = $this->can_scrobble_along();
+        $scrobble_along = ( $this->can_scrobble_along() === true );
         
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => ( $can_scrobble_along && !is_wp_error($can_scrobble_along) && $this->get_options('scrobble_along') ),
-            'lastfm_user_scrobbler'     => ( $this->lastfm_user->is_lastfm_enabled() === true),
+            'lastfm_scrobble_along'     => $scrobble_along,
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
+    }
+    
+    /*
+    TOU FIX should be hooked only when player is loaded ?
+    */
+    public function app_auth_notice(){
+        
+        $enabled = $this->lastfm_user->is_user_enabled();
+        $connected = ( $this->lastfm_user->is_user_connected() == true);
+
+        if ( $enabled && !$connected ){
+            $lastfm_auth_url = self::get_app_auth_url();
+            $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
+            $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
+            $notice = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
+
+            wpsstm_notice( $notice );
+        }
+
     }
 
     /*
@@ -324,40 +306,26 @@ class WPSSTM_LastFM{
     */
     
     public function after_app_auth(){
+        //FOR TESTS delete_user_meta( $this->lastfm_user->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name );
         if ( !isset($_GET['wpsstm_lastfm_after_app_auth']) ) return;
-        $token = ( isset($_GET['token']) ) ? $_GET['token'] : null;
-        if (!$token) return;
-        $this->lastfm_user->set_user_token($token);
-
-    }
-
-                            
-    /*
-    Api request for a token
-    */
-
-    public function request_auth_token(){
         
-        $can_api = $this->can_lastfm_api();
-        if ( is_wp_error($can_api) ) return $can_api;
+        $token = ( isset($_GET['token']) ) ? $_GET['token'] : null;
+        $this->lastfm_user->set_lastfm_user_api_metas($token);
 
-        try {
-            $authentication = new AuthApi('gettoken', array(
-                'apiKey' =>     $this->get_options('client_id'),
-                'apiSecret' =>  $this->get_options('client_secret')
-            ));
-        }catch(Exception $e){
-            return self::handle_api_exception($e);
-        }
+        add_action('wp_head',array($this,'after_app_auth_notice'));
 
-        return $authentication->token;
     }
-                            
+    
+    public function after_app_auth_notice(){
+        $username = $this->lastfm_user->get_lastfm_user_metas('username');
+        wpsstm_notice(sprintf(__('Your Last.fm account is now connected, %s.','wpsstm'),$username));
+    }
+                      
     /*
     Get the URL of the app authentification at last.fm.
     */
     
-    private static function get_app_auth_url($redirect_url = null){
+    private function get_app_auth_url($redirect_url = null){
 
         if ( !$redirect_url ) $redirect_url = home_url();
         
@@ -386,7 +354,7 @@ class WPSSTM_LastFM{
     private function get_basic_api_auth(){
         
         $can_api = $this->can_lastfm_api();
-        if ( is_wp_error($can_api) ) return $can_api;
+        if ( !$can_api ) return false;
         
         //TO FIX store temporary ?
         $basic_auth = null;
@@ -483,29 +451,24 @@ class WPSSTM_LastFM{
         
         if ( !$user_id = get_current_user_id() ){
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
-            $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
-            $result['notice'] = sprintf('<p id="wpsstm-dialog-auth-notice">%s</p>',$wp_auth_text);
+            $result['notice'] = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
         }else{
-
-            //check last.fm auth
-            if($do_enable){
             
-                $is_lastfm_auth = ( $this->lastfm_user->is_user_api_logged() === true );
-
-                if (!$is_lastfm_auth){
-                    $lastfm_auth_url = self::get_app_auth_url();
-                    $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
-                    $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
-                    $result['notice'] = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
+            $result['user_id'] = $user_id;
+            
+            if ($do_enable){
+                delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
+                $connected = ( $this->lastfm_user->is_user_connected() === true );
+                if (!$connected){
+                    $result['success'] = false;
                 }else{
-                    delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
                     $result['success'] = true;
                 }
+               
             }else{
-                update_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name, true );
                 $result['success'] = true;
+                delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
             }
-
         }
         
         header('Content-type: application/json');
@@ -517,9 +480,7 @@ class WPSSTM_LastFM{
     }
     
     function ajax_lastfm_now_playing_track(){
-        
-        if ( !$this->lastfm_user->is_lastfm_enabled() ) return;
-        
+
         $ajax_data = wp_unslash($_POST);
         
         $result = array(
@@ -583,7 +544,6 @@ class WPSSTM_LastFM{
 
     function ajax_lastfm_scrobble_community_track(){
         
-        $enabled = $this->get_options('scrobble_along');
         $ajax_data = wp_unslash($_POST);
         $community_user_id = wpsstm()->get_options('community_user_id');
 
@@ -594,9 +554,7 @@ class WPSSTM_LastFM{
             'community_user_id' =>  $community_user_id
         );
         
-        if ( $community_user_id && $enabled ){
-            
-            
+        if ( $community_user_id ){
 
             $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
             
@@ -642,24 +600,26 @@ class WPSSTM_LastFM{
     
     function get_lastfm_actions($actions = null){
 
-        //enable scrobbler
-        if ( $this->get_options('can_scrobble') ){
-            if ( get_current_user_id() ){
-                $actions['scrobbler'] = array(
-                    'text' =>       __('Last.fm scrobble', 'wpsstm'),
-                    'href' =>       '#',
-                );
-            }else{
-                $actions['scrobbler'] = array(
-                    'text' =>       __('Last.fm scrobble', 'wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
-                );
-            }
-
+        if ( get_current_user_id() ){
+            
+            $connected = ( $this->lastfm_user->is_user_connected() === true );
+            
+            $actions['scrobbler'] = array(
+                'text' =>       __('Last.fm scrobble', 'wpsstm'),
+                'href' =>       '#',
+                'classes' =>    array(
+                    ( $connected ) ? 'active' : null
+                ),
+            );
+        }else{
+            $actions['scrobbler'] = array(
+                'text' =>       __('Last.fm scrobble', 'wpsstm'),
+                'href' =>       '#',
+                'desc' =>       __('This action requires you to be logged.','wpsstm'),
+                'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
+            );
         }
-        
+
         return $actions;
     }
     
@@ -668,29 +628,19 @@ class WPSSTM_LastFM{
         $api_key = $this->get_options('client_id');
         $api_secret = $this->get_options('client_secret');
         
-        if ( !$api_key ) return new WP_Error( 'lastfm_no_api_key', __( "Required Last.fm API key missing", "wpsstm" ) );
-        if ( !$api_secret ) return new WP_Error( 'lastfm_no_api_secret', __( "Required Last.fm API secret missing", "wpsstm" ) );
-        
-        return true;
+        return ($api_key && $api_secret);
         
     }
     
     public function can_scrobble_along(){
-        
-        $can_api = $this->can_lastfm_api();
-        if ( is_wp_error($can_api) ) return $can_api;
-        
+
         $community_user_id = wpsstm()->get_options('community_user_id');
         if (!$community_user_id){
             return new WP_Error( 'wpsstm_lastfm_community_scrobble',__('A community user is required.','wpsstm') );   
         }
-        
+
         $community_user = new WPSSTM_LastFM_User($community_user_id);
-        $has_user_lastfm = $community_user->is_user_api_logged();
-        if ( !$has_user_lastfm ){
-            return new WP_Error( 'wpsstm_lastfm_community_scrobble', __("The community user must be authentificated to Last.fm. Please login with the community user, enable scrobbler and follow instructions.",'wpsstm'), 'inline' );
-        }
-        return true;
+        return ( $community_user->is_user_connected() === true);
     }
 
     static function register_lastfm_service_links($links){
@@ -740,10 +690,9 @@ class WPSSTM_LastFM{
 
 class WPSSTM_LastFM_User{
     var $user_id = null;
-    var $user_token_transient_name = null;
     var $user_api_metas = null;
     var $token = null;
-    var $is_user_api_logged = null;
+    private $is_user_api_logged = null;
     var $user_auth = null;
     
     static $lastfm_user_scrobbler_disabled_meta_name = 'wpsstm_scrobbler_disabled';
@@ -754,80 +703,54 @@ class WPSSTM_LastFM_User{
         if (!$user_id) return false;
         
         $this->user_id = $user_id;
-        $this->user_token_transient_name = sprintf( 'wpsstm_lastfm_usertoken_%s',$user_id ); //name of the transient that stores the token for a user ID
     }
     
-    function is_lastfm_enabled(){
+    function debug_log($data,$title = null){
+
+        $title = sprintf('[lastfm user: %s] ',$this->user_id) . $title;
+        wpsstm()->debug_log($data,$title);
+
+    }
+    
+    function is_user_enabled(){
+        global $wpsstm_lastfm;
+        
+        if (!$this->user_id) return false;
+        
+        $can_api = $wpsstm_lastfm->can_lastfm_api();
+        if ( !$can_api ) return false;
+        
+        $service_disabled = get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $this->user_id );
+
+        return !$service_disabled;
+    }
+    
+    public function is_user_connected(){
         global $wpsstm_lastfm;
 
         if ( !$this->user_id ){
             return new WP_Error( 'missing_user_id', __( "Missing user ID.", "wpsstm" ) );
-        }elseif ( !$wpsstm_lastfm->get_options('can_scrobble') ){
-            return new WP_Error( 'cannot_scrobble', __( "Scrobbling is disabled for users", "wpsstm" ) );
-        }else{
-            if ( get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $this->user_id ) ) return false;
-            return $this->is_user_api_logged();
         }
-    }
-    
-    /*
-    Get the user token from a transient, or request it.
-    */
-    
-    private function get_user_token(){
-        global $wpsstm_lastfm;
 
-        if ( $this->token === null ){
-            $this->token = false;
-            $token = $token_transient = $token_request = null;
-            
-            if ( !$token_name = $this->user_token_transient_name ) return;
-            
-            if ( $token = $token_transient = get_transient( $token_name ) ) {
-                $this->token = $token;
-            }else{
-                $token = $token_request = $wpsstm_lastfm->request_auth_token();
-                if ( is_wp_error($token) ) return $token;
-                $this->token = (string)$this->set_user_token($token);
-            }
-        }
+        if( !$this->is_user_enabled() ) return false;
+
+        return $this->is_user_api_logged();
         
-        wpsstm()->debug_log(array('token'=>$this->token,'transient'=>(bool)$token_transient,'request'=>(bool)$token_request),"lastfm - get_user_token()");
-        return $this->token;
     }
-    
-    /*
-    Store the user token for 1 hour (last.fm token duration)
-    */
-    
-    public function set_user_token($token){
-        if ( !$token_name = $this->user_token_transient_name ) return;
-        wpsstm()->debug_log((string)$token,"lastfm - set_user_token()"); 
-        if ( set_transient( $token_name, (string)$token, 1 * HOUR_IN_SECONDS ) ){
-            return $token;
-        }
-    }
-    
+
     /*
     Get the user metas stored after a last.fm session has been initialized.
     */
     
-    public function get_lastfm_user_api_metas($keys=null){
+    public function get_lastfm_user_metas($keys=null){
         if (!$this->user_id) return false;
-        
-        if ( $this->user_api_metas === null ) {
-            $this->user_api_metas = false;
 
-            if ( $api_metas = get_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name, true ) ){
-                $this->user_api_metas = $api_metas;
-            }else{
-                //try to populate it
-                $remote_api_metas = $this->request_lastfm_user_api_metas();
-                if ( is_wp_error($remote_api_metas) ) return $remote_api_metas;
-                $this->user_api_metas = $remote_api_metas;
-            }
+        if ( $this->user_api_metas === null ) {
+            $this->user_api_metas = get_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name, true );
         }
         
+        if (!$this->user_api_metas) return;
+
         if ($keys){
             return wpsstm_get_array_value($keys, $this->user_api_metas);
         }else{
@@ -836,21 +759,18 @@ class WPSSTM_LastFM_User{
     }
     
     /*
-    Request user informations (username and session key) from a token and store it as user meta.
+    Request user informations (username and session key) from a token
     */
 
-    private function request_lastfm_user_api_metas(){
+    public function set_lastfm_user_api_metas($token){
         global $wpsstm_lastfm;
         
         if (!$this->user_id) return false;
         
         $can_api = $wpsstm_lastfm->can_lastfm_api();
-        if ( is_wp_error($can_api) ) return $can_api;
+        if ( !$can_api ) return false;
 
-        $token = $this->get_user_token();
-
-        if ( is_wp_error($token) ) return $token;
-        if ( !$token ) return new WP_Error( 'lastfm_php_api', __('Last.fm PHP Api Error: You must provilde a valid api token','wpsstm') );
+        if ( !$token ) return new WP_Error( 'lastfm_missing_token', __('Missing last.fm user token','wpsstm') );
 
         $auth_args = array(
             'apiKey' =>     $wpsstm_lastfm->get_options('client_id'),
@@ -858,29 +778,28 @@ class WPSSTM_LastFM_User{
             'token' =>      $token
         );
 
-        //wpsstm()->debug_log($auth_args,"lastfm - request_lastfm_user_api_metas()"); 
+        $this->debug_log($auth_args,"lastfm - set_lastfm_user_api_metas()"); 
 
         try {
 
             $session = new AuthApi('getsession', $auth_args);
 
-            $user_api_metas = array(
+            $usermetas = array(
                 'username'      => $session->username,
                 'subscriber'    => $session->subscriber,
                 'sessionkey'    => $session->sessionKey,
 
             );
 
-            wpsstm()->debug_log($user_api_metas,"WPSSTM_LastFM_User::request_lastfm_user_api_metas()");
-
-            update_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name, $user_api_metas );
-
+            $this->debug_log($usermetas,"WPSSTM_LastFM_User::set_lastfm_user_api_metas()");
 
         }catch(Exception $e){
             return WPSSTM_LastFM::handle_api_exception($e);
         }
-
-        return $user_api_metas;
+        
+        if ( $usermetas && !is_wp_error($usermetas) ){
+            return update_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name, $usermetas );
+        }
 
     }
     
@@ -891,13 +810,12 @@ class WPSSTM_LastFM_User{
 
     private function get_user_api_auth(){
         global $wpsstm_lastfm;
-        
+
         $can_api = $wpsstm_lastfm->can_lastfm_api();
-        if ( is_wp_error($can_api) ) return $can_api;
+        if ( !$can_api ) return false;
 
-        $user_auth = null;
-
-        $api_metas = $this->get_lastfm_user_api_metas();
+        $user_auth = null;        
+        $api_metas = $this->get_lastfm_user_metas();
         if ( is_wp_error($api_metas) ) return $api_metas;
 
         if ( $api_metas ) {
@@ -909,15 +827,20 @@ class WPSSTM_LastFM_User{
                 'subscriber' => ( isset($api_metas['subscriber']) ) ? $api_metas['subscriber'] : null,
             );
 
-
             try{
                 $user_auth = new AuthApi('setsession', $auth_args);
             }catch(Exception $e){
-                $user_auth = WPSSTM_LastFM::handle_api_exception($e);
+                WPSSTM_LastFM::handle_api_exception($e);
             }
         }
 
-        return $user_auth;
+        if (!$user_auth){
+            //TOUFIX is this at the right place ?
+            delete_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name );
+            $this->debug_log("***deleted lastfm user api metas");
+        }else{
+            return $user_auth;
+        }
 
     }
     
@@ -927,62 +850,39 @@ class WPSSTM_LastFM_User{
     //TO FIX run only if player is displayed
     */
 
-    public function is_user_api_logged(){
+    private function is_user_api_logged(){
+        
+        if ( !$this->user_id ){
+            return new WP_Error( 'missing_user_id', __( "Missing user ID.", "wpsstm" ) );
+        }
 
         if ($this->is_user_api_logged === null) {
 
-            $is_user_api_logged = false;
-
-            if ( $this->user_id ) {
-
-                $this->user_auth = $this->get_user_api_auth();
-
-                if ( is_wp_error($this->user_auth) ){
-                    $code = $this->user_auth->get_error_code();
-                    $api_code = $this->user_auth->get_error_data($code);
-                    $this->user_auth = null;
-
-                    switch ($api_code){
-                        case 4: //'Unauthorized Token - This token has not been issued' - probably expired
-                            delete_transient( $this->user_token_transient_name );
-                        break;
-                        case 14: //'Unauthorized Token - This token has not been authorized'
-                            $this->delete_lastfm_user_api_metas(); //TO FIX at the right place ?
-                        break;
-                    }
-
-                }else{
-                    $is_user_api_logged = true;
-                }
+            $auth = $this->get_user_api_auth();
+            if ( is_wp_error($auth) ) return $auth;
+            
+            if ($auth){
+                $this->user_auth = $auth;
+                $this->is_user_api_logged = true;
             }
 
-            $this->is_user_api_logged = $is_user_api_logged;
-            
             $debug = array(
                 'logged'    =>          $this->is_user_api_logged,
-                'lastfm_username' =>    $this->get_lastfm_user_api_metas('username')
+                'lastfm_username' =>    $this->get_lastfm_user_metas('username')
             );
             
-            //wpsstm()->debug_log($debug,"lastfm - is_user_api_logged()");
+            //$this->debug_log($debug,"lastfm - is_user_api_logged()");
             
         }
-        
+
         return $this->is_user_api_logged;
 
     }
-    
-    private function delete_lastfm_user_api_metas(){
-        if (!$this->user_id) return false;
-        if ( delete_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name ) ){
-            delete_transient( $this->user_token_transient_name );
-            $this->user_api_metas = false;
-        }
-    }
-    
+
     public function love_lastfm_track(WPSSTM_Track $track,$do_love = null){
         
-        $enabled = $this->is_lastfm_enabled();
-        if ( is_wp_error($enabled) || !$enabled ) return $enabled;
+        $connected = $this->is_user_connected();
+        if ( is_wp_error($connected) || !$connected ) return $connected;
 
         if ($do_love === null) return;
 
@@ -1005,19 +905,19 @@ class WPSSTM_LastFM_User{
         }
         
         $debug_args = $api_args;
-        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_metas('username');
         $debug_args['success'] = $results;
         $debug_args['do_love'] = $do_love;
         
-        wpsstm()->debug_log($debug_args,"lastfm love track");
+        $this->debug_log($debug_args,"lastfm love track");
         
         return $results;
     }
     
     public function now_playing_lastfm_track(WPSSTM_Track $track){
 
-        $enabled = $this->is_lastfm_enabled();
-        if ( is_wp_error($enabled) || !$enabled ) return $enabled;
+        $connected = $this->is_user_connected();
+        if ( is_wp_error($connected) || !$connected ) return $connected;
 
         $results = null;
         
@@ -1027,9 +927,9 @@ class WPSSTM_LastFM_User{
         );
 
         $debug_args = $api_args;
-        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_metas('username');
         
-        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
+        $this->debug_log($debug_args,"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -1043,12 +943,8 @@ class WPSSTM_LastFM_User{
     
     public function scrobble_lastfm_track(WPSSTM_Track $track, $timestamp){
         
-        $enabled = $this->is_lastfm_enabled();
-        if ( is_wp_error($enabled) ) return $enabled;
-        
-        if (!$enabled) {
-            return new WP_Error('lastfm_user_scrobbler_disabled',__("User has its scrobbler disabled.",'wpsstm'));
-        }
+        $connected = $this->is_user_connected();
+        if ( is_wp_error($connected) || !$connected ) return $connected;
 
         $results = null;
         
@@ -1067,9 +963,9 @@ class WPSSTM_LastFM_User{
         }
         
         $debug_args = $api_args;
-        $debug_args['lastfm_username'] = $this->get_lastfm_user_api_metas('username');
+        $debug_args['lastfm_username'] = $this->get_lastfm_user_metas('username');
 
-        wpsstm()->debug_log($debug_args,"WPSSTM_LastFM_User::scrobble_lastfm_track()");
+        $this->debug_log($debug_args,"scrobble last.fm track");
         
         try {
             $track_api = new TrackApi($this->user_auth);
