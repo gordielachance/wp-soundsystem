@@ -182,12 +182,13 @@ class WpsstmSource extends HTMLElement{
     play_source(){
         var source = this;
         var track = this.closest('wpsstm-track').getQueueTrack();
-        var track_instances = track.get_instances();
+        var track_instances = source.track.get_instances();
+        var source_instances = track_instances.find('wpsstm-source');
+        var tracks_container = track_instances.parents('.tracks-container');
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
         
         player.setup_track(track);
-        track_instances.addClass('track-loading');
 
         //we're trying to play the same source again
         if ( $(source).hasClass('source-active') ){
@@ -195,26 +196,15 @@ class WpsstmSource extends HTMLElement{
             success.resolve();
             return success.promise();
         }
-
-        source.debug("play");
-        player.current_source = source;
-        source.setAttribute('requestSourcePlay',true);
-
-        $(source).addClass('source-active');
-
-        var track_instances = source.track.get_instances();
-
-        var source_instances = track_instances.find('wpsstm-source');
-        var tracklist_instances = track_instances.parent();
         
-        /*
-        handle current (previous) source
-        */
-
-        source.debug("play source: " + source.src);
+        ///
+        tracks_container.addClass('tracks-container-loading');
+        track_instances.addClass('track-loading');
         source_instances.addClass('source-active source-loading');
-        
-        tracklist_instances.addClass('tracklist-active tracklist-loading');
+        //
+        player.current_source = source;
+        source.debug("play source: " + source.src);
+        source.setAttribute('requestSourcePlay',true);
 
         /*
         register new events
@@ -237,27 +227,16 @@ class WpsstmSource extends HTMLElement{
 
         $(player.current_media).on('play', function() {
             //player.debug('media - play');
-            
-            player.tracksHistory.push(track);
-
-            source_instances.addClass('source-playing source-has-played');
-            $(player).addClass('player-playing player-has-played');
-            track_instances.addClass('track-playing track-has-played');
-            
-            track.setAttribute('trackstatus','playing');
-            
             success.resolve();
         });
 
         $(player.current_media).on('pause', function() {
             //player.debug('player - pause');
 
-            //tracklists
             $(player).removeClass('player-playing');
-            //tracks
-            track_instances.removeClass('track-playing');
+            tracks_container.removeClass('tracks-container-playing');
             track.setAttribute('trackstatus','paused');
-            //sources
+            track_instances.removeClass('track-playing');
             source_instances.removeClass('source-playing');
         });
 
@@ -265,12 +244,10 @@ class WpsstmSource extends HTMLElement{
 
             player.debug('media - ended');
             
-            //tracklists
             $(player).removeClass('player-playing');
-            //tracks
+            tracks_container.removeClass('tracks-container-playing');
+            track.removeAttr('trackstatus');
             track_instances.removeClass('track-playing track-active');
-            $(track_instances).removeAttr('trackstatus');
-            //sources
             source_instances.removeClass('source-playing source-active');
 
             //Play next song if any
@@ -278,22 +255,26 @@ class WpsstmSource extends HTMLElement{
         });
         
         success.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('source-loading');
+            tracks_container.removeClass('tracks-container-loading');
             track_instances.removeClass('track-loading');
+            source_instances.removeClass('source-loading');
         })
         success.done(function(v) {
+            
+            player.tracksHistory.push(track);
+            $(player).addClass('player-playing player-has-played');
+            tracks_container.addClass('tracks-container-playing');
+            track.setAttribute('trackstatus','playing');
+            track_instances.removeClass('track-error').addClass('track-playing track-has-played');
+            source_instances.removeClass('source-error').addClass('source-playing source-has-played');
             source.can_play = true;
-            tracklist_instances.removeClass('tracklist-loading');
-            track_instances.removeClass('track-error track-loading');
             
         })
         success.fail(function() {
-            source.can_play = false;
-            //sources
-            source_instances.removeClass('source-active').addClass('source-error');
-            //tracks
             track_instances.addClass('track-error');
             track_instances.removeClass('track-active');
+            source.can_play = false;
+            source_instances.removeClass('source-active').addClass('source-error');
         })
 
         ////

@@ -233,6 +233,29 @@ class WpsstmPlayer extends HTMLElement{
         });
 
     }
+    
+    queueContainer(container){
+        var player = this;
+        
+        $(container).addClass('tracks-container');
+        var tracks = $(container).find('wpsstm-track');
+        var autoplayTrackIdx;
+
+        tracks.each(function(index, track) {
+            var queueTrack = player.queueTrack(track);
+
+            if ( $(track).hasClass('track-autoplay') ){
+                autoplayTrackIdx = Array.from(track.parentNode.children).indexOf(track);
+            }
+        });
+        
+        player.debug("Queued tracks: " + tracks.length );
+
+        if (typeof autoplayTrackIdx !== 'undefined'){
+            player.debug("autoplay track #" + autoplayTrackIdx);
+            player.play_queue(autoplayTrackIdx);
+        }
+    }
 
     queueTrack(track){
         var self = this;

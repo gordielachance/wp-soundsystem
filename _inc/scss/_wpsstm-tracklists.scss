@@ -47,10 +47,6 @@ wpsstm-tracklist{
         font-size:.9em;
         text-align:center;
 
-        .wpsstm-tracklist-icon{
-            @include opacity(.15);
-        }
-        
         .wpsstm-live-tracklist-icon{
             position: absolute;
             top: 0;
@@ -94,25 +90,6 @@ wpsstm-tracklist{
             @include opacity(.25);
         }
     } 
-
-    &.tracklist-loading{
-        .wpsstm-tracklist-icon{
-            @extend .wpsstm-loading-icon;
-        }
-    }
-    
-
-    &:not(.tracklist-playing) .wpsstm-tracklist-icon:before,&.tracklist-pause .wpsstm-tracklist-icon:before{
-        content:"\f04b"; //.fa-play
-    }
-
-    &.tracklist-playing .wpsstm-tracklist-icon:before{
-        content:"\f04c"; //.fa-pause;
-    }
-
-    &.tracklist-error .wpsstm-tracklist-icon:before{
-        content:"\f071"; //.fa-exclamation-triangle;
-    }
 
     &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
@@ -177,6 +154,27 @@ wpsstm-tracklist{
     }
 
 }
+
+.tracks-container{
+    
+    .wpsstm-tracks-container-icon{
+        @include opacity(.15);
+    }
+    
+    &.tracks-container-loading{
+        .wpsstm-tracks-container-icon{
+            @extend .wpsstm-loading-icon;
+        }
+    }
+    &:not(.tracks-container-playing) .wpsstm-tracks-container-icon:before,&.tracklist-pause .wpsstm-tracks-container-icon:before{
+        content:"\f04b"; //.fa-play
+    }
+
+    &.tracks-container-playing .wpsstm-tracks-container-icon:before{
+        content:"\f04c"; //.fa-pause;
+    }
+}
+
 
 .wpsstm-tracklist-actions{
 

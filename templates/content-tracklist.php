@@ -11,7 +11,7 @@ $has_player = wpsstm()->get_options('player_enabled');
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->title;?>">
             <?php if ( $has_player ){ ?>
-                <i class="wpsstm-tracklist-icon wpsstm-icon"></i>
+                <i class="wpsstm-tracks-container-icon wpsstm-icon"></i>
             <?php } ?>
             <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->title;?></a>
                 <?php

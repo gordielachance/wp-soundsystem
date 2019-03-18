@@ -61,24 +61,7 @@ $( document ).ready(function() {
     
     //queue on tracklist init/refresh
     $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-
-        var tracks = $(tracklist).find('wpsstm-track');
-        var autoplayTrack;
-        
-        tracks.each(function(index, track) {
-            var queueTrack = bottomPlayer.queueTrack(track);
-            
-            if ( $(track).hasClass('track-autoplay') ){
-                autoplayTrackIdx = Array.from(track.parentNode.children).indexOf(track);
-            }
-        });
-        
-        if (typeof autoplayTrackIdx !== 'undefined'){
-            bottomPlayer.debug("autoplay track #" + autoplayTrackIdx);
-            bottomPlayer.play_queue(autoplayTrackIdx);
-        }
-        
-        bottomPlayer.debug("Queued tracks: " + tracks.length );
+        bottomPlayer.queueContainer(tracklist);
 
     });
 
