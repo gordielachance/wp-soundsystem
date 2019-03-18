@@ -196,7 +196,7 @@ class WPSSTM_Track{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         $subtracks_ids = $this->get_subtrack_matches();
-        
+
         if ( is_wp_error($subtracks_ids) ) return $subtracks_ids;
         if ( !$subtracks_ids ) return;
 
@@ -207,6 +207,7 @@ class WPSSTM_Track{
         $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
         
         $tracklist_ids = $wpdb->get_col($querystr);
+        
         return array_unique($tracklist_ids);
 
     }
@@ -515,10 +516,9 @@ class WPSSTM_Track{
         global $wpdb;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
+
         //check we have enough informations on this track
-        if ( !$this->post_id && ( $this->validate_track() !== true) ) return false;
-        
+        if ( !$this->post_id || ( $this->validate_track() !== true) ) return false;
 
         if ($this->post_id){
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
