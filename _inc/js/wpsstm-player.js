@@ -313,8 +313,7 @@ class WpsstmPlayer extends HTMLElement{
 
         var queue = $(player.current_track.parentNode);
         var tracks = queue.find('wpsstm-track');
-        var current_track = tracks.filter('.track-active').get(0);
-        var current_track_idx = tracks.index( $(current_track) );
+        var current_track_idx = tracks.index( $(self.current_track) );
         if (current_track_idx == -1) return; //index not found
         
         if (tracks){
@@ -353,8 +352,7 @@ class WpsstmPlayer extends HTMLElement{
 
         var queue = $(player.current_track.parentNode);
         var tracks = queue.find('wpsstm-track');
-        var current_track = tracks.filter('.track-active').get(0);
-        var current_track_idx = tracks.index( $(current_track) );
+        var current_track_idx = tracks.index( $(self.current_track) );
         if (current_track_idx == -1) return; //index not found
 
         if (tracks){
@@ -452,6 +450,7 @@ class WpsstmPlayer extends HTMLElement{
 
                 /* node has been swapped so fetch the track again*/
                 var updatedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
+                updatedTrack.did_sources_request = true;
 
                 //check that it still the same track that is requested
                 if (player.current_track !== requestedTrack) return;

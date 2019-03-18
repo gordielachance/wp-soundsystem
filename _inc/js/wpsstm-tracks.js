@@ -306,8 +306,6 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-            
-            self.did_sources_request = true;
 
             if ( data.success === true ){
                 self.reload_track().then(
