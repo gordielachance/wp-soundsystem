@@ -236,12 +236,20 @@ class WPSSTM_Core_BuddyPress{
     function queue_track_activity($track,$tracklist_id){
         
         $user_link = bp_core_get_userlink( get_current_user_id() );
-        $track_title = sprintf('<strong>%s</strong>',(string)$track);
-        $tracklist_title = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+        $track_link = sprintf('<strong>%s</strong>',(string)$track);
+        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+        
+        $action_text = sprintf(__('%s queued the track %s to %s','wpsstm'),$user_link,$track_link,$tracklist_link);
+        
+        //from tracklist
+        if ($track->from_tracklist && get_post_type($track->from_tracklist) ){
+            $from_tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($track->from_tracklist),get_the_title($track->from_tracklist));
+            $action_text = sprintf(__('%s spotted the track %s in %s and queued it to %s','wpsstm'),$user_link,$track_link,$from_tracklist_link,$tracklist_link);
+        }
 
         $args = array(
             //'id' =>
-            'action' =>         sprintf(__('%s added the track %s to %s','wpsstm'),$user_link,$track_title,$tracklist_title),
+            'action' =>         $action_text,
             //'content' =>
             'component' =>      WPSSTM_BASE_SLUG,
             'type' =>           'queue_track',
