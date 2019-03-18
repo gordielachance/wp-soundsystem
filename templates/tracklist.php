@@ -76,7 +76,7 @@ $body_classes = array(
             }
         } 
     }else{
-        die("tata");
+        die("no tracklist found.");
     }
     ?>
     <?php
