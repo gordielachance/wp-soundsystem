@@ -453,9 +453,7 @@ class WPSSTM_LastFM{
             $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url(),__('here','wpsstm'));
             $result['notice'] = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
         }else{
-            
-            $result['user_id'] = $user_id;
-            
+
             if ($do_enable){
                 delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
                 $connected = ( $this->lastfm_user->is_user_connected() === true );
@@ -467,7 +465,7 @@ class WPSSTM_LastFM{
                
             }else{
                 $result['success'] = true;
-                delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
+                update_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name, true );
             }
         }
         
@@ -714,7 +712,7 @@ class WPSSTM_LastFM_User{
     
     function is_user_enabled(){
         global $wpsstm_lastfm;
-        
+
         if (!$this->user_id) return false;
         
         $can_api = $wpsstm_lastfm->can_lastfm_api();
