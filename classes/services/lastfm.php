@@ -238,15 +238,15 @@ class WPSSTM_LastFM{
     
     function scrobble_along_callback(){
 
-        $can_scrobble_along = $this->can_scrobble_along();
-        $enabled = ( $can_scrobble_along === true );
+        $enabled = ( $this->can_scrobble_along() === true );
         
         /*
         form
         */
 
         $help = array();
-        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.  To enable this option, you have to login with the community user, activate the scrobbler and follow instructions.","wpsstm");
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
+        $help[]= sprintf('<small>%s</small>',__("To enable this option, you have to login with the community user, activate the scrobbler and follow the instructions.","wpsstm"));
         
         $el = sprintf(
             '<input type="checkbox" value="on" disabled="disabled" %s /> %s',

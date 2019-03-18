@@ -381,7 +381,7 @@ class WP_SoundSystem {
         
         $registration_link = sprintf('<span class="wpsstm-join-now"><a href="%s">%s</a> !</span>',wp_registration_url(),__('Join now','wpsstm'));
         
-        return sprintf(__('Get the best out of %s : create and manage playlists, sync your account with other services, favorite tracks, and much more. %s','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$registration_link);
+        return sprintf(__('Get the best out of %s : create and manage playlists, favorite tracks, sync your account with other services, and much more. %s','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$registration_link);
     }
 
     function register_scripts_styles(){
