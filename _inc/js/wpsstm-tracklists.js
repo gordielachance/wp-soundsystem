@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
 
 //tracklist modals
-$('body.wpsstm-iframe').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
+$('body.wpsstm-popup').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist-popup>a', function(e) {
     e.preventDefault();
 
     var content_url = this.href;

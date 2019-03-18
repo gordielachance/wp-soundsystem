@@ -86,7 +86,7 @@ class WPSSTM_Core_Tracklists{
         //JS
         wp_register_script( 'wpsstm-tracklist-manager', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklist-manager.js', array('jquery'),wpsstm()->version, true );
         
-        if ( did_action('wpsstm-tracklist-manager-iframe') ) {
+        if ( did_action('wpsstm-tracklist-manager-popup') ) {
             wp_enqueue_script( 'wpsstm-tracklist-manager' );
         }
 
