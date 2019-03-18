@@ -189,10 +189,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             $post_playlist_new_args = wp_parse_args($post_playlist_new_args,$post_playlist_args);
 
+            //TOUFIX TOUCHECK post_date is OK but post_date_gmt doesn't update. = WP bug on drafts ?
+            // see https://ryansechrest.com/2013/02/no-value-for-post_date_gmt-and-post_modified_gmt-when-creating-drafts-in-wordpress/ ?
             $success = wp_insert_post( $post_playlist_new_args, true );
             if ( is_wp_error($success) ) return $success;
             $post_playlist_id = $success;
-            
+
             $this->tracklist_log( array('post_id'=>$post_playlist_id,'args'=>json_encode($post_playlist_new_args)), "WPSSTM_Post_Tracklist::save_tracklist() - post playlist inserted"); 
 
         }else{ //is a playlist update

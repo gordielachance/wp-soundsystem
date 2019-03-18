@@ -31,51 +31,6 @@ body.wpsstm-popup{
             }
         }
         
-        .tracklist-list{
-            > li{
-                border-bottom: 1px solid rgba(51, 51, 51, 0.1);
-                @include display-flex();
-                height: 1em;
-                padding: 1em 0;
-                > *{
-                    @include display-flex();
-                    @include flex-grow(1);
-                    align-items: center;
-                    padding: 0 .25em;
-                    box-sizing: border-box;
-                    max-width:50%;
-                    &.wpsstm-tracklist-title{
-                        a{
-                            @extend .wpsstm-ellipsis;
-                        }
-                        .wpsstm-tracklist-post-state{
-                            &.wpsstm-tracklist-post-state-publish{
-                                display:none;
-                            }
-                        }
-                    }
-                    &.wpsstm-tracklist-actions{
-                        @include justify-content(space-between);
-                        @include flex-grow(0);
-                        @include flex-shrink(0);
-                        text-align:right;
-                        visibility:hidden;
-                        ul{
-                            li{
-                                @extend .wpsstm-action-icon;
-                            }
-                        }
-                    }
-                }
-                &:hover{
-                    .wpsstm-tracklist-actions{
-                        visibility:visible;
-                    }
-                }
-
-            }
-        }
-        
     }
 
 }

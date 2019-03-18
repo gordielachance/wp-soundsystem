@@ -260,7 +260,7 @@ class WPSSTM_Core_Tracks{
 
             break;
 
-            case 'init_tracklist':
+            case 'new_tracklist':
                 $tracklist_title = wpsstm_get_array_value(array('new_tracklist_title'),$manager_data);
                 if (!$tracklist_title){
                     $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
@@ -269,6 +269,7 @@ class WPSSTM_Core_Tracks{
                     //create new tracklist
                     $tracklist = new WPSSTM_Post_Tracklist();
                     $tracklist->title = $tracklist_title;
+
                     $success = $tracklist->save_tracklist();
 
                     //append subtrack if any

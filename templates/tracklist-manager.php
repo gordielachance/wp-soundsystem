@@ -54,7 +54,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
             <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-new-tracklist" method="post">
                 <input name="wpsstm_manager_data[new_tracklist_title]" type="text" placeholder="<?php _e('Type to filter playlists or to create a new one','wpsstm');?>" class="wpsstm-fullwidth" />
                 <?php echo $wpsstm_track->get_subtrack_hidden_form_fields();?>
-                <input name="wpsstm_manager_action" type="hidden" value='init_tracklist' />
+                <input name="wpsstm_manager_action" type="hidden" value='new_tracklist' />
                 <button type="submit" class="button button-primary wpsstm-icon-button">
                     <i class="fa fa-plus" aria-hidden="true"></i> <?php _e('New');?>
                 </button>
