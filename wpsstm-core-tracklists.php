@@ -256,7 +256,9 @@ class WPSSTM_Core_Tracklists{
     }
     
     function filter_tracklist_empty_tite( $title, $post_id = null ) {
-        if(!$title) $title = sprintf('(tracklist #%d)',$post_id);
+        if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
+            $title = sprintf('(tracklist #%d)',$post_id);
+        }
         return $title;
     }
 
