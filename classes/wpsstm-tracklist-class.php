@@ -167,10 +167,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         /*
         $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey    => $this->artist,
+            WPSSTM_Core_Tracks::$artist_metakey     => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            WPSSTM_MusicBrainz::$mbid_metakey           => $this->mbid,
+            WPSSTM_MusicBrainz::$mbid_metakey       => $this->mbid,
             //sources is more specific, will be saved below
         );
         */
