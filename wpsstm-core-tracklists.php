@@ -515,9 +515,13 @@ class WPSSTM_Core_Tracklists{
             
         if($user_id === true) $user_id = null; //no specific user ID set, get every favorited tracklists
         
-        $ids = self::get_favorited_tracklist_ids($user_id);
+        if ( $ids = self::get_favorited_tracklist_ids($user_id) ){
+            $query->set ( 'post__in', $ids );
+        }else{
+            $query->set ( 'post__in', array(0) ); //force no results
+        }
         
-        $query->set ( 'post__in', $ids ); 
+        
 
         return $query;
     }
