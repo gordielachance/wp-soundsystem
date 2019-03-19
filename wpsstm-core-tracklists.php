@@ -46,7 +46,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'posts_where', array($this,'tracklist_query_where_track_id'), 10, 2 );
 
         //post content
-        add_filter( 'the_title', array($this, 'filter_tracklist_empty_tite'), 10, 2 );
+        add_filter( 'the_title', array($this, 'filter_tracklist_empty_title'), 10, 2 );
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
         
         //tracklist shortcode
@@ -255,6 +255,7 @@ class WPSSTM_Core_Tracklists{
         echo $output;
     }
     
+
     function filter_tracklist_empty_tite( $title, $post_id = null ) {
         if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
             $title = sprintf('(tracklist #%d)',$post_id);
@@ -517,9 +518,13 @@ class WPSSTM_Core_Tracklists{
             
         if($user_id === true) $user_id = null; //no specific user ID set, get every favorited tracklists
         
-        $ids = self::get_favorited_tracklist_ids($user_id);
+        if ( $ids = self::get_favorited_tracklist_ids($user_id) ){
+            $query->set ( 'post__in', $ids );
+        }else{
+            $query->set ( 'post__in', array(0) ); //force no results
+        }
         
-        $query->set ( 'post__in', $ids ); 
+        
 
         return $query;
     }

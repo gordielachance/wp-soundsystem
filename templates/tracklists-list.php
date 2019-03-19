@@ -13,8 +13,7 @@ $args = array(
 );
 
 //self playlists, allow any post stati
-//TOUFIX TOUCHECK move in filter ?
-if ( isset($args['author']) && ( $args['author'] === get_current_user_id() ) ){
+if ( ( $user_id = get_current_user_id() ) && isset($args['author']) && ( $args['author'] === $user_id ) ){
     $args['post_status'] = array('publish','private','future','pending','draft');
 }
 

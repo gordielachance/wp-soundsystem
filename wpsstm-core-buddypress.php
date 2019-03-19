@@ -33,7 +33,7 @@ class WPSSTM_Core_BuddyPress{
         bp_core_new_subnav_item( array(
             'name'            => __( 'Playlists', 'wpsstm' ),
             'slug'            => WPSSTM_PLAYLISTS_SLUG,
-            'parent_url'      => $bp->loggedin_user->domain . WPSSTM_BASE_SLUG . '/',
+            'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 10,
             'screen_function' => array($this,'view_user_static_playlists'),
@@ -43,7 +43,7 @@ class WPSSTM_Core_BuddyPress{
         bp_core_new_subnav_item( array(
             'name'            => __( 'Radios', 'wpsstm' ),
             'slug'            => WPSSTM_LIVE_PLAYLISTS_SLUG,
-            'parent_url'      => $bp->loggedin_user->domain . WPSSTM_BASE_SLUG . '/',
+            'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 20,
             'screen_function' => array($this,'view_user_live_playlists'),
@@ -53,7 +53,7 @@ class WPSSTM_Core_BuddyPress{
         bp_core_new_subnav_item( array(
             'name'            => __( 'Favorited tracklists', 'wpsstm' ),
             'slug'            => WPSSTM_FAVORITE_TRACKLISTS_SLUG,
-            'parent_url'      => $bp->loggedin_user->domain . WPSSTM_BASE_SLUG . '/',
+            'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 30,
             'screen_function' => array($this,'view_user_favorite_tracklists'),
@@ -62,7 +62,7 @@ class WPSSTM_Core_BuddyPress{
         bp_core_new_subnav_item( array(
             'name'            => __( 'Favorited tracks', 'wpsstm' ),
             'slug'            => WPSSTM_FAVORITE_TRACKS_SLUG,
-            'parent_url'      => $bp->loggedin_user->domain . WPSSTM_BASE_SLUG . '/',
+            'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 40,
             'screen_function' => array($this,'view_user_favorite_tracks')
@@ -73,7 +73,7 @@ class WPSSTM_Core_BuddyPress{
         bp_core_new_subnav_item( array(
             'name'            => __( 'Settings', 'buddypress' ),
             'slug'            => bp_get_settings_slug(),
-            'parent_url'      => $bp->loggedin_user->domain . WPSSTM_BASE_SLUG . '/',
+            'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 90,
             'screen_function' => array($this,'view_user_settings')
@@ -201,7 +201,7 @@ class WPSSTM_Core_BuddyPress{
     
     function user_favorite_tracks_subnav_title(){
         $user_id = bp_displayed_user_id();
-        $tracklist_id = wpsstm()->user->favorites_id;
+        $tracklist_id = WPSSTM_Core_User::get_user_favorites_id($user_id);
         echo get_the_title($tracklist_id);
     }
 
@@ -210,7 +210,7 @@ class WPSSTM_Core_BuddyPress{
         
         //set global $wpsstm_tracklist
         $user_id = bp_displayed_user_id();
-        $tracklist_id = wpsstm()->user->favorites_id;
+        $tracklist_id = WPSSTM_Core_User::get_user_favorites_id($user_id);
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         echo $wpsstm_tracklist->get_tracklist_html();
     }
