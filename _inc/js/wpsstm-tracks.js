@@ -77,9 +77,9 @@ class WpsstmTrack extends HTMLElement{
             case 'trackstatus':
 
                 if (!newVal){
-                    track.end_track();
                     var track_instances = track.get_instances();
                     track_instances.removeClass('track-active track-loading');
+                    track.end_track();
                 }
 
                 if (newVal == 'request'){
@@ -115,25 +115,41 @@ class WpsstmTrack extends HTMLElement{
 
     render(){
         
-        var self = this;
+        var track = this;
 
-        self.tracklist =            self.closest('wpsstm-tracklist');
-        self.position =             Number($(self).attr('data-wpsstm-subtrack-position')); //index in tracklist
-        self.track_artist =         $(self).find('[itemprop="byArtist"]').text();
-        self.track_title =          $(self).find('[itemprop="name"]').text();
-        self.track_album =          $(self).find('[itemprop="inAlbum"]').text();
-        self.post_id =              Number($(self).attr('data-wpsstm-track-id'));
-        self.subtrack_id =          Number($(self).attr('data-wpsstm-subtrack-id'));
-        self.did_sources_request =  $(self).hasClass('track-autosourced');
+        track.tracklist =            track.closest('wpsstm-tracklist');
+        track.position =             Number($(track).attr('data-wpsstm-subtrack-position')); //index in tracklist
+        track.track_artist =         $(track).find('[itemprop="byArtist"]').text();
+        track.track_title =          $(track).find('[itemprop="name"]').text();
+        track.track_album =          $(track).find('[itemprop="inAlbum"]').text();
+        track.post_id =              Number($(track).attr('data-wpsstm-track-id'));
+        track.subtrack_id =          Number($(track).attr('data-wpsstm-subtrack-id'));
+        track.did_sources_request =  $(track).hasClass('track-autosourced');
 
-        var player = self.closest('wpsstm-player');
+        var player = track.closest('wpsstm-player');
 
         /*
         populate existing sources
         */
+        var trackSources = $(track).find('wpsstm-source');
+
+        if (!trackSources.length && track.did_sources_request){
+            $(track).addClass('track-error');
+        }
+
+        var toggleSourcesEl = $(track).find('.wpsstm-track-action-toggle-sources a');
+        var sourceCountEl = toggleSourcesEl.find('.wpsstm-sources-count');
+        if ( !sourceCountEl.length ){ //create item
+            sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
+            toggleSourcesEl.append(sourceCountEl);            
+        }
+
+        $(track).attr('data-wpsstm-sources-count',trackSources.length);
+        sourceCountEl.text(trackSources.length);
 
         //manage single source
-        $(self).find('.wpsstm-track-sources').each(function() {
+        
+        trackSources.each(function() {
             var sources_container = $(this);
             var sources_list_el = sources_container.find('.wpsstm-track-sources-list');
 
@@ -148,15 +164,18 @@ class WpsstmTrack extends HTMLElement{
                         attribute: 'data-wpsstm-source-id'
                     });
 
-                    var reordered = self.update_sources_order(sourceOrder); //TOUFIX bad logic
+                    var reordered = track.update_sources_order(sourceOrder); //TOUFIX bad logic
 
                 }
             });
 
         });
+        
+        
+        
 
         //track popups within iframe
-        $(self).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
+        $(track).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
             e.preventDefault();
 
             var content_url = this.href;
@@ -194,32 +213,32 @@ class WpsstmTrack extends HTMLElement{
         });
 
         //toggle favorite
-        $(self).on('click','.wpsstm-track-action-favorite a,.wpsstm-track-action-unfavorite a', function(e) {
+        $(track).on('click','.wpsstm-track-action-favorite a,.wpsstm-track-action-unfavorite a', function(e) {
 
             e.preventDefault();
 
             var action_el = $(this).parents('.wpsstm-track-action');
             var do_love = action_el.hasClass('action-favorite');
             
-            self.toggle_favorite(do_love);        
+            track.toggle_favorite(do_love);        
 
         });
 
         //dequeue
-        $(self).on('click','.wpsstm-track-action-dequeue a', function(e) {
+        $(track).on('click','.wpsstm-track-action-dequeue a', function(e) {
             e.preventDefault();
-            self.dequeue_track();
+            track.dequeue_track();
         });
 
         //delete
-        $(self).on('click','.wpsstm-track-action-trash a', function(e) {
+        $(track).on('click','.wpsstm-track-action-trash a', function(e) {
             e.preventDefault();
-            self.trash_track();
+            track.trash_track();
         });
 
         //sources
 
-        var toggleSourcesEl = $(self).find('.wpsstm-track-action-toggle-sources a');
+        var toggleSourcesEl = $(track).find('.wpsstm-track-action-toggle-sources a');
 
         toggleSourcesEl.click(function(e) {
             e.preventDefault();
@@ -230,25 +249,13 @@ class WpsstmTrack extends HTMLElement{
 
     }
 
-    getQueueTrack(){
-        var playerTrack;
-        var self = this;
-
-        if (this.pageNode){ //is a queue track
-            playerTrack = this;
-        }else{ //is a page track
-            playerTrack = this.queueNode;
-        }
-        return playerTrack;
-    }
-
     get_instances(){
-        var self = this;
+        var track = this;
         var instances = [];
         
-        instances.push(self);
-        instances.push(self.pageNode);
-        instances.push(self.queueNode);
+        instances.push(track);
+        instances.push(track.pageNode);
+        instances.push(track.queueNode);
         
         instances = instances.filter(Boolean); //remove falsy
         
@@ -257,29 +264,28 @@ class WpsstmTrack extends HTMLElement{
     
     maybe_load_sources(){
 
-        var self = this;
+        var track = this;
         var success = $.Deferred();
         var can_autosource = true; //TOUFIX should be from localized var
-        var sources = $(self).find('wpsstm-source');
+        var sources = $(track).find('wpsstm-source');
 
         if (sources.length > 0){
-            
             success.resolve();
             
         }else if ( !can_autosource ){
-            
             success.resolve("Autosource is disabled");
             
-        } else if ( self.did_sources_request ) {
-            success.resolve("already did sources auto request for track #" + self.position);
+        } else if ( track.did_sources_request ) {
+            track.debug("we already did sources requests");
+            success.resolve("already did sources auto request for track #" + track.position);
             
         } else{
-            success = self.get_track_sources_request();
+            success = track.get_track_sources_request();
         }
         
         success.always(function() {
-            var sources = $(self).find('wpsstm-source');
-            self.can_play = (sources.length > 0);    
+            var sources = $(track).find('wpsstm-source');
+            track.can_play = (sources.length > 0);    
         });
 
         return success.promise();
@@ -287,15 +293,15 @@ class WpsstmTrack extends HTMLElement{
 
     get_track_sources_request() {
 
-        var self = this;
-        var track_instances = self.get_instances();
+        var track = this;
+        var track_instances = track.get_instances();
         var success = $.Deferred();
 
         track_instances.addClass('track-sources-loading');
 
         var ajax_data = {
             action:     'wpsstm_track_autosource',
-            track:      self.to_ajax(),   
+            track:      track.to_ajax(),   
         };
 
         var sources_request = $.ajax({
@@ -308,7 +314,7 @@ class WpsstmTrack extends HTMLElement{
         sources_request.done(function(data) {
 
             if ( data.success === true ){
-                self.reload_track().then(
+                track.reload_track().then(
                     function(success_msg){
                         success.resolve();
                     },
@@ -317,7 +323,7 @@ class WpsstmTrack extends HTMLElement{
                     }
                 );
             }else{
-                self.debug("track sources request failed: " + data.message);
+                track.debug("track sources request failed: " + data.message);
                 success.reject(data.message);
             }
 
@@ -361,6 +367,9 @@ class WpsstmTrack extends HTMLElement{
                 /*delete old nodes, and and new ones with pageNode/queueNode properties*/
                 
                 var newContent = $(data.html);
+                
+                //important ! Settings this class assure us that the node will have did_sources_request = true when it will be inserted in DOM
+                $(newContent).addClass('track-autosourced');
 
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
@@ -373,6 +382,7 @@ class WpsstmTrack extends HTMLElement{
 
                 oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
                 oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
+
 
                 success.resolve();
                 
@@ -395,23 +405,23 @@ class WpsstmTrack extends HTMLElement{
 
     //reduce object for communication between JS & PHP
     to_ajax(){
-        var self = this;
+        var track = this;
         
         var output = {
-            position:       self.position,
-            subtrack_id:    self.subtrack_id,
-            artist:         self.track_artist,
-            title:          self.track_title,
-            album:          self.track_album,
-            duration:       self.duration,
+            position:       track.position,
+            subtrack_id:    track.subtrack_id,
+            artist:         track.track_artist,
+            title:          track.track_title,
+            album:          track.track_album,
+            duration:       track.duration,
         }
 
         return output;
     }
     
     toggle_favorite(do_love){
-        var self = this;
-        var track_instances = self.get_instances();
+        var track = this;
+        var track_instances = track.get_instances();
 
         if (do_love){
             var link_el = track_instances.find('.wpsstm-track-action-favorite a');
@@ -421,7 +431,7 @@ class WpsstmTrack extends HTMLElement{
 
         var ajax_data = {
             action:     'wpsstm_track_toggle_favorite',
-            track:      self.to_ajax(),   
+            track:      track.to_ajax(),   
             do_love:    do_love,
         };
 
@@ -463,13 +473,13 @@ class WpsstmTrack extends HTMLElement{
     }
     
     dequeue_track(){
-        var self = this;
-        var track_instances = self.get_instances();
+        var track = this;
+        var track_instances = track.get_instances();
         var link_el = track_instances.find('.wpsstm-track-action-dequeue a');
         
         var ajax_data = {
             action:         'wpsstm_subtrack_dequeue',
-            track:          self.to_ajax(),
+            track:          track.to_ajax(),
         };
 
         $.ajax({
@@ -487,7 +497,7 @@ class WpsstmTrack extends HTMLElement{
                     console.log(data);
                 }else{
                     track_instances.remove();
-                    self.tracklist.refresh_tracks_positions();
+                    track.tracklist.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -504,13 +514,13 @@ class WpsstmTrack extends HTMLElement{
     
     trash_track(){
         
-        var self = this;
-        var track_instances = self.get_instances();
+        var track = this;
+        var track_instances = track.get_instances();
         var link_el = track_instances.find('.wpsstm-track-action-trash a');
 
         var ajax_data = {
             action:     'wpsstm_track_trash',
-            track:      self.to_ajax(),
+            track:      track.to_ajax(),
         };
 
         $.ajax({
@@ -527,7 +537,7 @@ class WpsstmTrack extends HTMLElement{
                     console.log(data);
                 }else{
                     track_instances.remove();
-                    self.tracklist.refresh_tracks_positions();
+                    track.tracklist.refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -544,18 +554,18 @@ class WpsstmTrack extends HTMLElement{
 
     static update_sources_order(source_ids){
         
-        var self = this;
-        var track_instances = self.get_instances();
+        var track = this;
+        var track_instances = track.get_instances();
         var success = $.Deferred();
 
         //ajax update order
         var ajax_data = {
             action:     'wpsstm_update_track_sources_order',
-            track_id:   self.post_id,
+            track_id:   track.post_id,
             source_ids: source_ids
         };
         
-        //self.debug(ajax_data,"update_sources_order");
+        //track.debug(ajax_data,"update_sources_order");
 
         var ajax = jQuery.ajax({
             type: "post",
@@ -608,7 +618,7 @@ class WpsstmTrack extends HTMLElement{
             success.resolve();
         })
         source_play.fail(function(reason) {
-            console.log(reason);
+            track.debug(reason);
             success.reject(reason);
         })
 
@@ -716,11 +726,8 @@ class WpsstmTrack extends HTMLElement{
         track_instances.removeClass('track-playing');
 
         var player = track.closest('wpsstm-player');
-        var allSources = $(track).find('wpsstm-source');
 
-        var currentSource = allSources.filter('.source-active').get(0);
-
-        if (currentSource){
+        if (player && player.current_source){
             player.current_media.pause();
             track_instances.find('wpsstm-source').removeClass('source-playing');
         }

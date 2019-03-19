@@ -87,59 +87,6 @@ class WpsstmTracklist extends HTMLElement{
         var debug = {message:msg,tracklist:this};
         wpsstm_debug(debug);
     }
-    
-    /*
-    Watch the first track.  If it is requested, maybe reload tracklist.
-    */
-    
-    firstTrackWatch(mutationsList) {
-
-        for(var mutation of mutationsList) {
-            
-            if (mutation.type == 'attributes') {
-
-                var attrName = mutation.attributeName;
-                var attrValue = mutation.target.getAttribute(attrName);
-
-                switch (attrName) {
-                    case 'class':
-                        
-                        var track = mutation.target;
-                        if ( $(track).hasClass('track-active') ){ //TOUFIX maybe we need something more consistant here
-
-                            var tracklist = track.closest('wpsstm-tracklist');
-
-                            if (tracklist.isExpired){
-                                tracklist.debug("TRACK#1 requested but tracklist is outdated, refresh!");
-                                tracklist.reload_tracklist(true);
-                            }
-                        }
-
-                    break;
-                }
-                
-                
-                
-            }
-        }
-    }
-    
-    /*
-    Watch for tracklist queue update.
-    */
-    
-    pageQueueWatch(mutationsList){
-
-        for(var mutation of mutationsList) {
-            if (mutation.type == 'childList') {
-                var queue = mutation.target;
-                var tracklist = mutation.target.closest('wpsstm-tracklist');
-                var firstPageTrack = $(tracklist).find('wpsstm-track').first().get(0);
-                var firstTrackObserver = new MutationObserver(tracklist.firstTrackWatch);
-                firstTrackObserver.observe(firstPageTrack,{attributes: true});
-            }
-        }
-    }
 
     render(){
 
@@ -179,7 +126,7 @@ class WpsstmTracklist extends HTMLElement{
         });
 
         /*
-        Refresh BT
+        Refresh
         */
         var refresh_bt = $(tracklist).find(".wpsstm-tracklist-action-refresh a");
         refresh_bt.click(function(e) {
@@ -188,21 +135,12 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.reload_tracklist();
         });
         
-        /* Observe first track to know if we need to update the tracklist*/
-        
-        //in page, at init
-        var firstPageTrack = $(tracklist).find('wpsstm-track').first().get(0);
-        if (firstPageTrack){
-            var firstTrackObserver = new MutationObserver(tracklist.firstTrackWatch);
-            firstTrackObserver.observe(firstPageTrack,{attributes: true});
-        }
-
-        //in page, at queue update
-        var queue = $(tracklist).find('.wpsstm-tracks-list').get(0);
-        if (queue){
-            var firstTrackObserver = new MutationObserver(tracklist.pageQueueWatch);
-            firstTrackObserver.observe(queue,{childList: true});
-        }
+        $(tracklist).on( "wpsstmTracklistLoop", function( event,player ) {
+            tracklist.debug("tracklist loop");
+            if (tracklist.isExpired){
+                tracklist.reload_tracklist(true);
+            }
+        });
 
         /*
         Tracklist actions
@@ -263,13 +201,14 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         
         //stop player
-        var activeTrack = $(tracklist).find('wpsstm-track.track-active').get(0);
+        var pageNode = $(tracklist).find('wpsstm-track.track-active').get(0);
         
-        if (activeTrack){
-            activeTrack.removeAttribute('trackstatus');
+        if (pageNode){
+            var queueNode = pageNode.queueNode;
             if (typeof autoplay === 'undefined'){
-                autoplay = true;
+                autoplay = ( queueNode.getAttribute("trackstatus") == 'playing' )
             }
+            queueNode.removeAttribute('trackstatus');
         }
 
         tracklist.debug("reload tracklist... autoplay ?" + autoplay);
