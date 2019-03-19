@@ -173,17 +173,15 @@ class WP_SoundSystem {
     }
     
     function setup_actions(){
-        // activation
+        // activation, deactivation...
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
-
-        // deactivation
         register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
-
         add_action( 'plugins_loaded', array($this, 'upgrade'));
-
-        add_action( 'admin_init', array($this,'load_textdomain'));
         
+        //init
         add_action( 'init', array($this,'init_post_types'), 5);
+        add_action( 'init', array($this,'init_rewrite'), 5);
+        add_action( 'admin_init', array($this,'load_textdomain'));
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
@@ -218,10 +216,7 @@ class WP_SoundSystem {
 	
     function activate_wpsstm() {
         $this->debug_log('activation');
-        $this->init_post_types();
         $this->add_custom_capabilites();
-        $this->init_rewrite();
-        flush_rewrite_rules();
     }
     
     function init_post_types(){
@@ -236,6 +231,8 @@ class WP_SoundSystem {
         $this->debug_log('set rewrite rules');
 
         do_action('wpsstm_init_rewrite');
+        
+        flush_rewrite_rules();
     }
 
     function deactivate_wpsstm() {
