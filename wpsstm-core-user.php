@@ -31,7 +31,7 @@ class WPSSTM_Core_User{
     Get the ID of the favorites tracklist for a user, or create it and store option
     */
     
-    private static function get_user_favorites_id($user_id = null){
+    public static function get_user_favorites_id($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 

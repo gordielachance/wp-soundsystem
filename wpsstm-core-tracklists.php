@@ -46,7 +46,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'posts_where', array($this,'tracklist_query_where_track_id'), 10, 2 );
 
         //post content
-        add_filter( 'the_title', array($this, 'filter_tracklist_empty_tite'), 10, 2 );
+        add_filter( 'the_title', array($this, 'filter_tracklist_empty_title'), 10, 2 );
         add_filter( 'the_content', array($this,'content_append_tracklist_table') );
         
         //tracklist shortcode
@@ -255,7 +255,7 @@ class WPSSTM_Core_Tracklists{
         echo $output;
     }
     
-    function filter_tracklist_empty_tite( $title, $post_id = null ) {
+    function filter_tracklist_empty_title( $title, $post_id = null ) {
         if(!$title) $title = sprintf('(tracklist #%d)',$post_id);
         return $title;
     }
