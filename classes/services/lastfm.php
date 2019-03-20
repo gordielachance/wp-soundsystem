@@ -831,15 +831,14 @@ class WPSSTM_LastFM_User{
                 WPSSTM_LastFM::handle_api_exception($e);
             }
         }
-
-        if (!$user_auth){
+        
+        if ($user_auth){
+            return $user_auth;
+        }elseif ($api_metas){
             //TOUFIX is this at the right place ?
             delete_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name );
             $this->debug_log("***deleted lastfm user api metas");
-        }else{
-            return $user_auth;
         }
-
     }
     
     /*
