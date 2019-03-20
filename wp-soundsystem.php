@@ -109,7 +109,6 @@ class WP_SoundSystem {
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
             'ajax_load_tracklists'              => true,
             'player_enabled'                    => true,
-            'autoplay'                          => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
             'importer_enabled'                  => true,

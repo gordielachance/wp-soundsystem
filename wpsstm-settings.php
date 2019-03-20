@@ -80,7 +80,6 @@ class WPSSTM_Settings {
         */
 
         $new_input['player_enabled'] = isset($input['player_enabled']);
-        $new_input['autoplay'] = isset($input['autoplay']);
         $new_input['autosource'] = isset($input['autosource']);
 
         /*
@@ -155,14 +154,6 @@ class WPSSTM_Settings {
             'player_enabled', 
             __('Enabled','wpsstm'), 
             array( $this, 'player_enabled_callback' ), 
-            'wpsstm-settings-page', 
-            'player_settings'
-        );
-        
-        add_settings_field(
-            'autoplay', 
-            __('Autoplay','wpsstm'), 
-            array( $this, 'autoplay_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
@@ -281,17 +272,6 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             checked( $option,true, false ),
             $desc
-        );
-    }
-    
-    function autoplay_callback(){
-        $option = wpsstm()->get_options('autoplay');
-
-        printf(
-            '<input type="checkbox" name="%s[autoplay]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option, true, false ),
-            __("Autoplay the first track displayed.","wpsstm")
         );
     }
 

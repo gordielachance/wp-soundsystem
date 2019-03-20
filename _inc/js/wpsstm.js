@@ -66,16 +66,12 @@ $( document ).ready(function() {
 
     trackContainers.each(function(index,tracklist) {
         
-        var autoplay = ( index === 0 ); //autoplay if this is the first page tracklist
         tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
         if (tracklist.isExpired){
-            tracklist.reload_tracklist(autoplay);
+            tracklist.reload_tracklist();
         }else{
-            
-            if (autoplay){
-                $(tracklist).find('wpsstm-track').first().addClass('track-autoplay');
-            }
+
             
             /*
             Since wpsstmTracklistReady is fired when the tracklist is inserted, it will be fired before document.ready.

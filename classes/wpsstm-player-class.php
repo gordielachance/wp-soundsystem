@@ -77,10 +77,9 @@ class WPSSTM_Player{
     }
     
     function get_audio_attr($values_attr=null){
-
-        $values_defaults = array(
-            'autoplay' =>   wpsstm()->get_options('autoplay'),
-        );
+        
+        //https://www.w3schools.com/tags/tag_audio.asp
+        $values_defaults = array();
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
         
