@@ -145,7 +145,7 @@ class WPSSTM_Core_Live_Playlists{
     public static function is_community_user_ready(){
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_live_playlist );
         $community_user_id = wpsstm()->get_options('community_user_id');
-        
+
         if (!$community_user_id){
             return new WP_Error( 'wpsstm_missing_community_user', __("A community user is required.",'wpsstm'));
         }

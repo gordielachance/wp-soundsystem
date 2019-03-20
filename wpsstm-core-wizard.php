@@ -343,20 +343,15 @@ class WPSSTM_Core_Wizard{
     }
 
     public static function can_frontend_wizard(){
-        
         $page_id = wpsstm()->get_options('frontend_scraper_page_id');
         
         if (!$page_id){
             return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
         }
         
-        $user_id = get_current_user_id(); 
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        $can_wizard_unlogged = ( wpsstm()->get_options('visitors_wizard') && $community_user_id );
-        
-        if ( !$user_id && !$can_wizard_unlogged ){
-            return new WP_Error( 'wpsstm_wizard_not_logged', __('You need to be logged to use the wizard.','wpsstm'));
-        }
+        //wpssstm API
+        $can_wpsstm_api = wpsstm()->can_wpsstmapi();
+        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
         
         return WPSSTM_Core_Live_Playlists::is_community_user_ready();
     }

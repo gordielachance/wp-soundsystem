@@ -76,7 +76,7 @@ class WPSSTM_Settings {
         }
 
         /*
-        Tracklist
+        Player
         */
 
         $new_input['player_enabled'] = isset($input['player_enabled']);
@@ -84,8 +84,10 @@ class WPSSTM_Settings {
         $new_input['autosource'] = isset($input['autosource']);
 
         /*
-        Sources
+        Importer
         */
+        
+        $new_input['importer_enabled'] = isset($input['importer_enabled']);
 
 
         /*
@@ -101,11 +103,6 @@ class WPSSTM_Settings {
 
         }
 
-        //recent wizard entries
-        if ( isset ($input['recent_wizard_entries']) && ctype_digit($input['recent_wizard_entries']) ){
-                $new_input['recent_wizard_entries'] = $input['recent_wizard_entries'];
-        }
-        
         /*
         Styling
         */
@@ -145,21 +142,21 @@ class WPSSTM_Settings {
         );
         
         /*
-        Tracklists
+        Player
         */
         add_settings_section(
-            'tracklist_settings', // ID
-            __('Tracklists','wpsstm'), // Title
+            'player_settings', // ID
+            __('Player','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
         add_settings_field(
             'player_enabled', 
-            __('Audio Player','wpsstm'), 
+            __('Enabled','wpsstm'), 
             array( $this, 'player_enabled_callback' ), 
             'wpsstm-settings-page', 
-            'tracklist_settings'
+            'player_settings'
         );
         
         add_settings_field(
@@ -167,62 +164,42 @@ class WPSSTM_Settings {
             __('Autoplay','wpsstm'), 
             array( $this, 'autoplay_callback' ), 
             'wpsstm-settings-page', 
-            'tracklist_settings'
+            'player_settings'
         );
 
-        /*
-        Sources
-        */
-        
-        add_settings_section(
-            'sources', // ID
-            __('Sources','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
         add_settings_field(
             'autosource', 
             __('Autosource','wpsstm'), 
             array( $this, 'autosource_callback' ), 
             'wpsstm-settings-page', 
-            'sources'
+            'player_settings'
         );
 
         /*
-        Frontend Wizard
+        Tracklist Importer
         */
-        
+
         add_settings_section(
-            'frontend_wizard_settings', // ID
-            __('Frontend Wizard','wpsstm'), // Title
-            array( $this, 'section_frontend_wizard_desc' ), // Callback
+            'tracklist_importer', // ID
+            __('Tracklist Importer','wpsstm'), // Title
+            array( $this, 'section_importer_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
+        add_settings_field(
+            'importer_enabled', 
+            __('Enabled','wpsstm'), 
+            array( $this, 'importer_enabled_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_importer'
+        );
 
         add_settings_field(
             'frontend_scraper_page_id', 
-            __('Frontend wizard page ID','wpsstm'), 
-            array( $this, 'wizard_page_id_callback' ), 
+            __('Frontend Tracklist Importer','wpsstm'), 
+            array( $this, 'frontend_importer_callback' ), 
             'wpsstm-settings-page', 
-            'frontend_wizard_settings'
-        );
-        
-        add_settings_field(
-            'visitors_wizard', 
-            __('Enable for visitors','wpsstm'), 
-            array( $this, 'visitors_wizard_callback' ), 
-            'wpsstm-settings-page', 
-            'frontend_wizard_settings'
-        );
-        
-        add_settings_field(
-            'recent_wizard_entries', 
-            __('Show recent entries','wpsstm'), 
-            array( $this, 'recent_wizard_entries_callback' ), 
-            'wpsstm-settings-page', 
-            'frontend_wizard_settings'
+            'tracklist_importer'
         );
 
         /*
@@ -341,9 +318,9 @@ class WPSSTM_Settings {
         if ( $enabled ){
         
             //autosource
-            $can_autosource = WPSSTM_Core_Sources::can_autosource();
-            if ( is_wp_error($can_autosource) ){
-                add_settings_error('autosource', 'cannot_autosource', $can_autosource->get_error_message(),'inline');
+            $can = WPSSTM_Core_Sources::can_autosource();
+            if ( is_wp_error($can) ){
+                add_settings_error('autosource',$can->get_error_code(),$can->get_error_message(),'inline');
             }
             
         }
@@ -369,16 +346,58 @@ class WPSSTM_Settings {
 
     }
 
-    function section_frontend_wizard_desc(){
-        _e('Setup a frontend page from which users will be able to load a remote tracklist.','wppsm');
-        printf('  <small>%s</small>',__("This requires the community user ID to be set.","wpsstm") );
+    function section_importer_desc(){
+        $desc[] = __('This module adds a new metabox to import tracks from various services like Spotify, or any webpage where a tracklist is displayed.','wppsm');
+        $desc[] = __('It also enables a new post type, "Radios", which are self-updating tracklists based on a remote URL.','wppsm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo implode("\n",$desc);
+        
     }
     
-    function wizard_page_id_callback(){
+    function importer_enabled_callback(){
+        $enabled = wpsstm()->get_options('importer_enabled');
+        $desc = '';
+        
+        printf(
+            '<input type="checkbox" name="%s[importer_enabled]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $enabled,true, false ),
+            $desc
+        );
+        
+        /*
+        errors
+        */
+        
+        //register errors
+        if ( $enabled ){
+        
+            //autosource
+            $can = WPSSTM_Core_Sources::can_autosource();
+            if ( is_wp_error($can) ){
+                add_settings_error('importer',$can->get_error_code(),$can->get_error_message(),'inline');
+            }
+            
+        }
+        
+        //display errors
+        settings_errors('importer');
+        
+    }
+    
+    function frontend_importer_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
 
         $help = array();
-        $help[]= __("ID of the page used to display the frontend Tracklist Wizard.","wpsstm");
+        $help[]= __("ID of the page used to display the frontend Tracklist Importer.","wpsstm");
         $help[]= __("0 = Disabled.","wpsstm");
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
@@ -393,9 +412,9 @@ class WPSSTM_Settings {
         if ( $option ){
         
             //can wizard
-             $can_frontend_wizard = WPSSTM_Core_Live_Playlists::is_community_user_ready();
-            if ( is_wp_error($can_frontend_wizard) ){
-                add_settings_error('frontend_wizard', 'cannot_frontend_wizard',$can_frontend_wizard->get_error_message(),'inline');
+             $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+            if ( is_wp_error($can) ){
+                add_settings_error('frontend_wizard',$can->get_error_code(),$can->get_error_message(),'inline');
             }
             
         }
@@ -404,34 +423,7 @@ class WPSSTM_Settings {
         settings_errors('frontend_wizard');
         
     }
-    
-    function visitors_wizard_callback(){
-        $option = wpsstm()->get_options('visitors_wizard');
 
-        printf(
-            '<input type="checkbox" name="%s[visitors_wizard]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option,true, false ),
-            __("Enable frontend wizard for non-logged users.","wpsstm")
-        );
-    }
-    
-    function recent_wizard_entries_callback(){
-        $option = (int)wpsstm()->get_options('recent_wizard_entries');
-        
-        $help = array();
-        $help[]= __("Number of recent entries to display on the wizard page.","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
-
-        printf(
-            '<input type="number" name="%s[recent_wizard_entries]" size="2" min="0" value="%s" /><br/>%s',
-            wpsstm()->meta_name_options,
-            $option,
-            $help
-        );
-    }
-    
     function registration_notice_callback(){
         $option = wpsstm()->get_options('registration_notice');
 

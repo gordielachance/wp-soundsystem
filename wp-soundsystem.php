@@ -101,7 +101,6 @@ class WP_SoundSystem {
         
         $options_default = array(
             'frontend_scraper_page_id'          => null,
-            'visitors_wizard'                   => true,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
@@ -110,6 +109,7 @@ class WP_SoundSystem {
             'autoplay'                          => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
+            'importer_enabled'                  => true,
             'registration_notice'               => true,
         );
         
@@ -140,9 +140,10 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'wpsstm-core-wizard.php';
-        require $this->plugin_dir . 'wpsstm-core-buddypress.php';        
+        require $this->plugin_dir . 'wpsstm-core-buddypress.php';
+
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
-        
+
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
@@ -616,6 +617,11 @@ class WP_SoundSystem {
         }
         
         return implode("\n",$output);
+    }
+    
+    function can_wpsstmapi(){
+        return new WP_Error( 'wpsstmapi_missing', __('Unable to use WPSSTM API','wpsstm') );
+        return true;
     }
 
 }

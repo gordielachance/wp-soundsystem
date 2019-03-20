@@ -522,9 +522,9 @@ class WPSSTM_Core_Sources{
             return new WP_Error( 'wpsstm_autosource',__('Autosource requires a community user to be set.','wpsstm') );   
         }
         
-        //spotify API
-        $can_spotify_api = $wpsstm_spotify->can_spotify_api();
-        if ( is_wp_error($can_spotify_api) ) return $can_spotify_api;
+        //wpssstm API
+        $can_wpsstm_api = wpsstm()->can_wpsstmapi();
+        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
