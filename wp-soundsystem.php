@@ -148,6 +148,8 @@ class WP_SoundSystem {
         if ( wpsstm()->can_wpsstmapi() === true ){
             require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
             require $this->plugin_dir . 'wpsstm-core-importer.php';
+            //MUSICBRAINZ?
+            //SPOTIFY?
         }
 
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
