@@ -2,6 +2,12 @@
 class WPSSTM_Core_Albums{
     
     function __construct() {
+        
+        //append to playlists post types
+        wpsstm()->tracklist_post_types[] = 'wpsstm_release';
+        wpsstm()->static_tracklist_post_types[] = 'wpsstm_release';
+        
+        
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
@@ -11,6 +17,10 @@ class WPSSTM_Core_Albums{
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
         
         add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
+        
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
         
     }
     

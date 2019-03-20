@@ -12,7 +12,7 @@ $list_els = array_map(
    $links
 );
 ?>
-<section id="wpsstm-wizard-services">
+<section id="wpsstm-importer-services">
     <h3><?php _e('Supported services','wpsstm');?></h3>
     <ul>
         <?php echo implode("\n",$list_els); ?>

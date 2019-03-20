@@ -381,7 +381,7 @@ class WPSSTM_Settings {
         if ( $enabled ){
         
             //autosource
-            $can = WPSSTM_Core_Sources::can_autosource();
+            $can = wpsstm()->can_importer();
             if ( is_wp_error($can) ){
                 add_settings_error('importer',$can->get_error_code(),$can->get_error_message(),'inline');
             }
@@ -410,9 +410,9 @@ class WPSSTM_Settings {
         
         //register errors
         if ( $option ){
-        
+
             //can wizard
-             $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+            $can = wpsstm()->can_frontend_importer();
             if ( is_wp_error($can) ){
                 add_settings_error('frontend_wizard',$can->get_error_code(),$can->get_error_message(),'inline');
             }

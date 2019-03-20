@@ -36,8 +36,9 @@ class WP_SoundSystem {
     public $post_type_source = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
-    public $tracklist_post_types = array('wpsstm_release','wpsstm_playlist','wpsstm_live_playlist');
-    public $static_tracklist_post_types = array('wpsstm_release','wpsstm_playlist');
+    
+    public $tracklist_post_types = array('wpsstm_playlist'); //radios & albums could be appened to this
+    public $static_tracklist_post_types = array('wpsstm_playlist'); //radios & albums could be appened to this
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
@@ -139,10 +140,13 @@ class WP_SoundSystem {
         //require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
-        require $this->plugin_dir . 'wpsstm-core-wizard.php';
+        
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
-        require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
+        if ( wpsstm()->can_wpsstmapi() === true ){
+            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
+            require $this->plugin_dir . 'wpsstm-core-importer.php';
+        }
 
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
@@ -229,7 +233,7 @@ class WP_SoundSystem {
     Hook for rewrite rules.
     */
     function init_rewrite(){
-        $this->debug_log('set rewrite rules');
+        //$this->debug_log('set rewrite rules');
 
         do_action('wpsstm_init_rewrite');
         
@@ -620,7 +624,44 @@ class WP_SoundSystem {
     }
     
     function can_wpsstmapi(){
+        return true;
         return new WP_Error( 'wpsstmapi_missing', __('Unable to use WPSSTM API','wpsstm') );
+        return true;
+    }
+    
+    public function can_importer(){
+        //wpssstm API
+        $can_wpsstm_api = $this->can_wpsstmapi();
+        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
+        
+        return $this->is_community_user_ready();
+    }
+
+    public function can_frontend_importer(){
+        $page_id = $this->get_options('frontend_scraper_page_id');
+        
+        if (!$page_id){
+            return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
+        }
+        
+        return $this->can_importer();
+
+    }
+    
+    public function is_community_user_ready(){
+        
+        $community_user_id = $this->get_options('community_user_id');
+
+        if (!$community_user_id){
+            return new WP_Error( 'wpsstm_missing_community_user', __("A community user is required.",'wpsstm'));
+        }
+
+        $tracklist_obj = get_post_type_object( wpsstm()->post_type_playlist );
+        $can = user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+        
+        if (!$can){
+            return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));
+        }
         return true;
     }
 

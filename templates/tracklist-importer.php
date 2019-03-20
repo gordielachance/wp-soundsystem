@@ -4,22 +4,22 @@ $wpsstm_tracklist->populate_preset();
 ?>
 
 <!--remote url-->
-<div class="wpsstm-wizard-section">
-    <h3 class="wpsstm-wizard-section-label"><?php _e('Remote URL','wpsstm');?></h3>
+<div class="wpsstm-importer-section">
+    <h3 class="wpsstm-importer-section-label"><?php _e('Remote URL','wpsstm');?></h3>
     <div>
 
         <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Type something or enter a tracklist URL','wpsstm');?>" />
     </div>
 </div>
-<div class="wpsstm-advanced-wizard">
+<div class="wpsstm-advanced-importer">
     <!--track-->
-    <div class="wpsstm-wizard-section">
-        <h3 class="wpsstm-wizard-section-label"><?php _e('Tracks','wpsstm');?></h3>
+    <div class="wpsstm-importer-section">
+        <h3 class="wpsstm-importer-section-label"><?php _e('Tracks','wpsstm');?></h3>
         <!--tracks selector-->
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Selector','wpsstm');?></h4>
-            <div class="wpsstm-wizard-row-content">
-                <?php WPSSTM_Core_Wizard::css_selector_block('tracks');?>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Selector','wpsstm');?></h4>
+            <div class="wpsstm-importer-row-content">
+                <?php WPSSTM_Core_Importer::css_selector_block('tracks');?>
                 <small>
                     <?php 
                     printf(__('Enter a <a href="%s" target="_blank">jQuery selector</a> to target each track item from the tracklist page, for example: %s.','wpsstm'),'http://www.w3schools.com/jquery/jquery_ref_selectors.asp','<code>#content #tracklist .track</code>');
@@ -29,9 +29,9 @@ $wpsstm_tracklist->populate_preset();
 
         </div>
          <!--tracks order-->
-         <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Order','wpsstm');?></h4>
-            <div class="wpsstm-wizard-row-content">
+         <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Order','wpsstm');?></h4>
+            <div class="wpsstm-importer-row-content">
                 <?php
                 $option = $wpsstm_tracklist->preset->get_options('tracks_order');
                 $default_option = wpsstm_get_array_value('tracks_order',$wpsstm_tracklist->preset->default_options);
@@ -60,8 +60,8 @@ $wpsstm_tracklist->populate_preset();
     </div>
 
     <!--track details-->
-    <div class="wpsstm-wizard-section">
-        <div class="wpsstm-wizard-section-label">
+    <div class="wpsstm-importer-section">
+        <div class="wpsstm-importer-section-label">
             <h3><?php _e('Track details','wpsstm');?></h3>
             <small>
                 <?php
@@ -76,36 +76,36 @@ $wpsstm_tracklist->populate_preset();
                 ?>
             </small>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Wizard::regex_link()?></h4>
-            <div class="wpsstm-wizard-row-content"><?php WPSSTM_Core_Wizard::css_selector_block('track_artist');?></div>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_artist');?></div>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Wizard::regex_link()?></h4>
-            <div class="wpsstm-wizard-row-content"><?php WPSSTM_Core_Wizard::css_selector_block('track_title');?></div>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_title');?></div>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Wizard::regex_link()?></h4>
-            <div class="wpsstm-wizard-row-content"><?php WPSSTM_Core_Wizard::css_selector_block('track_album');?></div>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_album');?></div>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Wizard::regex_link()?></h4>
-            <div class="wpsstm-wizard-row-content"><?php WPSSTM_Core_Wizard::css_selector_block('track_image');?></div>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_image');?></div>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Source URLs Selector','wpsstm'); echo WPSSTM_Core_Wizard::regex_link()?></h4>
-            <div class="wpsstm-wizard-row-content"><?php WPSSTM_Core_Wizard::css_selector_block('track_source_urls');?></div>
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Source URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_source_urls');?></div>
         </div>
     </div>
 
     <!--options-->
-    <div class="wpsstm-wizard-section">
-        <div class="wpsstm-wizard-section-label">
+    <div class="wpsstm-importer-section">
+        <div class="wpsstm-importer-section-label">
             <h3><?php _e('Tracklist options','wpsstm');?></h3>
         </div>
-        <div class="wpsstm-wizard-row">
-            <h4 class="wpsstm-wizard-row-label"><?php _e('Cache duration','wpsstm');?></h4>
-            <div class="wpsstm-wizard-row-content">
+        <div class="wpsstm-importer-row">
+            <h4 class="wpsstm-importer-row-label"><?php _e('Cache duration','wpsstm');?></h4>
+            <div class="wpsstm-importer-row-content">
                 <?php
 
                 $option = $wpsstm_tracklist->get_options('remote_delay_min');

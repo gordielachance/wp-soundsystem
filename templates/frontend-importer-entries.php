@@ -5,14 +5,14 @@ $recent_wizard_args = array(
     'post_type'         => wpsstm()->post_type_live_playlist,
     'posts_per_page'    => (int)wpsstm()->get_options('recent_wizard_entries'),
     'meta_query'        => array(
-        array( WPSSTM_Core_Wizard::$is_wizard_tracklist_metakey => true ) //created with wizard
+        array( WPSSTM_Core_Importer::$is_wizard_tracklist_metakey => true ) //created with wizard
     )
 );
 $recent_wizard_q = new WP_Query( $recent_wizard_args );
 ?>
 <?php if ( $recent_wizard_q->have_posts() ) { 
     ?>
-    <section id="wpsstm-frontend-wizard-recent">
+    <section id="wpsstm-frontend-importer-recent">
         <h3><?php _e('Recently');?></h3>
         <ul>
             <?php while ( $recent_wizard_q->have_posts() ) : $recent_wizard_q->the_post();

@@ -22,7 +22,7 @@ Playlists, Radios, Tracks and Sources each uses a custom post type, so you can e
 Managing the playlist tracks is a piece of cake using the *Tracklist metabox*:
 Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
 
-Import a tracklist from a file or a music service like Spotify using the *Remote Tracklist Wizard* (see below).
+Import a tracklist from a file or a music service like Spotify using the *Tracklist Importer* (see below).
 
 = Audio player =
 
@@ -36,7 +36,7 @@ If you didn't set sources for your tracks (see below) and that the **autosource*
 
 Those links will be used by the audio player (see above) to play the track if the source URL is supported.
 
-= Remote Tracklist Wizard Metabox =
+= Tracklist Importer Metabox =
 
 Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
 

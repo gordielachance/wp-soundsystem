@@ -6,7 +6,7 @@ $( document ).ready(function() {
     */
 
     //should we show it by default ?
-    $('.wpsstm-wizard-selector-advanced').each(function() {
+    $('.wpsstm-importer-selector-advanced').each(function() {
         var advanced_block = $(this);
         var inputs_filled = advanced_block.find('input').filter(function () {
             return !!this.value;
@@ -16,10 +16,10 @@ $( document ).ready(function() {
         }
     });
 
-    $('a.wpsstm-wizard-selector-toggle-advanced').click(function(e) {
+    $('a.wpsstm-importer-selector-toggle-advanced').click(function(e) {
         e.preventDefault();
-        var selector_row = $(this).parents('.wpsstm-wizard-row');
-        var advanced_row = selector_row.find('.wpsstm-wizard-selector-advanced');
+        var selector_row = $(this).parents('.wpsstm-importer-row');
+        var advanced_row = selector_row.find('.wpsstm-importer-selector-advanced');
         advanced_row.toggleClass('active');
     });
 });

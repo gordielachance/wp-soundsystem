@@ -93,7 +93,7 @@ class WPSSTM_Core_User{
         $can = false;
         $post_types = wpsstm()->static_tracklist_post_types;
         foreach ($post_types as $post_type){
-            $post_type_obj = get_post_type_object($post_type);
+            if ( !$post_type_obj = get_post_type_object($post_type) ) continue;
             $can = user_can( $this->user_id, $post_type_obj->cap->edit_posts);
             if ( $can ) break;
         }

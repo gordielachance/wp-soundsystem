@@ -1,21 +1,21 @@
 <?php
 
-class WPSSTM_Core_Wizard{
+class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
 
     function __construct(){
 
         //frontend
-        add_action( 'wp', array($this,'handle_frontend_wizard' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'wizard_register_frontend_scripts_styles' ) );
-        add_filter( 'the_content', array($this,'frontend_wizard_content'));
+        add_action( 'wp', array($this,'handle_frontend_importer' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
+        add_filter( 'the_content', array($this,'frontend_importer_content'));
 
         //backend
-        add_action( 'add_meta_boxes', array($this, 'metabox_scraper_wizard_register'), 11 );
-        add_action( 'save_post', array($this,'metabox_save_scraper_wizard') );
-        
-        add_action( 'admin_enqueue_scripts', array( $this, 'wizard_register_backend_scripts_styles' ) );
+        add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 11 );
+        add_action( 'save_post', array($this,'metabox_save_importer') );
+
+        add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
 
     }
 
@@ -24,51 +24,35 @@ class WPSSTM_Core_Wizard{
     We're requesting the frontend wizard page, load the wizard template
     */
     
-    function frontend_wizard_content($content){
+    function frontend_importer_content($content){
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
         
         ob_start();
-        wpsstm_locate_template( 'frontend-wizard.php', true, false );
+        wpsstm_locate_template( 'frontend-importer.php', true, false );
         $wizard = ob_get_clean();
         return $content . $wizard;
     }
 
-    function wizard_register_frontend_scripts_styles(){
+    function importer_register_scripts_styles(){
         
         // JS
-        wp_register_script( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-frontend-wizard.js',array('jquery'),wpsstm()->version);
-        //CSS
-        wp_register_style( 'wpsstm-frontend-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-frontend-wizard.css',null,wpsstm()->version );
-
-        if ( is_page(wpsstm()->get_options('frontend_scraper_page_id')) ){
-            wp_enqueue_script('wpsstm-frontend-wizard');
-            wp_enqueue_style('wpsstm-frontend-wizard');
-        }
-    }
-    
-    function wizard_register_backend_scripts_styles(){
-        
-        // JS
-        wp_register_script( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/js/wpsstm-wizard.js',array('jquery'),wpsstm()->version);
+        wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery'),wpsstm()->version);
         
         //CSS
-        wp_register_style( 'wpsstm-wizard', wpsstm()->plugin_url . '_inc/css/wpsstm-wizard.css',null,wpsstm()->version );
+        wp_register_style( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/css/wpsstm-importer.css',null,wpsstm()->version );
         
         ///
 
-        $screen = get_current_screen();
-        if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_live_playlist )  ){
-            wp_enqueue_script('wpsstm-wizard');
-            wp_enqueue_style('wpsstm-wizard');
-        }
+        wp_enqueue_script('wpsstm-importer');
+        wp_enqueue_style('wpsstm-importer');
     }
 
-    function metabox_scraper_wizard_register(){
+    function metabox_importer_register(){
 
         add_meta_box( 
-            'wpsstm-metabox-wizard', 
-            __('Remote Tracklist Wizard','wpsstm'),
-            array($this,'metabox_wizard_display'),
+            'wpsstm-metabox-importer', 
+            __('Tracklist Importer','wpsstm'),
+            array($this,'metabox_importer_display'),
             wpsstm()->tracklist_post_types, 
             'normal', //context
             'high' //priority
@@ -76,12 +60,12 @@ class WPSSTM_Core_Wizard{
 
     }
 
-    function metabox_wizard_display(){
+    function metabox_importer_display(){
         global $wpsstm_tracklist;
-        wpsstm_locate_template( 'tracklist-wizard.php', true );
+        wpsstm_locate_template( 'tracklist-importer.php', true );
     }
     
-    function metabox_save_scraper_wizard( $post_id ) {
+    function metabox_save_importer( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -111,12 +95,12 @@ class WPSSTM_Core_Wizard{
     Set the community user as post author so we can detect it as a wizard tracklist.
     */
 
-    function handle_frontend_wizard(){
+    function handle_frontend_importer(){
         
         global $wpsstm_tracklist;
 
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return;
-        if ( is_wp_error(self::can_frontend_wizard()) ) return;
+        if ( is_wp_error(wpsstm()->can_frontend_importer()) ) return;
         
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;
@@ -198,7 +182,7 @@ class WPSSTM_Core_Wizard{
 
     static function regex_link(){
         return sprintf(
-            '<a href="#" title="%1$s" class="wpsstm-wizard-selector-toggle-advanced"><i class="fa fa-cog" aria-hidden="true"></i></a>',
+            '<a href="#" title="%1$s" class="wpsstm-importer-selector-toggle-advanced"><i class="fa fa-cog" aria-hidden="true"></i></a>',
             __('Use Regular Expression','wpsstm')
         );
     }
@@ -221,7 +205,7 @@ class WPSSTM_Core_Wizard{
         $attr = ( $attr ? htmlentities($attr) : null);
 
         ?>
-        <div class="wpsstm-wizard-selector">
+        <div class="wpsstm-importer-selector">
             <?php
 
             //build info
@@ -278,7 +262,7 @@ class WPSSTM_Core_Wizard{
             
             
             printf(
-                '<input type="text" class="wpsstm-wizard-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
+                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
                 'wpsstm_wizard',
                 $selector,
                 $path,
@@ -288,10 +272,10 @@ class WPSSTM_Core_Wizard{
             //regex
             //uses a table so the style matches with the global form (WP-core styling)
             ?>
-            <div class="wpsstm-wizard-selector-advanced">
+            <div class="wpsstm-importer-selector-advanced">
                 <?php
                 if ($info){
-                    printf('<p class="wpsstm-wizard-track-selector-desc">%s</p>',$info);
+                    printf('<p class="wpsstm-importer-track-selector-desc">%s</p>',$info);
                 }
                 ?>
                 <table class="form-table">
@@ -303,7 +287,7 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-wizard-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
                                         'wpsstm_wizard',
                                         $selector,
                                         $attr,
@@ -320,7 +304,7 @@ class WPSSTM_Core_Wizard{
                                     <?php
 
                                     printf(
-                                        '<p class="wpsstm-wizard-selector-regex">
+                                        '<p class="wpsstm-importer-selector-regex">
                                         <span>~</span>
                                         <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
                                         <span>~m</span>
@@ -340,20 +324,6 @@ class WPSSTM_Core_Wizard{
         </div>
         <?php
         
-    }
-
-    public static function can_frontend_wizard(){
-        $page_id = wpsstm()->get_options('frontend_scraper_page_id');
-        
-        if (!$page_id){
-            return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
-        }
-        
-        //wpssstm API
-        $can_wpsstm_api = wpsstm()->can_wpsstmapi();
-        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
-        
-        return WPSSTM_Core_Live_Playlists::is_community_user_ready();
     }
 
     static private function save_wizard(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
@@ -520,7 +490,7 @@ class WPSSTM_Core_Wizard{
 }
 
 function wpsstm_wizard_init(){
-    new WPSSTM_Core_Wizard();
+    new WPSSTM_Core_Importer();
 }
 
 add_action('wpsstm_init','wpsstm_wizard_init');

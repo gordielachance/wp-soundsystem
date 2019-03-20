@@ -334,18 +334,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $can_edit_tracklist = ($this->post_id && current_user_can($post_type_obj->cap->edit_post,$this->post_id) );
         $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
-        $can_request = WPSSTM_Core_Live_Playlists::is_community_user_ready();
-        $can_refresh = ( ($this->tracklist_type == 'live' ) && ($this->feed_url) && !is_wp_error($can_request) );
 
         $actions = array();
 
-        //refresh
-        if ($can_refresh){
-            $actions['refresh'] = array(
-                'text' =>      __('Refresh', 'wpsstm'),
-                'href' =>      $this->get_tracklist_action_url('render'),
-            );
-        }
+
         
         //share
         $actions['share'] = array(
@@ -430,7 +422,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             );
         }
 
-        return apply_filters('wpsstm_tracklist_actions',$actions);
+        return apply_filters('wpsstm_tracklist_actions',$actions, $this);
     }
     
     function get_tracklist_url(){
@@ -494,7 +486,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
 
         //TO FIX validate status regarding user's caps
-        $new_status = ( isset($_REQUEST['frontend-wizard-status']) ) ? $_REQUEST['frontend-wizard-status'] : null;
+        $new_status = ( isset($_REQUEST['frontend-importer-status']) ) ? $_REQUEST['frontend-importer-status'] : null;
         
         $updated_post = array(
             'ID'            => $this->post_id,
@@ -722,7 +714,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             //link to wizard if we have a remote response (request did succeed) but no tracks
             if ( !is_wp_error($this->preset->response_body) && !$tracks ){
-                $wizard_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-wizard';
+                $wizard_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
                 $wizard_link = sprintf('<a href="%s">%s</a>',$wizard_url,__('here','wpsstm'));
                 $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
             }
@@ -749,7 +741,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //capability check
-        $can = WPSSTM_Core_Live_Playlists::is_community_user_ready();
+        $can = wpsstm()->is_community_user_ready();
         if ( is_wp_error($can) ) return $can;
         
         $this->tracklist_log('SET LIVE DATAS'); 

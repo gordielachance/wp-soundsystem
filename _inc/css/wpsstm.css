@@ -105,7 +105,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 82, ../scss/_wpsstm-shared.scss */
-.wpsstm-can-click, .wpsstm-icon-input [type="submit"], .toggle-children-link, .tracks-container .wpsstm-tracks-container-icon, wpsstm-track .wpsstm-track-position, wpsstm-source label, .wpsstm-track-sources-list wpsstm-source > *.wpsstm-source-title {
+.wpsstm-can-click, .wpsstm-icon-input [type="submit"], .toggle-children-link, .tracks-container .wpsstm-tracks-container-icon, wpsstm-track .wpsstm-track-position, wpsstm-source label, .wpsstm-track-sources-list wpsstm-source > .wpsstm-source-title {
   cursor: pointer;
   cursor: hand;
 }
@@ -143,7 +143,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 123, ../scss/_wpsstm-shared.scss */
-.wpsstm-ellipsis, ul.tracklist-list > li > *.wpsstm-tracklist-title a, wpsstm-track, wpsstm-track .wpsstm-track-info > *, .wpsstm-track-sources-list wpsstm-source > *.wpsstm-source-title {
+.wpsstm-ellipsis, ul.tracklist-list > li > *.wpsstm-tracklist-title a, wpsstm-track, wpsstm-track .wpsstm-track-info > *, .wpsstm-track-sources-list wpsstm-source > .wpsstm-source-title {
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;

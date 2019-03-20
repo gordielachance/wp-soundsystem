@@ -10,7 +10,7 @@ $list_els = array_map(
    $links
 );
 ?>
-<section id="wpsstm-wizard-bangs">
+<section id="wpsstm-importer-bangs">
     <h3><?php _e('Bangs','wpsstm');?> (<small><?php _e('shortcuts','wpsstm');?>)</small></h3>
     <p>
     <?php _e('You can type those shortcuts in the input box above.','wpsstm');?>

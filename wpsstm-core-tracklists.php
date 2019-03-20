@@ -27,16 +27,8 @@ class WPSSTM_Core_Tracklists{
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
-
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
-
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(__class__,'tracklists_columns_content') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
 
         //tracklist queries
         add_action( 'current_screen',  array($this, 'the_single_backend_tracklist'));
@@ -241,7 +233,7 @@ class WPSSTM_Core_Tracklists{
             'wpsstm-tracklist', 
             __('Tracklist','wpsstm'),
             array($this,'metabox_tracklist_content'),
-            wpsstm()->static_tracklist_post_types, 
+            wpsstm()->tracklist_post_types, 
             'normal', 
             'high' //priority 
         );
@@ -307,11 +299,11 @@ class WPSSTM_Core_Tracklists{
 
         foreach((array)wpsstm()->tracklist_post_types as $post_type){
 
-            $obj = get_post_type_object( $post_type );
+            if ( !$post_type_obj = get_post_type_object( $post_type ) ) continue;
 
             //subtrack by tracklist position
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS
+                sprintf('^%s/(\d+)/(\d+)/?',$post_type_obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/POS
                 sprintf('index.php?post_type=%s&tracklist_id=$matches[1]&subtrack_position=$matches[2]',wpsstm()->post_type_track),
                 'top'
             );
@@ -319,7 +311,7 @@ class WPSSTM_Core_Tracklists{
             //tracklist ID action
 
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/action/([^/]+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/action/ACTION
+                sprintf('^%s/(\d+)/action/([^/]+)/?',$post_type_obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID/action/ACTION
                 sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',$post_type),
                 'top'
             );
@@ -327,7 +319,7 @@ class WPSSTM_Core_Tracklists{
             //tracklist ID
             
             add_rewrite_rule( 
-                sprintf('^%s/(\d+)/?',$obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID
+                sprintf('^%s/(\d+)/?',$post_type_obj->rewrite['slug']), // /music/TRACKLIST_TYPE/ID
                 sprintf('index.php?post_type=%s&p=$matches[1]',$post_type),
                 'top'
             );

@@ -2,7 +2,9 @@
 @import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
-#wpsstm-metabox-wizard{
+#wpsstm-metabox-importer{
+    
+    font-size:2em;
     
     h3{
         font-weight: bold;
@@ -11,16 +13,16 @@
         
     }
 
-    .wpsstm-wizard-row{
+    .wpsstm-importer-row{
         @include display-flex();
         padding: .25em 0;
         > * {
-            &.wpsstm-wizard-row-label{
+            &.wpsstm-importer-row-label{
                 padding-right:1em;
                 width:30%;
                 
             }
-            &.wpsstm-wizard-row-content{
+            &.wpsstm-importer-row-content{
                 @include flex-grow(1);
                 margin-left:2em;
             }
@@ -62,7 +64,7 @@
             color: lightgrey;
             padding-right: 0.5em;
     }
-    .wpsstm-wizard-selector-toggle-advanced {
+    .wpsstm-importer-selector-toggle-advanced {
             text-decoration: none;
     }
 
@@ -72,7 +74,7 @@
     }
     
 
-    #wpsstm-wizard-sections-header{
+    #wpsstm-importer-sections-header{
         clear:both;
         overflow:auto;
         li {
@@ -84,7 +86,7 @@
         }
     }
 
-    .wpsstm-wizard-section{
+    .wpsstm-importer-section{
         margin: 1em 0;
         padding: 1em 0;
         margin-top: 0;
@@ -92,7 +94,7 @@
 
         border-bottom: 1px solid #ddd;
         
-        .wpsstm-wizard-section-label{
+        .wpsstm-importer-section-label{
             margin:1em;
         }
         
@@ -100,17 +102,17 @@
             color:#CCC;
         }
 
-        .wpsstm-wizard-selector{
+        .wpsstm-importer-selector{
             input[type="text"]{
                     width:100%;
             }
             
-            .wpsstm-wizard-selector-advanced{
+            .wpsstm-importer-selector-advanced{
                 display: none;
                 &.active{
                     display: block;
                 }
-                .wpsstm-wizard-track-selector-desc{
+                .wpsstm-importer-track-selector-desc{
                     padding: 1em;
                     font-style:italic;
                     code{
@@ -123,7 +125,7 @@
                         padding: 5px;
                         font-family: Consolas, Monaco, monospace;
                     }
-                    .wpsstm-wizard-selector-regex {
+                    .wpsstm-importer-selector-regex {
                         @include display-flex();
                         color:lightgrey;
                         input {
@@ -133,8 +135,8 @@
                 }
             }
         }
-        &#wpsstm-wizard-step-tracks-content{
-            .wpsstm-wizard-selector{
+        &#wpsstm-importer-step-tracks-content{
+            .wpsstm-importer-selector{
                 input[type="text"]{
                     min-width:100%;
                 }
@@ -146,4 +148,62 @@
             display: none;
     }
 
+}
+
+#frontend-importer{
+    #wpsstm-importer-services{
+        ul{
+            margin:0;
+            padding:0;
+            li{
+                width:100px;
+                height:100px;
+                display:inline-block;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                img{
+                    width:100%;
+                    height:auto;
+                }
+
+            }
+        }
+    }
+
+    #wpsstm-importer-bangs{
+
+        ul{
+            list-style: none;
+        }
+
+
+        > ul > li{
+            margin-top:1em;
+        }
+
+        .wpsstm-bang-desc{
+            font-size:.8em;
+        }
+    }
+
+    #wpsstm-frontend-importer-recent{
+        ul{
+            list-style: none;
+            padding:0;
+            margin:0;
+            li{
+                position:relative;
+                line-height: 1em;
+                line-height:1.5em;
+                a{
+                    @include display-flex();
+                    strong{
+                        margin-right:.25em;
+                    }
+                    > *{
+                        @extend .wpsstm-ellipsis;
+                    }
+                }
+            }
+        }
+    }
 }
