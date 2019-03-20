@@ -117,20 +117,6 @@ function wpsstm_get_post_album($post_id = null){
 }
 
 /**
-Get the MusicBrainz link of an item (artist/track/album).
-**/
-function wpsstm_get_post_mb_link_for_post($post_id){
-    $mbid = null;
-    if ($mbid = wpsstm_get_post_mbid($post_id) ){
-
-        $mbtype = WPSSTM_MusicBrainz::get_musicbrainz_type_by_post_id($post_id);
-        $url = sprintf('https://musicbrainz.org/%s/%s',$mbtype,$mbid);
-        $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
-    }
-    return $mbid;
-}
-
-/**
 Get the Spotify link of an item (artist/track/album).
 **/
 function wpsstm_get_post_spotify_link_for_post($post_id){

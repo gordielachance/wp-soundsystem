@@ -5,12 +5,6 @@ class WPSSTM_Core_Artists{
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
         add_filter( 'the_title', array($this, 'the_artist_post_title'), 9, 2 );
-        
-        /*
-        AJAX
-        */
-        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
-        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
     }
     
     //add custom admin submenu under WPSSTM
@@ -122,36 +116,7 @@ class WPSSTM_Core_Artists{
         );
         register_post_type( wpsstm()->post_type_artist, $args );
     }
-    
-    /*
-    Use MusicBrainz API to search artists
-    WARNING for partial search, you'll need a wildcard * !
-    */
-    
-    function ajax_search_artists(){
-        
-        $ajax_data = wp_unslash($_POST);
-        
-        $result = array(
-            'input' =>              $ajax_data,
-            'message' =>            null,
-            'success' =>            false
-        );
-        
-        $search = $result['search'] = isset($ajax_data['search']) ? $ajax_data['search'] : null;
-        if ($search){
-            $results = WPSSTM_MusicBrainz::get_musicbrainz_api_entry('artist',null,$search);
-            if ( is_wp_error($results) ){
-                $result['message'] = $results->get_error_message();
-            }else{
-                $result['data'] = $results;
-                $result['success'] = true;
-            }
-        }
-        header('Content-type: application/json');
-        wp_send_json( $result ); 
-    }
-    
+
     function the_artist_post_title($title,$post_id){
         //post type check
         $post_type = get_post_type($post_id);

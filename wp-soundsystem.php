@@ -82,6 +82,8 @@ class WP_SoundSystem {
         
         define("WPSSTM_BASE_SLUG", "music");
         
+        define('WPSSTM_API_URL','http://wpsstm-api/wordpress/wp-json/v1/'); 
+        
         define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
         define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
         define("WPSSTM_PLAYLISTS_SLUG", "playlists");

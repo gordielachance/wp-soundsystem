@@ -46,6 +46,11 @@ class WPSSTM_MusicBrainz {
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array($this,'mb_columns_content'), 10, 2 );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array($this,'mb_columns_content'), 10, 2 );
         
+        /*
+        AJAX
+        */
+        add_action('wp_ajax_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
+        add_action('wp_ajax_nopriv_wpsstm_search_artists', array($this,'ajax_search_artists')); //for autocomplete
 
     }
     
@@ -155,13 +160,27 @@ class WPSSTM_MusicBrainz {
         return $defaults;
     }
     
+    /**
+    Get the MusicBrainz link of an item (artist/track/album).
+    **/
+    public static function get_musicbrainz_link_for_post($post_id){
+        $mbid = null;
+        if ($mbid = wpsstm_get_post_mbid($post_id) ){
+
+            $mbtype = WPSSTM_MusicBrainz::get_musicbrainz_type_by_post_id($post_id);
+            $url = sprintf('https://musicbrainz.org/%s/%s',$mbtype,$mbid);
+            $mbid = sprintf('<a class="mbid %s-mbid" href="%s" target="_blank">%s</a>',$mbtype,$url,$mbid);
+        }
+        return $mbid;
+    }
+    
     public static function mb_columns_content($column,$post_id){
         global $post;
         
         switch ( $column ) {
             case 'mbid':
                 $mbid = '—';
-                if (!$mbid = wpsstm_get_post_mb_link_for_post($post_id) ){
+                if (!$mbid = self::get_musicbrainz_link_for_post($post_id) ){
                     $mbid = '—';
                 }
                 
@@ -601,6 +620,10 @@ class WPSSTM_MusicBrainz {
     */
     
     private function reload_mb_datas($post_id){
+        
+        $api_url = null;
+
+        if ( !$post_type = get_post_type($post_id) ) return false;
 
         //delete existing
         if ( delete_post_meta( $post_id, self::$mbdata_metakey ) ){
@@ -609,15 +632,38 @@ class WPSSTM_MusicBrainz {
         }
 
 
-        if ( !$mbid = wpsstm_get_post_mbid($post_id) ) return;
+        if ( !$mbid = wpsstm_get_post_mbid($post_id) ){
+            return new WP_Error('wpsstmapi_missing_mbid',__("Missing Musicbrainz ID",'wpsstm'));
+        }
+        //artists/releases/recordings
+        switch($post_type){
+            //artist
+            case wpsstm()->post_type_artist:
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/artists/%s',$mbid);
+            break;
+            //album
+            case wpsstm()->post_type_album:
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/releases/%s',$mbid);
+            break;
+            //track
+            case wpsstm()->post_type_track:
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/recordings/%s',$mbid);
+            break;
+        }
 
-        //get API data
-        $mb_post_type = self::get_musicbrainz_type_by_post_id($post_id);
-        $data = self::get_musicbrainz_api_entry($mb_post_type,$mbid);
+        if (!$api_url){
+            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
+        }
 
-        if ( is_wp_error($data) ) return $data;
+        $request = wp_remote_get($api_url);
+        if (is_wp_error($request)) return $request;
 
-        if ( $success = update_post_meta( $post_id, self::$mbdata_metakey, $data ) ){
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
+        
+        $api_results = json_decode($response, true);
+
+        if ( $success = update_post_meta( $post_id, self::$mbdata_metakey, $api_results ) ){
             
             //fill empty fields with mb datas
             $this->fill_with_mbdatas($post_id);
@@ -776,151 +822,64 @@ class WPSSTM_MusicBrainz {
         return $items;
     }
 
-    static function get_musicbrainz_api_entry($type,$mbid = null,$query = null,$offset = null){
-        global $post;
-
-        $api_results = null;
-        $cached_results = null;
-
-        $allowed_types = array('artist', 'release', 'release-group', 'recording', 'work', 'label');
-        
-        if ( !in_array($type,$allowed_types) ) 
-            return new WP_Error('mb_invalid_type',__("invalid MusicBrainz type",'wpsstm'));
-
-        $inc = array('url-rels'); //https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2
-        
-        switch($type){
-            case 'artist':
-                $inc[] = 'tags';
-            break;
-            case 'recording':
-                $inc[] = 'artist-credits';
-                $inc[] = 'releases';
-            break;
-            case 'release':
-                $inc[] = 'artist-credits';
-                //$inc[] = 'collections';
-                $inc[] = 'labels';
-                $inc[] = 'recordings';
-                $inc[] = 'release-groups';
-
-            break;
-        }
-        
-        
-        if ($mbid){
-            $url = sprintf('http://musicbrainz.org/ws/2/%1s/%2s',$type,$mbid);
-        }elseif($query){
-            $url = sprintf('http://musicbrainz.org/ws/2/%1s/',$type);
-            $url = add_query_arg(array('query'=>$query),$url);
-        }else{
-            return;
-        }
-
-        if ($inc) $url = add_query_arg(array('inc'=>implode('+',$inc)),$url);
-        $url = add_query_arg(array('fmt'=>'json'),$url);
-
-        //define the transient name for this MB url
-        $transient_url_name = str_replace('http://musicbrainz.org/ws/2/','',$url);
-        $transient_url_name = self::$mb_data_by_url_transient_prefix.md5($transient_url_name); //WARNING should be 172 characters or less or less !  md5 returns 32 chars.
-        
-        // check if we should try to load cached data
-        if ( $days_cache = wpsstm()->get_options('cache_api_results') ){
-            $api_results = $cached_results = get_transient( $transient_url_name );
-        }
-        
-        if ( !$api_results ){
-            
-            //TO FIX TO CHECK : delay API call ?
-            if ($wait_api_time = self::$mb_api_sleep ){
-                sleep($wait_api_time);
-            }
-
-            //do request
-            $request_args = array(
-              'timeout' => 20,
-              'User-Agent' => sprintf('wpsstm/%s',wpsstm()->version)
-            );
-
-            $request = wp_remote_get($url,$request_args);
-            if (is_wp_error($request)) return $request;
-
-            $response = wp_remote_retrieve_body( $request );
-            if (is_wp_error($response)) return $response;
-
-            if ( $api_results = json_decode($response, true) ){
-                //api error
-                if ( isset($api_results['error']) ){
-                    $error = $api_results['error'];
-                    return new WP_Error('mb_api_error',$error );
-                }elseif ( $days_cache ){
-                    set_transient( $transient_url_name, $api_results, $days_cache * DAY_IN_SECONDS );
-                }
-            }
-
-        }
-        
-        //debug
-        $cached = ($cached_results) ? '(loaded from transient)' : null;
-        wpsstm()->debug_log(sprintf("get_musicbrainz_api_entry():%s %s",$url,$cached)); 
-
-        return $api_results;
-
-    }
-    
     private static function search_mb_entries_for_post($post_id = null ){
         
         global $post;
         if (!$post_id) $post_id = $post->ID;
-        if (!$post_id) return;
+        if ( !$post_type = get_post_type($post_id) ) return false;
 
-        $api_type = self::get_musicbrainz_type_by_post_id($post_id);
+        $api_url = null;
+        $data = null;
+        
         $artist = wpsstm_get_post_artist($post_id);
         $track = wpsstm_get_post_track($post_id);
         $album = wpsstm_get_post_album($post_id);
-
-        $api_lookup = null;
-        $api_query = null;
-        $result_keys = null;
-
-        switch($api_type){
-                
-            case 'artist':
+        
+        switch($post_type){
+            case wpsstm()->post_type_artist:
                 
                 if ( !$artist ) break;
                 
-                $api_query = '"'.rawurlencode($artist).'"';
-                $result_keys = array('artists');
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s',$artist);
+                
                 
             break;
                 
-            case 'recording': //track
-                
-                if ( !$artist || !$track ) break;
-                
-                $api_query = '"'.rawurlencode($track).'"';
-                $api_query .= rawurlencode(sprintf(' AND artist:%s',$artist));
-                $result_keys = array('recordings');
-                
-            break;
-                
-            case 'release': //album
+            case wpsstm()->post_type_album:
                 
                 if ( !$artist || !$album ) break;
                 
-                $api_query = '"'.rawurlencode($album).'"';
-                $api_query .= rawurlencode(sprintf(' AND artist:%s',$artist));
-                $result_keys = array('releases');
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
                 
             break;
-
+                
+            case wpsstm()->post_type_track:
+                
+                if ( !$artist || !$track ) break;
+                
+                if (!$album) $album = '_';
+                
+                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
+                
+            break;
+        }
+        
+        if (!$api_url){
+            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
         }
 
-        if (!$api_query) return;
+        //TATA
+        //get_musicbrainz_type_by_post_id
+
+        $request = wp_remote_get($api_url);
+        if (is_wp_error($request)) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
         
-        $data = self::get_musicbrainz_api_entry($api_type,null,$api_query);
-        if ( is_wp_error($data) ) return $data;
-        return wpsstm_get_array_value($result_keys, $data);
+        $api_results = json_decode($response, true);
+        
+        return $api_results;
         
     }
     
@@ -965,6 +924,48 @@ class WPSSTM_MusicBrainz {
         $item = sprintf('<a href="https://www.musicbrainz.org" target="_blank" title="%s"><img src="%s" /></a>','Musicbrainz',wpsstm()->plugin_url . '_inc/img/musicbrainz-icon.png');
         $links[] = $item;
         return $links;
+    }
+    
+    /*
+    Use MusicBrainz API to search artists
+    WARNING for partial search, you'll need a wildcard * !
+    */
+    
+    public static function ajax_search_artists(){
+        
+        $ajax_data = wp_unslash($_POST);
+        
+        $result = array(
+            'input' =>              $ajax_data,
+            'message' =>            null,
+            'success' =>            false
+        );
+        
+        $artist = $result['search'] = wpsstm_get_array_value('search',$ajax_data);
+        
+        if ($artist){
+            
+            $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s',$artist);
+
+            $request = wp_remote_get($api_url);
+            
+            if ( !is_wp_error($request) ){
+                 $response = wp_remote_retrieve_body( $request );
+                
+                if ( !is_wp_error($response) ){
+                    $result['data'] = json_decode($response, true);
+                    $result['success'] = true;
+                }else{
+                    $result['message'] = $response->get_error_message();
+                }
+            }else{
+                $result['message'] = $request->get_error_message();
+            }
+
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result ); 
     }
     
 }
@@ -1173,7 +1174,16 @@ class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
         global $wpsstm_musicbrainz;
         
         if ( $this->mbid = self::get_release_mbid($url) ){
-            $this->mbdatas = $wpsstm_musicbrainz->get_musicbrainz_api_entry('release',$this->mbid);
+            
+            $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/releases/%s',$this->mbid);
+            
+            $request = wp_remote_get($api_url);
+            if (is_wp_error($request)) return $request;
+
+            $response = wp_remote_retrieve_body( $request );
+            if (is_wp_error($response)) return $response;
+
+            $this->mbdatas = json_decode($response, true);
         }
         
         return $this->mbdatas;
