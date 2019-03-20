@@ -678,15 +678,17 @@ class WPSSTM_Track{
             }
         }
         
-        ///
-        $autosources_arr = WPSSTM_SongLink::get_track_autosources($this);
-        if ( is_wp_error($autosources_arr) ) return $autosources_arr;
-        ///
+        /*
+        Get sources automatically - services should be hooked here to fetch results.
+        */
+        $sources_auto = apply_filters('wpsstm_track_autosource_items',array(),$this);
+        if ( is_wp_error($sources_auto) ) return $sources_auto;
+
+        /*
+        Handle those sources
+        */
         
-        
-        foreach((array)$autosources_arr as $key=>$source_arr){
-            $source = new WPSSTM_Source(null);
-            $source->from_array($source_arr);
+        foreach((array)$sources_auto as $key=>$source){
             $source->track = $this;
             $source->is_community = true;
             
@@ -702,6 +704,10 @@ class WPSSTM_Track{
             $autosources[] = $source;
 
         }
+        
+        /*
+        Hook filter here to ignore some of the sources
+        */
         
         $autosources = apply_filters('wpsstm_pre_save_autosources',$autosources,$this);
 

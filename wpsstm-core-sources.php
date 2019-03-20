@@ -456,7 +456,7 @@ class WPSSTM_Core_Sources{
                 
             break;
             case 'order':
-                if ($wpsstm_source->index != -1){
+                if ($wpsstm_source->index !== null){
                     echo $wpsstm_source->index;
                 }else{
                     echo '—';

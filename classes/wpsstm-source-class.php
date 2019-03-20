@@ -2,7 +2,7 @@
 class WPSSTM_Source{
     var $post_id;
     
-    var $index = -1;
+    var $index = null;
     
     var $title; //source title (as they might appear on Youtube or Soundcloud, for example; when there is no artist + track title)
     var $title_artist; //if available, the artist name
@@ -339,6 +339,28 @@ class WPSSTM_Source{
 
         $this->track->track_log($data,$title);
 
+    }
+    
+    function to_array(){
+
+        $arr = array(
+            'post_id' =>        $this->post_id,
+
+            'index' =>          $this->index,
+
+            'title' =>          $this->title,
+            'title_artist' =>   $this->title_artist,
+            'title_track' =>    $this->title_track,
+
+            'is_community' =>   $this->is_community,
+            'permalink_url' =>  $this->permalink_url,
+            'stream_url' =>     $this->stream_url,
+            'download_url' =>   $this->download_url,
+            'mime_type' =>      $this->mime_type,
+            'duration' =>       $this->duration,
+            'trackt_id' =>      $this->track->post_id,
+        );
+        return array_filter($arr);
     }
 
 }

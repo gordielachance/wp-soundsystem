@@ -2,16 +2,25 @@
 
 class WPSSTM_SongLink{
     function __construct(){
-        
+        add_filter('wpsstm_track_autosource_items',array($this,'filter_track_autosources'),10,2);
     }
+
+    public function filter_track_autosources($sources,$track){
+        $new_sources = $this->get_track_autosources($track);
+        
+        if ( !is_wp_error($new_sources) && $new_sources ){
+            $sources = array_merge($sources,$new_sources);
+        }
+        
+        return $sources;
+    }
+    
     static function get_track_autosources($track){
         global $wpsstm_spotify;
+        $sources = array();
         
-        $valid = $track->validate_track();
-        if ( is_wp_error( $valid ) ) return $valid;
-        
-        $auto_sources = array();
-        
+        //we need a spotify ID
+
         if (!$track->spotify_id){
             $spotify_id = $wpsstm_spotify->auto_spotify_id( $track->post_id );
             if ( is_wp_error($spotify_id) ) return $spotify_id;
@@ -22,7 +31,10 @@ class WPSSTM_SongLink{
             return new WP_Error('missing_spotify_id',__('Autosourcing requires a Spotify Track ID','wpsstm'));
         }
 
-        $sources = array();
+        /*
+        Get remote page
+        */
+        
         $url = sprintf('https://song.link/s/%s',$track->spotify_id);
         $track->track_log($url, "Getting SongLink page..." ); 
 
@@ -57,12 +69,11 @@ class WPSSTM_SongLink{
             $title = $link_el->getAttribute('aria-label');
             $title = preg_replace('/^' . preg_quote('Listen to ', '/') . '/', '', $title); //remove 'Listen to' prefix
             
-            $source = array(
-                'title' =>          $title,
-                'permalink_url' =>  $url,
-            );
+            $new_source = new WPSSTM_Source();
+            $new_source->title = $title;
+            $new_source->permalink_url = $url;
 
-            $sources[] = $source;
+            $sources[] = $new_source;
             
         }
 
