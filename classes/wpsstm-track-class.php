@@ -686,6 +686,8 @@ class WPSSTM_Track{
         
         if (wpsstm()->can_wpsstmapi() === true){
             
+            //TOUFIX should we try to get spotify ID here ?
+            
             if (!$this->spotify_id) {
                 return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
             }
@@ -723,7 +725,7 @@ class WPSSTM_Track{
             $autosources[] = $source;
 
         }
-        
+
         /*
         Hook filter here to ignore some of the sources
         */

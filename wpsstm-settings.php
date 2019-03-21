@@ -413,8 +413,8 @@ class WPSSTM_Settings {
         );
         
         //expiration
-        if ( $token = get_transient( wpsstm()->wpsstmapi_token_name ) ){
-            $expiration = wpsstm_get_array_value('expiration',$token);
+        if ( $tokendata = get_transient( wpsstm()->wpsstmapi_token_name ) ){
+            $expiration = wpsstm_get_array_value('expiration',$tokendata);
             $date = date_i18n( get_option('date_format'), $expiration );
             printf('<p><em>%s</em></p>',sprintf(__('Valid until: %s','wpsstm'),$date));
         }

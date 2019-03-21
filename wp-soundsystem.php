@@ -11,7 +11,8 @@ License: GPL2
 
 define("WPSSTM_BASE_SLUG", "music");
 
-define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/wpsstmapi/v1/'); 
+define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/wpsstmapi/v1/');
+//define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/wordpress/wp-json/wpsstmapi/v1/'); //URGENT
 
 define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
 define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
@@ -669,6 +670,13 @@ class WP_SoundSystem {
     
     function api_request($url){
         $url = WPSSTM_API_URL . $url;
+        
+        
+        if ( $tokendata = get_transient( wpsstm()->wpsstmapi_token_name ) ){
+            $token = wpsstm_get_array_value('token',$tokendata);
+            $url = add_query_arg(array('token'=>$token),$url);
+        }
+        
         $this->debug_log($url,'query API...');
 
         $request = wp_remote_get($url);
