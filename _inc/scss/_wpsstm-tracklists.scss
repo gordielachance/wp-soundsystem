@@ -35,6 +35,12 @@ wpsstm-tracklist{
             }
         }
     }
+    
+    &.tracklist-expired{
+        .wpsstm-live-tracklist-icon{
+            animation: opacityPulse 1s linear infinite;
+        }
+    }
 
     &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
@@ -154,28 +160,6 @@ wpsstm-tracklist{
     }
 
 }
-
-.tracks-container{
-    
-    .wpsstm-tracks-container-icon{
-        @extend .wpsstm-can-click;
-        @include opacity(.15);
-    }
-    
-    &.tracks-container-loading{
-        .wpsstm-tracks-container-icon{
-            @extend .wpsstm-loading-icon;
-        }
-    }
-    &:not(.tracks-container-playing) .wpsstm-tracks-container-icon:before,&.tracklist-pause .wpsstm-tracks-container-icon:before{
-        content:"\f04b"; //.fa-play
-    }
-
-    &.tracks-container-playing .wpsstm-tracks-container-icon:before{
-        content:"\f04c"; //.fa-pause;
-    }
-}
-
 
 .wpsstm-tracklist-actions{
 

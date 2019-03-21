@@ -22,12 +22,12 @@ class WPSSTM_Player{
         $wpsstm_player = $this;
         
         $defaults = array(
-        'id' => null,
+            'id' => null,
         );
         
         $options = wp_parse_args($options,$defaults);
         
-        wpsstm()->debug_log($options,'init player');
+        //wpsstm()->debug_log($options,'init player');
         
         $wpsstm_player->options = $options;
         

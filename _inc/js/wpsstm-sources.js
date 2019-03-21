@@ -208,7 +208,7 @@ class WpsstmSource extends HTMLElement{
 
         $(player.current_media).on('play', function() {
             $(player).addClass('player-playing player-has-played');
-            tracks_container.addClass('tracks-container-playing');
+            tracks_container.addClass('tracks-container-playing tracks-container-has-played');
             track_instances.removeClass('track-error').addClass('track-playing track-has-played');
             track.setAttribute('trackstatus','playing');
             source_instances.removeClass('source-error').addClass('source-playing source-has-played');
