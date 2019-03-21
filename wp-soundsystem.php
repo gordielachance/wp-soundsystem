@@ -11,7 +11,7 @@ License: GPL2
 
 define("WPSSTM_BASE_SLUG", "music");
 
-define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/wordpress/wp-json/v1/'); 
+define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/wpsstmapi/v1/'); 
 
 define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
 define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
@@ -66,6 +66,7 @@ class WP_SoundSystem {
     public $user;
 
     public $meta_name_options = 'wpsstm_options';
+    public $wpsstmapi_token_name = 'wpsstmapi_token';
     
     var $menu_page;
     var $options = array();
@@ -631,15 +632,45 @@ class WP_SoundSystem {
     }
     
     function can_wpsstmapi(){
+        if ( !$client_secret = wpsstm()->get_options('wpsstmapi_client_secret') ){
+            return new WP_Error( 'wpsstmapi_missing_client_secret', __('Missing WPSSTM API client secret','wpsstm') );
+        }else{
+
+            $token = get_transient( $this->wpsstmapi_token_name );
+
+            if (!$token){ //try to get one and set transient
+
+                $api_url = sprintf('auth/get_token/%s',$client_secret);
+                $api_results = wpsstm()->api_request($api_url);
+                if ( is_wp_error($api_results) ) return $api_results;
+                
+                $token = wpsstm_get_array_value('token',$api_results);
+                $expiration = wpsstm_get_array_value('expiration',$api_results);
+
+                //set local transient
+                //TOUFIX should set expiration = now - token expiration ?
+                if ($token && $expiration){
+                    $this->debug_log($api_results,'store WPSSTMAPI token as transient !');
+                    set_transient($this->wpsstmapi_token_name,$api_results,1 * DAY_IN_SECONDS);
+                }
+            }
+            
+            if (!$token){
+                return new WP_Error( 'wpsstmapi_missing_token', __('Missing WPSSTM API token','wpsstm') );
+            }
+            
+        }
+        
+
+        
         return true;
-        return new WP_Error( 'wpsstmapi_missing', __('Unable to use WPSSTM API','wpsstm') );
-        return true;
+
     }
     
     function api_request($url){
         $url = WPSSTM_API_URL . $url;
         $this->debug_log($url,'query API...');
-        
+
         $request = wp_remote_get($url);
         if (is_wp_error($request)) return $request;
 
@@ -647,7 +678,7 @@ class WP_SoundSystem {
         if (is_wp_error($response)) return $response;
         
         $response = json_decode($response, true);
-        
+
         //TOUFIX hackish
         if ( $code = wpsstm_get_array_value('code',$response) ){
             $message = wpsstm_get_array_value('message',$response);
@@ -666,7 +697,7 @@ class WP_SoundSystem {
     public function can_importer(){
         //wpssstm API
         $can_wpsstm_api = $this->can_wpsstmapi();
-        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
+        if ( $can_wpsstm_api !== true ) return $can_wpsstm_api;
         
         //community user
         if ( !$user_id = wpsstm()->get_options('community_user_id') ){

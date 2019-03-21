@@ -113,7 +113,17 @@ class WPSSTM_Settings {
         /*
         WPSSTM API
         */
-        $new_input['wpsstmapi_client_secret'] = trim($input['wpsstmapi_client_secret']);
+
+        $old_secret = wpsstm()->get_options('wpsstmapi_client_secret');
+        $new_secret = trim($input['wpsstmapi_client_secret']);
+
+        //delete token
+        if ($old_secret != $new_secret){
+            delete_transient( wpsstm()->wpsstmapi_token_name );
+        }
+
+        $new_input['wpsstmapi_client_secret'] = $new_secret;
+
 
         return $new_input;
         
@@ -331,6 +341,7 @@ class WPSSTM_Settings {
         
             //autosource
             $can = WPSSTM_Core_Sources::can_autosource();
+
             if ( is_wp_error($can) ){
                 add_settings_error('autosource',$can->get_error_code(),$can->get_error_message(),'inline');
             }
@@ -401,7 +412,15 @@ class WPSSTM_Settings {
             $client_secret
         );
         
-        $url = 'http://api.spiff-radio.org';
+        //expiration
+        if ( $token = get_transient( wpsstm()->wpsstmapi_token_name ) ){
+            $expiration = wpsstm_get_array_value('expiration',$token);
+            $date = date_i18n( get_option('date_format'), $expiration );
+            printf('<p><em>%s</em></p>',sprintf(__('Valid until: %s','wpsstm'),$date));
+        }
+
+        
+        $url = 'https://api.spiff-radio.org/?p=10';
         printf('<p><a href="%s" target="_blank">%s</a> !</p>',$url,__('Get an API key now','wpsstm'));
     }
 

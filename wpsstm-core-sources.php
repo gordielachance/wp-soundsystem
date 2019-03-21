@@ -524,7 +524,7 @@ class WPSSTM_Core_Sources{
         
         //wpssstm API
         $can_wpsstm_api = wpsstm()->can_wpsstmapi();
-        if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
+        if ( $can_wpsstm_api !== true ) return $can_wpsstm_api;
 
         //capability check
         $sources_post_type_obj = get_post_type_object(wpsstm()->post_type_source);
