@@ -141,6 +141,10 @@ class WpsstmTracklist extends HTMLElement{
                 tracklist.reload_tracklist(true);
             }
         });
+        
+        $(document).on('click', '.tracklist-expired .wpsstm-live-tracklist-icon', function(e) {
+            refresh_bt.trigger('click');
+        });
 
         /*
         Tracklist actions

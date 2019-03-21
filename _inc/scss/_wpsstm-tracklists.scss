@@ -39,6 +39,7 @@ wpsstm-tracklist{
     &.tracklist-expired{
         .wpsstm-live-tracklist-icon{
             animation: opacityPulse 1s linear infinite;
+            @extend .wpsstm-can-click;
         }
     }
 
