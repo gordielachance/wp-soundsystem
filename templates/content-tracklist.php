@@ -3,16 +3,13 @@
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
-$has_player = wpsstm()->get_options('player_enabled');
 
 ?>
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
         <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->title;?>">
-            <?php if ( $has_player ){ ?>
-                <i class="wpsstm-tracks-container-icon wpsstm-icon"></i>
-            <?php } ?>
+            <i class="wpsstm-tracks-container-icon wpsstm-icon"></i>
             <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->title;?></a>
                 <?php
                 //radio icon

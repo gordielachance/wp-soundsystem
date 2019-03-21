@@ -197,7 +197,7 @@ class WPSSTM_LastFM{
         $new_app_url = 'https://www.last.fm/api/account/create';
         
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>',$new_app_url,__('here','wpsstm') );
-        printf(__('Required for the Last.fm preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
+        printf(__('Required for the Last.fm importer preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
     }
     
     

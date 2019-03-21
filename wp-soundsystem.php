@@ -65,15 +65,15 @@ class WP_SoundSystem {
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
 
-    /**
-    * @var The one true Instance
-    */
-    private static $instance;
-
     public $meta_name_options = 'wpsstm_options';
     
     var $menu_page;
     var $options = array();
+    
+    /**
+    * @var The one true Instance
+    */
+    private static $instance;
 
     public static function instance() {
         
@@ -86,12 +86,8 @@ class WP_SoundSystem {
             return self::$instance;
     }
     /**
-        * A dummy constructor to prevent bbPress from being loaded more than once.
-        *
-        * @since bbPress (r2464)
-        * @see bbPress::instance()
-        * @see bbpress();
-        */
+    * A dummy constructor to prevent plugin from being loaded more than once.
+    */
     private function __construct() { /* Do nothing here */ }
     
     function setup_globals() {
@@ -107,8 +103,7 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'ajax_load_tracklists'              => false, //TOUFIX URGENT
-            'player_enabled'                    => true,
+            'ajax_load_tracklists'              => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
             'importer_enabled'                  => true,
