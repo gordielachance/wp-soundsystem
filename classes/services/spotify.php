@@ -501,160 +501,41 @@ class WPSSTM_Spotify{
         //same nonce than in metabox_mbid_content()
         wp_nonce_field( 'wpsstm_spotify_id_meta_box', 'wpsstm_spotify_id_meta_box_nonce' );
     }
-    
-    public static function get_spotify_type_by_post_id($post_id = null,$plural = false){
-        global $post;
-        if (!$post_id) $post_id = $post->ID;
-        $post_type = get_post_type($post_id);
-        
-        $type = null;
-        switch( $post_type ){
-            case wpsstm()->post_type_artist:
-                $type = 'artist';
-            break;
-            case wpsstm()->post_type_track:
-                $type = 'track';
-            break;
-            case wpsstm()->post_type_album:
-                $type = 'album';
-            break;
-        }
-        
-        if ($plural){
-            $type.='s';
-        }
-        
-        return $type;
-        
-    }
-    
-    //TOUFIX
+
     private function search_spotify_entries_for_post($post_id = null ){
         
         global $post;
         if (!$post_id) $post_id = $post->ID;
-        if (!$post_id) return;
-
-        $api_type = self::get_spotify_type_by_post_id($post_id);
+        if (!$post_type = get_post_type($post_id)) return;
+        
+        $api_url = null;
+        
         $artist = wpsstm_get_post_artist($post_id);
         $track = wpsstm_get_post_track($post_id);
         $album = wpsstm_get_post_album($post_id);
-
-        $api_lookup = null;
-        $api_query = null;
-        $result_keys = null;
-
-        switch($api_type){
-                
-            case 'artist':
-                
-                if ( !$artist ) break;
-                
-                $api_query = sprintf('artist:%s',$artist);
-                $result_keys = array('artists');
-                
+        if (!$album) $album = '_';
+        
+        switch( $post_type ){
+            case wpsstm()->post_type_artist:
+                $api_url = sprintf('services/spotify/search/%s',$artist);
             break;
-                
-            case 'track':
-                
-                if ( !$artist || !$track ) break;
-                
-                $api_query = sprintf('artist:%s track:%s',$artist,$track);
-                $result_keys = array('tracks');
-                
+            case wpsstm()->post_type_album:
+                $api_url = sprintf('services/spotify/search/%s/%s',$artist,$album);
             break;
-                
-            case 'album':
-                
-                if ( !$artist || !$album ) break;
-                
-                $api_query = sprintf('artist:%s album:%s',$artist,$album);
-                $result_keys = array('albums');
-                
+            case wpsstm()->post_type_track:
+                $api_url = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
             break;
-
-        }
-
-        if (!$api_query) return;
-        
-        $data = $this->get_spotify_api_entry($api_type,null,$api_query);
-        if ( is_wp_error($data) ) return $data;
-        
-        $result_keys[] = 'items';
-        return wpsstm_get_array_value($result_keys, $data);
-        
-    }
-    
-    function get_spotify_api_entry($type,$spotify_id = null,$query = null,$offset = null){
-        global $post;
-
-        $api_results = null;
-        $cached_results = null;
-        
-        if ($spotify_id){
-            
-            $allowed_types = array('artists', 'albums', 'tracks','playlists');
-
-            if ( !in_array($type,$allowed_types) ) 
-                return new WP_Error('spotify_invalid_type',__("invalid Spotify type",'wpsstm'));
-            
-            $url = sprintf('https://api.spotify.com/v1/%s/%s',$type,$spotify_id);
-        }elseif($query){
-            
-            $allowed_types = array('artist', 'album', 'track');
-
-            if ( !in_array($type,$allowed_types) ) 
-                return new WP_Error('spotify_invalid_type',__("invalid Spotify type",'wpsstm'));
-            
-            $url_args = array(
-                'q' =>      rawurlencode($query),
-                'type' =>   $type,
-                'limit' =>  10,
-            );
-            
-            $url = add_query_arg($url_args,'https://api.spotify.com/v1/search');
-        }else{
-            return;
-        }
-
-        //define the transient name for this MB url
-        $transient_url_name = str_replace('https://api.spotify.com/v1/','',$url);
-        $transient_url_name = self::$spotify_data_by_url_transient_prefix.md5($transient_url_name); //WARNING should be 172 characters or less or less !  md5 returns 32 chars.
-        
-        // check if we should try to load cached data
-
-        if ( $days_cache = wpsstm()->get_options('cache_api_results') ){
-            $api_results = $cached_results = get_transient( $transient_url_name );
-        }
-
-        
-        if ( !$api_results ){
-            
-            $spotify_args = $this->get_spotify_request_args();
-            if (is_wp_error($spotify_args) ) return $spotify_args;
-            
-            $request = wp_remote_get($url,$spotify_args);
-            if (is_wp_error($request)) return $request;
-
-            $response = wp_remote_retrieve_body( $request );
-            if (is_wp_error($response)) return $response;
-
-            if ( $api_results = json_decode($response, true) ){
-                if ( $days_cache ){
-                    set_transient( $transient_url_name, $api_results, $days_cache * DAY_IN_SECONDS );
-                }
-            }
-
         }
         
-        //debug
-        $cached = ($cached_results) ? '(loaded from transient)' : null;
-        wpsstm()->debug_log(sprintf("get_spotify_api_entry():%s %s",$url,$cached)); 
-
+        if (!$api_url){
+            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
+        }
+        
+        $api_results = wpsstm()->api_request($api_url);
         return $api_results;
-
+        
     }
-    
+
     /**
     Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
     **/
@@ -700,14 +581,28 @@ class WPSSTM_Spotify{
         }
 
 
-        if ( !$id = wpsstm_get_post_spotify_id($post_id) ) return;
+        if ( !$spotify_id = wpsstm_get_post_spotify_id($post_id) ) return;
+        
+        switch( $post_type ){
+            case wpsstm()->post_type_artist:
+                $api_url = sprintf('services/spotify/data/artists/%s',$spotify_id);
+            break;
+            case wpsstm()->post_type_album:
+                $api_url = sprintf('services/spotify/data/albums/%s',$spotify_id);
+            break;
+            case wpsstm()->post_type_track:
+                $api_url = sprintf('services/spotify/data/tracks/%s',$spotify_id);
+            break;
+        }
+        
+        if (!$api_url){
+            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
+        }
+        
+        $api_results = wpsstm()->api_request($api_url);
+        if ( is_wp_error($api_results) ) return $api_results;
 
-        //get API data
-        $api_type = self::get_spotify_type_by_post_id($post_id,true);
-        $data = $this->get_spotify_api_entry($api_type,$id);
-        if ( is_wp_error($data) ) return $data;
-
-        if ( $success = update_post_meta( $post_id, self::$spotify_data_meta_key, $data ) ){
+        if ( $success = update_post_meta( $post_id, self::$spotify_data_meta_key, $api_results ) ){
 
             //save timestamp
             $now = current_time('timestamp');
@@ -916,7 +811,13 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
         global $wpsstm_spotify;
 
         if ( $this->playlist_id = self::get_playlist_id_from_url($url) ){
-            $this->playlist_data = $wpsstm_spotify->get_spotify_api_entry('playlists',$this->playlist_id);
+            
+            $api_url = sprintf('services/spotify/data/playlists/%s',$this->playlist_id);
+            
+            $api_results = wpsstm()->api_request($api_url);
+            if (is_wp_error($api_results)) return $api_results;
+            
+            $this->playlist_data = $api_results;
             
             //update pagination
             $total_tracks = wpsstm_get_array_value(array('tracks','total'),$this->playlist_data);
