@@ -109,6 +109,11 @@ class WPSSTM_Settings {
         
         //recent wizard entries
         $new_input['registration_notice'] = isset($input['registration_notice']);
+        
+        /*
+        WPSSTM API
+        */
+        $new_input['wpsstmapi_client_secret'] = trim($input['wpsstmapi_client_secret']);
 
         return $new_input;
         
@@ -219,6 +224,24 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'settings_styling'
         );
+        
+        /*
+        WPSSTM API
+        */
+        add_settings_section(
+            'wpsstmapi_settings', // ID
+            'WP SoundSystem API', // Title
+            array( $this, 'section_wpsstmapi_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'wpsstmapi_client_secret', 
+            __('API','wpsstm'), 
+            array( $this, 'wpsstmapi_apisecret_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
 
 
     }
@@ -321,7 +344,7 @@ class WPSSTM_Settings {
 
     function section_community_user_desc(){
         $desc = array();
-        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource, radios or frontend wizard.","wpsstm");
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource and tracklist importer.","wpsstm");
 
         //wrap
         $desc = array_map(
@@ -333,6 +356,53 @@ class WPSSTM_Settings {
         
         echo implode("\n",$desc);
 
+    }
+    
+    function section_wpsstmapi_desc(){
+        
+        $features = array(
+            sprintf(__('Automatically search and save track sources online with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('autosource module','wpsstm'))),
+            sprintf(__('Import tracklists from popular music services like Spotify (and almost any website where a tracklist is visible) with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('Tracklist Importer metabox','wpsstm'))),
+            sprintf(__('Enable the %s - remote tracklists that are automatically refreshing every X minutes.','wpsstm'),sprintf('<strong>%s</strong>',__('Radios post type','wpsstm'))),
+        );
+        
+        //wrap
+        $features = array_map(
+           function ($el) {
+              return "<li>{$el}</li>";
+           },
+           $features
+        );
+        
+        
+        $desc[] = __('Get more out of this plugin by registering an API key!','wppsm');
+        $desc[] = sprintf('<ul>%s</ul>',implode("\n",$features));
+        $desc[] = __("That's also a nice way to support the work done - hundred of hours - for this free plugin, and to ensure its durability.  Thanks for your help !",'wppsm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo sprintf('<div id="wpsstm-api-promo">%s</div>',implode("\n",$desc));
+        
+    }
+    
+    function wpsstmapi_apisecret_callback(){
+        //client secret
+        $client_secret = wpsstm()->get_options('wpsstmapi_client_secret');
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_client_secret]" value="%s" /></p>',
+            __('Client Secret:','wpsstm'),
+            wpsstm()->meta_name_options,
+            $client_secret
+        );
+        
+        $url = 'http://api.spiff-radio.org';
+        printf('<p><a href="%s" target="_blank">%s</a> !</p>',$url,__('Get an API key now','wpsstm'));
     }
 
     function section_importer_desc(){

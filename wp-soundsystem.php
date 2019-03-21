@@ -109,6 +109,7 @@ class WP_SoundSystem {
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
             'registration_notice'               => true,
+            'wpsstmapi_client_secret'           => null,
         );
         
         $db_option = get_option( $this->meta_name_options);
