@@ -12,7 +12,6 @@ License: GPL2
 define("WPSSTM_BASE_SLUG", "music");
 
 define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/wpsstmapi/v1/');
-//define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/wordpress/wp-json/wpsstmapi/v1/'); //URGENT
 
 define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
 define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");

@@ -50,14 +50,14 @@ This requires to be somewhat familiar with [jQuery selectors](http://www.w3schoo
 
 You may also propose a **Frontend Tracklist Importer** to your visitors: just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
 
-Demo on [spiff-radio.org](http://www.spiff-radio.org/?p=213).
+Demo on [spiff-radio.org](https://www.spiff-radio.org/?p=213).
 
 = Radios =
 
 Radios lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
 For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically; and eventually temporary store the tracks if tracklist cache is enabled.
 
-Demo on [spiff-radio.org](http://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
+Demo on [spiff-radio.org](https://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
 
 = MusicBrainz =
 

@@ -574,6 +574,8 @@ class WPSSTM_Spotify{
     */
     
     private function reload_spotify_datas($post_id){
+        
+        if (!$post_type = get_post_type($post_id) ) return false;
 
         //delete existing
         if ( delete_post_meta( $post_id, self::$spotify_data_meta_key ) ){
