@@ -3,93 +3,74 @@ Contributors: grosbouff
 Donate link: http://bit.ly/gbreant
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
-Tested up to: 5.1
+Tested up to: 5.1.1
 Stable tag: trunk
 License: GPLv2 or later
 
-Manage a music library within Wordpress ! Build playlists, manage tracks, import/backup remote playlists from various services, and keep it in sync.  The perfect fit for your music blog !
+WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks, audio sources, and play them with our audio player.
 
 == Description ==
 
-Manage a music library within Wordpress ! Build playlists, manage tracks, import/backup remote playlists from various services, and keep it in sync.  The perfect fit for your music blog !
+WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks, audio sources, and play them with our audio player.  The perfect fit for a music blog !
 
-= Several new post types =
+= Custom Post Types =
 
-Playlists, Radios, Tracks and Sources each uses a custom post type, so you can easily manage/extend them.
+Several new post types will be available : Playlists, Radios, Tracks, and Sources.
 
 = Playlists =
 
-Managing the playlist tracks is a piece of cake using the *Tracklist metabox*:
+Creating and editing playlists is a piece of cake using the *Tracklist Importer*:
 Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
 
-Import a tracklist from a file or a music service like Spotify using the *Tracklist Importer* (see below).
+Frontend, playlists can be favorited and exported by your users.
 
-= Audio player =
+= Tracks =
 
-When viewing a post that contains a tracklist, an audio player will show up to play your tracks !
-
-**Supported sources**: Youtube, Soundcloud, regular audio files.
+When editing a track, you can retrieve details from other music services like [MusicBrainz](https://musicbrainz.org/) or [Spotify](https://musicbrainz.org/).
+You can attach audio sources to your tracks with the **Track sources** metabox.
+Track can be favorited by your users frontend, or added to any new playlist on-the-fly.
 
 = Sources =
 
-If you didn't set sources for your tracks (see below) and that the **autosource** option is enabled; the audio player will try to find an online source automatically (Youtube, Soundcloud, ...) based on the track informations.
-
-Those links will be used by the audio player (see above) to play the track if the source URL is supported.
-
-= Tracklist Importer Metabox =
-
-Enter the URL of a tracklist (eg. a local XSPF file, a Spotify Playlist, a radio station page...) to scrape its data.
-
-Popular services like Spotify or Radionomy are automated through presets; and you will not need to do anything to retrieve their tracklists.
-
-But if the URL is not recognized, the advanced wizard will show up and you will need to enter some extra informations to get the tracklist data.
-
-This requires to be somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
-
-**Native presets**: Last.fm, Spotify, Radionomy, Deezer, SomaFM, BBC, Slacker, Soundcloud, Twitter, Soundsgood, Hype Machine, Reddit, Indie Shuffle, RadioKing, Online Radio Box.
-
-You may also propose a **Frontend Tracklist Importer** to your visitors: just create a blank page and set its ID for the *Frontend wizard page ID* field in the plugin settings page.
-
-Demo on [spiff-radio.org](https://www.spiff-radio.org/?p=213).
+You can attach several audio sources to any track.  It can be a link to an audio file, a Soundcloud or Youtube URL, etc.  The player will then try to play them.
 
 = Radios =
 
-Radios lets you grab a tracklist from a remote URL and remains **synchronised** with it.  
-For example, you can load a radio station page and the plugin will keep its tracklist up-to-date automatically; and eventually temporary store the tracks if tracklist cache is enabled.
+Radios are how we call live playlists.  Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.  Popular services are supported out-of-the-box (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,...), and you can use the **Tracklist Importer** metabox to try your own setup.
 
-Demo on [spiff-radio.org](https://www.spiff-radio.org/?post_type=wpsstm_live_playlist).
+= Tracklist Importer =
 
-= MusicBrainz =
+Backup your playlists using the Tracklist Importer Metabox.  Popular services only need the playlist URL !
+You can also setup your own configuration, if you are somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-When managing a track, artist or album, the plugin can search for its **MusicBrainz ID**.
-It makes it easier to identify the items, and loads various metadatas from [MusicBrainz](https://musicbrainz.org/) — an open data music database.
-For example, when creating an album post, you can load its tracklist from the MusicBrainz datas; so you don't need to enter each track manually.
+= Autosource =
+
+If you don't attach sources to your track manually, you can enable the autosource in the plugin settings.  
+It will search remote sources (Youtube, Soundcloud...) and try to play them.
 
 = Last.fm =
 
-The audio player can **scrobble** tracks to your Last.fm account; or add tracks to your Last.fm favorites.
-
-= Shortcodes =
-
-`[wpsstm-track post_id="150"]`
-
-To embed the single track #150.
-Optional arguments: *post_id*.
-
-`[wpsstm-tracklist post_id="160"]`
-
-To embed the tracklist from the post #160.  
-Works for albums, playlists and radios.
-Optional arguments: *post_id*,*max_rows*.
+The audio player can **scrobble** tracks to your Last.fm account.
+When the scrobbler is enabled, every track favorited by a user connected on Last.fm will also be loved on that service.
 
 = BuddyPress =
 
-This plugin is BuddyPress ready, and supports a new "music" menu for users, activity, etc.
+This plugin is BuddyPress ready, and supports a new "music" section that lists the user favorite tracks and tracklists, and the ones he created.
+It will also enable new BuddyPress activity items.
 
-= Donate! =
+= WP SoundSystem API =
 
-It truly took me a LOT of time to code this plugin, and I decided to release it for free - without any "Premium" plans.
-If you like it, please consider [making a donation](http://bit.ly/gbreant).
+Get more out of this plugin by registering an API key!
+
+Automatically search and save track sources online with the autosource module.
+Import tracklists from popular music services like Spotify (and almost any website where a tracklist is visible) with the Tracklist Importer metabox.
+Enable the Radios post type - remote tracklists that are automatically refreshing every X minutes.
+That's also a nice way to support the work done - hundred of hours - for this free plugin, and to ensure its durability. Thanks for your help !
+
+= Donate =
+It truly took me a LOT of time to code this plugin.
+If you like this plugin, please consider [making a donation](http://bit.ly/gbreant).
+
 This would be very appreciated — Thanks !
 
 = Dependencies =
@@ -117,6 +98,20 @@ This plugin requires PHP Version 5.4 or later.
 
 == Frequently Asked Questions ==
 
+== How can I embed a track or a playlist in a post ? =
+
+`[wpsstm-track post_id="150"]`
+
+To embed the single track #150.
+Optional arguments: *post_id*.
+
+`[wpsstm-tracklist post_id="160"]`
+
+To embed the tracklist from the post #160.  
+Works for albums, playlists and radios.
+Optional arguments: *post_id*,*max_rows*.
+
+
 = How can I display the tracklist of a post in my templates ? =
 
 Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
@@ -129,10 +124,7 @@ echo $tracklist->get_tracklist_html();
 = What are community tracks and when are they created ? =
 
 Community tracks are tracks that are automatically created by the plugin and for which the author is the community user (see settings).
-They are created when a live tracklist is updated; only if its cache is disabled/expired.
-A community track is also created when we autosource a track; so the sources query is ran only once.
-
-There is an option in the plugin settings to flush those community tracks : they will be deleted; but only if they do not appear in a tracklist and are not favorited by any users.
+For instance, tracks that are imported are assigned to the community user, as for the imported sources.
 
 == Screenshots ==
 
