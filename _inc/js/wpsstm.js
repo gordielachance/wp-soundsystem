@@ -55,16 +55,16 @@ $( document ).ready(function() {
         notice.remove();
     });
     
+    //queue tracks in player on tracklist init/refresh
     var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
-    var trackContainers = $('wpsstm-tracklist');
-    
-    //queue on tracklist init/refresh
-    $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-        bottomPlayer.queueContainer(tracklist);
+    if (bottomPlayer){
+        $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
+            bottomPlayer.queueContainer(tracklist);
 
-    });
+        });
+    }
 
-    trackContainers.each(function(index,tracklist) {
+    $('wpsstm-tracklist').each(function(index,tracklist) {
         
         tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
