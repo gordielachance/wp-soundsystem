@@ -686,7 +686,21 @@ class WPSSTM_Track{
         
         if (wpsstm()->can_wpsstmapi() === true){
             
-            //TOUFIX should we try to get spotify ID here ?
+            if (!$this->spotify_id) {
+
+                $album = ($this->album) ? $this->album : $album = '_';
+                
+                $api_url = sprintf('services/spotify/search/%s/%s/%s',$this->artist,$album,$this->title);
+                $api_results = wpsstm()->api_request($api_url);
+                if ( is_wp_error($api_results) ) return $api_results;
+                
+                //TOUFIX all this is not very clean.  Should be checked above ? Saved after ? Etc.
+                if ($api_results){
+                    $match = $api_results[0];
+                    $this->spotify_id = wpsstm_get_array_value('id',$match);
+                    $success = update_post_meta( $this->post_id, WPSSTM_Spotify::$spotify_id_meta_key, $this->spotify_id );
+                }
+            }
             
             if (!$this->spotify_id) {
                 return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
