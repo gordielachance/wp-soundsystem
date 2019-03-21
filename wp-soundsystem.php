@@ -9,6 +9,28 @@ Version: 2.1.8
 License: GPL2
 */
 
+define("WPSSTM_BASE_SLUG", "music");
+
+define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/wordpress/wp-json/v1/'); 
+
+define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
+define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
+define("WPSSTM_PLAYLISTS_SLUG", "playlists");
+define("WPSSTM_PLAYLIST_SLUG", "playlist");
+define("WPSSTM_ARTISTS_SLUG", "artists");
+define("WPSSTM_ARTIST_SLUG", "artist");
+define("WPSSTM_ALBUMS_SLUG", "albums");
+define("WPSSTM_ALBUM_SLUG", "album");
+define("WPSSTM_TRACKS_SLUG", "tracks");
+define("WPSSTM_TRACK_SLUG", "track");
+define("WPSSTM_SUBTRACKS_SLUG", "subtracks");
+define("WPSSTM_SUBTRACK_SLUG", "subtrack");
+define("WPSSTM_SOURCES_SLUG", "sources");
+define("WPSSTM_SOURCE_SLUG", "source");
+
+define("WPSSTM_NEW_ITEM_SLUG", "new");
+define("WPSSTM_MANAGER_SLUG", "manager");
+
 class WP_SoundSystem {
     /** Version ***************************************************************/
     /**
@@ -79,35 +101,13 @@ class WP_SoundSystem {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        
-        define("WPSSTM_BASE_SLUG", "music");
-        
-        define('WPSSTM_API_URL','http://wpsstm-api/wordpress/wp-json/v1/'); 
-        
-        define("WPSSTM_LIVE_PLAYLISTS_SLUG", "radios");
-        define("WPSSTM_LIVE_PLAYLIST_SLUG", "radio");
-        define("WPSSTM_PLAYLISTS_SLUG", "playlists");
-        define("WPSSTM_PLAYLIST_SLUG", "playlist");
-        define("WPSSTM_ARTISTS_SLUG", "artists");
-        define("WPSSTM_ARTIST_SLUG", "artist");
-        define("WPSSTM_ALBUMS_SLUG", "albums");
-        define("WPSSTM_ALBUM_SLUG", "album");
-        define("WPSSTM_TRACKS_SLUG", "tracks");
-        define("WPSSTM_TRACK_SLUG", "track");
-        define("WPSSTM_SUBTRACKS_SLUG", "subtracks");
-        define("WPSSTM_SUBTRACK_SLUG", "subtrack");
-        define("WPSSTM_SOURCES_SLUG", "sources");
-        define("WPSSTM_SOURCE_SLUG", "source");
-        
-        define("WPSSTM_NEW_ITEM_SLUG", "new");
-        define("WPSSTM_MANAGER_SLUG", "manager");
-        
+
         $options_default = array(
             'frontend_scraper_page_id'          => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'cache_api_results'                 => 1, //days a musicbrainz query (for an url) is cached
-            'ajax_load_tracklists'              => true,
+            'ajax_load_tracklists'              => false,
             'player_enabled'                    => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
@@ -630,6 +630,33 @@ class WP_SoundSystem {
         return true;
         return new WP_Error( 'wpsstmapi_missing', __('Unable to use WPSSTM API','wpsstm') );
         return true;
+    }
+    
+    function api_request($url){
+        $url = WPSSTM_API_URL . $url;
+        $this->debug_log($url,'query API...');
+        
+        $request = wp_remote_get($url);
+        if (is_wp_error($request)) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
+        
+        $response = json_decode($response, true);
+        
+        //TOUFIX hackish
+        if ( $code = wpsstm_get_array_value('code',$response) ){
+            $message = wpsstm_get_array_value('message',$response);
+            $data = wpsstm_get_array_value('data',$response);
+            $error = new WP_Error($code,$message,$data );
+            
+            $this->debug_log($error,'query API error');
+            
+            return $error;
+        }
+        
+        return $response;
+
     }
     
     public function can_importer(){

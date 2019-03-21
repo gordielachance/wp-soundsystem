@@ -639,15 +639,15 @@ class WPSSTM_MusicBrainz {
         switch($post_type){
             //artist
             case wpsstm()->post_type_artist:
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/artists/%s',$mbid);
+                $api_url = sprintf('services/musicbrainz/data/artists/%s',$mbid);
             break;
             //album
             case wpsstm()->post_type_album:
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/releases/%s',$mbid);
+                $api_url = sprintf('services/musicbrainz/data/releases/%s',$mbid);
             break;
             //track
             case wpsstm()->post_type_track:
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/recordings/%s',$mbid);
+                $api_url = sprintf('services/musicbrainz/data/recordings/%s',$mbid);
             break;
         }
 
@@ -655,13 +655,8 @@ class WPSSTM_MusicBrainz {
             return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
         }
 
-        $request = wp_remote_get($api_url);
-        if (is_wp_error($request)) return $request;
-
-        $response = wp_remote_retrieve_body( $request );
-        if (is_wp_error($response)) return $response;
-        
-        $api_results = json_decode($response, true);
+        $api_results = wpsstm()->api_request($api_url);
+        if ( is_wp_error($api_results) ) return $api_results;
 
         if ( $success = update_post_meta( $post_id, self::$mbdata_metakey, $api_results ) ){
             
@@ -742,23 +737,18 @@ class WPSSTM_MusicBrainz {
         if ( is_wp_error($entries) ) return $entries;
         if (!$entries) return;
         
-        $first_entry = $entries[0];
-        $score = $first_entry['score'];
+        $score = wpsstm_get_array_value(array(0,'score'),$entries);
+        $mbid = wpsstm_get_array_value(array(0,'id'),$entries);
 
-        //only if we got a minimum score
-        if ($score < 90) return;
-
-        //get MBID of first entry
-        $mbid = $first_entry['id'];
-
-        if ($mbid){
-            if ( $success = update_post_meta( $post_id, self::$mbid_metakey, $mbid ) ){
-                wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'mbid'=>$mbid)),"Updated MBID" ); 
-                $this->reload_mb_datas($post_id);
-            }
-            
-            return $mbid;
+        if (!$mbid) return;
+        if ($score < 90) return; //only if we got a minimum score
+        
+        if ( $success = update_post_meta( $post_id, self::$mbid_metakey, $mbid ) ){
+            wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'mbid'=>$mbid)),"Updated MBID" ); 
+            $this->reload_mb_datas($post_id);
         }
+
+        return $mbid;
         
     }
 
@@ -840,7 +830,7 @@ class WPSSTM_MusicBrainz {
                 
                 if ( !$artist ) break;
                 
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s',$artist);
+                $api_url = sprintf('services/musicbrainz/search/%s',$artist);
                 
                 
             break;
@@ -849,7 +839,7 @@ class WPSSTM_MusicBrainz {
                 
                 if ( !$artist || !$album ) break;
                 
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
+                $api_url = sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
                 
             break;
                 
@@ -859,7 +849,7 @@ class WPSSTM_MusicBrainz {
                 
                 if (!$album) $album = '_';
                 
-                $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
+                $api_url = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
                 
             break;
         }
@@ -871,15 +861,7 @@ class WPSSTM_MusicBrainz {
         //TATA
         //get_musicbrainz_type_by_post_id
 
-        $request = wp_remote_get($api_url);
-        if (is_wp_error($request)) return $request;
-
-        $response = wp_remote_retrieve_body( $request );
-        if (is_wp_error($response)) return $response;
-        
-        $api_results = json_decode($response, true);
-        
-        return $api_results;
+        return wpsstm()->api_request($api_url);
         
     }
     
@@ -945,21 +927,14 @@ class WPSSTM_MusicBrainz {
         
         if ($artist){
             
-            $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/search/%s',$artist);
+            $api_url = sprintf('services/musicbrainz/search/%s',$artist);
+            $api_results = wpsstm()->api_request($api_url);
 
-            $request = wp_remote_get($api_url);
-            
-            if ( !is_wp_error($request) ){
-                 $response = wp_remote_retrieve_body( $request );
-                
-                if ( !is_wp_error($response) ){
-                    $result['data'] = json_decode($response, true);
-                    $result['success'] = true;
-                }else{
-                    $result['message'] = $response->get_error_message();
-                }
+            if ( is_wp_error($api_results) ){
+                $result['message'] = $api_results->get_error_message();
             }else{
-                $result['message'] = $request->get_error_message();
+                $result['data'] = $api_results;
+                $result['success'] = true;
             }
 
         }
@@ -1175,15 +1150,12 @@ class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
         
         if ( $this->mbid = self::get_release_mbid($url) ){
             
-            $api_url = WPSSTM_API_URL . sprintf('services/musicbrainz/data/releases/%s',$this->mbid);
+            $api_url = sprintf('services/musicbrainz/data/releases/%s',$this->mbid);
             
-            $request = wp_remote_get($api_url);
-            if (is_wp_error($request)) return $request;
+            $api_results = wpsstm()->api_request($api_url);
+            if (is_wp_error($api_results)) return $api_results;
 
-            $response = wp_remote_retrieve_body( $request );
-            if (is_wp_error($response)) return $response;
-
-            $this->mbdatas = json_decode($response, true);
+            $this->mbdatas = $api_results;
         }
         
         return $this->mbdatas;

@@ -681,14 +681,33 @@ class WPSSTM_Track{
         /*
         Get sources automatically - services should be hooked here to fetch results.
         */
-        $sources_auto = apply_filters('wpsstm_track_autosource_items',array(),$this);
+        
+        $sources_auto = array();
+        
+        if (wpsstm()->can_wpsstmapi() === true){
+            
+            if (!$this->spotify_id) {
+                return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
+            }
+            
+            $api_url = sprintf('track/autosource/spotify/%s',$this->spotify_id);
+            $api_results = wpsstm()->api_request($api_url);
+            if ( is_wp_error($api_results) ) return $api_results;
+            $sources_auto = $api_results;
+        }
+
+        $sources_auto = apply_filters('wpsstm_track_autosource_items',$sources_auto,$this);
         if ( is_wp_error($sources_auto) ) return $sources_auto;
 
         /*
         Handle those sources
         */
         
-        foreach((array)$sources_auto as $key=>$source){
+        foreach((array)$sources_auto as $key=>$args){
+            
+            $source = new WPSSTM_Source();
+            $source->from_array( $args );
+            
             $source->track = $this;
             $source->is_community = true;
             
