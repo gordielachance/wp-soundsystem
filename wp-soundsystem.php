@@ -112,19 +112,13 @@ class WP_SoundSystem {
             'autosource'                        => true,
             'limit_autosources'                 => 5,
             'importer_enabled'                  => true,
+            'radios_enabled'                    => true,
             'registration_notice'               => true,
         );
         
         $db_option = get_option( $this->meta_name_options);
         $this->options = wp_parse_args($db_option,$options_default);
-
-        /* TO FIX NOT WORKING HERE because of get_userdata() that should be fired after 'plugins_loaded'
-        https://wordpress.stackexchange.com/a/126206/70449
         
-        if ( $this->options['frontend_scraper_page_id'] && !is_string( get_post_status( $this->options['frontend_scraper_page_id'] ) ) ) $this->options['community_user_id'] = null;
-        if ( $this->options['community_user_id'] && !get_userdata( $this->options['community_user_id'] ) ) $this->options['community_user_id'] = null;
-        if ( $this->options['scrobble_along'] && !get_userdata( $this->options['scrobble_along'] ) ) $this->options['scrobble_along'] = false;
-        */
     }
     
     function includes(){
@@ -145,8 +139,12 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
 
         if ( wpsstm()->can_wpsstmapi() === true ){
-            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
             require $this->plugin_dir . 'wpsstm-core-importer.php';
+            //MUSICBRAINZ?
+            //SPOTIFY?
+        }
+        if ( ( wpsstm()->can_radios() === true ) && $this->get_options('radios_enabled') ){
+            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
             //MUSICBRAINZ?
             //SPOTIFY?
         }
@@ -185,6 +183,7 @@ class WP_SoundSystem {
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
         register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
         add_action( 'plugins_loaded', array($this, 'upgrade'));
+        add_action( 'plugins_loaded', array($this, 'startup_check_options'));
         
         //init
         add_action( 'init', array($this,'init_post_types'), 5);
@@ -318,6 +317,15 @@ class WP_SoundSystem {
         
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
+    }
+    
+    function startup_check_options(){
+        
+        //community user
+        if ( !$user_id = $this->get_options('community_user_id') ) return;
+        if ( !$userdatas = get_userdata($user_id) ) {
+            $this->options['community_user_id'] = null;
+        }
     }
     
     function setup_subtracks_table(){
@@ -489,7 +497,7 @@ class WP_SoundSystem {
     
     function register_community_view($views){
         
-        if ( !$user_id = wpsstm()->get_options('community_user_id') ) return $views;
+        if ( !$user_id = $this->get_options('community_user_id') ) return $views;
         
         $screen = get_current_screen();
         $post_type = $screen->post_type;
@@ -664,7 +672,17 @@ class WP_SoundSystem {
         $can_wpsstm_api = $this->can_wpsstmapi();
         if ( is_wp_error($can_wpsstm_api) ) return $can_wpsstm_api;
         
-        return $this->is_community_user_ready();
+        //community user
+        if ( !$user_id = wpsstm()->get_options('community_user_id') ){
+            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
+        }
+        
+        return true;
+        
+    }
+    
+    public function can_radios(){
+        return $this->can_importer();
     }
 
     public function can_frontend_importer(){
@@ -677,17 +695,16 @@ class WP_SoundSystem {
         return $this->can_importer();
 
     }
-    
+
     public function is_community_user_ready(){
-        
-        $community_user_id = $this->get_options('community_user_id');
-
-        if (!$community_user_id){
-            return new WP_Error( 'wpsstm_missing_community_user', __("A community user is required.",'wpsstm'));
+        //community user
+        $user_id = $this->get_options('community_user_id');
+        if (!$user_id){
+            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
         }
-
+        
         $tracklist_obj = get_post_type_object( wpsstm()->post_type_playlist );
-        $can = user_can($community_user_id,$tracklist_obj->cap->edit_posts);
+        $can = user_can($user_id,$tracklist_obj->cap->edit_posts);
         
         if (!$can){
             return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));

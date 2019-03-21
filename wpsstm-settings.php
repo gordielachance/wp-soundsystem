@@ -87,6 +87,7 @@ class WPSSTM_Settings {
         */
         
         $new_input['importer_enabled'] = isset($input['importer_enabled']);
+        $new_input['radios_enabled'] = isset($input['radios_enabled']);
 
 
         /*
@@ -181,6 +182,14 @@ class WPSSTM_Settings {
             'importer_enabled', 
             __('Enabled','wpsstm'), 
             array( $this, 'importer_enabled_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_importer'
+        );
+        
+        add_settings_field(
+            'radios_enabled', 
+            __('Radios Post Type','wpsstm'), 
+            array( $this, 'radios_enabled_callback' ), 
             'wpsstm-settings-page', 
             'tracklist_importer'
         );
@@ -370,6 +379,37 @@ class WPSSTM_Settings {
         
         //display errors
         settings_errors('importer');
+        
+    }
+    
+    function radios_enabled_callback(){
+        $enabled = wpsstm()->get_options('radios_enabled');
+        $desc = '';
+        
+        printf(
+            '<input type="checkbox" name="%s[radios_enabled]" value="on" %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $enabled,true, false ),
+            $desc
+        );
+        
+        /*
+        errors
+        */
+        
+        //register errors
+        if ( $enabled ){
+        
+            //autosource
+            $can = wpsstm()->can_radios();
+            if ( is_wp_error($can) ){
+                add_settings_error('radios',$can->get_error_code(),$can->get_error_message(),'inline');
+            }
+            
+        }
+        
+        //display errors
+        settings_errors('radios');
         
     }
     
