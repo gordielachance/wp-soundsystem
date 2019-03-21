@@ -169,12 +169,12 @@ class WPSSTM_Core_Live_Playlists{
         if ($tracklist->tracklist_type !== 'live' ) return $actions;
         if (!$tracklist->feed_url) return $actions;
         
-        $actions['refresh'] = array(
+        $new_actions['refresh'] = array(
             'text' =>      __('Refresh', 'wpsstm'),
             'href' =>      $tracklist->get_tracklist_action_url('render'),
         );
         
-        return $actions;
+        return $new_actions + $actions;
     }
 
 }
