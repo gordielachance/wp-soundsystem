@@ -821,6 +821,11 @@ class WPSSTM_MusicBrainz {
         $track = wpsstm_get_post_track($post_id);
         $album = wpsstm_get_post_album($post_id);
         
+        //url encode
+        $artist = urlencode($artist);
+        $track = urlencode($track);
+        $album = urlencode($album);
+        
         switch($post_type){
             case wpsstm()->post_type_artist:
                 
@@ -920,7 +925,10 @@ class WPSSTM_MusicBrainz {
         );
         
         $artist = $result['search'] = wpsstm_get_array_value('search',$ajax_data);
-
+        
+        //urlencode
+        $artist = urlencode($artist);
+        
         if ($artist){
             
             $api_url = sprintf('services/musicbrainz/search/%s',$artist);

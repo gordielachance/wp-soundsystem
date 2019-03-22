@@ -515,6 +515,11 @@ class WPSSTM_Spotify{
         $album = wpsstm_get_post_album($post_id);
         if (!$album) $album = '_';
         
+        //url encode
+        $artist = urlencode($artist);
+        $track = urlencode($track);
+        $album = urlencode($album);
+        
         switch( $post_type ){
             case wpsstm()->post_type_artist:
                 $api_url = sprintf('services/spotify/search/%s',$artist);
