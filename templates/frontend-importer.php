@@ -59,5 +59,3 @@ global $wpsstm_tracklist;
     ?>
 
 </div>
-
-<?php
