@@ -157,10 +157,10 @@ class WPSSTM_Core_Tracks{
                     'post_author'   => wpsstm()->get_options('community_user_id'),	
                 );
 
-                $success = $wpsstm_track->save_track_post($tracks_args);	
+                $post_id = $wpsstm_track->save_track_post($tracks_args);	
                 
-                if (!is_wp_error($success)){
-                    $redirect_url = get_edit_post_link($success);
+                if ( !is_wp_error($post_id) ){
+                    $redirect_url = get_edit_post_link($post_id);
                 }
 
             break;
