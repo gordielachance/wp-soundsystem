@@ -31,7 +31,7 @@ class WPSSTM_Core_Tracks{
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
-        add_action( 'save_post', array($this,'metabox_save_track_settings'), 5);
+        add_action( 'save_post', array($this,'metabox_save_music_details'), 5); //TOUFIX should NOT be within the track class ?
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
@@ -730,9 +730,9 @@ class WPSSTM_Core_Tracks{
     function metabox_track_register(){
 
         add_meta_box( 
-            'wpsstm-track-settings', 
-            __('Track Settings','wpsstm'),
-            array($this,'metabox_track_settings_content'),
+            'wpsstm-music-details', 
+            __('Music Details','wpsstm'),
+            array(__class__,'metabox_music_details_content'),
             wpsstm()->post_type_track, 
             'after_title', 
             'high' 
@@ -749,14 +749,46 @@ class WPSSTM_Core_Tracks{
 
     }
     
-    function metabox_track_settings_content( $post ){
+    static function metabox_music_details_content( $post ){
+        
+        $post_type = get_post_type($post);
+        
+        switch($post_type){
+                
+            case wpsstm()->post_type_artist:
+                
+                //artist
+                echo self::get_edit_artist_input($post->ID);
+                
+            break;
+                
+                
+            case wpsstm()->post_type_album:
+                
+                //artist
+                echo self::get_edit_artist_input($post->ID);
+                //album
+                echo self::get_edit_album_input($post->ID);
+                
+            break;
+                
+                
+            case wpsstm()->post_type_track:
+                
+                //artist
+                echo self::get_edit_artist_input($post->ID);
+                //album
+                echo self::get_edit_album_input($post->ID);
+                //title
+                echo self::get_edit_track_title_input($post->ID);
+                //length
+                echo self::get_edit_track_length_input($post->ID);
+                
+            break;
+                
+        }
 
-        echo self::get_edit_track_title_input($post->ID);
-        echo self::get_edit_artist_input($post->ID);
-        echo self::get_edit_album_input($post->ID);
-        echo self::get_edit_track_length_input($post->ID);
-
-        wp_nonce_field( 'wpsstm_track_settings_meta_box', 'wpsstm_track_settings_meta_box_nonce' );
+        wp_nonce_field( 'wpsstm_music_details_meta_box', 'wpsstm_music_details_meta_box_nonce' );
 
     }
     
@@ -860,43 +892,65 @@ class WPSSTM_Core_Tracks{
     Save track field for this post
     **/
     
-    function metabox_save_track_settings( $post_id ) {
+    function metabox_save_music_details( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_track_settings_meta_box_nonce']);
+        $is_metabox = isset($_POST['wpsstm_music_details_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_track);
-        if ( !in_array($post_type,$allowed_post_types) ) return;
 
         //nonce
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_settings_meta_box_nonce'], 'wpsstm_track_settings_meta_box' ) );
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_music_details_meta_box_nonce'], 'wpsstm_music_details_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_track_settings_meta_box_nonce']);
-
-        /*title*/
-        $title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
-        self::save_meta_track_title($post_id, $title);
+        unset($_POST['wpsstm_music_details_meta_box_nonce']);
         
-        /*artist*/
+        //check post type
+        $post_type = get_post_type($post_id);
+        
+        //sanitize datas
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
-        self::save_meta_artist($post_id, $artist);
-        
-        /*album*/
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
-        self::save_meta_album($post_id, $album);
-
-        /*length*/
+        $title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
         $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
-        self::save_meta_track_length($post_id, $length);
+        
+        switch($post_type){
+                
+            case wpsstm()->post_type_artist:
+                
+                //artist
+                self::save_meta_artist($post_id, $artist);
+                
+            break;
+                
+                
+            case wpsstm()->post_type_album:
+                
+                //artist
+                self::save_meta_artist($post_id, $artist);
+                //album
+                self::save_meta_album($post_id, $album);
+                
+            break;
+                
+                
+            case wpsstm()->post_type_track:
+                
+                //artist
+                self::save_meta_artist($post_id, $artist);
+                //album
+                self::save_meta_album($post_id, $album);
+                //title
+                self::save_meta_track_title($post_id, $title);
+                //length
+                self::save_meta_track_length($post_id, $length);
+
+            break;
+        }
 
     }
     

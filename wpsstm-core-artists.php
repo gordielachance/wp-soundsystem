@@ -4,6 +4,9 @@ class WPSSTM_Core_Artists{
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_artist' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
+        
+        add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
+        
         add_filter( 'the_title', array($this, 'the_artist_post_title'), 9, 2 );
     }
     
@@ -115,6 +118,18 @@ class WPSSTM_Core_Artists{
             )
         );
         register_post_type( wpsstm()->post_type_artist, $args );
+    }
+    
+    function metabox_artist_register(){
+
+        add_meta_box( 
+            'wpsstm-music-details', 
+            __('Music Details','wpsstm'),
+            array('WPSSTM_Core_Tracks','metabox_music_details_content'),
+            wpsstm()->post_type_artist, 
+            'after_title', 
+            'high' 
+        );
     }
 
     function the_artist_post_title($title,$post_id){

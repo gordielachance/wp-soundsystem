@@ -9,8 +9,9 @@ class WPSSTM_Core_Albums{
         
         
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
-        
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
+        
+        add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
         
         //TO FIX TO CHECK used ? same as in tracklist ?
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
@@ -18,10 +19,22 @@ class WPSSTM_Core_Albums{
         
         add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
         
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','tracks_count_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','favorited_tracklist_column_register') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','tracklists_columns_content') );
         
+    }
+
+    function metabox_album_register(){
+
+        add_meta_box( 
+            'wpsstm-music-details', 
+            __('Music Details','wpsstm'),
+            array('WPSSTM_Core_Tracks','metabox_music_details_content'),
+            wpsstm()->post_type_album, 
+            'after_title', 
+            'high' 
+        );
     }
     
     //add custom admin submenu under WPSSTM

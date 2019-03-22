@@ -7,15 +7,15 @@ Tested up to: 5.1.1
 Stable tag: trunk
 License: GPLv2 or later
 
-WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks, audio sources, and play them with our audio player.
+WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
 
 == Description ==
 
-WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks, audio sources, and play them with our audio player.  The perfect fit for a music blog !
+WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.  The perfect fit for a music blog !
 
 = Custom Post Types =
 
-Several new post types will be available : Playlists, Radios, Tracks, and Sources.
+Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Sources.
 
 = Playlists =
 
@@ -38,12 +38,12 @@ You can attach several audio sources to any track.  It can be a link to an audio
 
 Radios are how we call live playlists.  Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.  Popular services are supported out-of-the-box (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,...), and you can use the **Tracklist Importer** metabox to try your own setup.
 
-= Tracklist Importer =
+= Tracklist Importer (requires an API key) =
 
 Backup your playlists using the Tracklist Importer Metabox.  Popular services only need the playlist URL !
 You can also setup your own configuration, if you are somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
 
-= Autosource =
+= Autosource (requires an API key) =
 
 If you don't attach sources to your track manually, you can enable the autosource in the plugin settings.  
 It will search remote sources (Youtube, Soundcloud...) and try to play them.
@@ -60,16 +60,13 @@ It will also enable new BuddyPress activity items.
 
 = WP SoundSystem API =
 
-Get more out of this plugin by registering an API key!
+Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable the Tracklist Importer, the Autosource module, and the Radios post type.
 
-Automatically search and save track sources online with the autosource module.
-Import tracklists from popular music services like Spotify (and almost any website where a tracklist is visible) with the Tracklist Importer metabox.
-Enable the Radios post type - remote tracklists that are automatically refreshing every X minutes.
-That's also a nice way to support the work done - hundred of hours - for this free plugin, and to ensure its durability. Thanks for your help !
+Without an API key, the plugin still is very complete; but consider it as a nice way to support the work done - hundred of hours - for this plugin, and to ensure its durability.
 
 = Donate =
-It truly took me a LOT of time to code this plugin.
-If you like this plugin, please consider [making a donation](http://bit.ly/gbreant).
+It truly took me a of time to code this plugin.
+If you like it, please consider [making a donation](http://bit.ly/gbreant).
 
 This would be very appreciated — Thanks !
 
@@ -100,31 +97,22 @@ This plugin requires PHP Version 5.4 or later.
 
 == How can I embed a track or a playlist in a post ? =
 
-`[wpsstm-track post_id="150"]`
+Using shortcodes:
 
-To embed the single track #150.
-Optional arguments: *post_id*.
+`[wpsstm-track post_id="150"]`
 
 `[wpsstm-tracklist post_id="160"]`
 
-To embed the tracklist from the post #160.  
-Works for albums, playlists and radios.
-Optional arguments: *post_id*,*max_rows*.
-
-
-= How can I display the tracklist of a post in my templates ? =
-
-Use the tracklist shortcode **[wpsstm-tracklist]** in your post content (see the *shortcodes* section above), or use those functions directly in your templates:
+Or directly with PHP functions:
 
 `<?php
 $tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
 echo $tracklist->get_tracklist_html();
 ?>`
 
-= What are community tracks and when are they created ? =
+= What is the community user ? =
 
-Community tracks are tracks that are automatically created by the plugin and for which the author is the community user (see settings).
-For instance, tracks that are imported are assigned to the community user, as for the imported sources.
+The community user is a Wordpress user you need to create, and that will be assigned as author to the content created automatically by the plugin, for instance imported tracks or sources.
 
 == Screenshots ==
 
