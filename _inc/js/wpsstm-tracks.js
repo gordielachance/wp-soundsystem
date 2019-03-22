@@ -312,20 +312,25 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-
-            if ( data.success === true ){
-                track.reload_track().then(
-                    function(success_msg){
+            
+            var reloadTrack = track.reload_track();
+            
+            //a track post has been created/updated while autosourcing. Refresh it.
+            reloadTrack.then(
+                function(success_msg){
+                    
+                    if ( data.success === true ){
                         success.resolve();
-                    },
-                    function(error_msg){
-                        success.reject(error_msg);
+                    }else{
+                        track.debug("track sources request failed: " + data.message);
+                        success.reject(data.message);
                     }
-                );
-            }else{
-                track.debug("track sources request failed: " + data.message);
-                success.reject(data.message);
-            }
+                    
+                },
+                function(error_msg){
+                    success.reject(error_msg);
+                }
+            );
 
         });
 
