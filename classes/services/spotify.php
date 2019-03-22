@@ -332,7 +332,7 @@ class WPSSTM_Spotify{
                         <td>
                             <?php
                             submit_button( __('Spotify Lookup','wpsstm'), null, 'wpsstm-spotify-id-lookup');
-                            _e('Search ID from track title, artist & album.','wpsstm');
+                            _e('Search ID based on current post datas.','wpsstm');
                             ?>
 
                         </td>

@@ -1021,8 +1021,6 @@ class WPSSTM_Track{
 
         
         foreach ((array)$input_sources as $source){
-            
-            wpsstm()->debug_log($source,"***ADDING SOURCE");
 
             if ( is_a($source, 'WPSSTM_Source') ){
                 $source_obj = $source;

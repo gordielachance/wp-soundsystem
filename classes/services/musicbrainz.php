@@ -306,7 +306,7 @@ class WPSSTM_MusicBrainz {
                         <td>
                             <?php
                             submit_button( __('MusicBrainz Lookup','wpsstm'), null, 'wpsstm-mb-id-lookup');
-                            _e('Search ID from track title, artist & album.','wpsstm');
+                            _e('Search ID based on current post datas.','wpsstm');
                             ?>
 
                         </td>
@@ -407,7 +407,7 @@ class WPSSTM_MusicBrainz {
                                 
                                 //mismatch check
                                 $mismatch  = $db = $mb = null;
-                                
+
                                 $meta = get_post_meta($post->ID,$field['metaname'],true);
                                 $mb = wpsstm_get_array_value($field['mbpath'], $mbdata);
 
@@ -767,7 +767,7 @@ class WPSSTM_MusicBrainz {
             //album
             case wpsstm()->post_type_album:
                 $items['album'] = array(
-                    'name'=>__('Album','wpsstm'),
+                    'name'=>        __('Album','wpsstm'),
                     'metaname' =>   WPSSTM_Core_Tracks::$album_metakey,
                     'mbpath' =>     array('title')
                 );
@@ -776,14 +776,11 @@ class WPSSTM_MusicBrainz {
                     'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
                     'mbpath' =>     array('artist-credit',0,'name')
                 );
-                $items['album_tracklist'] = array(
-                    'name'=>__('Tracklist','wpsstm') 
-                );
             break;
             //track
             case wpsstm()->post_type_track:
                 $items['track'] = array(
-                    'name'=>__('Title','wpsstm'),
+                    'name'=>        __('Title','wpsstm'),
                     'metaname' =>   WPSSTM_Core_Tracks::$title_metakey,
                     'mbpath' =>     array('title')
                 );
