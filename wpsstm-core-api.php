@@ -64,9 +64,12 @@ class WPSSTM_Core_API {
             $url = add_query_arg(array('token'=>$token),$url);
         }
         
+        /*
+        TOUFIX at one point, all api requests will need a token (free or not).
         if (!$token){
             return new WP_Error( 'wpsstm_mising_api_token', __("Missing API Token",'wpsstm') );
         }
+        */
         
         wpsstm()->debug_log($url,'query API...');
 
