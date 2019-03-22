@@ -679,6 +679,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function populate_subtracks(){
         global $wpdb;
+        
+        //avoid populating the subtracks several times (eg. Jetpack populates the content several times)
+        if ($this->track_count !== null) return;
 
         $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
         $refresh_delay = $this->get_human_next_refresh_time();
@@ -1091,7 +1094,7 @@ class WPSSTM_Tracklist{
     
     var $track;
     var $current_track = -1;
-    var $track_count = 0;
+    var $track_count = null;
     var $in_subtracks_loop = false;
 
     /*
