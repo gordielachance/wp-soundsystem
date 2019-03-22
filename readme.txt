@@ -116,12 +116,14 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Screenshots ==
 
-1. Settings page
-2. Tracks menu
-3. Playlists menu
-4. Tracklist metabox
-5. Tracklist parser metabox
-6. Music sources metabox
+1. Tracklist playing frontend
+2. Radio (live) tracklist
+3. Plugin settings page & menu
+4. Tracklist Importer metabox
+5. Track Sources metabox
+6. Tracklists manager popup (when favoriting a track)
+7. Frontend Tracklist Importer
+8. Music menu on a BuddyPress profile
 
 == Changelog ==
 
