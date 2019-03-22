@@ -527,17 +527,13 @@ class WPSSTM_Spotify{
             break;
         }
         
-        if (!$api_url){
-            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
-        }
-        
-        $api_results = wpsstm()->api_request($api_url);
+        $api_results = WPSSTM_Core_API::api_request($api_url);
         return $api_results;
         
     }
 
     /**
-    Try to guess the MusicBrainz ID of a post, based on its artist / album / title.
+    Try to guess the Spotify ID of a post, based on its artist / album / title.
     **/
     
     public function auto_spotify_id( $post_id ){
@@ -568,7 +564,7 @@ class WPSSTM_Spotify{
         }
         
     }
-    
+
     /*
     Reload Spotify entry data for an MBID.
     */
@@ -596,12 +592,8 @@ class WPSSTM_Spotify{
                 $api_url = sprintf('services/spotify/data/tracks/%s',$spotify_id);
             break;
         }
-        
-        if (!$api_url){
-            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
-        }
-        
-        $api_results = wpsstm()->api_request($api_url);
+
+        $api_results = WPSSTM_Core_API::api_request($api_url);
         if ( is_wp_error($api_results) ) return $api_results;
 
         if ( $success = update_post_meta( $post_id, self::$spotify_data_meta_key, $api_results ) ){
@@ -816,7 +808,7 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
             
             $api_url = sprintf('services/spotify/data/playlists/%s',$this->playlist_id);
             
-            $api_results = wpsstm()->api_request($api_url);
+            $api_results = WPSSTM_Core_API::api_request($api_url);
             if (is_wp_error($api_results)) return $api_results;
             
             $this->playlist_data = $api_results;

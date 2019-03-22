@@ -651,11 +651,7 @@ class WPSSTM_MusicBrainz {
             break;
         }
 
-        if (!$api_url){
-            return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
-        }
-
-        $api_results = wpsstm()->api_request($api_url);
+        $api_results = WPSSTM_Core_API::api_request($api_url);
         if ( is_wp_error($api_results) ) return $api_results;
 
         if ( $success = update_post_meta( $post_id, self::$mbdata_metakey, $api_results ) ){
@@ -861,7 +857,7 @@ class WPSSTM_MusicBrainz {
         //TATA
         //get_musicbrainz_type_by_post_id
 
-        return wpsstm()->api_request($api_url);
+        return WPSSTM_Core_API::api_request($api_url);
         
     }
     
@@ -924,11 +920,11 @@ class WPSSTM_MusicBrainz {
         );
         
         $artist = $result['search'] = wpsstm_get_array_value('search',$ajax_data);
-        
+
         if ($artist){
             
             $api_url = sprintf('services/musicbrainz/search/%s',$artist);
-            $api_results = wpsstm()->api_request($api_url);
+            $api_results = WPSSTM_Core_API::api_request($api_url);
 
             if ( is_wp_error($api_results) ){
                 $result['message'] = $api_results->get_error_message();
@@ -1152,10 +1148,11 @@ class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
             
             $api_url = sprintf('services/musicbrainz/data/releases/%s',$this->mbid);
             
-            $api_results = wpsstm()->api_request($api_url);
-            if (is_wp_error($api_results)) return $api_results;
-
-            $this->mbdatas = $api_results;
+            $api_results = WPSSTM_Core_API::api_request($api_url);
+            
+            if ( !is_wp_error($api_results) ){
+                $this->mbdatas = $api_results;
+            }
         }
         
         return $this->mbdatas;

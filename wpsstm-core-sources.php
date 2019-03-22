@@ -27,7 +27,7 @@ class WPSSTM_Core_Sources{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        add_filter( 'wpsstm_pre_save_autosources', array( $this, 'filter_sources_to_save' ) );
+        add_filter( 'wpsstm_autosources_input', array( $this, 'autosources_cleanup' ) );
         
         /*
         QUERIES
@@ -523,7 +523,7 @@ class WPSSTM_Core_Sources{
         }
         
         //wpssstm API
-        $can_wpsstm_api = wpsstm()->can_wpsstmapi();
+        $can_wpsstm_api = WPSSTM_Core_API::can_wpsstmapi();
         if ( $can_wpsstm_api !== true ) return $can_wpsstm_api;
 
         //capability check
@@ -545,7 +545,7 @@ class WPSSTM_Core_Sources{
     /*
     Remove some of the sources before saving them as metas
     */
-    public function filter_sources_to_save($sources){
+    public function autosources_cleanup($sources){
 
         foreach((array)$sources as $key=>$source){
             $permalink = $source->permalink_url;

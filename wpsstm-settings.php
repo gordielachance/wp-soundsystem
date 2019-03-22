@@ -119,7 +119,7 @@ class WPSSTM_Settings {
 
         //delete token
         if ($old_secret != $new_secret){
-            delete_transient( wpsstm()->wpsstmapi_token_name );
+            delete_transient( WPSSTM_Core_API::$wpsstmapi_token_name );
         }
 
         $new_input['wpsstmapi_client_secret'] = $new_secret;
@@ -413,7 +413,7 @@ class WPSSTM_Settings {
         );
         
         //expiration
-        if ( $tokendata = get_transient( wpsstm()->wpsstmapi_token_name ) ){
+        if ( $tokendata = get_transient( WPSSTM_Core_API::$wpsstmapi_token_name ) ){
             $expiration = wpsstm_get_array_value('expiration',$tokendata);
             $date = date_i18n( get_option('date_format'), $expiration );
             printf('<p><em>%s</em></p>',sprintf(__('Valid until: %s','wpsstm'),$date));
