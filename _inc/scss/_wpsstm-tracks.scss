@@ -121,13 +121,7 @@ wpsstm-track{
     &.track-loading .wpsstm-track-icon{
         @extend .wpsstm-loading-icon;
     }
-    
-    &.track-reloading,
-    &.track-sources-loading{
-        @extend .wpsstm-freeze;
-        @include striped-bg();
-    }
-    
+
     &:not(.track-playing) .wpsstm-track-icon:before{
         content:"\f04b"; //.fa-play
     }
@@ -183,6 +177,12 @@ wpsstm-track{
         .wpsstm-track-action.action-unfavorite{
             display:none;
         }
+    }
+    
+    &.track-reloading,
+    &.track-sources-loading{
+        @extend .wpsstm-freeze;
+        @include striped-bg();
     }
 
 }
