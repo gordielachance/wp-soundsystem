@@ -131,5 +131,5 @@ $wpsstm_tracklist->populate_preset();
     </div>
 </div>
 <?php
-wp_nonce_field( 'wpsstm_scraper_wizard_meta_box', 'wpsstm_scraper_wizard_meta_box_nonce' );
+wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
 ?>

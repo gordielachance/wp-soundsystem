@@ -10,7 +10,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $preset_options = array(); //stored preset options
     
     var $updated_time = null;
-    private $is_expired = null;
+    public $is_expired = null;
     
     var $pagination = array(
         'total_pages'   => null,

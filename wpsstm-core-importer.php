@@ -71,15 +71,17 @@ class WPSSTM_Core_Importer{
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
         $is_revision = wp_is_post_revision( $post_id );
-        $is_metabox = isset($_POST['wpsstm_scraper_wizard_meta_box_nonce']);
+        $is_metabox = isset($_POST['wpsstm_tracklist_importer_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
         
         //check post type
         $post_type = get_post_type($post_id);
-        if ( $post_type != wpsstm()->post_type_live_playlist ) return;
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ){
+            return new WP_Error('wpsstm_invalid_tracklist',__('Invalid tracklist','wpsstm'));
+        }
 
         //nonce
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_scraper_wizard_meta_box_nonce'], 'wpsstm_scraper_wizard_meta_box' ) );
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_tracklist_importer_meta_box_nonce'], 'wpsstm_tracklist_importer_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
         if ( !$data = wpsstm_get_array_value('wpsstm_wizard',$_POST) ) return;
