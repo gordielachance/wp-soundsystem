@@ -1,52 +1,27 @@
 <?php
 
-define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/wpsstmapi/v1/');
+define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
+define('WPSSTM_API_NAMESPACE','wpsstmapi/v1/');
 
 class WPSSTM_Core_API {
-    
-    public static $wpsstmapi_token_name = 'wpsstmapi_token';
-    
+
     function __construct(){
-        
+        //add_action('wp',array($this,'test'));
+    }
+    
+    function test(){
+        $this->api_request("services/spotify/search/Radiohead");
     }
     
     public static function can_wpsstmapi(){
         
-        $token = self::get_token();
-        if ( is_wp_error($token) ) return $token;
-
+        $token = wpsstm()->get_options('wpsstmapi_token');
         if (!$token){
             return new WP_Error( 'wpsstmapi_missing_token', __('Missing WPSSTM API token','wpsstm') );
         }
         
         return true;
 
-    }
-    
-    private static function get_token(){
-        
-        if ( $token = get_transient( self::$wpsstmapi_token_name ) ){
-            return $token;
-        }
-
-        if ( !$client_secret = wpsstm()->get_options('wpsstmapi_client_secret') ){
-            return new WP_Error( 'wpsstmapi_missing_client_secret', __('Missing WPSSTM API client secret','wpsstm') );
-        }
-        
-        $api_url = sprintf('auth/get_token/%s',$client_secret);
-        $api_results = self::api_request($api_url);
-        if ( is_wp_error($api_results) ) return $api_results;
-
-        $token = wpsstm_get_array_value('token',$api_results);
-        $expiration = wpsstm_get_array_value('expiration',$api_results);
-
-        //set local transient
-        if ($token){
-            wpsstm()->debug_log($api_results,'store WPSSTMAPI token as transient !');
-            set_transient(self::$wpsstmapi_token_name,$api_results,1 * DAY_IN_SECONDS);
-        }
-        
-        return $token;
     }
 
     static function api_request($url = null){
@@ -55,39 +30,39 @@ class WPSSTM_Core_API {
             return new WP_Error('wpsstmapi_no_api_url',__("Missing API URL",'wpsstm'));
         }
         
-        //build URL with token
-        
-        $url = WPSSTM_API_URL . $url;
-
-        if ( $tokendata = get_transient( self::$wpsstmapi_token_name ) ){
-            $token = wpsstm_get_array_value('token',$tokendata);
-            $url = add_query_arg(array('token'=>$token),$url);
-        }
-        
-        /*
-        TOUFIX at one point, all api requests will need a token (free or not).
+        $token = wpsstm()->get_options('wpsstmapi_token');
         if (!$token){
-            return new WP_Error( 'wpsstm_mising_api_token', __("Missing API Token",'wpsstm') );
+            return new WP_Error( 'wpsstmapi_missing_token', __('Missing WPSSTM API token','wpsstm') );
         }
-        */
-        
-        wpsstm()->debug_log($url,'query API...');
 
-        $request = wp_remote_get($url);
+        //build headers
+        $auth_args = array(
+            'headers'=>array(
+                'Authorization' =>  'Bearer ' . $token,
+                'Accept' =>         'application/json',
+            )
+        );
+        
+        //build URL
+        $url = WPSSTM_API_URL . WPSSTM_API_NAMESPACE . $url;
+
+        wpsstm()->debug_log(array('url'=>$url,'token'=>$token),'query API...');
+
+        $request = wp_remote_get($url,$auth_args);
         if (is_wp_error($request)) return $request;
 
         $response = wp_remote_retrieve_body( $request );
         if (is_wp_error($response)) return $response;
         
         $response = json_decode($response, true);
-        
+
         //check for errors
         $code = wpsstm_get_array_value('code',$response);
         $message = wpsstm_get_array_value('message',$response);
         $data = wpsstm_get_array_value('data',$response);
         $status = wpsstm_get_array_value(array('data','status'),$response);
 
-        if ( $code && $message && $status ){
+        if ( $code && $message && ($status >= 400) ){
             $error = new WP_Error($code,$message,$data );
             wpsstm()->debug_log($error,'query API error');
             return $error;

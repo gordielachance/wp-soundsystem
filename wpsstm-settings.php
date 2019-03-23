@@ -114,15 +114,10 @@ class WPSSTM_Settings {
         WPSSTM API
         */
 
-        $old_secret = wpsstm()->get_options('wpsstmapi_client_secret');
-        $new_secret = trim($input['wpsstmapi_client_secret']);
+        $old_secret = wpsstm()->get_options('wpsstmapi_token');
+        $new_secret = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
 
-        //delete token
-        if ($old_secret != $new_secret){
-            delete_transient( WPSSTM_Core_API::$wpsstmapi_token_name );
-        }
-
-        $new_input['wpsstmapi_client_secret'] = $new_secret;
+        $new_input['wpsstmapi_token'] = $new_secret;
 
 
         return $new_input;
@@ -246,7 +241,7 @@ class WPSSTM_Settings {
         );
         
         add_settings_field(
-            'wpsstmapi_client_secret', 
+            'wpsstmapi_token', 
             __('API','wpsstm'), 
             array( $this, 'wpsstmapi_apisecret_callback' ), 
             'wpsstm-settings-page', 
@@ -404,22 +399,14 @@ class WPSSTM_Settings {
     
     function wpsstmapi_apisecret_callback(){
         //client secret
-        $client_secret = wpsstm()->get_options('wpsstmapi_client_secret');
+        $client_secret = wpsstm()->get_options('wpsstmapi_token');
         printf(
-            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
+            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_token]" value="%s" /></p>',
+            __('API Token:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );
-        
-        //expiration
-        if ( $tokendata = get_transient( WPSSTM_Core_API::$wpsstmapi_token_name ) ){
-            $expiration = wpsstm_get_array_value('expiration',$tokendata);
-            $date = date_i18n( get_option('date_format'), $expiration );
-            printf('<p><em>%s</em></p>',sprintf(__('Valid until: %s','wpsstm'),$date));
-        }
 
-        
         $url = 'https://api.spiff-radio.org/?p=10';
         printf('<p><a href="%s" target="_blank">%s</a> !</p>',$url,__('Get an API key now','wpsstm'));
     }
