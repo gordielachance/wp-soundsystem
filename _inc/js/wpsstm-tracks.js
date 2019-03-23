@@ -645,34 +645,7 @@ class WpsstmTrack extends HTMLElement{
         })
 
         success.done(function(v) {
-            
-            /*
-            preload sources for the X next tracks
-            */
-            
-            var tracks = $(player).find('wpsstm-track');
-            
-            
-            var max_items = 4; //number of following tracks to preload
-            var track_index = tracks.index( track );
-            if (track_index < 0) return; //index not found
-
-            //keep only tracks after this one
-            var rtrack_in = track_index + 1;
-            var next_tracks = tracks.slice( rtrack_in );
-            
-            //remove tracks that have already been autosourced
-            var next_tracks = next_tracks.filter(function (track) {
-                return (track.did_sources_request !== false);
-            });
-            
-            //reduce to X tracks
-            var tracks_slice = next_tracks.slice( 0, max_items );
-
-            $(tracks_slice).each(function(index, track_to_preload) {
-                track_to_preload.maybe_load_sources();
-            });
-            
+            track.preload_next_tracks();
         })
 
         success.fail(function() {
@@ -683,6 +656,36 @@ class WpsstmTrack extends HTMLElement{
 
         return success.promise();
 
+    }
+    
+    /*
+    preload sources for the X next tracks
+    */
+    preload_next_tracks(){
+        var track = this;
+        var player = track.closest('wpsstm-player');
+        var tracks = $(player).find('wpsstm-track');
+
+
+        var max_items = 4; //number of following tracks to preload
+        var track_index = tracks.index( track );
+        if (track_index < 0) return; //index not found
+
+        //keep only tracks after this one
+        var rtrack_in = track_index + 1;
+        var next_tracks = tracks.slice( rtrack_in );
+
+        //remove tracks that have already been autosourced
+        var next_tracks = next_tracks.filter(function (track) {
+            return (track.did_sources_request !== false);
+        });
+
+        //reduce to X tracks
+        var tracks_slice = next_tracks.slice( 0, max_items );
+
+        $(tracks_slice).each(function(index, track_to_preload) {
+            track_to_preload.maybe_load_sources();
+        });
     }
     
     play_first_available_source(source_idx){

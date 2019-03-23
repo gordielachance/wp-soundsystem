@@ -170,8 +170,9 @@ class WPSSTM_Core_Live_Playlists{
         if (!$tracklist->feed_url) return $actions;
         
         $new_actions['refresh'] = array(
-            'text' =>      __('Refresh', 'wpsstm'),
-            'href' =>      $tracklist->get_tracklist_action_url('render'),
+            'text' =>       __('Refresh', 'wpsstm'),
+            'href' =>       $tracklist->get_tracklist_action_url('render'),
+            'classes' =>    array('wpsstm-reload-bt'),
         );
         
         return $new_actions + $actions;

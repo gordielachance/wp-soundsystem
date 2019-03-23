@@ -131,7 +131,7 @@ class WpsstmTracklist extends HTMLElement{
         /*
         Refresh
         */
-        var refresh_bt = $(tracklist).find(".wpsstm-tracklist-action-refresh a,.wpsstm-tracklist-action-import a");
+        var refresh_bt = $(tracklist).find(".wpsstm-reload-bt");
         refresh_bt.click(function(e) {
             e.preventDefault();
             tracklist.debug("clicked 'refresh' bt");
@@ -143,10 +143,6 @@ class WpsstmTracklist extends HTMLElement{
             if (tracklist.isExpired){
                 tracklist.reload_tracklist(true);
             }
-        });
-        
-        $(document).on('click', '.tracklist-expired .wpsstm-live-tracklist-icon', function(e) {
-            refresh_bt.trigger('click');
         });
 
         /*

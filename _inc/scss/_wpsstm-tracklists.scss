@@ -21,7 +21,6 @@ wpsstm-tracklist{
             margin-top:1em;
 
             .wpsstm-tracklist-action{
-
                 padding: .25em .5em;
                 font-size:.8em;
                 border: 1px solid #F7F7F7;
@@ -37,14 +36,14 @@ wpsstm-tracklist{
     }
     
     &.tracklist-expired{
-        .wpsstm-live-tracklist-icon{
+        .wpsstm-reload-bt{
             animation: opacityPulse 1s linear infinite;
             @extend .wpsstm-can-click;
         }
     }
 
     &:not(.tracklist-expired){
-        .wpsstm-tracklist-action-refresh{
+        .wpsstm-reload-bt{
             pointer-events:none;
         }
     }

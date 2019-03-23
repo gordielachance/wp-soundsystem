@@ -15,7 +15,7 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
                 //radio icon
                 if ($wpsstm_tracklist->tracklist_type == 'live'){
                     ?>
-                    <span class="wpsstm-live-tracklist-icon" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">
+                    <span class="wpsstm-live-tracklist-icon wpsstm-reload-bt" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">
                         <i class="fa fa-rss" aria-hidden="true"></i>
                     </span>
                     <?php

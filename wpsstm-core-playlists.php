@@ -144,8 +144,9 @@ class WPSSTM_Core_Playlists{
         if (!$tracklist->feed_url) return $actions;
         
         $new_actions['import'] = array(
-            'text' =>      __('Import again', 'wpsstm'),
-            'href' =>      $tracklist->get_tracklist_action_url('import'),
+            'text' =>       __('Import again', 'wpsstm'),
+            'href' =>       $tracklist->get_tracklist_action_url('import'),
+            'classes' =>    array('wpsstm-reload-bt'),
         );
         
         return $new_actions + $actions;
