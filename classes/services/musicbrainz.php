@@ -31,7 +31,7 @@ class WPSSTM_MusicBrainz {
         
         add_action( 'add_meta_boxes', array($this, 'metaboxes_mb_register'),50);
         add_action( 'save_post', array($this,'metabox_mbid_save'), 7);
-        add_action( 'save_post', array($this,'auto_mbid_on_post_save'), 8);
+        //TOUFIX URGENT add_action( 'save_post', array($this,'auto_mbid_on_post_save'), 8);
         add_action( 'save_post', array($this,'metabox_mbdata_save'), 9);
 
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_mbid') );

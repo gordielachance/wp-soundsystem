@@ -269,15 +269,8 @@ class WpsstmTrack extends HTMLElement{
         var can_autosource = true; //TOUFIX should be from localized var
         var sources = $(track).find('wpsstm-source');
 
-        if (sources.length > 0){
-            success.resolve();
-            
-        }else if ( !can_autosource ){
-            success.resolve("Autosource is disabled");
-            
-        } else if ( track.did_sources_request ) {
-            track.debug("we already did sources requests");
-            success.resolve("already did sources auto request for track #" + track.position);
+        if ( (sources.length > 0) || ( !can_autosource ) || ( track.did_sources_request ) ){
+            success.resolve(track);
             
         } else{
             success = track.get_track_sources_request();
@@ -312,25 +305,43 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-            
-            var reloadTrack = track.reload_track();
-            
-            //a track post has been created/updated while autosourcing. Refresh it.
-            reloadTrack.then(
-                function(success_msg){
-                    
-                    if ( data.success === true ){
-                        success.resolve();
-                    }else{
-                        track.debug("track sources request failed: " + data.message);
-                        success.reject(data.message);
+
+            var trackUpdated = $.Deferred();
+            var trackCreated = (track.post_id != data.track.post_id);
+            var hasNewSources = ( data.source_ids );
+
+            //a track post has been created/updated while autosourcing, refresh it.
+            if (trackCreated || hasNewSources){
+                var reloadTrack = track.reload_track();
+
+                reloadTrack.then(
+                    function(newTrack){
+
+                        if ( data.success === true ){
+                            trackUpdated.resolve(newTrack);
+                        }else{
+                            track.debug("track refresh request failed: " + data.message);
+                            trackUpdated.reject(data.message);
+                        }
+
+                    },
+                    function(error_msg){
+                        trackUpdated.reject(error_msg);
                     }
-                    
-                },
-                function(error_msg){
-                    success.reject(error_msg);
-                }
-            );
+                );
+                
+            }else{
+                //no need to reload track
+                trackUpdated.resolve(track);
+            }
+            
+            trackUpdated.done(function(track) {
+                success.resolve(track);
+            });
+            
+            trackUpdated.fail(function(reason) {
+                success.reject(reason);
+            });
 
         });
 
@@ -367,12 +378,16 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-            if ( data.html ){
 
-                /*delete old nodes, and and new ones with pageNode/queueNode properties*/
+            if ( data.html ){
                 
+                /*
+                delete old nodes, and add new ones instead
+                */
+
                 var newContent = $(data.html);
-                
+                var oldStatus = track.getAttribute('trackstatus');
+
                 //important ! Settings this class assure us that the node will have did_sources_request = true when it will be inserted in DOM
                 $(newContent).addClass('track-autosourced');
 
@@ -387,9 +402,11 @@ class WpsstmTrack extends HTMLElement{
 
                 oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
                 oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
-
-
-                success.resolve();
+                
+                /* pass the status to the new node*/
+                newQueueTrack.setAttribute('trackstatus',oldStatus);
+                
+                success.resolve(newQueueTrack);
                 
             }else{
                 track.debug("track refresh failed: " + data.message);

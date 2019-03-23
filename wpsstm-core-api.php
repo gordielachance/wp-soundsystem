@@ -6,13 +6,8 @@ define('WPSSTM_API_NAMESPACE','wpsstmapi/v1/');
 class WPSSTM_Core_API {
 
     function __construct(){
-        //add_action('wp',array($this,'test'));
     }
-    
-    function test(){
-        $this->api_request("services/spotify/search/Radiohead");
-    }
-    
+
     public static function can_wpsstmapi(){
         
         $token = wpsstm()->get_options('wpsstmapi_token');

@@ -1085,7 +1085,6 @@ class WPSSTM_Core_Tracks{
             'error_code'    => null,
             'message'       => null,
             'success'       => false,
-            'track'         => $track->to_array(),
         );
    
         //autosource
@@ -1097,8 +1096,11 @@ class WPSSTM_Core_Tracks{
             $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
         }else{
+            $result['source_ids'] = $new_ids;
             $result['success'] = true;
         }
+        
+        $result['track'] = $track->to_array(); //maybe we have a new post ID here, if the track has been created
 
         header('Content-type: application/json');
         wp_send_json( $result );

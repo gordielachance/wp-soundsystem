@@ -45,7 +45,7 @@ class WPSSTM_Spotify{
             add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
             
             add_action( 'save_post', array($this,'metabox_spotify_id_save'), 7);
-            add_action( 'save_post', array($this,'guess_spotify_id_on_post_save'), 8);
+            //TOUFIX URGENT add_action( 'save_post', array($this,'auto_spotify_id_on_post_save'), 8);
             add_action( 'save_post', array($this,'metabox_spotify_data_save'), 9);
         }
     }
@@ -486,8 +486,28 @@ class WPSSTM_Spotify{
         settings_errors('wpsstm_spotify-entries');
 
         $entries = null;
+        $post_type = get_post_type($post->ID);
+        $artist = wpsstm_get_post_artist($post->ID);
+        $album = wpsstm_get_post_album($post->ID);
+        $track = wpsstm_get_post_track($post->ID);
+        
+        switch($post_type){
+            case wpsstm()->post_type_artist:
+                
+                $entries = $this->get_spotify_entries($artist);
 
-        $entries = $this->get_spotify_entries($post->ID);
+            break;
+            case wpsstm()->post_type_album:
+                
+                $entries = $this->get_spotify_entries($artist,$album);
+
+            break;
+            case wpsstm()->post_type_track:
+                
+                $entries = $this->get_spotify_entries($artist,$album,$track);
+
+            break;
+        }
 
         if ( is_wp_error($entries) ){
             add_settings_error('wpsstm-spotify-entries', 'api_error', $entries->get_error_message(),'inline');
@@ -506,8 +526,11 @@ class WPSSTM_Spotify{
     Try to get the Spotify ID of a post, based on its artist / album / title.
     **/
 
-    function get_spotify_id( $post_id ){
-        $entries = $this->get_spotify_entries($post_id);
+    function get_spotify_id( $artist,$album = null,$track = null ){
+        
+        //TOUFIX add transient & check so we don't make too much requests ?
+        
+        $entries = $this->get_spotify_entries($artist,$album,$track);
         if ( is_wp_error($entries) ) return $entries;
         
         $sid = ( isset($entries[0]['id']) ) ? $entries[0]['id'] : null;
@@ -515,40 +538,47 @@ class WPSSTM_Spotify{
         return $sid;
     }
     
-    public function get_spotify_entries( $post_id ){
-
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return false;
+    function get_post_spotify_id($post_id){
         
+        $post_type = get_post_type($post_id);
         $artist = wpsstm_get_post_artist($post_id);
         $album = wpsstm_get_post_album($post_id);
         $track = wpsstm_get_post_track($post_id);
         
+        switch($post_type){
+            case wpsstm()->post_type_artist:
+                
+                return $this->get_spotify_id( $artist);
+
+            break;
+            case wpsstm()->post_type_album:
+                
+                return $this->get_spotify_id( $artist,$album);
+
+            break;
+            case wpsstm()->post_type_track:
+                
+                return $this->get_spotify_id( $artist,$album,$track);
+
+            break;
+        }
+    }
+    
+    private function get_spotify_entries( $artist,$album = null,$track = null ){
+
         $artist = urlencode($artist);
         $album = ($album) ? $album : '_';
         $album = urlencode($album);
         $track = urlencode($track);
         
-        switch($post_type){
-            case wpsstm()->post_type_artist:
-                
-                $api_url = sprintf('services/spotify/search/%s',$artist);
-
-            break;
-            case wpsstm()->post_type_album:
-                
-                $api_url = sprintf('services/spotify/search/%s/%s',$artist,$album);
-
-            break;
-            case wpsstm()->post_type_track:
-                
-                $api_url = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
-
-            break;
+        if($artist && $track){//track
+            $api_url = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
+        }elseif($artist && $album){//album
+            $api_url = sprintf('services/spotify/search/%s/%s',$artist,$album);
+        }elseif($artist){//artist
+            $api_url = sprintf('services/spotify/search/%s',$artist);
         }
-        
+
         $api_results = WPSSTM_Core_API::api_request($api_url);
         return $api_results;
         
@@ -643,8 +673,10 @@ class WPSSTM_Spotify{
 
         switch ($action){
             case 'autoguess-id':
-                $sid = $this->get_spotify_id( $post_id );
+
+                $sid = $this->get_post_spotify_id($post_id);
                 if ( is_wp_error($sid) ) break;
+                
                 $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
             break;
         }
@@ -697,7 +729,7 @@ class WPSSTM_Spotify{
     When saving an artist / track / album and that no Spotify ID exists, guess it - if option enabled
     */
     
-    public function guess_spotify_id_on_post_save( $post_id ){
+    public function auto_spotify_id_on_post_save( $post_id ){
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
@@ -723,7 +755,10 @@ class WPSSTM_Spotify{
         if ($track->spotify_id) return;
         
         //get auto mbid
-        $sid = $this->get_spotify_id( $post_id );
+        $artist = wpsstm_get_post_artist($post_id);
+        $album = wpsstm_get_post_album($post_id);
+        $track = wpsstm_get_post_track($post_id);
+        $sid = $this->get_spotify_id( $artist,$album,$track );
         if ( is_wp_error($sid) ) return $sid;
         $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
         

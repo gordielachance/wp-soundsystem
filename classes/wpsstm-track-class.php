@@ -391,15 +391,19 @@ class WPSSTM_Track{
         }
         
         $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey    => $this->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            WPSSTM_MusicBrainz::$mbid_metakey       => $this->mbid,
-            WPSSTM_Core_Tracks::$image_url_metakey  => $this->image_url,
+            WPSSTM_Core_Tracks::$artist_metakey         => $this->artist,
+            WPSSTM_Core_Tracks::$title_metakey          => $this->title,
+            WPSSTM_Core_Tracks::$album_metakey          => $this->album,
+            WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
         );
         
+        //swap metas
+        if ( isset($args['meta_input']) ){
+            $meta_input = wp_parse_args($args['meta_input'],$meta_input);
+        }
+
         $meta_input = array_filter($meta_input);
-        
+
         $required_args = array(
             'post_title'    => (string)$this, // = __toString()
             'post_type'     => wpsstm()->post_type_track,
@@ -666,28 +670,6 @@ class WPSSTM_Track{
 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-
-        /*
-        Create community post :
-        if track does not exists yet, create it as a community track - we need a post ID to store various metadatas.
-        It is created BEFORE the sources request so we can flag the track as having been autosourced.
-        */
-
-        if ( !$this->post_id ){
-            $this->track_log('Creating community track','autosource');
-            $tracks_args = array( //as community tracks	
-                'post_author'   => wpsstm()->get_options('community_user_id'),	
-            );	
-            	
-            $success = $this->save_track_post($tracks_args);	
-            if ( is_wp_error($success) ){
-                $error_msg = $success->get_error_message();
-                $this->track_log($error_msg,'Error while creating community track');
-                return $success;
-            }else{
-                $this->track_log($success,'Community track created');
-            }
-        }
         
         /*
         Get sources automatically - services should be hooked here to fetch results.
@@ -695,22 +677,52 @@ class WPSSTM_Track{
         
         $sources_auto = array();
         
+        /*
+        Create community post if track does not exists yet, since we need to store some datas, including the autosource time.
+        */
+        if(!$this->post_id){
+
+            $tracks_args = array( //as community tracks	
+                'post_author'   => wpsstm()->get_options('community_user_id')
+            );	
+
+            $success = $this->save_track_post($tracks_args);
+
+            if ( is_wp_error($success) ){
+                $error_msg = $success->get_error_message();
+                $this->track_log($error_msg,'Error while creating community track');
+                return $success;
+            }
+
+        }
+        
+        //save autosourced time so we won't query autosources again too soon
+        $now = current_time('timestamp');
+        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
+        
         if (WPSSTM_Core_API::can_wpsstmapi() === true){
             
             if (!$this->spotify_id) {
                 
-                $sid = $wpsstm_spotify->get_spotify_id( $this->post_id );
+                $sid = $wpsstm_spotify->get_spotify_id( $this->artist,$this->album,$this->title ); //maybe no post ID yet
+
                 if ( is_wp_error($sid) ) return $sid;
                 
-                if ( $sid && ( $success = update_post_meta( $this->post_id, WPSSTM_Spotify::$spotify_id_meta_key, $sid ) ) ){
+                if ($sid){
+                    
                     $this->spotify_id = $sid;
+                    
+                    if ( !$success = update_post_meta( $this->post_id, WPSSTM_Spotify::$spotify_id_meta_key, $this->spotify_id ) ){
+                        $this->track_log($success,"Error while updated the track's Spotify ID");
+                    }
                 }
+                
             }
-            
+
             if ( !$this->spotify_id ){
-                return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
+                return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
             }
-            
+
             $api_url = sprintf('track/autosource/spotify/%s',$this->spotify_id);
             $sources_auto = WPSSTM_Core_API::api_request($api_url);
             if ( is_wp_error($sources_auto) ) return $sources_auto;
@@ -753,12 +765,7 @@ class WPSSTM_Track{
         $new_sources = array_slice($new_sources, 0, $limit_autosources);
         $new_sources = apply_filters('wpsstm_track_autosources',$new_sources);
 
-        //save autosourced time so we won't query autosources again too soon
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
-
         $this->add_sources($new_sources);
-
         $new_ids = $this->save_new_sources();
         
         $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>count($this->source_count),'sources_saved'=>count($new_ids)),'autosource results');
