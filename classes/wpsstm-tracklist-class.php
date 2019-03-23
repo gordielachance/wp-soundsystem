@@ -818,7 +818,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks'); 
         
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
         
