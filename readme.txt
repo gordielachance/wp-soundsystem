@@ -7,66 +7,76 @@ Tested up to: 5.1.1
 Stable tag: trunk
 License: GPLv2 or later
 
-WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
+WP Soundsystem is a complete solution to manage a music library within WordPress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
 
 == Description ==
 
-WP Soundsystem is a complete solution to manage a music library within Wordpress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.  The perfect fit for a music blog !
+*WP Soundsystem* is a complete solution to manage a music library within WordPress.
 
-= Custom Post Types =
+Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
 
 Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Sources.
 
-= Playlists =
+= Tracklists =
 
-Creating and editing playlists is a piece of cake using the *Tracklist Importer*:
-Add or remove tracks on the fly, reorder them, and link one or several music sources to each track.
-
-Frontend, playlists can be favorited and exported by your users.
+Creating and editing playlists is a piece of cake (not to mention the *Tracklist Importer*): 
+Add or remove tracks on the fly, reorder them, favorite a track or a tracklist, export…
 
 = Tracks =
 
-When editing a track, you can retrieve details from other music services like [MusicBrainz](https://musicbrainz.org/) or [Spotify](https://musicbrainz.org/).
-You can attach audio sources to your tracks with the **Track sources** metabox.
-Track can be favorited by your users frontend, or added to any new playlist on-the-fly.
+When editing a track, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
+Audio sources can be linked to your tracks with the *Track Sources* metabox.
 
 = Sources =
 
-You can attach several audio sources to any track.  It can be a link to an audio file, a Soundcloud or Youtube URL, etc.  The player will then try to play them.
+You can link several audio sources to any track. 
+It can be a the path of an audio file, a Soundcloud or Youtube link, etc. 
+The player will then try to play them.
 
 = Radios =
 
-Radios are how we call live playlists.  Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.  Popular services are supported out-of-the-box (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,...), and you can use the **Tracklist Importer** metabox to try your own setup.
+Radios are how we call *live playlists*. 
+Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.
 
 = Tracklist Importer (requires an API key) =
 
-Backup your playlists using the Tracklist Importer Metabox.  Popular services only need the playlist URL !
-You can also setup your own configuration, if you are somewhat familiar with [jQuery selectors](http://www.w3schools.com/jquery/jquery_ref_selectors.asp).
+Backup your playlists using the Tracklist Importer. 
+Popular services (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,…) are available out-of-the-box, just by pasting a playlist link.
+More advanced setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 = Autosource (requires an API key) =
 
-If you don't attach sources to your track manually, you can enable the autosource in the plugin settings.  
-It will search remote sources (Youtube, Soundcloud...) and try to play them.
+If you don’t link audio sources to your track manually, you can enable our *autosource* module. It will search for remote sources (Youtube, Soundcloud…) and attach them to your tracks.
 
 = Last.fm =
 
 The audio player can **scrobble** tracks to your Last.fm account.
-When the scrobbler is enabled, every track favorited by a user connected on Last.fm will also be loved on that service.
+When the scrobbler is enabled, every track favorited by a user connected on [Last.fm](https://www.last.fm/) will also be loved on that service.
 
 = BuddyPress =
 
-This plugin is BuddyPress ready, and supports a new "music" section that lists the user favorite tracks and tracklists, and the ones he created.
-It will also enable new BuddyPress activity items.
+Users profiles will get a new music section that lists the user favorite tracks, tracklists, and the ones he created. 
+It will also fire new *BuddyPress activity* items.
+
+= Contribute =
+
+WP Soundsystem is dev friendly. 
+Wanna give a hand as developer ? Check the [Github](https://github.com/gordielachance/wp-soundsystem) repo.
 
 = WP SoundSystem API =
 
-Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable the Tracklist Importer, the Autosource module, and the Radios post type.
+Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable
 
-Without an API key, the plugin still is very complete; but consider it as a nice way to support the work done - hundred of hours - for this plugin, and to ensure its durability.
+* the Tracklist Importer
+* the Autosource module
+* the Radios post type
+
+Those are optionals, but are nice features to a solid plugin.
+Consider getting one as a nice way to support the work done – hundred of hours – , and to ensure its durability.
 
 = Donate =
-It truly took me a of time to code this plugin.
-If you like it, please consider [making a donation](https://api.spiff-radio.org/?p=31).
+Whatever, if you like this plugin, please also consider [making a donation](https://api.spiff-radio.org/?p=31).
+This would be very appreciated !
 
 This would be very appreciated — Thanks !
 

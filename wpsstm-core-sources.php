@@ -229,7 +229,7 @@ class WPSSTM_Core_Sources{
         
         add_meta_box( 
             'wpsstm-metabox-sources', 
-            __('Track sources','wpsstm'),
+            __('Track Sources','wpsstm'),
             array($this,'metabox_track_sources_content'),
             wpsstm()->post_type_track, 
             'normal', //context
