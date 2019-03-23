@@ -462,12 +462,7 @@ class WpsstmPlayer extends HTMLElement{
 
         success.then(
             function (newTrack) { //success
-                
-                console.log("OLD TRACK");
-                console.log(requestedTrack);
-                console.log("NEW TRACK");
-                console.log(newTrack);
-                
+
                 //check that it still the same track that is requested
                 if (player.current_track !== newTrack) return;                
                 newTrack.play_track(source_idx);
