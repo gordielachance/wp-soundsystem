@@ -20,6 +20,8 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
         add_filter( 'template_include', array($this,'tracklist_template') );
+        
+        add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
 
@@ -424,6 +426,7 @@ class WPSSTM_Core_Tracklists{
             break;
             case 'get-autorship':
                 $success = $wpsstm_tracklist->get_autorship();
+                $redirect_url = get_permalink($wpsstm_tracklist->post_id);
             break;
         }
 
@@ -650,6 +653,14 @@ class WPSSTM_Core_Tracklists{
 
         return $flushed_ids;
 
+    }
+    
+    //TOUFIX TOUIMPROVE we woudl like to have that title in the input title backend, too.
+    function filter_imported_playlist_title( $title, $post_id = null ) {
+        if ( in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){
+            $title = WPSSTM_Post_Tracklist::get_tracklist_title($post_id);
+        }
+        return $title;
     }
 
 }
