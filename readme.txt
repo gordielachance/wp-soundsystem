@@ -66,7 +66,7 @@ Without an API key, the plugin still is very complete; but consider it as a nice
 
 = Donate =
 It truly took me a of time to code this plugin.
-If you like it, please consider [making a donation](http://bit.ly/gbreant).
+If you like it, please consider [making a donation](https://api.spiff-radio.org/?p=31).
 
 This would be very appreciated — Thanks !
 

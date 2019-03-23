@@ -10,6 +10,14 @@ class WPSSTM_Core_API {
 
     function __construct(){
     }
+    
+    /*
+    YESSS,... You could...
+    But please consider the time i've spent developping this plugin.
+    You can by an API key here: https://api.spiff-radio.org/?p=10
+    Or make on donation there : https://api.spiff-radio.org/?p=31
+    Thanks !
+    */
 
     public static function can_wpsstmapi(){
         if ( !$token = wpsstm()->get_options('wpsstmapi_token') ){
