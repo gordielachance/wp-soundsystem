@@ -6,20 +6,9 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 
 //imported tracklist notice
 //TOUFIX is this the right place ?
-if ( $wpsstm_tracklist->track_count ){
-    if  ( $wpsstm_tracklist->user_can_get_tracklist_autorship() === true ){
-
-        $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
-        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
-        $message = __("This is a temporary tracklist.","wpsstm");
-        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
-        $wpsstm_tracklist->add_notice('get-autorship', $message );
-
-    }
-}else{
-    $notice = $wpsstm_tracklist->get_no_tracks_notice();
-    $wpsstm_tracklist->add_notice('empty-tracklist', $notice );
-}
+$notice = $wpsstm_tracklist->autorship_notice();
+$notice = $wpsstm_tracklist->no_tracks_notice();
+$notice = $wpsstm_tracklist->importer_notice();
 
 
 

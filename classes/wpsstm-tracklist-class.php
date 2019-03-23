@@ -704,17 +704,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             // handle remote errors
             if ( is_wp_error($success) ){
+                //TOUFIX THIS IS A WIZARD NOTICE, should be stored elsewhere so it is shown only on the backend.
                 $this->add_notice($success->get_error_code(), $success->get_error_message() );                
             }else{
                 $this->add_tracks($tracks);
                 $updated = $this->set_live_datas($this->preset);
-            }
-            
-            //link to wizard if we have a remote response (request did succeed) but no tracks
-            if ( !is_wp_error($this->preset->response_body) && !$tracks ){
-                $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
-                $wizard_link = sprintf('<a href="%s">%s</a>',$importer_url,__('here','wpsstm'));
-                $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
             }
 
         }else{
@@ -1073,7 +1067,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return implode("\n",$fields);
     }
     
-    function get_no_tracks_notice(){
+    function no_tracks_notice(){
         
         if ( $this->track_count ) return;
         
@@ -1081,31 +1075,39 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $not_found = __('No tracks found.','wpsstm');
 
-        if ($this->feed_url){
+        if (!$this->feed_url) return;
 
 
-            $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="#">%s</a>',__('Resfresh'));
-            $not_found .= sprintf("  %s ?",$refresh_el);
+        $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="#">%s</a>',__('Resfresh'));
+        $not_found .= sprintf("  %s ?",$refresh_el);
 
-        }
+        $this->add_notice('empty-tracklist', $not_found );
+    }
+    
+    function importer_notice(){
+        if ( !$this->feed_url ) return;
+        if ( $this->track_count ) return;
         
-        $desc[] = $not_found;
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ) return;
         
-        if ($this->feed_url){
-            $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
-            $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer settings','wpsstm'));
-            $desc[] = sprintf(__('You may also want to edit the %s.','wpsstm'),$importer_el);
-        }
-
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-
-        return implode("\n",$desc);
+        $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
+        $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer settings','wpsstm'));
+        $notice = sprintf(__('You may also want to edit the %s.','wpsstm'),$importer_el);
+        $this->add_notice('importer-settings', $notice );
+    }
+    
+    function autorship_notice(){
+        if ( !$this->track_count ) return;
+        if  ( !$this->user_can_get_tracklist_autorship() === true ) return;
+        if ( !wpsstm_is_community_post($this->post_id) ) return;
+        
+        $autorship_url = $this->get_tracklist_action_url('get-autorship');
+        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+        $message = __("This is a temporary tracklist.","wpsstm");
+        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+        $this->add_notice('get-autorship', $message );
     }
 
 }

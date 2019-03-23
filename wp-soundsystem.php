@@ -618,7 +618,7 @@ class WP_SoundSystem {
                 'class' => implode(' ',$notice_classes),
             );
 
-            $output[] = sprintf('<p %s><strong>%s</strong></p>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
+            $output[] = sprintf('<li %s><strong>%s</strong></li>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
         }
         
         return implode("\n",$output);
