@@ -4,6 +4,26 @@ global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 
+//imported tracklist notice
+//TOUFIX is this the right place ?
+if ( $wpsstm_tracklist->track_count ){
+    if  ( $wpsstm_tracklist->user_can_get_tracklist_autorship() === true ){
+
+        $autorship_url = $wpsstm_tracklist->get_tracklist_action_url('get-autorship');
+        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+        $message = __("This is a temporary tracklist.","wpsstm");
+        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+        $wpsstm_tracklist->add_notice('get-autorship', $message );
+
+    }
+}else{
+    $notice = $wpsstm_tracklist->get_no_tracks_notice();
+    $wpsstm_tracklist->add_notice('empty-tracklist', $notice );
+}
+
+
+
+
 ?>
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
@@ -70,7 +90,18 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
             ?>
         </div>
     </div>
-    <?php    
+    <?php
+    /*
+    Notices
+    */
+    if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
+        ?>
+        <ul class="wpsstm-tracklist-notices">
+            <?php echo $notices_el; ?>
+        </ul>
+        <?php
+    }
+    
     /*
     tracks list
     */
@@ -87,18 +118,6 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
             ?>
        </ul>
     <?php
-    }else{ //no tracks
-        ?>
-        <p id="wpsstm-no-tracks">
-            <?php _e('No tracks found.','wpsstm'); ?>
-            <?php 
-            if ($wpsstm_tracklist->feed_url){
-                $refresh_el = sprintf('<a href="#">%s</a>',__('Resfresh'));
-                printf("%s ?",$refresh_el);
-            }
-            ?>
-        </p>
-        <?php
     }
     
     /*

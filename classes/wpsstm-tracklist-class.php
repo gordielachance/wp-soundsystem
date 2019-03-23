@@ -712,8 +712,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             //link to wizard if we have a remote response (request did succeed) but no tracks
             if ( !is_wp_error($this->preset->response_body) && !$tracks ){
-                $wizard_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
-                $wizard_link = sprintf('<a href="%s">%s</a>',$wizard_url,__('here','wpsstm'));
+                $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
+                $wizard_link = sprintf('<a href="%s">%s</a>',$importer_url,__('here','wpsstm'));
                 $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
             }
 
@@ -1071,6 +1071,41 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[title]" value="%s" />',esc_attr($this->title));
         }
         return implode("\n",$fields);
+    }
+    
+    function get_no_tracks_notice(){
+        
+        if ( $this->track_count ) return;
+        
+        $desc = array();
+        
+        $not_found = __('No tracks found.','wpsstm');
+
+        if ($this->feed_url){
+
+
+            $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="#">%s</a>',__('Resfresh'));
+            $not_found .= sprintf("  %s ?",$refresh_el);
+
+        }
+        
+        $desc[] = $not_found;
+        
+        if ($this->feed_url){
+            $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
+            $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer settings','wpsstm'));
+            $desc[] = sprintf(__('You may also want to edit the %s.','wpsstm'),$importer_el);
+        }
+
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+
+        return implode("\n",$desc);
     }
 
 }
