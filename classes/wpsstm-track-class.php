@@ -624,10 +624,8 @@ class WPSSTM_Track{
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
-        
-        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
 
-        if ( !$this->sources && !$is_ajax_refresh ){
+        if ( !$this->sources ){
             $success = $this->autosource();
         }
         
