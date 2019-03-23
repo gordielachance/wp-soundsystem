@@ -649,6 +649,7 @@ class WPSSTM_Track{
     */
     
     function autosource(){
+        global $wpsstm_spotify;
         
         $new_sources = array();
 
@@ -695,19 +696,26 @@ class WPSSTM_Track{
         $sources_auto = array();
         
         if (WPSSTM_Core_API::can_wpsstmapi() === true){
-
+            
             if (!$this->spotify_id) {
+                
+                $sid = $wpsstm_spotify->get_spotify_id( $this->post_id );
+                if ( is_wp_error($sid) ) return $sid;
+                
+                if ( $sid && ( $success = update_post_meta( $this->post_id, WPSSTM_Spotify::$spotify_id_meta_key, $sid ) ) ){
+                    $this->spotify_id = $sid;
+                }
+            }
+            
+            if ( !$this->spotify_id ){
                 return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
             }
             
             $api_url = sprintf('track/autosource/spotify/%s',$this->spotify_id);
-            $api_results = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($api_results) ) return $api_results;
-            $sources_auto = $api_results;
+            $sources_auto = WPSSTM_Core_API::api_request($api_url);
+            if ( is_wp_error($sources_auto) ) return $sources_auto;
 
         }
-
-        if ( is_wp_error($sources_auto) ) return $sources_auto;
 
         /*
         Handle those sources
