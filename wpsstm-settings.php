@@ -114,10 +114,15 @@ class WPSSTM_Settings {
         WPSSTM API
         */
 
-        $old_secret = wpsstm()->get_options('wpsstmapi_token');
-        $new_secret = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
+        $old_token = wpsstm()->get_options('wpsstmapi_token');
+        $new_token = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
+        
+        if($old_token !== $new_token){
+            delete_transient( WPSSTM_Core_API::$auth_transient_name );
+            wpsstm()->debug_log('deleted wpsstmapi auth transient');
+        }
 
-        $new_input['wpsstmapi_token'] = $new_secret;
+        $new_input['wpsstmapi_token'] = $new_token;
 
 
         return $new_input;
@@ -407,8 +412,7 @@ class WPSSTM_Settings {
             $client_secret
         );
 
-        $url = 'https://api.spiff-radio.org/?p=10';
-        printf('<p><a href="%s" target="_blank">%s</a> !</p>',$url,__('Get an API key now','wpsstm'));
+        printf('<p><a href="%s" target="_blank">%s</a> !</p>',WPSSTM_API_REGISTER_URL,__('Get an API key now','wpsstm'));
     }
 
     function section_importer_desc(){

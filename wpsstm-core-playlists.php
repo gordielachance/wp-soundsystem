@@ -7,6 +7,8 @@ class WPSSTM_Core_Playlists{
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
         
+        add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_static_tracklist_actions'),10,2 );
+        
         /*
         AJAX
         */
@@ -132,6 +134,21 @@ class WPSSTM_Core_Playlists{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
+    }
+    
+    function filter_static_tracklist_actions($actions,$tracklist){
+        
+        $post_type = get_post_type($tracklist->post_id);
+        if ($tracklist->tracklist_type !== 'static' ) return $actions;
+        
+        if (!$tracklist->feed_url) return $actions;
+        
+        $new_actions['import'] = array(
+            'text' =>      __('Import again', 'wpsstm'),
+            'href' =>      $tracklist->get_tracklist_action_url('import'),
+        );
+        
+        return $new_actions + $actions;
     }
     
 }

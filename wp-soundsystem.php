@@ -58,7 +58,7 @@ class WP_SoundSystem {
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
     public $tracklist_post_types = array('wpsstm_playlist'); //radios & albums could be appened to this
-    public $static_tracklist_post_types = array('wpsstm_playlist'); //radios & albums could be appened to this
+    public $static_tracklist_post_types = array('wpsstm_playlist','wpsstm_release'); //radios & albums could be appened to this
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;

@@ -91,6 +91,12 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
         ?>
         <p id="wpsstm-no-tracks">
             <?php _e('No tracks found.','wpsstm'); ?>
+            <?php 
+            if ($wpsstm_tracklist->feed_url){
+                $refresh_el = sprintf('<a href="#">%s</a>',__('Resfresh'));
+                printf("%s ?",$refresh_el);
+            }
+            ?>
         </p>
         <?php
     }

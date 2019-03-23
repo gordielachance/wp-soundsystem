@@ -10,7 +10,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $preset_options = array(); //stored preset options
     
     var $updated_time = null;
-    public $is_expired = null;
+    public $is_expired = false;
     
     var $pagination = array(
         'total_pages'   => null,
@@ -94,12 +94,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         
         //time updated
-        $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
-        if ( $this->tracklist_type == 'live' ){//TOUFIX what if not the 'live' type ?
-            $this->updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        //TOUFIX bad logic.  We should rather update the post time when an import is done.
+        if ( $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
+            $this->updated_time = (int)$last_import_time;
+        }else{
+            $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
         }
-        $seconds = $this->seconds_before_refresh();
-        $this->is_expired = ($seconds <= 0);
+        
+        if ( $this->tracklist_type == 'live' ){
+            $seconds = $this->seconds_before_refresh();
+            $this->is_expired = ($seconds <= 0);
+        }else{
+            $this->is_expired = !$last_import_time;
+        }
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
@@ -218,24 +225,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function get_tracklist_html($force_refresh = null){
-        
-        if ($force_refresh === true){
-            
-            $this->is_expired = true;
-            
-        }else{
-            
-            $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+    function get_tracklist_html(){
 
-            if ( $is_ajax_refresh && !wp_doing_ajax() ){
-                $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
-                $this->is_expired = false;
-            }
-            
+        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+
+        if ( $is_ajax_refresh && !wp_doing_ajax() ){
+            $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
+            $this->is_expired = false;
         }
-        
-
 
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
@@ -676,18 +673,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');
     }
 
-
-    function populate_subtracks(){
+    function populate_subtracks($force_reload = false){
         global $wpdb;
         
         //avoid populating the subtracks several times (eg. Jetpack populates the content several times)
         if ($this->track_count !== null) return;
-
-        $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
+ 
         $refresh_delay = $this->get_human_next_refresh_time();
 
-        if ($live){
-            
+        if ( $this->is_expired ){
+
             $this->populate_preset();
             $success =       $this->preset->populate_remote_tracks();
             
@@ -727,7 +722,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->add_tracks($tracks);
         }
         
-        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
+        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'is_expired'=>$this->is_expired,'refresh_delay'=>$refresh_delay),'Populated subtracks');
 
         return true;
     }

@@ -165,7 +165,8 @@ wpsstm-tracklist{
 .wpsstm-tracklist-actions{
 
     .wpsstm-tracklist-action{
-        &.wpsstm-tracklist-action-refresh a:before{
+        &.wpsstm-tracklist-action-refresh a:before,
+        &.wpsstm-tracklist-action-import a:before{
             content:"\f021";//.fa-refresh;
         }
         &.wpsstm-tracklist-action-share a:before{
