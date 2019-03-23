@@ -313,7 +313,13 @@ class WPSSTM_Core_Sources{
             $now = current_time( 'timestamp' );
             $refreshed = human_time_diff( $now, $then );
             $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);
-            echo '  ' . $refreshed;
+            
+            $unset_autosource_bt = sprintf('<input id="wpsstm-unset-autosource-bt" type="submit" name="wpsstm_unset_autosource" class="button" value="%s">',__('Clear','wpsstm'));
+                ?>
+
+                <?php
+            
+            echo '  ' . $refreshed .' ' . $unset_autosource_bt;
         }
 
         //track sources
@@ -411,6 +417,11 @@ class WPSSTM_Core_Sources{
 
             $track->add_sources($new_sources);
             $track->save_new_sources();
+        }
+        
+        //unset autosource
+        if ( isset($_POST['wpsstm_unset_autosource']) ){
+            delete_post_meta( $track->post_id, WPSSTM_Core_Sources::$autosource_time_metakey );
         }
 
         //autosource & save
