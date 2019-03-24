@@ -1,6 +1,6 @@
 === WP SoundSystem ===
 Contributors: grosbouff
-Donate link: http://bit.ly/gbreant
+Donate link: https://api.spiff-radio.org?p=31
 Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
 Requires at least: 4.9
 Tested up to: 5.1.1
