@@ -994,7 +994,7 @@ class WPSSTM_Core_Tracks{
     function shortcode_track( $atts ) {
         global $post;
         global $wpsstm_tracklist;
-        
+
         $output = null;
 
         // Attributes
@@ -1003,14 +1003,16 @@ class WPSSTM_Core_Tracks{
         );
         
         $atts = shortcode_atts($default,$atts);
+        $post_id = wpsstm_get_array_value('post_id',$atts);
+        $post_type = get_post_type($post_id);
         
-        if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
-            //single track tracklist
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
-            $track = new WPSSTM_Track( $atts['post_id'] );
-            $wpsstm_tracklist->add_tracks($track);
-            $output = $wpsstm_tracklist->get_tracklist_html();
-        }
+        if ( $post_type !== wpsstm()->post_type_track ) return;
+        
+        //single track tracklist
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
+        $track = new WPSSTM_Track( $atts['post_id'] );
+        $wpsstm_tracklist->add_tracks($track);
+        $output = $wpsstm_tracklist->get_tracklist_html();
 
         return $output;
 

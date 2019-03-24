@@ -30,8 +30,6 @@ class WPSSTM_Track{
     
     public $notices = array();
     
-    public $autosourced = null;
-    
     function __construct( $post_id = null, $tracklist = null ){
         
         /*
@@ -65,7 +63,6 @@ class WPSSTM_Track{
         $this->album        = wpsstm_get_post_album($this->post_id);
         $this->image_url    = wpsstm_get_post_image_url($this->post_id);
         $this->duration     = wpsstm_get_post_length($this->post_id);
-        $this->autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
         
         //TOUFIX this should be hooked ?
         $this->mbid         = wpsstm_get_post_mbid($this->post_id);
@@ -642,8 +639,11 @@ class WPSSTM_Track{
         Check if a track has been autosourced recently
         */
 
+        $last_autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
+        if (!$last_autosourced) return false;
+        
         $now = current_time( 'timestamp' );
-        $seconds = $now - $this->autosourced;
+        $seconds = $now - $last_autosourced;
         $hours = $seconds / HOUR_IN_SECONDS;
         
         return ($hours < 48);

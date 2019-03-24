@@ -10,9 +10,6 @@ $notice = $wpsstm_tracklist->autorship_notice();
 $notice = $wpsstm_tracklist->no_tracks_notice();
 $notice = $wpsstm_tracklist->importer_notice();
 
-
-
-
 ?>
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>

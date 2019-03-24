@@ -187,9 +187,7 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
-        ///
-        
+
         do_action('wpsstm_init');
 
     }
