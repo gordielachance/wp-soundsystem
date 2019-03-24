@@ -1,7 +1,7 @@
 === WP SoundSystem ===
 Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
-Tags: music,library,playlists,collection,artists,tracks,albums,MusicBrainz,xspf
+Tags: music,player,audio,tracklist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks,sources
 Requires at least: 4.9
 Tested up to: 5.1.1
 Stable tag: trunk
@@ -148,7 +148,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 = 2.5.1 =
 * So much improvements that they cannot even be listed !  More than one year of developpement and 754 commits !
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
-* Code mostly entirely rewritten
+* Code entirely rewritten
 * HTML : uses HTML5 custom elements
 * REST API
 * ...
