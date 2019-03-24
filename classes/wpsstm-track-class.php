@@ -615,11 +615,7 @@ class WPSSTM_Track{
         return new WP_Query($args);
     }
     
-    function populate_sources($force = false){
-        
-        if(!$force){
-            if ( !wpsstm()->get_options('ajax_load_tracklists') || !wp_doing_ajax() ) return false;
-        }
+    function populate_sources(){
 
         if ($this->post_id){
             $query = $this->query_sources(array('fields'=>'ids'));
@@ -627,10 +623,6 @@ class WPSSTM_Track{
             $this->add_sources($source_ids);
         }else{
             $this->add_sources($this->sources); //so we're sure the sources count is set
-        }
-
-        if ( !$this->sources ){
-            return $this->autosource();
         }
         
         return true;
@@ -642,9 +634,7 @@ class WPSSTM_Track{
         /*
         Check if a track has been autosourced recently
         */
-        
-        if (!$this->autosourced) return false;
-        
+
         $now = current_time( 'timestamp' );
         $seconds = $now - $this->autosourced;
         $hours = $seconds / HOUR_IN_SECONDS;
