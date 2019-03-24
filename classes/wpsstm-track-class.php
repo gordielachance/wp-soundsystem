@@ -615,9 +615,11 @@ class WPSSTM_Track{
         return new WP_Query($args);
     }
     
-    function populate_sources(){
+    function populate_sources($force = false){
         
-        if ( !wpsstm()->get_options('ajax_load_tracklists') || !wp_doing_ajax() ) return false;
+        if(!$force){
+            if ( !wpsstm()->get_options('ajax_load_tracklists') || !wp_doing_ajax() ) return false;
+        }
 
         if ($this->post_id){
             $query = $this->query_sources(array('fields'=>'ids'));
@@ -635,7 +637,8 @@ class WPSSTM_Track{
         
     }
     
-    function is_autosource_lock(){
+    function did_autosource(){
+
         /*
         Check if a track has been autosourced recently
         */
@@ -663,7 +666,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
         }
         
-        if ( $this->is_autosource_lock() ) {
+        if ( $this->did_autosource() ) {
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track has already been autosourced recently.",'wpsstm') );
         }
         
@@ -799,7 +802,8 @@ class WPSSTM_Track{
             }
 
         }
-        return $inserted;
+        
+        return count($inserted);
     }
 
     function get_track_url(){
@@ -1019,7 +1023,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->is_autosource_lock() ? 'track-autosourced' : null,
+            $this->did_autosource()  ? 'did-track-autosource' : null,
 
         );
 

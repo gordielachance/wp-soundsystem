@@ -104,8 +104,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type == 'live' ){
             $seconds = $this->seconds_before_refresh();
             $this->is_expired = ($seconds <= 0);
-        }else{
-            $this->is_expired = !$last_import_time;
         }
 
         //live
@@ -1083,6 +1081,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function importer_notice(){
+        if ( is_admin() ) return;
         if ( !$this->feed_url ) return;
         if ( $this->track_count ) return;
         

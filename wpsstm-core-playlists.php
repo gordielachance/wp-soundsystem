@@ -9,6 +9,8 @@ class WPSSTM_Core_Playlists{
         
         add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_static_tracklist_actions'),10,2 );
         
+        add_action( 'current_screen', array($this,'import_at_init') );
+        
         /*
         AJAX
         */
@@ -150,6 +152,23 @@ class WPSSTM_Core_Playlists{
         );
         
         return $new_actions + $actions;
+    }
+    
+    
+    /*
+    Specifically for static post types, set the tracklist as expired until an import has been made; or the tracklist will be empty...
+    */
+    function import_at_init(){
+        global $post;
+        global $wpsstm_tracklist;
+        $screen = get_current_screen();
+        if ( ( $screen->base == 'post' ) && ( $wpsstm_tracklist->tracklist_type == 'static'  ) && $wpsstm_tracklist->feed_url ){
+            $last_import_time = get_post_meta($wpsstm_tracklist->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+            
+            if (!$last_import_time){
+               $wpsstm_tracklist->is_expired = true;
+            }
+        }
     }
     
 }

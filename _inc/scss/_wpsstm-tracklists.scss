@@ -42,12 +42,6 @@ wpsstm-tracklist{
         }
     }
 
-    &:not(.tracklist-expired){
-        .wpsstm-reload-bt{
-            pointer-events:none;
-        }
-    }
-
     .tracklist-header{
         margin-bottom:1em;
         font-size:.9em;

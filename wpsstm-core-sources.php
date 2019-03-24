@@ -296,6 +296,8 @@ class WPSSTM_Core_Sources{
     
     function metabox_track_sources_content( $post ){
         global $wpsstm_track;
+        $wpsstm_track->populate_sources(true);
+        
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
         ?>
@@ -402,7 +404,7 @@ class WPSSTM_Core_Sources{
         if ( !$is_valid_nonce ) return;
         
         $track = new WPSSTM_Track($post_id);
-        
+
         //new source URLs
         $source_urls = isset($_POST['wpsstm_new_track_sources']) ? array_filter($_POST['wpsstm_new_track_sources']) : null;
 
@@ -416,7 +418,8 @@ class WPSSTM_Core_Sources{
             }
 
             $track->add_sources($new_sources);
-            $track->save_new_sources();
+            $success = $track->save_new_sources();
+
         }
         
         //unset autosource

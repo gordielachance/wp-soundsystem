@@ -124,7 +124,7 @@ class WpsstmTrack extends HTMLElement{
         track.track_album =          $(track).find('[itemprop="inAlbum"]').text();
         track.post_id =              Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =          Number($(track).attr('data-wpsstm-subtrack-id'));
-        track.did_sources_request =  $(track).hasClass('track-autosourced');
+        track.did_sources_request =  $(track).hasClass('did-track-autosource');
 
         var player = track.closest('wpsstm-player');
 
@@ -389,7 +389,7 @@ class WpsstmTrack extends HTMLElement{
                 var oldStatus = track.getAttribute('trackstatus');
 
                 //important ! Settings this class assure us that the node will have did_sources_request = true when it will be inserted in DOM
-                $(newContent).addClass('track-autosourced');
+                $(newContent).addClass('did-track-autosource');
 
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
@@ -513,7 +513,7 @@ class WpsstmTrack extends HTMLElement{
                 link_el.removeClass('action-error').addClass('action-loading');
             },
             success: function(data){
-                
+
                 if (data.success === false) {
                     link_el.addClass('action-error');
                     console.log(data);
