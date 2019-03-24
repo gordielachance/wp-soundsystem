@@ -87,14 +87,6 @@ class WPSSTM_MusicBrainz {
             'mbz_service'//section
         );
         
-        add_settings_field(
-            'auto-mbid', 
-            __('Auto lookup','wpsstm'), 
-            array( $this, 'mbz_auto_id_callback' ), 
-            'wpsstm-settings-page', // Page
-            'mbz_service'//section
-        );
-        
     }
     
     function mbz_settings_sanitize($input){
