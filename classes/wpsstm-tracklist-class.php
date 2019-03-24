@@ -227,9 +227,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_html(){
 
-        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
-
-        if ( $is_ajax_refresh && !wp_doing_ajax() ){
+        if ( wpsstm()->get_options('ajax_load_tracklists') && !wp_doing_ajax() ){
             $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
             $this->is_expired = false;
         }
