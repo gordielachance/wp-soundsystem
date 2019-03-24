@@ -102,6 +102,10 @@ $notice = $wpsstm_tracklist->importer_notice();
 
             while ( $wpsstm_tracklist->have_subtracks() ) {
                 $wpsstm_tracklist->the_subtrack();
+                if ( !wpsstm()->get_options('ajax_load_tracklists') ){
+                    global $wpsstm_track;
+                    $wpsstm_track->populate_sources();
+                }
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
             ?>

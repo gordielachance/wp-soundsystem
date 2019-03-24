@@ -616,6 +616,8 @@ class WPSSTM_Track{
     }
     
     function populate_sources(){
+        
+        if ( !wpsstm()->get_options('ajax_load_tracklists') || !wp_doing_ajax() ) return false;
 
         if ($this->post_id){
             $query = $this->query_sources(array('fields'=>'ids'));
@@ -626,8 +628,10 @@ class WPSSTM_Track{
         }
 
         if ( !$this->sources ){
-            $success = $this->autosource();
+            return $this->autosource();
         }
+        
+        return true;
         
     }
     
@@ -652,7 +656,7 @@ class WPSSTM_Track{
     
     function autosource(){
         global $wpsstm_spotify;
-        
+
         $new_sources = array();
 
         if ( !wpsstm()->get_options('autosource') ){
