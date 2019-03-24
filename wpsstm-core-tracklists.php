@@ -105,7 +105,6 @@ class WPSSTM_Core_Tracklists{
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $wpsstm_tracklist->is_expired = true;
         $html = $wpsstm_tracklist->get_tracklist_html();
 
         $result = array(
