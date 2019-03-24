@@ -1063,7 +1063,7 @@ class WPSSTM_Core_Tracks{
         $wpsstm_track->populate_sources();
         
         if ( !$wpsstm_track->sources ){
-            return $this->autosource();
+            return $wpsstm_track->autosource();
         }
         
         ob_start();
