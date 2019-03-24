@@ -15,7 +15,6 @@ class WPSSTM_Spotify{
         $options_default = array(
             'client_id' =>          null,
             'client_secret' =>      null,
-            'spotify_auto_id' =>    true,
         );
         
         $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name),$options_default);
@@ -45,7 +44,6 @@ class WPSSTM_Spotify{
             add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
             
             add_action( 'save_post', array($this,'metabox_spotify_id_save'), 7);
-            //TOUFIX URGENT add_action( 'save_post', array($this,'auto_spotify_id_on_post_save'), 8);
             add_action( 'save_post', array($this,'metabox_spotify_data_save'), 9);
         }
     }
@@ -301,19 +299,14 @@ class WPSSTM_Spotify{
         );
         
         $input_el = wpsstm_get_backend_form_input($input_attr);
-        
-        if ( $this->get_options('spotify_auto_id') ){
-            $is_ignore = ( get_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true ) );
-            $input_auto_id_el = sprintf('<input type="checkbox" value="on" name="wpsstm-ignore-auto-spotify-id" %s/>',checked($is_ignore,true,false));
-            $desc_el .= $input_auto_id_el . ' ' .__("Do not auto-identify",'wpsstm');
-        }
-        
+
         return $input_el . $desc_el;
     }
 
     public function metabox_spotify_id_content($post){
 
         $spotify_id = wpsstm_get_post_spotify_id($post->ID);
+        $spotify_data = wpsstm_get_spotify_data($post->ID);
         $can_search_entries = $this->can_spotify_search_entries($post->ID);
 
         ?>
@@ -326,41 +319,29 @@ class WPSSTM_Spotify{
                 if ( $can_search_entries ){
                     ?>
                     <tr valign="top">
-                        <th scope="row">
-                            <label><?php _e('Spotify Lookup','wpsstm');?></label>
-                        </th>
                         <td>
                             <?php
-                            submit_button( __('Spotify Lookup','wpsstm'), null, 'wpsstm-spotify-id-lookup');
-                            _e('Search ID based on current post datas.','wpsstm');
+                    
+                            if (!$spotify_id){
+                                submit_button( __('Search','wpsstm'), null, 'wpsstm-spotify-id-lookup');
+                            }
+
+                            if ($spotify_data) {
+                                submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-spotify-data-reload');
+                            }
+
+                            if ($can_search_entries && $spotify_id) {
+                                $entries_url = get_edit_post_link();
+                                $entries_url = add_query_arg(array('spotify-list-entries'=>true),$entries_url);
+                                printf('<p><a class="button" href="%s">%s</a></p>',$entries_url,__('Switch entry','wpsstm'));
+                            }
+
                             ?>
 
                         </td>
                     </tr>
                     <?php
                 }
-                ?>
-                <?php 
-                /*
-                TOUFIX
-                
-                if ($can_search_entries && $spotify_id) {
-                    ?>
-                    <tr valign="top">
-                        <th scope="row">
-                            <label><?php _e('Switch entry','wpsstm');?></label>
-                        </th>
-                        <td>
-                            <?php
-                            $entries_url = get_edit_post_link();
-                            $entries_url = add_query_arg(array('spotify-list-entries'=>true),$entries_url);
-                            printf('<a class="button" href="%s">%s</a>',$entries_url,__('Switch entry','wpsstm'));
-                            ?>
-                        </td>
-                    </tr>
-                    <?php
-                }
-                */
                 ?>
             </tbody>
         </table>
@@ -407,24 +388,6 @@ class WPSSTM_Spotify{
                 ?>
                 <?php 
                 if ($spotify_data) {
-                    ?>
-                    <tr valign="top">
-                        <th scope="row">
-                            <label><?php _e('Refresh data','wpsstm');?></label>
-                        </th>
-                        <td>
-                            <?php
-                            submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-spotify-data-reload');
-                    
-                            if ( $then = get_post_meta( $post->ID, self::$spotify_data_time_metakey, true ) ){
-                                $now = current_time( 'timestamp' );
-                                $refreshed = human_time_diff( $now, $then );
-                                printf(__('Data was refreshed %s ago.','wpsstm'),$refreshed);
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                    <?php
                     /*
                     TOUFIX
                     
@@ -548,20 +511,28 @@ class WPSSTM_Spotify{
         switch($post_type){
             case wpsstm()->post_type_artist:
                 
-                return $this->get_spotify_id( $artist);
+                $id = $this->get_spotify_id( $artist);
 
             break;
             case wpsstm()->post_type_album:
                 
-                return $this->get_spotify_id( $artist,$album);
+                $id = $this->get_spotify_id( $artist,$album);
 
             break;
             case wpsstm()->post_type_track:
                 
-                return $this->get_spotify_id( $artist,$album,$track);
+                $id = $this->get_spotify_id( $artist,$album,$track);
 
             break;
         }
+        
+        if ( $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $id ) ){
+            wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'spotify'=>$id)),"Updated Spotify ID" ); 
+            $this->reload_spotify_datas($post_id);
+        }
+        
+        return $id;
+        
     }
     
     private function get_spotify_entries( $artist,$album = null,$track = null ){
@@ -596,7 +567,6 @@ class WPSSTM_Spotify{
         if ( delete_post_meta( $post_id, self::$spotify_data_meta_key ) ){
             delete_post_meta( $post_id, self::$spotify_data_time_metakey ); //delete timestamp
         }
-
 
         if ( !$spotify_id = wpsstm_get_post_spotify_id($post_id) ) return;
         
@@ -649,44 +619,29 @@ class WPSSTM_Spotify{
         $id = ( isset($_POST[ 'wpsstm_spotify_id' ]) ) ? $_POST[ 'wpsstm_spotify_id' ] : null;
         $is_id_update = ($old_id != $id);
 
+        switch ($action){
+            case 'autoguess-id':
+
+                $id = $this->get_post_spotify_id($post_id);
+                if ( is_wp_error($id) ) break;
+                $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $id );
+            break;
+        }
+        
         if (!$id){
             delete_post_meta( $post_id, self::$spotify_id_meta_key );
             delete_post_meta( $post_id, self::$spotify_data_meta_key ); //delete mdbatas
             delete_post_meta( $post_id, self::$spotify_data_time_metakey ); //delete mdbatas timestamp
         }else{
             update_post_meta( $post_id, self::$spotify_id_meta_key, $id );
-            
             if ($is_id_update){
                 $this->reload_spotify_datas($post_id);
             }
-        }
-        
-        //ignore auto MBID
-        if ( $this->get_options('spotify_auto_id') ){
-            $do_ignore = ( isset($_POST['wpsstm-ignore-auto-spotify-id']) ) ? true : false;
-            if ($do_ignore){
-                update_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true );
-            }else{
-                delete_post_meta( $post_id, self::$spotify_no_auto_id_metakey );
-            }
-        }
-
-        switch ($action){
-            case 'autoguess-id':
-
-                $sid = $this->get_post_spotify_id($post_id);
-                if ( is_wp_error($sid) ) break;
-                
-                $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
-            break;
         }
 
     }
     
     public function metabox_spotify_data_save( $post_id ){
-
-        $mbid = null;
-        $mbdata = null;
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
@@ -721,53 +676,13 @@ class WPSSTM_Spotify{
             case 'reload':
                 $this->reload_spotify_datas($post_id);
             break;
+            case 'fill':
+                die("TO FIX fill spotify data");
+            break;
         }
         
     }
-    
-    /*
-    When saving an artist / track / album and that no Spotify ID exists, guess it - if option enabled
-    */
-    
-    public function auto_spotify_id_on_post_save( $post_id ){
 
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $skip_status = in_array( get_post_status( $post_id ),array('auto-draft','trash') );
-        $is_revision = wp_is_post_revision( $post_id );
-
-        if ( $is_autosave || $skip_status || $is_revision ) return;
-
-        //check post type
-        $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return;
-        
-        //ignore if global option disabled
-        if ( !$this->get_options('spotify_auto_id') ) return false;
-
-        //ignore if option disabled
-        $is_ignore = ( get_post_meta( $post_id, self::$spotify_no_auto_id_metakey, true ) );
-        if ($is_ignore) return false;
-        
-        $track = new WPSSTM_Track($post_id);
-        
-        //ignore if value exists
-        if ($track->spotify_id) return;
-        
-        //get auto mbid
-        $artist = wpsstm_get_post_artist($post_id);
-        $album = wpsstm_get_post_album($post_id);
-        $track = wpsstm_get_post_track($post_id);
-        $sid = $this->get_spotify_id( $artist,$album,$track );
-        if ( is_wp_error($sid) ) return $sid;
-        $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $sid );
-        
-        if($success){
-            add_filter( 'redirect_post_location', array(__class__,'after_auto_id_redirect') );
-        }
-
-        return $sid;
-    }
 
     static function is_entries_switch(){
         return ( isset($_GET['spotify-list-entries'])) ? true : false;
