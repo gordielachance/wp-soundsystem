@@ -520,6 +520,7 @@ class WPSSTM_Track{
 
     /*
     retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
+    //TOUFIX albums should be enabled ? TOCHECK carefully.
     */
     function get_subtrack_matches($tracklist_id = null){
         global $wpdb;
@@ -527,13 +528,19 @@ class WPSSTM_Track{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         //check we have enough informations on this track
-        if ( !$this->post_id || ( $this->validate_track() !== true) ) return false;
+        if ( $this->validate_track() !== true) return false;
 
         if ($this->post_id){
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
             
         }else{
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' AND album = '%s'", $this->artist,$this->title,$this->album);
+            $albumstr = ($this->album) ? sprintf("AND album = '%s'",$this->album) : null;
+            if ($this->album){
+                $querystr . '';
+            }
+            
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' %s", $this->artist,$this->title,$albumstr);
+            
         }
         
         if($tracklist_id){
