@@ -11,11 +11,15 @@ WP Soundsystem is a complete solution to manage a music library within WordPress
 
 == Description ==
 
+*If you are updating the plugin from < version 2.5, please BACKUP your database first, as many, many things have been updated.*
+
 *WP Soundsystem* is a complete solution to manage a music library within WordPress.
 
 Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
 
 Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Sources.
+
+[See it working on Spiff Radio](https://www.spiff-radio.org/)
 
 = Tracklists =
 
@@ -38,11 +42,15 @@ The player will then try to play them.
 Radios are how we call *live playlists*. 
 Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.
 
+[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist)
+
 = Tracklist Importer (requires an API key) =
 
 Backup your playlists using the Tracklist Importer. 
 Popular services (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,…) are available out-of-the-box, just by pasting a playlist link.
 More advanced setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
+
+[Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
 
 = Autosource (requires an API key) =
 
@@ -137,19 +145,14 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.0.0 =
+= 2.5.0 =
+* So much improvements that they cannot even be listed !  More than one year of developpement and 754 commits !
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
-* tracklists loaded as iframes (faster and better for styling)
-* loved tracks are now regular subtracks, part of a simple tracklist that is created for each user
-* Improved autosource
-* Improved wizard
-* Improved templates
-* Better tracks source GUI
-* Spotify metabox
-* PHP : pass tracklist object  to the track object / pass track object to the source object
-* merged all playlists classes; and new class WPSSTM_Remote_Tracklist
-* uses HTML5 custom elements
-* removed Artist & Album post types
+* PHP: merged all playlists classes; and new class WPSSTM_Remote_Tracklist
+* JS: player rewritten
+* HTML : uses HTML5 custom elements
+* REST API
+* ...
 
 = 1.9.4 =
 * Better settings page errors
