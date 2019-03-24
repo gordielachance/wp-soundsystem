@@ -144,6 +144,11 @@ class WPSSTM_Core_Playlists{
         if ($tracklist->tracklist_type !== 'static' ) return $actions;
         
         if (!$tracklist->feed_url) return $actions;
+        if ( !is_admin() ) return $actions;
+        
+        //TOUCHECK TOUFIX WHOLE BEHAVIOUR OF THIS
+        
+        
         
         $new_actions['import'] = array(
             'text' =>       __('Import again', 'wpsstm'),
