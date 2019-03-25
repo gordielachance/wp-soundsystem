@@ -1,8 +1,11 @@
 <?php
 
 global $wpsstm_track;
-$track_type_obj = get_post_type_object(wpsstm()->post_type_track);
-$can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
+$wpsstm_track->populate_sources();
+
+if ( !wpsstm()->get_options('ajax_load_tracklists') && !$wpsstm_track->have_sources() ){
+    $wpsstm_track->autosource();
+}
 
 if ( $wpsstm_track->have_sources() ) { ?>
     <ul class="wpsstm-track-sources-list">

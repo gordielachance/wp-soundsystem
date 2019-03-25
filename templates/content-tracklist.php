@@ -100,10 +100,6 @@ $notice = $wpsstm_tracklist->importer_notice();
             while ( $wpsstm_tracklist->have_subtracks() ) {
                 $wpsstm_tracklist->the_subtrack();
                 global $wpsstm_track;
-                if ( !wpsstm()->get_options('ajax_load_tracklists') || $wpsstm_track->did_autosource() ){
-                    
-                    $wpsstm_track->populate_sources();
-                }
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
             ?>

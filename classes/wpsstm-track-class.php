@@ -28,6 +28,8 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $from_tracklist = null;
     
+    private $did_autosource = null;
+    
     public $notices = array();
     
     function __construct( $post_id = null, $tracklist = null ){
@@ -57,12 +59,13 @@ class WPSSTM_Track{
         if ( get_post_type($track_id) != wpsstm()->post_type_track ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
-        $this->post_id      = $track_id;
-        $this->title        = wpsstm_get_post_track($this->post_id);
-        $this->artist       = wpsstm_get_post_artist($this->post_id);
-        $this->album        = wpsstm_get_post_album($this->post_id);
-        $this->image_url    = wpsstm_get_post_image_url($this->post_id);
-        $this->duration     = wpsstm_get_post_length($this->post_id);
+        $this->post_id          = $track_id;
+        $this->title            = wpsstm_get_post_track($this->post_id);
+        $this->artist           = wpsstm_get_post_artist($this->post_id);
+        $this->album            = wpsstm_get_post_album($this->post_id);
+        $this->image_url        = wpsstm_get_post_image_url($this->post_id);
+        $this->duration         = wpsstm_get_post_length($this->post_id);
+        $this->did_autosource   = $this->autosource_check();
         
     }
     
@@ -627,20 +630,24 @@ class WPSSTM_Track{
         
     }
     
-    function did_autosource(){
+    private function autosource_check(){
 
         /*
         Check if a track has been autosourced recently
         */
+        
+        if ($this->did_autosource === null){
+            $last_autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
+            if (!$last_autosourced) return false;
 
-        $last_autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
-        if (!$last_autosourced) return false;
-        
-        $now = current_time( 'timestamp' );
-        $seconds = $now - $last_autosourced;
-        $hours = $seconds / HOUR_IN_SECONDS;
-        
-        return ($hours < 48);
+            $now = current_time( 'timestamp' );
+            $seconds = $now - $last_autosourced;
+            $hours = $seconds / HOUR_IN_SECONDS;
+
+            $this->did_autosource = ($hours < 48);
+        }
+
+        return $this->did_autosource;
  
     }
 
@@ -657,7 +664,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
         }
         
-        if ( $this->did_autosource() ) {
+        if ( $this->did_autosource ) {
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track has already been autosourced recently.",'wpsstm') );
         }
         
@@ -989,7 +996,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->did_autosource()  ? 'did-track-autosource' : null,
+            $this->did_autosource  ? 'did-track-autosource' : null,
 
         );
 
