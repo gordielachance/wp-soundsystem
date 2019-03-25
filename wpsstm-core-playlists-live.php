@@ -18,8 +18,6 @@ class WPSSTM_Core_Live_Playlists{
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
 
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
-
-        add_filter( 'the_title', array($this, 'filter_live_playlist_title'), 9, 2 );
         
         add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
@@ -157,21 +155,15 @@ class WPSSTM_Core_Live_Playlists{
         return $classes;
     }
     
-    function filter_live_playlist_title( $title, $post_id = null ) {
-        if ( in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){
-            $title = WPSSTM_Post_Tracklist::get_tracklist_title($post_id);
-        }
-        return $title;
-    }
-    
     function filter_live_tracklist_actions($actions,$tracklist){
         
         if ($tracklist->tracklist_type !== 'live' ) return $actions;
         if (!$tracklist->feed_url) return $actions;
         
         $new_actions['refresh'] = array(
-            'text' =>      __('Refresh', 'wpsstm'),
-            'href' =>      $tracklist->get_tracklist_action_url('render'),
+            'text' =>       __('Refresh', 'wpsstm'),
+            'href' =>       $tracklist->get_tracklist_action_url('render'),
+            'classes' =>    array('wpsstm-reload-bt'),
         );
         
         return $new_actions + $actions;

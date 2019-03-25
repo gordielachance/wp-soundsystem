@@ -4,6 +4,12 @@ global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
 $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 
+//imported tracklist notice
+//TOUFIX is this the right place ?
+$notice = $wpsstm_tracklist->autorship_notice();
+$notice = $wpsstm_tracklist->no_tracks_notice();
+$notice = $wpsstm_tracklist->importer_notice();
+
 ?>
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
@@ -15,7 +21,7 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
                 //radio icon
                 if ($wpsstm_tracklist->tracklist_type == 'live'){
                     ?>
-                    <span class="wpsstm-live-tracklist-icon" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">
+                    <span class="wpsstm-live-tracklist-icon wpsstm-reload-bt" title="<?php _e("This is a live tracklist, it will auto-update!","wpsstm");?>">
                         <i class="fa fa-rss" aria-hidden="true"></i>
                     </span>
                     <?php
@@ -70,7 +76,18 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
             ?>
         </div>
     </div>
-    <?php    
+    <?php
+    /*
+    Notices
+    */
+    if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_tracklist->notices) ){
+        ?>
+        <ul class="wpsstm-tracklist-notices">
+            <?php echo $notices_el; ?>
+        </ul>
+        <?php
+    }
+    
     /*
     tracks list
     */
@@ -82,17 +99,16 @@ $wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 
             while ( $wpsstm_tracklist->have_subtracks() ) {
                 $wpsstm_tracklist->the_subtrack();
+                global $wpsstm_track;
+                if ( !wpsstm()->get_options('ajax_load_tracklists') || $wpsstm_track->did_autosource() ){
+                    
+                    $wpsstm_track->populate_sources();
+                }
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
             ?>
        </ul>
     <?php
-    }else{ //no tracks
-        ?>
-        <p id="wpsstm-no-tracks">
-            <?php _e('No tracks found.','wpsstm'); ?>
-        </p>
-        <?php
     }
     
     /*

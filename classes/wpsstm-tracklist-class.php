@@ -10,7 +10,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $preset_options = array(); //stored preset options
     
     var $updated_time = null;
-    public $is_expired = null;
+    public $is_expired = false;
     
     var $pagination = array(
         'total_pages'   => null,
@@ -94,12 +94,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         
         //time updated
-        $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
-        if ( $this->tracklist_type == 'live' ){//TOUFIX what if not the 'live' type ?
-            $this->updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        //TOUFIX bad logic.  We should rather update the post time when an import is done.
+        if ( $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
+            $this->updated_time = (int)$last_import_time;
+        }else{
+            $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
         }
-        $seconds = $this->seconds_before_refresh();
-        $this->is_expired = ($seconds <= 0);
+        
+        if ( $this->tracklist_type == 'live' ){
+            $seconds = $this->seconds_before_refresh();
+            $this->is_expired = ($seconds <= 0);
+        }
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
@@ -170,7 +175,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             WPSSTM_Core_Tracks::$artist_metakey     => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            WPSSTM_MusicBrainz::$mbid_metakey       => $this->mbid,
             //sources is more specific, will be saved below
         );
         */
@@ -218,24 +222,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
 
-    function get_tracklist_html($force_refresh = null){
-        
-        if ($force_refresh === true){
-            
-            $this->is_expired = true;
-            
-        }else{
-            
-            $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
+    function get_tracklist_html(){
 
-            if ( $is_ajax_refresh && !wp_doing_ajax() ){
-                $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
-                $this->is_expired = false;
-            }
-            
+        if ( wpsstm()->get_options('ajax_load_tracklists') && !wp_doing_ajax() ){
+            $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
+            $this->is_expired = false;
         }
-        
-
 
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
@@ -676,18 +668,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');
     }
 
-
-    function populate_subtracks(){
+    function populate_subtracks($force_reload = false){
         global $wpdb;
         
         //avoid populating the subtracks several times (eg. Jetpack populates the content several times)
         if ($this->track_count !== null) return;
-
-        $live = ( ($this->tracklist_type == 'live') && $this->is_expired );
+ 
         $refresh_delay = $this->get_human_next_refresh_time();
 
-        if ($live){
-            
+        if ( $this->is_expired ){
+
             $this->populate_preset();
             $success =       $this->preset->populate_remote_tracks();
             
@@ -709,17 +699,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
             // handle remote errors
             if ( is_wp_error($success) ){
+                //TOUFIX THIS IS A WIZARD NOTICE, should be stored elsewhere so it is shown only on the backend.
                 $this->add_notice($success->get_error_code(), $success->get_error_message() );                
             }else{
                 $this->add_tracks($tracks);
                 $updated = $this->set_live_datas($this->preset);
-            }
-            
-            //link to wizard if we have a remote response (request did succeed) but no tracks
-            if ( !is_wp_error($this->preset->response_body) && !$tracks ){
-                $wizard_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
-                $wizard_link = sprintf('<a href="%s">%s</a>',$wizard_url,__('here','wpsstm'));
-                $this->add_notice('wizard_link', sprintf(__('We reached the remote page but were unable to parse the tracklist.  Click %s to open the parser settings.','wpsstm'),$wizard_link) );
             }
 
         }else{
@@ -727,7 +711,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->add_tracks($tracks);
         }
         
-        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'live'=>$live,'refresh_delay'=>$refresh_delay),'Populated subtracks');
+        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'is_expired'=>$this->is_expired,'refresh_delay'=>$refresh_delay),'Populated subtracks');
 
         return true;
     }
@@ -818,7 +802,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks'); 
         
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
         
@@ -1077,6 +1060,50 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $fields[] = sprintf('<input type="hidden" name="wpsstm_tracklist_data[title]" value="%s" />',esc_attr($this->title));
         }
         return implode("\n",$fields);
+    }
+    
+    function no_tracks_notice(){
+        
+        if ( $this->track_count ) return;
+        
+        $desc = array();
+        
+        $not_found = __('No tracks found.','wpsstm');
+
+        if (!$this->feed_url) return;
+
+
+        $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="#">%s</a>',__('Resfresh'));
+        $not_found .= sprintf("  %s ?",$refresh_el);
+
+        $this->add_notice('empty-tracklist', $not_found );
+    }
+    
+    function importer_notice(){
+        if ( is_admin() ) return;
+        if ( !$this->feed_url ) return;
+        if ( $this->track_count ) return;
+        
+        $post_type = get_post_type($this->post_id);
+        $tracklist_obj = get_post_type_object($post_type);
+        if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ) return;
+        
+        $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
+        $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer settings','wpsstm'));
+        $notice = sprintf(__('You may also want to edit the %s.','wpsstm'),$importer_el);
+        $this->add_notice('importer-settings', $notice );
+    }
+    
+    function autorship_notice(){
+        if ( !$this->track_count ) return;
+        if  ( !$this->user_can_get_tracklist_autorship() === true ) return;
+        if ( !wpsstm_is_community_post($this->post_id) ) return;
+        
+        $autorship_url = $this->get_tracklist_action_url('get-autorship');
+        $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
+        $message = __("This is a temporary tracklist.","wpsstm");
+        $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
+        $this->add_notice('get-autorship', $message );
     }
 
 }

@@ -458,19 +458,14 @@ class WpsstmPlayer extends HTMLElement{
         requestedTrack.debug('request track');
         requestedTrack.setAttribute('trackstatus','request');
 
-        var trackPopulated = requestedTrack.maybe_load_sources();
+        var success = requestedTrack.maybe_load_sources();
 
-        trackPopulated.then(
-            function () { //success
+        success.then(
+            function (newTrack) { //success
 
                 //check that it still the same track that is requested
-                if (player.current_track !== requestedTrack) return;
-                
-                /* node has been swapped so fetch the track again*/
-                var updatedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
-                updatedTrack.setAttribute('trackstatus','request');
-                
-                updatedTrack.play_track(source_idx);
+                if (player.current_track !== newTrack) return;                
+                newTrack.play_track(source_idx);
 
             }, function (error) { //error
                 requestedTrack.debug('unable to play track, skipping...');

@@ -114,16 +114,17 @@ class WPSSTM_Settings {
         WPSSTM API
         */
 
-        $old_secret = wpsstm()->get_options('wpsstmapi_client_secret');
-        $new_secret = trim($input['wpsstmapi_client_secret']);
-
-        //delete token
-        if ($old_secret != $new_secret){
-            delete_transient( WPSSTM_Core_API::$wpsstmapi_token_name );
+        $old_token = wpsstm()->get_options('wpsstmapi_token');
+        $new_token = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
+        
+        if($old_token !== $new_token){
+            delete_transient( WPSSTM_Core_API::$auth_transient_name );
+            wpsstm()->debug_log('deleted wpsstmapi auth transient');
         }
 
-        $new_input['wpsstmapi_client_secret'] = $new_secret;
-
+        $new_input['wpsstmapi_token'] = $new_token;
+        
+        $new_input['details_engine'] = (array)$input['details_engine'];
 
         return $new_input;
         
@@ -246,9 +247,17 @@ class WPSSTM_Settings {
         );
         
         add_settings_field(
-            'wpsstmapi_client_secret', 
+            'wpsstmapi_token', 
             __('API','wpsstm'), 
             array( $this, 'wpsstmapi_apisecret_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
+        
+        add_settings_field(
+            'details_engine', 
+            __('Music Details','wpsstm'), 
+            array( $this, 'details_engine_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
         );
@@ -402,26 +411,36 @@ class WPSSTM_Settings {
         
     }
     
+    function details_engine_callback(){
+        $enabled_services = wpsstm()->get_options('details_engine');
+        $available_engines = wpsstm()->get_available_detail_engines();
+
+        foreach((array)$available_engines as $engine){
+            
+            $is_checked = in_array($engine->slug,$enabled_services);
+            
+            printf(
+                '<input type="radio" name="%s[details_engine]" value="%s" %s /> <label>%s</label> ',
+                wpsstm()->meta_name_options,
+                $engine->slug,
+                checked($is_checked,true, false ),
+                $engine->name
+            );
+        }
+
+    }
+    
     function wpsstmapi_apisecret_callback(){
         //client secret
-        $client_secret = wpsstm()->get_options('wpsstmapi_client_secret');
+        $client_secret = wpsstm()->get_options('wpsstmapi_token');
         printf(
-            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_client_secret]" value="%s" /></p>',
-            __('Client Secret:','wpsstm'),
+            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_token]" value="%s" /></p>',
+            __('API Token:','wpsstm'),
             wpsstm()->meta_name_options,
             $client_secret
         );
-        
-        //expiration
-        if ( $tokendata = get_transient( WPSSTM_Core_API::$wpsstmapi_token_name ) ){
-            $expiration = wpsstm_get_array_value('expiration',$tokendata);
-            $date = date_i18n( get_option('date_format'), $expiration );
-            printf('<p><em>%s</em></p>',sprintf(__('Valid until: %s','wpsstm'),$date));
-        }
 
-        
-        $url = 'https://api.spiff-radio.org/?p=10';
-        printf('<p><a href="%s" target="_blank">%s</a> !</p>',$url,__('Get an API key now','wpsstm'));
+        printf('<p><a href="%s" target="_blank">%s</a> !</p>',WPSSTM_API_REGISTER_URL,__('Get an API key now','wpsstm'));
     }
 
     function section_importer_desc(){

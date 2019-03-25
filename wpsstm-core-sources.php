@@ -27,7 +27,7 @@ class WPSSTM_Core_Sources{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        add_filter( 'wpsstm_autosources_input', array( $this, 'autosources_cleanup' ) );
+        add_filter( 'wpsstm_autosource_filtered', array( $this, 'autosources_cleanup' ) );
         
         /*
         QUERIES
@@ -229,7 +229,7 @@ class WPSSTM_Core_Sources{
         
         add_meta_box( 
             'wpsstm-metabox-sources', 
-            __('Track sources','wpsstm'),
+            __('Track Sources','wpsstm'),
             array($this,'metabox_track_sources_content'),
             wpsstm()->post_type_track, 
             'normal', //context
@@ -296,6 +296,8 @@ class WPSSTM_Core_Sources{
     
     function metabox_track_sources_content( $post ){
         global $wpsstm_track;
+        $wpsstm_track->populate_sources();
+        
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
         ?>
@@ -313,7 +315,13 @@ class WPSSTM_Core_Sources{
             $now = current_time( 'timestamp' );
             $refreshed = human_time_diff( $now, $then );
             $refreshed = sprintf(__('Last autosource query: %s ago.','wpsstm'),$refreshed);
-            echo '  ' . $refreshed;
+            
+            $unset_autosource_bt = sprintf('<input id="wpsstm-unset-autosource-bt" type="submit" name="wpsstm_unset_autosource" class="button" value="%s">',__('Clear','wpsstm'));
+                ?>
+
+                <?php
+            
+            echo '  ' . $refreshed .' ' . $unset_autosource_bt;
         }
 
         //track sources
@@ -396,7 +404,7 @@ class WPSSTM_Core_Sources{
         if ( !$is_valid_nonce ) return;
         
         $track = new WPSSTM_Track($post_id);
-        
+
         //new source URLs
         $source_urls = isset($_POST['wpsstm_new_track_sources']) ? array_filter($_POST['wpsstm_new_track_sources']) : null;
 
@@ -410,7 +418,13 @@ class WPSSTM_Core_Sources{
             }
 
             $track->add_sources($new_sources);
-            $track->save_new_sources();
+            $success = $track->save_new_sources();
+
+        }
+        
+        //unset autosource
+        if ( isset($_POST['wpsstm_unset_autosource']) ){
+            delete_post_meta( $track->post_id, WPSSTM_Core_Sources::$autosource_time_metakey );
         }
 
         //autosource & save

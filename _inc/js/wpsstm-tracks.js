@@ -124,7 +124,7 @@ class WpsstmTrack extends HTMLElement{
         track.track_album =          $(track).find('[itemprop="inAlbum"]').text();
         track.post_id =              Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =          Number($(track).attr('data-wpsstm-subtrack-id'));
-        track.did_sources_request =  $(track).hasClass('track-autosourced');
+        track.did_sources_request =  $(track).hasClass('did-track-autosource');
 
         var player = track.closest('wpsstm-player');
 
@@ -269,15 +269,8 @@ class WpsstmTrack extends HTMLElement{
         var can_autosource = true; //TOUFIX should be from localized var
         var sources = $(track).find('wpsstm-source');
 
-        if (sources.length > 0){
-            success.resolve();
-            
-        }else if ( !can_autosource ){
-            success.resolve("Autosource is disabled");
-            
-        } else if ( track.did_sources_request ) {
-            track.debug("we already did sources requests");
-            success.resolve("already did sources auto request for track #" + track.position);
+        if ( (sources.length > 0) || ( !can_autosource ) || ( track.did_sources_request ) ){
+            success.resolve(track);
             
         } else{
             success = track.get_track_sources_request();
@@ -312,25 +305,43 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-            
-            var reloadTrack = track.reload_track();
-            
-            //a track post has been created/updated while autosourcing. Refresh it.
-            reloadTrack.then(
-                function(success_msg){
-                    
-                    if ( data.success === true ){
-                        success.resolve();
-                    }else{
-                        track.debug("track sources request failed: " + data.message);
-                        success.reject(data.message);
+
+            var trackUpdated = $.Deferred();
+            var trackCreated = (track.post_id != data.track.post_id);
+            var hasNewSources = ( data.source_ids );
+
+            //a track post has been created/updated while autosourcing, refresh it.
+            if (trackCreated || hasNewSources){
+                var reloadTrack = track.reload_track();
+
+                reloadTrack.then(
+                    function(newTrack){
+
+                        if ( data.success === true ){
+                            trackUpdated.resolve(newTrack);
+                        }else{
+                            track.debug("track refresh request failed: " + data.message);
+                            trackUpdated.reject(data.message);
+                        }
+
+                    },
+                    function(error_msg){
+                        trackUpdated.reject(error_msg);
                     }
-                    
-                },
-                function(error_msg){
-                    success.reject(error_msg);
-                }
-            );
+                );
+                
+            }else{
+                //no need to reload track
+                trackUpdated.resolve(track);
+            }
+            
+            trackUpdated.done(function(track) {
+                success.resolve(track);
+            });
+            
+            trackUpdated.fail(function(reason) {
+                success.reject(reason);
+            });
 
         });
 
@@ -367,14 +378,18 @@ class WpsstmTrack extends HTMLElement{
         });
 
         sources_request.done(function(data) {
-            if ( data.html ){
 
-                /*delete old nodes, and and new ones with pageNode/queueNode properties*/
+            if ( data.html ){
                 
+                /*
+                delete old nodes, and add new ones instead
+                */
+
                 var newContent = $(data.html);
-                
+                var oldStatus = track.getAttribute('trackstatus');
+
                 //important ! Settings this class assure us that the node will have did_sources_request = true when it will be inserted in DOM
-                $(newContent).addClass('track-autosourced');
+                $(newContent).addClass('did-track-autosource');
 
                 var newQueueTrack = newContent.get(0);
                 var newPageTrack = newContent.clone().get(0);
@@ -387,9 +402,11 @@ class WpsstmTrack extends HTMLElement{
 
                 oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
                 oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
-
-
-                success.resolve();
+                
+                /* pass the status to the new node*/
+                newQueueTrack.setAttribute('trackstatus',oldStatus);
+                
+                success.resolve(newQueueTrack);
                 
             }else{
                 track.debug("track refresh failed: " + data.message);
@@ -496,7 +513,7 @@ class WpsstmTrack extends HTMLElement{
                 link_el.removeClass('action-error').addClass('action-loading');
             },
             success: function(data){
-                
+
                 if (data.success === false) {
                     link_el.addClass('action-error');
                     console.log(data);
@@ -628,34 +645,7 @@ class WpsstmTrack extends HTMLElement{
         })
 
         success.done(function(v) {
-            
-            /*
-            preload sources for the X next tracks
-            */
-            
-            var tracks = $(player).find('wpsstm-track');
-            
-            
-            var max_items = 4; //number of following tracks to preload
-            var track_index = tracks.index( track );
-            if (track_index < 0) return; //index not found
-
-            //keep only tracks after this one
-            var rtrack_in = track_index + 1;
-            var next_tracks = tracks.slice( rtrack_in );
-            
-            //remove tracks that have already been autosourced
-            var next_tracks = next_tracks.filter(function (track) {
-                return (track.did_sources_request !== false);
-            });
-            
-            //reduce to X tracks
-            var tracks_slice = next_tracks.slice( 0, max_items );
-
-            $(tracks_slice).each(function(index, track_to_preload) {
-                track_to_preload.maybe_load_sources();
-            });
-            
+            track.preload_next_tracks();
         })
 
         success.fail(function() {
@@ -666,6 +656,36 @@ class WpsstmTrack extends HTMLElement{
 
         return success.promise();
 
+    }
+    
+    /*
+    preload sources for the X next tracks
+    */
+    preload_next_tracks(){
+        var track = this;
+        var player = track.closest('wpsstm-player');
+        var tracks = $(player).find('wpsstm-track');
+
+
+        var max_items = 4; //number of following tracks to preload
+        var track_index = tracks.index( track );
+        if (track_index < 0) return; //index not found
+
+        //keep only tracks after this one
+        var rtrack_in = track_index + 1;
+        var next_tracks = tracks.slice( rtrack_in );
+
+        //remove tracks that have already been autosourced
+        var next_tracks = next_tracks.filter(function (track) {
+            return (track.did_sources_request !== false);
+        });
+
+        //reduce to X tracks
+        var tracks_slice = next_tracks.slice( 0, max_items );
+
+        $(tracks_slice).each(function(index, track_to_preload) {
+            track_to_preload.maybe_load_sources();
+        });
     }
     
     play_first_available_source(source_idx){

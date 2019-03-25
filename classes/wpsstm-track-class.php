@@ -30,8 +30,6 @@ class WPSSTM_Track{
     
     public $notices = array();
     
-    public $autosourced = null;
-    
     function __construct( $post_id = null, $tracklist = null ){
         
         /*
@@ -65,11 +63,6 @@ class WPSSTM_Track{
         $this->album        = wpsstm_get_post_album($this->post_id);
         $this->image_url    = wpsstm_get_post_image_url($this->post_id);
         $this->duration     = wpsstm_get_post_length($this->post_id);
-        $this->autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
-        
-        //TOUFIX this should be hooked ?
-        $this->mbid         = wpsstm_get_post_mbid($this->post_id);
-        $this->spotify_id   = wpsstm_get_post_spotify_id($this->post_id);
         
     }
     
@@ -272,16 +265,14 @@ class WPSSTM_Track{
     */
     
     function to_xspf_array(){
-        $xspf_track = array(
-            'identifier'    => ( $this->mbid ) ? sprintf('https://musicbrainz.org/recording/%s',$this->mbid) : null,
+        $output = array(
             'title'         => $this->title,
             'creator'       => $this->artist,
             'album'         => $this->album
         );
         
-        $xspf_track = array_filter($xspf_track);
-        
-        return apply_filters('wpsstm_get_track_xspf',$xspf_track,$this);
+        $output = apply_filters('wpsstm_get_track_xspf',$output,$this);
+        return array_filter($output);
     }
     
     function validate_track($strict = true){
@@ -391,15 +382,19 @@ class WPSSTM_Track{
         }
         
         $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey    => $this->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            WPSSTM_MusicBrainz::$mbid_metakey       => $this->mbid,
-            WPSSTM_Core_Tracks::$image_url_metakey  => $this->image_url,
+            WPSSTM_Core_Tracks::$artist_metakey         => $this->artist,
+            WPSSTM_Core_Tracks::$title_metakey          => $this->title,
+            WPSSTM_Core_Tracks::$album_metakey          => $this->album,
+            WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
         );
         
+        //swap metas
+        if ( isset($args['meta_input']) ){
+            $meta_input = wp_parse_args($args['meta_input'],$meta_input);
+        }
+
         $meta_input = array_filter($meta_input);
-        
+
         $required_args = array(
             'post_title'    => (string)$this, // = __toString()
             'post_type'     => wpsstm()->post_type_track,
@@ -516,6 +511,7 @@ class WPSSTM_Track{
 
     /*
     retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
+    //TOUFIX albums should be enabled ? TOCHECK carefully.
     */
     function get_subtrack_matches($tracklist_id = null){
         global $wpdb;
@@ -523,13 +519,19 @@ class WPSSTM_Track{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         //check we have enough informations on this track
-        if ( !$this->post_id || ( $this->validate_track() !== true) ) return false;
+        if ( $this->validate_track() !== true) return false;
 
         if ($this->post_id){
             $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
             
         }else{
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' AND album = '%s'", $this->artist,$this->title,$this->album);
+            $albumstr = ($this->album) ? sprintf("AND album = '%s'",$this->album) : null;
+            if ($this->album){
+                $querystr . '';
+            }
+            
+            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' %s", $this->artist,$this->title,$albumstr);
+            
         }
         
         if($tracklist_id){
@@ -621,23 +623,21 @@ class WPSSTM_Track{
             $this->add_sources($this->sources); //so we're sure the sources count is set
         }
         
-        $is_ajax_refresh = wpsstm()->get_options('ajax_load_tracklists');
-
-        if ( !$this->sources && !$is_ajax_refresh ){
-            $success = $this->autosource();
-        }
+        return true;
         
     }
     
-    function is_autosource_lock(){
+    function did_autosource(){
+
         /*
         Check if a track has been autosourced recently
         */
-        
-        if (!$this->autosourced) return false;
+
+        $last_autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
+        if (!$last_autosourced) return false;
         
         $now = current_time( 'timestamp' );
-        $seconds = $now - $this->autosourced;
+        $seconds = $now - $last_autosourced;
         $hours = $seconds / HOUR_IN_SECONDS;
         
         return ($hours < 48);
@@ -649,14 +649,15 @@ class WPSSTM_Track{
     */
     
     function autosource(){
-        
+        global $wpsstm_spotify;
+
         $new_sources = array();
 
         if ( !wpsstm()->get_options('autosource') ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
         }
         
-        if ( $this->is_autosource_lock() ) {
+        if ( $this->did_autosource() ) {
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track has already been autosourced recently.",'wpsstm') );
         }
         
@@ -665,28 +666,6 @@ class WPSSTM_Track{
 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-
-        /*
-        Create community post :
-        if track does not exists yet, create it as a community track - we need a post ID to store various metadatas.
-        It is created BEFORE the sources request so we can flag the track as having been autosourced.
-        */
-
-        if ( !$this->post_id ){
-            $this->track_log('Creating community track','autosource');
-            $tracks_args = array( //as community tracks	
-                'post_author'   => wpsstm()->get_options('community_user_id'),	
-            );	
-            	
-            $success = $this->save_track_post($tracks_args);	
-            if ( is_wp_error($success) ){
-                $error_msg = $success->get_error_message();
-                $this->track_log($error_msg,'Error while creating community track');
-                return $success;
-            }else{
-                $this->track_log($success,'Community track created');
-            }
-        }
         
         /*
         Get sources automatically - services should be hooked here to fetch results.
@@ -694,25 +673,37 @@ class WPSSTM_Track{
         
         $sources_auto = array();
         
-        if (WPSSTM_Core_API::can_wpsstmapi() === true){
+        /*
+        Create community post if track does not exists yet, since we need to store some datas, including the autosource time.
+        */
+        if(!$this->post_id){
 
-            if (!$this->spotify_id) {
-                return new WP_Error( 'missing_spotify_id',__( 'Missing spotify ID.', 'wpsstmapi' ));
+            $tracks_args = array( //as community tracks	
+                'post_author'   => wpsstm()->get_options('community_user_id')
+            );	
+
+            $success = $this->save_track_post($tracks_args);
+
+            if ( is_wp_error($success) ){
+                $error_msg = $success->get_error_message();
+                $this->track_log($error_msg,'Error while creating community track');
+                return $success;
             }
-            
-            $api_url = sprintf('track/autosource/spotify/%s',$this->spotify_id);
-            $api_results = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($api_results) ) return $api_results;
-            $sources_auto = $api_results;
 
         }
-
-        if ( is_wp_error($sources_auto) ) return $sources_auto;
-
-        /*
-        Handle those sources
-        */
         
+        /*
+        save autosourced time so we won't query autosources again too soon
+        */
+        $now = current_time('timestamp');
+        //TOUFIX URGENT update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
+        
+        /*
+        Hook filter here to add autosources (array)
+        */
+
+        $sources_auto = apply_filters('wpsstm_autosource_input',$sources_auto,$this);
+
         foreach((array)$sources_auto as $key=>$args){
             
             $source = new WPSSTM_Source();
@@ -738,19 +729,14 @@ class WPSSTM_Track{
         Hook filter here to ignore some of the sources
         */
 
-        $new_sources = apply_filters('wpsstm_autosources_input',$new_sources,$this);
+        $new_sources = apply_filters('wpsstm_autosource_filtered',$new_sources,$this);
 
         //limit autosource results
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
         $new_sources = array_slice($new_sources, 0, $limit_autosources);
         $new_sources = apply_filters('wpsstm_track_autosources',$new_sources);
 
-        //save autosourced time so we won't query autosources again too soon
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
-
         $this->add_sources($new_sources);
-
         $new_ids = $this->save_new_sources();
         
         $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>count($this->source_count),'sources_saved'=>count($new_ids)),'autosource results');
@@ -782,7 +768,8 @@ class WPSSTM_Track{
             }
 
         }
-        return $inserted;
+        
+        return count($inserted);
     }
 
     function get_track_url(){
@@ -1002,7 +989,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->is_autosource_lock() ? 'track-autosourced' : null,
+            $this->did_autosource()  ? 'did-track-autosource' : null,
 
         );
 

@@ -179,7 +179,7 @@ class WPSSTM_Core_Tracks{
             $redirect_url = add_query_arg($redirect_args, $redirect_url);
 
             wp_safe_redirect($redirect_url);
-            die();
+            exit;
             
         }else{
             if ( is_wp_error($success) ){
@@ -865,28 +865,6 @@ class WPSSTM_Core_Tracks{
         $attr_str = wpsstm_get_html_attr($attr);
         printf('<a %s>%s</a>',$attr_str,__('Playlists manager','wpsstm'));
     }
-
-    function mb_populate_trackid( $post_id ) {
-        
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        if ( $is_autosave || $is_autodraft || $is_revision ) return;
-        
-        //already had an MBID
-        //$trackid = wpsstm_get_post_mbid($post_id);
-        //if ($trackid) return;
-
-        //requires a title
-        $track = wpsstm_get_post_track($post_id);
-        if (!$track) return;
-        
-        //requires an artist
-        $artist = wpsstm_get_post_artist($post_id);
-        if (!$artist) return;
-
-        
-    }
     
     /**
     Save track field for this post
@@ -994,7 +972,7 @@ class WPSSTM_Core_Tracks{
     function shortcode_track( $atts ) {
         global $post;
         global $wpsstm_tracklist;
-        
+
         $output = null;
 
         // Attributes
@@ -1003,14 +981,16 @@ class WPSSTM_Core_Tracks{
         );
         
         $atts = shortcode_atts($default,$atts);
+        $post_id = wpsstm_get_array_value('post_id',$atts);
+        $post_type = get_post_type($post_id);
         
-        if ( ( $post_type = get_post_type($atts['post_id']) ) && ($post_type == wpsstm()->post_type_track) ){ //check that the post exists
-            //single track tracklist
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
-            $track = new WPSSTM_Track( $atts['post_id'] );
-            $wpsstm_tracklist->add_tracks($track);
-            $output = $wpsstm_tracklist->get_tracklist_html();
-        }
+        if ( $post_type !== wpsstm()->post_type_track ) return;
+        
+        //single track tracklist
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
+        $track = new WPSSTM_Track( $atts['post_id'] );
+        $wpsstm_tracklist->add_tracks($track);
+        $output = $wpsstm_tracklist->get_tracklist_html();
 
         return $output;
 
@@ -1060,7 +1040,8 @@ class WPSSTM_Core_Tracks{
         
         //define global
         $wpsstm_track = $track;
-        
+        $wpsstm_track->populate_sources();
+
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );
         $updated_track = ob_get_clean();
@@ -1085,7 +1066,6 @@ class WPSSTM_Core_Tracks{
             'error_code'    => null,
             'message'       => null,
             'success'       => false,
-            'track'         => $track->to_array(),
         );
    
         //autosource
@@ -1097,8 +1077,11 @@ class WPSSTM_Core_Tracks{
             $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
         }else{
+            $result['source_ids'] = $new_ids;
             $result['success'] = true;
         }
+        
+        $result['track'] = $track->to_array(); //maybe we have a new post ID here, if the track has been created
 
         header('Content-type: application/json');
         wp_send_json( $result );
