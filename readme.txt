@@ -34,8 +34,8 @@ Audio sources can be linked to your tracks with the *Track Sources* metabox.
 = Sources =
 
 You can link several audio sources to any track. 
-It can be a the path of an audio file, a Soundcloud or Youtube link, etc. 
-The player will then try to play them.
+It can be a the path of an audio file, a music service link, etc.
+The player will then try to play them. 
 
 = Radios =
 
@@ -54,9 +54,11 @@ More advanced setups are also available, if you are somewhat familiar with [CSS 
 
 = Autosource (requires an API key) =
 
-If you don’t link audio sources to your track manually, you can enable our *autosource* module. It will search for remote sources (Youtube, Soundcloud…) and attach them to your tracks.
+Our player uses of the [MediaElement.js library](https://www.mediaelementjs.com/), which is native in Wordpress.  
+It supports audio (and video) files, but also links from various services like Youtube or Soundcloud.
+It has been extended with various features built on top of it, like a tracks queue or a Last.fm scrobbler.
 
-= Last.fm =
+= Player =
 
 The audio player can **scrobble** tracks to your Last.fm account.
 When the scrobbler is enabled, every track favorited by a user connected on [Last.fm](https://www.last.fm/) will also be loved on that service.
