@@ -60,8 +60,10 @@ It has been extended with various features built on top of it, like a tracks que
 
 = Player =
 
-The audio player can **scrobble** tracks to your Last.fm account.
-When the scrobbler is enabled, every track favorited by a user connected on [Last.fm](https://www.last.fm/) will also be loved on that service.
+Our player uses of the [MediaElement.js](https://www.mediaelementjs.com) library, which is native in WordPress. It supports audio (& video) files, but also links from various services like Youtube or Soundcloud.
+It has been extended with various features built on top of it, like a tracks queue or a Last.fm scrobbler.
+
+In addition of being able to scrobble on [Last.fm](https://www.last.fm/), every track favorited by a user connected to his account will also be loved on that service.
 
 = BuddyPress =
 
