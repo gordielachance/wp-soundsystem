@@ -39,6 +39,9 @@ $wpsstm_track->local_track_lookup(); //check for this track in the database (if 
     </div>
     <?php
     //track sources
+    if ( !wpsstm()->get_options('ajax_load_tracklists') && !wp_doing_ajax() ){
+        $wpsstm_track->autosource();
+    }
     wpsstm_locate_template( 'content-sources.php', true, false );
 
     
