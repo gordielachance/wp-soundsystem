@@ -288,8 +288,7 @@ abstract class WPSSTM_Music_Data{
                             if (!$music_id){
                                 submit_button( __('Search','wpsstm'), null, 'wpsstm-mb-id-lookup');
                             }
-
-                            if ($music_id) {
+                            if ($music_id &&  ($this->slug === 'musicbrainz')) { //TOUFIX should be available for any service
                                 $entries_url = get_edit_post_link();
                                 $entries_url = add_query_arg(array('list-music-items'=>true),$entries_url);
                                 printf('<p><a class="button" href="%s">%s</a></p>',$entries_url,__('Switch entry','wpsstm'));
@@ -454,6 +453,7 @@ abstract class WPSSTM_Music_Data{
         }
 
         $data = $this->get_details_for_post($post_id);
+
         if ( is_wp_error($data) ) $data = null;
 
         if ( $success = update_post_meta( $post_id, $this->data_metakey, $data ) ){
