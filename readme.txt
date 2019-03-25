@@ -33,9 +33,13 @@ Audio sources can be linked to your tracks with the *Track Sources* metabox.
 
 = Sources =
 
-You can link several audio sources to any track. 
-It can be a the path of an audio file, a music service link, etc.
-The player will then try to play them. 
+You can link several audio sources to any track.  
+It can be a the path of an audio file or even music services links like Youtube, or Soundcloud!
+
+= Autosource (requires an API key) =
+
+If you don't link audio sources to your track manually, you can enable our *autosource* module.  
+It will search for remote sources and attach them to your tracks. 
 
 = Radios =
 
@@ -51,12 +55,6 @@ Popular services (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgo
 More advanced setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
-
-= Autosource (requires an API key) =
-
-Our player uses of the [MediaElement.js library](https://www.mediaelementjs.com/), which is native in Wordpress.  
-It supports audio (and video) files, but also links from various services like Youtube or Soundcloud.
-It has been extended with various features built on top of it, like a tracks queue or a Last.fm scrobbler.
 
 = Player =
 
