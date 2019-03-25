@@ -149,78 +149,19 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.5.4 =
+* bugfix populate sources/autosources
+
 = 2.5.3 =
 * new class WPSSTM_Music_Data
 
-= 2.5.1 =
+= 2.5.0 =
 * So much improvements that they cannot even be listed !  More than one year of developpement and 754 commits !
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
 * Code entirely rewritten
 * HTML : uses HTML5 custom elements
 * REST API
 * ...
-
-= 1.9.4 =
-* Better settings page errors
-* Improved metaboxes for artist/track/album/MusicBrainz
-* new track length meta
-* remove frontend edit functions for track (load backend in popup)
-* new playlist subtrack : create it and load backend in popup
-* save autosource time in meta '_wpsstm_autosource_time'
-
-= 1.9.3 =
-* Cleaned up a lot of code : https://github.com/gordielachance/wp-soundsystem/commit/9b2742e9e4fc0a021766c115dd81a58bd0b90073
-
-= 1.9.2 =
-* Do not wait for JS document.ready (https://github.com/gordielachance/wp-soundsystem/issues/50)
-
-= 1.9.1 =
-* Improve popup template
-* Improve track/tracklist frontend admin
-
-= 1.9.0 =
-* Subtracks are now stored in the custom 'wp_wpsstm_subtracks' SQL table.  It contains the track ID, tracklist ID, and track position.  This makes easier to handle subtracks.
-* Improved sources reorder
-* Improved source delete
-
-= 1.8.9 =
-* Single template for tracklists
-* When wizard input is not an URL, redirect to last.fm track search
-* Autosourcing: create post if it does not exists yet
-
-= 1.8.8 =
-* presets: use filters instead of extending the tracklist class
-* JS - improved toggleChildren.js
-* 'edit backend' action for tracklists/tracks/sources
-* improved 'services' wizard widget
-* new plugin option 'Flush Community Tracks'
-* radios : get_the_title() now returns the remote tracklist title if WP post title is empty ('the_cached_remote_title' hooked on 'the_title')
-* remove title support for artist/album/track
-* some live tracklist & wizard improvements
-* fixed shuffle mode
-
-= 1.8.7 =
-* restored XSPF preset
-* removed FontAwesome from SCSS
-* use jQuery UI Dialog instead of Thickbox
-* improved notices
-* improved player/tracklists/tracks/sources actions
-* cleaned SCSS/CSS + plugin option to disable default styles
-* embed player backend
-
-= 1.8.6 =
-* better code for tracklists and tracks actions
-* ability to redirect to a track action even if the track does not exists in the DB yet - see get_track_action_url() and get_new_track_url()
-* better sources manager
-* WIP sources list: add link to reorder sources (drag & drop) - not yet working but started to implement it
-
-= 1.8.5 =
-* welcome Wordpress 4.9! Finally!
-* improved wizard (GUI, presets, widgets), etc.
-* ajax artist autocomplete
-* fixed WPSSTM_Preset_LastFM_Artist_Scraper
-* strict validate tracks on the frontend wizard
-* fix shortcode fatal error when post requested does not exists
 
 == Upgrade Notice ==
 
