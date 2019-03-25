@@ -131,7 +131,7 @@ class WPSSTM_Core_Importer{
                 $existing_id = $duplicate_query->posts[0];
                 $link = get_permalink($existing_id);
                 wp_safe_redirect($link);
-                exit();
+                exit;
             }
         }
 
@@ -148,7 +148,7 @@ class WPSSTM_Core_Importer{
             $existing_id = $duplicate_query->posts[0];
             $link = get_permalink($existing_id);
             wp_safe_redirect($link);
-            exit();
+            exit;
         }
 
         /*
@@ -173,12 +173,12 @@ class WPSSTM_Core_Importer{
             $link = get_permalink(wpsstm()->get_options('frontend_scraper_page_id'));
             $link = add_query_arg(array('wizard_error'=>$success->get_error_code()),$link);
             wp_safe_redirect($link);
-            exit();
+            exit;
         }else{
             $post_id = $success;
             $link = get_permalink($post_id);
             wp_safe_redirect($link);
-            exit();
+            exit;
         }
     }
 

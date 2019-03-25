@@ -123,6 +123,8 @@ class WPSSTM_Settings {
         }
 
         $new_input['wpsstmapi_token'] = $new_token;
+        
+        $new_input['details_engine'] = $input['details_engine'];
 
 
         return $new_input;
@@ -249,6 +251,14 @@ class WPSSTM_Settings {
             'wpsstmapi_token', 
             __('API','wpsstm'), 
             array( $this, 'wpsstmapi_apisecret_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
+        
+        add_settings_field(
+            'details_engine', 
+            __('Music Details','wpsstm'), 
+            array( $this, 'details_engine_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
         );
@@ -400,6 +410,23 @@ class WPSSTM_Settings {
         
         echo sprintf('<div id="wpsstm-api-promo">%s</div>',implode("\n",$desc));
         
+    }
+    
+    function details_engine_callback(){
+        $option = wpsstm()->get_options('details_engine');
+        $available_engines = wpsstm()->get_available_detail_engines();
+        
+        foreach((array)$available_engines as $key=>$engine){
+            
+            printf(
+                '<input type="radio" name="%s[details_engine]" value="%s" %s /> <label>%s</label> ',
+                wpsstm()->meta_name_options,
+                $key,
+                checked($option,$key, false ),
+                $engine->name
+            );
+        }
+
     }
     
     function wpsstmapi_apisecret_callback(){

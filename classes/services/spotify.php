@@ -2,11 +2,6 @@
 class WPSSTM_Spotify{
     
     static $spotify_options_meta_name = 'wpsstm_spotify_options';
-    static $spotify_id_meta_key = '_wpsstm_spotify_id';
-    static $spotify_data_meta_key = '_wpsstm_spotify_data';
-    static $spotify_data_time_metakey = '_wpsstm_spotify_data_time';
-    static $spotify_no_auto_id_metakey = '_wpsstm_spotify_no_auto_id';
-    static $spotify_data_by_url_transient_prefix = 'wpsstm_spotify_by_url_'; //to cache the musicbrainz API results
     
     public $options = array();
     
@@ -21,30 +16,17 @@ class WPSSTM_Spotify{
         
         /*backend*/
         add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );
+        add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') );
         
         if ( $this->can_spotify_api() === true ){
             
             //presets
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
             add_filter('wpsstm_remote_presets',array($this,'register_spotify_presets'));
-            
-            
-            add_action( 'add_meta_boxes', array($this, 'metabox_spotify_register'),55);
-            
-            //backend columns
-            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_artist), array(__class__,'spotify_columns_register'), 10, 2 );
-            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'spotify_columns_register'), 10, 2 );
-            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'spotify_columns_register'), 10, 2 );
-
-            add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_artist), array(__class__,'spotify_columns_content'), 10, 2 );
-            add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'spotify_columns_content'), 10, 2 );
-            add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'spotify_columns_content'), 10, 2 );
 
             add_filter('wpsstm_wizard_service_links',array($this,'register_spotify_service_links'), 6);
             add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
             
-            add_action( 'save_post', array($this,'metabox_spotify_id_save'), 7);
-            add_action( 'save_post', array($this,'metabox_spotify_data_save'), 9);
         }
     }
     
@@ -209,333 +191,96 @@ class WPSSTM_Spotify{
         return $request_args;
         
     }
+    
+    public function register_details_engine($engines){
+        $engines[] = new WPSSTM_Spotify_Data();
+        return $engines;
+    }
 
-    function metabox_spotify_register(){
-        global $post;
-        if (!$post) return;
+}
 
-        $entries_post_types = array(
+class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
+    public $slug = 'spotify';
+    public $entries_table_classname = 'WPSSTM_MB_Entries';
+            
+    protected function get_supported_post_types(){
+        return array(
             wpsstm()->post_type_artist,
             wpsstm()->post_type_track,
             wpsstm()->post_type_album
         );
-
-        //MBID Metabox
-        $sid_callback = array($this,'metabox_spotify_id_content');
-        
-        //TOUFIX
-        /*
-        if ( self::is_entries_switch() ){  
-            $sid_callback = array(__class__,'metabox_spotify_entries_content');
-        }
-        */
-
-        add_meta_box( 
-            'wpsstm-spotify-id', 
-            __('Spotify ID','wpsstm'),
-            $sid_callback,
-            $entries_post_types,
-            'after_title', 
-            'high' 
-        );
-        
-        //MB datas Metabox
-        if ( $sid = wpsstm_get_post_spotify_id($post->ID) ){
-            add_meta_box( 
-                'wpsstm-spotify_data', 
-                __('Spotify Data','wpsstm'),
-                array(__class__,'metabox_spotify_data_content'),
-                $entries_post_types,
-                'after_title', 
-                'high' 
-            );
-        }
-
     }
-    
-    /*
-    Checks if the post contains enough information to do an API lookup
-    */
 
-    function can_spotify_search_entries($post_id){
+    public function get_music_item_url($post_id = null){
+        $id = null;
+        $link = null;
+        if (!$id = self::get_post_music_id($post_id) ) return;
+
         $post_type = get_post_type($post_id);
-        
-        $spotify_id = wpsstm_get_post_spotify_id($post_id);
-        $artist = wpsstm_get_post_artist($post_id);
-        $track = wpsstm_get_post_track($post_id);
-        $album = wpsstm_get_post_album($post_id);
-        
-        $can = false;
+        $remote_type = null;
 
         switch($post_type){
+
             case wpsstm()->post_type_artist:
-                $can = ($spotify_id || $artist);
+                $remote_type = 'artist';
             break;
+
             case wpsstm()->post_type_track:
-                $can = ($spotify_id || ($artist && $track) );
+                $remote_type = 'track';
             break;
+
             case wpsstm()->post_type_album:
-                $can = ($spotify_id || ($artist && $album) );
+                $remote_type = 'album';
             break;
+
         }
         
-        return $can;
-
-    }
-    
-    private function get_edit_spotify_id_input($post_id = null){
-        global $post;
-        if (!$post) $post_id = $post->ID;
-        
-        $input_el = $desc_el = null;
-        
-        $input_attr = array(
-            'id' => 'wpsstm-spotify_id',
-            'name' => 'wpsstm_spotify_id',
-            'value' => wpsstm_get_post_spotify_id($post_id),
-            'icon' => '<i class="fa fa-key" aria-hidden="true"></i>',
-            'label' => __("Spotify ID",'wpsstm'),
-            'placeholder' => __("Enter Spotify ID here",'wpsstm')
-        );
-        
-        $input_el = wpsstm_get_backend_form_input($input_attr);
-
-        return $input_el . $desc_el;
+        if (!$remote_type) return;
+        return sprintf('https://open.spotify.com/%s/%s',$remote_type,$id);
     }
 
-    public function metabox_spotify_id_content($post){
-
-        $spotify_id = wpsstm_get_post_spotify_id($post->ID);
-        $spotify_data = wpsstm_get_spotify_data($post->ID);
-        $can_search_entries = $this->can_spotify_search_entries($post->ID);
-
-        ?>
-        <p>
-            <?php echo $this->get_edit_spotify_id_input($post->ID);?>
-        </p>
-        <table class="form-table">
-            <tbody>
-                <?php 
-                if ( $can_search_entries ){
-                    ?>
-                    <tr valign="top">
-                        <td>
-                            <?php
-                    
-                            if (!$spotify_id){
-                                submit_button( __('Search','wpsstm'), null, 'wpsstm-spotify-id-lookup');
-                            }
-
-                            if ($spotify_data) {
-                                submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-spotify-data-reload');
-                            }
-
-                            if ($can_search_entries && $spotify_id) {
-                                $entries_url = get_edit_post_link();
-                                $entries_url = add_query_arg(array('spotify-list-entries'=>true),$entries_url);
-                                printf('<p><a class="button" href="%s">%s</a></p>',$entries_url,__('Switch entry','wpsstm'));
-                            }
-
-                            ?>
-
-                        </td>
-                    </tr>
-                    <?php
-                }
-                ?>
-            </tbody>
-        </table>
-        <?php
-
-        /*
-        form
-        */
-
-        wp_nonce_field( 'wpsstm_spotify_id_meta_box', 'wpsstm_spotify_id_meta_box_nonce' );
+    function get_item_auto_id( $artist,$album = null,$track = null ){
         
+        $entries = $this->query_music_entries($artist,$album,$track);
+        if ( is_wp_error($entries) || !$entries ) return $entries;
         
-    }
-    
-    public static function metabox_spotify_data_content($post){
-
-        $spotify_id = wpsstm_get_post_spotify_id($post->ID);
-        $spotify_data = wpsstm_get_spotify_data($post->ID);
-
-        ?>
-        <table class="form-table">
-            <tbody>
-                <?php 
-                if ($spotify_data) {
-                    ?>
-                    <tr valign="top">
-                        <th scope="row">
-                            <label><?php _e('Data','wpsstm');?></label>
-                        </th>
-                        <td>
-                            <p>
-                                <?php
-                                /* 
-                                Entry data 
-                                */
-                                $list = wpsstm_get_list_from_array($spotify_data);
-                                printf('<div id="wpsstm-mbdata">%s</div>',$list);
-                                ?>
-                            </p>
-                        </td>
-                    </tr>
-                    <?php
-                }
-                ?>
-                <?php 
-                if ($spotify_data) {
-                    /*
-                    TOUFIX
-                    
-                    <tr valign="top">
-                        <th scope="row">
-                            <label><?php _e('Fill post','wpsstm');?></label>
-                        </th>
-                        <td>
-                            <p>
-                            <?php
-                            $fields = self::get_fillable_fields($post->ID);
-                    
-                            foreach ($fields as $slug=>$field){
-                                
-                                //mismatch check
-                                $mismatch  = $db = $mb = null;
-                                
-                                $meta = get_post_meta($post->ID,$field['metaname'],true);
-                                $mb = wpsstm_get_array_value($field['mbpath'], $spotify_data);
-                                
-                                //exceptions
-                                if($slug=='track_length'){
-                                   $mb = round($mb / 1000);
-                                }
-
-                                $mismatch_icon = ($meta != $mb) ? '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' : null;
-
-                                $input_el = sprintf('<input type="checkbox" name="wpsstm-spotify-data-fill-fields[]" value="%s"/> %s<label>%s</label><br/>',$slug,$mismatch_icon,$field['name']);
-                                echo $input_el;
-                            }
-                            submit_button( __('Fill with data','wpsstm'), null, 'wpsstm-spotify-data-fill');
-                            ?>
-                            </p>
-                            <?php
-                            _e('Fill post with various datas from MusicBrainz (eg. artist, length, ...).','wpsstm');
-                            ?>
-                        </td>
-                    </tr>
-                    <?php
-                    */
-                }
-                ?>
-            </tbody>
-        </table>
-        <?php
-
-        /*
-        form
-        */
-
-        wp_nonce_field( 'wpsstm_spotify_data_meta_box', 'wpsstm_spotify_data_meta_box_nonce' );
-        
-        
-    }
-    
-    //TOUFIX
-    public static function metabox_spotify_entries_content($post){
-
-        settings_errors('wpsstm_spotify-entries');
-
-        $entries = null;
-        $post_type = get_post_type($post->ID);
-        $artist = wpsstm_get_post_artist($post->ID);
-        $album = wpsstm_get_post_album($post->ID);
-        $track = wpsstm_get_post_track($post->ID);
-        
-        switch($post_type){
-            case wpsstm()->post_type_artist:
-                
-                $entries = $this->get_spotify_entries($artist);
-
-            break;
-            case wpsstm()->post_type_album:
-                
-                $entries = $this->get_spotify_entries($artist,$album);
-
-            break;
-            case wpsstm()->post_type_track:
-                
-                $entries = $this->get_spotify_entries($artist,$album,$track);
-
-            break;
-        }
-
-        if ( is_wp_error($entries) ){
-            add_settings_error('wpsstm-spotify-entries', 'api_error', $entries->get_error_message(),'inline');
-        }else{
-            $entries_table = new WPSSTM_Spotify_Entries();
-            $entries_table->items = $entries;
-            $entries_table->prepare_items();
-            $entries_table->display();
-        }
-
-        //same nonce than in metabox_mbid_content()
-        wp_nonce_field( 'wpsstm_spotify_id_meta_box', 'wpsstm_spotify_id_meta_box_nonce' );
-    }
-
-    /**
-    Try to get the Spotify ID of a post, based on its artist / album / title.
-    **/
-
-    function get_spotify_id( $artist,$album = null,$track = null ){
-        
-        //TOUFIX add transient & check so we don't make too much requests ?
-        
-        $entries = $this->get_spotify_entries($artist,$album,$track);
-        if ( is_wp_error($entries) ) return $entries;
-        
-        $sid = ( isset($entries[0]['id']) ) ? $entries[0]['id'] : null;
-        
-        return $sid;
-    }
-    
-    function get_post_spotify_id($post_id){
-        
-        $post_type = get_post_type($post_id);
-        $artist = wpsstm_get_post_artist($post_id);
-        $album = wpsstm_get_post_album($post_id);
-        $track = wpsstm_get_post_track($post_id);
-        
-        switch($post_type){
-            case wpsstm()->post_type_artist:
-                
-                $id = $this->get_spotify_id( $artist);
-
-            break;
-            case wpsstm()->post_type_album:
-                
-                $id = $this->get_spotify_id( $artist,$album);
-
-            break;
-            case wpsstm()->post_type_track:
-                
-                $id = $this->get_spotify_id( $artist,$album,$track);
-
-            break;
-        }
-        
-        if ( $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $id ) ){
-            wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'spotify'=>$id)),"Updated Spotify ID" ); 
-            $this->reload_spotify_datas($post_id);
-        }
+        $entry = wpsstm_get_array_value(array(0),$entries);
+        $id = wpsstm_get_array_value(array('id'),$entry);
         
         return $id;
-        
+
     }
     
-    private function get_spotify_entries( $artist,$album = null,$track = null ){
+    protected function get_details_for_post($post_id){
+        
+        if ( !$post_type = get_post_type($post_id) ) return false;
+        
+        if ( !$music_id = $this->get_post_music_id($post_id) ){
+            return new WP_Error('wpsstm_missing_music_id',__("Missing music ID",'wpsstm'));
+        }
+        
+        //remote API type
+        $endpoint = null;
+        switch($post_type){
+            case wpsstm()->post_type_artist:
+                $endpoint = 'artists';
+            break;
+
+            case wpsstm()->post_type_track:
+                $endpoint = 'tracks';
+            break;
+
+            case wpsstm()->post_type_album:
+                $endpoint = 'albums';
+            break;
+        }
+        
+        $api_url = sprintf('services/spotify/data/%endpoint/%s',$endpoint,$music_id);
+        $api_results = WPSSTM_Core_API::api_request($api_url);
+        return $api_results;
+    }
+    
+    protected function query_music_entries( $artist,$album = null,$track = null ){
 
         $artist = urlencode($artist);
         $album = ($album) ? $album : '_';
@@ -554,169 +299,22 @@ class WPSSTM_Spotify{
         return $api_results;
         
     }
-
-    /*
-    Reload Spotify entry data for an MBID.
-    */
     
-    private function reload_spotify_datas($post_id){
-        
-        if (!$post_type = get_post_type($post_id) ) return false;
-
-        //delete existing
-        if ( delete_post_meta( $post_id, self::$spotify_data_meta_key ) ){
-            delete_post_meta( $post_id, self::$spotify_data_time_metakey ); //delete timestamp
-        }
-
-        if ( !$spotify_id = wpsstm_get_post_spotify_id($post_id) ) return;
-        
-        switch( $post_type ){
-            case wpsstm()->post_type_artist:
-                $api_url = sprintf('services/spotify/data/artists/%s',$spotify_id);
-            break;
-            case wpsstm()->post_type_album:
-                $api_url = sprintf('services/spotify/data/albums/%s',$spotify_id);
-            break;
-            case wpsstm()->post_type_track:
-                $api_url = sprintf('services/spotify/data/tracks/%s',$spotify_id);
-            break;
-        }
-
-        $api_results = WPSSTM_Core_API::api_request($api_url);
-        if ( is_wp_error($api_results) ) return $api_results;
-
-        if ( $success = update_post_meta( $post_id, self::$spotify_data_meta_key, $api_results ) ){
-
-            //save timestamp
-            $now = current_time('timestamp');
-            update_post_meta( $post_id, self::$spotify_data_time_metakey, $now );
-        }
-        
-        return $success;
-        
-    }
-    
-    public function metabox_spotify_id_save( $post_id ) {
-
-        //check save status
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        $is_valid_nonce = ( isset($_POST['wpsstm_spotify_id_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_spotify_id_meta_box_nonce'], 'wpsstm_spotify_id_meta_box' ) );
-        if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
-        
-        unset($_POST['wpsstm_spotify_id_meta_box_nonce']); //so we avoid the infinite loop
-
-        //clicked a musicbrainz action button
-        $action = null;
-        if ( isset($_POST['wpsstm-spotify-id-lookup']) ){
-            $action = 'autoguess-id';
-        }
-        
-        
-        //update ID
-        $old_id = wpsstm_get_post_spotify_id($post_id);
-        $id = ( isset($_POST[ 'wpsstm_spotify_id' ]) ) ? $_POST[ 'wpsstm_spotify_id' ] : null;
-        $is_id_update = ($old_id != $id);
-
-        switch ($action){
-            case 'autoguess-id':
-
-                $id = $this->get_post_spotify_id($post_id);
-                if ( is_wp_error($id) ) break;
-                $success = update_post_meta( $post_id, self::$spotify_id_meta_key, $id );
-            break;
-        }
-        
-        if (!$id){
-            delete_post_meta( $post_id, self::$spotify_id_meta_key );
-            delete_post_meta( $post_id, self::$spotify_data_meta_key ); //delete mdbatas
-            delete_post_meta( $post_id, self::$spotify_data_time_metakey ); //delete mdbatas timestamp
-        }else{
-            update_post_meta( $post_id, self::$spotify_id_meta_key, $id );
-            if ($is_id_update){
-                $this->reload_spotify_datas($post_id);
-            }
-        }
-
-    }
-    
-    public function metabox_spotify_data_save( $post_id ){
-
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-
-        $is_metabox = isset($_POST['wpsstm_spotify_data_meta_box_nonce']);
-        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-
-        //check post type
+    //TOUFIX
+    protected function get_fillable_details_map($post_id = null){
+        $items = array();
         $post_type = get_post_type($post_id);
-        $allowed_post_types = array(wpsstm()->post_type_artist,wpsstm()->post_type_track,wpsstm()->post_type_album);
-        if ( !in_array($post_type,$allowed_post_types) ) return;
-
-        //nonce
-        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_spotify_data_meta_box_nonce'], 'wpsstm_spotify_data_meta_box' ) );
-        if ( !$is_valid_nonce ) return;
-
-        //this should run only once (for the main post); so unset meta box nonce.
-        //without this the function would be called for every subtrack if there was some.
-        unset($_POST['wpsstm_spotify_data_meta_box_nonce']);
-
-        //clicked a musicbrainz action button
-        $action = null;
-        if ( isset($_POST['wpsstm-spotify-data-reload']) ){
-            $action = 'reload';
-        }elseif ( isset($_POST['wpsstm-spotify-data-fill']) ){
-            $action = 'fill';
-        }
-
-        switch ($action){
-
-            case 'reload':
-                $this->reload_spotify_datas($post_id);
-            break;
-            case 'fill':
-                die("TO FIX fill spotify data");
-            break;
+        
+        switch($post_type){
         }
         
+        die("TOUFIX");
     }
+            
+}
 
-
-    static function is_entries_switch(){
-        return ( isset($_GET['spotify-list-entries'])) ? true : false;
-    }
-    
-    public static function after_auto_id_redirect($location){
-        $location = add_query_arg(array('spotify-list-entries'=>true),$location);
-        return $location;
-    }
-    
-    public static function spotify_columns_register($defaults) {
-        $defaults['spotifyid'] = __('Spotify ID','wpsstm');
-        return $defaults;
-    }
-    
-    public static function spotify_columns_content($column,$post_id){
-        global $post;
-        
-        switch ( $column ) {
-            case 'spotifyid':
-                $link = ($link = wpsstm_get_post_spotify_link_for_post($post_id)) ? $link : '-';
-                echo $link;
-                
-            break;
-        }
-    }
-    
-    public static function get_user_from_url($url){
-        $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([\w\d]+)~i';
-        preg_match($pattern,$url, $matches);
-
-        return isset($matches[1]) ? $matches[1] : null;
-    }
-    
+class WPSSTM_Spotify_Entries extends WPSSTM_Music_Entries {
+    //TOUFIX
 }
 
 class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{

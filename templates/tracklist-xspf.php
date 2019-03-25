@@ -52,5 +52,5 @@ if ( $tracklist->have_subtracks() ) {
 
 echo $xspf->output();
 
-exit();
+exit;
 

@@ -179,7 +179,7 @@ class WPSSTM_Core_Tracks{
             $redirect_url = add_query_arg($redirect_args, $redirect_url);
 
             wp_safe_redirect($redirect_url);
-            die();
+            exit;
             
         }else{
             if ( is_wp_error($success) ){
@@ -864,28 +864,6 @@ class WPSSTM_Core_Tracks{
         
         $attr_str = wpsstm_get_html_attr($attr);
         printf('<a %s>%s</a>',$attr_str,__('Playlists manager','wpsstm'));
-    }
-
-    function mb_populate_trackid( $post_id ) {
-        
-        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
-        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
-        $is_revision = wp_is_post_revision( $post_id );
-        if ( $is_autosave || $is_autodraft || $is_revision ) return;
-        
-        //already had an MBID
-        //$trackid = wpsstm_get_post_mbid($post_id);
-        //if ($trackid) return;
-
-        //requires a title
-        $track = wpsstm_get_post_track($post_id);
-        if (!$track) return;
-        
-        //requires an artist
-        $artist = wpsstm_get_post_artist($post_id);
-        if (!$artist) return;
-
-        
     }
     
     /**

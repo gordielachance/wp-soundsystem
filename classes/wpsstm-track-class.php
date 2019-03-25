@@ -64,10 +64,6 @@ class WPSSTM_Track{
         $this->image_url    = wpsstm_get_post_image_url($this->post_id);
         $this->duration     = wpsstm_get_post_length($this->post_id);
         
-        //TOUFIX this should be hooked ?
-        $this->mbid         = wpsstm_get_post_mbid($this->post_id);
-        $this->spotify_id   = wpsstm_get_post_spotify_id($this->post_id);
-        
     }
     
     function populate_subtrack($subtrack_id){
@@ -269,16 +265,14 @@ class WPSSTM_Track{
     */
     
     function to_xspf_array(){
-        $xspf_track = array(
-            'identifier'    => ( $this->mbid ) ? sprintf('https://musicbrainz.org/recording/%s',$this->mbid) : null,
+        $output = array(
             'title'         => $this->title,
             'creator'       => $this->artist,
             'album'         => $this->album
         );
         
-        $xspf_track = array_filter($xspf_track);
-        
-        return apply_filters('wpsstm_get_track_xspf',$xspf_track,$this);
+        $output = apply_filters('wpsstm_get_track_xspf',$output,$this);
+        return array_filter($output);
     }
     
     function validate_track($strict = true){
@@ -704,28 +698,21 @@ class WPSSTM_Track{
         
         if (WPSSTM_Core_API::can_wpsstmapi() === true){
             
-            if (!$this->spotify_id) {
+            die("toto");
+            
+            $spotify_engine = new WPSSTM_Spotify_Data();
+            if ( !$music_id = $spotify_engine->get_post_music_id($this->post_id) ){
                 
-                $sid = $wpsstm_spotify->get_spotify_id( $this->artist,$this->album,$this->title ); //maybe no post ID yet
+                $music_id = $spotify_engine->auto_music_id($this->post_id); //we need a post ID here
+                if ( is_wp_error($music_id) ) $music_id = null;
 
-                if ( is_wp_error($sid) ) return $sid;
-                
-                if ($sid){
-                    
-                    $this->spotify_id = $sid;
-                    
-                    if ( !$success = update_post_meta( $this->post_id, WPSSTM_Spotify::$spotify_id_meta_key, $this->spotify_id ) ){
-                        $this->track_log($success,"Error while updated the track's Spotify ID");
-                    }
-                }
-                
             }
 
-            if ( !$this->spotify_id ){
+            if ( !$music_id ){
                 return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
             }
 
-            $api_url = sprintf('track/autosource/spotify/%s',$this->spotify_id);
+            $api_url = sprintf('track/autosource/spotify/%s',$music_id);
             $sources_auto = WPSSTM_Core_API::api_request($api_url);
             if ( is_wp_error($sources_auto) ) return $sources_auto;
 

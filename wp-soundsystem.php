@@ -38,7 +38,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '200';
+    public $db_version = '201';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -67,6 +67,7 @@ class WP_SoundSystem {
     
     var $menu_page;
     var $options = array();
+    var $details_engine;
     
     /**
     * @var The one true Instance
@@ -100,13 +101,14 @@ class WP_SoundSystem {
             'frontend_scraper_page_id'          => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
-            'ajax_load_tracklists'              => true,
+            'ajax_load_tracklists'              => false,//URGENT
             'autosource'                        => true,
             'limit_autosources'                 => 5,
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
             'registration_notice'               => true,
             'wpsstmapi_token'                   => null,
+            'details_engine'                    => 'musicbrainz',
         );
         
         $db_option = get_option( $this->meta_name_options);
@@ -132,6 +134,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-api.php';
 
         if ( WPSSTM_Core_API::can_wpsstmapi() === true ){
+            require $this->plugin_dir . 'classes/wpsstm-music-details.php';
             require $this->plugin_dir . 'wpsstm-core-importer.php';
         }
         if ( ( wpsstm()->can_radios() === true ) && $this->get_options('radios_enabled') ){
@@ -177,7 +180,9 @@ class WP_SoundSystem {
         //init
         add_action( 'init', array($this,'init_post_types'), 5);
         add_action( 'init', array($this,'init_rewrite'), 5);
+        add_action( 'init', array($this,'load_music_details_engine'));
         add_action( 'admin_init', array($this,'load_textdomain'));
+        
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
@@ -187,6 +192,8 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        
 
         do_action('wpsstm_init');
 
@@ -227,6 +234,17 @@ class WP_SoundSystem {
         do_action('wpsstm_init_rewrite');
         
         flush_rewrite_rules();
+    }
+    
+    function load_music_details_engine(){
+        $enabled_engine_slug = wpsstm()->get_options('details_engine');
+        $available_engines = wpsstm()->get_available_detail_engines();
+        
+        foreach((array)$available_engines as $engine){
+            if ( $engine->slug !== $enabled_engine_slug) continue;
+            $engine->setup_actions();
+            $this->details_engine = $engine;
+        }
     }
 
     function deactivate_wpsstm() {
@@ -298,6 +316,28 @@ class WP_SoundSystem {
                 $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
                 $wpdb->query("ALTER TABLE $subtracks_table ADD time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
                 $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NULL");
+            }
+            
+            if ($current_version < 201){
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_id', '_wpsstm_mbid' );
+                $result = $wpdb->get_results ( $querystr );
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_data', '_wpsstm_mbdata' );
+                $result = $wpdb->get_results ( $querystr );
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_time', '_wpsstm_mbdata_time' );
+                $result = $wpdb->get_results ( $querystr );
+
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s'  WHERE meta_key = '%s'",'_wpsstm_details_spotify_id', '_wpsstm_spotify_id' );
+                $result = $wpdb->get_results ( $querystr );
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_data', '_wpsstm_spotify_data' );
+                $result = $wpdb->get_results ( $querystr );
+                //
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_time', '_wpsstm_spotify_data_time' );
+                $result = $wpdb->get_results ( $querystr );
             }
 
         }
@@ -664,6 +704,13 @@ class WP_SoundSystem {
             return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));
         }
         return true;
+    }
+    
+    /*
+    Get the list of services that could get music details
+    */
+    public function get_available_detail_engines(){
+        return apply_filters('wpsstm_get_music_detail_engines',array());
     }
 
 }
