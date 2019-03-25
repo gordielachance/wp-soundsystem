@@ -201,6 +201,7 @@ class WPSSTM_Spotify{
 
 class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
     public $slug = 'spotify';
+    public $name = 'Spotify';
     public $entries_table_classname = 'WPSSTM_MB_Entries';
             
     protected function get_supported_post_types(){
@@ -300,15 +301,16 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         
     }
     
-    //TOUFIX
+    
     protected function get_fillable_details_map($post_id = null){
         $items = array();
         $post_type = get_post_type($post_id);
         
         switch($post_type){
+            //TOUFIX
         }
+        return $items;
         
-        die("TOUFIX");
     }
             
 }

@@ -692,36 +692,18 @@ class WPSSTM_Track{
 
         }
         
-        //save autosourced time so we won't query autosources again too soon
-        $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
-        
-        if (WPSSTM_Core_API::can_wpsstmapi() === true){
-            
-            die("toto");
-            
-            $spotify_engine = new WPSSTM_Spotify_Data();
-            if ( !$music_id = $spotify_engine->get_post_music_id($this->post_id) ){
-                
-                $music_id = $spotify_engine->auto_music_id($this->post_id); //we need a post ID here
-                if ( is_wp_error($music_id) ) $music_id = null;
-
-            }
-
-            if ( !$music_id ){
-                return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
-            }
-
-            $api_url = sprintf('track/autosource/spotify/%s',$music_id);
-            $sources_auto = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($sources_auto) ) return $sources_auto;
-
-        }
-
         /*
-        Handle those sources
+        save autosourced time so we won't query autosources again too soon
         */
+        $now = current_time('timestamp');
+        //TOUFIX URGENT update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
         
+        /*
+        Hook filter here to add autosources (array)
+        */
+
+        $sources_auto = apply_filters('wpsstm_autosource_input',$sources_auto,$this);
+
         foreach((array)$sources_auto as $key=>$args){
             
             $source = new WPSSTM_Source();
@@ -747,7 +729,7 @@ class WPSSTM_Track{
         Hook filter here to ignore some of the sources
         */
 
-        $new_sources = apply_filters('wpsstm_autosources_input',$new_sources,$this);
+        $new_sources = apply_filters('wpsstm_autosource_filtered',$new_sources,$this);
 
         //limit autosource results
         $limit_autosources = (int)wpsstm()->get_options('limit_autosources');

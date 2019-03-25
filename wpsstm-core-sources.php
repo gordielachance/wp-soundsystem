@@ -27,7 +27,7 @@ class WPSSTM_Core_Sources{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_source), array(wpsstm(),'register_community_view') );
         
-        add_filter( 'wpsstm_autosources_input', array( $this, 'autosources_cleanup' ) );
+        add_filter( 'wpsstm_autosource_filtered', array( $this, 'autosources_cleanup' ) );
         
         /*
         QUERIES

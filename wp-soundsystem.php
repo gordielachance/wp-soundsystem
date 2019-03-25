@@ -101,14 +101,14 @@ class WP_SoundSystem {
             'frontend_scraper_page_id'          => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
-            'ajax_load_tracklists'              => false,//URGENT
+            'ajax_load_tracklists'              => true,
             'autosource'                        => true,
             'limit_autosources'                 => 5,
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
             'registration_notice'               => true,
             'wpsstmapi_token'                   => null,
-            'details_engine'                    => 'musicbrainz',
+            'details_engine'                    => array('musicbrainz'),
         );
         
         $db_option = get_option( $this->meta_name_options);
@@ -180,7 +180,7 @@ class WP_SoundSystem {
         //init
         add_action( 'init', array($this,'init_post_types'), 5);
         add_action( 'init', array($this,'init_rewrite'), 5);
-        add_action( 'init', array($this,'load_music_details_engine'));
+        add_action( 'init', array($this,'save_music_details_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
         
 
@@ -236,14 +236,16 @@ class WP_SoundSystem {
         flush_rewrite_rules();
     }
     
-    function load_music_details_engine(){
-        $enabled_engine_slug = wpsstm()->get_options('details_engine');
+    function save_music_details_engines(){
+        $enabled_engine_slugs = wpsstm()->get_options('details_engine');
         $available_engines = wpsstm()->get_available_detail_engines();
-        
+
         foreach((array)$available_engines as $engine){
-            if ( $engine->slug !== $enabled_engine_slug) continue;
+            if ( !in_array($engine->slug,$enabled_engine_slugs) ) continue;
             $engine->setup_actions();
             $this->details_engine = $engine;
+                
+            break;//TOUFIX at the end we should be able to populate several details engines
         }
     }
 

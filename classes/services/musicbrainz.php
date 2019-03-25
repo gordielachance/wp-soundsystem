@@ -99,6 +99,7 @@ class WPSSTM_MusicBrainz {
 
 class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
     public $slug = 'musicbrainz';
+    public $name = 'MusicBrainz';
     public $entries_table_classname = 'WPSSTM_MB_Entries';
             
     protected function get_supported_post_types(){
@@ -142,8 +143,9 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         
         //url encode
         $artist = urlencode($artist);
-        $track = urlencode($track);
+        $album = ($album) ? $album : '_';
         $album = urlencode($album);
+        $track = urlencode($track);
         
         if($artist && $track){//track
             $api_url = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
@@ -152,7 +154,7 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         }elseif($artist){//artist
             $api_url = sprintf('services/musicbrainz/search/%s',$artist);
         }
-        
+
         if (!$api_url){
             return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
         }
@@ -160,7 +162,7 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         return WPSSTM_Core_API::api_request($api_url);
     }
             
-    public function get_item_auto_id($artist,$track,$album){
+    public function get_item_auto_id($artist,$album=null,$track=null){
         $entries = $this->query_music_entries($artist,$album,$track);
         if ( is_wp_error($entries) || !$entries ) return $entries;
         
