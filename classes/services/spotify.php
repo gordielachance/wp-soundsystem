@@ -276,7 +276,7 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
             break;
         }
         
-        $api_url = sprintf('services/spotify/data/%endpoint/%s',$endpoint,$music_id);
+        $api_url = sprintf('services/spotify/data/%s/%s',$endpoint,$music_id);
         $api_results = WPSSTM_Core_API::api_request($api_url);
         return $api_results;
     }
