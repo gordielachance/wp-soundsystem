@@ -1,7 +1,7 @@
 === WP SoundSystem ===
 Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
-Tags: music,player,audio,tracklist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks,sources
+Tags: music,player,audio,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks,sources
 Requires at least: 4.9
 Tested up to: 5.1.1
 Stable tag: trunk
