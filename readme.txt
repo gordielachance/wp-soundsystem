@@ -147,6 +147,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.5.3 =
+* new class WPSSTM_Music_Data
+
 = 2.5.1 =
 * So much improvements that they cannot even be listed !  More than one year of developpement and 754 commits !
 * now compatible with the [Autoplay Policy Change](https://developers.google.com/web/updates/2017/09/autoplay-policy-changes) from Chrome
