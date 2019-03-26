@@ -7,8 +7,6 @@ class WPSSTM_Remote_Tracklist{
     //url request
     var $url = null; //url requested
     var $remote_request_url = null; //url filtered by preset
-    
-    
     var $remote_request_args;
     
     var $default_options = array(
@@ -21,13 +19,12 @@ class WPSSTM_Remote_Tracklist{
             'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
         ),
-        'tracks_order'              => 'desc'
+        'tracks_order'              => 'desc',
+        'remote_delay_min'          => 5,
     );
     
-    var $preset_options = array();
-    
     var $options = array();
-    
+    var $preset_options = array(); //options that will override the user options
 
     var $default_request_args = array(
         'headers'   => array(
@@ -59,21 +56,22 @@ class WPSSTM_Remote_Tracklist{
     public $title;
     public $author;
 
-    public function __construct($url = null,$options = null) {
+    public function __construct($url = null,$options = array() ) {
         $this->url = trim($url);
-        
-        /* BUILD PARSER OPTIONS */
 
-        $this->options = $this->default_options;
-        
         //push custom options if any
         if ( !empty($options) ){
-            $this->options = array_replace_recursive($this->options,$options);
+            
+            $this->options = $options;
+            $this->options = array_replace_recursive($this->default_options,$options); //last one has priority
+
+        }else{
+            $this->options = $this->default_options;
         }
 
         //override with presets options if any
         if ( !empty($this->preset_options) ){
-            $this->options = array_replace_recursive($this->options,$this->preset_options);
+            $this->options = array_replace_recursive($this->options,$this->preset_options); //last one has priority
         }
 
     }
@@ -204,6 +202,9 @@ class WPSSTM_Remote_Tracklist{
 
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
+    }
+    function get_preset_options($keys = null){
+        return wpsstm_get_array_value($keys,$this->preset_options);
     }
     
     function get_selectors($keys = null){

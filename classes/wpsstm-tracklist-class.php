@@ -6,8 +6,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
+    var $default_options = array();
     var $options = array();
-    var $preset_options = array(); //stored preset options
     
     var $updated_time = null;
     public $is_expired = false;
@@ -43,11 +43,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $can_autosource = ( WPSSTM_Core_Sources::can_autosource() === true);
         
-        $this->options = array(
+        $this->default_options = array(
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'tracks_strict'             => true, //requires a title AND an artist
-            'remote_delay_min'          => 5,
-            'is_expired'                => false,
         );
 
         $this->set_tracklist_pagination($pagination_args);
@@ -108,15 +106,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-        
+
         //options
-        //$options_db = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        //$this->options = array_replace_recursive($this->options,(array)$options_db);
-        
-        //scraper options
-        $this->preset_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        
-        
+        $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        $this->options = array_replace_recursive($this->default_options,$db_options); //last one has priority
+
         //location
         $this->location = get_permalink($this->post_id);
         if ( $this->tracklist_type == 'live' ){
@@ -652,7 +646,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
         foreach((array)$presets as $test_preset){
             
-            $test_preset->__construct($feed_url,$this->preset_options);
+            $test_preset->__construct($feed_url,$this->options);
             
             if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
                 $this->preset = $test_preset;
@@ -662,7 +656,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //default presset
         if (!$this->preset){
-            $this->preset = new WPSSTM_Remote_Tracklist($feed_url,$this->preset_options);
+            $this->preset = new WPSSTM_Remote_Tracklist($feed_url,$this->options);
         }
 
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');

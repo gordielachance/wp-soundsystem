@@ -49,9 +49,9 @@ if ($is_debug){
             <h4 class="wpsstm-importer-row-label"><?php _e('Order','wpsstm');?></h4>
             <div class="wpsstm-importer-row-content">
                 <?php
-                $option = $wpsstm_tracklist->preset->get_options('tracks_order');
-                $default_option = wpsstm_get_array_value('tracks_order',$wpsstm_tracklist->preset->default_options);
-                $disabled = ($default_option) ? disabled( $option, $default_option, false ) : null;
+                $forced_option = $wpsstm_tracklist->preset->get_preset_options('tracks_order');
+                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->preset->get_options('tracks_order');
+                $disabled = disabled( (bool)$forced_option, true, false );
 
                 $desc_text = sprintf(
                     '<input type="radio" name="%1s[tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
@@ -133,9 +133,9 @@ if ($is_debug){
             <div class="wpsstm-importer-row-content">
                 <?php
 
-                $option = $wpsstm_tracklist->get_options('remote_delay_min');
-                $default_option = wpsstm_get_array_value('remote_delay_min',$wpsstm_tracklist->preset->default_options);
-                $disabled = ($default_option) ? disabled( true, true, false ) : null;
+                $forced_option = $wpsstm_tracklist->preset->get_preset_options('remote_delay_min');
+                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->preset->get_options('remote_delay_min');
+                $disabled = disabled( (bool)$forced_option, true, false );
 
                 $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
                 $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');

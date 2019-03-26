@@ -196,17 +196,22 @@ class WPSSTM_Core_Importer{
         global $wpsstm_tracklist;
         
         //path
-        $path = $wpsstm_tracklist->preset->get_selectors(array($selector,'path') );
-        $path_default = wpsstm_get_array_value(array('selectors',$selector,'path'),$wpsstm_tracklist->preset->default_options);
-        $disabled = ($path_default) ? disabled( $path, $path_default, false ) : null;
+        $path = $wpsstm_tracklist->preset->get_selectors( array($selector,'path') );
+        $path_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'path'));
+        $path_disabled = disabled( (bool)$path_forced, true, false );
         $path = ( $path ? htmlentities($path) : null);
+
 
         //regex
         $regex = $wpsstm_tracklist->preset->get_selectors(array($selector,'regex') );
+        $regex_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'regex'));
+        $regex_disabled = disabled( (bool)$regex_forced, true, false );
         $regex = ( $regex ? htmlentities($regex) : null);
 
         //attr
         $attr = $wpsstm_tracklist->preset->get_selectors(array($selector,'attr') );
+        $attr_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'attr'));
+        $regex_disabled = disabled( (bool)$attr_forced, true, false );
         $attr = ( $attr ? htmlentities($attr) : null);
 
         ?>
@@ -271,7 +276,7 @@ class WPSSTM_Core_Importer{
                 'wpsstm_wizard',
                 $selector,
                 $path,
-                $disabled
+                $path_disabled
             );
 
             //regex
@@ -296,7 +301,7 @@ class WPSSTM_Core_Importer{
                                         'wpsstm_wizard',
                                         $selector,
                                         $attr,
-                                        $disabled
+                                        $attr_disabled
                                     );
                                     ?>
                                 </div>
@@ -317,7 +322,7 @@ class WPSSTM_Core_Importer{
                                         'wpsstm_wizard',
                                         $selector,
                                         $regex,
-                                        $disabled
+                                        $regex_disabled
                                     );
                                     ?>
                                 </div>
@@ -341,7 +346,7 @@ class WPSSTM_Core_Importer{
         
         //settings
         $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-        $wizard_data = self::sanitize_importer_settings($wizard_data);
+        $wizard_data = self::sanitize_importer_settings($wizard_data,$tracklist);
 
         //feed URL
         $feed_url = wpsstm_get_array_value('feed_url',$wizard_data);
@@ -376,7 +381,7 @@ class WPSSTM_Core_Importer{
      * Sanitize wizard data
      */
     
-    static function sanitize_importer_settings($input){
+    static function sanitize_importer_settings($input,$tracklist){
 
         $new_input = array();
 
