@@ -622,7 +622,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemscope' =>                          true,
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
-            'data-wpsstm-tracklist-options' =>      json_encode($this->get_options()),
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
         );
 

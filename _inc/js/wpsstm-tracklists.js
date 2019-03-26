@@ -45,7 +45,6 @@ class WpsstmTracklist extends HTMLElement{
         this.index =                    undefined;
         this.post_id =                  undefined;
         this.tracklist_request =        undefined;
-        this.options =                  [];
         this.isExpired =                undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
@@ -93,7 +92,6 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
 
         tracklist.post_id =     Number( $(tracklist).data('wpsstm-tracklist-id') );
-        tracklist.options =     $(tracklist).data('wpsstm-tracklist-options');
         tracklist.isExpired =   $(tracklist).hasClass('tracklist-expired');
 
         if (!tracklist.isExpired){
