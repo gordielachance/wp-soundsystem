@@ -346,11 +346,20 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
         global $wpsstm_spotify;
 
         if ( $this->playlist_id = self::get_playlist_id_from_url($url) ){
-            
-            $api_url = sprintf('services/spotify/data/playlists/%s',$this->playlist_id);
-            
-            $api_results = WPSSTM_Core_API::api_request($api_url);
-            if (is_wp_error($api_results)) return $api_results;
+
+            $transient_name = sprintf('wpsstm-spotify-data-%s',$this->playlist_id);//TO FIX TO CHECK might be too long for a transient key ?
+
+            //data cache ?
+            if ( false === ( $api_results = get_transient($transient_name ) ) ) {
+
+                $api_url = sprintf('services/spotify/data/playlists/%s',$this->playlist_id);
+
+                $api_results = WPSSTM_Core_API::api_request($api_url);
+                if (is_wp_error($api_results)) return $api_results;
+                
+                set_transient( $transient_name, $api_results, 1 * DAY_IN_SECONDS );
+                
+            }
             
             $this->playlist_data = $api_results;
             
