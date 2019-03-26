@@ -147,14 +147,11 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.5.6 =
+= 2.5.7 =
+* fix url encoding & regexes for Last.fm presets
 * tracklist expiration bugfix
-
-= 2.5.5 =
 * improved importer and importer settings
 * importer debug GUI
-
-= 2.5.4 =
 * bugfix populate sources/autosources
 
 = 2.5.3 =

@@ -11,6 +11,13 @@ wpsstm-tracklist{
         list-style: none;
         width:100%;
     }
+    .wpsstm-tracklist-notices{
+        position:relative;
+        margin:auto;
+        padding: .5em 0;
+        list-style: none!important;
+        margin: 0 !important;
+    }
     
     &.wpsstm-post-tracklist{
         
