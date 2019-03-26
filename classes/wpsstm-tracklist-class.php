@@ -105,7 +105,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if ( $this->tracklist_type == 'live' ){
             $seconds = $this->seconds_before_refresh();
-            $this->is_expired = ($seconds <= 0);
+            $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
         }
 
         //live
@@ -120,7 +120,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type == 'live' ){
             $this->location = $this->feed_url;
         }
-        
+
         //classes
         if( $this->is_expired ) {
             $this->classes[] = 'tracklist-expired';
@@ -760,6 +760,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($this->tracklist_type != 'live') return false;
 
         $cache_min = $this->get_options('remote_delay_min');
+
         if (!$cache_min) return false;
         
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
@@ -771,6 +772,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_human_next_refresh_time(){
+        
+        if ($this->tracklist_type != 'live') return false;
 
         $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
 
@@ -1004,8 +1007,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             /*
             expiration time
             */
-            //if no real cache is set; let's say tracklist is already expired at load!
-            $metas['wpsstmRefreshTimer'] = $this->seconds_before_refresh();
+            $seconds = $this->seconds_before_refresh();
+            if ($seconds !== false){
+                //if no real cache is set; let's say tracklist is already expired at load!
+                $metas['wpsstmRefreshTimer'] = $seconds;
+            }
         }
         
         return $metas;
