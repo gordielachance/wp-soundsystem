@@ -65,7 +65,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //if no title has been set, use the cached title if any
         if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
-            $title = $this->get_cached_title($post_id);
+            $title = self::get_cached_title($post_id);
         }
 
         return $title;

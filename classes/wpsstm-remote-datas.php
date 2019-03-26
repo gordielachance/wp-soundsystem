@@ -657,10 +657,9 @@ class WPSSTM_Remote_Tracklist{
         wpsstm()->debug_log($message,$title);
 
     }
-    
-   public function get_preset_name()
-   {
-      return static::class;
-   }
+
+    public function get_preset_name(){
+    return static::class;
+    }
     
 }
