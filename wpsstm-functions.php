@@ -120,25 +120,21 @@ function wpsstm_get_url_domain($url){
     return false;
 }
 
-function wpsstm_array_recursive_diff($aArray1, $aArray2) {
-  $aReturn = array();
-
-  foreach ($aArray1 as $mKey => $mValue) {
-    if (array_key_exists($mKey, $aArray2)) {
-      if (is_array($mValue)) {
-        $aRecursiveDiff = wpsstm_array_recursive_diff($mValue, $aArray2[$mKey]);
-        if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
-      } else {
-        if ($mValue != $aArray2[$mKey]) {
-          $aReturn[$mKey] = $mValue;
+//https://gist.github.com/boonebgorges/5510970
+function wpsstm_recursive_parse_args( &$a, $b ) {
+    $a = (array) $a;
+    $b = (array) $b;
+    $r = $b;
+    foreach ( $a as $k => &$v ) {
+        if ( is_array( $v ) && isset( $r[ $k ] ) ) {
+            $r[ $k ] = wpsstm_recursive_parse_args( $v, $r[ $k ] );
+        } else {
+            $r[ $k ] = $v;
         }
-      }
-    } else {
-      $aReturn[$mKey] = $mValue;
     }
-  }
-  return $aReturn;
-} 
+    return $r;
+}
+
 
 function wpsstm_is_backend(){
     return ( is_admin() && !wp_doing_ajax() );
