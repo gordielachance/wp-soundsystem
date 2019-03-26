@@ -703,7 +703,7 @@ class WPSSTM_Track{
         save autosourced time so we won't query autosources again too soon
         */
         $now = current_time('timestamp');
-        //TOUFIX URGENT update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
+        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
         
         /*
         Hook filter here to add autosources (array)
