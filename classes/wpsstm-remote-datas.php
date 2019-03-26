@@ -20,7 +20,7 @@ class WPSSTM_Remote_Tracklist{
             'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
         ),
         'tracks_order'              => 'desc',
-        'remote_delay_min'          => 5,
+        'remote_delay_min'          => 15,
     );
     
     var $options = array();
