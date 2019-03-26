@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://github.com/gordielachance
-Version: 2.5.4
+Version: 2.5.5
 License: GPL2
 */
 
@@ -34,7 +34,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.5.4';
+    public $version = '2.5.5';
     /**
     * @public string plugin DB version
     */
