@@ -147,6 +147,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.5.6 =
+* tracklist expiration bugfix
+
 = 2.5.5 =
 * improved importer and importer settings
 * importer debug GUI

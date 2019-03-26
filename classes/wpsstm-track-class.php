@@ -28,7 +28,7 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $from_tracklist = null;
     
-    private $did_autosource = null;
+    public $did_autosource = null;
     
     public $notices = array();
     
@@ -656,7 +656,6 @@ class WPSSTM_Track{
     */
     
     function autosource(){
-        global $wpsstm_spotify;
 
         $new_sources = array();
 
@@ -704,6 +703,7 @@ class WPSSTM_Track{
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
+        $this->did_autosource = true;
         
         /*
         Hook filter here to add autosources (array)

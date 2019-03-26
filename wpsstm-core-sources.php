@@ -296,8 +296,7 @@ class WPSSTM_Core_Sources{
     
     function metabox_track_sources_content( $post ){
         global $wpsstm_track;
-        $wpsstm_track->populate_sources();
-        
+
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
         ?>
@@ -429,6 +428,7 @@ class WPSSTM_Core_Sources{
 
         //autosource & save
         if ( isset($_POST['wpsstm_track_autosource']) ){
+            $track->did_autosource = false;
             $success = $track->autosource();
         }
     }

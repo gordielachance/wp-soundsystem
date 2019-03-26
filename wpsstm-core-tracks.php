@@ -1040,7 +1040,6 @@ class WPSSTM_Core_Tracks{
         
         //define global
         $wpsstm_track = $track;
-        $wpsstm_track->populate_sources();
 
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );
