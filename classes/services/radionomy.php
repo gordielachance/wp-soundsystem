@@ -32,7 +32,6 @@ class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{
                 'track_artist'      => array('path'=>'artists'),
                 'track_title'       => array('path'=>'title'),
                 'track_image'       => array('path'=>'cover'),
-                //playduration
             )
         );
         

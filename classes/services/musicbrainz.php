@@ -260,8 +260,6 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
      
 }
 
-
-
 class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {
     
     function display_tablenav($which){

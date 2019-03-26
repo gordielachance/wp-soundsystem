@@ -97,7 +97,6 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
 
 }
 
-
 function wpsstm_radioking_init(){
     new WPSSTM_RadioKing();
 }

@@ -411,7 +411,6 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
 }
 
-
 function wpsstm_spotify_init(){
     global $wpsstm_spotify;
     $wpsstm_spotify = new WPSSTM_Spotify();
