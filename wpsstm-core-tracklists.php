@@ -23,8 +23,6 @@ class WPSSTM_Core_Tracklists{
         
         add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
 
-        add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
-
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
@@ -229,27 +227,6 @@ class WPSSTM_Core_Tracklists{
          echo $output;
 
     }
-
-    function metabox_tracklist_register(){
-
-        add_meta_box( 
-            'wpsstm-tracklist', 
-            __('Tracklist','wpsstm'),
-            array($this,'metabox_tracklist_content'),
-            wpsstm()->tracklist_post_types, 
-            'normal', 
-            'high' //priority 
-        );
-        
-    }
-    
-    function metabox_tracklist_content( $post ){
-        global $wpsstm_tracklist;
-        
-        $output = $wpsstm_tracklist->get_tracklist_html();
-        echo $output;
-    }
-    
 
     function filter_tracklist_empty_title( $title, $post_id = null ) {
         if ( !$title && in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){

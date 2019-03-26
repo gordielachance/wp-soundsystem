@@ -211,7 +211,7 @@ class WPSSTM_Core_Importer{
         //attr
         $attr = $wpsstm_tracklist->preset->get_selectors(array($selector,'attr') );
         $attr_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'attr'));
-        $regex_disabled = disabled( (bool)$attr_forced, true, false );
+        $attr_disabled = disabled( (bool)$attr_forced, true, false );
         $attr = ( $attr ? htmlentities($attr) : null);
 
         ?>

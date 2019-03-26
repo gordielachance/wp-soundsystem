@@ -65,10 +65,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //if no title has been set, use the cached title if any
         if ( !$title && in_array($post_type,wpsstm()->tracklist_post_types) ){
-            $title = get_post_meta($post_id,self::$remote_title_meta_name,true);
+            $title = $this->get_cached_title($post_id);
         }
 
         return $title;
+    }
+    
+    static public function get_cached_title($post_id){
+        return get_post_meta($post_id,self::$remote_title_meta_name,true);
     }
     
     function populate_tracklist_post(){
@@ -109,7 +113,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //options
         $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $this->options = array_replace_recursive($this->default_options,$db_options); //last one has priority
+        $this->options = array_replace_recursive($this->default_options,(array)$db_options); //last one has priority
 
         //location
         $this->location = get_permalink($this->post_id);
@@ -662,7 +666,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log($this->preset->get_preset_name(),'preset found');
     }
 
-    function populate_subtracks($force_reload = false){
+    function populate_subtracks(){
         global $wpdb;
         
         //avoid populating the subtracks several times (eg. Jetpack populates the content several times)

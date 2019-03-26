@@ -17,6 +17,7 @@ if ($is_debug){
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-options"><?php _e('Options','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-output"><?php _e('Output','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-debug"><?php _e('Debug','wpsstm');?></a></li>
     </ul>
 
@@ -154,7 +155,22 @@ if ($is_debug){
             </div>
         </div>
     </div>
-    
+    <!--output-->
+    <div id="wpsstm-importer-step-output" class="wpsstm-importer-section wpsstm-importer-section-advanced">
+        <div class="wpsstm-importer-section-label">
+            <h3><?php _e('Output','wpsstm');?></h3>
+        </div>
+        <div class="wpsstm-importer-row">
+        <?php
+            $importer_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
+            $importer_tracklist->is_expired = true;
+            $importer_tracklist->populate_subtracks();
+            $importer_tracklist->title = WPSSTM_Post_Tracklist::get_cached_title(get_the_ID()); //use cached title
+            $output = $importer_tracklist->get_tracklist_html();
+            echo $output;
+        ?>
+        </div>
+    </div>
     <!--debug-->
     <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section wpsstm-importer-section-advanced">
         <div class="wpsstm-importer-section-label">
