@@ -28,7 +28,7 @@ class WPSSTM_LastFM{
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
         
         ///
-        add_filter('wpsstm_feed_url', array($this, 'lastfm_artist_bang_to_url'));
+        add_filter('wpsstm_feed_url', array($this, 'artist_bang_to_lastfm_url'));
         add_filter('wpsstm_feed_url', array($this, 'lastfm_station_artist_bang_to_url'));
         add_filter('wpsstm_feed_url', array($this, 'lastfm_station_user_bang_to_url'));
         add_filter('wpsstm_remote_presets',array($this,'register_lastfm_presets'));
@@ -73,14 +73,15 @@ class WPSSTM_LastFM{
 
     }
     
-    function lastfm_artist_bang_to_url($url){
-        $pattern = '~^artist:([\w\d]+)(?::([\w\d]+))?~i';
+    function artist_bang_to_lastfm_url($url){
+        $pattern = '~^artist:([^:]+)(?::([^:]+))?~i';
         preg_match($pattern, $url, $matches);
         $artist = isset($matches[1]) ? $matches[1] : null;
+        $artist = urlencode($artist);
         $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
 
         if ( $artist ){
-            $url = sprintf('https://www.last.fm/music/%s',urlencode($artist));
+            $url = sprintf('https://www.last.fm/music/%s',$artist);
             if ($subpage){
                 switch($subpage){
                     
@@ -95,24 +96,30 @@ class WPSSTM_LastFM{
                 
             }
         }
+
         return $url;
     }
     function lastfm_station_artist_bang_to_url($url){
-        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
+        $pattern = '~^lastfm:station:([^:]+):([^:]+)(?::([^:]+))?~i';
         preg_match($pattern, $url, $matches);
         $page = isset($matches[1]) ? $matches[1] : null;
         $artist = isset($matches[2]) ? $matches[2] : null;
+        $artist = urlencode($artist);
 
         if ( ( $page == 'music' )  && $artist ){
-            $url = sprintf('https://www.last.fm/player/station/music/%s',urlencode($artist));
+            $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
         }
+        
+        wpsstm()->debug_log($url,"lastfm_station_artist_bang_to_url");
+        
         return $url;
     }
     function lastfm_station_user_bang_to_url($url){
-        $pattern = '~^lastfm:station:([\w\d]+):([\w\d]+)(?::([\w\d]+))?~i';
+        $pattern = '~^lastfm:station:([^:]+):([^:]+)(?::([^:]+))?~i';
         preg_match($pattern, $url, $matches);
         $page = isset($matches[1]) ? $matches[1] : null;
         $user = isset($matches[2]) ? $matches[2] : null;
+        $user = urlencode($user);
         $subpage = isset($matches[3]) ? $matches[3] : 'library';
 
         if ( ( $page == 'user' )  && $user ){
