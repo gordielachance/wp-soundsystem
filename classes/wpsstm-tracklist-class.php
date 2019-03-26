@@ -13,9 +13,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     public $is_expired = false;
     
     var $pagination = array(
-        'total_pages'   => null,
-        'per_page'      => null,
-        'current_page'  => null
+        'total_pages'       => null,
+        'per_page'          => null,
+        'current_page'      => null,
     );
 
     var $paged_var = 'tracklist_page';
@@ -46,6 +46,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->default_options = array(
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
             'tracks_strict'             => true, //requires a title AND an artist
+            'remote_delay_min'  => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
         );
 
         $this->set_tracklist_pagination($pagination_args);
@@ -758,13 +759,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function seconds_before_refresh(){
 
         if ($this->tracklist_type != 'live') return false;
-
-        $cache_min = $this->get_options('remote_delay_min');
-
-        if (!$cache_min) return false;
         
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        
+        if(!$updated_time) return 0;//never imported
+
+        $cache_min = $this->get_options('remote_delay_min');
+        if (!$cache_min) return 0; //no delay
+
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
 

@@ -313,11 +313,9 @@ class WpsstmTracklist extends HTMLElement{
         var remaining_sec = undefined;
 
         var meta_expiration = $(tracklist).find('meta[itemprop="wpsstmRefreshTimer"]');
-        if (meta_expiration.length){
-            remaining_sec = meta_expiration.attr('content');
-        }
-        
-        if (!remaining_sec) return;
+        if (!meta_expiration.length) return;
+            
+        remaining_sec = parseInt( meta_expiration.attr('content') );
 
         if (remaining_sec > 0){
             tracklist.isExpired = false;
