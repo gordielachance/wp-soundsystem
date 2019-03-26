@@ -1,6 +1,15 @@
 <?php
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_preset();
+
+$is_debug = isset($_GET['wpsstm_tracklist_debug']);
+
+if ($is_debug){
+    $wpsstm_tracklist->is_expired = true;
+    $wpsstm_tracklist->populate_subtracks();
+}
+
+
 ?>
 <div id="wpsstm-importer">
     <ul id="wpsstm-importer-tabs">
@@ -8,6 +17,7 @@ $wpsstm_tracklist->populate_preset();
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-options"><?php _e('Options','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-debug"><?php _e('Debug','wpsstm');?></a></li>
     </ul>
 
     <!--remote url-->
@@ -144,6 +154,69 @@ $wpsstm_tracklist->populate_preset();
             </div>
         </div>
     </div>
+    
+    <!--debug-->
+    <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section wpsstm-importer-section-advanced">
+        <div class="wpsstm-importer-section-label">
+            <h3><?php _e('Tracklist Debug','wpsstm');?></h3>
+        </div>
+        <?php
+        if (!$is_debug){
+            ?>
+                <div class="wpsstm-block-notice">
+                    <span>
+                        <?php 
+                        $url = get_edit_post_link();
+                        $url = add_query_arg(array('wpsstm_tracklist_debug'=>true),$url) . '#wpsstm-importer-step-debug';
+                        $link = sprintf('<a href="%s">%s</a>',$url,__('Reload tracklist','wpsstm'));
+                        printf(__('%s to display the feedback','wpsstm'),$link);
+                        ?>
+                        </span>
+                </div>
+            <?php
+        }else{
+            ?>
+            <!--preset-->
+             <div class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Preset','wpsstm');?></h4>
+                <div class="wpsstm-importer-row-content">
+                    <?php
+                    WPSSTM_Core_Importer::feedback_preset();
+                    ?>
+                </div>
+            </div>
+            <!--data type-->
+             <div class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Data','wpsstm');?></h4>
+                <div class="wpsstm-importer-row-content">
+                    <?php
+                    WPSSTM_Core_Importer::feedback_data_type_callback();
+                    ?>
+                </div>
+            </div>
+             <!--tracks-->
+             <div class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Tracklist','wpsstm');?></h4>
+                <div class="wpsstm-importer-row-content">
+                    <?php
+                    WPSSTM_Core_Importer::feedback_source_content_callback();
+                    ?>
+                </div>
+            </div>
+             <!--tracks-->
+             <div class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Tracks','wpsstm');?></h4>
+                <div class="wpsstm-importer-row-content">
+                    <?php
+                    WPSSTM_Core_Importer::feedback_tracks_callback();
+                    ?>
+                </div>
+            </div>
+            <?php
+        }
+        ?>
+    </div>
+    
     <?php
     wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
     ?>

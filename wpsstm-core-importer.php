@@ -429,6 +429,11 @@ class WPSSTM_Core_Importer{
     Feedback
     */
     
+    static function feedback_preset(){
+        global $wpsstm_tracklist;
+        echo $wpsstm_tracklist->preset->get_preset_name();
+    }
+    
     
     static function feedback_data_type_callback(){
         global $wpsstm_tracklist;
@@ -436,7 +441,7 @@ class WPSSTM_Core_Importer{
         $output = "—";
 
         if ( $wpsstm_tracklist->preset->response_type ){
-            $output = $wpsstm_tracklist->response_type;
+            $output = $wpsstm_tracklist->preset->response_type;
         }
         
         echo $output;

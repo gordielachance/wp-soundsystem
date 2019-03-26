@@ -16,6 +16,8 @@
         padding: .25em 0;
         > * {
             &.wpsstm-importer-row-label{
+                margin:0;
+                padding:0;
             }
             &.wpsstm-importer-row-content{
                 @include flex-grow(1);
@@ -91,8 +93,11 @@
         }
 
         .wpsstm-importer-selector{
+            @include display-flex();
+            justify-content: center;
+            align-items: center;
             input[type="text"]{
-                    width:100%;
+                flex-grow: 1;
             }
             
             .wpsstm-importer-selector-advanced{
