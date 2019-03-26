@@ -84,17 +84,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->tracklist_log('Invalid tracklist post');
             return;
         }
-
-        $post_author_id = get_post_field( 'post_author', $this->post_id );
-        $this->author = get_the_author_meta( 'display_name', $post_author_id );
-
-        //type
         
+        //options
+        $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        $this->options = array_replace_recursive($this->default_options,(array)$db_options); //last one has priority
+
+        //type        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
         //title (will be filtered)
         $this->title = get_the_title($this->post_id);
         
+        //author
+        $post_author_id = get_post_field( 'post_author', $this->post_id );
+        $this->author = get_the_author_meta( 'display_name', $post_author_id );
         
         //time updated
         //TOUFIX bad logic.  We should rather update the post time when an import is done.
@@ -111,10 +114,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //live
         $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-
-        //options
-        $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $this->options = array_replace_recursive($this->default_options,(array)$db_options); //last one has priority
 
         //location
         $this->location = get_permalink($this->post_id);
@@ -764,6 +763,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if(!$updated_time) return 0;//never imported
 
         $cache_min = $this->get_options('remote_delay_min');
+
         if (!$cache_min) return 0; //no delay
 
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
